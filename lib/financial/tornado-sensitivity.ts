@@ -195,6 +195,22 @@ export function computeTornadoSensitivities(
     highLabel: `Share ${(shareHigh * 100).toFixed(0)}%`,
   });
 
+  // 7. Differentiation Premium (0% vs current vs +20% max)
+  // Only meaningful when the asset has differentiation factors selected
+  if (inputs.differentiationFactors && inputs.differentiationFactors.length > 0) {
+    const noDiffValue = runWithOverride({ differentiationFactors: [] });
+    const maxDiffValue = runWithOverride({
+      differentiationFactors: ['novelMechanism', 'superiorEfficacy', 'betterSafety', 'convenientDosing', 'biomarkerSelected'],
+    });
+    sensitivities.push({
+      factor: 'Differentiation Premium',
+      lowValue: noDiffValue,
+      highValue: maxDiffValue,
+      lowLabel: 'No premium',
+      highLabel: 'Max +20%',
+    });
+  }
+
   // Sort by total spread descending
   return sensitivities.sort(
     (a, b) => Math.abs(b.highValue - b.lowValue) - Math.abs(a.highValue - a.lowValue)

@@ -5,6 +5,7 @@
 import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { DealWaterfallStep } from '@/lib/financial/types';
+import { computeDifferentiationAdjustment, DIFFERENTIATION_FACTORS, type DifferentiationKey } from '@/lib/financial/differentiation-profiles';
 
 /**
  * Renders an inline SVG waterfall chart for the deal valuation cascade.
@@ -218,6 +219,52 @@ export function renderDealWaterfallPage(data: PDFReportData, meta: ReportMeta): 
         ${rangeBox('Comm Milestones', wf.commercialMilestones.low, wf.commercialMilestones.median, wf.commercialMilestones.high, '#6366f1')}
         ${rangeBox('Royalty Range', wf.royaltyRate.low, wf.royaltyRate.median, wf.royaltyRate.high, '#8b5cf6', true)}
       </div>
+
+      <!-- Asset Differentiation Detail -->
+      ${(() => {
+        const factors = data.inputs.differentiationFactors;
+        if (!factors || factors.length === 0) return '';
+        const diffResult = computeDifferentiationAdjustment(factors as DifferentiationKey[], data.inputs.phase);
+        if (diffResult.factorBreakdown.length === 0) return '';
+        return `
+          <div class="section-title">Asset Differentiation Premium</div>
+          <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 14px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Factor</th>
+                  <th style="text-align: right;">Base</th>
+                  <th style="text-align: right;">Phase Credit</th>
+                  <th style="text-align: right;">Effective</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${diffResult.factorBreakdown.map(f => `
+                  <tr>
+                    <td style="font-weight: 500;">${escapeHtml(f.label)}</td>
+                    <td style="text-align: right; color: ${COLORS.gray500};">+${(f.baseAdjustment * 100).toFixed(0)}%</td>
+                    <td style="text-align: right; color: ${f.phaseScaling < 1 ? '#d97706' : COLORS.gray500};">${(f.phaseScaling * 100).toFixed(0)}%</td>
+                    <td style="text-align: right; font-weight: 700; color: ${COLORS.teal};">+${(f.effectiveAdjustment * 100).toFixed(1)}%</td>
+                  </tr>
+                `).join('')}
+                <tr style="background: ${COLORS.gray50}; border-top: 2px solid ${COLORS.navy};">
+                  <td style="font-weight: 700;">Total${diffResult.wasCapped ? ' (capped)' : ''}</td>
+                  <td></td>
+                  <td></td>
+                  <td style="text-align: right; font-weight: 700; color: #0f766e;">+${(diffResult.totalAdjustment * 100).toFixed(0)}%</td>
+                </tr>
+              </tbody>
+            </table>
+            ${diffResult.warnings.length > 0 ? `
+              <div style="padding: 8px 14px; background: #fef3c7; border-top: 1px solid #fde68a;">
+                ${diffResult.warnings.map(w => `
+                  <div style="font-size: 9px; color: #92400e; margin: 2px 0;">${escapeHtml(w.message)}</div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      })()}
 
       <!-- Narrative -->
       <div class="callout" style="margin-bottom: 10px;">

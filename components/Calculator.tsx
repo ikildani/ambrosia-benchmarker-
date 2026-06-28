@@ -819,6 +819,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         <AssetDifferentiationSection
                           selectedFactors={state.differentiationFactors}
                           onToggle={actions.toggleDifferentiationFactor}
+                          phase={state.phase}
                         />
                       </div>
                     );
@@ -833,6 +834,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                         <AssetDifferentiationSection
                           selectedFactors={state.differentiationFactors}
                           onToggle={actions.toggleDifferentiationFactor}
+                          phase={state.phase}
                         />
                         <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
                       </div>

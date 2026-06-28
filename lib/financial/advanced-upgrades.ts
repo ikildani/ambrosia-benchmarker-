@@ -245,6 +245,14 @@ export function calculateCompetitiveDynamics(
     Math.round(intensity.baseCompetitorCount * positionMod.competitorCountMultiplier),
   );
 
+  // Differentiation resilience — assets with proven differentiation erode slower
+  let differentiationShield = 1.0;
+  if (input.differentiationFactors && input.differentiationFactors.length > 0) {
+    const { computeDifferentiationAdjustment } = require('./differentiation-profiles');
+    const diff = computeDifferentiationAdjustment(input.differentiationFactors, input.phase);
+    differentiationShield = Math.max(0.6, 1.0 - diff.totalAdjustment * 0.5);
+  }
+
   // Upgrade 2: Modality-aware entry lag (biologics get biosimilar protection)
   const modalityLagMult = getModalityLagMultiplier(input.modality);
 
@@ -291,7 +299,7 @@ export function calculateCompetitiveDynamics(
 
       competitorTimeline.push({
         entryYear: relativeEntry,
-        shareImpact: intensity.avgShareImpact * moaMultiplier * biomarkerMultiplier,
+        shareImpact: intensity.avgShareImpact * moaMultiplier * biomarkerMultiplier * differentiationShield,
         rampYears: 2,
         type: 'classCompetitor',
         name: comp.name,
@@ -305,7 +313,7 @@ export function calculateCompetitiveDynamics(
       for (let i = 0; i < pipelineData.additionalCompetitorCount; i++) {
         competitorTimeline.push({
           entryYear: launchYear + effectiveEntryLag + i * 1.5,
-          shareImpact: intensity.avgShareImpact * 0.85,
+          shareImpact: intensity.avgShareImpact * 0.85 * differentiationShield,
           rampYears: 2,
           type: 'nextGen',
         });
@@ -316,9 +324,8 @@ export function calculateCompetitiveDynamics(
     for (let i = 0; i < effectiveCompetitorCount; i++) {
       const entryOffset = effectiveEntryLag + i * 1.2;
       const isPreLaunch = entryOffset < 0;
-      // Diminishing returns: first competitor takes most share, subsequent take less
       const diminishingFactor = Math.pow(0.85, i);
-      const sharePerCompetitor = intensity.avgShareImpact * diminishingFactor;
+      const sharePerCompetitor = intensity.avgShareImpact * diminishingFactor * differentiationShield;
 
       competitorTimeline.push({
         entryYear: launchYear + entryOffset,

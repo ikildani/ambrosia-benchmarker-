@@ -116,33 +116,115 @@ export const DIFFERENTIATION_KEYS: DifferentiationKey[] = Object.keys(
   DIFFERENTIATION_FACTORS,
 ) as DifferentiationKey[];
 
-const MAX_DIFFERENTIATION_PREMIUM = 0.20;
+export const MAX_DIFFERENTIATION_PREMIUM = 0.20;
+
+/** Phase normalization — canonical mapping from any phase string variant */
+const PHASE_MAP: Record<string, string> = {
+  discovery: 'preclinical', preclinical: 'preclinical',
+  phase1: 'phase1', 'phase 1': 'phase1', phase_1: 'phase1',
+  phase1_2: 'phase1_2', 'phase 1/2': 'phase1_2',
+  phase2: 'phase2', 'phase 2': 'phase2', phase_2: 'phase2',
+  phase2_3: 'phase2_3', 'phase 2/3': 'phase2_3',
+  phase3: 'phase3', 'phase 3': 'phase3', phase_3: 'phase3',
+  nda_filed: 'phase3', approved: 'approved',
+};
+
+function normalizePhase(phase?: string): string {
+  if (!phase) return 'phase2';
+  const key = phase.replace(/[_-]/g, '').toLowerCase();
+  return PHASE_MAP[key] ?? PHASE_MAP[phase.toLowerCase()] ?? 'phase2';
+}
+
+/** Per-factor breakdown returned by computeDifferentiationAdjustment */
+export interface DifferentiationFactorBreakdown {
+  key: DifferentiationKey;
+  label: string;
+  baseAdjustment: number;
+  phaseScaling: number;
+  effectiveAdjustment: number;
+}
+
+/** Validation warnings for unrealistic factor selections */
+export interface DifferentiationWarning {
+  factorKey: DifferentiationKey;
+  message: string;
+  severity: 'warning' | 'info';
+}
+
+/** Validate factor selections against phase realism */
+export function validateDifferentiationFactors(
+  selected: DifferentiationKey[],
+  phase?: string,
+): DifferentiationWarning[] {
+  const warnings: DifferentiationWarning[] = [];
+  const norm = normalizePhase(phase);
+  const isEarly = norm === 'preclinical' || norm === 'phase1';
+
+  if (selected.includes('superiorEfficacy') && isEarly) {
+    warnings.push({
+      factorKey: 'superiorEfficacy',
+      message: `Superior efficacy is unverifiable at ${norm === 'preclinical' ? 'preclinical' : 'Phase 1'} — no comparative clinical data exists. Premium scaled to ${(DIFFERENTIATION_FACTORS.superiorEfficacy.phaseScaling[norm] * 100).toFixed(0)}%.`,
+      severity: 'warning',
+    });
+  }
+
+  if (selected.includes('betterSafety') && norm === 'preclinical') {
+    warnings.push({
+      factorKey: 'betterSafety',
+      message: 'Safety differentiation cannot be established before first-in-human dosing. Premium scaled to 30%.',
+      severity: 'warning',
+    });
+  }
+
+  if (selected.includes('novelMechanism') && selected.includes('superiorEfficacy') && isEarly) {
+    warnings.push({
+      factorKey: 'superiorEfficacy',
+      message: 'Novel mechanism and superior efficacy are often correlated — buyers may not credit both at this stage.',
+      severity: 'info',
+    });
+  }
+
+  return warnings;
+}
+
+export interface DifferentiationResult {
+  totalAdjustment: number;
+  rawTotal: number;
+  wasCapped: boolean;
+  narrative: string;
+  factorBreakdown: DifferentiationFactorBreakdown[];
+  warnings: DifferentiationWarning[];
+}
 
 export function computeDifferentiationAdjustment(
   selected: DifferentiationKey[],
   phase?: string,
-): { totalAdjustment: number; narrative: string } {
-  if (!selected || selected.length === 0) {
-    return { totalAdjustment: 0, narrative: '' };
-  }
+): DifferentiationResult {
+  const empty: DifferentiationResult = { totalAdjustment: 0, rawTotal: 0, wasCapped: false, narrative: '', factorBreakdown: [], warnings: [] };
+
+  if (!selected || selected.length === 0) return empty;
 
   const unique = [...new Set(selected)].filter(
     (k) => k in DIFFERENTIATION_FACTORS,
   );
 
-  if (unique.length === 0) {
-    return { totalAdjustment: 0, narrative: '' };
-  }
+  if (unique.length === 0) return empty;
 
-  const normalizedPhase = (phase || 'phase2').replace(/[- ]/g, '').toLowerCase()
-    .replace('phase 1', 'phase1').replace('phase 2', 'phase2').replace('phase 3', 'phase3');
+  const norm = normalizePhase(phase);
 
-  const rawTotal = unique.reduce((sum, key) => {
+  const factorBreakdown: DifferentiationFactorBreakdown[] = unique.map((key) => {
     const factor = DIFFERENTIATION_FACTORS[key];
-    const scaling = factor.phaseScaling[normalizedPhase] ?? 1.0;
-    return sum + factor.baseAdjustment * scaling;
-  }, 0);
+    const scaling = factor.phaseScaling[norm] ?? 1.0;
+    return {
+      key,
+      label: factor.label,
+      baseAdjustment: factor.baseAdjustment,
+      phaseScaling: scaling,
+      effectiveAdjustment: factor.baseAdjustment * scaling,
+    };
+  });
 
+  const rawTotal = factorBreakdown.reduce((sum, f) => sum + f.effectiveAdjustment, 0);
   const totalAdjustment = Math.min(rawTotal, MAX_DIFFERENTIATION_PREMIUM);
   const wasCapped = rawTotal > MAX_DIFFERENTIATION_PREMIUM;
 
@@ -153,11 +235,12 @@ export function computeDifferentiationAdjustment(
   if (unique.length === 1) {
     narrative = `Asset differentiation premium of ${pctStr} applied for ${factorLabels[0].toLowerCase()}.`;
   } else {
-    const lastLabel = factorLabels.pop()!;
-    narrative = `Asset differentiation premium of ${pctStr} applied for ${factorLabels.join(', ')} and ${lastLabel.toLowerCase()}.`;
+    const allLabels = [...factorLabels];
+    const lastLabel = allLabels.pop()!;
+    narrative = `Asset differentiation premium of ${pctStr} applied for ${allLabels.join(', ')} and ${lastLabel.toLowerCase()}.`;
   }
 
-  if (phase && normalizedPhase === 'preclinical') {
+  if (phase && norm === 'preclinical') {
     narrative += ' Premium scaled down for preclinical stage (claims not yet validated by clinical data).';
   }
 
@@ -165,5 +248,7 @@ export function computeDifferentiationAdjustment(
     narrative += ` Premium capped at +${(MAX_DIFFERENTIATION_PREMIUM * 100).toFixed(0)}%.`;
   }
 
-  return { totalAdjustment, narrative };
+  const warnings = validateDifferentiationFactors(unique, phase);
+
+  return { totalAdjustment, rawTotal, wasCapped, narrative, factorBreakdown, warnings };
 }

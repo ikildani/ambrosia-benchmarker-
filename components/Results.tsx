@@ -1602,6 +1602,28 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   )}
                 </div>
               ))}
+              {fullInputs?.differentiationFactors && fullInputs.differentiationFactors.length > 0 && (() => {
+                const { computeDifferentiationAdjustment } = require('@/lib/financial/differentiation-profiles');
+                const diff = computeDifferentiationAdjustment(fullInputs.differentiationFactors, fullInputs.phase);
+                if (diff.totalAdjustment <= 0) return null;
+                return (
+                  <div className="group relative flex-shrink-0">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 cursor-help">
+                      <span className="whitespace-nowrap">Differentiation</span>
+                      <span className="font-bold whitespace-nowrap">(+{(diff.totalAdjustment * 100).toFixed(0)}%)</span>
+                    </span>
+                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-left leading-relaxed whitespace-normal hidden sm:block">
+                      {diff.factorBreakdown.map((f: { label: string; effectiveAdjustment: number; phaseScaling: number }, i: number) => (
+                        <div key={i} className="flex justify-between gap-2">
+                          <span>{f.label}</span>
+                          <span className="font-semibold text-teal-300">+{(f.effectiveAdjustment * 100).toFixed(1)}%{f.phaseScaling < 1 ? ` (${(f.phaseScaling * 100).toFixed(0)}%)` : ''}</span>
+                        </div>
+                      ))}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800 dark:border-t-slate-700" />
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
