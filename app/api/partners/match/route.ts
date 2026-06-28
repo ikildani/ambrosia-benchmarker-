@@ -14,6 +14,8 @@ const MATCH_LIMITS: Record<string, number> = {
   free: 3,
   report: 10,
   pro: 10,
+  portfolio: 10,
+  starter: 5,
 };
 
 export async function POST(request: NextRequest) {
