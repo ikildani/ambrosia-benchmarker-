@@ -138,71 +138,51 @@ export default function HistoryDetailModal({
   }, [item, onReuse]);
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const handleDownloadPDF = useCallback(async () => {
-    if (result && fullInputs) {
-      setIsGeneratingPDF(true);
-      try {
-        const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
-        const riskScore = calculateRiskScore(fullInputs);
-        const comparableDeals = findComparableDeals({
-          therapeuticArea: fullInputs.therapeuticArea,
-          modality: fullInputs.modality,
-          indication: fullInputs.indication,
-          phase: fullInputs.phase,
-        }, 6);
+    if (!result || !fullInputs) return;
+    setIsGeneratingPDF(true);
+    setPdfError(null);
+    try {
+      const sensitivityData = computeSensitivityAnalysis(fullInputs, result);
+      const riskScore = calculateRiskScore(fullInputs);
+      const comparableDeals = findComparableDeals({
+        therapeuticArea: fullInputs.therapeuticArea,
+        modality: fullInputs.modality,
+        indication: fullInputs.indication,
+        phase: fullInputs.phase,
+      }, 6);
 
-        // Fetch deal memo with auth
-        let memoData;
-        if (userEmail) {
-          try {
-            const response = await fetch('/api/deal-memo', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: userEmail,
-                inputs: fullInputs,
-                results: result,
-                labels: {
-                  phase: item?.labels?.phase || '',
-                  modality: item?.labels?.modality || '',
-                  indication: item?.labels?.indication || '',
-                },
-              }),
-            });
-            if (response.ok) {
-              const data = await response.json();
-              memoData = data.memo;
-            }
-          } catch {
-            // Proceed without memo
-          }
-        }
-
-        // Run financial modeling pipeline for report
-        const fm = runFinancialModel(fullInputs, result, epiData.indications);
-        const pdfData: PDFReportData = {
-          result,
-          inputs: fullInputs,
-          sensitivityData,
-          riskScore,
-          partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
-          memoData,
-          comparableDeals,
-          historyId: item?.id,
-          rnpvResult: fm.rnpv,
-          monteCarloResult: fm.monteCarlo,
-          marketSizeEstimate: fm.marketSize ?? undefined,
-          scenarioResults: fm.scenarios,
-          fxSensitivity: fm.fxSensitivity,
-          defensiveAnalysis: fm.defensiveAnalysis,
-        };
-        generatePDFReport(pdfData);
-      } finally {
-        setIsGeneratingPDF(false);
-      }
+      const fm = runFinancialModel(fullInputs, result, epiData.indications);
+      const pdfData: PDFReportData = {
+        result,
+        inputs: fullInputs,
+        sensitivityData,
+        riskScore,
+        partnerMatches: partnerMatches.length > 0 ? partnerMatches : undefined,
+        comparableDeals,
+        historyId: item?.id,
+        rnpvResult: fm.rnpv,
+        monteCarloResult: fm.monteCarlo,
+        marketSizeEstimate: fm.marketSize ?? undefined,
+        scenarioResults: fm.scenarios,
+        fxSensitivity: fm.fxSensitivity,
+        defensiveAnalysis: fm.defensiveAnalysis,
+        dealWaterfall: fm.dealWaterfall,
+        scenarioComparison: fm.scenarioComparison,
+        lifecycleExtensions: fm.lifecycleExtensions,
+        competitiveDynamics: fm.competitiveDynamics,
+        realOptions: fm.realOptions,
+      };
+      generatePDFReport(pdfData);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      setPdfError('Failed to generate report. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
-  }, [result, item, partnerMatches, fullInputs, userEmail]);
+  }, [result, item, partnerMatches, fullInputs]);
 
   if (!isOpen || !item) return null;
 
@@ -383,6 +363,11 @@ export default function HistoryDetailModal({
             Close
           </button>
         </div>
+        {pdfError && (
+          <div className="px-4 sm:px-6 py-2 bg-red-50 dark:bg-red-900/20 border-t border-red-200 dark:border-red-800">
+            <p className="text-sm text-red-600 dark:text-red-400">{pdfError}</p>
+          </div>
+        )}
       </div>
     </div>
   );
