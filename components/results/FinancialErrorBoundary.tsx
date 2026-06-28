@@ -27,6 +27,10 @@ export default class FinancialErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error) {
+    console.error(`[FinancialErrorBoundary] ${this.props.fallbackTitle}:`, error.message, error.stack?.split('\n').slice(0, 3).join(' '));
+  }
+
   render() {
     if (this.state.hasError) {
       return (

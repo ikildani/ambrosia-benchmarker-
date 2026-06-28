@@ -73,25 +73,32 @@ function DealMemoSectionInner({
             {dealMemo && (
               <div className="space-y-5">
                 {/* Executive Summary */}
+                {dealMemo.executive_summary && (
                 <div>
                   <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Executive Summary</h4>
                   <p className="text-sm text-neutral-800 dark:text-slate-200 leading-relaxed">{dealMemo.executive_summary}</p>
                 </div>
+                )}
 
                 {/* Valuation Rationale */}
+                {dealMemo.valuation_rationale && (
                 <div>
                   <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Valuation Rationale</h4>
                   <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.valuation_rationale}</p>
                 </div>
+                )}
 
                 {/* Market Context */}
+                {dealMemo.market_context && (
                 <div>
                   <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Market Context</h4>
                   <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.market_context}</p>
                 </div>
+                )}
 
                 {/* Risk Factors + Negotiation Priorities side by side */}
                 <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                  {Array.isArray(dealMemo.risk_factors) && dealMemo.risk_factors.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Risks</h4>
                     <ul className="space-y-1.5">
@@ -103,6 +110,8 @@ function DealMemoSectionInner({
                       ))}
                     </ul>
                   </div>
+                  )}
+                  {Array.isArray(dealMemo.negotiation_priorities) && dealMemo.negotiation_priorities.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Negotiation Priorities</h4>
                     <ul className="space-y-1.5">
@@ -114,15 +123,19 @@ function DealMemoSectionInner({
                       ))}
                     </ul>
                   </div>
+                  )}
                 </div>
 
                 {/* Comparable Analysis */}
+                {dealMemo.comparable_analysis && (
                 <div>
                   <h4 className="text-sm font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Comparable Deal Analysis</h4>
                   <p className="text-sm text-neutral-700 dark:text-slate-300 leading-relaxed">{dealMemo.comparable_analysis}</p>
                 </div>
+                )}
 
                 {/* Confidence */}
+                {dealMemo.confidence_level && (
                 <div className="flex items-center gap-2 pt-2 border-t border-neutral-200 dark:border-slate-700">
                   <span className="text-xs text-neutral-500 dark:text-slate-400">Confidence:</span>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
@@ -133,6 +146,7 @@ function DealMemoSectionInner({
                     {dealMemo.confidence_level.toUpperCase()}
                   </span>
                 </div>
+                )}
               </div>
             )}
 
