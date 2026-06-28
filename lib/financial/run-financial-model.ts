@@ -35,6 +35,16 @@ import { checkCrossEngineConsistency } from './consistency-checks';
 import { assertInvariants, checkScenarioInvariants } from './invariants';
 import { calculateEnsembleValuation } from './ensemble-valuation';
 import { computeCalculationFingerprint } from './calculation-version';
+import { computeRegulatoryRisk, type RegulatoryRiskResult } from './regulatory-risk';
+import { computeMilestoneProbabilities, type MilestoneProbabilityResult } from './milestone-probability';
+import { computeTaxStructureImpact, type TaxStructureResult } from './cross-border-tax';
+import { estimateStackingByModality, type RoyaltyStackingResult } from './royalty-stacking';
+import { computePatentDynamics, type PatentDynamicsResult } from './patent-loe-dynamics';
+import { computeCMCRisk, type CMCRiskResult } from './cmc-timeline-risk';
+import { DEFAULT_EARNOUT_STRUCTURE, computeEarnoutValue, type EarnoutResult } from './earnout-cvr';
+import { computePricingConstraints, type PricingConstraintResult } from './pricing-access';
+import { computeIndicationSequence, type IndicationSequenceResult } from './indication-sequencing';
+import { computeBuyerSynergy, BUYER_PROFILES, type BuyerSynergyResult } from './buyer-synergy';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -60,6 +70,18 @@ export interface FinancialModelResult {
   ensemble: EnsembleResult;
   /** Deterministic fingerprint for full model reproducibility (inputs + engine version) */
   calculationFingerprint?: string;
+
+  // ── Institutional-Grade Extensions (Steps 12-21) ──
+  regulatoryRisk?: RegulatoryRiskResult;
+  milestoneProbabilities?: MilestoneProbabilityResult;
+  taxStructure?: TaxStructureResult;
+  royaltyStacking?: RoyaltyStackingResult;
+  patentDynamics?: PatentDynamicsResult;
+  cmcRisk?: CMCRiskResult;
+  earnoutValuation?: EarnoutResult;
+  pricingConstraints?: PricingConstraintResult;
+  indicationSequence?: IndicationSequenceResult;
+  buyerSynergies?: BuyerSynergyResult[];
 }
 
 /**
@@ -320,6 +342,130 @@ export function runFinancialModel(
     });
   }
 
+  // ── Steps 12-21: Institutional-Grade Extensions ──
+  // Each wrapped in try/catch — non-critical, never breaks pipeline.
+
+  // Step 12: FDA Regulatory Pathway Risk Model
+  let regulatoryRisk: RegulatoryRiskResult | undefined;
+  try {
+    regulatoryRisk = computeRegulatoryRisk(
+      rnpvInput.phase,
+      rnpvInput.therapeuticArea,
+      rnpvInput.modality,
+      rnpvInput.indication,
+      {
+        breakthrough: rnpvInput.regulatoryDesignations.breakthrough,
+        fastTrack: rnpvInput.regulatoryDesignations.fastTrack,
+        orphan: rnpvInput.regulatoryDesignations.orphan,
+        acceleratedApproval: false,
+        priorityReview: false,
+        rarePediatric: false,
+      },
+    );
+  } catch { /* non-critical — keep going */ }
+
+  let milestoneProbabilities: MilestoneProbabilityResult | undefined;
+  try {
+    milestoneProbabilities = computeMilestoneProbabilities(
+      inputs.phase, inputs.therapeuticArea, inputs.modality,
+      inputs.indication, inputs.dealType || 'licensing',
+    );
+  } catch { /* non-critical */ }
+
+  let taxStructure: TaxStructureResult | undefined;
+  try {
+    taxStructure = computeTaxStructureImpact(
+      inputs.territory as any, rnpv.impliedDealValue.totalDeal.median,
+      (result.tieredRoyalties?.base?.low ?? 5) / 100,
+      (inputs.dealType || 'licensing') as any,
+      rnpvInput.peakSalesEstimate?.median ?? 0,
+    );
+  } catch { /* non-critical */ }
+
+  let royaltyStacking: RoyaltyStackingResult | undefined;
+  try {
+    royaltyStacking = estimateStackingByModality(
+      (result.tieredRoyalties?.base?.low ?? 5) / 100, inputs.modality as any,
+    );
+  } catch { /* non-critical */ }
+
+  // Step 16: Patent Term & LOE Dynamics
+  let patentDynamics: PatentDynamicsResult | undefined;
+  try {
+    const currentYear = new Date().getFullYear();
+    const approvalYear = currentYear + Math.ceil(rnpv.yearsToMarket);
+    patentDynamics = computePatentDynamics(
+      rnpvInput.phase,
+      rnpvInput.modality,
+      rnpvInput.therapeuticArea,
+      rnpvInput.indication,
+      {
+        breakthrough: rnpvInput.regulatoryDesignations.breakthrough,
+        fastTrack: rnpvInput.regulatoryDesignations.fastTrack,
+        orphan: rnpvInput.regulatoryDesignations.orphan,
+        prime: rnpvInput.regulatoryDesignations.prime,
+      },
+      approvalYear,
+    );
+  } catch { /* non-critical — keep going */ }
+
+  let cmcRisk: CMCRiskResult | undefined;
+  try {
+    cmcRisk = computeCMCRisk(inputs.modality, inputs.phase, inputs.therapeuticArea);
+  } catch { /* non-critical */ }
+
+  let earnoutValuation: EarnoutResult | undefined;
+  try {
+    const earnoutStructure = DEFAULT_EARNOUT_STRUCTURE(inputs.phase, inputs.dealType || 'licensing');
+    earnoutValuation = computeEarnoutValue(
+      earnoutStructure, inputs.phase, inputs.therapeuticArea,
+      rnpv.discountRate, rnpvInput.peakSalesEstimate?.median ?? 0,
+    );
+  } catch { /* non-critical */ }
+
+  let pricingConstraints: PricingConstraintResult | undefined;
+  try {
+    const annualCost = inputs.modality?.includes('gene') ? 500000
+      : inputs.modality?.includes('carT') ? 400000
+      : inputs.modality?.includes('mab') || inputs.modality?.includes('adc') ? 150000
+      : inputs.modality === 'smallMolecule' ? 50000
+      : 100000;
+    pricingConstraints = computePricingConstraints(
+      inputs.therapeuticArea, inputs.modality, inputs.indication,
+      inputs.territory, rnpvInput.peakSalesEstimate?.median ?? 0, annualCost,
+    );
+  } catch { /* non-critical */ }
+
+  let indicationSequence: IndicationSequenceResult | undefined;
+  try {
+    indicationSequence = computeIndicationSequence(
+      inputs.therapeuticArea, inputs.indication, inputs.modality,
+      rnpvInput.peakSalesEstimate?.median ?? 0,
+    );
+  } catch { /* non-critical */ }
+
+  let buyerSynergiesResult: BuyerSynergyResult[] | undefined;
+  try {
+    const peakSales = rnpvInput.peakSalesEstimate?.median ?? 0;
+    const assetProfile = {
+      assetName: inputs.indication || 'Asset',
+      therapeuticArea: inputs.therapeuticArea as any,
+      modality: inputs.modality as any,
+      indication: inputs.indication,
+      projectedPeakSales_M: peakSales,
+      annualRDCost_M: peakSales * 0.05,
+      filingGeographies: inputs.territory === 'global' ? ['us', 'eu', 'japan'] as any[] : [inputs.territory] as any[],
+      mechanism: inputs.treatmentApproach || 'targeted',
+      phase: inputs.phase,
+      requiresCompanionDx: inputs.biomarker === 'companion',
+      numberOfBidders: inputs.competitivePosition === 'firstInClass' ? 4 : inputs.competitivePosition === 'crowded' ? 2 : 3,
+      attractiveness: inputs.competitivePosition === 'firstInClass' ? 8 : inputs.competitivePosition === 'crowded' ? 5 : 6,
+    };
+    buyerSynergiesResult = Object.entries(BUYER_PROFILES).slice(0, 5).map(([, profile]) => {
+      try { return computeBuyerSynergy(profile, assetProfile); } catch { return null; }
+    }).filter(Boolean) as BuyerSynergyResult[];
+  } catch { /* non-critical */ }
+
   return {
     rnpv,
     monteCarlo,
@@ -334,6 +480,16 @@ export function runFinancialModel(
     realOptions,
     ensemble,
     calculationFingerprint: computeCalculationFingerprint(inputs as unknown as Record<string, unknown>),
+    regulatoryRisk,
+    milestoneProbabilities,
+    taxStructure,
+    royaltyStacking,
+    patentDynamics,
+    cmcRisk,
+    earnoutValuation,
+    pricingConstraints,
+    indicationSequence,
+    buyerSynergies: buyerSynergiesResult,
   };
 }
 
