@@ -338,6 +338,16 @@ export default function ReportGenerationModal({
           realOptions: fm.realOptions,
           buyerSpecificValuation: p.buyerSpecificValuation || undefined,
           buyerSpecificValuations: p.buyerSpecificValuations || undefined,
+          regulatoryRisk: fm.regulatoryRisk,
+          milestoneProbabilities: fm.milestoneProbabilities,
+          earnoutValuation: fm.earnoutValuation,
+          patentDynamics: fm.patentDynamics,
+          cmcRisk: fm.cmcRisk,
+          pricingConstraints: fm.pricingConstraints,
+          indicationSequence: fm.indicationSequence,
+          taxStructure: fm.taxStructure,
+          royaltyStacking: fm.royaltyStacking,
+          buyerSynergies: fm.buyerSynergies,
         };
         pdfDataRef.current = pdfData;
 

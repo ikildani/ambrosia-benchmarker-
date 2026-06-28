@@ -25,6 +25,16 @@ import { renderScenarioComparisonPage } from './pages/scenarioComparison';
 import { renderDealWaterfallPage } from './pages/dealWaterfall';
 import { renderRealOptionsLifecyclePage } from './pages/realOptionsLifecycle';
 import { renderBuyerSpecificPage } from './pages/buyerSpecific';
+import { renderRegulatoryRiskPage } from './pages/regulatoryRiskPage';
+import { renderMilestonePage } from './pages/milestonePage';
+import { renderTaxStructurePage } from './pages/taxStructurePage';
+import { renderRoyaltyStackingPage } from './pages/royaltyStackingPage';
+import { renderPatentDynamicsPage } from './pages/patentDynamicsPage';
+import { renderCMCRiskPage } from './pages/cmcRiskPage';
+import { renderEarnoutPage } from './pages/earnoutPage';
+import { renderPricingAccessPage } from './pages/pricingAccessPage';
+import { renderIndicationSequencingPage } from './pages/indicationSequencingPage';
+import { renderBuyerSynergyPage } from './pages/buyerSynergyPage';
 import type { PDFReportData, ReportMeta, TocEntry, BrandConfig } from './types';
 
 export type { PDFReportData, PartnerForPDF, BrandConfig } from './types';
@@ -73,6 +83,16 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
     if (hasAdvancedAnalytics) toc('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions');
     if (hasBuyerSpecific) toc('Buyer-Specific Valuation', 'Strategic premium analysis across matched partners');
   }
+  if (data.regulatoryRisk) toc('Regulatory Risk', 'FDA CRL, AdComm, PDUFA, and PRV analysis');
+  if (data.milestoneProbabilities) toc('Milestone Analysis', 'Individual milestone probability weighting');
+  if (data.earnoutValuation) toc('Earnout & CVR', 'Contingent payment probability and time value');
+  if (data.patentDynamics) toc('Patent & LOE', 'Patent term adjustments and generic entry dynamics');
+  if (data.cmcRisk) toc('Manufacturing Risk', 'CMC timeline, scalability, and supply chain risk');
+  if (data.pricingConstraints) toc('Pricing & Access', 'ICER thresholds, IRA exposure, and payer dynamics');
+  if (data.indicationSequence) toc('Franchise Expansion', 'Indication sequencing and cannibalization');
+  if (data.taxStructure) toc('Tax Structure', 'Cross-border IP structuring and tax optimization');
+  if (data.royaltyStacking) toc('Royalty Stacking', 'Upstream IP obligations and net royalty impact');
+  if (data.buyerSynergies?.length) toc('Buyer Synergies', 'Acquirer-specific synergy analysis');
   toc('Methodology', 'Model design, data sources, and disclaimer');
 
   const totalPages = pageNum;
@@ -120,6 +140,17 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
     if (hasAdvancedAnalytics) addPage(renderRealOptionsLifecyclePage);
     if (hasBuyerSpecific) addPage(renderBuyerSpecificPage);
   }
+  // New advanced analytics pages — conditionally included when data exists
+  if (data.regulatoryRisk) addPage(renderRegulatoryRiskPage);
+  if (data.milestoneProbabilities) addPage(renderMilestonePage);
+  if (data.earnoutValuation) addPage(renderEarnoutPage);
+  if (data.patentDynamics) addPage(renderPatentDynamicsPage);
+  if (data.cmcRisk) addPage(renderCMCRiskPage);
+  if (data.pricingConstraints) addPage(renderPricingAccessPage);
+  if (data.indicationSequence) addPage(renderIndicationSequencingPage);
+  if (data.taxStructure) addPage(renderTaxStructurePage);
+  if (data.royaltyStacking) addPage(renderRoyaltyStackingPage);
+  if (data.buyerSynergies?.length) addPage(renderBuyerSynergyPage);
   addPage(renderMethodologyPage);
 
   return `

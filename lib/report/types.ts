@@ -4,8 +4,14 @@ import type { ComparableDealForUI } from '@/lib/comparableDeals';
 import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import type { RNPVResult, MonteCarloResult, MarketSizeEstimate, ScenarioResult, FXSensitivity, CompetitiveLandscape, DealFlowForecast, DealWaterfall, ScenarioComparisonResult, LifecycleExtensionResult } from '@/lib/financial/types';
+import type { MilestoneProbabilityResult } from '@/lib/financial/milestone-probability';
 import type { CompetitiveDynamicsResult, RealOptionsResult } from '@/lib/financial/advanced-upgrades';
 import type { BuyerSpecificValuation } from '@/lib/financial/buyer-specific-valuation';
+import type { RegulatoryRiskResult } from '@/lib/financial/regulatory-risk';
+import type { RoyaltyStackingResult } from '@/lib/financial/royalty-stacking';
+import type { CMCRiskResult } from '@/lib/financial/cmc-timeline-risk';
+import type { PricingConstraintResult } from '@/lib/financial/pricing-access';
+import type { BuyerSynergyResult } from '@/lib/financial/buyer-synergy';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -65,6 +71,78 @@ export interface PDFReportData {
   realOptions?: RealOptionsResult;
   buyerSpecificValuation?: BuyerSpecificValuation;
   buyerSpecificValuations?: BuyerSpecificValuation[];
+  milestoneProbabilities?: MilestoneProbabilityResult;
+  regulatoryRisk?: RegulatoryRiskResult;
+  royaltyStacking?: RoyaltyStackingResult;
+  cmcRisk?: CMCRiskResult;
+  pricingConstraints?: PricingConstraintResult;
+  buyerSynergies?: BuyerSynergyResult[];
+  taxStructure?: {
+    effectiveTaxRate: number;
+    taxSavings_M: number;
+    optimalStructure: string;
+    withholdingTaxImpact_M: number;
+    transferPricingRisk: string;
+    pillarTwoImpact: string;
+    structureBreakdown: {
+      jurisdiction: string;
+      taxRate: number;
+      applicableIncome_pct: number;
+      rationale: string;
+    }[];
+    narrative: string;
+  };
+  patentDynamics?: {
+    basePatentLife_years: number;
+    ptaAdjustment_years: number;
+    pteAdjustment_years: number;
+    pediatricExclusivity_years: number;
+    orphanExclusivity_years: number;
+    nceExclusivity_years: number;
+    biologicExclusivity_years: number;
+    effectiveLOE_yearsFromApproval: number;
+    genericEntryProfile: {
+      year1erosion: number;
+      year2erosion: number;
+      year3erosion: number;
+      steadyStateGenericShare: number;
+    };
+    paragraphIVRisk: {
+      probability: number;
+      expectedEntryTiming_years: number;
+    };
+    authorizedGenericImpact: number;
+    narrative: string;
+  };
+  earnoutValuation?: {
+    probabilityWeightedValue_M: number;
+    tranches: {
+      trigger: string;
+      value_M: number;
+      probability: number;
+      expectedTiming_years: number;
+      discountedValue_M: number;
+      triggerType: string;
+    }[];
+    expectedPayoutSchedule: { year: number; expectedPayout_M: number }[];
+    upfrontEquivalent_M: number;
+    earnoutAsPercentOfTotal: number;
+    narrative: string;
+  };
+  indicationSequence?: {
+    expansionSequence: {
+      indication: string;
+      lineOfTherapy: string;
+      probability: number;
+      lag_years: number;
+      incrementalPeakSales_M: number;
+      cannibalization_pct: number;
+      sequenceOrder: number;
+    }[];
+    totalFranchiseValue_M: number;
+    franchisePremium_pct: number;
+    narrative: string;
+  };
 }
 
 export interface TocEntry {
