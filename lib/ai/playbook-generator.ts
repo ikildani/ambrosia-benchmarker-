@@ -158,11 +158,11 @@ async function callAnthropicAPI(prompt: string, maxTokens: number): Promise<stri
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     }),
-    signal: AbortSignal.timeout(50_000),
+    signal: AbortSignal.timeout(30_000),
   });
 
   if (!response.ok) {
