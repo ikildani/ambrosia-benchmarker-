@@ -112,7 +112,7 @@ export async function trackCronPerformance(
     pastErrorRates.length > 0
       ? pastErrorRates.reduce((a, b) => a + b, 0) / pastErrorRates.length
       : 0;
-  const thisErrorRate = metrics.processed > 0 ? metrics.errors / metrics.processed : 0;
+  const thisErrorRate = metrics.processed > 0 ? (metrics.errors ?? 0) / metrics.processed : 0;
   const errorRateVsLastWeek =
     avgPastErrorRate > 0 ? (thisErrorRate - avgPastErrorRate) / avgPastErrorRate : null;
 
