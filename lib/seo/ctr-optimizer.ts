@@ -33,14 +33,32 @@ export interface OptimizationResult {
 
 // ── Candidate discovery ──────────────────────────────────────────────────────
 
+export interface CtrThresholds {
+  minImpressions: number;
+  minPosition: number;
+  maxPosition: number;
+  maxCtr: number;
+}
+
+export const DEFAULT_CTR_THRESHOLDS: CtrThresholds = {
+  minImpressions: 100,
+  minPosition: 8,
+  maxPosition: 20,
+  maxCtr: 3,
+};
+
 /**
  * Find pages that are ranking but underperforming on CTR.
  * Criteria: avg position 8-20, avg CTR < 3%, total impressions > 100,
  * not optimized in last 14 days.
+ *
+ * Thresholds can be overridden via the `thresholds` parameter for adaptive tuning.
  */
 export async function findOptimizationCandidates(
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  thresholds?: Partial<CtrThresholds>
 ): Promise<OptimizationCandidate[]> {
+  const t = { ...DEFAULT_CTR_THRESHOLDS, ...thresholds };
   // 1. Read latest GSC performance rows
   const { data: metrics, error: metricsError } = await supabase
     .from('seo_metrics')
