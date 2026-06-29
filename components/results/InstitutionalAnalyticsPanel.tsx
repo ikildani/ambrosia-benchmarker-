@@ -402,7 +402,7 @@ export default function InstitutionalAnalyticsPanel({ financialModel: fm, tier, 
               gradient="from-orange-500 to-red-500"
             >
               <KpiGrid>
-                <Kpi label="Gross Royalty" value={fmtPct(fm.royaltyStacking.grossRoyaltyRate)} accent="blue" />
+                <Kpi label="Gross Royalty" value={fmtPct(fm.royaltyStacking.netRoyaltyRate + fm.royaltyStacking.totalUpstreamBurden)} accent="blue" />
                 <Kpi label="Upstream Burden" value={`-${fmtPct(fm.royaltyStacking.totalUpstreamBurden)}`} accent="rose" />
                 <Kpi label="Net Royalty" value={fmtPct(fm.royaltyStacking.netRoyaltyRate)} accent="teal" />
                 <Kpi label="Deal Value Impact" value={`-${fm.royaltyStacking.impactOnDealValue_pct.toFixed(0)}%`} accent="rose" />
