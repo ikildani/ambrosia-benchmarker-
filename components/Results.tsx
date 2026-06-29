@@ -803,6 +803,43 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     return () => { cancelled = true; };
   }, [fullInputs, result]);
 
+  // Eager partner match fetch — needed by BuyerSpecificPanel in Analysis tab
+  // without requiring user to visit Playbook tab first
+  const partnerFetchedRef = useRef(false);
+  useEffect(() => {
+    if (partnerFetchedRef.current || !inputs || partnerMatches.length > 0) return;
+    partnerFetchedRef.current = true;
+    fetch('/api/partners/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        modality: inputs.modality,
+        development_phase: inputs.phase,
+        indication_category: inputs.indication,
+        territory_scope: inputs.territory,
+        therapeutic_area: fullInputs?.therapeuticArea,
+        tier: tier,
+      }),
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.matches?.length > 0 && partnerMatches.length === 0) {
+          setPartnerMatches(data.matches.map((m: any) => ({
+            company_name: m.company_name,
+            company_id: m.company_id || m.company_name,
+            match_score: m.match_score,
+            match_reasons: m.match_reasons || [],
+            deals_last_12mo: m.deals_last_12mo || 0,
+            hq_country: m.hq_country,
+            company_type: m.company_type || null,
+            strategic_context: m.strategic_context || null,
+            pharma_intent: m.pharma_intent || null,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [inputs, fullInputs, tier]);
+
   // Fetch server-side financial data (competitive landscape, deal flow forecast)
   useEffect(() => {
     if (!fullInputs) return;
