@@ -558,6 +558,149 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
           </button>
         )}
       </div>
+
+      {/* AI Comparable Narration — Pro only, async loaded */}
+      {hasFullAccess && visibleDeals.length > 0 && (
+        <ComparableNarrationSection inputs={inputs} deals={visibleDeals} />
+      )}
+    </div>
+  );
+}
+
+// ── AI Narration Sub-Component ──
+
+function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInput; deals: EnrichedDeal[] }) {
+  const [narration, setNarration] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const startedRef = useCallback(() => {}, []);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  const generateNarration = useCallback(async () => {
+    if (loading || narration) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const comparables = deals.map(d => ({
+        id: d.id,
+        parties: d.parties,
+        totalValue: d.totalValue,
+        year: d.year,
+        phase: d.phase,
+        relevanceReasons: d.relevanceReasons,
+        scoreBreakdown: { weightedScore: d.matchScore },
+      }));
+
+      const res = await fetch('/api/comparable-narration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs, results: { terms: {} }, comparables }),
+        signal: AbortSignal.timeout(35000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNarration(data.narration);
+      } else {
+        setError('Unable to generate analysis');
+      }
+    } catch {
+      setError('Analysis timed out');
+    } finally {
+      setLoading(false);
+    }
+  }, [inputs, deals, loading, narration]);
+
+  // Auto-trigger once on mount
+  useEffect(() => {
+    if (!hasStarted && deals.length > 0) {
+      setHasStarted(true);
+      const timer = setTimeout(generateNarration, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasStarted, deals.length, generateNarration]);
+
+  return (
+    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">AI Comparable Analysis</span>
+            <span className="ml-2 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded">Ambrosia AI</span>
+          </div>
+        </div>
+        {narration?.confidenceLevel && (
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+            narration.confidenceLevel === 'high' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+            : narration.confidenceLevel === 'medium' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+            : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
+          }`}>
+            {narration.confidenceLevel} confidence
+          </span>
+        )}
+      </div>
+
+      {loading && (
+        <div className="flex items-center gap-3 py-6 justify-center">
+          <div className="w-5 h-5 border-2 border-purple-200 dark:border-purple-800 border-t-purple-500 rounded-full animate-spin" />
+          <span className="text-xs text-slate-500 dark:text-slate-400">Analyzing comparables...</span>
+        </div>
+      )}
+
+      {error && !narration && (
+        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+          <p className="text-xs text-slate-500">{error}</p>
+          <button onClick={generateNarration} className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-1 hover:underline">Try again</button>
+        </div>
+      )}
+
+      {narration && (
+        <div className="space-y-3">
+          {/* Per-deal narratives */}
+          {narration.narratedDeals?.map((d: any, i: number) => (
+            <div key={i} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{d.parties}</span>
+                {d.netAdjustment_pct !== 0 && (
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${d.netAdjustment_pct > 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'}`}>
+                    {d.netAdjustment_pct > 0 ? '+' : ''}{d.netAdjustment_pct}% adj
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{d.detailedNarrative}</p>
+              {d.adjustments?.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {d.adjustments.map((a: any, j: number) => (
+                    <span key={j} className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${a.direction === 'premium' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : a.direction === 'discount' ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'}`}>
+                      {a.factor}: {a.direction === 'discount' ? '-' : '+'}{a.magnitude_pct}%
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Synthesis */}
+          {narration.synthesisNarrative && (
+            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10 border border-purple-200 dark:border-purple-800">
+              <p className="text-xs font-semibold text-purple-800 dark:text-purple-300 mb-1">Synthesis</p>
+              <p className="text-xs text-purple-700 dark:text-purple-300/80 leading-relaxed">{narration.synthesisNarrative}</p>
+            </div>
+          )}
+
+          {/* Valuation implication */}
+          {narration.valuationImplication && (
+            <div className="p-3 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/10 dark:to-cyan-900/10 border border-teal-200 dark:border-teal-800">
+              <p className="text-xs font-semibold text-teal-800 dark:text-teal-300 mb-1">Valuation Implication</p>
+              <p className="text-xs text-teal-700 dark:text-teal-300/80 leading-relaxed">{narration.valuationImplication}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
