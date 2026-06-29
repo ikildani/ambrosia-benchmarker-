@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { runPressReleaseIngestion } from '@/lib/ingestion/press-releases';
 import { logCronRun, reclassifyOtherDeals } from '@/lib/cron-utils';
 import { notifyHighValueDeal } from '@/lib/slack/notify';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -83,6 +84,35 @@ export async function GET(request: NextRequest) {
       errors: result.errors,
     });
 
+    // Diagnostic log: if we processed many items but inserted none, log skip reasons
+    if (result.deals_inserted === 0 && result.potential_deals > 10) {
+      const skipBreakdown = {
+        totalArticlesFound: result.articles_found,
+        potentialDeals: result.potential_deals,
+        dealsExtracted: result.deals_extracted,
+        dealsInserted: result.deals_inserted,
+        errorCount: result.errors.length,
+        topErrors: result.errors.slice(0, 5),
+        likelyCause: result.deals_extracted === 0
+          ? 'extraction_failure: Claude failed to extract deals from articles'
+          : result.deals_extracted > 0 && result.deals_inserted === 0
+            ? 'dedup_or_validation: deals extracted but rejected by validation or duplicate check'
+            : 'unknown',
+      };
+      console.log(
+        `[press-releases] Processed ${result.potential_deals} but inserted 0. Breakdown:`,
+        JSON.stringify(skipBreakdown, null, 2)
+      );
+    }
+
+    // Run cron intelligence
+    const healthReport = await runCronIntelligence(supabase, 'press_releases_cron', {
+      processed: result.potential_deals,
+      inserted: result.deals_inserted,
+      skipped: result.potential_deals - result.deals_inserted - result.errors.length,
+      errors: result.errors.length,
+    });
+
     return NextResponse.json({
       success: true,
       durationMs,
@@ -92,7 +122,9 @@ export async function GET(request: NextRequest) {
       deals_extracted: result.deals_extracted,
       deals_inserted: result.deals_inserted,
       errors: result.errors.length,
-      error_details: result.errors.slice(0, 10), // First 10 errors for debugging
+      error_details: result.errors.slice(0, 10),
+      health: healthReport.status,
+      recommendation: healthReport.recommendation,
     });
   } catch (error) {
     console.error('Daily press release ingestion error:', error);

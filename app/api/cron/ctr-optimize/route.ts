@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isTimeBudgetExceeded, logCronRun } from '@/lib/cron-utils';
+import { getAdaptiveThreshold, runCronIntelligence } from '@/lib/cron-intelligence';
 import {
   findOptimizationCandidates,
   optimizePage,
@@ -45,15 +46,44 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
 
   try {
-    // 2. Find candidates
-    const candidates = await findOptimizationCandidates(supabase);
+    // 2. Get adaptive thresholds
+    const minImpressions = await getAdaptiveThreshold(supabase, 'ctr-optimize', 'min_impressions', 100, {
+      minValue: 20, maxValue: 500, stepDown: 25, stepUp: 50,
+    });
+    const maxCtr = await getAdaptiveThreshold(supabase, 'ctr-optimize', 'max_ctr', 3, {
+      minValue: 1, maxValue: 8, stepDown: 0.5, stepUp: 1,
+    });
+    const minPosition = await getAdaptiveThreshold(supabase, 'ctr-optimize', 'min_position', 8, {
+      minValue: 3, maxValue: 15, stepDown: 1, stepUp: 2,
+    });
+    const maxPosition = await getAdaptiveThreshold(supabase, 'ctr-optimize', 'max_position', 20, {
+      minValue: 15, maxValue: 50, stepDown: 5, stepUp: 5,
+    });
+
+    // 3. Find candidates using adaptive thresholds
+    const candidates = await findOptimizationCandidates(supabase, {
+      minImpressions,
+      maxCtr,
+      minPosition,
+      maxPosition,
+    });
 
     if (candidates.length === 0) {
       await logCronRun(supabase, 'ctr-optimize', {
         processed: 0,
-        parameters: { status: 'no_candidates' },
+        parameters: { status: 'no_candidates', thresholds: { minImpressions, maxCtr, minPosition, maxPosition } },
       });
-      return NextResponse.json({ message: 'No candidates found', optimized: 0 });
+
+      // Run intelligence even on empty runs — this detects stalls
+      await runCronIntelligence(supabase, 'ctr-optimize', {
+        processed: 0,
+        inserted: 0,
+        skipped: 0,
+        errors: 0,
+        thresholds: { min_impressions: minImpressions, max_ctr: maxCtr, min_position: minPosition, max_position: maxPosition },
+      });
+
+      return NextResponse.json({ message: 'No candidates found', optimized: 0, thresholds: { minImpressions, maxCtr, minPosition, maxPosition } });
     }
 
     // 3. Optimize each candidate
@@ -116,7 +146,17 @@ export async function GET(request: NextRequest) {
       parameters: {
         candidateCount: candidates.length,
         optimizedPages: results.map((r) => r.pagePath),
+        thresholds: { minImpressions, maxCtr, minPosition, maxPosition },
       },
+    });
+
+    // 6. Run cron intelligence
+    const healthReport = await runCronIntelligence(supabase, 'ctr-optimize', {
+      processed: results.length + errors.length,
+      inserted: results.length,
+      skipped: candidates.length - results.length - errors.length,
+      errors: errors.length,
+      thresholds: { min_impressions: minImpressions, max_ctr: maxCtr, min_position: minPosition, max_position: maxPosition },
     });
 
     const durationMs = Date.now() - startTime;
@@ -127,6 +167,8 @@ export async function GET(request: NextRequest) {
       candidates: candidates.length,
       errors: errors.length,
       durationMs,
+      thresholds: { minImpressions, maxCtr, minPosition, maxPosition },
+      health: healthReport.status,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';

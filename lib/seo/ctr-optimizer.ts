@@ -100,20 +100,20 @@ export async function findOptimizationCandidates(
     });
   }
 
-  // 3. Filter pages: avg position 8-20, avg CTR < 3%, total impressions > 100
+  // 3. Filter pages using adaptive thresholds
   const candidates: OptimizationCandidate[] = [];
 
   for (const [pagePath, { queries }] of pageMap) {
     const totalImpressions = queries.reduce((sum, q) => sum + q.impressions, 0);
-    if (totalImpressions <= 100) continue;
+    if (totalImpressions <= t.minImpressions) continue;
 
     const weightedPosition =
       queries.reduce((sum, q) => sum + q.position * q.impressions, 0) / totalImpressions;
-    if (weightedPosition < 8 || weightedPosition > 20) continue;
+    if (weightedPosition < t.minPosition || weightedPosition > t.maxPosition) continue;
 
     const weightedCtr =
       queries.reduce((sum, q) => sum + q.ctr * q.impressions, 0) / totalImpressions;
-    if (weightedCtr >= 3) continue;
+    if (weightedCtr >= t.maxCtr) continue;
 
     candidates.push({
       pagePath,
