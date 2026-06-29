@@ -80,7 +80,7 @@ export function formatDealCount(count: number): string {
 // 2026-04-14: Migration 051 flagged 750 LLM-fabricated rows as synthetic
 // 2026-06-29: Hard-deleted 782 rejected deals, reclassified 227 fake-TA deals
 // Deal count reflects only non-synthetic, non-rejected, verified+pending real deals.
-export const LIVE_DEAL_COUNT = 1507;
+export const LIVE_DEAL_COUNT = 1440;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
