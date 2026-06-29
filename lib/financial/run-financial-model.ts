@@ -364,30 +364,37 @@ export function runFinancialModel(
     );
   } catch { /* non-critical — keep going */ }
 
+  // Step 13: Milestone Probability Weighting
   let milestoneProbabilities: MilestoneProbabilityResult | undefined;
   try {
     milestoneProbabilities = computeMilestoneProbabilities(
-      inputs.phase, inputs.therapeuticArea, inputs.modality,
-      inputs.indication, inputs.dealType || 'licensing',
+      rnpvInput.phase,
+      rnpvInput.therapeuticArea,
+      rnpvInput.modality,
+      rnpvInput.indication,
+      rnpvInput.dealType ?? 'licensing',
     );
-  } catch { /* non-critical */ }
+  } catch { /* non-critical — keep going */ }
 
+  // Step 14: Cross-Border Tax Structuring
   let taxStructure: TaxStructureResult | undefined;
   try {
+    const royaltyRate = 0.10; // default 10% royalty rate estimate
     taxStructure = computeTaxStructureImpact(
-      inputs.territory as any, rnpv.impliedDealValue.totalDeal.median,
-      (result.tieredRoyalties?.base?.low ?? 5) / 100,
-      (inputs.dealType || 'licensing') as any,
-      rnpvInput.peakSalesEstimate?.median ?? 0,
+      rnpvInput.territory as 'us' | 'eu' | 'japan' | 'china' | 'row' | 'global',
+      rnpv.impliedDealValue.totalDeal.median,
+      royaltyRate,
+      (rnpvInput.dealType ?? 'licensing') as 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration',
+      rnpvInput.peakSalesEstimate.median,
     );
-  } catch { /* non-critical */ }
+  } catch { /* non-critical — keep going */ }
 
+  // Step 15: Royalty Stacking Risk
   let royaltyStacking: RoyaltyStackingResult | undefined;
   try {
-    royaltyStacking = estimateStackingByModality(
-      (result.tieredRoyalties?.base?.low ?? 5) / 100, inputs.modality as any,
-    );
-  } catch { /* non-critical */ }
+    const baseRoyalty = (result.tieredRoyalties?.base?.low ?? 5) / 100;
+    royaltyStacking = estimateStackingByModality(baseRoyalty, inputs.modality as any);
+  } catch { /* non-critical — keep going */ }
 
   // Step 16: Patent Term & LOE Dynamics
   let patentDynamics: PatentDynamicsResult | undefined;
@@ -409,62 +416,103 @@ export function runFinancialModel(
     );
   } catch { /* non-critical — keep going */ }
 
+  // Step 17: CMC Timeline & Risk
   let cmcRisk: CMCRiskResult | undefined;
   try {
-    cmcRisk = computeCMCRisk(inputs.modality, inputs.phase, inputs.therapeuticArea);
-  } catch { /* non-critical */ }
+    cmcRisk = computeCMCRisk(
+      rnpvInput.modality,
+      rnpvInput.phase,
+      rnpvInput.therapeuticArea,
+    );
+  } catch { /* non-critical — keep going */ }
 
+  // Step 18: Earnout / CVR Valuation
   let earnoutValuation: EarnoutResult | undefined;
   try {
-    const earnoutStructure = DEFAULT_EARNOUT_STRUCTURE(inputs.phase, inputs.dealType || 'licensing');
-    earnoutValuation = computeEarnoutValue(
-      earnoutStructure, inputs.phase, inputs.therapeuticArea,
-      rnpv.discountRate, rnpvInput.peakSalesEstimate?.median ?? 0,
+    const earnoutStructure = DEFAULT_EARNOUT_STRUCTURE(
+      rnpvInput.phase,
+      rnpvInput.dealType ?? 'licensing',
     );
-  } catch { /* non-critical */ }
+    earnoutValuation = computeEarnoutValue(
+      earnoutStructure,
+      rnpvInput.phase,
+      rnpvInput.therapeuticArea,
+      rnpv.discountRate,
+      rnpvInput.peakSalesEstimate.median,
+    );
+  } catch { /* non-critical — keep going */ }
 
+  // Step 19: Pricing & Reimbursement Constraints
   let pricingConstraints: PricingConstraintResult | undefined;
   try {
-    const annualCost = inputs.modality?.includes('gene') ? 500000
-      : inputs.modality?.includes('carT') ? 400000
-      : inputs.modality?.includes('mab') || inputs.modality?.includes('adc') ? 150000
-      : inputs.modality === 'smallMolecule' ? 50000
-      : 100000;
+    // Estimate annual cost of therapy from peak sales and addressable patients
+    const estimatedPatientsAtPeak = 10_000; // conservative default
+    const annualCostOfTherapy = marketSize?.annualRevenuePerPatient
+      ?? (rnpvInput.peakSalesEstimate.median * 1_000_000) / estimatedPatientsAtPeak;
     pricingConstraints = computePricingConstraints(
-      inputs.therapeuticArea, inputs.modality, inputs.indication,
-      inputs.territory, rnpvInput.peakSalesEstimate?.median ?? 0, annualCost,
+      rnpvInput.therapeuticArea,
+      rnpvInput.modality,
+      rnpvInput.indication,
+      rnpvInput.territory,
+      rnpvInput.peakSalesEstimate.median,
+      annualCostOfTherapy,
     );
-  } catch { /* non-critical */ }
+  } catch { /* non-critical — keep going */ }
 
+  // Step 20: Indication Sequencing (franchise expansion)
   let indicationSequence: IndicationSequenceResult | undefined;
   try {
     indicationSequence = computeIndicationSequence(
-      inputs.therapeuticArea, inputs.indication, inputs.modality,
-      rnpvInput.peakSalesEstimate?.median ?? 0,
+      rnpvInput.therapeuticArea,
+      rnpvInput.indication,
+      rnpvInput.modality,
+      rnpvInput.peakSalesEstimate.median,
     );
-  } catch { /* non-critical */ }
+  } catch { /* non-critical — keep going */ }
 
+  // Step 21: Buyer-Specific Synergy Analysis
+  // Runs against all buyer archetypes in BUYER_PROFILES to produce an array
+  // of synergy assessments ranked by total premium.
   let buyerSynergiesResult: BuyerSynergyResult[] | undefined;
   try {
-    const peakSales = rnpvInput.peakSalesEstimate?.median ?? 0;
-    const assetProfile = {
-      assetName: inputs.indication || 'Asset',
-      therapeuticArea: inputs.therapeuticArea as any,
-      modality: inputs.modality as any,
-      indication: inputs.indication,
-      projectedPeakSales_M: peakSales,
-      annualRDCost_M: peakSales * 0.05,
-      filingGeographies: inputs.territory === 'global' ? ['us', 'eu', 'japan'] as any[] : [inputs.territory] as any[],
-      mechanism: inputs.treatmentApproach || 'targeted',
-      phase: inputs.phase,
-      requiresCompanionDx: inputs.biomarker === 'companion',
-      numberOfBidders: inputs.competitivePosition === 'firstInClass' ? 4 : inputs.competitivePosition === 'crowded' ? 2 : 3,
-      attractiveness: inputs.competitivePosition === 'firstInClass' ? 8 : inputs.competitivePosition === 'crowded' ? 5 : 6,
+    const modalityKeyMap: Record<string, import('./buyer-synergy').ModalityKey> = {
+      smallMolecule: 'small_molecule', protac: 'small_molecule', molecularGlue: 'small_molecule',
+      mab: 'mab', fcrnAntagonist: 'mab', complementInhibitor: 'mab',
+      bispecific: 'bispecific', tCellEngager: 'bispecific', bispecificHeme: 'bispecific',
+      adc: 'adc',
+      geneTherapy: 'gene_therapy', geneTherapyRare: 'gene_therapy', geneTherapyOcular: 'gene_therapy',
+      carT_heme: 'cell_therapy', carT_solid: 'cell_therapy', cellTherapy: 'cell_therapy', stemCell: 'cell_therapy',
+      mrna: 'mrna',
+      peptide: 'peptide', glp1Agonist: 'peptide', dualIncretin: 'peptide', tripleIncretin: 'peptide',
+      rnai: 'oligonucleotide', aso: 'oligonucleotide', oligonucleotide: 'oligonucleotide',
+      vaccinePreventive: 'vaccine', therapeuticVaccine: 'vaccine',
     };
-    buyerSynergiesResult = Object.entries(BUYER_PROFILES).slice(0, 5).map(([, profile]) => {
-      try { return computeBuyerSynergy(profile, assetProfile); } catch { return null; }
-    }).filter(Boolean) as BuyerSynergyResult[];
-  } catch { /* non-critical */ }
+    const assetProfile: import('./buyer-synergy').AssetSynergyProfile = {
+      assetName: rnpvInput.indication,
+      therapeuticArea: rnpvInput.therapeuticArea as import('./buyer-synergy').TherapeuticAreaKey,
+      modality: modalityKeyMap[rnpvInput.modality] ?? 'small_molecule',
+      indication: rnpvInput.indication,
+      projectedPeakSales_M: rnpvInput.peakSalesEstimate.median,
+      annualRDCost_M: rnpv.phaseTransitions.reduce((s, t) => s + t.costEstimate, 0) / Math.max(1, rnpv.yearsToMarket),
+      filingGeographies: (['us', 'eu', 'japan', 'china', 'row'] as const).filter(
+        g => g === rnpvInput.territory || rnpvInput.territory === 'global',
+      ),
+      mechanism: rnpvInput.modality,
+      phase: rnpvInput.phase,
+      requiresCompanionDx: false,
+      numberOfBidders: 2,
+      attractiveness: 6,
+    };
+
+    const results: BuyerSynergyResult[] = [];
+    for (const profile of Object.values(BUYER_PROFILES)) {
+      try {
+        results.push(computeBuyerSynergy(profile, assetProfile));
+      } catch { /* skip individual buyer failures */ }
+    }
+    results.sort((a, b) => b.totalSynergyPremium_pct - a.totalSynergyPremium_pct);
+    buyerSynergiesResult = results;
+  } catch { /* non-critical — keep going */ }
 
   return {
     rnpv,

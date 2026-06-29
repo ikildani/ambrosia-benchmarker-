@@ -298,12 +298,40 @@ export function computeRoyaltyStacking(
  * Quick stacking estimate using typical rates for a modality.
  * Applies default floor provision at 50% of gross.
  */
+const MODALITY_TO_STACKING: Record<string, StackingModality> = {
+  smallMolecule: 'smallMolecule', mab: 'mab', adc: 'adc', bispecific: 'bispecific',
+  carT_heme: 'carT', carT_solid: 'carT', carT_autoimmune: 'carT', inVivoCarT: 'carT', carTreg: 'carT',
+  geneTherapy: 'geneTherapy_AAV', geneTherapyOcular: 'geneTherapy_AAV', geneTherapyRare: 'geneTherapy_AAV',
+  rnai: 'siRNA_ASO', aso: 'siRNA_ASO', oligonucleotide: 'siRNA_ASO', siRNA: 'siRNA_ASO',
+  tCellEngager: 'bispecific', bispecificHeme: 'bispecific',
+  peptide: 'smallMolecule', protac: 'smallMolecule', molecularGlue: 'smallMolecule',
+  glp1Agonist: 'smallMolecule', dualIncretin: 'smallMolecule', tripleIncretin: 'smallMolecule',
+  oralPeptide: 'smallMolecule', sglt2Inhibitor: 'smallMolecule', amylinAnalog: 'smallMolecule',
+  mrna: 'siRNA_ASO', cellTherapy: 'carT', stemCell: 'carT',
+  radiopharmaceutical: 'smallMolecule', psychedelic: 'smallMolecule',
+  antiVegf: 'mab', fcrnAntagonist: 'mab', complementInhibitor: 'mab',
+  jakInhibitor: 'smallMolecule', jakInhibitorDerm: 'smallMolecule',
+  il17Inhibitor: 'mab', il13Inhibitor: 'mab', s1pModulator: 'smallMolecule',
+  antiTl1a: 'mab', tl1aInhibitor: 'mab', il23GI: 'mab',
+  myosinInhibitor: 'smallMolecule', pcsk9Targeting: 'mab', rnaCardio: 'siRNA_ASO',
+  antiviral: 'smallMolecule', antibioticNovel: 'smallMolecule', vaccinePreventive: 'mab', phageTherapy: 'mab',
+  gnrhAntagonist: 'smallMolecule', hormoneTherapy: 'smallMolecule', neuroactiveSteroid: 'smallMolecule',
+  enzymeReplacement: 'mab', substrateReduction: 'smallMolecule',
+  oncolyticVirus: 'geneTherapy_AAV', bbbPlatform: 'mab', therapeuticVaccine: 'mab',
+  ionChannel: 'smallMolecule', tauTargeting: 'mab',
+  topicalBiologic: 'mab', topicalOphthalmic: 'smallMolecule', intravitreal: 'mab',
+  oralIntegrin: 'smallMolecule', gutSelectiveIntegrin: 'mab', dualAntagonist: 'mab',
+  btki: 'smallMolecule', microbiomeBased: 'smallMolecule', antiActivin: 'mab',
+  anticoagulantNovel: 'smallMolecule',
+};
+
 export function estimateStackingByModality(
   grossRoyaltyRate: number,
-  modality: StackingModality,
+  modality: StackingModality | string,
   obligationCount = 2,
 ): RoyaltyStackingResult {
-  const profile = TYPICAL_BACKGROUND_IP_RATES[modality];
+  const mappedModality = MODALITY_TO_STACKING[modality as string] || (modality as StackingModality);
+  const profile = TYPICAL_BACKGROUND_IP_RATES[mappedModality];
   if (!profile) throw new Error(`Unknown modality: ${modality}`);
 
   const perRate = profile.midpoint / Math.max(1, obligationCount);
