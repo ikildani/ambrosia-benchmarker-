@@ -136,6 +136,8 @@ export async function GET(request: NextRequest) {
       await runCronIntelligence(supabase, 'drip-emails', {
         processed: subscribers.length,
         inserted: day3Sent + day5Sent,
+        skipped: 0,
+        errors: 0,
       });
     } catch {}
 
