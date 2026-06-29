@@ -24,11 +24,11 @@ function fmtM(v: number): string {
 }
 
 const ACCENT = {
-  teal: { border: 'border-t-teal-500', bg: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-teal-700 dark:text-teal-400', badge: 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400' },
-  blue: { border: 'border-t-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-400', badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' },
-  purple: { border: 'border-t-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-700 dark:text-purple-400', badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' },
-  amber: { border: 'border-t-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-400', badge: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' },
-  rose: { border: 'border-t-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-700 dark:text-rose-400', badge: 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400' },
+  teal: { border: 'border-t-teal-500', bar: 'bg-teal-500' },
+  blue: { border: 'border-t-blue-500', bar: 'bg-blue-500' },
+  purple: { border: 'border-t-purple-500', bar: 'bg-purple-500' },
+  amber: { border: 'border-t-amber-500', bar: 'bg-amber-500' },
+  rose: { border: 'border-t-rose-500', bar: 'bg-rose-500' },
 };
 
 export default function DealStructureComparison({ inputs, currentResult, tier, onBuyReport }: Props) {
@@ -103,7 +103,7 @@ export default function DealStructureComparison({ inputs, currentResult, tier, o
                           <span className="text-sm font-bold text-neutral-900 dark:text-white">{fmtM(r.terms.upfront.median)}</span>
                         </div>
                         <div className="mt-1 h-1.5 bg-neutral-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full bg-gradient-to-r from-${c.color}-400 to-${c.color}-500`} style={{ width: `${upfrontPct}%` }} />
+                          <div className={`h-full rounded-full ${accent.bar}`} style={{ width: `${upfrontPct}%` }} />
                         </div>
                         <div className="flex justify-between mt-0.5">
                           <span className="text-[9px] text-neutral-400">{fmtM(r.terms.upfront.low)}</span>
@@ -114,11 +114,11 @@ export default function DealStructureComparison({ inputs, currentResult, tier, o
                       {/* TDV */}
                       <div className="mb-2">
                         <div className="flex items-baseline justify-between">
-                          <span className="text-[10px] font-semibold text-neutral-400 dark:text-slate-500 uppercase tracking-wider">Total Deal</span>
+                          <span className="text-[10px] font-semibold text-neutral-400 dark:text-slate-500 uppercase tracking-wider">{c.key === 'acquisition' ? 'Cash Value' : 'Total Deal'}</span>
                           <span className="text-sm font-bold text-neutral-900 dark:text-white">{fmtM(r.terms.totalDealValue.median)}</span>
                         </div>
                         <div className="mt-1 h-1.5 bg-neutral-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full bg-gradient-to-r from-${c.color}-400 to-${c.color}-500`} style={{ width: `${tdvPct}%` }} />
+                          <div className={`h-full rounded-full ${accent.bar}`} style={{ width: `${tdvPct}%` }} />
                         </div>
                       </div>
 
@@ -149,11 +149,9 @@ export default function DealStructureComparison({ inputs, currentResult, tier, o
                 {(() => {
                   const licensing = comparisons.find(c => c.key === 'licensing');
                   const acquisition = comparisons.find(c => c.key === 'acquisition');
-                  const option = comparisons.find(c => c.key === 'option');
-                  if (!licensing?.result || !acquisition?.result || !option?.result) return 'Compare structures to find the optimal balance between upfront certainty and total deal value.';
-                  const acqPremium = ((acquisition.result.terms.upfront.median / licensing.result.terms.upfront.median - 1) * 100).toFixed(0);
-                  const optDiscount = ((1 - option.result.terms.totalDealValue.median / licensing.result.terms.totalDealValue.median) * 100).toFixed(0);
-                  return `Acquisition delivers ${acqPremium}% higher upfront than licensing but requires full asset transfer. Option deals trade ${optDiscount}% lower total value for strategic flexibility. Co-development shares R&D cost but compresses royalties. Choose based on your capitalization needs and strategic objectives.`;
+                  if (!licensing?.result || !acquisition?.result) return 'Compare structures to find the optimal balance between upfront certainty and total deal value.';
+                  const acqUpfrontPct = ((acquisition.result.terms.upfront.median / licensing.result.terms.upfront.median) * 100).toFixed(0);
+                  return `Licensing TDV represents total potential value including contingent milestones — the headline number but not guaranteed cash. Acquisition TDV is lower but ${acqUpfrontPct}% of it is upfront cash (vs ${licensing.result.dealRecommendation.upfrontPercent}% for licensing). Co-development shares R&D cost but compresses royalties. Option deals preserve strategic flexibility at the lowest upfront commitment. Choose based on capitalization needs, control preferences, and risk appetite.`;
                 })()}
               </p>
             </div>

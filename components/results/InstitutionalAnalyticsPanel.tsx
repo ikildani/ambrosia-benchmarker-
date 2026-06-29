@@ -68,7 +68,7 @@ function ModulePanel({ title, subtitle, icon, gradient, defaultOpen = false, chi
         <div className="rounded-[11px] bg-white dark:bg-slate-800 overflow-hidden">
           <button
             onClick={() => setOpen(!open)}
-            className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-neutral-50 dark:hover:bg-slate-750 transition-colors"
+            className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-neutral-50 dark:hover:bg-slate-700/50 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-soft flex-shrink-0`}>
@@ -221,7 +221,7 @@ export default function InstitutionalAnalyticsPanel({ financialModel: fm, tier, 
                   </thead>
                   <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
                     {[...fm.milestoneProbabilities.developmentMilestones, ...fm.milestoneProbabilities.commercialMilestones].map((m, i) => (
-                      <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-slate-750 transition-colors">
+                      <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-slate-700/50 transition-colors">
                         <td className="py-2 px-3 text-neutral-700 dark:text-slate-300 font-medium">{m.event}</td>
                         <td className="py-2 px-3 text-right">
                           <span className={`font-bold ${m.probability > 0.5 ? 'text-emerald-600 dark:text-emerald-400' : m.probability > 0.2 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>
@@ -431,7 +431,7 @@ export default function InstitutionalAnalyticsPanel({ financialModel: fm, tier, 
                   </thead>
                   <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
                     {fm.buyerSynergies.map((b, i) => (
-                      <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-slate-750 transition-colors">
+                      <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-slate-700/50 transition-colors">
                         <td className="py-2 px-3 font-medium text-neutral-700 dark:text-slate-300">{b.synergySources?.[0]?.rationale?.split(' ')[0] || `Buyer ${i + 1}`}</td>
                         <td className="py-2 px-3 text-right font-bold text-teal-600 dark:text-teal-400">+{b.totalSynergyPremium_pct.toFixed(0)}%</td>
                         <td className="py-2 px-3 text-right text-neutral-900 dark:text-white">{fmtM(b.revenueSynergies_M)}</td>
