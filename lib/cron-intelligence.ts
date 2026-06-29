@@ -52,8 +52,8 @@ export async function trackCronPerformance(
   metrics: {
     processed: number;
     inserted: number;
-    skipped: number;
-    errors: number;
+    skipped?: number;
+    errors?: number;
     thresholds?: Record<string, number>;
   }
 ): Promise<CronHealthReport> {
@@ -361,8 +361,8 @@ export async function runCronIntelligence(
   metrics: {
     processed: number;
     inserted: number;
-    skipped: number;
-    errors: number;
+    skipped?: number;
+    errors?: number;
     thresholds?: Record<string, number>;
   }
 ): Promise<CronHealthReport> {
