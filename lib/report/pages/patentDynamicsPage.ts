@@ -188,9 +188,9 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
           </div>
         </div>
         <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.cyan}; border-radius: 6px; padding: 14px 16px; background: white;">
-          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Authorized Generic Impact</div>
-          <div style="font-size: 26px; font-weight: 800; color: ${COLORS.cyan}; letter-spacing: -0.03em; line-height: 1;">${formatPercent(pd.authorizedGenericImpact * 100, 0)}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray500}; margin-top: 6px; line-height: 1.5;">Revenue retained via authorized generic strategy relative to unmanaged LOE erosion.</div>
+          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Authorized Generic</div>
+          <div style="font-size: 26px; font-weight: 800; color: ${pd.authorizedGenericImpact ? COLORS.rose : COLORS.teal}; letter-spacing: -0.03em; line-height: 1;">${pd.authorizedGenericImpact ? 'Likely' : 'Unlikely'}</div>
+          <div style="font-size: 9px; color: ${COLORS.gray500}; margin-top: 6px; line-height: 1.5;">${pd.authorizedGenericImpact ? 'Authorized generic launch expected — accelerates post-LOE erosion.' : 'Authorized generic launch unlikely — standard LOE erosion profile.'}</div>
         </div>
       </div>
 
