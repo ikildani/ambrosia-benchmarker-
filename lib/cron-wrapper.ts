@@ -30,28 +30,20 @@ import {
   collectUserDemandSignals,
   getCronIntelligenceBus,
   autoRemediate,
+  EMPTY_DEMAND_SIGNALS,
+  EMPTY_INTELLIGENCE_BUS,
 } from '@/lib/cron-intelligence';
-import type { CronHealthReport, CronHealthStatus } from '@/lib/cron-intelligence';
+import type {
+  CronHealthReport,
+  CronHealthStatus,
+  UserDemandSignals,
+  IntelligenceBus,
+} from '@/lib/cron-intelligence';
+
+// Re-export types so consumers can import from either module
+export type { UserDemandSignals, IntelligenceBus, CronHealthReport };
 
 // ── Types ────────────────────────────────────────────────────────────────────
-
-export interface UserDemandSignals {
-  topTherapeuticAreas: Array<{ ta: string; count: number }>;
-  topModalities: Array<{ modality: string; count: number }>;
-  topIndications: Array<{ indication: string; count: number }>;
-  trendingSearches: string[];
-  updatedAt: string;
-}
-
-export interface IntelligenceBus {
-  winningTopics: Array<{ ta: string; modality: string; conversionRate: number }>;
-  titleStrategiesThatWork: string[];
-  titleStrategiesThatFailed: string[];
-  newCompetitorQueries: string[];
-  activeExitIntentVariant: string;
-  priorityTAs: string[];
-  updatedAt: string;
-}
 
 export interface CronContext {
   supabase: SupabaseClient;
@@ -69,24 +61,6 @@ interface CronResult {
 }
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
-
-const EMPTY_PRIORITIES: UserDemandSignals = {
-  topTherapeuticAreas: [],
-  topModalities: [],
-  topIndications: [],
-  trendingSearches: [],
-  updatedAt: '',
-};
-
-const EMPTY_BUS: IntelligenceBus = {
-  winningTopics: [],
-  titleStrategiesThatWork: [],
-  titleStrategiesThatFailed: [],
-  newCompetitorQueries: [],
-  activeExitIntentVariant: '',
-  priorityTAs: [],
-  updatedAt: '',
-};
 
 function defaultHealthReport(cronName: string): CronHealthReport {
   return {
@@ -205,19 +179,19 @@ export async function withCronIntelligence(
     const supabase = createServiceClient();
 
     // ── Load intelligence (gracefully degraded) ──
-    let priorities: UserDemandSignals = EMPTY_PRIORITIES;
-    let bus: IntelligenceBus = EMPTY_BUS;
+    let priorities: UserDemandSignals = EMPTY_DEMAND_SIGNALS;
+    let bus: IntelligenceBus = EMPTY_INTELLIGENCE_BUS;
 
     if (!options?.skipIntelligence) {
       try {
         const [loadedPriorities, loadedBus] = await Promise.all([
           collectUserDemandSignals(supabase).catch((err) => {
             console.error(`[cron-wrapper] collectUserDemandSignals failed for ${cronName}:`, err);
-            return EMPTY_PRIORITIES;
+            return EMPTY_DEMAND_SIGNALS;
           }),
           getCronIntelligenceBus(supabase).catch((err) => {
             console.error(`[cron-wrapper] getCronIntelligenceBus failed for ${cronName}:`, err);
-            return EMPTY_BUS;
+            return EMPTY_INTELLIGENCE_BUS;
           }),
         ]);
         priorities = loadedPriorities;

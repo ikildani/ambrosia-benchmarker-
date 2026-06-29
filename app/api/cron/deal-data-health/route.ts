@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { fixUpfrontExceedsTdv, fixMissingTherapeuticArea, flagDuplicatesForReview } from '@/lib/ingestion/auto-remediate';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -353,6 +354,14 @@ export async function GET(request: NextRequest) {
         }),
       });
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'deal-data-health', {
+        processed: totalDeals || 0,
+        inserted: tdvFixResult.fixed + taFixResult.fixed + dupResult.fixed,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

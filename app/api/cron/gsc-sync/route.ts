@@ -13,6 +13,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 
@@ -231,6 +232,14 @@ export async function GET(request: NextRequest) {
         indexingFailed: indexingResults.failed,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'gsc-sync', {
+        processed: performanceData.length,
+        inserted: indexedCount,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

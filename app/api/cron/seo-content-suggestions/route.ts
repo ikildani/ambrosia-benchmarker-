@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -774,6 +775,14 @@ export async function GET(request: NextRequest) {
     await sendSlackNotification(suggestions, lowPerformingPages);
 
     const durationMs = Date.now() - startTime;
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'seo-content-suggestions', {
+        processed: suggestions.length,
+        inserted: 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { sendEmail } from '@/lib/email/client';
 import { buildDay0Email, buildDay3Email, buildDay5Email } from '@/lib/email/drip-sequences';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -129,6 +130,14 @@ export async function GET(request: NextRequest) {
         errors.push(`Error processing ${sub.email}: ${String(err)}`);
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'drip-emails', {
+        processed: subscribers.length,
+        inserted: day3Sent + day5Sent,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

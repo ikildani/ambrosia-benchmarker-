@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runCompletenessAudit } from '@/lib/ingestion/completeness-audit';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -163,6 +164,14 @@ export async function GET(request: NextRequest) {
         completeness_after: afterPct,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'deal-completeness', {
+        processed: result.deals_found_public,
+        inserted: result.deals_auto_ingested,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

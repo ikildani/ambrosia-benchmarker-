@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { publishBlogPost } from '@/lib/seo/blog-publisher';
 import { GSCClient } from '@/lib/seo/gsc-client';
 import { type GeneratedBlogContent } from '@/lib/ai/content-generator';
@@ -498,6 +499,14 @@ export async function GET(request: NextRequest) {
         durationMs,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'seo-page-render', {
+        processed: publishedPages.length + errors.length,
+        inserted: publishedPages.length,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

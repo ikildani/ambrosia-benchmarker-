@@ -35,6 +35,7 @@ import {
   extractAuditExcerpt,
 } from '@/lib/ingestion/deal-extraction-validator';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -274,6 +275,14 @@ export async function GET(request: NextRequest) {
       inserted: metrics.updated,
       errors: metrics.errors,
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 're-extract-pending', {
+        processed: metrics.queued,
+        inserted: metrics.updated,
+      });
+    } catch {}
 
     return NextResponse.json({
       ok: true,

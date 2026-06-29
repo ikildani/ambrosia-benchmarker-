@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { STATIC_MACRO_FALLBACK, type MacroSnapshot } from '@/lib/financial/macro-factors';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -173,6 +174,14 @@ export async function GET(request: NextRequest) {
         /* Sentry optional in tests */
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'macro-factors', {
+        processed: 1,
+        inserted: 1,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

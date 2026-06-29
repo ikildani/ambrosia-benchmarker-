@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runFTCIngestion } from '@/lib/ingestion/ftc-premerger';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120; // 2 minutes max (FTC runs are lightweight)
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,14 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await runFTCIngestion(supabase, anthropicApiKey, perplexityApiKey);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'ftc-update', {
+        processed: result.deals_discovered,
+        inserted: result.deals_inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

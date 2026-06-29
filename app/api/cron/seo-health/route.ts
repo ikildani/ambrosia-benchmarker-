@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { validateSitemap } from '@/lib/seo/sitemap-validator';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 
@@ -99,6 +100,14 @@ export async function GET(request: NextRequest) {
         unresolved: unresolved.length,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'seo-health', {
+        processed: healthResult.checked,
+        inserted: resolved.length,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

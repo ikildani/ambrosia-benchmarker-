@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { sendEmail } from '@/lib/email/client';
 import { logCronRun } from '@/lib/cron-utils';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -237,6 +238,14 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`[smart-trial-extend] Done: checked ${expiringUsers.length}, extended ${extended}, errors ${errors.length}`);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'smart-trial-extend', {
+        processed: expiringUsers.length,
+        inserted: extended,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -381,6 +382,14 @@ export async function GET(request: NextRequest) {
         `${hasErrors ? `\nErrors: ${results.generalist.errors.join(', ')}` : ''}`,
       );
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'apollo-auto-enroll', {
+        processed: scanned,
+        inserted: totalAdded,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

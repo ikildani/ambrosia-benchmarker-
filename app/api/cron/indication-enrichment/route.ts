@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
+import { createServiceClient } from '@/lib/supabase/server';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 import {
   indicationOptions,
   neurologyIndicationOptions,
@@ -480,6 +482,15 @@ export async function GET(request: NextRequest) {
     const totalSuggestions = results.reduce((s, r) => s + r.suggestions.length, 0);
     const totalErrors = results.reduce((s, r) => s + r.errors.length, 0);
     const durationMs = Date.now() - startTime;
+
+    // Intelligence tracking
+    try {
+      const supabase = createServiceClient();
+      await runCronIntelligence(supabase, 'indication-enrichment', {
+        processed: results.length,
+        inserted: totalSuggestions,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runWeeklyIngestion } from '@/lib/ingestion/clinical-trials';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,14 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
 
     const result = await runWeeklyIngestion(supabase, { batchSize: 30 });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'trials-update', {
+        processed: result.companies,
+        inserted: result.trials,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -38,6 +38,7 @@ import {
 } from '@/lib/email/pro-gate-drip';
 import { getProgrammaticPageData, formatCurrency } from '@/lib/seo/programmatic-pages';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -337,6 +338,14 @@ export async function GET(request: NextRequest) {
         errors.push(`Error processing lead ${lead.email}: ${String(err)}`);
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'pro-gate-drip', {
+        processed: leads.length,
+        inserted: completed,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

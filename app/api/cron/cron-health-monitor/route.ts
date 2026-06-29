@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { collectUserDemandSignals, updateIntelligenceBus, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 
@@ -322,6 +323,30 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 7b. Collect user demand signals and update intelligence bus
+    let demandSignals;
+    try {
+      demandSignals = await collectUserDemandSignals(supabase);
+    } catch (err) {
+      console.error('[cron-health-monitor] Failed to collect demand signals:', err);
+      demandSignals = null;
+    }
+
+    // Write a summary to the intelligence bus based on health findings
+    try {
+      const bus = await getCronIntelligenceBus(supabase);
+      // Derive priority TAs from demand signals
+      const priorityTAs = demandSignals
+        ? demandSignals.topTherapeuticAreas.slice(0, 5).map((t) => t.ta)
+        : bus.priorityTAs;
+
+      await updateIntelligenceBus(supabase, {
+        priorityTAs,
+      });
+    } catch (err) {
+      console.error('[cron-health-monitor] Failed to update intelligence bus:', err);
+    }
+
     // 8. Build Slack report
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (webhookUrl) {
@@ -447,6 +472,26 @@ export async function GET(request: NextRequest) {
         });
       }
 
+      // User demand signals
+      if (demandSignals && demandSignals.topTherapeuticAreas.length > 0) {
+        blocks.push({ type: 'divider' });
+        blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text:
+              '*User Demand Signals (7d):*\n' +
+              `Top TAs: ${demandSignals.topTherapeuticAreas.slice(0, 5).map((t) => `${t.ta} (${t.count})`).join(', ')}\n` +
+              (demandSignals.topModalities.length > 0
+                ? `Top Modalities: ${demandSignals.topModalities.slice(0, 5).map((m) => `${m.modality} (${m.count})`).join(', ')}\n`
+                : '') +
+              (demandSignals.trendingSearches.length > 0
+                ? `Trending Searches: ${demandSignals.trendingSearches.slice(0, 5).join(', ')}`
+                : ''),
+          },
+        });
+      }
+
       // Summary context
       blocks.push({ type: 'divider' });
       blocks.push({
@@ -495,6 +540,8 @@ export async function GET(request: NextRequest) {
         notRunning: notRunning.length,
         crossCronInsights: crossCronInsights.length,
         thresholdAdjustments: thresholdAdjustments.length,
+        demandSignalsTAs: demandSignals?.topTherapeuticAreas.length || 0,
+        demandSignalsModalities: demandSignals?.topModalities.length || 0,
       },
     });
 

@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -514,6 +515,14 @@ export async function GET(request: NextRequest) {
         draftTitles: inserted?.map((d) => d.title) || [],
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'linkedin-content', {
+        processed: drafts.length,
+        inserted: inserted?.length || 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

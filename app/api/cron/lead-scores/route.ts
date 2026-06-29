@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -247,6 +248,14 @@ export async function GET(request: NextRequest) {
         upserted += chunk.length;
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'lead-scores', {
+        processed: upserted,
+        inserted: upserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: batchErrors === 0,

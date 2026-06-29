@@ -14,6 +14,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { fetchCompetitorContent, filterNewEntries } from '@/lib/seo/competitor-monitor';
 import { analyzeCompetitorContent, type AnalyzedEntry } from '@/lib/seo/competitor-analysis';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 
@@ -348,6 +349,14 @@ export async function GET(request: NextRequest) {
     });
 
     const durationMs = Date.now() - startTime;
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'competitor-intel', {
+        processed: newEntries.length,
+        inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { updateIntelligenceBus } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -335,6 +336,25 @@ export async function GET(request: NextRequest) {
     // 4. Send Slack summary
     if (validationResults.length > 0 || errors.length > 0) {
       await sendSlackSummary(validationResults, errors);
+    }
+
+    // Write title strategy learnings to the intelligence bus
+    const busSuccessful = validationResults.filter((r) => r.outcome === 'successful');
+    const busReverted = validationResults.filter((r) => r.outcome === 'reverted');
+
+    if (busSuccessful.length > 0 || busReverted.length > 0) {
+      try {
+        await updateIntelligenceBus(supabase, {
+          titleStrategiesThatWork: busSuccessful.map(
+            (r) => `${r.pagePath}: +${(r.lift * 100).toFixed(1)}% CTR lift`
+          ),
+          titleStrategiesThatFailed: busReverted.map(
+            (r) => `${r.pagePath}: ${(r.lift * 100).toFixed(1)}% (reverted)`
+          ),
+        });
+      } catch {
+        console.error('[ctr-validation] Failed to update intelligence bus (non-fatal)');
+      }
     }
 
     // 5. Log cron run

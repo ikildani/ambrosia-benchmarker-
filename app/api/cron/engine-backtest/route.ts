@@ -12,6 +12,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runFullBackTest, formatReportMarkdown } from '@/lib/financial/backtest/runner';
+import { createServiceClient } from '@/lib/supabase/server';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 function verifyCron(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -80,6 +82,15 @@ export async function GET(request: NextRequest) {
         '#059669',
       );
     }
+
+    // Intelligence tracking
+    try {
+      const supabase = createServiceClient();
+      await runCronIntelligence(supabase, 'engine-backtest', {
+        processed: 1,
+        inserted: 0,
+      });
+    } catch {}
 
     if (format === 'markdown') {
       return new NextResponse(formatReportMarkdown(report), {

@@ -15,6 +15,7 @@ import { timingSafeEqual } from 'crypto';
 import { logCronRun } from '@/lib/cron-utils';
 import { verifyPendingDeals } from '@/lib/ingestion/deal-verifier';
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -125,6 +126,14 @@ export async function GET(request: NextRequest) {
     errors: result.errors,
     parameters: { maxDeals: 20, timeBudgetMs: 250_000 },
   });
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'deal-verification', {
+      processed: result.verified + result.flagged + result.unchanged,
+      inserted: result.verified,
+    });
+  } catch {}
 
   return NextResponse.json({
     success: true,

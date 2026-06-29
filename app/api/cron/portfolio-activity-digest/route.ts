@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendPortfolioActivityDigest } from '@/lib/email/client';
 import { timingSafeEqual } from 'crypto';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -205,6 +206,14 @@ export async function GET(request: NextRequest) {
         );
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'portfolio-activity-digest', {
+        processed: teams.length,
+        inserted: totalDelivered,
+      });
+    } catch {}
 
     return NextResponse.json({
       processed: teams.length,

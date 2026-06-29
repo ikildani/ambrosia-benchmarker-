@@ -17,6 +17,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
 import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 import type { BenchmarkPageData } from '@/lib/benchmarkPages';
 
 export const maxDuration = 120;
@@ -615,6 +616,14 @@ export async function GET(request: NextRequest) {
         durationMs,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'seo-page-expand', {
+        processed: rankedOpportunities.length,
+        inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

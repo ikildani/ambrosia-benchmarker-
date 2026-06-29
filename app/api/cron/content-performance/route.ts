@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { updateIntelligenceBus } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -133,6 +134,28 @@ export async function GET(request: NextRequest) {
 
     // Send Slack digest
     await sendSlackDigest(contentAttribution, utmAttribution, queuedTopics);
+
+    // Write winning topics to the intelligence bus
+    const winningTopics = contentAttribution
+      .filter((c) => c.signups > 0 || (c.gscClicks >= 10 && c.conversionRate > 0.01))
+      .slice(0, 10)
+      .map((c) => {
+        const ta = detectTherapeuticArea(c.title, [], c.slug) || 'unknown';
+        const modality = detectModality(c.title, c.slug) || 'unknown';
+        return { ta, modality, conversionRate: c.conversionRate };
+      });
+
+    try {
+      await updateIntelligenceBus(supabase, {
+        winningTopics,
+        priorityTAs: winningTopics
+          .map((w) => w.ta)
+          .filter((ta) => ta !== 'unknown')
+          .filter((ta, i, arr) => arr.indexOf(ta) === i),
+      });
+    } catch {
+      console.error('[content-performance] Failed to update intelligence bus (non-fatal)');
+    }
 
     const durationMs = Date.now() - startTime;
 

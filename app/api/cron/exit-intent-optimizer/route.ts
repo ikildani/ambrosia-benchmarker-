@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -140,6 +141,14 @@ export async function GET(request: NextRequest) {
         lockedWinner: rotationResult.lockedWinner,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'exit-intent-optimizer', {
+        processed: 1,
+        inserted: 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

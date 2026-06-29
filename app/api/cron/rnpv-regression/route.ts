@@ -15,10 +15,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import { calculateRNPV } from '@/lib/financial/rnpv-engine';
 import { runMonteCarlo } from '@/lib/financial/monte-carlo';
 import { runAllScenarios } from '@/lib/financial/scenario-planner';
 import type { RNPVInput } from '@/lib/financial/types';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 async function postSlackAlert(title: string, body: string): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
@@ -438,6 +440,15 @@ export async function GET(request: NextRequest) {
       `Daily rNPV regression tests detected drift or bugs.\n\n${summary}`
     );
   }
+
+  // Intelligence tracking
+  try {
+    const supabase = createServiceClient();
+    await runCronIntelligence(supabase, 'rnpv-regression', {
+      processed: results.length,
+      inserted: passed,
+    });
+  } catch {}
 
   return NextResponse.json({
     ok: failed === 0,

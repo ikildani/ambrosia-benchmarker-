@@ -14,6 +14,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { embedUnprocessedDeals } from '@/lib/embeddings';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,14 @@ export async function GET(request: NextRequest) {
     inserted: result.processed,
     errors: result.errors > 0 ? [`${result.errors} embedding failures`] : [],
   });
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'embed-deals', {
+      processed: result.processed,
+      inserted: result.processed,
+    });
+  } catch {}
 
   return NextResponse.json({
     success: true,

@@ -10,6 +10,7 @@ import { captureApiError } from '@/lib/sentry-api';
 import { estimateMarketSize } from '@/lib/financial/market-size';
 import { validateIndicationTA } from '@/lib/financial/validation';
 import { fixNegativeDealValues, fixMissingTherapeuticArea } from '@/lib/ingestion/auto-remediate';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300; // 5 min — full matrix takes time
 export const dynamic = 'force-dynamic';
@@ -865,6 +866,14 @@ export async function GET(request: NextRequest) {
       }),
     });
   }
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'qa-health-check', {
+      processed: checks.length,
+      inserted: matrix.length,
+    });
+  } catch {}
 
   return NextResponse.json({
     success: true,

@@ -17,6 +17,7 @@ import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { findOrCreateCompany } from '@/lib/ingestion/sec-edgar';
 import Anthropic from '@anthropic-ai/sdk';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -180,6 +181,14 @@ Text: ${text.substring(0, 3000)}`
     inserted: result.urls_found + result.terms_found + result.companies_linked,
     errors: result.errors,
   });
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'deal-enrichment', {
+      processed: result.processed,
+      inserted: result.urls_found + result.terms_found + result.companies_linked,
+    });
+  } catch {}
 
   return NextResponse.json({ success: true, ...result });
 }

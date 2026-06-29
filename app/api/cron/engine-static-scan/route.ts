@@ -20,6 +20,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { createServiceClient } from '@/lib/supabase/server';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 function verifyCron(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -287,6 +289,15 @@ export async function GET(request: NextRequest) {
       `Daily code scan detected anti-patterns in calculation engines:\n\n${summary}\n\n_Total: ${allFindings.length} findings across ${ENGINE_FILES.length} files._`
     );
   }
+
+  // Intelligence tracking
+  try {
+    const supabase = createServiceClient();
+    await runCronIntelligence(supabase, 'engine-static-scan', {
+      processed: allFindings.length,
+      inserted: 0,
+    });
+  } catch {}
 
   return NextResponse.json({
     ok: critical.length === 0 && high.length === 0,

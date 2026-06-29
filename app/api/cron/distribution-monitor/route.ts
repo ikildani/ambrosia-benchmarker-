@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { investigateDriftCause } from '@/lib/ingestion/auto-remediate';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 // ---------------------------------------------------------------------------
 // Thresholds (defined at the top so they're easy to tune)
@@ -297,6 +298,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         driftLines + investigationSection,
       );
     }
+
+    // Intelligence tracking
+    try {
+      const supabaseIntel = createServiceClient();
+      await runCronIntelligence(supabaseIntel, 'distribution-monitor', {
+        processed: recentRows.length,
+        inserted: findings.length,
+      });
+    } catch {}
 
     return NextResponse.json({
       ok: true,

@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 30;
 
@@ -132,6 +133,14 @@ export async function GET(request: NextRequest) {
       attachments: [{ color: '#14b8a6', blocks }],
     }),
   });
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'admin-deal-digest', {
+      processed: totalNew,
+      inserted: 0,
+    });
+  } catch {}
 
   return NextResponse.json({ ok: true, sent: true, totalNew, totalInDb });
 }

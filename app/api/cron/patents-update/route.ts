@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPatentIngestion } from '@/lib/ingestion/patents';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -42,6 +43,14 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('Patent ingestion error:', error);
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'patents-update', {
+        processed: patentResult.patents_found,
+        inserted: patentResult.patents_inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

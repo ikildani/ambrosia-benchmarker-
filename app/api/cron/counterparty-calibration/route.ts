@@ -19,6 +19,7 @@ import {
   type DealRow,
   type CompanyRow,
 } from '@/lib/financial/counterparty-premiums';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -90,6 +91,14 @@ export async function GET(request: NextRequest) {
       .from('counterparty_premiums')
       .upsert(rows, { onConflict: 'company_id,as_of_date' });
     if (upsertErr) throw upsertErr;
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'counterparty-calibration', {
+        processed: deals.length,
+        inserted: premiums.length,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

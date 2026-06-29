@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { updateIntelligenceBus } from '@/lib/cron-intelligence';
 import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
 
 export const maxDuration = 120;
@@ -170,6 +171,19 @@ export async function GET(request: NextRequest) {
 
     // 9. Slack digest
     await sendSlackDigest(comparisonPerformance, discoveredCompetitors, pagesQueued, flagged);
+
+    // Write discovered competitors to the intelligence bus
+    if (discoveredCompetitors.length > 0) {
+      try {
+        await updateIntelligenceBus(supabase, {
+          newCompetitorQueries: discoveredCompetitors.map(
+            (c) => `${c.name}: "${c.query}" (${c.impressions} impressions)`
+          ),
+        });
+      } catch {
+        console.error('[comparison-optimizer] Failed to update intelligence bus (non-fatal)');
+      }
+    }
 
     // 10. Log cron run
     await logCronRun(supabase, 'comparison-optimizer', {

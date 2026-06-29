@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runBacktestV2 } from '@/lib/services/pharma-intent-backtest-v2';
 import { timingSafeEqual } from 'crypto';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300; // 5 minutes — backtest can take a while
 export const dynamic = 'force-dynamic';
@@ -56,6 +57,14 @@ export async function GET(request: NextRequest) {
         weight_shift: result.weightShift,
         elapsed_ms: elapsedMs,
       });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'intent-calibration-v2', {
+        processed: 1,
+        inserted: 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

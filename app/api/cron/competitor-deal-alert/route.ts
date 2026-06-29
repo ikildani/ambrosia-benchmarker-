@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -309,6 +310,14 @@ export async function GET(request: NextRequest) {
 
     // ── 7. Slack summary ────────────────────────────────────────────────
     await sendSlackSummary(totalEmailsSent, unalertedDeals.length, unalertedDeals, totalErrors);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'competitor-deal-alert', {
+        processed: unalertedDeals.length,
+        inserted: totalEmailsSent,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

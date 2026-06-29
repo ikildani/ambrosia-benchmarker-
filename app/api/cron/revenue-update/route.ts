@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { runXBRLRevenueUpdate } from '@/lib/ingestion/sec-xbrl';
 import { runProductRevenueExtraction } from '@/lib/ingestion/sec-revenue-extraction';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -50,6 +51,14 @@ export async function GET(request: NextRequest) {
 
     // Tier 2: Product-level revenue extraction for top 20
     const productResult = await runProductRevenueExtraction(supabase, { topCompanies: 20 });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'revenue-update', {
+        processed: xbrlResult.processed,
+        inserted: xbrlResult.updated,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

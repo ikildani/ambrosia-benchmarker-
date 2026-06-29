@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runEMAIngestion } from '@/lib/ingestion/ema-medicines';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -36,6 +37,14 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
 
     const result = await runEMAIngestion(supabase);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'ema-update', {
+        processed: result.processed,
+        inserted: result.inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

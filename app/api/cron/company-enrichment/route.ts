@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runCompanyEnrichment } from '@/lib/ingestion/company-enrichment';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -36,6 +37,14 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
 
     const result = await runCompanyEnrichment(supabase);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'company-enrichment', {
+        processed: result.companies_processed,
+        inserted: result.stats_updated,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

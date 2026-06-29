@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runNIHReporterIngestion } from '@/lib/ingestion/nih-reporter';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,14 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('NIH RePORTER ingestion error:', error);
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'funding-update', {
+        processed: nihResult.projects_found,
+        inserted: nihResult.projects_inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

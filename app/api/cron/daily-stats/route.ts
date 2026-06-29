@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { notifyDailyStats } from '@/lib/slack/notify';
 import { updateDealCountIfChanged } from '@/lib/seo/deal-count-updater';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 30;
 
@@ -161,6 +162,14 @@ export async function GET(request: NextRequest) {
         }),
       }).then(() => {}, () => {});
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'daily-stats', {
+        processed: 1,
+        inserted: 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

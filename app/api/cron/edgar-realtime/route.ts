@@ -12,6 +12,7 @@ import {
 import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
 import { notifyHighValueDeal } from '@/lib/slack/notify';
 import { isTimeBudgetExceeded, logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -330,6 +331,14 @@ export async function GET(request: NextRequest) {
         highValueAlerts,
       },
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'edgar-realtime', {
+        processed,
+        inserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendProExpirationWarning } from '@/lib/email/pro-engagement';
 import { timingSafeEqual } from 'crypto';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,14 @@ export async function GET(request: NextRequest) {
   }
 
   console.log(`[pro-expiration] Done: ${results.warnings} warnings, ${results.downgrades} downgrades, ${results.errors.length} errors`);
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'pro-expiration', {
+      processed: results.warnings + results.downgrades,
+      inserted: results.downgrades,
+    });
+  } catch {}
 
   return NextResponse.json({
     success: true,

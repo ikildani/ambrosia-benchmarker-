@@ -21,6 +21,7 @@ import {
   deriveTherapeuticArea,
 } from '@/lib/ingestion/sec-edgar';
 import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -307,6 +308,14 @@ export async function GET(request: NextRequest) {
       // Company stats update failed (non-fatal)
     }
   }
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'deal-backfill', {
+      processed: result.fetched,
+      inserted: result.inserted,
+    });
+  } catch {}
 
   return NextResponse.json({ success: true, ...result });
 }

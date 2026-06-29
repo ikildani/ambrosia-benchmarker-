@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { PATENT_CLIFFS_STATIC } from '@/lib/financial/patent-cliffs';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -89,6 +90,14 @@ export async function GET(request: NextRequest) {
       console.error('indication_patent_cliffs upsert failed', error);
       return NextResponse.json({ error: 'Patent cliff refresh failed' }, { status: 500 });
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'patent-cliffs', {
+        processed: rows.length,
+        inserted: rows.length,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

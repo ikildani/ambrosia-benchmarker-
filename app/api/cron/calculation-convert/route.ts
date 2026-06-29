@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { sendEmail } from '@/lib/email/client';
 import { logCronRun } from '@/lib/cron-utils';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -325,6 +326,14 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`[calculation-convert] Done: ${highIntentUserIds.length} high-intent, ${freeUsers.length} free, ${emailsSent} emails sent`);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'calculation-convert', {
+        processed: freeUsers.length,
+        inserted: emailsSent,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

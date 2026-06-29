@@ -17,6 +17,7 @@ import { timingSafeEqual } from 'crypto';
 import { runPerplexityDealDiscovery } from '@/lib/ingestion/perplexity-deals';
 import { logCronRun, reclassifyOtherDeals, updateCompanyStats } from '@/lib/cron-utils';
 import { notifyHighValueDeal } from '@/lib/slack/notify';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -134,6 +135,14 @@ export async function GET(request: NextRequest) {
     completed_at: new Date().toISOString(),
     notes: String(currentIndex), // Cursor for rotation tracking
   });
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'perplexity-discovery', {
+      processed: result.deals_discovered,
+      inserted: result.deals_inserted,
+    });
+  } catch {}
 
   return NextResponse.json({
     success: true,

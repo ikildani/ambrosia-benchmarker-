@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runBenchmarkCalibration } from '@/lib/ingestion/benchmark-calibration';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,14 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
 
     const result = await runBenchmarkCalibration(supabase);
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'benchmark-calibration', {
+        processed: 1,
+        inserted: 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

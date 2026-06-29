@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { calculatePharmaIntent, getCalibratedIntentWeights } from '@/lib/services/pharma-intent';
 import type { TrialForIntent, DealForIntent } from '@/lib/services/pharma-intent';
 import { timingSafeEqual } from 'crypto';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -184,6 +185,14 @@ export async function GET(request: NextRequest) {
         }
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'intent-snapshots', {
+        processed: snapshotCount,
+        inserted: snapshotCount,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

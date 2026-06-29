@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { notifyDealAlert } from '@/lib/slack/portfolio-notify';
 import { sendDealAlertDigestEmail } from '@/lib/email/client';
 import { timingSafeEqual } from 'crypto';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -123,6 +124,14 @@ export async function GET(request: NextRequest) {
 
       totalDelivered += newDeals.length;
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'portfolio-deal-alerts', {
+        processed: configs.length,
+        inserted: totalDelivered,
+      });
+    } catch {}
 
     return NextResponse.json({
       processed: configs.length,

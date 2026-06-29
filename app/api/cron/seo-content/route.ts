@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
 import { getNextTopic } from '@/lib/seo/topic-rotation';
 import { publishBlogPost, notifySEOContentGenerated } from '@/lib/seo/blog-publisher';
@@ -461,6 +462,14 @@ export async function GET(request: NextRequest) {
     });
 
     const durationMs = Date.now() - startTime;
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'seo-content', {
+        processed: published.length,
+        inserted: published.length,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

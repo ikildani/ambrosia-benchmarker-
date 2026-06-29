@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { runDailyIngestion } from '@/lib/ingestion/sec-edgar';
 import { runPressReleaseIngestion } from '@/lib/ingestion/press-releases';
 import { runOpenFDAIngestion } from '@/lib/ingestion/openfda';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300; // 5 minutes max
 export const dynamic = 'force-dynamic';
@@ -363,6 +364,14 @@ export async function GET(request: NextRequest) {
 
     // Per-run Slack notification removed — consolidated into weekly-deal-digest cron.
     // Only high-value deals (>$500M) fire real-time alerts via notifyHighValueDeal.
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'deals-update', {
+        processed: (edgarResult.processed || 0) + (pressResult.deals_inserted || 0) + (fdaResult.inserted || 0),
+        inserted: totalInserted,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

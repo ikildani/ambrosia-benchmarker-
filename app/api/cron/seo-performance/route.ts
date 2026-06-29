@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
+import { createServiceClient } from '@/lib/supabase/server';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -331,6 +333,15 @@ export async function GET(request: NextRequest) {
         }),
       });
     }
+
+    // Intelligence tracking
+    try {
+      const supabase = createServiceClient();
+      await runCronIntelligence(supabase, 'seo-performance', {
+        processed: topQueries.length,
+        inserted: 0,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

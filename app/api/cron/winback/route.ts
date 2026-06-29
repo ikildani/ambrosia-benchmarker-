@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -253,6 +254,14 @@ export async function GET(request: NextRequest) {
         }),
       }).then(() => {}, () => {});
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'winback', {
+        processed: profiles.length,
+        inserted: emailsSent,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

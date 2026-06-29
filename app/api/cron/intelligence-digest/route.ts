@@ -16,6 +16,7 @@ import { timingSafeEqual } from 'crypto';
 import { sendEmail } from '@/lib/email/client';
 import { fetchUpcomingReadouts } from '@/lib/market-intelligence/ct-gov-events';
 import { getAdCommCalendar } from '@/lib/market-intelligence/fda-adcomm';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -166,6 +167,14 @@ export async function GET(request: NextRequest) {
         failed++;
       }
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'intelligence-digest', {
+        processed: list.length,
+        inserted: sent,
+      });
+    } catch {}
 
     return NextResponse.json({ success: true, sent, failed, total: list.length });
   } catch (err) {

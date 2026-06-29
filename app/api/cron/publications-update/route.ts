@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import { runPubMedIngestion } from '@/lib/ingestion/pubmed';
 import { runBioRxivIngestion } from '@/lib/ingestion/biorxiv';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,14 @@ export async function GET(request: NextRequest) {
       inserted: (pubmedResult.articles_inserted || 0) + (biorxivResult.preprints_inserted || 0),
       errors: [...pubmedResult.errors, ...biorxivResult.errors],
     });
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'publications-update', {
+        processed: (pubmedResult.articles_found || 0) + (biorxivResult.preprints_found || 0),
+        inserted: (pubmedResult.articles_inserted || 0) + (biorxivResult.preprints_inserted || 0),
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

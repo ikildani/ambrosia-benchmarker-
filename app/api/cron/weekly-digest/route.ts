@@ -5,6 +5,7 @@ import { generateWeeklySnapshot } from '@/lib/digest/weekly-snapshot';
 import { buildWeeklyDigestHtml } from '@/lib/digest/email-templates';
 import { sendEmail } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -184,6 +185,14 @@ export async function GET(request: NextRequest) {
           { onConflict: 'user_id' }
         );
     }
+
+    // Intelligence tracking
+    try {
+      await runCronIntelligence(supabase, 'weekly-digest', {
+        processed: eligibleUsers.length,
+        inserted: emailsSent,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

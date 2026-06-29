@@ -15,6 +15,7 @@ import { timingSafeEqual } from 'crypto';
 import { runFDABreakthroughIngestion } from '@/lib/ingestion/fda-breakthrough';
 import { runSemanticScholarIngestion } from '@/lib/ingestion/semantic-scholar';
 import { logCronRun } from '@/lib/cron-utils';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -66,6 +67,14 @@ export async function GET(request: NextRequest) {
   });
 
   const durationMs = Date.now() - startTime;
+
+  // Intelligence tracking
+  try {
+    await runCronIntelligence(supabase, 'research-enrichment', {
+      processed: btdResult.fetched + scholarResult.papers_found,
+      inserted: btdResult.enriched_deals + scholarResult.papers_stored,
+    });
+  } catch {}
 
   return NextResponse.json({
     success: true,
