@@ -117,6 +117,7 @@ async function getUnenrolledContacts(page: number = 1): Promise<{
   const apiKey = process.env.APOLLO_API_KEY;
   if (!apiKey) throw new Error('APOLLO_API_KEY not configured');
 
+  // Filter server-side: verified email + not currently in any active sequence
   const res = await fetch(`${APOLLO_API}/contacts/search`, {
     method: 'POST',
     headers: {
@@ -128,6 +129,8 @@ async function getUnenrolledContacts(page: number = 1): Promise<{
       per_page: 100,
       sort_by_field: 'contact_created_at',
       sort_ascending: false,
+      contact_email_status_v2: ['verified', 'likely_to_engage'],
+      currently_in_sequence: false,
     }),
   });
 
@@ -352,15 +355,30 @@ export async function GET(request: NextRequest) {
       parameters: { skippedNoEmail, skippedAlreadyEnrolled, skippedEnterprise, skippedNoTitleMatch, proEnrolled: results.generalist.added },
     });
 
-    // Slack notification -- send on success AND failure
+    // Diagnostic: log sample of skipped contacts for debugging
+    console.log(`[apollo-auto-enroll] Scan results: ${scanned} scanned, ${proFitContactDetails.length} fit, ${totalAdded} enrolled`);
+    console.log(`[apollo-auto-enroll] Skip breakdown: ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled, ${skippedEnterprise} enterprise/VC, ${skippedNoTitleMatch} no title match`);
+
+    // Slack notification -- always send with full diagnostic
+    const enrollmentRate = scanned > 0 ? ((proFitContactDetails.length / scanned) * 100).toFixed(1) : '0';
     if (totalAdded > 0) {
       await sendSlackNotification(
-        `:rocket: Apollo Auto-Enroll: ${totalAdded} Pro-fit contacts enrolled into Generalist sequence. Scanned ${scanned}, skipped ${skippedEnterprise} enterprise/VC (strategist), ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.${hasErrors ? `\n:warning: Errors: ${results.generalist.errors.join(', ')}` : ''}`,
+        `:rocket: Apollo Auto-Enroll: *${totalAdded}* contacts enrolled into Generalist sequence\n` +
+        `Scanned ${scanned} | Fit rate: ${enrollmentRate}%\n` +
+        `Skipped: ${skippedEnterprise} enterprise/VC, ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already in sequence` +
+        `${hasErrors ? `\n:warning: Errors: ${results.generalist.errors.join(', ')}` : ''}`,
+      );
+    } else if (scanned === 0) {
+      await sendSlackNotification(
+        `:x: Apollo Auto-Enroll: *No contacts returned from Apollo API*. Check APOLLO_API_KEY and account status.`,
+        true,
       );
     } else {
-      // Zero enrollments -- could indicate a problem or just no new contacts
       await sendSlackNotification(
-        `:warning: Apollo Auto-Enroll: 0 contacts enrolled. Scanned ${scanned}, skipped ${skippedEnterprise} enterprise/VC, ${skippedNoTitleMatch} no title match, ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled.${hasErrors ? `\n:x: Errors: ${results.generalist.errors.join(', ')}` : ' All contacts already processed or filtered out.'}`,
+        `:warning: Apollo Auto-Enroll: 0 enrolled from ${scanned} scanned\n` +
+        `Skip breakdown: ${skippedNoEmail} no email, ${skippedAlreadyEnrolled} already enrolled, ${skippedEnterprise} enterprise/VC (strategist), ${skippedNoTitleMatch} no title match\n` +
+        `${proFitContactDetails.length > 0 ? `:x: ${proFitContactDetails.length} contacts were fit but Apollo enrollment API returned 0. Check sequence ${SEQUENCES.generalist} status.` : 'No contacts matched Pro-fit title criteria.'}` +
+        `${hasErrors ? `\nErrors: ${results.generalist.errors.join(', ')}` : ''}`,
       );
     }
 
