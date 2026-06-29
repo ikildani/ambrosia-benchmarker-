@@ -29,7 +29,7 @@ export function renderTaxStructurePage(data: PDFReportData, meta: ReportMeta): s
   const optimalJurisdiction = tx.optimalStructure;
 
   // Withholding tax styling
-  const whtIsNegative = tx.withholdingTaxImpact_M > 0;
+  const whtIsNegative = tx.witholdingTaxImpact_M > 0;
   const whtColor = whtIsNegative ? COLORS.rose : COLORS.green;
 
   // Transfer pricing risk badge
@@ -61,7 +61,7 @@ export function renderTaxStructurePage(data: PDFReportData, meta: ReportMeta): s
         <!-- Withholding Tax Impact -->
         <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${whtColor}; border-radius: 6px; padding: 16px 14px; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;">
           <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em;">Withholding Tax Impact</div>
-          <div style="font-size: 28px; font-weight: 800; color: ${whtColor}; letter-spacing: -0.03em; line-height: 1;">${whtIsNegative ? '-' : ''}${formatUsd(tx.withholdingTaxImpact_M)}</div>
+          <div style="font-size: 28px; font-weight: 800; color: ${whtColor}; letter-spacing: -0.03em; line-height: 1;">${whtIsNegative ? '-' : ''}${formatUsd(tx.witholdingTaxImpact_M)}</div>
           <div style="font-size: 8px; color: ${COLORS.gray500};">cross-border royalty/milestone leakage</div>
         </div>
       </div>
