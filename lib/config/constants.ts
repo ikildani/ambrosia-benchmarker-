@@ -78,9 +78,9 @@ export function formatDealCount(count: number): string {
 // Updated daily by /api/cron/daily-stats via GitHub API
 // 2026-03-26: Major dedup — removed 103 fake FDA approvals + 907 duplicates
 // 2026-04-14: Migration 051 flagged 750 LLM-fabricated rows as synthetic
-// (asset_name pattern TARGET-NNN / TARGET-mab / Anti-TARGET, 0-3% verified).
-// Deal count reflects the cleaner verified+real count.
-export const LIVE_DEAL_COUNT = 1918;
+// 2026-06-29: Hard-deleted 782 rejected deals, reclassified 227 fake-TA deals
+// Deal count reflects only non-synthetic, non-rejected, verified+pending real deals.
+export const LIVE_DEAL_COUNT = 1507;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),

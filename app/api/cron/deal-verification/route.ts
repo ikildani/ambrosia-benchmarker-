@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
 
   const result = await verifyPendingDeals(supabase, perplexityApiKey, anthropicApiKey, {
-    maxDeals: 20,
+    maxDeals: 50,
     timeBudgetMs: 250_000,
   });
 
