@@ -2044,23 +2044,45 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
-        {/* Asset Readiness Score (Pro/Report) */}
-        {hasFullAccess && fullInputs && (
-          <div id={TOUR_STEP_IDS.ASSET_READINESS}>
-          <FinancialErrorBoundary fallbackTitle="Asset Readiness Score unavailable">
-            <AssetReadinessScore
-              dataQuality={fullInputs.dataQuality}
-              competitivePosition={fullInputs.competitivePosition}
-              biomarkerStatus={fullInputs.biomarker}
-              phase={fullInputs.phase}
-              regulatoryDesignations={fullInputs.regulatoryDesignations}
-              tier={tier || 'free'}
-              dealType={fullInputs.dealType}
-              modality={fullInputs.modality}
-              onUpgrade={onUpgrade}
-              onBuyReport={onBuyReport}
-            />
-          </FinancialErrorBoundary>
+        {/* Asset Readiness Score (all tiers — blurred for free) */}
+        {fullInputs && (
+          <div id={TOUR_STEP_IDS.ASSET_READINESS} className="relative">
+            {!hasFullAccess && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-slate-900/60 backdrop-blur-sm">
+                <div className="text-center px-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full text-teal-400 text-xs font-semibold mb-3">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    PRO
+                  </div>
+                  <p className="text-sm font-semibold text-white mb-1">Asset Readiness Score</p>
+                  <p className="text-xs text-slate-400 mb-4 max-w-xs">See how your asset scores across data quality, competitive position, biomarker status, and regulatory designations.</p>
+                  <button
+                    onClick={onUpgrade}
+                    className="px-5 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold rounded-lg hover:from-teal-400 hover:to-cyan-400 transition-all shadow-lg shadow-teal-500/20"
+                  >
+                    Unlock Full Analysis
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className={!hasFullAccess ? 'pointer-events-none select-none' : ''}>
+              <FinancialErrorBoundary fallbackTitle="Asset Readiness Score unavailable">
+                <AssetReadinessScore
+                  dataQuality={fullInputs.dataQuality}
+                  competitivePosition={fullInputs.competitivePosition}
+                  biomarkerStatus={fullInputs.biomarker}
+                  phase={fullInputs.phase}
+                  regulatoryDesignations={fullInputs.regulatoryDesignations}
+                  tier={tier || 'free'}
+                  dealType={fullInputs.dealType}
+                  modality={fullInputs.modality}
+                  onUpgrade={onUpgrade}
+                  onBuyReport={onBuyReport}
+                />
+              </FinancialErrorBoundary>
+            </div>
           </div>
         )}
 
