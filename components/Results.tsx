@@ -36,6 +36,7 @@ const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr
 const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const CompetitiveLandscapePanel = dynamic(() => import('./results/CompetitiveLandscapePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const DealFlowForecastPanel = dynamic(() => import('./results/DealFlowForecastPanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
+const InstitutionalAnalyticsPanel = dynamic(() => import('./results/InstitutionalAnalyticsPanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const IndexDrugComparison = dynamic(() => import('./results/IndexDrugComparison'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const DealStructureToggle = dynamic(() => import('./results/DealStructureToggle'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const AssetReadinessScore = dynamic(() => import('./results/AssetReadinessScore'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
@@ -1990,6 +1991,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 forecast={serverData.dealFlowForecast}
                 tier={tier || 'free'}
                 onUpgrade={onUpgrade}
+                onBuyReport={onBuyReport}
+              />
+            </FinancialErrorBoundary>
+            <FinancialErrorBoundary fallbackTitle="Institutional Analytics unavailable">
+              <InstitutionalAnalyticsPanel
+                financialModel={financialModel}
+                tier={tier || 'free'}
                 onBuyReport={onBuyReport}
               />
             </FinancialErrorBoundary>
