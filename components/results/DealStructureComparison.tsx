@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { calculateDealTerms, type CalculationInput, type CalculationResult } from '@/lib/calculations';
+import { calculateDealTerms, type CalculationInput, type CalculationResult, type DealType } from '@/lib/calculations';
 
 interface Props {
   inputs: CalculationInput;
@@ -37,7 +37,7 @@ export default function DealStructureComparison({ inputs, currentResult, tier, o
 
   const comparisons = useMemo(() => {
     return STRUCTURES.map(s => {
-      const modified = { ...inputs, dealType: s.key as string };
+      const modified = { ...inputs, dealType: s.key as DealType };
       try {
         const result = calculateDealTerms(modified);
         return { ...s, result, isCurrent: s.key === currentDealType };
