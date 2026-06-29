@@ -26,7 +26,7 @@ function triggerColor(type?: string): { fill: string; light: string } {
 // ---------------------------------------------------------------------------
 
 function renderPayoutScheduleSVG(
-  schedule: { year: number; expectedPayout_M: number }[],
+  schedule: { year: number; expectedPayment_M: number }[],
 ): string {
   if (!schedule || schedule.length === 0) {
     return `<svg width="520" height="120" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg">
@@ -42,7 +42,7 @@ function renderPayoutScheduleSVG(
   const chartW = w - padL - padR;
   const h = padT + schedule.length * rowH + 12;
 
-  const maxVal = Math.max(...schedule.map(s => s.expectedPayout_M), 1) * 1.2;
+  const maxVal = Math.max(...schedule.map(s => s.expectedPayment_M), 1) * 1.2;
   const scaleX = (v: number) => (v / maxVal) * chartW;
 
   const uid = `eo-${Math.random().toString(36).slice(2, 8)}`;
@@ -66,12 +66,12 @@ function renderPayoutScheduleSVG(
     const y = padT + i * rowH;
     const barY = y + 4;
     const barH = rowH - 8;
-    const barW = Math.max(scaleX(s.expectedPayout_M), 4);
+    const barW = Math.max(scaleX(s.expectedPayment_M), 4);
 
     return `
       <text x="${padL - 6}" y="${barY + barH / 2 + 3}" text-anchor="end" font-size="8" font-weight="600" fill="${COLORS.gray600}">Year ${s.year}</text>
       <rect x="${padL}" y="${barY}" width="${barW}" height="${barH}" rx="3" fill="url(#${uid}-grad)" filter="url(#${uid}-shadow)" />
-      <text x="${padL + barW + 5}" y="${barY + barH / 2 + 3}" font-size="8" font-weight="700" fill="${COLORS.teal}">${formatUsd(s.expectedPayout_M)}</text>
+      <text x="${padL + barW + 5}" y="${barY + barH / 2 + 3}" font-size="8" font-weight="700" fill="${COLORS.teal}">${formatUsd(s.expectedPayment_M)}</text>
     `;
   }).join('');
 

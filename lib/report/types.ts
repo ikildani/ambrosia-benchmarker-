@@ -12,6 +12,10 @@ import type { RoyaltyStackingResult } from '@/lib/financial/royalty-stacking';
 import type { CMCRiskResult } from '@/lib/financial/cmc-timeline-risk';
 import type { PricingConstraintResult } from '@/lib/financial/pricing-access';
 import type { BuyerSynergyResult } from '@/lib/financial/buyer-synergy';
+import type { TaxStructureResult } from '@/lib/financial/cross-border-tax';
+import type { PatentDynamicsResult } from '@/lib/financial/patent-loe-dynamics';
+import type { EarnoutResult } from '@/lib/financial/earnout-cvr';
+import type { IndicationSequenceResult } from '@/lib/financial/indication-sequencing';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -77,72 +81,10 @@ export interface PDFReportData {
   cmcRisk?: CMCRiskResult;
   pricingConstraints?: PricingConstraintResult;
   buyerSynergies?: BuyerSynergyResult[];
-  taxStructure?: {
-    effectiveTaxRate: number;
-    taxSavings_M: number;
-    optimalStructure: string;
-    withholdingTaxImpact_M: number;
-    transferPricingRisk: string;
-    pillarTwoImpact: string;
-    structureBreakdown: {
-      jurisdiction: string;
-      taxRate: number;
-      applicableIncome_pct: number;
-      rationale: string;
-    }[];
-    narrative: string;
-  };
-  patentDynamics?: {
-    basePatentLife_years: number;
-    ptaAdjustment_years: number;
-    pteAdjustment_years: number;
-    pediatricExclusivity_years: number;
-    orphanExclusivity_years: number;
-    nceExclusivity_years: number;
-    biologicExclusivity_years: number;
-    effectiveLOE_yearsFromApproval: number;
-    genericEntryProfile: {
-      year1erosion: number;
-      year2erosion: number;
-      year3erosion: number;
-      steadyStateGenericShare: number;
-    };
-    paragraphIVRisk: {
-      probability: number;
-      expectedEntryTiming_years: number;
-    };
-    authorizedGenericImpact: number;
-    narrative: string;
-  };
-  earnoutValuation?: {
-    probabilityWeightedValue_M: number;
-    tranches: {
-      trigger: string;
-      value_M: number;
-      probability: number;
-      expectedTiming_years: number;
-      discountedValue_M: number;
-      triggerType: string;
-    }[];
-    expectedPayoutSchedule: { year: number; expectedPayout_M: number }[];
-    upfrontEquivalent_M: number;
-    earnoutAsPercentOfTotal: number;
-    narrative: string;
-  };
-  indicationSequence?: {
-    expansionSequence: {
-      indication: string;
-      lineOfTherapy: string;
-      probability: number;
-      lag_years: number;
-      incrementalPeakSales_M: number;
-      cannibalization_pct: number;
-      sequenceOrder: number;
-    }[];
-    totalFranchiseValue_M: number;
-    franchisePremium_pct: number;
-    narrative: string;
-  };
+  taxStructure?: TaxStructureResult;
+  patentDynamics?: PatentDynamicsResult;
+  earnoutValuation?: EarnoutResult;
+  indicationSequence?: IndicationSequenceResult;
 }
 
 export interface TocEntry {
