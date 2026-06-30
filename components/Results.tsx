@@ -1088,6 +1088,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
   const handleProFeatureClick = (feature: string) => {
     trackProFeatureClick(feature as 'export_excel' | 'export_pdf' | 'comparable_deals' | 'saved_scenarios' | 'team_sharing', 'results_section');
+    window.dispatchEvent(new CustomEvent('pro-feature-click', { detail: { feature } }));
     onUpgrade?.();
   };
 
@@ -2297,6 +2298,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             therapeuticArea={fullInputs?.therapeuticArea}
             phase={fullInputs?.phase}
             modality={fullInputs?.modality}
+            financialModel={financialModel}
           />
         )}
 
