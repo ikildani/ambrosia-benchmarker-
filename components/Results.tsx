@@ -42,6 +42,7 @@ const IndexDrugComparison = dynamic(() => import('./results/IndexDrugComparison'
 const DealStructureToggle = dynamic(() => import('./results/DealStructureToggle'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const AssetReadinessScore = dynamic(() => import('./results/AssetReadinessScore'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const NextStepsDrawer = dynamic(() => import('./results/NextStepsDrawer'), { ssr: false });
+const SmartTrialPrompt = dynamic(() => import('./results/SmartTrialPrompt'), { ssr: false });
 
 // Static type import (types are erased at runtime, safe alongside dynamic component import)
 import type { PartnerMatchForPDF } from './PartnerMatchesContainer';
@@ -2283,6 +2284,19 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             format={reportFormat}
             buyerSpecificValuation={buyerSpecificValuations?.[0] ?? null}
             buyerSpecificValuations={buyerSpecificValuations}
+          />
+        )}
+
+        {/* Smart Trial Prompt — contextual conversion for free users */}
+        {!hasFullAccess && (
+          <SmartTrialPrompt
+            result={result}
+            tier={tier || 'free'}
+            onUpgrade={onUpgrade}
+            onBuyReport={onBuyReport}
+            therapeuticArea={fullInputs?.therapeuticArea}
+            phase={fullInputs?.phase}
+            modality={fullInputs?.modality}
           />
         )}
 
