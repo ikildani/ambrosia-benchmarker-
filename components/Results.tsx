@@ -493,19 +493,19 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const isReport = tier === 'report';
 
   // Power Calculation: first-ever free calc gets full unblurred access
-  const [isPowerCalc, setIsPowerCalc] = useState(() => {
+  // After the first calc, localStorage is set and all subsequent calcs are gated
+  const isPowerCalc = useMemo(() => {
     if (typeof window === 'undefined') return false;
     if (tier !== 'free') return false;
-    const used = localStorage.getItem('power_calc_used');
-    return !used; // true if this is the first calculation ever
-  });
+    return !localStorage.getItem('power_calc_used');
+  }, [tier, result]); // re-evaluates when result changes (new calculation)
 
-  // Mark power calc as used after this render so subsequent calculations are gated
+  // Mark power calc as used immediately so the NEXT calculation is gated
   useEffect(() => {
-    if (isPowerCalc && tier === 'free') {
+    if (tier === 'free' && typeof window !== 'undefined' && !localStorage.getItem('power_calc_used')) {
       localStorage.setItem('power_calc_used', 'true');
     }
-  }, [isPowerCalc, tier]);
+  }, [tier]);
 
   // Build per-field warning text from non-critical guardrail warnings
   const fieldWarnings = useMemo(() => {
