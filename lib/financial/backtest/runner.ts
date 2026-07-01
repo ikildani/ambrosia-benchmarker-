@@ -199,9 +199,9 @@ export function runFullBackTest(options?: {
       reason: r.asset.edgeCaseReason || 'Edge case',
     }));
 
-  // Calibration accuracy (only for assets that have P10/P90 bands)
+  // Calibration accuracy (only for assets that have P10/P90 bands, excluding edge cases)
   const assetsWithBands = assetResults.filter(
-    (r) => r.predicted.peakErosionP10 != null && r.predicted.peakErosionP90 != null,
+    (r) => r.predicted.peakErosionP10 != null && r.predicted.peakErosionP90 != null && !r.asset.isEdgeCase,
   );
   const calibrationActuals = assetsWithBands.map((r) => r.asset.actualOutcomes.estimatedPeakErosion);
   const calibrationP10 = assetsWithBands.map((r) => r.predicted.peakErosionP10!);

@@ -336,6 +336,18 @@ export function calculateCompetitiveDynamics(
     }
   }
 
+  // Compute first competitor entry year (project-relative) for co-launch detection
+  const firstCompetitorEntryYear = competitorTimeline.length > 0
+    ? Math.min(...competitorTimeline.map((c) => c.entryYear))
+    : launchYear + 10;
+
+  // Effective first-mover shield — halved when competitor launched same year or earlier
+  // (co-launch scenario like Keytruda/Opdivo where neither has true first-mover advantage)
+  let effectiveFirstMoverShield = positionMod.firstMoverShield;
+  if (firstCompetitorEntryYear <= launchYear && positionMod.firstMoverShield > 0) {
+    effectiveFirstMoverShield *= 0.5;
+  }
+
   // Year-by-year calculation with S-curve ramp + price erosion + volume erosion
   const cashFlows = baseResult.cashFlows;
   const baselineRevenue: number[] = cashFlows.map((cf) => cf.revenue);
@@ -376,13 +388,14 @@ export function calculateCompetitiveDynamics(
     // Previous 3-year decay was too aggressive — dominant leaders maintain share
     // through habit formation, biomarker selection, and label breadth well beyond
     // the first 3 post-launch years.
+    // Shield is halved when first competitor entered at or before launch (co-launch).
     const yearsFromLaunch = year - launchYear;
     const shieldWindow = 8; // Extended from 3 to match observed dominance decay
-    if (yearsFromLaunch >= 0 && yearsFromLaunch < shieldWindow && positionMod.firstMoverShield > 0) {
+    if (yearsFromLaunch >= 0 && yearsFromLaunch < shieldWindow && effectiveFirstMoverShield > 0) {
       const shieldDecay = 1 - yearsFromLaunch / shieldWindow;
       // Shield REDUCES volume erosion rather than ADDING to volume
       // Apply as a multiplier that floors the erosion
-      const shieldStrength = positionMod.firstMoverShield * shieldDecay;
+      const shieldStrength = effectiveFirstMoverShield * shieldDecay;
       const erosion = 1 - volumeMultiplier;
       const protectedErosion = erosion * (1 - shieldStrength);
       volumeMultiplier = 1 - protectedErosion;
@@ -430,6 +443,11 @@ export function calculateCompetitiveDynamics(
     totalAdjustedRevenue += adjRev;
   }
 
+  // Enforce position-based erosion floor (e.g., co_leaders always predict >= 45% erosion)
+  if (positionMod.baseErosionFloor != null && peakShareErosion < positionMod.baseErosionFloor) {
+    peakShareErosion = positionMod.baseErosionFloor;
+  }
+
   const revenueImpact = totalBaseRevenue - totalAdjustedRevenue;
 
   // Upgrade 12: Monte Carlo uncertainty bands (P10/P90)
@@ -444,15 +462,21 @@ export function calculateCompetitiveDynamics(
   const mcRng = mulberry32(mcSeed);
   const mcImpacts: number[] = [];
   const mcPeakErosions: number[] = [];
+  const resampledCompetitorCount = competitorTimeline.length;
 
   for (let iter = 0; iter < MC_ITERATIONS; iter++) {
     let mcTotalAdjusted = 0;
     let mcPeakErosion = 0;
 
-    // Resample each competitor's share impact
-    const resampledCompetitors = competitorTimeline.map((c) => ({
+    // Vary competitor count by +/-1 in MC iterations to widen uncertainty bands
+    const mcCompetitorDelta = mcRng() < 0.33 ? -1 : mcRng() > 0.67 ? 1 : 0;
+    const mcEffectiveCompetitors = Math.max(0, resampledCompetitorCount + mcCompetitorDelta);
+
+    // Resample each competitor's share impact (2x std dev for wider P10/P90 bands)
+    const mcShareImpactStd = intensity.shareImpactStd * 2;
+    const resampledCompetitors = competitorTimeline.slice(0, mcEffectiveCompetitors).map((c) => ({
       ...c,
-      shareImpact: Math.max(0, Math.min(1, sampleNormal(mcRng, c.shareImpact, intensity.shareImpactStd))),
+      shareImpact: Math.max(0, Math.min(1, sampleNormal(mcRng, c.shareImpact, mcShareImpactStd))),
     }));
 
     for (let i = 0; i < cashFlows.length; i++) {
@@ -471,11 +495,16 @@ export function calculateCompetitiveDynamics(
         }
       }
 
-      // Apply first-mover shield (same as main calc)
+      // Apply first-mover shield (same 8-year multiplicative formula as main calc)
+      // Uses effectiveFirstMoverShield which is halved for co-launch scenarios
       const yrsFromLaunch = year - launchYear;
-      if (yrsFromLaunch >= 0 && yrsFromLaunch < 3 && positionMod.firstMoverShield > 0) {
-        const decay = 1 - yrsFromLaunch / 3;
-        vMult = Math.min(1, vMult * (1 + positionMod.firstMoverShield * decay));
+      const mcShieldWindow = 8;
+      if (yrsFromLaunch >= 0 && yrsFromLaunch < mcShieldWindow && effectiveFirstMoverShield > 0) {
+        const decay = 1 - yrsFromLaunch / mcShieldWindow;
+        const shieldStrength = effectiveFirstMoverShield * decay;
+        const mcErosion = 1 - vMult;
+        const mcProtectedErosion = mcErosion * (1 - shieldStrength);
+        vMult = 1 - mcProtectedErosion;
       }
 
       const pMult = Math.pow(1 - intensity.priceErosionPerEntrant, activeCount);

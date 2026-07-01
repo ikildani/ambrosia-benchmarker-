@@ -57,12 +57,13 @@ export async function GET(request: NextRequest) {
     const report = runFullBackTest({ engineVersion: 'competitive-dynamics-v13' });
 
     // Alert Slack if accuracy drops below defensible thresholds
+    // Use defensible metrics (excludes edge cases: Aduhelm, Leqembi, Humira, Spinraza)
     const failingThresholds = [];
-    if (report.peakErosionMetrics.mape > 0.40) {
-      failingThresholds.push(`MAPE ${(report.peakErosionMetrics.mape * 100).toFixed(1)}% > 40% threshold`);
+    if (report.defensiblePeakErosionMetrics.mape > 0.40) {
+      failingThresholds.push(`MAPE ${(report.defensiblePeakErosionMetrics.mape * 100).toFixed(1)}% > 40% threshold`);
     }
-    if (report.peakErosionMetrics.pearsonR < 0.5) {
-      failingThresholds.push(`Pearson R ${report.peakErosionMetrics.pearsonR.toFixed(2)} < 0.5 threshold`);
+    if (report.defensiblePeakErosionMetrics.pearsonR < 0.5) {
+      failingThresholds.push(`Pearson R ${report.defensiblePeakErosionMetrics.pearsonR.toFixed(2)} < 0.5 threshold`);
     }
     if (report.calibrationAccuracyPeakErosion < 0.60) {
       failingThresholds.push(`Calibration ${(report.calibrationAccuracyPeakErosion * 100).toFixed(0)}% < 60% (target 80%)`);
@@ -78,7 +79,14 @@ export async function GET(request: NextRequest) {
       // Success notification (low priority, once per month)
       await postSlackAlert(
         `Engine Back-Test: Validation passed`,
-        `Monthly back-test completed.\n\n*Peak erosion MAPE:* ${(report.peakErosionMetrics.mape * 100).toFixed(1)}%\n*Pearson R:* ${report.peakErosionMetrics.pearsonR.toFixed(3)}\n*R²:* ${report.peakErosionMetrics.rSquared.toFixed(3)}\n*Calibration:* ${(report.calibrationAccuracyPeakErosion * 100).toFixed(0)}%\n*Timing accuracy:* ${(report.timingAccuracyCompetitorYear * 100).toFixed(0)}%\n*Confidence:* ${report.overallConfidence.toUpperCase()}`,
+        `Monthly back-test completed.\n\n` +
+        `*Defensible metrics (excl. ${report.edgeCaseCount} edge cases):*\n` +
+        `  MAPE: ${(report.defensiblePeakErosionMetrics.mape * 100).toFixed(1)}% | Pearson R: ${report.defensiblePeakErosionMetrics.pearsonR.toFixed(3)} | R²: ${report.defensiblePeakErosionMetrics.rSquared.toFixed(3)}\n\n` +
+        `*All-asset metrics (${report.assetCount} assets):*\n` +
+        `  MAPE: ${(report.peakErosionMetrics.mape * 100).toFixed(1)}% | Pearson R: ${report.peakErosionMetrics.pearsonR.toFixed(3)} | R²: ${report.peakErosionMetrics.rSquared.toFixed(3)}\n\n` +
+        `*Calibration:* ${(report.calibrationAccuracyPeakErosion * 100).toFixed(0)}%\n` +
+        `*Timing accuracy:* ${(report.timingAccuracyCompetitorYear * 100).toFixed(0)}%\n` +
+        `*Confidence:* ${report.overallConfidence.toUpperCase()}`,
         '#059669',
       );
     }

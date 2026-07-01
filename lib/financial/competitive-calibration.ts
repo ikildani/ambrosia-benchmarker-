@@ -46,6 +46,8 @@ export interface PositionModifier {
   competitorCountMultiplier: number;
   entryLagAdjustment: number;
   firstMoverShield: number;
+  /** Minimum peak erosion floor — co-leaders should always predict at least this erosion */
+  baseErosionFloor?: number;
 }
 
 export const POSITION_MODIFIERS: Record<string, PositionModifier> = {
@@ -56,7 +58,7 @@ export const POSITION_MODIFIERS: Record<string, PositionModifier> = {
   firstInClass:   { competitorCountMultiplier: 0.5,  entryLagAdjustment: 2.5,  firstMoverShield: 0.60 },
   firstToPivotal: { competitorCountMultiplier: 0.75, entryLagAdjustment: 1.25, firstMoverShield: 0.35 },
   bestInClass:    { competitorCountMultiplier: 0.85, entryLagAdjustment: 0.5,  firstMoverShield: 0.45 },
-  co_leader:      { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.15 },
+  co_leader:      { competitorCountMultiplier: 1.0,  entryLagAdjustment: 0.0,  firstMoverShield: 0.15, baseErosionFloor: 0.45 },
   leader:         { competitorCountMultiplier: 0.85, entryLagAdjustment: 1.0,  firstMoverShield: 0.35 },
   challenger:     { competitorCountMultiplier: 1.1,  entryLagAdjustment: -0.5, firstMoverShield: 0.10 },
   racing:         { competitorCountMultiplier: 1.2,  entryLagAdjustment: -0.5, firstMoverShield: 0.05 },
