@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 
 const breadcrumbSchema = generateBreadcrumbSchema([
   { name: 'Home', url: 'https://calculator.ambrosiaventures.co' },
@@ -43,7 +45,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PulseLayout({ children }: { children: React.ReactNode }) {
+export default async function PulseLayout({ children }: { children: React.ReactNode }) {
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return <IntelligenceUpgradeGate isAuthenticated={auth.isAuthenticated} />;
+  }
+
   return (
     <>
       <script

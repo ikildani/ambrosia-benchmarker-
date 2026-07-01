@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import CompaniesPageClient from './CompaniesPageClient';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 
 export const metadata: Metadata = {
   title: 'Company Profiles — Biotech & Pharma Deal Intelligence | Ambrosia Ventures',
@@ -21,7 +23,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CompaniesPage() {
+export default async function CompaniesPage() {
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return <IntelligenceUpgradeGate isAuthenticated={auth.isAuthenticated} />;
+  }
+
   const collectionSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
