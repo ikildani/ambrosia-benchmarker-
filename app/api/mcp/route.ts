@@ -1,9 +1,10 @@
 /**
- * MCP Server — Ambrosia Benchmarker
+ * MCP Server — Ambrosia Benchmarker v2.0
  *
- * Exposes 8 institutional-grade tools over the Model Context Protocol (MCP)
- * using the Streamable HTTP transport. Each tool wraps one of the core
- * calculation engines that power calculator.ambrosiaventures.co.
+ * Exposes 8 institutional-grade tools, 5 read-only resources, and 3 prompt
+ * templates over the Model Context Protocol (MCP) using the Streamable HTTP
+ * transport. Each tool wraps one of the core calculation engines that power
+ * calculator.ambrosiaventures.co.
  *
  * Auth: Enterprise API keys only (Pro + Portfolio tiers).
  * Rate limits: pilot 1K/mo, growth 10K/mo, enterprise 100K/mo.
@@ -47,6 +48,108 @@ import { findPartnerMatches } from '@/lib/services/partner-matching';
 import type { RNPVInput } from '@/lib/financial/types';
 
 export const maxDuration = 60;
+
+// ═════════════════════════════════════════════════════════════════════════
+// MCP Resource Data (read-only reference data for AI agents)
+// ═════════════════════════════════════════════════════════════════════════
+
+const TA_RESOURCE = [
+  { key: 'oncology', label: 'Oncology', dealCount: '500+', topModalities: ['ADC', 'mAb', 'bispecific', 'small molecule'] },
+  { key: 'neurology', label: 'Neurology', dealCount: '150+', topModalities: ['small molecule', 'mAb', 'gene therapy', 'ASO'] },
+  { key: 'immunology', label: 'Immunology', dealCount: '113+', topModalities: ['mAb', 'bispecific', 'small molecule'] },
+  { key: 'metabolic', label: 'Metabolic', dealCount: '79+', topModalities: ['GLP-1 agonist', 'small molecule', 'peptide'] },
+  { key: 'cardiovascular', label: 'Cardiovascular', dealCount: '33+', topModalities: ['small molecule', 'RNAi', 'mAb'] },
+  { key: 'infectiousDisease', label: 'Infectious Disease', dealCount: '40+', topModalities: ['antiviral', 'vaccine', 'mAb'] },
+  { key: 'rareDisease', label: 'Rare Disease', dealCount: '50+', topModalities: ['gene therapy', 'enzyme replacement', 'ASO'] },
+  { key: 'hematology', label: 'Hematology', dealCount: '43+', topModalities: ['CAR-T', 'bispecific', 'mAb'] },
+  { key: 'ophthalmology', label: 'Ophthalmology', dealCount: '32+', topModalities: ['anti-VEGF', 'gene therapy', 'small molecule'] },
+  { key: 'dermatology', label: 'Dermatology', dealCount: '40+', topModalities: ['mAb', 'JAK inhibitor', 'small molecule'] },
+  { key: 'gastroenterology', label: 'Gastroenterology', dealCount: '39+', topModalities: ['mAb', 'small molecule', 'anti-TL1A'] },
+  { key: 'womensHealth', label: "Women's Health", dealCount: '35+', topModalities: ['small molecule', 'hormone therapy', 'GnRH antagonist'] },
+] as const;
+
+const MODALITY_RESOURCE = [
+  { ta: 'oncology', modalities: [
+    { key: 'adc', label: 'Antibody-Drug Conjugate (ADC)', multiplier: 1.35 },
+    { key: 'mab', label: 'Monoclonal Antibody', multiplier: 1.10 },
+    { key: 'bispecific', label: 'Bispecific Antibody', multiplier: 1.25 },
+    { key: 'smallMolecule', label: 'Small Molecule', multiplier: 1.00 },
+    { key: 'carT_heme', label: 'CAR-T (Hematologic)', multiplier: 1.40 },
+    { key: 'carT_solid', label: 'CAR-T (Solid Tumor)', multiplier: 1.50 },
+    { key: 'radiopharmaceutical', label: 'Radiopharmaceutical', multiplier: 1.30 },
+    { key: 'protac', label: 'PROTAC', multiplier: 1.20 },
+  ]},
+  { ta: 'neurology', modalities: [
+    { key: 'smallMolecule', label: 'Small Molecule', multiplier: 1.00 },
+    { key: 'mab', label: 'Monoclonal Antibody', multiplier: 1.15 },
+    { key: 'geneTherapy', label: 'Gene Therapy', multiplier: 1.50 },
+    { key: 'aso', label: 'Antisense Oligonucleotide', multiplier: 1.30 },
+    { key: 'bbbPlatform', label: 'BBB-Crossing Platform', multiplier: 1.45 },
+  ]},
+  { ta: 'immunology', modalities: [
+    { key: 'mab', label: 'Monoclonal Antibody', multiplier: 1.10 },
+    { key: 'bispecific', label: 'Bispecific Antibody', multiplier: 1.25 },
+    { key: 'carT_autoimmune', label: 'CAR-T (Autoimmune)', multiplier: 1.55 },
+    { key: 'jakInhibitor', label: 'JAK Inhibitor', multiplier: 1.05 },
+  ]},
+  { ta: 'metabolic', modalities: [
+    { key: 'glp1Agonist', label: 'GLP-1 Agonist', multiplier: 1.30 },
+    { key: 'dualIncretin', label: 'Dual Incretin', multiplier: 1.45 },
+    { key: 'tripleIncretin', label: 'Triple Incretin', multiplier: 1.55 },
+    { key: 'smallMolecule', label: 'Small Molecule', multiplier: 1.00 },
+  ]},
+  { ta: 'rareDisease', modalities: [
+    { key: 'geneTherapy', label: 'Gene Therapy', multiplier: 1.50 },
+    { key: 'enzymeReplacement', label: 'Enzyme Replacement', multiplier: 1.20 },
+    { key: 'aso', label: 'Antisense Oligonucleotide', multiplier: 1.30 },
+    { key: 'substrateReduction', label: 'Substrate Reduction', multiplier: 1.15 },
+  ]},
+] as const;
+
+const TERRITORY_RESOURCE = [
+  { key: 'global', label: 'Global', revenueWeight: 1.0, agencies: ['FDA', 'EMA', 'PMDA', 'NMPA', 'TGA', 'Health Canada', 'Swissmedic'] },
+  { key: 'us_only', label: 'US Only', revenueWeight: 0.55, agencies: ['FDA'] },
+  { key: 'europe', label: 'Europe', revenueWeight: 0.25, agencies: ['EMA', 'Swissmedic'] },
+  { key: 'us_eu', label: 'US + EU', revenueWeight: 0.80, agencies: ['FDA', 'EMA'] },
+  { key: 'japan', label: 'Japan', revenueWeight: 0.08, agencies: ['PMDA'] },
+  { key: 'china', label: 'China', revenueWeight: 0.07, agencies: ['NMPA'] },
+  { key: 'us_japan', label: 'US + Japan', revenueWeight: 0.63, agencies: ['FDA', 'PMDA'] },
+  { key: 'ex_us', label: 'Ex-US', revenueWeight: 0.45, agencies: ['EMA', 'PMDA', 'NMPA', 'TGA', 'Health Canada', 'Swissmedic'] },
+  { key: 'canada', label: 'Canada', revenueWeight: 0.03, agencies: ['Health Canada'] },
+  { key: 'australia', label: 'Australia', revenueWeight: 0.02, agencies: ['TGA'] },
+  { key: 'row', label: 'Rest of World', revenueWeight: 0.05, agencies: ['TGA', 'Health Canada'] },
+  { key: 'apac_ex_cj', label: 'APAC (ex-China/Japan)', revenueWeight: 0.02, agencies: ['TGA'] },
+  { key: 'latam', label: 'Latin America', revenueWeight: 0.03, agencies: ['FDA (reference)'] },
+  { key: 'mena', label: 'Middle East & North Africa', revenueWeight: 0.02, agencies: ['FDA (reference)'] },
+  { key: 'south_korea', label: 'South Korea', revenueWeight: 0.02, agencies: ['FDA', 'EMA (reference)'] },
+] as const;
+
+const BUYER_PREMIUMS_RESOURCE = [
+  { company: 'Novo Nordisk', premium: 1.407, confidence: 'high' as const, topTAs: ['metabolic', 'rareDisease'] },
+  { company: 'Biogen', premium: 1.331, confidence: 'high' as const, topTAs: ['neurology', 'rareDisease'] },
+  { company: 'GSK', premium: 1.320, confidence: 'high' as const, topTAs: ['infectiousDisease', 'immunology'] },
+  { company: 'AstraZeneca', premium: 1.312, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+  { company: 'Novartis', premium: 1.289, confidence: 'high' as const, topTAs: ['oncology', 'cardiovascular'] },
+  { company: 'Amgen', premium: 1.234, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+  { company: 'AbbVie', premium: 1.360, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+  { company: 'Roche', premium: 1.360, confidence: 'high' as const, topTAs: ['oncology', 'neurology'] },
+  { company: 'Gilead Sciences', premium: 1.127, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+  { company: 'Eli Lilly', premium: 1.061, confidence: 'high' as const, topTAs: ['metabolic', 'neurology'] },
+  { company: 'Pfizer', premium: 1.060, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+  { company: 'Sanofi', premium: 1.015, confidence: 'high' as const, topTAs: ['immunology', 'rareDisease'] },
+  { company: 'Merck', premium: 0.893, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+  { company: 'Bristol-Myers Squibb', premium: 1.046, confidence: 'high' as const, topTAs: ['oncology', 'hematology'] },
+  { company: 'Johnson & Johnson', premium: 1.086, confidence: 'high' as const, topTAs: ['oncology', 'immunology'] },
+] as const;
+
+const DIFFERENTIATION_RESOURCE = [
+  { key: 'novelMechanism', label: 'Novel mechanism of action', baseAdjustment: 0.08, preclinicalScaling: 0.6 },
+  { key: 'superiorEfficacy', label: 'Demonstrated superior efficacy', baseAdjustment: 0.07, preclinicalScaling: 0.3 },
+  { key: 'convenientDosing', label: 'Dosing/delivery advantage', baseAdjustment: 0.05, preclinicalScaling: 0.5 },
+  { key: 'betterSafety', label: 'Differentiated safety profile', baseAdjustment: 0.04, preclinicalScaling: 0.3 },
+  { key: 'biomarkerSelected', label: 'Biomarker-selected population', baseAdjustment: 0.05, preclinicalScaling: 0.5 },
+  { key: 'combinationBackbone', label: 'Combination backbone potential', baseAdjustment: 0.06, preclinicalScaling: 0.4 },
+] as const;
 
 // ═════════════════════════════════════════════════════════════════════════
 // Shared Zod Schemas
@@ -168,7 +271,8 @@ async function trackToolUsage(keyId: string, toolName: string): Promise<void> {
 function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
   const server = new McpServer({
     name: 'Ambrosia Benchmarker',
-    version: '1.0.0',
+    version: '2.0.0',
+    description: 'Institutional-grade biopharma deal intelligence — 21 engines, 1,900+ transactions, 850+ companies',
   });
 
   // ─────────────────────────────────────────────────────────────────────
@@ -186,10 +290,37 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       competitivePosition: competitivePositionEnum,
       dealType: dealTypeEnum.optional().describe('Deal structure type. Defaults to licensing.'),
       peakSalesMedian: z.number().positive().optional().describe('Peak annual sales estimate in $M. If omitted, the engine uses indication-based defaults.'),
-      differentiationFactors: z.array(z.string()).optional().describe('Asset differentiation factors: "novelMechanism", "superiorEfficacy", "betterSafety", "convenientDosing", "biomarkerSelected"'),
+      differentiationFactors: z.array(z.string()).optional().describe('Asset differentiation factors: "novelMechanism", "superiorEfficacy", "betterSafety", "convenientDosing", "biomarkerSelected", "combinationBackbone"'),
+      dataQuality: z.enum(['robust', 'moderate', 'promising', 'preliminary', 'preclinical_only']).optional().describe('Quality of available clinical/preclinical data. Defaults to "promising".'),
+      biomarkerStatus: z.enum(['validated', 'exploratory', 'unselected', 'none']).optional().describe('Biomarker selection status. Defaults to "unselected".'),
+      lineOfTherapy: z.enum(['1L', '2L', '3L', 'adjuvant', 'neoadjuvant', 'maintenance']).optional().describe('Line of therapy. Defaults to "1L".'),
+      regulatoryDesignations: regulatoryDesignationsSchema.optional().describe('Regulatory designations held by the asset.'),
     },
     async (params) => {
       await trackToolUsage(apiKeyContext.keyId, 'calculate_deal_terms');
+
+      // Map MCP-facing data quality values to engine-expected values
+      const dataQualityMap: Record<string, DataQuality> = {
+        robust: 'pivotalReady',
+        moderate: 'strongPhase2',
+        promising: 'promising',
+        preliminary: 'mixed',
+        preclinical_only: 'limited',
+      };
+      const mappedDataQuality = params.dataQuality
+        ? (dataQualityMap[params.dataQuality] ?? 'promising')
+        : 'promising';
+
+      // Map MCP-facing biomarker values to engine-expected values
+      const biomarkerMap: Record<string, BiomarkerStatus> = {
+        validated: 'selected',
+        exploratory: 'selected',
+        unselected: 'unselected',
+        none: 'unselected',
+      };
+      const mappedBiomarker = params.biomarkerStatus
+        ? (biomarkerMap[params.biomarkerStatus] ?? 'unselected')
+        : 'unselected';
 
       const input: CalculationInput = {
         therapeuticArea: params.therapeuticArea as TherapeuticArea,
@@ -199,12 +330,12 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         territory: params.territory as Territory,
         competitivePosition: params.competitivePosition as CompetitivePosition,
         dealType: (params.dealType as DealType) || undefined,
-        biomarker: 'unselected',
-        lineOfTherapy: '1L',
+        biomarker: mappedBiomarker,
+        lineOfTherapy: (params.lineOfTherapy ?? '1L') as CalculationInput['lineOfTherapy'],
         treatmentApproach: 'diseaseModifying',
         combinationPotential: 'some',
-        dataQuality: 'promising',
-        regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+        dataQuality: mappedDataQuality,
+        regulatoryDesignations: params.regulatoryDesignations ?? { breakthrough: false, fastTrack: false, orphan: false, prime: false },
         differentiationFactors: params.differentiationFactors,
         peakSalesOverrideM: params.peakSalesMedian ?? null,
       };
@@ -228,7 +359,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'Calculation failed'}` }],
+          content: [{ type: 'text' as const, text: `Error calculating deal terms: ${err instanceof Error ? err.message : 'Calculation failed'}. Check that your indication is valid for the specified therapeutic area. Use the therapeutic-areas resource for valid TA keys and modalities.` }],
           isError: true,
         };
       }
@@ -256,6 +387,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       regulatoryDesignations: regulatoryDesignationsSchema.optional(),
       dealType: dealTypeEnum.optional().describe('Deal structure. Defaults to licensing.'),
       companyType: z.enum(['largePharma', 'midPharma', 'biotech', 'clinicalStageBiotech', 'academic']).optional().describe('Asset owner company type. Affects discount rate.'),
+      lineOfTherapy: z.enum(['1L', '2L', '3L', 'adjuvant', 'neoadjuvant', 'maintenance']).optional().describe('Line of therapy. Affects market size and competitive dynamics. Defaults to "1L".'),
     },
     async (params) => {
       await trackToolUsage(apiKeyContext.keyId, 'run_rnpv_model');
@@ -280,6 +412,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         },
         dealType: params.dealType ?? 'licensing',
         companyType: params.companyType ?? 'biotech',
+        lineOfTherapy: params.lineOfTherapy,
       };
 
       try {
@@ -324,7 +457,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'rNPV/MC calculation failed'}` }],
+          content: [{ type: 'text' as const, text: `Error running rNPV model: ${err instanceof Error ? err.message : 'rNPV/MC calculation failed'}. Verify peak sales estimates are reasonable for the indication and that therapeutic area, modality, and phase are compatible.` }],
           isError: true,
         };
       }
@@ -392,7 +525,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'Deal structure optimization failed'}` }],
+          content: [{ type: 'text' as const, text: `Error optimizing deal structure: ${err instanceof Error ? err.message : 'Deal structure optimization failed'}. Ensure peak sales estimate and phase are compatible with the specified therapeutic area and modality.` }],
           isError: true,
         };
       }
@@ -462,7 +595,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'Partner matching failed'}` }],
+          content: [{ type: 'text' as const, text: `Error matching partners: ${err instanceof Error ? err.message : 'Partner matching failed'}. Ensure therapeutic area and modality are valid. Use the therapeutic-areas resource for supported values.` }],
           isError: true,
         };
       }
@@ -577,7 +710,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'ZOPA computation failed'}` }],
+          content: [{ type: 'text' as const, text: `Error computing negotiation ZOPA: ${err instanceof Error ? err.message : 'ZOPA computation failed'}. Verify buyer names match known companies (use the buyer-premiums resource) and that BATNA amount is reasonable for the asset.` }],
           isError: true,
         };
       }
@@ -668,7 +801,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'Regulatory risk analysis failed'}` }],
+          content: [{ type: 'text' as const, text: `Error analyzing regulatory risk: ${err instanceof Error ? err.message : 'Regulatory risk analysis failed'}. Verify indication and territory are valid. Use the territories resource to see which agencies apply to each territory.` }],
           isError: true,
         };
       }
@@ -727,7 +860,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'Comparable deals search failed'}` }],
+          content: [{ type: 'text' as const, text: `Error searching comparable deals: ${err instanceof Error ? err.message : 'Comparable deals search failed'}. Ensure modality and therapeutic area have matching deals in the database. Try broadening filters (remove indication or territory).` }],
           isError: true,
         };
       }
@@ -796,11 +929,195 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
         };
       } catch (err) {
         return {
-          content: [{ type: 'text' as const, text: `Error: ${err instanceof Error ? err.message : 'Market intelligence fetch failed'}` }],
+          content: [{ type: 'text' as const, text: `Error fetching market intelligence: ${err instanceof Error ? err.message : 'Market intelligence fetch failed'}. The ClinicalTrials.gov API may be temporarily unavailable. Try again or reduce daysAhead/readoutLimit.` }],
           isError: true,
         };
       }
     },
+  );
+
+  // ═════════════════════════════════════════════════════════════════════
+  // MCP Resources (read-only data for AI agents to browse)
+  // ═════════════════════════════════════════════════════════════════════
+
+  server.resource(
+    'therapeutic-areas',
+    'ambrosia://therapeutic-areas',
+    { description: 'List of 12 therapeutic areas with deal volume and top modalities. Use to understand available TAs and select valid keys for tool calls.', mimeType: 'application/json' },
+    async () => ({
+      contents: [{
+        uri: 'ambrosia://therapeutic-areas',
+        text: JSON.stringify(TA_RESOURCE, null, 2),
+        mimeType: 'application/json',
+      }],
+    }),
+  );
+
+  server.resource(
+    'modalities',
+    'ambrosia://modalities',
+    { description: 'Modalities grouped by therapeutic area with valuation multiplier data. Use to select valid modality keys and understand relative value premiums.', mimeType: 'application/json' },
+    async () => ({
+      contents: [{
+        uri: 'ambrosia://modalities',
+        text: JSON.stringify(MODALITY_RESOURCE, null, 2),
+        mimeType: 'application/json',
+      }],
+    }),
+  );
+
+  server.resource(
+    'territories',
+    'ambrosia://territories',
+    { description: 'List of 15 territories with revenue weights and applicable regulatory agencies. Use to understand territory value and agency coverage.', mimeType: 'application/json' },
+    async () => ({
+      contents: [{
+        uri: 'ambrosia://territories',
+        text: JSON.stringify(TERRITORY_RESOURCE, null, 2),
+        mimeType: 'application/json',
+      }],
+    }),
+  );
+
+  server.resource(
+    'buyer-premiums',
+    'ambrosia://buyer-premiums',
+    { description: 'Top 15 pharma/biotech buyers with historical deal premium multipliers and confidence levels. Use to identify high-premium buyers and inform negotiation strategy.', mimeType: 'application/json' },
+    async () => ({
+      contents: [{
+        uri: 'ambrosia://buyer-premiums',
+        text: JSON.stringify(BUYER_PREMIUMS_RESOURCE, null, 2),
+        mimeType: 'application/json',
+      }],
+    }),
+  );
+
+  server.resource(
+    'differentiation-factors',
+    'ambrosia://differentiation-factors',
+    { description: 'The 6 asset differentiation factors with base valuation adjustments and preclinical scaling. Use to understand how differentiation impacts deal terms.', mimeType: 'application/json' },
+    async () => ({
+      contents: [{
+        uri: 'ambrosia://differentiation-factors',
+        text: JSON.stringify(DIFFERENTIATION_RESOURCE, null, 2),
+        mimeType: 'application/json',
+      }],
+    }),
+  );
+
+  // ═════════════════════════════════════════════════════════════════════
+  // MCP Prompts (pre-built templates for common workflows)
+  // ═════════════════════════════════════════════════════════════════════
+
+  server.prompt(
+    'deal_benchmark',
+    'Generate a comprehensive deal benchmark for a pharmaceutical asset',
+    {
+      asset_description: z.string().describe('Describe the asset (e.g., "Phase 2 ADC for HER2+ breast cancer")'),
+      territory: z.string().optional().describe('Target territory (e.g., "global", "us_only", "europe")'),
+    },
+    async (params) => ({
+      messages: [{
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `You are an institutional-grade biopharma deal advisor. Using the Ambrosia Benchmarker MCP tools, generate a comprehensive deal benchmark for: ${params.asset_description}
+
+Steps:
+1. Call calculate_deal_terms with the appropriate parameters
+2. Call run_rnpv_model for risk-adjusted valuation
+3. Call match_partners to identify potential buyers
+4. Call get_regulatory_risk to assess regulatory pathway
+5. Call get_comparable_deals for precedent transactions
+
+Present the results as a structured deal memo with:
+- Headline deal terms (upfront, milestones, royalties, total deal value)
+- Risk-adjusted valuation (rNPV, Monte Carlo P10/P50/P90)
+- Top 5 potential partners with intent scores
+- Regulatory risk assessment per relevant agency
+- 3-5 comparable transactions
+- Deal structure recommendation (licensing vs co-dev vs option)
+
+Territory: ${params.territory || 'global'}`,
+        },
+      }],
+    }),
+  );
+
+  server.prompt(
+    'partner_search',
+    'Find and rank the best licensing partners for a pharmaceutical asset',
+    {
+      asset_description: z.string().describe('Describe the asset (e.g., "Phase 1 bispecific antibody for r/r DLBCL")'),
+      deal_type: z.string().optional().describe('Preferred deal structure: licensing, acquisition, codevelopment, option, collaboration'),
+      territory: z.string().optional().describe('Target territory (e.g., "global", "us_only", "ex_us")'),
+    },
+    async (params) => ({
+      messages: [{
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `You are a biopharma business development expert. Using the Ambrosia Benchmarker MCP tools, identify and rank the best licensing partners for: ${params.asset_description}
+
+Steps:
+1. Read the buyer-premiums resource to understand premium multipliers
+2. Call match_partners with the appropriate TA, modality, and phase
+3. For the top 5 matches, call compute_negotiation_zopa to estimate deal value with each buyer
+4. Call get_comparable_deals to find precedent transactions with each potential partner
+
+Present the results as a partner ranking with:
+- Company name, match score, and strategic rationale
+- Historical premium multiplier and recent deal activity
+- Estimated deal value range (floor to ceiling) per partner
+- Watch-outs and risks for each partnership
+- Recommended outreach priority and sequencing strategy
+
+Preferred deal type: ${params.deal_type || 'licensing'}
+Territory: ${params.territory || 'global'}`,
+        },
+      }],
+    }),
+  );
+
+  server.prompt(
+    'negotiation_prep',
+    'Prepare a negotiation strategy for a pharmaceutical deal with specific buyers',
+    {
+      asset_description: z.string().describe('Describe the asset (e.g., "Phase 2b oral PCSK9 inhibitor for hyperlipidemia")'),
+      buyers: z.string().describe('Comma-separated buyer names (e.g., "Pfizer, AbbVie, Novartis")'),
+      batna_upfront_m: z.string().optional().describe('Walk-away upfront amount in $M (e.g., "50")'),
+    },
+    async (params) => ({
+      messages: [{
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `You are a senior biopharma deal negotiation strategist. Using the Ambrosia Benchmarker MCP tools, prepare a comprehensive negotiation strategy for: ${params.asset_description}
+
+Target buyers: ${params.buyers}
+
+Steps:
+1. Call calculate_deal_terms to establish baseline deal terms
+2. Call run_rnpv_model for the asset's risk-adjusted valuation
+3. Call optimize_deal_structure to rank deal structures by licensor value
+4. Call compute_negotiation_zopa with the specified buyers and BATNA
+5. Read the buyer-premiums resource for historical premium context
+6. Call get_comparable_deals to identify precedent transactions
+7. Call get_regulatory_risk to understand regulatory timeline risks
+
+Present the results as a negotiation preparation brief:
+- Base case valuation and recommended deal structure
+- Per-buyer ZOPA analysis with floor, ceiling, and opening position
+- Premium/discount rationale for each buyer based on strategic fit
+- Key negotiation levers (milestones, royalties, territory splits, opt-ins)
+- Risk factors that could shift buyer willingness to pay
+- Recommended negotiation sequencing (which buyer to approach first)
+- Comparable transactions to cite during negotiations
+
+BATNA upfront: $${params.batna_upfront_m || '0'}M`,
+        },
+      }],
+    }),
   );
 
   return server;
@@ -860,10 +1177,15 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     name: 'Ambrosia Benchmarker MCP Server',
-    version: '1.0.0',
+    version: '2.0.0',
     protocol: 'mcp',
     transport: 'streamable-http',
-    description: 'Institutional-grade pharmaceutical deal intelligence via the Model Context Protocol. 8 tools covering deal terms, rNPV/Monte Carlo valuation, deal structure optimization, partner matching, negotiation ZOPA, regulatory risk, comparable transactions, and market intelligence.',
+    description: 'Institutional-grade biopharma deal intelligence via the Model Context Protocol. 8 tools, 5 resources, and 3 prompt templates covering deal terms, rNPV/Monte Carlo valuation, deal structure optimization, partner matching, negotiation ZOPA, regulatory risk, comparable transactions, and market intelligence — calibrated against 2,500+ real transactions.',
+    contact: {
+      name: 'Issa Kildani',
+      email: 'ikildani@ambrosiaventures.co',
+      url: 'https://ambrosiaventures.co',
+    },
     auth: {
       type: 'bearer',
       prefix: 'ambk_',
@@ -908,6 +1230,47 @@ export async function GET() {
       {
         name: 'get_market_intelligence',
         description: 'Upcoming Phase 3 readouts (ClinicalTrials.gov) and FDA AdComm calendar for near-term catalysts.',
+      },
+    ],
+    resources: [
+      {
+        name: 'therapeutic-areas',
+        uri: 'ambrosia://therapeutic-areas',
+        description: 'List of 12 therapeutic areas with deal volume and top modalities.',
+      },
+      {
+        name: 'modalities',
+        uri: 'ambrosia://modalities',
+        description: 'Modalities grouped by TA with valuation multiplier data.',
+      },
+      {
+        name: 'territories',
+        uri: 'ambrosia://territories',
+        description: '15 territories with revenue weights and applicable regulatory agencies.',
+      },
+      {
+        name: 'buyer-premiums',
+        uri: 'ambrosia://buyer-premiums',
+        description: 'Top 15 pharma/biotech buyers with historical deal premium multipliers.',
+      },
+      {
+        name: 'differentiation-factors',
+        uri: 'ambrosia://differentiation-factors',
+        description: '6 asset differentiation factors with base adjustments and phase scaling.',
+      },
+    ],
+    prompts: [
+      {
+        name: 'deal_benchmark',
+        description: 'Generate a comprehensive deal benchmark for a pharmaceutical asset. Orchestrates 5 tools into a structured deal memo.',
+      },
+      {
+        name: 'partner_search',
+        description: 'Find and rank the best licensing partners for an asset. Combines partner matching with ZOPA analysis and comparable deals.',
+      },
+      {
+        name: 'negotiation_prep',
+        description: 'Prepare a negotiation strategy for specific buyers. Includes ZOPA, deal structure optimization, and precedent transactions.',
       },
     ],
     endpoint: 'POST /api/mcp',
