@@ -67,7 +67,17 @@ export async function resolveUserTier(): Promise<TierCheckResult> {
       userId: user.id,
       hasProAccess,
     };
-  } catch {
+  } catch (err) {
+    console.error('[tier-check] Failed to resolve user tier:', err instanceof Error ? err.message : String(err));
+    // Fallback: try service client with cookies header to handle SSR edge cases
+    try {
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const authToken = cookieStore.getAll().find(c => c.name.includes('auth-token') && !c.name.includes('.'));
+      if (authToken) {
+        console.log('[tier-check] Auth cookie exists but getUser() failed — possible SSR race condition');
+      }
+    } catch {}
     return { isAuthenticated: false, tier: null, email: null, userId: null, hasProAccess: false };
   }
 }

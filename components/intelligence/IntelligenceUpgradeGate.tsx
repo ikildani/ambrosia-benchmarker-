@@ -61,7 +61,7 @@ export function IntelligenceUpgradeGate({ isAuthenticated }: Props) {
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href={isAuthenticated ? '/pro' : '/calculator'}
+                  href={isAuthenticated ? '/pro' : '/calculator?auth=signin'}
                   className="rounded-md bg-teal-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-teal-400"
                 >
                   {isAuthenticated ? 'Upgrade to Pro →' : 'Sign in →'}
