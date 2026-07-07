@@ -10,19 +10,9 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
       {
-        userAgent: 'Googlebot',
-        allow: ['/', '/api/og'],
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/_next/'],
-      },
-      {
-        userAgent: 'Bingbot',
-        allow: '/',
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/'],
-      },
-      {
         userAgent: '*',
-        allow: ['/', '/api/og'],
-        disallow: ['/api/', '/dashboard', '/admin/', '/auth/', '/share/', '/_next/', '/portfolio/admin/'],
+        allow: '/',
+        disallow: ['/api/', '/dashboard', '/auth/', '/portfolio/admin/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

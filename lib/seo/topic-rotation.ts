@@ -166,6 +166,30 @@ export async function getNextTopic(
     }
   }
 
-  // 4. All combos exhausted
+  // 4. All base combos exhausted — start a new cycle with a suffix.
+  // Determine current cycle number by counting how many full sets have been used.
+  // Each cycle adds ":cN" to the topicKey so the content log treats it as new.
+  const baseCombos = candidates.length;
+  const cycle = Math.floor(usedKeys.size / baseCombos) + 1;
+
+  for (const candidate of candidates) {
+    const cycledKey = `${candidate.topicKey}:c${cycle}`;
+    if (!usedKeys.has(cycledKey)) {
+      return {
+        ...candidate,
+        topicKey: cycledKey,
+        // Refresh the title angle for the new cycle
+        title: generateTitle(
+          MODALITIES.find(m => m.key === candidate.modality)?.label || candidate.modality,
+          TAS.find(t => t.key === candidate.therapeuticArea)?.label || candidate.therapeuticArea,
+          DEAL_TYPES.find(d => d.key === candidate.dealType)?.label || candidate.dealType,
+          PHASES.find(p => p.key === candidate.phase)?.label || candidate.phase,
+          cycle * baseCombos + candidates.indexOf(candidate),
+        ),
+      };
+    }
+  }
+
+  // Should never reach here, but safety fallback
   return null;
 }

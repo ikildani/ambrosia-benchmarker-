@@ -118,7 +118,10 @@ async function getUnenrolledContacts(page: number = 1): Promise<{
   const apiKey = process.env.APOLLO_API_KEY;
   if (!apiKey) throw new Error('APOLLO_API_KEY not configured');
 
-  // Filter server-side: verified email + not currently in any active sequence
+  // Filter server-side: verified email, sort oldest-first so we reach contacts
+  // that haven't been enrolled yet (newest contacts are most likely already in a sequence).
+  // Note: Apollo's search API does not support a "currently_in_sequence" filter —
+  // we filter out already-enrolled contacts client-side via emailer_campaign_ids.
   const res = await fetch(`${APOLLO_API}/contacts/search`, {
     method: 'POST',
     headers: {
@@ -129,9 +132,8 @@ async function getUnenrolledContacts(page: number = 1): Promise<{
       page,
       per_page: 100,
       sort_by_field: 'contact_created_at',
-      sort_ascending: false,
+      sort_ascending: true,
       contact_email_status_v2: ['verified', 'likely_to_engage'],
-      currently_in_sequence: false,
     }),
   });
 
@@ -274,9 +276,26 @@ export async function GET(request: NextRequest) {
     let skippedEnterprise = 0;
     let skippedNoTitleMatch = 0;
 
+    // Resume pagination from where we left off last run.
+    // This avoids re-scanning the same oldest contacts every time.
+    const supabase = createServiceClient();
+    let startPage = 1;
+    const { data: pageConfig } = await supabase
+      .from('system_config')
+      .select('value')
+      .eq('key', 'apollo_enroll_page')
+      .single();
+
+    if (pageConfig?.value) {
+      const parsed = parseInt(pageConfig.value, 10);
+      if (!isNaN(parsed) && parsed > 0) startPage = parsed;
+    }
+
     // Scan contacts -- only enroll Pro/Report-fit biotech operators
     // Skip VCs, CVCs, and enterprise contacts (your strategist handles those)
-    for (let page = 1; page <= 10; page++) {
+    let lastPage = startPage;
+    let hitEnd = false;
+    for (let page = startPage; page < startPage + 10; page++) {
       const { contacts, totalPages } = await getUnenrolledContacts(page);
       if (contacts.length === 0) break;
 
