@@ -1051,13 +1051,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   };
 
   const handleDownloadPDF = () => {
-    trackExportAttempted('pdf');
+    try { trackExportAttempted('pdf'); } catch {}
     setReportFormat('pdf');
     setShowReportModal(true);
   };
 
   const handleDownloadExcel = () => {
-    trackExportAttempted('excel');
+    try { trackExportAttempted('excel'); } catch {}
     setReportFormat('excel');
     setShowReportModal(true);
   };
