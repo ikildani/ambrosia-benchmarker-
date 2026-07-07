@@ -243,7 +243,7 @@ export function renderRegulatoryRiskPage(data: PDFReportData, meta: ReportMeta):
       ` : ''}
 
       <!-- Accelerated Approval Risk (if eligible) -->
-      ${rr.acceleratedApprovalRisk.eligible ? `
+      ${rr.acceleratedApprovalRisk?.eligible ? `
       <div class="section-title">Accelerated Approval Risk</div>
       <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 14px;">
         <table class="data-table">
