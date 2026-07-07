@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@sendgrid/mail": "^8.1.6",
     "@sentry/nextjs": "^10.38.0",
     "@sparticuz/chromium": "^143.0.4",
