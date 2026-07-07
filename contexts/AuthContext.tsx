@@ -255,13 +255,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   setTierState('pro');
                   localStorage.setItem('user_tier', 'pro');
                 }
-              } catch {
+              } catch (tierQueryErr) {
                 // Fallback to email allowlist if DB query fails
                 if (supabaseUser.email && isProEmailClient(supabaseUser.email)) {
                   setTierState('pro');
                   localStorage.setItem('user_tier', 'pro');
                 }
-                console.warn('[Auth] Tier query failed');
+                console.warn('[Auth] Tier query failed:', tierQueryErr instanceof Error ? tierQueryErr.message : String(tierQueryErr));
               }
 
               // Sync usage count from database (fire-and-forget — not gating UI)
