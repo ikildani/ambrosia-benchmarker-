@@ -28,7 +28,7 @@ export async function verifyPendingDeals(
   supabase: SupabaseClient,
   perplexityApiKey: string,
   anthropicApiKey: string,
-  options?: { maxDeals?: number; timeBudgetMs?: number }
+  options?: { maxDeals?: number; timeBudgetMs?: number; priorityTAs?: string[] }
 ): Promise<{
   verified: number;
   flagged: number;
@@ -38,6 +38,7 @@ export async function verifyPendingDeals(
   const maxDeals = options?.maxDeals ?? 20;
   const timeBudgetMs = options?.timeBudgetMs ?? 250_000;
   const startTime = Date.now();
+  const priorityTAs = options?.priorityTAs || [];
 
   const result = { verified: 0, flagged: 0, unchanged: 0, errors: [] as string[] };
 
@@ -62,10 +63,20 @@ export async function verifyPendingDeals(
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(maxDeals);
 
-  const deals = [
+  let deals = [
     ...(discoveryDeals || []),
     ...(remainingDeals || []).filter(d => !discoveryIds.has(d.id)),
   ].slice(0, maxDeals);
+
+  // Sort deals so priority TAs (user-demanded) come first
+  if (priorityTAs.length > 0) {
+    const prioritySet = new Set(priorityTAs);
+    deals.sort((a, b) => {
+      const aIsPriority = prioritySet.has(a.therapeutic_area) ? 1 : 0;
+      const bIsPriority = prioritySet.has(b.therapeutic_area) ? 1 : 0;
+      return bIsPriority - aIsPriority; // Priority deals first
+    });
+  }
 
   if (queryError) {
     result.errors.push(`Query failed: ${queryError.message}`);

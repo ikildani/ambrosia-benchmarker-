@@ -12,7 +12,7 @@ import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
-import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
 import { getNextTopic } from '@/lib/seo/topic-rotation';
 import { publishBlogPost, notifySEOContentGenerated } from '@/lib/seo/blog-publisher';
@@ -348,6 +348,17 @@ export async function GET(request: NextRequest) {
     // ── Phase 2: Fill remaining slots with rotation topics ───────────────
     const rotationSlots = ARTICLES_PER_RUN - published.length;
 
+    // Read intelligence bus for demand-driven topic selection
+    let priorityTAs: string[] = [];
+    let winningTopics: Array<{ ta: string; modality: string; conversionRate: number }> = [];
+    try {
+      const bus = await getCronIntelligenceBus(supabase);
+      priorityTAs = bus.priorityTAs || [];
+      winningTopics = bus.winningTopics || [];
+    } catch {
+      // Non-fatal: intelligence bus may not exist yet
+    }
+
     for (let i = 0; i < rotationSlots; i++) {
       // Time budget safety: leave ~60s per remaining article
       const remainingTime = 780_000 - (Date.now() - startTime);
@@ -458,6 +469,11 @@ export async function GET(request: NextRequest) {
         rotationArticles: rotationCount,
         articlesRequested: ARTICLES_PER_RUN,
         slugs: published.map((p) => p.slug),
+        demandSignals: {
+          priorityTAs,
+          winningTopicCount: winningTopics.length,
+          topWinningTA: winningTopics[0]?.ta || null,
+        },
       },
     });
 

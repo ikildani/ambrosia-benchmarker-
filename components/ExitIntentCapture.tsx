@@ -20,6 +20,37 @@ const DEFAULT_COPY: VariantCopy = {
   footnote: 'No spam, unsubscribe anytime. 3,000+ deals benchmarked.',
 };
 
+const TA_DISPLAY: Record<string, string> = {
+  oncology: 'oncology', neurology: 'neurology', immunology: 'immunology',
+  metabolic: 'metabolic', cardiovascular: 'cardiovascular', rareDisease: 'rare disease',
+  hematology: 'hematology', infectiousDisease: 'infectious disease',
+  ophthalmology: 'ophthalmology', dermatology: 'dermatology',
+  gastroenterology: 'gastroenterology', womensHealth: "women's health",
+};
+
+/** Return the user's most frequent TA from localStorage prefs, or null. */
+function getTopUserTA(): string | null {
+  try {
+    const prefs = JSON.parse(localStorage.getItem('user_prefs') || '{}');
+    const tas: string[] = prefs.tas || [];
+    if (tas.length === 0) return null;
+    // Count frequencies
+    const counts = new Map<string, number>();
+    for (const ta of tas) {
+      counts.set(ta, (counts.get(ta) || 0) + 1);
+    }
+    // Return the most frequent
+    let topTA = '';
+    let topCount = 0;
+    for (const [ta, count] of counts) {
+      if (count > topCount) { topTA = ta; topCount = count; }
+    }
+    return topTA || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ExitIntentCapture() {
   const { tier } = useAuth();
   const [show, setShow] = useState(false);
@@ -31,14 +62,25 @@ export default function ExitIntentCapture() {
   const [submitting, setSubmitting] = useState(false);
   const [copy, setCopy] = useState<VariantCopy>(DEFAULT_COPY);
 
-  // Fetch active variant copy from API
+  // Fetch active variant copy from API, then personalize with user prefs
   useEffect(() => {
     fetch('/api/exit-intent')
       .then((res) => res.json())
       .then((data: VariantCopy) => {
         if (data?.id && data?.headline) setCopy(data);
       })
-      .catch(() => {}); // fallback to default
+      .catch(() => {}) // fallback to default
+      .finally(() => {
+        // Personalize subtext based on user's calculation history
+        const topTA = getTopUserTA();
+        if (topTA) {
+          const taName = TA_DISPLAY[topTA] || topTA;
+          setCopy((prev) => ({
+            ...prev,
+            subtext: `See how your ${taName} deal compares to 300+ recent transactions.`,
+          }));
+        }
+      });
   }, []);
 
   useEffect(() => {

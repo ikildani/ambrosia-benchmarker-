@@ -15,7 +15,7 @@ import { timingSafeEqual } from 'crypto';
 import { logCronRun } from '@/lib/cron-utils';
 import { verifyPendingDeals } from '@/lib/ingestion/deal-verifier';
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
-import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -65,9 +65,32 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
 
+  // Read demand signals to prioritize verification of user-demanded TAs
+  let priorityTAs: string[] = [];
+  try {
+    const bus = await getCronIntelligenceBus(supabase);
+    priorityTAs = bus.priorityTAs || [];
+  } catch {
+    // Non-fatal
+  }
+
+  // Also read user demand signals for TA priority
+  if (priorityTAs.length === 0) {
+    try {
+      const { data: signalsRow } = await supabase
+        .from('system_config')
+        .select('value')
+        .eq('key', 'user_demand_signals')
+        .single();
+      const signals = signalsRow?.value as { topTherapeuticAreas?: Array<{ta: string; count: number}> } | null;
+      priorityTAs = (signals?.topTherapeuticAreas || []).slice(0, 5).map(s => s.ta);
+    } catch {}
+  }
+
   const result = await verifyPendingDeals(supabase, perplexityApiKey, anthropicApiKey, {
     maxDeals: 50,
     timeBudgetMs: 250_000,
+    priorityTAs,
   });
 
   // Auto-remediation: accept high-confidence verified deals, reject low-confidence flagged deals

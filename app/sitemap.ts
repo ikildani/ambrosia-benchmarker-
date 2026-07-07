@@ -145,11 +145,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createServiceClient();
 
-    // Fetch published blog posts
+    // Fetch published blog posts (exclude archived and noindex pages)
     const { data: posts, error: postsError } = await supabase
       .from('blog_posts')
       .select('slug, published_at')
-      .eq('status', 'published');
+      .eq('status', 'published')
+      .neq('noindex', true);
 
     if (postsError) {
       console.error('Sitemap: Error fetching blog posts:', postsError.message);

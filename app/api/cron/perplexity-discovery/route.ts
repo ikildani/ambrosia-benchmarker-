@@ -17,7 +17,7 @@ import { timingSafeEqual } from 'crypto';
 import { runPerplexityDealDiscovery } from '@/lib/ingestion/perplexity-deals';
 import { logCronRun, reclassifyOtherDeals, updateCompanyStats } from '@/lib/cron-utils';
 import { notifyHighValueDeal } from '@/lib/slack/notify';
-import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { runCronIntelligence, collectUserDemandSignals, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -82,7 +82,27 @@ export async function GET(request: NextRequest) {
   const currentIndex = (isNaN(lastIndex) ? 0 : (lastIndex + 1)) % TA_ROTATION.length;
   const rotationTAs = TA_ROTATION[currentIndex];
   // Always include mega-deals sweep to catch large deals across all TAs
-  const currentTAs = rotationTAs.includes('_mega_deals') ? rotationTAs : [...rotationTAs, '_mega_deals'];
+  let currentTAs = rotationTAs.includes('_mega_deals') ? rotationTAs : [...rotationTAs, '_mega_deals'];
+
+  // Wire demand signals: ensure the most-demanded TA is always included
+  let demandDriven = false;
+  try {
+    const { data: signalsRow } = await supabase
+      .from('system_config')
+      .select('value')
+      .eq('key', 'user_demand_signals')
+      .single();
+
+    const signals = signalsRow?.value as { topTherapeuticAreas?: Array<{ta: string; count: number}> } | null;
+    const topDemandTA = signals?.topTherapeuticAreas?.[0]?.ta;
+
+    if (topDemandTA && !currentTAs.includes(topDemandTA) && !topDemandTA.startsWith('_')) {
+      currentTAs.unshift(topDemandTA);
+      demandDriven = true;
+    }
+  } catch {
+    // Non-fatal: demand signals may not exist yet
+  }
 
   const result = await runPerplexityDealDiscovery(supabase, perplexityApiKey, anthropicApiKey, {
     therapeuticAreas: currentTAs,
@@ -125,7 +145,7 @@ export async function GET(request: NextRequest) {
   await supabase.from('data_ingestion_log').insert({
     source: 'perplexity_discovery',
     run_type: 'cron',
-    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta },
+    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta, demandDriven },
     records_fetched: result.queries_run,
     records_processed: result.deals_discovered,
     records_inserted: result.deals_inserted,

@@ -230,6 +230,19 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
           toast.warning('Unable to save calculation. Your results are shown but may not be synced.');
         });
 
+      // Track user TA/modality preferences for personalization
+      try {
+        const prefs = JSON.parse(localStorage.getItem('user_prefs') || '{"tas":[],"modalities":[]}');
+        prefs.tas.push(state.therapeuticArea);
+        prefs.modalities.push(state.modality || 'smallMolecule');
+        // Keep last 10 entries
+        prefs.tas = prefs.tas.slice(-10);
+        prefs.modalities = prefs.modalities.slice(-10);
+        localStorage.setItem('user_prefs', JSON.stringify(prefs));
+      } catch {
+        // localStorage may be unavailable — non-fatal
+      }
+
       // Save to local history (sync, fast)
       addToHistory({
         inputs: {

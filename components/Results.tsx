@@ -1227,7 +1227,31 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         </div>
 
         {/* Power Calculation used banner — shown to free users who already used their one free analysis */}
-        {!hasFullAccess && !isPowerCalc && tier === 'free' && (
+        {!hasFullAccess && !isPowerCalc && tier === 'free' && (() => {
+          // Personalize banner with user's calculation history
+          let bannerTitle = "You've used your free Power Analysis";
+          let bannerDesc = "Upgrade to Pro for unlimited access to all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more.";
+          try {
+            const prefs = JSON.parse(localStorage.getItem('user_prefs') || '{}');
+            const tas: string[] = prefs.tas || [];
+            if (tas.length > 0) {
+              const taCounts = new Map<string, number>();
+              for (const ta of tas) taCounts.set(ta, (taCounts.get(ta) || 0) + 1);
+              let topTA = ''; let topCount = 0;
+              for (const [ta, count] of taCounts) { if (count > topCount) { topTA = ta; topCount = count; } }
+              const taDisplay: Record<string, string> = {
+                oncology: 'oncology', neurology: 'neurology', immunology: 'immunology',
+                metabolic: 'metabolic', cardiovascular: 'cardiovascular', rareDisease: 'rare disease',
+                hematology: 'hematology', infectiousDisease: 'infectious disease',
+                ophthalmology: 'ophthalmology', dermatology: 'dermatology',
+                gastroenterology: 'gastroenterology', womensHealth: "women's health",
+              };
+              const taName = taDisplay[topTA] || topTA;
+              bannerTitle = `You've benchmarked ${tas.length} ${taName} deal${tas.length !== 1 ? 's' : ''}. Upgrade for unlimited access.`;
+              bannerDesc = `Pro unlocks all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more for your ${taName} pipeline.`;
+            }
+          } catch {}
+          return (
           <div className="mb-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-900/20 to-orange-900/20 p-4 sm:p-5">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
@@ -1236,8 +1260,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-bold text-amber-200 mb-1">You&apos;ve used your free Power Analysis</h4>
-                <p className="text-xs text-amber-300/70 mb-3">Upgrade to Pro for unlimited access to all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more.</p>
+                <h4 className="text-sm font-bold text-amber-200 mb-1">{bannerTitle}</h4>
+                <p className="text-xs text-amber-300/70 mb-3">{bannerDesc}</p>
                 <button
                   onClick={onUpgrade}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold rounded-lg hover:from-teal-600 hover:to-cyan-600 transition-all"
@@ -1250,7 +1274,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Expandable hint for free users */}
         {!hasFullAccess && (

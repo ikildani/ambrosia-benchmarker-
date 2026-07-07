@@ -309,6 +309,10 @@
     {
       "path": "/api/cron/cron-health-monitor",
       "schedule": "0 8 * * 0"
+    },
+    {
+      "path": "/api/cron/content-pruning",
+      "schedule": "0 6 1 * *"
     }
   ]
 }
