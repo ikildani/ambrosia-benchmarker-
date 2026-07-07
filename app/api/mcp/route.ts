@@ -130,10 +130,10 @@ async function authenticateRequest(
     return { error: 'Invalid, expired, or rate-limited API key', status: 401 };
   }
 
-  // Tier gate: only pro and portfolio tiers have MCP access
-  if (context.tier !== 'pro' && context.tier !== 'portfolio') {
+  // Tier gate: Portfolio License only — MCP is an enterprise feature
+  if (context.tier !== 'portfolio') {
     return {
-      error: 'MCP access requires Pro or Portfolio tier. Upgrade at https://calculator.ambrosiaventures.co/pricing',
+      error: 'MCP access requires a Portfolio License. Contact ikildani@ambrosiaventures.co for access.',
       status: 403,
     };
   }
@@ -868,8 +868,8 @@ export async function GET() {
       type: 'bearer',
       prefix: 'ambk_',
       header: 'Authorization: Bearer ambk_<your_api_key>',
-      tiers: ['pro', 'portfolio'],
-      note: 'Enterprise API keys only. Free/starter users receive 403.',
+      tiers: ['portfolio'],
+      note: 'Portfolio License only. Contact ikildani@ambrosiaventures.co for access.',
     },
     rateLimits: {
       pilot: '1,000 calls/month',
