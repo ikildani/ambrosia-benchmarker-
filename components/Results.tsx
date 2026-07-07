@@ -808,7 +808,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   // without requiring user to visit Playbook tab first
   const partnerFetchedRef = useRef(false);
   useEffect(() => {
-    if (partnerFetchedRef.current || !inputs || partnerMatches.length > 0) return;
+    if (!inputs || (partnerFetchedRef.current && partnerMatches.length > 0)) return;
+    if (partnerFetchedRef.current && tier === 'free') return;
     partnerFetchedRef.current = true;
     fetch('/api/partners/match', {
       method: 'POST',

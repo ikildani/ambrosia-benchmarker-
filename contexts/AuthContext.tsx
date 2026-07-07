@@ -193,10 +193,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const supabase = createClient();
       if (supabase) {
         // Check current session with a timeout to prevent infinite loading
+        let sessionTimedOut = false;
         const sessionTimeout = setTimeout(() => {
-          console.warn('[Auth] getSession timed out after 5s, proceeding with localStorage auth');
+          console.warn('[Auth] getSession timed out after 10s, proceeding with localStorage auth');
+          sessionTimedOut = true;
           setIsLoading(false);
-        }, 5000);
+        }, 10000);
 
         // Async IIFE so we can AWAIT the tier DB query before dropping isLoading.
         // Without the await, isLoading flips false while tier is still 'free' (initial),
