@@ -2338,7 +2338,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }}
           onDownloadReport={() => {
-            if (hasFullAccess || tier === 'pro' || tier === 'report' || tier === 'portfolio') {
+            if (hasFullAccess || isPro || isReport) {
               setReportFormat('pdf');
               setShowReportModal(true);
             } else {
