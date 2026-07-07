@@ -129,8 +129,8 @@ import { parseJsonResponse } from './parse-json';
 // Shared circuit breaker for playbook API calls
 const circuitBreaker = new CircuitBreaker({
   name: 'playbook',
-  failureThreshold: 3,
-  cooldownMs: 60_000,
+  failureThreshold: 5,
+  cooldownMs: 30_000,
 });
 
 /** Exponential backoff with jitter. */
@@ -162,7 +162,7 @@ async function callAnthropicAPI(prompt: string, maxTokens: number): Promise<stri
       max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     }),
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(45_000),
   });
 
   if (!response.ok) {
