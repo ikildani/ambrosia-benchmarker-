@@ -805,11 +805,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   }, [fullInputs, result]);
 
   // Eager partner match fetch — needed by BuyerSpecificPanel in Analysis tab
-  // without requiring user to visit Playbook tab first
+  // Retries if first attempt failed (e.g., auth timeout) when tier resolves
   const partnerFetchedRef = useRef(false);
   useEffect(() => {
-    if (!inputs || (partnerFetchedRef.current && partnerMatches.length > 0)) return;
-    if (partnerFetchedRef.current && tier === 'free') return;
+    if (!inputs) return;
+    if (partnerFetchedRef.current && partnerMatches.length > 0) return;
+    if (tier === 'free' || tier === 'starter') return;
     partnerFetchedRef.current = true;
     fetch('/api/partners/match', {
       method: 'POST',
@@ -825,7 +826,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
-        if (data?.matches?.length > 0 && partnerMatches.length === 0) {
+        if (data?.matches?.length > 0) {
           setPartnerMatches(data.matches.map((m: any) => ({
             company_name: m.company_name,
             company_id: m.company_id || m.company_name,
@@ -839,7 +840,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           })));
         }
       })
-      .catch(() => {});
+      .catch(() => { partnerFetchedRef.current = false; });
   }, [inputs, fullInputs, tier]);
 
   // Fetch server-side financial data (competitive landscape, deal flow forecast)

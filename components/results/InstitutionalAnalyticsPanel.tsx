@@ -168,25 +168,63 @@ export default function InstitutionalAnalyticsPanel({ financialModel: fm, tier, 
           {/* Tier 1: Highest impact — default open */}
           {fm.regulatoryRisk && (
             <ModulePanel
-              title="FDA Regulatory Risk"
-              subtitle="CRL probability, AdComm, PDUFA timing, PRV eligibility"
+              title="Global Regulatory Risk"
+              subtitle={`${(fm.regulatoryRisk as any).agencies?.length || 1} agencies · Rejection rates, expert committees, review timelines`}
               icon={<Shield className="w-5 h-5 text-white" />}
               gradient="from-rose-500 to-orange-500"
               defaultOpen
             >
+              {/* Primary agency KPIs (FDA for US/global, EMA for EU, etc.) */}
               <KpiGrid>
-                <Kpi label="CRL Probability" value={fmtPct(fm.regulatoryRisk.crlProbability)} accent={fm.regulatoryRisk.crlProbability > 0.15 ? 'rose' : fm.regulatoryRisk.crlProbability > 0.10 ? 'amber' : 'emerald'} />
-                <Kpi label="AdComm Required" value={fm.regulatoryRisk.adcommRequired ? 'Likely' : 'Unlikely'} sub={fm.regulatoryRisk.adcommRequired ? `${fmtPct(fm.regulatoryRisk.adcommFavorableVoteProbability)} favorable` : undefined} accent={fm.regulatoryRisk.adcommRequired ? 'amber' : 'emerald'} />
-                <Kpi label="PDUFA On-Time" value={fmtPct(fm.regulatoryRisk.pdufahRisk.onTime)} sub={`${fmtPct(fm.regulatoryRisk.pdufahRisk.delay3mo)} 3mo delay`} accent="blue" />
-                <Kpi label="Timeline Impact" value={`${fm.regulatoryRisk.timelineImpact_years > 0 ? '+' : ''}${fm.regulatoryRisk.timelineImpact_years.toFixed(1)} years`} accent={fm.regulatoryRisk.timelineImpact_years > 0 ? 'rose' : 'emerald'} />
+                <Kpi label="Rejection Probability" value={fmtPct(fm.regulatoryRisk.crlProbability)} sub={(fm.regulatoryRisk as any).primary?.rejectionLabel || 'CRL'} accent={fm.regulatoryRisk.crlProbability > 0.15 ? 'rose' : fm.regulatoryRisk.crlProbability > 0.10 ? 'amber' : 'emerald'} />
+                <Kpi label="Expert Committee" value={fm.regulatoryRisk.adcommRequired ? 'Likely' : 'Unlikely'} sub={fm.regulatoryRisk.adcommRequired ? `${fmtPct(fm.regulatoryRisk.adcommFavorableVoteProbability)} favorable` : undefined} accent={fm.regulatoryRisk.adcommRequired ? 'amber' : 'emerald'} />
+                <Kpi label="Review On-Time" value={fmtPct(fm.regulatoryRisk.pdufahRisk.onTime)} sub={`${fmtPct(fm.regulatoryRisk.pdufahRisk.delay3mo)} delayed`} accent="blue" />
+                <Kpi label="Timeline Impact" value={`${fm.regulatoryRisk.timelineImpact_years > 0 ? '+' : ''}${fm.regulatoryRisk.timelineImpact_years.toFixed(1)} yr`} accent={fm.regulatoryRisk.timelineImpact_years > 0 ? 'rose' : 'emerald'} />
               </KpiGrid>
+
+              {/* Multi-agency comparison table (when global result available) */}
+              {(fm.regulatoryRisk as any).agencies?.length > 1 && (
+                <div className="mb-3 overflow-x-auto">
+                  <table className="w-full text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-700">
+                        <th className="py-1.5 pr-3 text-left font-semibold text-slate-500 dark:text-slate-400">Agency</th>
+                        <th className="py-1.5 px-2 text-right font-semibold text-slate-500 dark:text-slate-400">Rejection</th>
+                        <th className="py-1.5 px-2 text-right font-semibold text-slate-500 dark:text-slate-400">Review (mo)</th>
+                        <th className="py-1.5 px-2 text-right font-semibold text-slate-500 dark:text-slate-400">Timeline</th>
+                        <th className="py-1.5 pl-2 text-left font-semibold text-slate-500 dark:text-slate-400">Conditional</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {((fm.regulatoryRisk as any).agencies as Array<{agency: string; agencyFullName: string; rejectionProbability: number; rejectionLabel: string; standardReviewMonths: number; currentReviewType: string; timelineImpact_years: number; conditionalApprovalLabel: string; conditionalApprovalAvailable: boolean}>).map((a) => (
+                        <tr key={a.agency} className="border-b border-slate-100 dark:border-slate-800">
+                          <td className="py-1.5 pr-3 font-medium text-slate-700 dark:text-slate-200">{a.agency}</td>
+                          <td className={`py-1.5 px-2 text-right tabular-nums font-semibold ${a.rejectionProbability > 0.10 ? 'text-rose-500' : a.rejectionProbability > 0.05 ? 'text-amber-500' : 'text-emerald-500'}`}>{fmtPct(a.rejectionProbability)}</td>
+                          <td className="py-1.5 px-2 text-right tabular-nums text-slate-600 dark:text-slate-300">{a.standardReviewMonths}{a.currentReviewType !== 'standard' ? ` (${a.currentReviewType})` : ''}</td>
+                          <td className={`py-1.5 px-2 text-right tabular-nums ${a.timelineImpact_years > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>{a.timelineImpact_years > 0 ? '+' : ''}{a.timelineImpact_years.toFixed(1)}yr</td>
+                          <td className="py-1.5 pl-2 text-slate-500 dark:text-slate-400">{a.conditionalApprovalAvailable ? a.conditionalApprovalLabel : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Overall risk score (when multi-agency) */}
+              {(fm.regulatoryRisk as any).overallRiskScore != null && (
+                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 mb-3">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Overall Regulatory Risk Score:</span>
+                  <span className={`text-sm font-bold tabular-nums ${(fm.regulatoryRisk as any).overallRiskScore > 20 ? 'text-rose-500' : (fm.regulatoryRisk as any).overallRiskScore > 10 ? 'text-amber-500' : 'text-emerald-500'}`}>{Math.round((fm.regulatoryRisk as any).overallRiskScore)}/100</span>
+                </div>
+              )}
+
               {fm.regulatoryRisk.prvEligible && (
                 <div className="flex items-center gap-2 p-2.5 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 mb-3">
                   <DollarSign className="w-4 h-4 text-purple-500 flex-shrink-0" />
                   <span className="text-xs font-medium text-purple-700 dark:text-purple-300">Priority Review Voucher eligible — estimated value {fmtM(fm.regulatoryRisk.prvValue_M)}</span>
                 </div>
               )}
-              {fm.regulatoryRisk.acceleratedApprovalRisk.eligible && (
+              {fm.regulatoryRisk.acceleratedApprovalRisk?.eligible && (
                 <div className="flex items-center gap-2 p-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800 mb-3">
                   <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
                   <span className="text-xs text-amber-700 dark:text-amber-300">Accelerated approval pathway — {fmtPct(fm.regulatoryRisk.acceleratedApprovalRisk.confirmatoryFailureProbability)} confirmatory failure risk</span>
