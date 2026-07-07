@@ -36,6 +36,7 @@ import { assertInvariants, checkScenarioInvariants } from './invariants';
 import { calculateEnsembleValuation } from './ensemble-valuation';
 import { computeCalculationFingerprint } from './calculation-version';
 import { computeRegulatoryRisk, type RegulatoryRiskResult } from './regulatory-risk';
+import { computeGlobalRegulatoryRisk } from './global-regulatory-risk';
 import { computeMilestoneProbabilities, type MilestoneProbabilityResult } from './milestone-probability';
 import { computeTaxStructureImpact, type TaxStructureResult } from './cross-border-tax';
 import { estimateStackingByModality, type RoyaltyStackingResult } from './royalty-stacking';
@@ -345,10 +346,10 @@ export function runFinancialModel(
   // ── Steps 12-21: Institutional-Grade Extensions ──
   // Each wrapped in try/catch — non-critical, never breaks pipeline.
 
-  // Step 12: FDA Regulatory Pathway Risk Model
+  // Step 12: Global Regulatory Pathway Risk Model (7 agencies, territory-aware)
   let regulatoryRisk: RegulatoryRiskResult | undefined;
   try {
-    regulatoryRisk = computeRegulatoryRisk(
+    regulatoryRisk = computeGlobalRegulatoryRisk(
       rnpvInput.phase,
       rnpvInput.therapeuticArea,
       rnpvInput.modality,
@@ -357,11 +358,13 @@ export function runFinancialModel(
         breakthrough: rnpvInput.regulatoryDesignations.breakthrough,
         fastTrack: rnpvInput.regulatoryDesignations.fastTrack,
         orphan: rnpvInput.regulatoryDesignations.orphan,
+        prime: rnpvInput.regulatoryDesignations.prime,
         acceleratedApproval: false,
         priorityReview: false,
         rarePediatric: false,
       },
-    );
+      rnpvInput.territory || 'global',
+    ) as unknown as RegulatoryRiskResult;
   } catch { /* non-critical — keep going */ }
 
   // Step 13: Milestone Probability Weighting
