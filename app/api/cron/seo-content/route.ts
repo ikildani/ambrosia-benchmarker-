@@ -12,11 +12,24 @@ import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
-import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
+import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
-import { getNextTopic } from '@/lib/seo/topic-rotation';
+import { getNextTopic, type TopicParams } from '@/lib/seo/topic-rotation';
+import type {
+  DealAnalysisData,
+  HowMuchData,
+  BuyerIntelligenceData,
+  MarketTrendData,
+  ComparisonData,
+} from '@/lib/seo/topic-rotation';
 import { publishBlogPost, notifySEOContentGenerated } from '@/lib/seo/blog-publisher';
-import { generateSEOBlogPrompt, type SEOBlogPromptParams } from '@/lib/ai/prompts/seo-blog';
+import {
+  generateDealAnalysisPrompt,
+  generateHowMuchPrompt,
+  generateBuyerIntelligencePrompt,
+  generateMarketTrendPrompt,
+  generateComparisonPrompt,
+} from '@/lib/ai/prompts/seo-blog-categories';
 import {
   generateReactiveBlogPrompt,
   type ReactiveBlogPromptParams,
@@ -132,6 +145,89 @@ function parseJsonResponse<T>(text: string): T {
     throw new Error('No JSON found in response');
   }
   return JSON.parse(jsonMatch[0]) as T;
+}
+
+/**
+ * Build the right prompt based on the topic's content category.
+ */
+function buildCategoryPrompt(topic: TopicParams): string {
+  switch (topic.data.category) {
+    case 'deal_analysis':
+      return generateDealAnalysisPrompt(topic.data as DealAnalysisData);
+    case 'how_much':
+      return generateHowMuchPrompt(topic.data as HowMuchData);
+    case 'buyer_intelligence':
+      return generateBuyerIntelligencePrompt(topic.data as BuyerIntelligenceData);
+    case 'market_trend':
+      return generateMarketTrendPrompt(topic.data as MarketTrendData);
+    case 'comparison':
+      return generateComparisonPrompt(topic.data as ComparisonData);
+    default:
+      throw new Error(`Unknown content category: ${(topic.data as { category: string }).category}`);
+  }
+}
+
+/**
+ * Extract publisher metadata from a category-aware topic.
+ * Maps the new category-based topics back to the TopicMeta the publisher expects.
+ */
+function extractTopicMeta(topic: TopicParams): {
+  therapeuticArea: string;
+  modality: string;
+  phase: string;
+  topicKey: string;
+  category?: string;
+} {
+  const d = topic.data;
+  switch (d.category) {
+    case 'deal_analysis':
+      return {
+        therapeuticArea: d.therapeuticArea || 'general',
+        modality: d.modality || 'general',
+        phase: d.phase || 'general',
+        topicKey: topic.topicKey,
+        category: 'deal-analysis',
+      };
+    case 'how_much':
+      return {
+        therapeuticArea: d.therapeuticArea || 'general',
+        modality: d.modality || 'general',
+        phase: d.phase || 'general',
+        topicKey: topic.topicKey,
+        category: 'how-much',
+      };
+    case 'buyer_intelligence':
+      return {
+        therapeuticArea: d.therapeuticAreas?.[0] || 'general',
+        modality: 'general',
+        phase: 'general',
+        topicKey: topic.topicKey,
+        category: 'buyer-intelligence',
+      };
+    case 'market_trend':
+      return {
+        therapeuticArea: d.trendType === 'ta_shift' ? d.dimension : 'general',
+        modality: d.trendType === 'modality_surge' ? d.dimension : 'general',
+        phase: 'general',
+        topicKey: topic.topicKey,
+        category: 'market-trend',
+      };
+    case 'comparison':
+      return {
+        therapeuticArea: 'general',
+        modality: 'general',
+        phase: 'general',
+        topicKey: topic.topicKey,
+        category: 'comparison',
+      };
+    default:
+      return {
+        therapeuticArea: 'general',
+        modality: 'general',
+        phase: 'general',
+        topicKey: topic.topicKey,
+      };
+  }
 }
 
 // ── Reactive Slack notification ─────────────────────────────────────────────
@@ -345,19 +441,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ── Phase 2: Fill remaining slots with rotation topics ───────────────
+    // ── Phase 2: Fill remaining slots with category-diverse rotation topics ──
     const rotationSlots = ARTICLES_PER_RUN - published.length;
-
-    // Read intelligence bus for demand-driven topic selection
-    let priorityTAs: string[] = [];
-    let winningTopics: Array<{ ta: string; modality: string; conversionRate: number }> = [];
-    try {
-      const bus = await getCronIntelligenceBus(supabase);
-      priorityTAs = bus.priorityTAs || [];
-      winningTopics = bus.winningTopics || [];
-    } catch {
-      // Non-fatal: intelligence bus may not exist yet
-    }
 
     for (let i = 0; i < rotationSlots; i++) {
       // Time budget safety: leave ~60s per remaining article
@@ -367,35 +452,23 @@ export async function GET(request: NextRequest) {
       }
 
       try {
-        // Pick next topic (skips already-generated ones)
+        // Pick next topic via weighted category selection + DB query
         const topic = await getNextTopic(supabase);
         if (!topic) {
           break;
         }
 
-        // Build prompt params
-        const phaseData = getPhaseData(topic.phase);
-        const comparableDeals = getComparableDeals(topic.therapeuticArea);
+        // Build the category-specific prompt
+        const prompt = buildCategoryPrompt(topic);
 
-        const promptParams: SEOBlogPromptParams = {
-          therapeuticArea: topic.therapeuticArea,
-          taLabel: TA_LABELS[topic.therapeuticArea] || topic.therapeuticArea,
-          phase: topic.phase,
-          phaseLabel: PHASE_LABELS[topic.phase] || topic.phase,
-          modality: topic.modality,
-          modalityLabel: MODALITY_LABELS[topic.modality] || topic.modality,
-          dealType: topic.dealType,
-          dealTypeLabel: DEAL_TYPE_LABELS[topic.dealType] || topic.dealType,
-          phaseData,
-          comparableDeals,
-        };
+        // Generate — category-aware token budget
+        const maxTokens = topic.category === 'comparison' || topic.category === 'how_much'
+          ? 8000
+          : 12000;
 
-        const prompt = generateSEOBlogPrompt(promptParams);
-
-        // Generate — bumped max_tokens for 2,500-3,500 word articles
         const message = await client.messages.create({
           model: 'claude-opus-4-6',
-          max_tokens: 12000,
+          max_tokens: maxTokens,
           messages: [{ role: 'user', content: prompt }],
         });
 
@@ -406,13 +479,11 @@ export async function GET(request: NextRequest) {
 
         const blogContent = parseJsonResponse<GeneratedBlogContent>(textContent.text);
 
+        // Extract metadata from the topic for the publisher
+        const topicMeta = extractTopicMeta(topic);
+
         // Publish
-        const result = await publishBlogPost(supabase, blogContent, {
-          therapeuticArea: topic.therapeuticArea,
-          modality: topic.modality,
-          phase: topic.phase,
-          topicKey: topic.topicKey,
-        });
+        const result = await publishBlogPost(supabase, blogContent, topicMeta);
 
         if (!result.success) {
           throw new Error(`Publish failed: ${result.error}`);
@@ -459,6 +530,13 @@ export async function GET(request: NextRequest) {
     const reactiveCount = published.filter((p) => p.reactive).length;
     const rotationCount = published.filter((p) => !p.reactive).length;
 
+    // Compute category distribution for logging
+    const categoryDistribution: Record<string, number> = {};
+    for (const p of published.filter((a) => !a.reactive)) {
+      const cat = p.topicKey.split(':')[0] || 'unknown';
+      categoryDistribution[cat] = (categoryDistribution[cat] || 0) + 1;
+    }
+
     await logCronRun(supabase, 'seo-content', {
       processed: published.length,
       inserted: published.length,
@@ -469,11 +547,7 @@ export async function GET(request: NextRequest) {
         rotationArticles: rotationCount,
         articlesRequested: ARTICLES_PER_RUN,
         slugs: published.map((p) => p.slug),
-        demandSignals: {
-          priorityTAs,
-          winningTopicCount: winningTopics.length,
-          topWinningTA: winningTopics[0]?.ta || null,
-        },
+        categoryDistribution,
       },
     });
 

@@ -277,12 +277,7 @@ async function generateDealAnalysis(
   // Fetch 5 most recent large deals (non-synthetic, TDV > $500M)
   const { data: deals, error } = await supabase
     .from('deals')
-    .select(
-      'id, licensor_name, licensee_name, asset_name, modality, therapeutic_area, ' +
-        'phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, ' +
-        'milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, ' +
-        'target, mechanism_of_action',
-    )
+    .select('id, licensor_name, licensee_name, asset_name, modality, therapeutic_area, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, target, mechanism_of_action')
     .eq('is_synthetic', false)
     .gt('total_deal_value_usd', 500_000_000)
     .order('announced_date', { ascending: false })
@@ -376,10 +371,7 @@ async function generateHowMuch(
     // Fetch up to 200 deals for this phase+TA
     const { data: deals, error } = await supabase
       .from('deals')
-      .select(
-        'licensor_name, licensee_name, upfront_usd, total_deal_value_usd, ' +
-          'announced_date, modality',
-      )
+      .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality')
       .eq('phase_at_signing', combo.phase)
       .eq('therapeutic_area', combo.ta)
       .eq('is_synthetic', false)
@@ -519,10 +511,7 @@ async function generateBuyerIntelligence(
     // Fetch this buyer's deals
     const { data: companyDeals, error: cdErr } = await supabase
       .from('deals')
-      .select(
-        'licensor_name, asset_name, upfront_usd, total_deal_value_usd, ' +
-          'phase_at_signing, therapeutic_area, deal_type, announced_date',
-      )
+      .select('licensor_name, asset_name, upfront_usd, total_deal_value_usd, phase_at_signing, therapeutic_area, deal_type, announced_date')
       .eq('licensee_name', companyName)
       .eq('is_synthetic', false)
       .order('announced_date', { ascending: false })
@@ -603,10 +592,7 @@ async function generateMarketTrend(
   // Fetch deals from the last 12 months
   const { data: deals, error } = await supabase
     .from('deals')
-    .select(
-      'licensor_name, licensee_name, upfront_usd, total_deal_value_usd, ' +
-        'announced_date, modality, therapeutic_area',
-    )
+    .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality, therapeutic_area')
     .eq('is_synthetic', false)
     .gte('announced_date', formatDateISO(previousStart))
     .order('announced_date', { ascending: false })

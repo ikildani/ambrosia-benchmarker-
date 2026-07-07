@@ -19,6 +19,7 @@ interface TopicMeta {
   modality: string;
   phase: string;
   topicKey: string;
+  category?: string; // content category: 'deal-analysis', 'how-much', 'buyer-intelligence', 'market-trend', 'comparison'
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -55,6 +56,10 @@ export async function publishBlogPost(
 
   try {
     // 1. Insert into blog_posts
+    // Build tags — filter out 'general' placeholder values
+    const tags = [topic.therapeuticArea, topic.modality, topic.phase]
+      .filter((t) => t && t !== 'general');
+
     const { data: post, error: postError } = await supabase
       .from('blog_posts')
       .insert({
@@ -63,9 +68,9 @@ export async function publishBlogPost(
         excerpt: content.excerpt,
         meta_description: content.meta_description,
         slug,
-        category: 'deal-trends',
-        tags: [topic.therapeuticArea, topic.modality, topic.phase],
-        modality: topic.modality,
+        category: topic.category || 'deal-trends',
+        tags: tags.length > 0 ? tags : ['pharma-deals'],
+        modality: topic.modality !== 'general' ? topic.modality : null,
         ai_generated: true,
         status: 'published',
         published_at: new Date().toISOString(),
