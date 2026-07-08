@@ -28,6 +28,8 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
   const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
 
+  const [isTrialLoading, setIsTrialLoading] = useState(false);
+
   const handleUpgrade = async () => {
     setIsLoading(true);
     setError(null);
@@ -64,6 +66,40 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
       setError('Connection error. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleStartTrial = async () => {
+    setIsTrialLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          userId: userId,
+          billingInterval,
+          trial: true,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError('Unable to start trial. Please try again.');
+      }
+    } catch (err) {
+      captureClientError(err, 'Pricing', { context: 'Trial checkout request failed' });
+      setError('Connection error. Please try again.');
+    } finally {
+      setIsTrialLoading(false);
     }
   };
 
@@ -322,13 +358,24 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                   {isManageLoading ? 'Loading...' : 'Manage Subscription'}
                 </button>
               ) : (
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleUpgrade(); }}
-                  disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg"
-                >
-                  {isLoading ? 'Processing...' : hasValidPromo ? 'Start Free Month' : billingInterval === 'annual' ? `Start Pro — ${PRICING.PRO_ANNUAL_MONTHLY}` : `Start Pro — ${PRICING.PRO_MONTHLY}`}
-                </button>
+                <div className="space-y-2.5">
+                  {!hasValidPromo && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleStartTrial(); }}
+                      disabled={isTrialLoading}
+                      className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-400 hover:to-cyan-400 shadow-soft hover:shadow-soft-lg"
+                    >
+                      {isTrialLoading ? 'Processing...' : 'Start 7-Day Free Trial'}
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleUpgrade(); }}
+                    disabled={isLoading}
+                    className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg"
+                  >
+                    {isLoading ? 'Processing...' : hasValidPromo ? 'Start Free Month' : billingInterval === 'annual' ? `Start Pro — ${PRICING.PRO_ANNUAL_MONTHLY}` : `Start Pro — ${PRICING.PRO_MONTHLY}`}
+                  </button>
+                </div>
               )}
 
               {error && (

@@ -9,12 +9,14 @@ interface ProCheckoutButtonProps {
   billingInterval?: 'monthly' | 'annual';
   className?: string;
   children?: React.ReactNode;
+  trial?: boolean;
 }
 
 export default function ProCheckoutButton({
   billingInterval = 'monthly',
   className = '',
   children,
+  trial = false,
 }: ProCheckoutButtonProps) {
   const { user, isAuthenticated, openAuthModal } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +53,7 @@ export default function ProCheckoutButton({
           userId: user?.id,
           billingInterval,
           promoCode: promoCode.trim() || undefined,
+          ...(trial && { trial: true }),
         }),
       });
 

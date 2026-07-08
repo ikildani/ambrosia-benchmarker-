@@ -14,6 +14,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Pro Plan | Unlimited Deal Intelligence | Ambrosia Ventures',
+  // Deal count should match LIVE_DEAL_COUNT in lib/config/constants.ts
   description:
     'Unlock 14 deal engines, 12 therapeutic areas, and unlimited calculations. rNPV, Monte Carlo, real options, partner matching, and more for biopharma BD professionals.',
   keywords: [
@@ -69,7 +70,7 @@ const faqs = [
   { q: 'What data sources do you use?', a: 'SEC 8-K filings, FTC premerger filings, press releases, ClinicalTrials.gov, FDA/EMA regulatory databases, patent filings, and company financial reports. New deals are ingested daily from 10+ sources.' },
   { q: 'How often are benchmarks updated?', a: 'Daily. New deals are automatically ingested and benchmarks recalibrate in real time. Your analyses always reflect the latest market data.' },
   { q: 'Can I use this for board presentations?', a: 'Absolutely. PDF reports are designed for deal committees and investment committees. Export 20-page branded reports with scenario comparison, deal waterfall, real options, competitive dynamics, and buyer-specific valuation.' },
-  { q: 'How does this compare to Evaluate Pharma or Cortellis?', a: 'Those platforms focus on pipeline and market data. Ambrosia focuses specifically on deal intelligence — benchmarking your deal terms against 1,900+ real transactions with institutional-grade financial modeling. Most users find it complementary, not duplicative.' },
+  { q: 'How does this compare to Evaluate Pharma or Cortellis?', a: `Those platforms focus on pipeline and market data. Ambrosia focuses specifically on deal intelligence — benchmarking your deal terms against ${DEAL_STATS.TOTAL_DEALS} real transactions with institutional-grade financial modeling. Most users find it complementary, not duplicative.` },
 ];
 
 // ---------------------------------------------------------------------------
@@ -80,7 +81,7 @@ export default function ProPage() {
   const productSchema = {
     '@context': 'https://schema.org', '@type': 'Product',
     name: 'Ambrosia Ventures Pro Plan',
-    description: 'Unlimited biopharma deal intelligence with 14 calculation engines, 12 therapeutic areas, and 1,900+ transaction benchmarks.',
+    description: `Unlimited biopharma deal intelligence with 14 calculation engines, 12 therapeutic areas, and ${DEAL_STATS.TOTAL_DEALS} transaction benchmarks.`,
     url: 'https://calculator.ambrosiaventures.co/pro',
     brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     offers: [
@@ -145,10 +146,17 @@ export default function ProPage() {
                 </div>
 
                 {/* CTAs */}
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-8 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4">
                   <ProCheckoutButton
                     billingInterval="monthly"
-                    className="px-7 py-3.5 bg-teal-500 text-white text-base shadow-lg shadow-teal-500/25 hover:bg-teal-400 hover:-translate-y-0.5"
+                    trial
+                    className="px-7 py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-base shadow-lg shadow-teal-500/25 hover:from-teal-400 hover:to-cyan-400 hover:-translate-y-0.5"
+                  >
+                    Start 7-Day Free Trial <ArrowRight className="w-4 h-4" />
+                  </ProCheckoutButton>
+                  <ProCheckoutButton
+                    billingInterval="monthly"
+                    className="px-7 py-3.5 bg-white/10 text-white text-base border border-white/20 hover:bg-white/20 hover:-translate-y-0.5"
                   />
                   <Link
                     href="/calculator"
@@ -357,7 +365,7 @@ export default function ProPage() {
                   Compare Generic vs. up to 3 specific buyers side-by-side. The 5-factor strategic premium model accounts for portfolio fit, deal urgency, patent cliff pressure, pipeline gaps, and competitive pressure.
                 </p>
                 <ul className="space-y-2">
-                  {['10-factor Pharma Intent Score per buyer', 'Strategic premium capped at +75% (calibrated from 1,900+ deals)', 'Negotiation leverage assessment', 'Timing advantage analysis'].map(item => (
+                  {[`10-factor Pharma Intent Score per buyer`, `Strategic premium capped at +75% (calibrated from ${DEAL_STATS.TOTAL_DEALS} deals)`, 'Negotiation leverage assessment', 'Timing advantage analysis'].map(item => (
                     <li key={item} className="flex items-start gap-2 text-sm text-slate-400">
                       <Check className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
                       {item}
@@ -1087,12 +1095,17 @@ export default function ProPage() {
                 <span className="text-3xl font-bold text-white">{PRICING.PRO_MONTHLY}</span>
                 <p className="text-sm text-slate-500 mt-1">or {PRICING.PRO_ANNUAL_MONTHLY} annually</p>
               </div>
-              <ProCheckoutButton
-                billingInterval="monthly"
-                className="px-8 py-4 bg-teal-500 text-white text-lg shadow-lg shadow-teal-500/25 hover:bg-teal-400 hover:-translate-y-0.5"
-              />
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <ProCheckoutButton
+                  billingInterval="monthly"
+                  trial
+                  className="px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-lg shadow-lg shadow-teal-500/25 hover:from-teal-400 hover:to-cyan-400 hover:-translate-y-0.5"
+                >
+                  Start 7-Day Free Trial <ArrowRight className="w-4 h-4" />
+                </ProCheckoutButton>
+              </div>
             </div>
-            <p className="mt-6 text-sm text-slate-600">Cancel anytime. No contracts.</p>
+            <p className="mt-6 text-sm text-slate-600">No charge for 7 days. Cancel anytime.</p>
           </div>
         </section>
 
