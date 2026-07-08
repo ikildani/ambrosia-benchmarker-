@@ -383,7 +383,7 @@ function buildModalityVsModalityPage(def: ModalityPairDef): BenchmarkPageData {
   const slug = `${taToSlug(ta)}-${modalityToSlug(modA)}-vs-${modalityToSlug(modB)}-deal-terms`;
   const title = `${labelA} vs ${labelB} Deal Terms Compared | ${taLabel} 2026 Licensing Benchmarks`;
   const h1 = `${labelA} vs ${labelB} — ${taLabel} Deal Terms Comparison`;
-  const metaDescription = `Compare ${labelA.toLowerCase()} vs ${labelB.toLowerCase()} deal terms in ${taLabel.toLowerCase()}: ${labelA} median upfront ${formatCurrency(rA.terms.upfront.median)} vs ${labelB} ${formatCurrency(rB.terms.upfront.median)}. Side-by-side benchmarks from 2,500+ deals.`;
+  const metaDescription = `Compare ${labelA.toLowerCase()} vs ${labelB.toLowerCase()} deal terms in ${taLabel.toLowerCase()}: ${labelA} median upfront ${formatCurrency(rA.terms.upfront.median)} vs ${labelB} ${formatCurrency(rB.terms.upfront.median)}. Side-by-side benchmarks from 1,500+ deals.`;
 
   const heroStats = [
     {
@@ -685,7 +685,7 @@ function buildTAVsTAPage(def: TAPairDef): BenchmarkPageData {
   const slug = `${taToSlug(taA)}-vs-${taToSlug(taB)}-deal-benchmarks`;
   const title = `${labelA} vs ${labelB} Deal Benchmarks | 2026 Licensing Comparison`;
   const h1 = `${labelA} vs ${labelB} — Deal Terms Comparison`;
-  const metaDescription = `Compare ${labelA.toLowerCase()} vs ${labelB.toLowerCase()} licensing deal terms: ${labelA} median upfront ${formatCurrency(rA.terms.upfront.median)} vs ${labelB} ${formatCurrency(rB.terms.upfront.median)}. Side-by-side TA benchmarks from 2,500+ deals.`;
+  const metaDescription = `Compare ${labelA.toLowerCase()} vs ${labelB.toLowerCase()} licensing deal terms: ${labelA} median upfront ${formatCurrency(rA.terms.upfront.median)} vs ${labelB} ${formatCurrency(rB.terms.upfront.median)}. Side-by-side TA benchmarks from 1,500+ deals.`;
 
   const heroStats = [
     {

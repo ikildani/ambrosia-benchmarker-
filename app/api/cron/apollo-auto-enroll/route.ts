@@ -297,7 +297,9 @@ export async function GET(request: NextRequest) {
     let hitEnd = false;
     for (let page = startPage; page < startPage + 10; page++) {
       const { contacts, totalPages } = await getUnenrolledContacts(page);
-      if (contacts.length === 0) break;
+      if (contacts.length === 0) { hitEnd = true; break; }
+
+      lastPage = page;
 
       for (const contact of contacts) {
         scanned++;
@@ -333,8 +335,14 @@ export async function GET(request: NextRequest) {
       }
 
       if (proFitContactDetails.length >= BATCH_SIZE) break;
-      if (page >= totalPages) break;
+      if (page >= totalPages) { hitEnd = true; break; }
     }
+
+    // Persist the next page to resume from. Reset to 1 if we hit the end.
+    const nextPage = hitEnd ? 1 : lastPage + 1;
+    await supabase
+      .from('system_config')
+      .upsert({ key: 'apollo_enroll_page', value: String(nextPage), updated_at: new Date().toISOString() }, { onConflict: 'key' });
 
     const proFitContactIds = proFitContactDetails.map((c) => c.id);
 
@@ -349,8 +357,6 @@ export async function GET(request: NextRequest) {
     const totalAdded = results.generalist.added;
     const hasErrors = results.generalist.errors.length > 0;
     const duration = Date.now() - startTime;
-
-    const supabase = createServiceClient();
 
     // Log enrollment details to apollo_enrollments table for attribution tracking
     if (totalAdded > 0) {

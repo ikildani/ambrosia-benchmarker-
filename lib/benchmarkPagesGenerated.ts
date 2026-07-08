@@ -490,10 +490,10 @@ function generateTAModalityPage(
 
   const title = `${modLabel} ${taLabel} Deal Benchmarks 2026 | Licensing Terms & Valuation`;
   const h1 = `${modLabel} Deal Benchmarks in ${taLabel}`;
-  const metaDescription = `Comprehensive ${modLabel.toLowerCase()} licensing and acquisition deal benchmarks for ${taLabel.toLowerCase()}. Median upfront ${formatCurrency(r.terms.upfront.median)}, total deal value ${formatCurrency(r.terms.totalDealValue.median)}, and royalty rates from 2,500+ verified deals.`;
+  const metaDescription = `Comprehensive ${modLabel.toLowerCase()} licensing and acquisition deal benchmarks for ${taLabel.toLowerCase()}. Median upfront ${formatCurrency(r.terms.upfront.median)}, total deal value ${formatCurrency(r.terms.totalDealValue.median)}, and royalty rates from 1,500+ verified deals.`;
 
   const contextParagraphs = [
-    `${modLabel} therapies in ${taLabel.toLowerCase()} have seen significant M&A and licensing activity in recent years. Based on analysis of 2,500+ verified transactions, the median upfront payment for a Phase 2 ${modLabel.toLowerCase()} asset in ${taLabel.toLowerCase()} is ${formatCurrency(r.terms.upfront.median)}, with total deal values reaching ${formatCurrency(r.terms.totalDealValue.median)}. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, while regulatory milestones contribute ${formatCurrency(r.terms.regMilestones.median)}.`,
+    `${modLabel} therapies in ${taLabel.toLowerCase()} have seen significant M&A and licensing activity in recent years. Based on analysis of 1,500+ verified transactions, the median upfront payment for a Phase 2 ${modLabel.toLowerCase()} asset in ${taLabel.toLowerCase()} is ${formatCurrency(r.terms.upfront.median)}, with total deal values reaching ${formatCurrency(r.terms.totalDealValue.median)}. Development milestones average ${formatCurrency(r.terms.devMilestones.median)}, while regulatory milestones contribute ${formatCurrency(r.terms.regMilestones.median)}.`,
     `The ${taLabel.toLowerCase()} ${modLabel.toLowerCase()} landscape is characterized by ${landscape.competition}. ${landscape.trend.charAt(0).toUpperCase() + landscape.trend.slice(1)}. The recommended deal structure allocates approximately ${r.dealRecommendation.upfrontPercent}% to upfront payments and ${r.dealRecommendation.milestonePercent}% to milestones, reflecting the risk-reward profile at the Phase 2 stage.`,
     `Royalty rates for ${modLabel.toLowerCase()} ${taLabel.toLowerCase()} deals range from ${r.tieredRoyalties.base.low}% to ${r.tieredRoyalties.base.high}% at the base tier, with tiered escalation reaching ${r.tieredRoyalties.highTier.low}%-${r.tieredRoyalties.highTier.high}% on blockbuster sales. Commercial milestones averaging ${formatCurrency(r.terms.commMilestones.median)} further reward successful market penetration.`,
   ];
@@ -548,7 +548,7 @@ function generateTAPhasePage(
 
   const title = `${phaseLabel} ${taLabel} Deal Benchmarks 2026 | Stage-Specific Licensing Terms`;
   const h1 = `${phaseLabel} ${taLabel} Deal Benchmarks`;
-  const metaDescription = `${phaseLabel} ${taLabel.toLowerCase()} licensing deal benchmarks: median upfront ${formatCurrency(r.terms.upfront.median)}, total deal value ${formatCurrency(r.terms.totalDealValue.median)}, and royalty rates. Data from 2,500+ verified transactions.`;
+  const metaDescription = `${phaseLabel} ${taLabel.toLowerCase()} licensing deal benchmarks: median upfront ${formatCurrency(r.terms.upfront.median)}, total deal value ${formatCurrency(r.terms.totalDealValue.median)}, and royalty rates. Data from 1,500+ verified transactions.`;
 
   const isEarly = ['preclinical', 'phase1', 'phase1_2'].includes(phase);
   const isLate = ['phase3', 'approved'].includes(phase);

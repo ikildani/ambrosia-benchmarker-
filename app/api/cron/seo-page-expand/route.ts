@@ -190,7 +190,7 @@ async function identifyGSCGaps(existingSlugs: Set<string>): Promise<PageOpportun
       pageData: buildPageData({
         slug: suggestedSlug,
         title: `${titleQuery} Benchmarks 2026 | Deal Terms & Market Data`,
-        metaDescription: `Explore ${query} deal benchmarks including upfront payments, milestones, royalties, and total deal values. Data-driven insights from 2,500+ biopharma transactions.`,
+        metaDescription: `Explore ${query} deal benchmarks including upfront payments, milestones, royalties, and total deal values. Data-driven insights from 1,500+ biopharma transactions.`,
         h1: `${titleQuery} Benchmarks`,
         category: 'overview',
         calculatorPrefill: {},
