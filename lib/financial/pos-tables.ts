@@ -1500,6 +1500,125 @@ export const INDICATION_REVENUE_CURVES: Record<string, IndicationRevenueCurve> =
     loeYearsAfterApproval: 12,
     source: 'Xiidra/Restasis 2016-2024; Tyrvaya 2021-2024 chronic disease ramp',
   },
+
+  // --------------------------------------------------------------------------
+  // Women's Health (5)
+  // --------------------------------------------------------------------------
+  endometriosis: { indication: 'endometriosis', ta: 'womensHealth', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Orilissa 2018-2024; Myfembree 2021-2024 ramp' },
+  uterineFibroids: { indication: 'uterineFibroids', ta: 'womensHealth', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Myfembree 2021-2024; Oriahnn limited launch' },
+  pcos: { indication: 'pcos', ta: 'womensHealth', rampUpYears: 5, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'No approved drug precedent; modeled on chronic endocrine therapy curves' },
+  postpartumDepression: { indication: 'postpartumDepression', ta: 'womensHealth', rampUpYears: 3, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'Zurzuvae 2023-2024 rapid launch; acute/episodic use pattern' },
+  menopause: { indication: 'menopause', ta: 'womensHealth', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Veozah 2023-2024 launch; chronic daily use supports long peak' },
+
+  // --------------------------------------------------------------------------
+  // Gastroenterology (5)
+  // --------------------------------------------------------------------------
+  crohnsDisease: { indication: 'crohnsDisease', ta: 'gastroenterology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Skyrizi CD 2022-2024 rapid adoption; Humira→Skyrizi biosimilar-driven switch' },
+  eosinophilicEsophagitis: { indication: 'eosinophilicEsophagitis', ta: 'gastroenterology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Dupixent EoE 2022-2024; chronic biologic use pattern' },
+  nonAlcoholicSteatohepatitis: { indication: 'nonAlcoholicSteatohepatitis', ta: 'gastroenterology', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Rezdiffra 2024 launch; GLP-1 competition may shorten peak window' },
+  ibsD: { indication: 'ibsD', ta: 'gastroenterology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 11, source: 'Viberzi/Xifaxan 2015-2024; moderate ramp, generic competition' },
+  primaryBiliaryCholangitis: { indication: 'primaryBiliaryCholangitis', ta: 'gastroenterology', rampUpYears: 3, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Ocaliva 2016-2024; Livdelzi/Iqirvo 2024 rapid uptake in UDCA-IR' },
+
+  // --------------------------------------------------------------------------
+  // Dermatology (5)
+  // --------------------------------------------------------------------------
+  hidradenitisSuppurativa: { indication: 'hidradenitisSuppurativa', ta: 'dermatology', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Humira HS 2015-2024; slow diagnosis-to-treatment, Cosentyx 2023 launch' },
+  alopeciaAreata: { indication: 'alopeciaAreata', ta: 'dermatology', rampUpYears: 3, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Olumiant/Litfulo 2022-2024 rapid market formation' },
+  vitiligo: { indication: 'vitiligo', ta: 'dermatology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Opzelura 2022-2024; chronic topical use, slow repigmentation, long patient journey' },
+  acne: { indication: 'acne', ta: 'dermatology', rampUpYears: 3, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 10, source: 'Winlevi/Aklief 2020-2024; short branded lifecycle due to generic topical competition' },
+  chronicUrticaria: { indication: 'chronicUrticaria', ta: 'dermatology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Xolair CSU 2014-2024; chronic biologic use, long peak due to limited alternatives' },
+
+  // --------------------------------------------------------------------------
+  // Hematology (5)
+  // --------------------------------------------------------------------------
+  cll: { indication: 'cll', ta: 'hematology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Ibrutinib 2013-2024 long ramp then zanubrutinib transition; venetoclax time-limited dosing' },
+  follicularLymphoma: { indication: 'follicularLymphoma', ta: 'hematology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Rituxan → bispecific transition 2022-2024; relapsed setting first then earlier lines' },
+  hodgkinLymphoma: { indication: 'hodgkinLymphoma', ta: 'hematology', rampUpYears: 3, peakDurationYears: 4, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Adcetris 2011-2024; shorter peak due to high cure rate (smaller ongoing market)' },
+  myelofibrosis: { indication: 'myelofibrosis', ta: 'hematology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 14, source: 'Jakafi 2011-2024 long peak, chronic daily use, limited competition' },
+  itp: { indication: 'itp', ta: 'hematology', rampUpYears: 3, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Nplate/Promacta 2008-2024; chronic TPO-RA use, established class' },
+
+  // --------------------------------------------------------------------------
+  // Ophthalmology (5)
+  // --------------------------------------------------------------------------
+  dryAmdGA: { indication: 'dryAmdGA', ta: 'ophthalmology', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Syfovre/Izervay 2023-2024; slow adoption due to modest efficacy and injection burden' },
+  diabeticRetinopathy: { indication: 'diabeticRetinopathy', ta: 'ophthalmology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Eylea DR 2015-2024; Vabysmo durability-driven switch 2022-2024' },
+  diabeticMacularEdema: { indication: 'diabeticMacularEdema', ta: 'ophthalmology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Eylea DME 2014-2024 long peak; Vabysmo bispecific 2022 adding durability share' },
+  glaucoma: { indication: 'glaucoma', ta: 'ophthalmology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 11, source: 'Rhopressa/Rocklatan 2018-2024; latanoprost generic dominance shortens branded lifecycle' },
+  retinitisPigmentosa: { indication: 'retinitisPigmentosa', ta: 'ophthalmology', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 14, source: 'Luxturna 2017-2024; gene therapy one-time dosing, slow genotype-by-genotype expansion' },
+
+  // --------------------------------------------------------------------------
+  // Cardiovascular (5)
+  // --------------------------------------------------------------------------
+  heartFailureHfpef: { indication: 'heartFailureHfpef', ta: 'cardiovascular', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Jardiance HFpEF 2023-2024; SGLT2i class chronic daily use' },
+  hypertrophicCardiomyopathy: { indication: 'hypertrophicCardiomyopathy', ta: 'cardiovascular', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Camzyos 2022-2024 rapid launch; first-in-class chronic therapy' },
+  coronaryArteryDisease: { indication: 'coronaryArteryDisease', ta: 'cardiovascular', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Repatha/Leqvio 2015-2024; PCSK9 slow initial uptake, now growing' },
+  stroke: { indication: 'stroke', ta: 'cardiovascular', rampUpYears: 3, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'tPA/TNKase acute setting; short commercial lifecycle for acute therapies' },
+  venousThromboembolism: { indication: 'venousThromboembolism', ta: 'cardiovascular', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Eliquis/Xarelto 2012-2024 long peak; chronic use, high adherence' },
+
+  // --------------------------------------------------------------------------
+  // Infectious Disease (5)
+  // --------------------------------------------------------------------------
+  rsv: { indication: 'rsv', ta: 'infectiousDisease', rampUpYears: 3, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Arexvy/Abrysvo/Beyfortus 2023-2024 very rapid market formation' },
+  tuberculosis: { indication: 'tuberculosis', ta: 'infectiousDisease', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Pretomanid 2019-2024; slow global rollout, NGO-driven access programs' },
+  influenza: { indication: 'influenza', ta: 'infectiousDisease', rampUpYears: 3, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'Xofluza 2018-2024; seasonal demand, rapid generic competition' },
+  hepatitisC: { indication: 'hepatitisC', ta: 'infectiousDisease', rampUpYears: 2, peakDurationYears: 3, declineRate: 0.30, loeYearsAfterApproval: 10, source: 'Harvoni/Epclusa 2014-2018 peak; curative drugs shrink their own market rapidly' },
+  covid: { indication: 'covid', ta: 'infectiousDisease', rampUpYears: 1, peakDurationYears: 2, declineRate: 0.40, loeYearsAfterApproval: 8, source: 'Paxlovid 2022-2023 spike then rapid decline; pandemic to endemic transition' },
+
+  // --------------------------------------------------------------------------
+  // Oncology (10 more)
+  // --------------------------------------------------------------------------
+  bladder: { indication: 'bladder', ta: 'oncology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Padcev 2019-2024 rapid ramp; EV-302 1L accelerating' },
+  renal: { indication: 'renal', ta: 'oncology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'IO+TKI combos 2019-2024; KEYNOTE-426, CheckMate-9ER, JAVELIN Renal 101' },
+  liver: { indication: 'liver', ta: 'oncology', rampUpYears: 5, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'IMbrave150 (atezo+bev) 2020-2024; liver dysfunction complicates tolerability → slower ramp' },
+  gastric: { indication: 'gastric', ta: 'oncology', rampUpYears: 5, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'Vyloy 2024 launch; regional variation slows global adoption' },
+  gbm: { indication: 'gbm', ta: 'oncology', rampUpYears: 3, peakDurationYears: 3, declineRate: 0.30, loeYearsAfterApproval: 10, source: 'Temodar 2005-2015 historical; Voranigo 2024 IDH-mutant niche. Short peak due to poor outcomes' },
+  breast_hr: { indication: 'breast_hr', ta: 'oncology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'CDK4/6 class 2015-2024; Ibrance→Verzenio shift, monarchE adjuvant extending lifecycle' },
+  lung_sclc: { indication: 'lung_sclc', ta: 'oncology', rampUpYears: 4, peakDurationYears: 3, declineRate: 0.28, loeYearsAfterApproval: 11, source: 'IMpower133 (atezo+chemo) 2019-2024; limited differentiation, short peak' },
+  mds: { indication: 'mds', ta: 'oncology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Reblozyl/Rytelo 2019-2024; anemia-driven prescribing' },
+  cervical: { indication: 'cervical', ta: 'oncology', rampUpYears: 4, peakDurationYears: 4, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Keytruda cervical 2021-2024; Tivdak 2L ADC 2021-2024' },
+  endometrial: { indication: 'endometrial', ta: 'oncology', rampUpYears: 4, peakDurationYears: 4, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Keytruda+Lenvima 2021-2024; dostarlimab dMMR niche 2022-2024' },
+
+  // --------------------------------------------------------------------------
+  // Neurology (8 more)
+  // --------------------------------------------------------------------------
+  narcolepsy: { indication: 'narcolepsy', ta: 'neurology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Xyrem→Xywav 2002-2024; chronic nightly use, Lumryz extended-release 2023' },
+  bipolar: { indication: 'bipolar', ta: 'neurology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Vraylar 2017-2024 ramp; generic mood stabilizer SOC limits branded peak' },
+  adhd: { indication: 'adhd', ta: 'neurology', rampUpYears: 3, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 11, source: 'Vyvanse 2007-2023 → generic; Qelbree 2021-2024 non-stimulant ramp' },
+  addiction: { indication: 'addiction', ta: 'neurology', rampUpYears: 5, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'Sublocade 2018-2024 slow uptake; stigma/access barriers prolong ramp' },
+  myasthenia: { indication: 'myasthenia', ta: 'neurology', rampUpYears: 3, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Vyvgart 2022-2024 very rapid launch; FcRn class chronic biologic use' },
+  pain: { indication: 'pain', ta: 'neurology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Lyrica 2004-2019 long peak then generic cliff; non-opioid class forming' },
+  trd: { indication: 'trd', ta: 'neurology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Spravato 2019-2024 growing; REMS requirement slows but does not limit adoption' },
+  frontotemporal: { indication: 'frontotemporal', ta: 'neurology', rampUpYears: 5, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 12, source: 'No approved therapy precedent; modeled on neurodegenerative rare disease curves (comparable to ALS)' },
+
+  // --------------------------------------------------------------------------
+  // Immunology (7 more)
+  // --------------------------------------------------------------------------
+  lupusNephritis: { indication: 'lupusNephritis', ta: 'immunology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Lupkynis 2021-2024 ramp; belimumab LN 2020-2024' },
+  psoriaticArthritis: { indication: 'psoriaticArthritis', ta: 'immunology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Cosentyx PsA 2016-2024; chronic biologic use, multi-class competition' },
+  ankylosingSpondylitis: { indication: 'ankylosingSpondylitis', ta: 'immunology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Cosentyx axSpA 2016-2024; Rinvoq AS 2023-2024' },
+  ipf: { indication: 'ipf', ta: 'immunology', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Ofev/Esbriet 2014-2024; slow ramp due to progressive nature and specialist prescribing' },
+  igan: { indication: 'igan', ta: 'immunology', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Tarpeyo 2021 / Filspari 2023 ramp; proteinuria-based treatment' },
+  gvhd: { indication: 'gvhd', ta: 'immunology', rampUpYears: 3, peakDurationYears: 4, declineRate: 0.25, loeYearsAfterApproval: 11, source: 'Jakafi GVHD 2019-2024; steroid-refractory acute + chronic' },
+  copd: { indication: 'copd', ta: 'immunology', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Trelegy 2017-2024; chronic daily inhalation, Dupixent COPD 2024 biologic entrant' },
+
+  // --------------------------------------------------------------------------
+  // Metabolic (6 more)
+  // --------------------------------------------------------------------------
+  type1Diabetes: { indication: 'type1Diabetes', ta: 'metabolic', rampUpYears: 5, peakDurationYears: 5, declineRate: 0.20, loeYearsAfterApproval: 12, source: 'Tzield 2022-2024; slow adoption due to at-risk screening requirement' },
+  gout: { indication: 'gout', ta: 'metabolic', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Krystexxa 2010-2024; IV infusion for uncontrolled gout, growing post-immunomodulation' },
+  diabeticKidneyDisease: { indication: 'diabeticKidneyDisease', ta: 'metabolic', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Kerendia 2021-2024 growing; chronic daily oral, large treatable population' },
+  sickleCell: { indication: 'sickleCell', ta: 'metabolic', rampUpYears: 4, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Casgevy/Lyfgenia 2023-2024 gene therapy launch; one-time dosing but slow site ramp' },
+  hemophiliaA: { indication: 'hemophiliaA', ta: 'metabolic', rampUpYears: 3, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Hemlibra 2018-2024 rapid adoption; chronic biweekly/monthly SubQ, long lifecycle' },
+  fabry: { indication: 'fabry', ta: 'metabolic', rampUpYears: 4, peakDurationYears: 7, declineRate: 0.15, loeYearsAfterApproval: 14, source: 'Fabrazyme 2003-2024 long peak; chronic ERT for life, very slow competitive erosion' },
+
+  // --------------------------------------------------------------------------
+  // Rare Disease (5 more)
+  // --------------------------------------------------------------------------
+  fabryDisease: { indication: 'fabryDisease', ta: 'rareDisease', rampUpYears: 4, peakDurationYears: 7, declineRate: 0.15, loeYearsAfterApproval: 14, source: 'Same as metabolic fabry; rare disease TA context' },
+  gaucherDisease: { indication: 'gaucherDisease', ta: 'rareDisease', rampUpYears: 4, peakDurationYears: 8, declineRate: 0.12, loeYearsAfterApproval: 15, source: 'Cerezyme 1994-2024 extremely long peak; lifetime ERT with minimal competition' },
+  pompeDisease: { indication: 'pompeDisease', ta: 'rareDisease', rampUpYears: 4, peakDurationYears: 7, declineRate: 0.15, loeYearsAfterApproval: 14, source: 'Myozyme/Lumizyme → Nexviazyme 2006-2024; ERT lifecycle with next-gen replacement' },
+  achondroplasia: { indication: 'achondroplasia', ta: 'rareDisease', rampUpYears: 4, peakDurationYears: 6, declineRate: 0.18, loeYearsAfterApproval: 13, source: 'Voxzogo 2021-2024 rapid launch; chronic daily injection until growth plate closure' },
+  dravetSyndrome: { indication: 'dravetSyndrome', ta: 'rareDisease', rampUpYears: 3, peakDurationYears: 5, declineRate: 0.22, loeYearsAfterApproval: 12, source: 'Epidiolex 2018-2024; Fintepla 2020-2024; anti-seizure class established' },
 };
 
 /**

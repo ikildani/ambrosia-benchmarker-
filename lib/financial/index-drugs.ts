@@ -3424,6 +3424,474 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     source: 'Merck 2024 (Keytruda cross-tumor $29B), BMS 2024 (Opdivo), Roche 2024 (Tecentriq), tissue-agnostic (Vitrakvi, Retevmo)',
     notes: 'Basket indications (NTRK/RET/TMB-H/dMMR). Label-expansion deals cover 3-5 tumor types.',
   },
+
+  // ---------------------------------------------------------------------------
+  // Women's Health (5)
+  // ---------------------------------------------------------------------------
+  endometriosis: {
+    indication: 'endometriosis', ta: 'womensHealth', globalTAM_M: 6000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Orilissa $300M), Myovant/Pfizer 2024 (Myfembree $400M+), EvaluatePharma 2025',
+    notes: '~10% prevalence; market constrained by diagnosis delay + off-label OCP/Lupron use',
+  },
+  uterineFibroids: {
+    indication: 'uterineFibroids', ta: 'womensHealth', globalTAM_M: 5000, maxDrugPeakSales_M: 2500,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Myovant/Pfizer 2024 (Myfembree), AbbVie 2024 (Oriahnn), EvaluatePharma 2025',
+    notes: '20-50% prevalence in reproductive-age women; surgical alternatives limit drug uptake',
+  },
+  pcos: {
+    indication: 'pcos', ta: 'womensHealth', globalTAM_M: 4000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'EvaluatePharma 2025, IQVIA Channel Dynamics 2025',
+    notes: 'No approved PCOS drug limits TAM estimation; 6-10% prevalence suggests $4B+ potential',
+  },
+  postpartumDepression: {
+    indication: 'postpartumDepression', ta: 'womensHealth', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Sage Therapeutics/Biogen 2024 (Zurzuvae $200M+ launch), EvaluatePharma 2025',
+    notes: 'Zurzuvae projected $2B peak; untreated PPD prevalence 10-15% of births',
+  },
+  menopause: {
+    indication: 'menopause', ta: 'womensHealth', globalTAM_M: 8000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Astellas 2024 (Veozah fezolinetant $500M launch), EvaluatePharma 2025',
+    notes: 'VMS affects 75% of menopausal women; non-hormonal path (NK3R) expanding addressable market',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Gastroenterology (5)
+  // ---------------------------------------------------------------------------
+  crohnsDisease: {
+    indication: 'crohnsDisease', ta: 'gastroenterology', globalTAM_M: 12000, maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 3000, estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Skyrizi CD $4B+, Rinvoq CD $2B), J&J 2024 (Stelara $10B cross), EvaluatePharma 2025',
+    notes: 'Skyrizi/Rinvoq replacing Humira; IL-23 class dominance in CD',
+  },
+  eosinophilicEsophagitis: {
+    indication: 'eosinophilicEsophagitis', ta: 'gastroenterology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Sanofi/Regeneron 2024 10-K (Dupixent EoE $1B+), EvaluatePharma 2025',
+    notes: 'Dupixent EoE launch $1B+; 50/100K prevalence, growing recognition and diagnosis rates',
+  },
+  nonAlcoholicSteatohepatitis: {
+    indication: 'nonAlcoholicSteatohepatitis', ta: 'gastroenterology', globalTAM_M: 20000, maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 2500, estimateYear: 2025,
+    source: 'Madrigal 2024 (Rezdiffra $5B+ peak consensus), EvaluatePharma 2025, IQVIA 2025',
+    notes: 'Massive TAM from 5% global MASH prevalence; GLP-1 class (semaglutide) may capture large share',
+  },
+  ibsD: {
+    indication: 'ibsD', ta: 'gastroenterology', globalTAM_M: 4000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Allergan/AbbVie 2024 (Viberzi), Salix/Bausch 2024 (Xifaxan), EvaluatePharma 2025',
+    notes: 'IBS-D 5% prevalence but low diagnosis/treatment rates. Xifaxan generic threat limits branded TAM',
+  },
+  primaryBiliaryCholangitis: {
+    indication: 'primaryBiliaryCholangitis', ta: 'gastroenterology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Ipsen 2024 (Iqirvo), Gilead 2024 (Livdelzi seladelpar), Intercept (Ocaliva $300M), EvaluatePharma 2025',
+    notes: 'Iqirvo + Livdelzi both approved 2024; UDCA-IR population well-defined',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Dermatology (5)
+  // ---------------------------------------------------------------------------
+  hidradenitisSuppurativa: {
+    indication: 'hidradenitisSuppurativa', ta: 'dermatology', globalTAM_M: 4000, maxDrugPeakSales_M: 2500,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'AbbVie 2024 (Humira HS allocation ~$500M), Novartis 2024 (Cosentyx HS $300M), EvaluatePharma 2025',
+    notes: '1-4% prevalence, severely underdiagnosed; bimekizumab Phase 3 results promising',
+  },
+  alopeciaAreata: {
+    indication: 'alopeciaAreata', ta: 'dermatology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Lilly 2024 10-K (Olumiant AA $200M), Pfizer 2024 (Litfulo $300M launch), EvaluatePharma 2025',
+    notes: '2% lifetime prevalence; JAK class opening market but moderate severity often untreated',
+  },
+  vitiligo: {
+    indication: 'vitiligo', ta: 'dermatology', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 600, estimateYear: 2025,
+    source: 'Incyte 2024 10-K (Opzelura vitiligo $400M+), EvaluatePharma 2025',
+    notes: '0.5-2% prevalence; Opzelura first approved treatment; slow repigmentation limits patient persistence',
+  },
+  acne: {
+    indication: 'acne', ta: 'dermatology', globalTAM_M: 5000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 400, estimateYear: 2025,
+    source: 'Galderma 2024 (Aklief), Sun Pharma 2024 (Winlevi), EvaluatePharma 2025, IQVIA 2025',
+    notes: '~85% of 12-24 year olds affected; generic dominance limits branded peak sales ceiling',
+  },
+  chronicUrticaria: {
+    indication: 'chronicUrticaria', ta: 'dermatology', globalTAM_M: 4000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
+    source: 'Novartis/Roche 2024 (Xolair CSU $2B+), EvaluatePharma 2025',
+    notes: '1% prevalence; Xolair dominant, remibrutinib Phase 3 positive for anti-H1-refractory CSU',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Hematology (5)
+  // ---------------------------------------------------------------------------
+  cll: {
+    indication: 'cll', ta: 'hematology', globalTAM_M: 10000, maxDrugPeakSales_M: 6000,
+    typicalAssetPeakSales_M: 2500, estimateYear: 2025,
+    source: 'AbbVie 2024 10-K (Imbruvica $4.5B declining), AZ 2024 (Calquence $2.8B), BeiGene 2024 (Brukinsa $3B+), AbbVie/Roche 2024 (Venclexta $2.5B)',
+    notes: 'BTK class in transition (ibrutinib → zanubrutinib); venetoclax fixed-duration shift',
+  },
+  follicularLymphoma: {
+    indication: 'follicularLymphoma', ta: 'hematology', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
+    source: 'Roche 2024 (Gazyva, Lunsumio, Columvi), Genmab/AbbVie 2024 (Epkinly), EvaluatePharma 2025',
+    notes: 'Bispecific antibodies (mosunetuzumab, glofitamab, epcoritamab) reshaping R/R setting',
+  },
+  hodgkinLymphoma: {
+    indication: 'hodgkinLymphoma', ta: 'hematology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Seagen/Takeda 2024 (Adcetris $850M), Merck 2024 (Keytruda HL), BMS 2024 (Opdivo HL)',
+    notes: 'High cure rate limits commercial ceiling; Adcetris 1L ECHELON shift expanding early-line use',
+  },
+  myelofibrosis: {
+    indication: 'myelofibrosis', ta: 'hematology', globalTAM_M: 4000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Incyte 2024 10-K (Jakafi $2.7B total MPN), CTI 2024 (Vonjo pacritinib), GSK 2024 (Ojjaara momelotinib)',
+    notes: 'Jakafi dominant; new entries in 2L (pacritinib anemia-friendly, momelotinib splenic + anemia)',
+  },
+  itp: {
+    indication: 'itp', ta: 'hematology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 700, estimateYear: 2025,
+    source: 'Amgen 2024 (Nplate $1B+), Novartis 2024 (Promacta $1.5B), Rigel 2024 (Tavalisse), EvaluatePharma 2025',
+    notes: 'TPO-RA class dominant (romiplostim, eltrombopag); SYK inhibitor fostamatinib adds option',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ophthalmology (5)
+  // ---------------------------------------------------------------------------
+  dryAmdGA: {
+    indication: 'dryAmdGA', ta: 'ophthalmology', globalTAM_M: 8000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'Apellis 2024 (Syfovre $400M launch), Astellas/Iveric 2024 (Izervay $300M launch), EvaluatePharma 2025',
+    notes: '5M US patients with GA; complement inhibition validated but modest efficacy limits ceiling',
+  },
+  diabeticRetinopathy: {
+    indication: 'diabeticRetinopathy', ta: 'ophthalmology', globalTAM_M: 6000, maxDrugPeakSales_M: 4000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'Regeneron 2024 10-K (Eylea DR $2B+), Roche 2024 (Vabysmo DR), EvaluatePharma 2025',
+    notes: 'Anti-VEGF class established; durability competition (Eylea HD, Vabysmo) driving differentiation',
+  },
+  diabeticMacularEdema: {
+    indication: 'diabeticMacularEdema', ta: 'ophthalmology', globalTAM_M: 7000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'Regeneron 2024 10-K (Eylea DME $3B+), Roche 2024 (Vabysmo DME), EvaluatePharma 2025',
+    notes: 'DME is the largest retinal injection market; Vabysmo bispecific durability advantage',
+  },
+  glaucoma: {
+    indication: 'glaucoma', ta: 'ophthalmology', globalTAM_M: 6000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Aerie 2024 (Rhopressa/Rocklatan $200M), Vyzulta 2024, IQVIA 2025',
+    notes: '60M global patients; latanoprost generic dominance caps branded peak sales',
+  },
+  retinitisPigmentosa: {
+    indication: 'retinitisPigmentosa', ta: 'ophthalmology', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Spark Therapeutics 2024 (Luxturna $150M), EvaluatePharma 2025',
+    notes: '1 in 4000 prevalence; gene therapy for specific genotypes, broad RP unaddressed',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Cardiovascular (5)
+  // ---------------------------------------------------------------------------
+  heartFailureHfpef: {
+    indication: 'heartFailureHfpef', ta: 'cardiovascular', globalTAM_M: 8000, maxDrugPeakSales_M: 4000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'BI/Lilly 2024 (Jardiance HFpEF $1B+), AZ 2024 (Forxiga HFpEF), EvaluatePharma 2025',
+    notes: 'SGLT2i class first HFpEF-specific evidence; 50% of HF is HFpEF, historically undertreated',
+  },
+  hypertrophicCardiomyopathy: {
+    indication: 'hypertrophicCardiomyopathy', ta: 'cardiovascular', globalTAM_M: 4000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'BMS 2024 10-K (Camzyos $500M launch), Cytokinetics 2024 (aficamten Phase 3), EvaluatePharma 2025',
+    notes: 'Camzyos first-in-class; aficamten potential $2B+ peak. 1 in 500 prevalence',
+  },
+  coronaryArteryDisease: {
+    indication: 'coronaryArteryDisease', ta: 'cardiovascular', globalTAM_M: 25000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'Amgen 2024 10-K (Repatha $1.8B), Novartis 2024 (Leqvio inclisiran), EvaluatePharma 2025',
+    notes: 'Statin/PCSK9 era; Leqvio siRNA injection for LDL. Massive prevalence but generic statin ceiling',
+  },
+  stroke: {
+    indication: 'stroke', ta: 'cardiovascular', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Genentech 2024 (Activase/TNKase legacy), EvaluatePharma 2025, IQVIA 2025',
+    notes: 'Acute ischemic stroke; tPA/tenecteplase + thrombectomy devices. Neuroprotection remains unmet',
+  },
+  venousThromboembolism: {
+    indication: 'venousThromboembolism', ta: 'cardiovascular', globalTAM_M: 12000, maxDrugPeakSales_M: 6000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'J&J/Bayer 2024 (Xarelto $6B declining), BMS/Pfizer 2024 (Eliquis $12B), EvaluatePharma 2025',
+    notes: 'DOAC market is largest CV class; biosimilar Eliquis 2028 LOE will reshape',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Infectious Disease (5)
+  // ---------------------------------------------------------------------------
+  rsv: {
+    indication: 'rsv', ta: 'infectiousDisease', globalTAM_M: 8000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'GSK 2024 10-K (Arexvy $2B launch), Pfizer 2024 (Abrysvo $800M), AZ 2024 (Beyfortus $1.5B), EvaluatePharma 2025',
+    notes: 'Vaccine + mAb market; adult + pediatric + maternal segments. Rapid $5B+ market formation',
+  },
+  tuberculosis: {
+    indication: 'tuberculosis', ta: 'infectiousDisease', globalTAM_M: 2000, maxDrugPeakSales_M: 1000,
+    typicalAssetPeakSales_M: 300, estimateYear: 2025,
+    source: 'TB Alliance 2024 (pretomanid), J&J 2024 (bedaquiline generic), EvaluatePharma 2025',
+    notes: '10M annual cases globally; generic pricing limits branded peak. MDR-TB niche is premium',
+  },
+  influenza: {
+    indication: 'influenza', ta: 'infectiousDisease', globalTAM_M: 5000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 600, estimateYear: 2025,
+    source: 'Roche 2024 (Xofluza $500M), Shionogi 2024, EvaluatePharma 2025',
+    notes: 'Seasonal antiviral market; Tamiflu generic. Universal flu vaccine pipeline could transform',
+  },
+  hepatitisC: {
+    indication: 'hepatitisC', ta: 'infectiousDisease', globalTAM_M: 4000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Gilead 2024 10-K (Epclusa $1.5B declining), AbbVie 2024 (Mavyret $1B declining)',
+    notes: 'Curative DAA class shrinking the treatable pool; declining revenue despite efficacy',
+  },
+  covid: {
+    indication: 'covid', ta: 'infectiousDisease', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Pfizer 2024 10-K (Paxlovid $1.5B declining), EvaluatePharma 2025',
+    notes: 'Declining severity and vaccination reduce antiviral demand; seasonal treatment market forming',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Oncology (10 more)
+  // ---------------------------------------------------------------------------
+  bladder: {
+    indication: 'bladder', ta: 'oncology', globalTAM_M: 6000, maxDrugPeakSales_M: 4000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'Seagen/Pfizer 2024 (Padcev $3B+ run rate), Merck 2024 (Keytruda UC), J&J 2024 (erdafitinib)',
+    notes: 'Padcev + Keytruda (EV-302) transforming 1L mUC; ADC+IO paradigm',
+  },
+  renal: {
+    indication: 'renal', ta: 'oncology', globalTAM_M: 10000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'Merck 2024 (Keytruda+Inlyta), BMS 2024 (Opdivo+Cabo), Exelixis 2024 (Cabometyx $2B), Pfizer 2024 (Inlyta)',
+    notes: 'IO+TKI combos dominate; belzutifan (HIF-2α) adding VHL disease path',
+  },
+  liver: {
+    indication: 'liver', ta: 'oncology', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Roche 2024 (Tecentriq+Avastin HCC $2B), Eisai/Merck 2024 (lenvatinib+Keytruda), EvaluatePharma 2025',
+    notes: 'IO+anti-VEGF first-line; sorafenib genericized; tremelimumab+durvalumab added',
+  },
+  gastric: {
+    indication: 'gastric', ta: 'oncology', globalTAM_M: 6000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
+    source: 'Astellas 2024 (Vyloy zolbetuximab $2B peak), AZ/Daiichi 2024 (Enhertu GEJ), Merck 2024 (Keytruda gastric)',
+    notes: 'CLDN18.2 (Vyloy) + HER2+ (Enhertu) + IO (Keytruda) segmentation',
+  },
+  lung_sclc: {
+    indication: 'lung_sclc', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Roche 2024 (Tecentriq SCLC), AZ 2024 (Imfinzi CASPIAN), EvaluatePharma 2025',
+    notes: 'IO+chemo only modest OS benefit; DLL3 ADC (ifinatamab) and bispecifics in development',
+  },
+  mds: {
+    indication: 'mds', ta: 'oncology', globalTAM_M: 4000, maxDrugPeakSales_M: 2500,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'BMS/Celgene 2024 (Revlimid del5q), Geron 2024 (Rytelo imetelstat), BMS 2024 (Reblozyl luspatercept)',
+    notes: 'HMA backbone (azacitidine); luspatercept for RS+ anemia; imetelstat for lower-risk',
+  },
+  cervical: {
+    indication: 'cervical', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 700, estimateYear: 2025,
+    source: 'Merck 2024 (Keytruda cervical KEYNOTE-826), Seagen/Genmab 2024 (Tivdak), EvaluatePharma 2025',
+    notes: 'IO + ADC; HPV prophylaxis reducing prevalence long-term but current advanced disease unmet',
+  },
+  endometrial: {
+    indication: 'endometrial', ta: 'oncology', globalTAM_M: 3500, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 700, estimateYear: 2025,
+    source: 'Merck/Eisai 2024 (Keytruda+Lenvima), GSK 2024 (dostarlimab), EvaluatePharma 2025',
+    notes: 'IO+TKI first-line advanced; dMMR/MSI-H subset has exceptional IO monotherapy response',
+  },
+  breast_hr: {
+    indication: 'breast_hr', ta: 'oncology', globalTAM_M: 15000, maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 3000, estimateYear: 2025,
+    source: 'Lilly 2024 10-K (Verzenio $5.3B), Pfizer 2024 (Ibrance $4.7B), Novartis 2024 (Kisqali $3B+)',
+    notes: 'CDK4/6 class $13B+; adjuvant expansion (monarchE) driving growth. Elacestrant oral SERD adds options',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Neurology (8 more)
+  // ---------------------------------------------------------------------------
+  narcolepsy: {
+    indication: 'narcolepsy', ta: 'neurology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Jazz 2024 10-K (Xywav $2B+), Harmony Bio 2024 (Lumryz), Takeda 2024 (TAK-861 orexin)',
+    notes: '~200K US narcolepsy patients; Xywav dominant, orexin agonist class emerging',
+  },
+  bipolar: {
+    indication: 'bipolar', ta: 'neurology', globalTAM_M: 6000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 600, estimateYear: 2025,
+    source: 'AbbVie 2024 (Vraylar $2B+), EvaluatePharma 2025, IQVIA 2025',
+    notes: 'Lithium/valproate generic; Vraylar only branded winner; atypical antipsychotic class',
+  },
+  adhd: {
+    indication: 'adhd', ta: 'neurology', globalTAM_M: 8000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Supernus 2024 (Qelbree viloxazine), Takeda 2024 (Vyvanse generic impact), EvaluatePharma 2025',
+    notes: '~10% pediatric prevalence; generic stimulant dominance. Non-stimulant class growing',
+  },
+  addiction: {
+    indication: 'addiction', ta: 'neurology', globalTAM_M: 4000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 400, estimateYear: 2025,
+    source: 'Indivior 2024 (Sublocade $500M), Alkermes 2024 (Vivitrol $350M), EvaluatePharma 2025',
+    notes: 'OUD/AUD; buprenorphine/naltrexone generic. Stimulant use disorder has NO approved therapy',
+  },
+  myasthenia: {
+    indication: 'myasthenia', ta: 'neurology', globalTAM_M: 5000, maxDrugPeakSales_M: 4000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'Argenx 2024 10-K (Vyvgart $2B+), AZ 2024 (Soliris/Ultomiris gMG), UCB 2024 (Rystiggo), EvaluatePharma 2025',
+    notes: 'FcRn + complement + B-cell depletion classes. Vyvgart projected $5B+ peak cross-indication',
+  },
+  pain: {
+    indication: 'pain', ta: 'neurology', globalTAM_M: 15000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Vertex 2024 (suzetrigine VX-548 Phase 3), EvaluatePharma 2025, IQVIA 2025',
+    notes: 'Massive TAM but generic NSAID/opioid dominance. Non-opioid class (NaV1.8 suzetrigine) emerging',
+  },
+  trd: {
+    indication: 'trd', ta: 'neurology', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'J&J 2024 10-K (Spravato $1B+), EvaluatePharma 2025',
+    notes: 'TRD 30% of MDD; Spravato growing, psilocybin/MDMA pipeline. High unmet need',
+  },
+  frontotemporal: {
+    indication: 'frontotemporal', ta: 'neurology', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'EvaluatePharma 2025, NRDD 2025',
+    notes: '50-60K US patients; no approved therapy. Tau-targeting antisense (BIIB080) and gene therapy in development',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Immunology (7 more)
+  // ---------------------------------------------------------------------------
+  lupusNephritis: {
+    indication: 'lupusNephritis', ta: 'immunology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Aurinia 2024 (Lupkynis $400M), GSK 2024 (Benlysta LN), EvaluatePharma 2025',
+    notes: '~50% of SLE patients develop LN; voclosporin + belimumab both approved. CNI-sparing regimens emerging',
+  },
+  psoriaticArthritis: {
+    indication: 'psoriaticArthritis', ta: 'immunology', globalTAM_M: 8000, maxDrugPeakSales_M: 5000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'Novartis 2024 (Cosentyx PsA $3B+), J&J 2024 (Stelara PsA $2B), AbbVie 2024 (Rinvoq, Skyrizi), EvaluatePharma 2025',
+    notes: 'IL-17/IL-23/JAK/PDE4 all compete; overlaps with psoriasis skin market',
+  },
+  ankylosingSpondylitis: {
+    indication: 'ankylosingSpondylitis', ta: 'immunology', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
+    source: 'Novartis 2024 (Cosentyx axSpA $1.5B), AbbVie 2024 (Rinvoq AS), EvaluatePharma 2025',
+    notes: 'IL-17 class dominant; JAK adding for TNF-IR. Overlap with nr-axSpA broadens market',
+  },
+  ipf: {
+    indication: 'ipf', ta: 'immunology', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
+    source: 'Roche 2024 (Esbriet pirfenidone $800M declining), BI 2024 (Ofev nintedanib $3B cross-indication), EvaluatePharma 2025',
+    notes: 'Two anti-fibrotic drugs only; high unmet need for combination and new mechanisms',
+  },
+  igan: {
+    indication: 'igan', ta: 'immunology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
+    typicalAssetPeakSales_M: 800, estimateYear: 2025,
+    source: 'Travere 2024 (Filspari sparsentan $500M), Calliditas 2024 (Tarpeyo $300M), EvaluatePharma 2025',
+    notes: '~130K US patients; complement (iptacopan) and BAFF (atacicept) pipeline growing',
+  },
+  gvhd: {
+    indication: 'gvhd', ta: 'immunology', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Incyte 2024 (Jakafi acute+chronic GVHD $500M), Kadmon/Sanofi 2024 (Rezurock belumosudil $200M)',
+    notes: '~50K annual allo-HSCT worldwide; steroid-refractory niche growing',
+  },
+  copd: {
+    indication: 'copd', ta: 'immunology', globalTAM_M: 20000, maxDrugPeakSales_M: 8000,
+    typicalAssetPeakSales_M: 3000, estimateYear: 2025,
+    source: 'GSK 2024 10-K (Trelegy $3.5B), AZ 2024 (Breztri Aerosphere $2B), Sanofi 2024 (Dupixent COPD launch), EvaluatePharma 2025',
+    notes: '~250M global patients; triple therapy dominant, Dupixent biologics era for type-2 COPD',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Metabolic (6 more)
+  // ---------------------------------------------------------------------------
+  type1Diabetes: {
+    indication: 'type1Diabetes', ta: 'metabolic', globalTAM_M: 6000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Provention/Sanofi 2024 (Tzield $200M launch), EvaluatePharma 2025',
+    notes: '~2M US T1D patients; Tzield delay-only, islet-cell therapy (Lantidra) and gene therapy pipeline',
+  },
+  gout: {
+    indication: 'gout', ta: 'metabolic', globalTAM_M: 4000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Horizon/Amgen 2024 (Krystexxa $800M), Takeda 2024 (Uloric), EvaluatePharma 2025',
+    notes: '~9M US gout patients; allopurinol generic dominant. Krystexxa for uncontrolled gout growing',
+  },
+  diabeticKidneyDisease: {
+    indication: 'diabeticKidneyDisease', ta: 'metabolic', globalTAM_M: 8000, maxDrugPeakSales_M: 4000,
+    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
+    source: 'Bayer 2024 10-K (Kerendia finerenone $1.5B), AZ 2024 (Farxiga DKD), EvaluatePharma 2025',
+    notes: '~40% of T2D develop CKD; MRA + SGLT2i + GLP-1 all have renal evidence',
+  },
+  sickleCell: {
+    indication: 'sickleCell', ta: 'metabolic', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
+    typicalAssetPeakSales_M: 1000, estimateYear: 2025,
+    source: 'Vertex/CRISPR 2024 (Casgevy), Bluebird 2024 (Lyfgenia), Pfizer 2024 (Oxbryta withdrawn), EvaluatePharma 2025',
+    notes: '~100K US SCD patients; gene therapy $2-3M/patient but transformative',
+  },
+  hemophiliaA: {
+    indication: 'hemophiliaA', ta: 'metabolic', globalTAM_M: 10000, maxDrugPeakSales_M: 6000,
+    typicalAssetPeakSales_M: 2000, estimateYear: 2025,
+    source: 'Roche 2024 10-K (Hemlibra $4.5B), BioMarin 2024 (Roctavian gene therapy), Novo Nordisk 2024 (Alhemo), EvaluatePharma 2025',
+    notes: 'Hemlibra dominant non-factor replacement; gene therapy Roctavian limited uptake but transformative potential',
+  },
+  fabry: {
+    indication: 'fabry', ta: 'metabolic', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 600, estimateYear: 2025,
+    source: 'Sanofi 2024 (Fabrazyme $1B+), Amicus 2024 (Galafold $500M), EvaluatePharma 2025',
+    notes: '~10K patients globally; ERT + chaperone therapy. Gene therapy pipeline',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Rare Disease (5 more)
+  // ---------------------------------------------------------------------------
+  fabryDisease: {
+    indication: 'fabryDisease', ta: 'rareDisease', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 600, estimateYear: 2025,
+    source: 'Same as metabolic fabry; rare disease TA context',
+    notes: 'Cross-listed from metabolic for rare disease TA calibration',
+  },
+  gaucherDisease: {
+    indication: 'gaucherDisease', ta: 'rareDisease', globalTAM_M: 2000, maxDrugPeakSales_M: 1500,
+    typicalAssetPeakSales_M: 700, estimateYear: 2025,
+    source: 'Sanofi 2024 (Cerezyme $800M), EvaluatePharma 2025',
+    notes: '~10K patients globally; ERT class well-established',
+  },
+  pompeDisease: {
+    indication: 'pompeDisease', ta: 'rareDisease', globalTAM_M: 1500, maxDrugPeakSales_M: 1200,
+    typicalAssetPeakSales_M: 500, estimateYear: 2025,
+    source: 'Sanofi 2024 (Nexviazyme $500M), EvaluatePharma 2025',
+    notes: '~3.5K patients globally; Nexviazyme next-gen ERT improving on Myozyme/Lumizyme',
+  },
+  achondroplasia: {
+    indication: 'achondroplasia', ta: 'rareDisease', globalTAM_M: 1000, maxDrugPeakSales_M: 800,
+    typicalAssetPeakSales_M: 400, estimateYear: 2025,
+    source: 'BioMarin 2024 10-K (Voxzogo $500M), EvaluatePharma 2025',
+    notes: '~30K patients globally; Voxzogo first-in-class, growth velocity endpoint validated',
+  },
+  dravetSyndrome: {
+    indication: 'dravetSyndrome', ta: 'rareDisease', globalTAM_M: 1000, maxDrugPeakSales_M: 800,
+    typicalAssetPeakSales_M: 400, estimateYear: 2025,
+    source: 'GW/Jazz 2024 (Epidiolex $700M cross-epilepsy), UCB 2024 (Fintepla $500M), EvaluatePharma 2025',
+    notes: '~20K US patients; anti-seizure medicines well-established, gene therapy SCN1A pipeline',
+  },
 };
 
 /**

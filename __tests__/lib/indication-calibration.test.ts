@@ -38,20 +38,20 @@ import {
 } from '@/lib/financial/indication-competitive-density';
 
 describe('Indication calibration Layer 0: coverage sanity', () => {
-  test('at least 50 indications are calibrated with PoS modifiers', () => {
-    expect(CALIBRATED_INDICATION_COUNT).toBeGreaterThanOrEqual(50);
+  test('at least 120 indications are calibrated with PoS modifiers', () => {
+    expect(CALIBRATED_INDICATION_COUNT).toBeGreaterThanOrEqual(120);
   });
 
-  test('at least 40 indications have market cap data', () => {
-    expect(Object.keys(INDICATION_MARKET_CAPS).length).toBeGreaterThanOrEqual(40);
+  test('at least 100 indications have market cap data', () => {
+    expect(Object.keys(INDICATION_MARKET_CAPS).length).toBeGreaterThanOrEqual(100);
   });
 
-  test('at least 40 indications have revenue curve data', () => {
-    expect(Object.keys(INDICATION_REVENUE_CURVES).length).toBeGreaterThanOrEqual(40);
+  test('at least 100 indications have revenue curve data', () => {
+    expect(Object.keys(INDICATION_REVENUE_CURVES).length).toBeGreaterThanOrEqual(100);
   });
 
-  test('at least 40 indications have competitive density data', () => {
-    expect(Object.keys(COMPETITIVE_DENSITY).length).toBeGreaterThanOrEqual(40);
+  test('at least 100 indications have competitive density data', () => {
+    expect(Object.keys(COMPETITIVE_DENSITY).length).toBeGreaterThanOrEqual(100);
   });
 });
 

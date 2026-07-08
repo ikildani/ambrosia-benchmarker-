@@ -698,6 +698,836 @@ export const INDICATION_POS_MODIFIERS: Record<string, IndicationPoSModifier> = {
     notes:
       'DED Phase 2 to Phase 3 sits at the ophthalmology mean. Sign/symptom dual-endpoint requirement and high placebo response create late-stage variability (cyclosporine, lifitegrast, varenicline nasal spray, perfluorohexyloctane all approved but several misses in between).',
   },
+
+  // ---------------------------------------------------------------------
+  // WOMEN'S HEALTH (5) — new Tier 1 entries
+  // ---------------------------------------------------------------------
+  endometriosis: {
+    indication: 'endometriosis',
+    ta: 'womensHealth',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.80,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; FDA CDER 2024-2025',
+    sourceYear: 2025,
+    notes:
+      'GnRH antagonists (elagolix/Orilissa, relugolix/Myfembree) have improved late-stage success, but Phase 2 → 3 historically hampered by subjective pain endpoints, high placebo response (~30%), and heterogeneous patient populations. BIO data shows 20% below average for WH.',
+  },
+  uterineFibroids: {
+    indication: 'uterineFibroids',
+    ta: 'womensHealth',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Myfembree (relugolix-E2/NETA) approval validates GnRH-antagonist path. Phase 2 → 3 challenged by need for dual bleeding + fibroid volume endpoints. Better than endometriosis but below WH average.',
+  },
+  pcos: {
+    indication: 'pcos',
+    ta: 'womensHealth',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.70,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'No FDA-approved drug specifically for PCOS despite 6-10% prevalence. Phase 2 → 3 attrition historically severe (~30% lower than WH base) due to heterogeneous diagnostic criteria (Rotterdam), poorly validated endpoints, and long trial durations. Ovasitol, metformin used off-label.',
+  },
+  postpartumDepression: {
+    indication: 'postpartumDepression',
+    ta: 'womensHealth',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'FDA CDER 2024-2025; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Brexanolone (Zulresso, 2019) and zuranolone (Zurzuvae, 2023) both approved relatively smoothly. Neurosteroid class has well-validated HAMD-17 endpoints, fast onset, and clear clinical signal. Phase 2 → 3 above WH average due to strong effect sizes.',
+  },
+  menopause: {
+    indication: 'menopause',
+    ta: 'womensHealth',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.95,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Fezolinetant (Veozah, 2023) NK3R antagonist approval validates non-hormonal VMS path. Phase 2 → 3 near WH baseline — VMS frequency endpoints are objective and validated, but placebo response can dilute effect sizes.',
+  },
+
+  // ---------------------------------------------------------------------
+  // GASTROENTEROLOGY (5) — new Tier 1 entries
+  // (Note: crohns and ulcerativeColitis exist under immunology TA keys)
+  // ---------------------------------------------------------------------
+  crohnsDisease: {
+    indication: 'crohnsDisease',
+    ta: 'gastroenterology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; Wong/Siah/Lo 2019',
+    sourceYear: 2025,
+    notes:
+      'Distinct from the immunology "crohns" entry — GI-TA calibration accounts for endoscopic endpoint requirements (SES-CD). Phase 2 → 3 below GI base due to high placebo remission rates (20-30%) and complex endoscopy + PRO co-primary endpoints mandated post-2020 FDA guidance.',
+  },
+  eosinophilicEsophagitis: {
+    indication: 'eosinophilicEsophagitis',
+    ta: 'gastroenterology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'FDA CDER 2024-2025; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Dupixent EoE approval (2022) validated histologic endpoint (peak eos ≤6/HPF). Phase 2 → 3 above GI base because histologic response is objective, effect sizes are large (60% vs 5% placebo), and the EoE patient population is well-defined.',
+  },
+  nonAlcoholicSteatohepatitis: {
+    indication: 'nonAlcoholicSteatohepatitis',
+    ta: 'gastroenterology',
+    phase1ToPhase2: 0.85,
+    phase2ToPhase3: 0.60,
+    phase3ToApproval: 0.75,
+    source: 'BIO 2024-2026; NRDD 2024-2025',
+    sourceYear: 2025,
+    notes:
+      'Resmetirom (Rezdiffra, 2024) broke through, but the NASH/MASH field has seen catastrophic Phase 3 failures (elafibranor, selonsertib, cenicriviroc). Phase 2 → 3 historically 40% below GI base. Liver biopsy endpoint variability, slow fibrosis regression, and GLP-1 class threat persist.',
+  },
+  ibsD: {
+    indication: 'ibsD',
+    ta: 'gastroenterology',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.75,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'IBS-D requires composite abdominal pain + stool consistency FDA endpoint. 30-40% placebo response rate makes Phase 2 → 3 difficult. Eluxadoline, rifaximin, alosetron (restricted) approved but each with narrow signals. Phase 2 → 3 ~25% below GI average.',
+  },
+  primaryBiliaryCholangitis: {
+    indication: 'primaryBiliaryCholangitis',
+    ta: 'gastroenterology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.10,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Seladelpar (Livdelzi, 2024) and elafibranor (Iqirvo, 2024) both approved in same year after clean Phase 3s. Alkaline phosphatase normalization is a validated, objective biochemical endpoint — clear dose-response, low placebo response. Above GI base.',
+  },
+
+  // ---------------------------------------------------------------------
+  // DERMATOLOGY (5) — new Tier 1 entries (atopicDermatitis already exists)
+  // ---------------------------------------------------------------------
+  hidradenitisSuppurativa: {
+    indication: 'hidradenitisSuppurativa',
+    ta: 'dermatology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.80,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; FDA CDER 2024-2025',
+    sourceYear: 2025,
+    notes:
+      'Adalimumab was first approved HS drug (2015), secukinumab (Cosentyx) added 2023. HiSCR endpoint is validated but clinical heterogeneity (Hurley stage, tunnel formation) makes trial design complex. Phase 2 → 3 ~20% below derm average.',
+  },
+  alopeciaAreata: {
+    indication: 'alopeciaAreata',
+    ta: 'dermatology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Baricitinib (Olumiant, 2022) and ritlecitinib (Litfulo, 2023) JAK approvals validated SALT score endpoint. Strong, objective, visible endpoint drives above-average Phase 2 → 3 success. JAK class showing durable responses.',
+  },
+  vitiligo: {
+    indication: 'vitiligo',
+    ta: 'dermatology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Ruxolitinib cream (Opzelura, 2022) first FDA-approved vitiligo treatment. F-VASI endpoint is objective and reproducible. Near-baseline Phase 2 → 3 rates — good endpoint but slow repigmentation requires long trials (24-52 weeks).',
+  },
+  acne: {
+    indication: 'acne',
+    ta: 'dermatology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'IGA success + inflammatory lesion count co-primary endpoint. Phase 2 → 3 slightly below average due to high placebo response (~15-20% IGA clear/almost clear) and crowded generic topical market. Sarecycline, clascoterone (Winlevi) recent approvals.',
+  },
+  chronicUrticaria: {
+    indication: 'chronicUrticaria',
+    ta: 'dermatology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Omalizumab (Xolair) approval validated UAS7 endpoint with robust effect sizes. Remibrutinib Phase 3 success (2024) confirms the CSU pathway. Phase 2 → 3 above derm average — clear immunologic mechanism, objective itch/hive scoring.',
+  },
+
+  // ---------------------------------------------------------------------
+  // HEMATOLOGY (5) — new Tier 1 entries (aml, dlbcl, myeloma exist)
+  // ---------------------------------------------------------------------
+  cll: {
+    indication: 'cll',
+    ta: 'hematology',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.20,
+    phase3ToApproval: 1.10,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'BTK/BCL-2 class era (ibrutinib, venetoclax, acalabrutinib, zanubrutinib) has exceptional Phase 2 → 3 rates. Well-defined iwCLL response criteria, PFS endpoint, and MRD as accelerated endpoint. 20% above hematology base.',
+  },
+  follicularLymphoma: {
+    indication: 'follicularLymphoma',
+    ta: 'hematology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Mosunetuzumab, glofitamab, epcoritamab bispecifics all approved via accelerated pathway 2022-2024. Lugano response criteria well-validated. Phase 2 → 3 above heme base — high ORR in relapsed setting with clear unmet need.',
+  },
+  hodgkinLymphoma: {
+    indication: 'hodgkinLymphoma',
+    ta: 'hematology',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Brentuximab vedotin (Adcetris) + nivolumab + pembrolizumab have reshaped treatment. Young patient population, high cure rates, and PFS/EFS endpoints drive above-average Phase 2 → 3. ECHELON-1 established combination paradigm.',
+  },
+  myelofibrosis: {
+    indication: 'myelofibrosis',
+    ta: 'hematology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Ruxolitinib (Jakafi) $2.7B monopoly, but fedratinib, pacritinib, momelotinib provide limited incremental benefit. SVR35 endpoint validated but difficult to beat ruxolitinib in 1L. Phase 2 → 3 slightly below heme average in post-ruxolitinib settings.',
+  },
+  itp: {
+    indication: 'itp',
+    ta: 'hematology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Platelet count ≥50×10⁹/L is a clean, objective primary endpoint. Romiplostim, eltrombopag, avatrombopag approved; fostamatinib added SYK path. Phase 2 → 3 near heme baseline with slight positive bias from clear endpoints.',
+  },
+
+  // ---------------------------------------------------------------------
+  // OPHTHALMOLOGY (5) — new Tier 1 entries (wetAmd, dryEyeDisease exist)
+  // ---------------------------------------------------------------------
+  dryAmdGA: {
+    indication: 'dryAmdGA',
+    ta: 'ophthalmology',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.75,
+    phase3ToApproval: 0.85,
+    source: 'FDA CDER 2024-2025; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Pegcetacoplan (Syfovre, 2023) and avacincaptad pegol (Izervay, 2023) approved but with modest efficacy (~25% GA growth reduction). Phase 2 → 3 below ophtho base — GA progression is slow (12-18 month trials), effect sizes are small, and functional vision endpoints remain controversial.',
+  },
+  diabeticRetinopathy: {
+    indication: 'diabeticRetinopathy',
+    ta: 'ophthalmology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Anti-VEGF class (Eylea, Lucentis, Vabysmo) validated in DME/DR. DRSS 2-step improvement endpoint established. Phase 2 → 3 slightly below ophtho average due to metabolic comorbidity confounding and long trial durations.',
+  },
+  diabeticMacularEdema: {
+    indication: 'diabeticMacularEdema',
+    ta: 'ophthalmology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'BCVA letter gain is a validated, objective endpoint. Vabysmo (faricimab) 2022 approval showed strong durability advantage. Phase 2 → 3 at/slightly above ophtho base — well-defined patient population and clear endpoint.',
+  },
+  glaucoma: {
+    indication: 'glaucoma',
+    ta: 'ophthalmology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.95,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'IOP reduction is a clean, objective, regulatory-accepted endpoint. Latanoprost generic dominance limits commercial upside. Netarsudil (Rhopressa), latanoprostene bunod (Vyzulta) recent additions. Phase 2 → 3 near baseline — validated endpoint but hard to beat prostaglandin efficacy.',
+  },
+  retinitisPigmentosa: {
+    indication: 'retinitisPigmentosa',
+    ta: 'ophthalmology',
+    phase1ToPhase2: 0.85,
+    phase2ToPhase3: 0.65,
+    phase3ToApproval: 0.80,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Luxturna (voretigene, 2017) approved for RPE65 biallelic only. Broader RP trials face extreme genetic heterogeneity (>60 genes), slow progression endpoints, and small patient pools per genotype. Phase 2 → 3 ~35% below ophtho base.',
+  },
+
+  // ---------------------------------------------------------------------
+  // CARDIOVASCULAR (5) — new Tier 1 entries (5 existing)
+  // ---------------------------------------------------------------------
+  heartFailureHfpef: {
+    indication: 'heartFailureHfpef',
+    ta: 'cardiovascular',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.80,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; NRDD 2024-2025',
+    sourceYear: 2025,
+    notes:
+      'HFpEF historically the "graveyard" of heart failure — multiple Phase 3 failures (sacubitril/valsartan missed in PARAGON-HF). EMPEROR-Preserved (empagliflozin, 2021) broke through, but Phase 2 → 3 ~20% below CV average due to heterogeneous EF cutoffs, comorbidities, and lack of validated surrogate.',
+  },
+  hypertrophicCardiomyopathy: {
+    indication: 'hypertrophicCardiomyopathy',
+    ta: 'cardiovascular',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Mavacamten (Camzyos, 2022) validated cardiac myosin inhibitor class. LVOT gradient reduction is an objective, hemodynamic endpoint. Phase 2 → 3 above CV average — clear mechanism, defined population, strong Phase 2 effect sizes.',
+  },
+  coronaryArteryDisease: {
+    indication: 'coronaryArteryDisease',
+    ta: 'cardiovascular',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; Wong/Siah/Lo 2019',
+    sourceYear: 2025,
+    notes:
+      'MACE endpoint trials require massive sample sizes (10-15K patients) and long follow-up (3-5 years). Multiple Phase 3 failures in anti-inflammatory approaches (canakinumab signal only, colchicine modest). Below CV average due to high bar for incremental efficacy over statins + antiplatelet SOC.',
+  },
+  stroke: {
+    indication: 'stroke',
+    ta: 'cardiovascular',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.75,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Acute ischemic stroke neuroprotection has been a Phase 3 graveyard for 30+ years (NXY-059, edaravone mixed). Only tPA/tenecteplase and thrombectomy have succeeded. Phase 2 → 3 ~25% below CV average — time-window constraints, heterogeneous stroke subtypes, and functional endpoints (mRS) with high variability.',
+  },
+  venousThromboembolism: {
+    indication: 'venousThromboembolism',
+    ta: 'cardiovascular',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.05,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'DOAC class (rivaroxaban, apixaban, edoxaban) validated. Symptomatic VTE recurrence endpoint is objective and event-driven. Phase 2 → 3 slightly above CV average — well-defined patient population, established trial design from ENGAGE/AMPLIFY/EINSTEIN legacy.',
+  },
+
+  // ---------------------------------------------------------------------
+  // INFECTIOUS DISEASE (5) — new Tier 1 entries (3 existing)
+  // ---------------------------------------------------------------------
+  rsv: {
+    indication: 'rsv',
+    ta: 'infectiousDisease',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'FDA CDER 2024-2025; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Arexvy (GSK), Abrysvo (Pfizer), nirsevimab (Beyfortus) all approved 2023-2024. RSV-LRTI endpoint well-validated, large effect sizes (>80% efficacy in trials). Phase 2 → 3 above ID average — viral endpoint is clean and regulatory path well-established after COVID vaccine infrastructure.',
+  },
+  tuberculosis: {
+    indication: 'tuberculosis',
+    ta: 'infectiousDisease',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.80,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Pretomanid (2019 approval) shortened MDR-TB treatment. But sputum culture conversion endpoint requires 6+ month trials, MDR-TB population is hard to recruit, and drug-drug interactions with multi-drug regimens complicate development. Phase 2 → 3 ~20% below ID average.',
+  },
+  influenza: {
+    indication: 'influenza',
+    ta: 'infectiousDisease',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Baloxavir (Xofluza, 2018) recent approval. Seasonal flu trials require precise timing during flu season, modest effect sizes vs placebo (1 day symptom reduction), and rapid resistance selection. Phase 2 → 3 slightly below ID average.',
+  },
+  hepatitisC: {
+    indication: 'hepatitisC',
+    ta: 'infectiousDisease',
+    phase1ToPhase2: 1.15,
+    phase2ToPhase3: 1.25,
+    phase3ToApproval: 1.20,
+    source: 'BIO 2024-2026; Wong/Siah/Lo 2019',
+    sourceYear: 2025,
+    notes:
+      'SVR12 is the gold-standard curative endpoint in ID — binary, objective, >95% rates with DAAs. Sofosbuvir/Harvoni/Epclusa/Mavyret class represents the highest Phase 2 → 3 success in all of infectious disease. Post-2014 pipeline is thin but the DAA template is proven.',
+  },
+  covid: {
+    indication: 'covid',
+    ta: 'infectiousDisease',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.70,
+    phase3ToApproval: 0.80,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Paxlovid (nirmatrelvir/ritonavir) succeeded but dozens of antivirals, mAbs, and repurposed drugs failed Phase 3 (fluvoxamine, ivermectin, hydroxychloroquine). Rapidly evolving viral variants, declining severity, and high placebo recovery rates make post-2023 COVID trials extremely difficult.',
+  },
+
+  // ---------------------------------------------------------------------
+  // ONCOLOGY (10 more) — filling gaps
+  // ---------------------------------------------------------------------
+  bladder: {
+    indication: 'bladder',
+    ta: 'oncology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Enfortumab vedotin + pembrolizumab (EV-302) transformed 1L metastatic UC in 2024. ADC + IO combo paradigm validated. Phase 2 → 3 below oncology average due to prior chemotherapy-only era failures, but improving with new classes.',
+  },
+  renal: {
+    indication: 'renal',
+    ta: 'oncology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.95,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'IO + TKI combos (Keytruda + Inlyta, Opdivo + Cabometyx, Bavencio + Inlyta) all succeeded Phase 3 in ccRCC. Well-validated PFS + OS endpoints. Phase 2 → 3 near oncology baseline.',
+  },
+  liver: {
+    indication: 'liver',
+    ta: 'oncology',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.75,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'HCC development complicated by underlying liver disease (cirrhosis Child-Pugh scoring), drug metabolism concerns, and post-sorafenib era failures. Atezolizumab + bevacizumab (IMbrave150) succeeded but many IO monotherapy Phase 3s failed. Phase 2 → 3 ~25% below oncology base.',
+  },
+  gastric: {
+    indication: 'gastric',
+    ta: 'oncology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.80,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Zolbetuximab (Vyloy, 2024) validated CLDN18.2 target. But gastric cancer Phase 3 historically difficult — heterogeneous tumors, regional variation (Japan vs West), and chemotherapy backbone complexity. Phase 2 → 3 ~20% below oncology average.',
+  },
+  gbm: {
+    indication: 'gbm',
+    ta: 'oncology',
+    phase1ToPhase2: 0.80,
+    phase2ToPhase3: 0.55,
+    phase3ToApproval: 0.70,
+    source: 'BIO 2024-2026; NRDD 2025; Wong/Siah/Lo 2019',
+    sourceYear: 2025,
+    notes:
+      'GBM has the worst Phase 2 → 3 in all of oncology — 45% below base. BBB penetration, immunosuppressive TME, rapid recurrence, and heterogeneous molecular subtypes. Only temozolomide + RT (Stupp 2005) has shown OS benefit in 20+ years. Dozens of Phase 3 failures (bevacizumab, nivolumab, TTFields controversy).',
+  },
+  breast_hr: {
+    indication: 'breast_hr',
+    ta: 'oncology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'CDK4/6 class (palbociclib, ribociclib, abemaciclib) transformed HR+ mBC. monarchE adjuvant success established abemaciclib beyond metastatic. Phase 2 → 3 at/slightly above oncology average — well-defined patient population and PFS/iDFS endpoints.',
+  },
+  lung_sclc: {
+    indication: 'lung_sclc',
+    ta: 'oncology',
+    phase1ToPhase2: 0.85,
+    phase2ToPhase3: 0.70,
+    phase3ToApproval: 0.80,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'SCLC has historically poor Phase 2 → 3 attrition (~30% below oncology base). Only atezolizumab + chemo (IMpower133) and durvalumab + chemo (CASPIAN) added OS benefit beyond etoposide/platinum in 30 years. Rapid progression, chemo sensitivity but rapid resistance, and limited targetable drivers.',
+  },
+  mds: {
+    indication: 'mds',
+    ta: 'oncology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Luspatercept (Reblozyl) and imetelstat (Rytelo) recently approved. IWG response criteria well-validated. Phase 2 → 3 slightly below oncology average — heterogeneous disease subtypes and HMA backbone.',
+  },
+  cervical: {
+    indication: 'cervical',
+    ta: 'oncology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Pembrolizumab (KEYNOTE-826) + tisotumab vedotin (Tivdak) approvals. HPV+ tumor immunogenicity supports IO response. Phase 2 → 3 near oncology baseline — OS/PFS validated endpoints, clear unmet need in advanced disease.',
+  },
+  endometrial: {
+    indication: 'endometrial',
+    ta: 'oncology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.95,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Pembrolizumab + lenvatinib (KEYNOTE-775) succeeded in MSS population. dMMR/MSI-H subset has exceptional IO responses. Phase 2 → 3 near oncology baseline for combination approaches.',
+  },
+
+  // ---------------------------------------------------------------------
+  // NEUROLOGY (8 more) — filling gaps
+  // ---------------------------------------------------------------------
+  narcolepsy: {
+    indication: 'narcolepsy',
+    ta: 'neurology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Orexin receptor agonists (TAK-994 failed on safety, but suvorexant class validated mechanism) + sodium oxybate (Xywav, Lumryz) show path. MWT/ESS endpoints well-validated and objective. Phase 2 → 3 above neuro average — clear mechanism, defined population, validated biomarkers (CSF hypocretin).',
+  },
+  bipolar: {
+    indication: 'bipolar',
+    ta: 'neurology',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.80,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; Wong/Siah/Lo 2019',
+    sourceYear: 2025,
+    notes:
+      'YMRS/MADRS rating scales have high placebo response (35-45%). Phase 2 → 3 ~20% below neuro average. Lithium, valproate, and atypical antipsychotics dominate; cariprazine (Vraylar) is a recent success but most novel mechanisms fail on efficacy vs active comparator.',
+  },
+  adhd: {
+    indication: 'adhd',
+    ta: 'neurology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.0,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'ADHD-RS-5 endpoint well-validated, large effect sizes for stimulants. Non-stimulant class (viloxazine/Qelbree, centanafadine) shows moderate success. Phase 2 → 3 at neuro baseline — established endpoints but commercial challenge from generic stimulant dominance.',
+  },
+  addiction: {
+    indication: 'addiction',
+    ta: 'neurology',
+    phase1ToPhase2: 0.85,
+    phase2ToPhase3: 0.65,
+    phase3ToApproval: 0.75,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Addiction (AUD, OUD, stimulant use disorder) has historically poor Phase 2 → 3 (~35% below neuro base). High dropout rates (30-50%), heterogeneous endpoints (abstinence vs harm reduction), relapse complexity, and lack of validated surrogate markers. Only naltrexone, buprenorphine, acamprosate have endured.',
+  },
+  myasthenia: {
+    indication: 'myasthenia',
+    ta: 'neurology',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Complement inhibitors (eculizumab/Soliris, ravulizumab/Ultomiris), FcRn antagonists (efgartigimod/Vyvgart, rozanolixizumab/Rystiggo), and CD19 (inebilizumab) have validated multiple mechanisms in gMG. MG-ADL endpoint is well-accepted. Phase 2 → 3 above neuro average.',
+  },
+  pain: {
+    indication: 'pain',
+    ta: 'neurology',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.70,
+    phase3ToApproval: 0.80,
+    source: 'BIO 2024-2026; Wong/Siah/Lo 2019',
+    sourceYear: 2025,
+    notes:
+      'Chronic pain trials face 30-40% placebo response rates, subjective NRS endpoints, and enriched enrollment design debates. Anti-CGRP class (migraine-adjacent) succeeded but chronic neuropathic pain remains extremely challenging. Tanezumab (anti-NGF) failed on joint safety. Phase 2 → 3 ~30% below neuro average.',
+  },
+  trd: {
+    indication: 'trd',
+    ta: 'neurology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Esketamine (Spravato, 2019) validated NMDA pathway for TRD. MADRS endpoint, but active comparator designs required (antidepressant switching is the SOC). Phase 2 → 3 slightly below neuro average — better than broad depression but still high placebo response.',
+  },
+  frontotemporal: {
+    indication: 'frontotemporal',
+    ta: 'neurology',
+    phase1ToPhase2: 0.80,
+    phase2ToPhase3: 0.55,
+    phase3ToApproval: 0.70,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'FTD has no approved disease-modifying therapy. Heterogeneous pathology (tau, TDP-43, FUS), lack of validated biomarker-to-clinical endpoint translation, and small populations. Phase 2 → 3 ~45% below neuro base — comparable to GBM in difficulty.',
+  },
+
+  // ---------------------------------------------------------------------
+  // IMMUNOLOGY (7 more) — filling gaps
+  // ---------------------------------------------------------------------
+  lupusNephritis: {
+    indication: 'lupusNephritis',
+    ta: 'immunology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Voclosporin (Lupkynis, 2021) and belimumab (LN indication, 2020) validated calcineurin inhibitor and BLyS pathways. Renal response (CRR/PRR) endpoints are objective but heterogeneous lupus flare patterns and variable background therapy complicate Phase 2 → 3. ~15% below immunology average.',
+  },
+  psoriaticArthritis: {
+    indication: 'psoriaticArthritis',
+    ta: 'immunology',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'IL-17/IL-23/JAK/PDE4 classes all have PsA approvals (secukinumab, guselkumab, tofacitinib, apremilast). ACR20 co-primary + skin clearance. Phase 2 → 3 above immunology average — dual-domain endpoint means dual validation; highly successful class development.',
+  },
+  ankylosingSpondylitis: {
+    indication: 'ankylosingSpondylitis',
+    ta: 'immunology',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'IL-17 class (secukinumab, ixekizumab) and JAK (tofacitinib, upadacitinib) validated ASAS20/40 endpoints. Clear unmet need in TNF-IR population. Phase 2 → 3 above immunology average — well-defined criteria and consistent effect sizes.',
+  },
+  ipf: {
+    indication: 'ipf',
+    ta: 'immunology',
+    phase1ToPhase2: 0.85,
+    phase2ToPhase3: 0.70,
+    phase3ToApproval: 0.80,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Only pirfenidone and nintedanib approved, both with modest FVC decline reduction. Phase 2 → 3 historically poor (~30% below immunology average) — FVC decline is slow and variable, high placebo arm stability, and multiple mechanism failures (PHTX3, pamrevlumab). Inhaled therapies and combination trials underway.',
+  },
+  igan: {
+    indication: 'igan',
+    ta: 'immunology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.95,
+    phase3ToApproval: 1.0,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Sparsentan (Filspari, 2023) and budesonide delayed-release (Tarpeyo, 2021) approvals validated proteinuria reduction endpoint (UPCR/eGFR slope). Phase 2 → 3 near immunology baseline — proteinuria is objective but confounded by variable RAS-inhibitor background.',
+  },
+  gvhd: {
+    indication: 'gvhd',
+    ta: 'immunology',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Ruxolitinib (Jakafi) approved acute + chronic GVHD. Belumosudil (Rezurock) added for cGVHD. Overall response rate (ORR) at day 28 is an FDA-accepted endpoint. Phase 2 → 3 slightly below immunology average due to heterogeneous transplant population and steroid-refractory stratification.',
+  },
+  copd: {
+    indication: 'copd',
+    ta: 'immunology',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Dupixent (dupilumab) COPD approval (2024) validated type-2 inflammation path for eosinophilic COPD. FEV1 and exacerbation reduction endpoints are validated but heterogeneous COPD population and strong LABA/LAMA/ICS SOC make Phase 2 → 3 ~15% below immunology average.',
+  },
+
+  // ---------------------------------------------------------------------
+  // METABOLIC (6 more) — filling gaps
+  // ---------------------------------------------------------------------
+  type1Diabetes: {
+    indication: 'type1Diabetes',
+    ta: 'metabolic',
+    phase1ToPhase2: 0.90,
+    phase2ToPhase3: 0.75,
+    phase3ToApproval: 0.85,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Teplizumab (Tzield, 2022) first disease-modifying T1D therapy but approved only for delay (not prevention). Phase 2 → 3 ~25% below metabolic average — autoimmune destruction is hard to halt, C-peptide preservation is a validated but noisy endpoint, and islet cell regeneration remains elusive.',
+  },
+  gout: {
+    indication: 'gout',
+    ta: 'metabolic',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Serum urate <6 mg/dL is a clean, objective, validated endpoint. Pegloticase (Krystexxa), lesinurad (Zurampic), and febuxostat (Uloric) all approved. Phase 2 → 3 slightly above metabolic average — biochemical endpoint with clear dose-response. URAT1 inhibitor pipeline showing promise.',
+  },
+  diabeticKidneyDisease: {
+    indication: 'diabeticKidneyDisease',
+    ta: 'metabolic',
+    phase1ToPhase2: 0.95,
+    phase2ToPhase3: 0.85,
+    phase3ToApproval: 0.90,
+    source: 'BIO 2024-2026; NRDD 2025',
+    sourceYear: 2025,
+    notes:
+      'Finerenone (Kerendia, 2021) validated nonsteroidal MRA path for DKD. SGLT2 class (dapagliflozin, canagliflozin) also CKD-approved. eGFR slope and kidney failure composite endpoints accepted. Phase 2 → 3 slightly below metabolic average — long trials (2-3 years), renal composites require large N.',
+  },
+  sickleCell: {
+    indication: 'sickleCell',
+    ta: 'metabolic',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 0.90,
+    phase3ToApproval: 0.95,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Voxelotor (Oxbryta, 2019 — withdrawn 2024), crizanlizumab (Adakveo), and gene therapies (Casgevy, Lyfgenia, 2023). VOC crisis frequency endpoint validated but heterogeneous. Phase 2 → 3 slightly below metabolic average due to recruitment challenges and endpoint variability. Gene therapy path validated.',
+  },
+  hemophiliaA: {
+    indication: 'hemophiliaA',
+    ta: 'metabolic',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Emicizumab (Hemlibra) validated bispecific antibody path; fitusiran (Alhemo) anti-TFPI. Gene therapy (valoctocogene/Roctavian) approved. ABR (annualized bleed rate) is an objective, validated endpoint. Phase 2 → 3 above metabolic average — clear pharmacodynamic readout and well-defined population.',
+  },
+  fabry: {
+    indication: 'fabry',
+    ta: 'metabolic',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Agalsidase alfa/beta (Fabrazyme, Replagal) ERT + migalastat (Galafold) chaperone approved. GL-3 substrate reduction is a validated biomarker. Phase 2 → 3 above metabolic average — well-defined genetic population, objective biochemical endpoint. Next-gen gene therapy in trials.',
+  },
+
+  // ---------------------------------------------------------------------
+  // RARE DISEASE (5 more) — filling gaps
+  // ---------------------------------------------------------------------
+  fabryDisease: {
+    indication: 'fabryDisease',
+    ta: 'rareDisease',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Same biological rationale as metabolic fabry entry. Rare disease TA context: orphan designation + validated GL-3 endpoint + genetic diagnosis certainty = above-average Phase 2 → 3 for rare disease.',
+  },
+  gaucherDisease: {
+    indication: 'gaucherDisease',
+    ta: 'rareDisease',
+    phase1ToPhase2: 1.10,
+    phase2ToPhase3: 1.15,
+    phase3ToApproval: 1.10,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Cerezyme, Cerdelga, eliglustat — multiple approved options. GCase activity and chitotriosidase biomarkers well-validated. Phase 2 → 3 above rare disease average — Gaucher is the most well-characterized LSD with objective biochemical and visceral endpoints.',
+  },
+  pompeDisease: {
+    indication: 'pompeDisease',
+    ta: 'rareDisease',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'BIO 2024-2026; FDA CDER 2024',
+    sourceYear: 2025,
+    notes:
+      'Lumizyme/Myozyme (alglucosidase alfa) + avalglucosidase alfa (Nexviazyme, 2021) approved. 6MWT and FVC endpoints validated for LOPD. Phase 2 → 3 at/slightly above rare disease average — enzyme replacement proof-of-concept well-established.',
+  },
+  achondroplasia: {
+    indication: 'achondroplasia',
+    ta: 'rareDisease',
+    phase1ToPhase2: 1.05,
+    phase2ToPhase3: 1.10,
+    phase3ToApproval: 1.05,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Vosoritide (Voxzogo, 2021) validated CNP pathway. Annualized growth velocity is an objective, validated endpoint. Phase 2 → 3 above rare disease average — clear mechanism, defined population (FGFR3 mutation), and measurable pharmacodynamic endpoint.',
+  },
+  dravetSyndrome: {
+    indication: 'dravetSyndrome',
+    ta: 'rareDisease',
+    phase1ToPhase2: 1.0,
+    phase2ToPhase3: 1.05,
+    phase3ToApproval: 1.0,
+    source: 'FDA CDER 2024; BIO 2024-2026',
+    sourceYear: 2025,
+    notes:
+      'Epidiolex (cannabidiol, 2018), fenfluramine (Fintepla, 2020), and stiripentol (Diacomit) approved. Seizure frequency reduction is an objective, validated endpoint. Phase 2 → 3 at/slightly above rare disease average — clear genetic diagnosis (SCN1A) and well-defined endpoint, but small N trials.',
+  },
 };
 
 /**
