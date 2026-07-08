@@ -167,7 +167,7 @@ export default async function GlossaryTermPage({
               See How {entry.term} Affects Deal Economics
             </h2>
             <p className="text-slate-600 mb-8">
-              Model deal terms with real benchmark data from 1,900+ biopharma transactions.
+              Model deal terms with real benchmark data from 1,500+ biopharma transactions.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
+import { DEAL_STATS } from '@/lib/config/constants';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 120;
@@ -303,7 +304,7 @@ REAL DATA FOR THIS WEEK (use ONLY these — do not fabricate):
 
 Generate exactly 3 post drafts. Each needs a DIFFERENT angle from the data above. If the data doesn't support a strong post, say so — don't force weak content.
 
-Each post must include a "first_comment" field — the text Issa posts as the FIRST COMMENT immediately after publishing. This is where the link goes. Format it naturally: "Full deal comps across 1,900+ transactions → calculator.ambrosiaventures.co/benchmarks" — not a bare URL.
+Each post must include a "first_comment" field — the text Issa posts as the FIRST COMMENT immediately after publishing. This is where the link goes. Format it naturally: "Full deal comps across ${DEAL_STATS.TOTAL_DEALS} transactions → calculator.ambrosiaventures.co/benchmarks" — not a bare URL.
 
 FORMAT (return ONLY this JSON array, nothing else):
 [{
@@ -362,7 +363,7 @@ FORMAT (return ONLY this JSON array, nothing else):
     return {
       title: d.title || 'Untitled Draft',
       body,
-      first_comment: d.first_comment || `Deal benchmarks across 1,900+ verified transactions → ${d.link_url || 'calculator.ambrosiaventures.co'}`,
+      first_comment: d.first_comment || `Deal benchmarks across ${DEAL_STATS.TOTAL_DEALS} verified transactions → ${d.link_url || 'calculator.ambrosiaventures.co'}`,
       link_url: d.link_url || 'https://calculator.ambrosiaventures.co/pulse',
     };
   });

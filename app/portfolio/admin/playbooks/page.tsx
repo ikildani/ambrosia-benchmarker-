@@ -5,6 +5,7 @@ import { BookOpen, Plus, ChevronDown, ChevronRight, Lock, ArrowUpRight } from 'l
 import { HelpTooltip } from '@/components/portfolio';
 import { useAuth } from '@/contexts/AuthContext';
 import { isScalePlus } from '@/lib/portfolio/feature-gates';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface KeyTerm {
   term: string;
@@ -196,7 +197,7 @@ export default function PlaybooksPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <BookOpen className="w-6 h-6 text-teal-400" />
-          <span className="inline-flex items-center gap-1.5">Negotiation Playbooks <HelpTooltip text="Negotiation frameworks with benchmark ranges derived from 1,900+ disclosed biopharma transactions. Use these as starting points — adjust for your specific deal context." /></span>
+          <span className="inline-flex items-center gap-1.5">Negotiation Playbooks <HelpTooltip text={`Negotiation frameworks with benchmark ranges derived from ${DEAL_STATS.TOTAL_DEALS} disclosed biopharma transactions. Use these as starting points — adjust for your specific deal context.`} /></span>
         </h1>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
@@ -208,7 +209,7 @@ export default function PlaybooksPage() {
       </div>
 
       <p className="text-sm text-slate-400">
-        Negotiation frameworks and term benchmarks from 1,900+ biopharma deals
+        Negotiation frameworks and term benchmarks from {DEAL_STATS.TOTAL_DEALS} biopharma deals
       </p>
 
       {/* Filter bar */}
@@ -309,7 +310,7 @@ export default function PlaybooksPage() {
           <BookOpen className="w-10 h-10 text-slate-600 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-white mb-1">No matching playbooks</h3>
           <p className="text-sm text-slate-400 mb-4">
-            Access negotiation frameworks built from 1,900+ real deals. System playbooks are loaded automatically — check your filters.
+            Access negotiation frameworks built from {DEAL_STATS.TOTAL_DEALS} real deals. System playbooks are loaded automatically — check your filters.
           </p>
         </div>
       ) : (

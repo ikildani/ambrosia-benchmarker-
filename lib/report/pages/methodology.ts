@@ -4,6 +4,7 @@
 import { logoIconColor } from '../logo';
 import { pageHeader, pageFooter, COLORS, formatDate, escapeHtml } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): string {
   const modifierNames = data.result.modifiers.map(m => m.name);
@@ -21,7 +22,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
           <div class="section-title">How the Model Works</div>
           <div class="card" style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">
             <p style="margin-bottom: 7px;">
-              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against 2,500+ publicly disclosed pharmaceutical licensing transactions from 2017\u20132026.
+              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against ${DEAL_STATS.TOTAL_DEALS} publicly disclosed pharmaceutical licensing transactions from 2017\u20132026.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>Base Valuation:</strong> Initial deal value ranges are established using therapeutic area-specific benchmarks derived from actual transaction data, stratified by development phase.
@@ -77,7 +78,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
       <div class="disclaimer-box">
         <div style="font-weight: 700; margin-bottom: 6px; font-size: 10px; color: ${COLORS.gray600};">ABOUT THESE BENCHMARKS</div>
         <p style="margin-bottom: 5px;">
-          This report is produced by the Ambrosia Deal Benchmarker, calibrated against 3,000+ verified biopharma transactions from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
+          This report is produced by the Ambrosia Deal Benchmarker, calibrated against ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
         </p>
         <p style="margin-bottom: 5px;">
           Individual deal outcomes depend on asset-specific factors including proprietary clinical data, IP landscape, competitive dynamics, regulatory interactions, and negotiation leverage. These benchmarks provide data-driven anchor points for deal strategy — for definitive structuring, engage qualified financial and legal advisors.

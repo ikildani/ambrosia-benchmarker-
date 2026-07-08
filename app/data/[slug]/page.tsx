@@ -8,6 +8,7 @@ import {
 } from '@/lib/seo/programmatic-pages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { ProGate } from '@/components/seo/ProGate';
+import { DEAL_STATS } from '@/lib/config/constants';
 import dynamic from 'next/dynamic';
 
 const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
@@ -403,7 +404,7 @@ export default async function ProgrammaticDataPage({
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors">Licensing Benchmarks Guide</p>
-                  <p className="text-xs text-slate-500">2026 data from 1,900+ deals</p>
+                  <p className="text-xs text-slate-500">2026 data from {DEAL_STATS.TOTAL_DEALS} deals</p>
                 </div>
               </Link>
 

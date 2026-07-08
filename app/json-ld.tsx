@@ -1,4 +1,5 @@
 import { generateOrganizationSchema, generateSoftwareApplicationSchema, generateDatasetSchema, generateWebSiteSchema, generateHowToSchema, generatePricingSchema, generateWebPageSchema } from '@/lib/seo/structured-data';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export function GlobalJsonLd() {
   const organizationSchema = generateOrganizationSchema();
@@ -10,7 +11,7 @@ export function GlobalJsonLd() {
 
   const calculatorPageSchema = generateWebPageSchema({
     name: 'Life Sciences Deal Calculator',
-    description: 'Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from 3,000+ real transactions.',
+    description: `Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     url: 'https://calculator.ambrosiaventures.co/calculator',
   });
 

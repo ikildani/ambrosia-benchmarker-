@@ -36,7 +36,7 @@ const guides = [
   {
     slug: 'negotiate-pharma-royalty-rates',
     title: 'How to Negotiate Pharma Licensing Royalty Rates',
-    description: 'Data-backed strategies for structuring and negotiating royalty rates in biopharma licensing deals, with benchmarks from 1,900+ transactions.',
+    description: `Data-backed strategies for structuring and negotiating royalty rates in biopharma licensing deals, with benchmarks from ${DEAL_STATS.TOTAL_DEALS} transactions.`,
     readTime: '14 min read',
     tags: ['Royalties', 'Negotiation', 'Benchmarks', 'Territory'],
   },
@@ -63,8 +63,8 @@ const guides = [
   },
   {
     slug: 'biopharma-licensing-benchmarks',
-    title: 'Biopharma Licensing Benchmarks 2026: Data From 1,900+ Deals',
-    description: 'Comprehensive benchmarks for upfront payments, milestones, and royalties by phase, modality, and therapeutic area — based on 1,900+ disclosed transactions.',
+    title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
+    description: `Comprehensive benchmarks for upfront payments, milestones, and royalties by phase, modality, and therapeutic area — based on ${DEAL_STATS.TOTAL_DEALS} disclosed transactions.`,
     readTime: '14 min read',
     tags: ['Benchmarks', 'Deal Terms', 'Data', '2026'],
   },

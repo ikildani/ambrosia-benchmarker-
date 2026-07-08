@@ -3,8 +3,7 @@
  *
  * Additive adjustments that compound on top of the STRATEGIC_PREMIUM
  * multiplier in institutional-upgrades.ts. Each dimension is empirically
- * grounded in deal premium differentials observed across the 1,900+
- * transaction dataset.
+ * grounded in deal premium differentials observed across the full deal corpus (see DEAL_STATS in constants.ts).
  *
  * Calibration approach: for each factor, we compared median upfront/TDV
  * for deals where the factor was present vs absent, controlling for

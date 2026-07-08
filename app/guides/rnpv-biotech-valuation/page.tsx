@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation: Complete Guide | Ambrosia Ventures',
@@ -187,7 +188,7 @@ export default function RnpvBiotechValuationPage() {
             </h3>
 
             <p className="text-slate-600 leading-relaxed mb-4">
-              The table below shows cumulative PoS rates from Phase 1 through approval, drawn from our engine&apos;s calibration against 1,900+ real biopharma transactions. These rates reflect the compounding effect of all phase transitions and are the inputs that drive our rNPV calculations.
+              The table below shows cumulative PoS rates from Phase 1 through approval, drawn from our engine&apos;s calibration against {DEAL_STATS.TOTAL_DEALS} real biopharma transactions. These rates reflect the compounding effect of all phase transitions and are the inputs that drive our rNPV calculations.
             </p>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
@@ -217,14 +218,14 @@ export default function RnpvBiotechValuationPage() {
             </div>
 
             <p className="text-xs text-slate-400 mb-6">
-              Source: Ambrosia Ventures engine calibration, 1,900+ transactions analyzed as of April 2026. Rates represent all-comers averages; individual asset PoS varies by modality, biomarker selection, and sponsor experience.
+              Source: Ambrosia Ventures engine calibration, {DEAL_STATS.TOTAL_DEALS} transactions analyzed as of April 2026. Rates represent all-comers averages; individual asset PoS varies by modality, biomarker selection, and sponsor experience.
             </p>
 
             {/* Inline CTA after PoS section */}
             <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-6 my-8">
               <p className="text-slate-900 font-semibold text-lg mb-2">Run rNPV analysis on your asset</p>
               <p className="text-slate-600 mb-4">
-                Our engine covers 12 therapeutic areas and 23+ modalities, calibrated against 1,900+ real transactions. Get probability-weighted valuations, Monte Carlo distributions, and deal benchmarks in seconds.
+                Our engine covers 12 therapeutic areas and 23+ modalities, calibrated against {DEAL_STATS.TOTAL_DEALS} real transactions. Get probability-weighted valuations, Monte Carlo distributions, and deal benchmarks in seconds.
               </p>
               <Link href="/calculator" className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors text-sm">
                 Start rNPV Analysis
@@ -301,7 +302,7 @@ export default function RnpvBiotechValuationPage() {
             </div>
 
             <p className="text-slate-600 leading-relaxed">
-              Best practice is to triangulate: use rNPV as the primary valuation framework, validate against comparable transactions from our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link> of 1,900+ deals, and supplement with DCF for commercial-stage assets. Our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">calculator</Link> produces all three perspectives in a single analysis.
+              Best practice is to triangulate: use rNPV as the primary valuation framework, validate against comparable transactions from our <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark database</Link> of {DEAL_STATS.TOTAL_DEALS} deals, and supplement with DCF for commercial-stage assets. Our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">calculator</Link> produces all three perspectives in a single analysis.
             </p>
 
             {/* Section 3 */}

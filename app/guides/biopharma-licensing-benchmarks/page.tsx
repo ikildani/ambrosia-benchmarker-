@@ -2,10 +2,11 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biopharma Licensing Benchmarks 2026: Data From 1,900+ Deals | Ambrosia Ventures',
-  description: 'Comprehensive biopharma licensing benchmarks for 2026 including upfront payments, milestones, royalties by phase, modality, and therapeutic area. Based on 1,900+ disclosed transactions.',
+  title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals | Ambrosia Ventures`,
+  description: `Comprehensive biopharma licensing benchmarks for 2026 including upfront payments, milestones, royalties by phase, modality, and therapeutic area. Based on ${DEAL_STATS.TOTAL_DEALS} disclosed transactions.`,
   keywords: [
     'biopharma licensing benchmarks',
     'pharma deal benchmarks',
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     'pharma deal comparables',
   ],
   openGraph: {
-    title: 'Biopharma Licensing Benchmarks 2026: Data From 1,900+ Deals',
+    title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
     description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, and royalties by phase, modality, and therapeutic area.',
     type: 'article',
     url: 'https://calculator.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Biopharma Licensing Benchmarks 2026: Data From 1,900+ Deals',
+    title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
     description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, and royalties.',
   },
   alternates: {
@@ -41,7 +42,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'Biopharma Licensing Benchmarks 2026: Data From 1,900+ Deals',
+    headline: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
     description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, royalties by phase, modality, and therapeutic area.',
     author: {
       '@type': 'Organization',
@@ -70,7 +71,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
         name: 'What is a typical upfront payment for a Phase 2 biopharma licensing deal?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Based on analysis of 1,900+ disclosed transactions, the median upfront payment for a Phase 2 biopharma licensing deal is $50M, with the 25th percentile at $20M and the 75th percentile at $125M. Oncology Phase 2 deals skew higher (median $75M) due to larger commercial opportunities, while rare disease deals command premiums for validated targets with clear regulatory pathways.',
+          text: `Based on analysis of ${DEAL_STATS.TOTAL_DEALS} disclosed transactions, the median upfront payment for a Phase 2 biopharma licensing deal is $50M, with the 25th percentile at $20M and the 75th percentile at $125M. Oncology Phase 2 deals skew higher (median $75M) due to larger commercial opportunities, while rare disease deals command premiums for validated targets with clear regulatory pathways.`,
         },
       },
       {
@@ -126,7 +127,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
             </h1>
 
             <p className="mt-6 text-xl text-slate-300 leading-relaxed">
-              Based on analysis of 1,900+ disclosed transactions. Upfront payments, milestones, royalties, and total deal values broken down by phase, modality, therapeutic area, and deal type.
+              Based on analysis of {DEAL_STATS.TOTAL_DEALS} disclosed transactions. Upfront payments, milestones, royalties, and total deal values broken down by phase, modality, therapeutic area, and deal type.
             </p>
           </div>
         </header>
@@ -135,7 +136,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
         <article className="max-w-3xl mx-auto px-4 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
             <p className="text-xl text-slate-700 leading-relaxed">
-              Licensing deal benchmarks are the foundation of every biopharma negotiation, board presentation, and investment committee memo. Yet most teams rely on a handful of publicly cited comparables or outdated industry reports. This page provides comprehensive, current benchmarks derived from the largest proprietary dataset of disclosed biopharma transactions available: 1,900+ deals spanning 12 therapeutic areas, 23+ modalities, and all clinical phases from discovery through approved products.
+              Licensing deal benchmarks are the foundation of every biopharma negotiation, board presentation, and investment committee memo. Yet most teams rely on a handful of publicly cited comparables or outdated industry reports. This page provides comprehensive, current benchmarks derived from the largest proprietary dataset of disclosed biopharma transactions available: {DEAL_STATS.TOTAL_DEALS} deals spanning 12 therapeutic areas, 23+ modalities, and all clinical phases from discovery through approved products.
             </p>
 
             <p className="text-slate-600 leading-relaxed">
@@ -213,7 +214,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
 
             {/* Mid-article CTA 1 */}
             <div className="my-10 p-6 bg-gradient-to-r from-slate-50 to-teal-50 rounded-xl border border-teal-100">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Benchmark your deal against 1,900+ transactions</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Benchmark your deal against {DEAL_STATS.TOTAL_DEALS} transactions</h3>
               <p className="text-slate-600 mb-4">Enter your asset details and get instant comparisons to real deal terms by phase, modality, and therapeutic area.</p>
               <Link href="/calculator" className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors">
                 Open the Calculator
@@ -349,7 +350,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
               Benchmark Your Next Deal
             </h2>
             <p className="text-teal-100 mb-8 text-lg">
-              Our calculator applies these benchmarks automatically, generating phase-, modality-, and TA-specific deal terms with rNPV validation across 1,900+ comparable transactions.
+              Our calculator applies these benchmarks automatically, generating phase-, modality-, and TA-specific deal terms with rNPV validation across {DEAL_STATS.TOTAL_DEALS} comparable transactions.
             </p>
             <Link
               href="/calculator"
@@ -380,7 +381,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  Based on our analysis of 1,900+ transactions, the median upfront for a Phase 2 licensing deal is $50M, with the 25th percentile at $20M and the 75th percentile at $125M. Oncology Phase 2 deals skew higher (median $75M), while rare disease deals command premiums for validated targets. Use our <Link href="/calculator" className="text-teal-600 hover:text-teal-700">calculator</Link> to get benchmarks specific to your asset.
+                  Based on our analysis of {DEAL_STATS.TOTAL_DEALS} transactions, the median upfront for a Phase 2 licensing deal is $50M, with the 25th percentile at $20M and the 75th percentile at $125M. Oncology Phase 2 deals skew higher (median $75M), while rare disease deals command premiums for validated targets. Use our <Link href="/calculator" className="text-teal-600 hover:text-teal-700">calculator</Link> to get benchmarks specific to your asset.
                 </div>
               </details>
 
@@ -437,7 +438,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Benchmark your deal against 1,900+ transactions' },
+                { href: '/calculator', title: 'Deal Calculator', desc: `Benchmark your deal against ${DEAL_STATS.TOTAL_DEALS} transactions` },
                 { href: '/methodology', title: 'Methodology', desc: 'Data sources and model assumptions' },
                 { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Guide', desc: 'Risk-adjusted valuation methodology' },
               ].map((resource) => (

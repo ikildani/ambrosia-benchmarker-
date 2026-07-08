@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useState, useEffect } from 'react';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface PhaseDataPoint {
   phase: string;
@@ -142,7 +143,7 @@ export function PhaseUpfrontChart({ data, title, yLabel = 'Median Upfront ($M)',
         </ResponsiveContainer>
       </div>
       <p className="text-[11px] text-slate-400 mt-3 text-center tracking-wide">
-        Source: Ambrosia Ventures | 1,900+ verified transactions (2020-2026) | SEC filings, FTC premerger filings, press releases
+        Source: Ambrosia Ventures | {DEAL_STATS.TOTAL_DEALS} verified transactions (2020-2026) | SEC filings, FTC premerger filings, press releases
       </p>
     </div>
   );

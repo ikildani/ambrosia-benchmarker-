@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import SharedCalculationView from '@/components/SharedCalculationView';
 import { ShareEmailGate } from '@/components/share/ShareEmailGate';
 import { createServerClient } from '@/lib/supabase/server';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const ShareViewTracker = dynamic(() => import('@/components/insights/ShareViewTracker').then(m => ({ default: m.ShareViewTracker })));
 
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `${baseUrl}/api/og/share/${token}`;
 
   let title = 'Deal Analysis | Ambrosia Ventures';
-  let description = 'Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across 1,900+ transactions.';
+  let description = 'Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across 1,500+ transactions.';
 
   try {
     const response = await fetch(`${baseUrl}/api/share/${token}`, { cache: 'no-store' });
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       const data = await response.json();
       if (data.labels) {
         title = `${data.labels.modality} ${data.labels.indication} Deal Analysis | Ambrosia Ventures`;
-        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from 1,900+ transactions.`;
+        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from 1,500+ transactions.`;
       }
     }
   } catch { /* generic metadata fallback */ }
@@ -104,7 +105,7 @@ export default async function SharePage({ params }: Props) {
           <div className="flex items-center gap-3 text-sm text-slate-400 mt-2">
             <span className="px-2.5 py-1 rounded-md bg-white/[0.06] border border-white/[0.08] text-xs font-semibold text-slate-300">{phase}</span>
             <span className="text-slate-500">&bull;</span>
-            <span className="text-xs text-slate-400">Based on 2,700+ biopharma transactions</span>
+            <span className="text-xs text-slate-400">Based on {DEAL_STATS.TOTAL_DEALS} biopharma transactions</span>
           </div>
         </div>
       </header>

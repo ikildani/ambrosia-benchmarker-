@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllInsightSlugs } from '@/lib/insightPages';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Insights | Ambrosia Ventures',
-  description: 'Data-driven insights on biopharma deal structure, licensing benchmarks, upfront payments, milestones, and royalty rates across 1,900+ transactions.',
+  description: `Data-driven insights on biopharma deal structure, licensing benchmarks, upfront payments, milestones, and royalty rates across ${DEAL_STATS.TOTAL_DEALS} transactions.`,
   alternates: { canonical: 'https://calculator.ambrosiaventures.co/insights' },
   openGraph: {
     title: 'Biopharma Deal Insights | Ambrosia Ventures',
@@ -46,7 +47,7 @@ export default function InsightsIndexPage() {
           <p className="text-xs font-bold text-teal-400 tracking-[0.15em] uppercase mb-3">Deal Intelligence</p>
           <h1 className="text-4xl font-bold text-white mb-4">Biopharma Deal Insights</h1>
           <p className="text-lg text-slate-400 max-w-2xl">
-            Data-driven analysis of biopharma deal structure, licensing benchmarks, and valuation trends — backed by 1,900+ real transactions.
+            Data-driven analysis of biopharma deal structure, licensing benchmarks, and valuation trends — backed by {DEAL_STATS.TOTAL_DEALS} real transactions.
           </p>
         </div>
 

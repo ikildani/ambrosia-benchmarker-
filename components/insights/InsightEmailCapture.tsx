@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface InsightEmailCaptureProps {
   slug: string;
@@ -64,7 +65,7 @@ export function InsightEmailCapture({ slug }: InsightEmailCaptureProps) {
           Get deal intelligence in your inbox
         </h3>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-          Weekly benchmarks, market signals, and deal analysis from 1,900+ transactions.
+          Weekly benchmarks, market signals, and deal analysis from {DEAL_STATS.TOTAL_DEALS} transactions.
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">

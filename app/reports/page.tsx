@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { BarChart3, ArrowRight } from 'lucide-react';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Life Sciences Deal Reports | Market Intelligence | Ambrosia Ventures',
@@ -29,7 +30,7 @@ const reports = [
   {
     slug: 'deal-trends-2026',
     title: 'Life Sciences Deal Trends 2026',
-    description: 'Annual market report covering deal volume by therapeutic area, hottest modalities, phase trends, geographic shifts, and 2027 outlook. Data from 3,000+ biopharma transactions.',
+    description: `Annual market report covering deal volume by therapeutic area, hottest modalities, phase trends, geographic shifts, and 2027 outlook. Data from ${DEAL_STATS.TOTAL_DEALS} biopharma transactions.`,
     date: 'March 2026',
     tags: ['Annual Report', 'Deal Trends', 'Market Data'],
   },

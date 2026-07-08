@@ -12,6 +12,7 @@ import SignInForm from './auth/SignInForm';
 import ForgotPasswordForm from './auth/ForgotPasswordForm';
 import VerifyEmailView from './auth/VerifyEmailView';
 import SocialSignInButtons from './auth/SocialSignInButtons';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -65,7 +66,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
 
   const getSubtitle = () => {
     switch (mode) {
-      case 'signup': return 'Access deal benchmarks from 1,900+ verified transactions';
+      case 'signup': return `Access deal benchmarks from ${DEAL_STATS.TOTAL_DEALS} verified transactions`;
       case 'signin': return 'Welcome back to Ambrosia Ventures';
       case 'forgot-password': return 'We\'ll send you a link to reset your password';
       case 'verify-email': return 'We sent a verification link to your email';

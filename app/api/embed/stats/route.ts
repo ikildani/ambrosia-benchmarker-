@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { LIVE_DEAL_COUNT } from '@/lib/config/constants';
 
 // Embeddable stats widget - generates backlinks when sites embed it
 export async function GET(request: NextRequest) {
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   // Live stats from benchmark data
   const stats = {
-    total_deals: 2600,
+    total_deals: LIVE_DEAL_COUNT,
     therapeutic_areas: 12,
     company_profiles: 850,
     avg_upfront_oncology_phase2: 95,

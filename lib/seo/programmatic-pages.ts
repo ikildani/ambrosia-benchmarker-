@@ -7,7 +7,7 @@
 import { getBenchmarksSync, type PhaseBaselineEntry } from '@/lib/benchmarks';
 import { calculateDealTerms, formatCurrency, type CalculationInput, type TherapeuticArea, type Phase, type Territory } from '@/lib/calculations';
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
-import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
+import { LIVE_DEAL_COUNT, formatDealCount, DEAL_STATS } from '@/lib/config/constants';
 
 const benchmarks = getBenchmarksSync();
 
@@ -157,7 +157,7 @@ function buildAllPages(): ProgrammaticPageData[] {
           const h1 = `${ta.label} ${phase.label} Deal Benchmarks${territoryLabel ? ` — ${territory.label}` : ''} (2026)`;
 
           // CTR-optimized description: lead with range, royalties, deal count, CTA, under 155 chars
-          // "Phase 2 oncology deals: $144M–$365M upfront, 12–19% royalties. From 1,900+ verified deals. Free benchmarks."
+          // "Phase 2 oncology deals: $144M–$365M upfront, 12–19% royalties. From ${dealCount} verified deals. Free benchmarks."
           const metaDescription = `${phase.label} ${ta.label.toLowerCase()} deals${territoryLabel ? ` in ${territory.label}` : ''}: ${upfrontLow}–${upfrontHigh} upfront, ${royaltyLow}–${royaltyHigh}% royalties. From ${dealCount} verified deals. Free benchmarks.`;
 
           pages.push({

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const footerLinks = {
   Product: [
@@ -75,7 +76,7 @@ export function SiteFooter() {
             &copy; {new Date().getFullYear()} Ambrosia Ventures. All rights reserved.
           </p>
           <p className="text-xs text-slate-600">
-            Benchmarks powered by 1,900+ real biopharma licensing deals
+            Benchmarks powered by {DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals
           </p>
         </div>
       </div>

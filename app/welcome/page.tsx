@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,7 +22,7 @@ interface SessionData {
 // ---------------------------------------------------------------------------
 
 const ENGINES: { name: string; description: string; icon: string }[] = [
-  { name: 'Deal Terms', description: 'Benchmark upfront, milestones, and royalties across 1,900+ deals', icon: 'handshake' },
+  { name: 'Deal Terms', description: 'Benchmark upfront, milestones, and royalties across 1,500+ deals', icon: 'handshake' },
   { name: 'rNPV', description: 'Risk-adjusted NPV with phase-specific LoA and discount rates', icon: 'chart-line' },
   { name: 'Monte Carlo', description: '10,000-iteration probabilistic simulation with confidence intervals', icon: 'dice' },
   { name: 'Sensitivity Analysis', description: 'Tornado charts isolating key value drivers', icon: 'sliders' },
@@ -588,7 +589,7 @@ function WelcomePageInner() {
 
           <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
             You now have full access to institutional-grade deal intelligence.
-            14 analytical engines, 1,900+ benchmarked transactions, and unlimited analyses.
+            14 analytical engines, {DEAL_STATS.TOTAL_DEALS} benchmarked transactions, and unlimited analyses.
           </p>
 
           {sessionData?.email && (

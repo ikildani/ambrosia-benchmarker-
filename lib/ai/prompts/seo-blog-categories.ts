@@ -1,3 +1,5 @@
+import { DEAL_STATS } from '@/lib/config/constants';
+
 /**
  * Category-specific SEO blog prompt generators.
  *
@@ -108,7 +110,7 @@ ${data.mechanismOfAction ? `- **Mechanism of Action**: ${data.mechanismOfAction}
 
 5. **H2: What This Means for Similar Assets** — If you have a ${data.phase || 'similar-phase'} ${data.modality || ''} ${data.therapeuticArea || ''} asset, what does this deal tell you about your valuation? Be specific about upfront expectations and royalty benchmarks.
 
-6. **CTA paragraph**: "Benchmark your own ${data.therapeuticArea || ''} deal against 2,500+ comparable transactions" — link to <a href="/calculator">the Ambrosia calculator</a>.
+6. **CTA paragraph**: "Benchmark your own ${data.therapeuticArea || ''} deal against ${DEAL_STATS.TOTAL_DEALS} comparable transactions" — link to <a href="/calculator">the Ambrosia calculator</a>.
 
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Deal Calculator</a> — custom benchmarks
@@ -191,7 +193,7 @@ ${sampleDealsTable}
 
 6. **H2: How to Position Your Deal** — Practical advice on where in the range a specific asset would fall and what levers move the upfront higher.
 
-7. **CTA paragraph**: "Run your own benchmark with the Ambrosia calculator" — link to <a href="/calculator">the calculator</a>. Mention that the platform has 2,500+ deals.
+7. **CTA paragraph**: "Run your own benchmark with the Ambrosia calculator" — link to <a href="/calculator">the calculator</a>. Mention that the platform has ${DEAL_STATS.TOTAL_DEALS} deals.
 
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Deal Calculator</a>
@@ -385,7 +387,7 @@ Write a 1,200-word comparison article: Ambrosia vs ${data.competitorName} for bi
 ${data.comparisonAngle}
 
 ## AMBROSIA DATA ADVANTAGE (verified facts — use these exact numbers)
-- **Deal count in database**: 2,500+
+- **Deal count in database**: ${DEAL_STATS.TOTAL_DEALS}
 - **Real-time benchmarking engines**: 14 (Deal Terms, rNPV, Monte Carlo, Tornado Sensitivity, Partner Matching with 850+ companies, Competitive Landscape, Market Sizing, Pharma Intent Score, Deal Waterfall, Scenario Comparison, Real Options via CRR lattice, Competitive Dynamics, Lifecycle Extensions, Buyer-Specific Valuation)
 - **Therapeutic areas covered**: 12 with 562 indications
 - **Pro pricing**: $299/month ($199/month annual)
@@ -409,7 +411,7 @@ ${data.comparisonAngle}
    - Columns: Feature, Ambrosia, ${data.competitorName}
    Be factual. If ${data.competitorName} has a feature, acknowledge it. If you genuinely don't know whether they have a feature, say "Not publicly available" — never claim they lack something you can't verify.
 
-5. **H2: Data Depth** — Compare the depth of deal data. Ambrosia has ${data.uniqueDataPoints.toLocaleString()} unique data points across 2,500+ deals. What does ${data.competitorName} offer? Discuss granularity: does the competitor provide upfront/milestone/royalty breakdowns or just headline numbers?
+5. **H2: Data Depth** — Compare the depth of deal data. Ambrosia has ${data.uniqueDataPoints.toLocaleString()} unique data points across ${DEAL_STATS.TOTAL_DEALS} deals. What does ${data.competitorName} offer? Discuss granularity: does the competitor provide upfront/milestone/royalty breakdowns or just headline numbers?
 
 6. **H2: Pricing** — Ambrosia Pro: $299/month ($199/month annual). One-time report: $499. Compare to ${data.competitorName}'s pricing if publicly available. Frame value in terms of what BD professionals actually need.
 
@@ -421,7 +423,7 @@ ${data.comparisonAngle}
 
 ## IMPORTANT GUIDELINES
 - Be factual and fair. An obviously biased comparison hurts credibility.
-- Highlight Ambrosia's genuine advantages: 14 engines, 2,500+ deals, real-time benchmarks, 562 indications across 12 TAs.
+- Highlight Ambrosia's genuine advantages: 14 engines, ${DEAL_STATS.TOTAL_DEALS} deals, real-time benchmarks, 562 indications across 12 TAs.
 - Do not fabricate competitor capabilities. If unsure, say "based on publicly available information."
 - Write for a BD professional evaluating tools — not for a marketing audience.
 

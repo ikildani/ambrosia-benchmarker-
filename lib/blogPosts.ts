@@ -1,3 +1,5 @@
+import { DEAL_STATS } from '@/lib/config/constants';
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -309,7 +311,7 @@ export const blogPosts: BlogPost[] = [
 
 <h2>Quantifying the Premium</h2>
 
-<p>Across our database of 3,000+ biopharma transactions, the phase transition premium follows a remarkably consistent pattern. When controlled for modality and therapeutic area, the median deal value multiples at each transition are:</p>
+<p>Across our database of ${DEAL_STATS.TOTAL_DEALS} biopharma transactions, the phase transition premium follows a remarkably consistent pattern. When controlled for modality and therapeutic area, the median deal value multiples at each transition are:</p>
 
 <ul>
 <li><strong>Preclinical to Phase 1:</strong> 1.8-2.5x increase in total deal value</li>
@@ -396,7 +398,7 @@ export const blogPosts: BlogPost[] = [
     content: `
 <p>Biotech licensing negotiations are high-stakes, low-frequency events. Most biotech companies negotiate a major partnership once or twice in their corporate life. Their pharma counterparts do it dozens of times per year. This asymmetry in experience creates an information advantage that consistently favors the acquirer — unless the biotech team comes prepared with data and strategy.</p>
 
-<p>Drawing from our analysis of 3,000+ disclosed biopharma transactions, here are seven strategies that repeatedly produce better outcomes for licensors.</p>
+<p>Drawing from our analysis of ${DEAL_STATS.TOTAL_DEALS} disclosed biopharma transactions, here are seven strategies that repeatedly produce better outcomes for licensors.</p>
 
 <h2>1. Anchor with Data, Not Aspiration</h2>
 
@@ -609,7 +611,7 @@ export const blogPosts: BlogPost[] = [
 </table>
 
 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
-  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Benchmark your ADC deal against 2,500+ transactions</p>
+  <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Benchmark your ADC deal against ${DEAL_STATS.TOTAL_DEALS} transactions</p>
   <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Run rNPV, Monte Carlo, and scenario analysis for any ADC asset — calibrated against real disclosed deal economics.</p>
   <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
 </div>
@@ -652,7 +654,7 @@ export const blogPosts: BlogPost[] = [
 
 <h2>ADC Deal Comparison: Benchmarking the Transaction</h2>
 
-<p>To contextualize the Gilead-Tubulis deal, we benchmark it against the major ADC transactions since 2020. In our dataset of 2,500+ biopharma transactions, ADC deals have consistently outperformed other modalities on total deal value — and the range of structures illustrates the breadth of valuation approaches in this modality:</p>
+<p>To contextualize the Gilead-Tubulis deal, we benchmark it against the major ADC transactions since 2020. In our dataset of ${DEAL_STATS.TOTAL_DEALS} biopharma transactions, ADC deals have consistently outperformed other modalities on total deal value — and the range of structures illustrates the breadth of valuation approaches in this modality:</p>
 
 <table>
 <thead>
@@ -720,7 +722,7 @@ export const blogPosts: BlogPost[] = [
     readTime: '9 min read',
     excerpt: 'Over $40B in biopharma partnership value was terminated in 2024 alone. We analyze the top terminations, the pattern of serial deal dissolutions, and how this trend is reshaping out-licensing strategy and deal structure negotiations.',
     content: `
-<p>The biopharma licensing model depends on a fundamental assumption: that partnerships, once signed, will be executed in good faith through clinical development and commercialization. Our tracking of 2,500+ disclosed biopharma deals shows that partnership termination rates have increased from 8% to 19% annually since 2021. In 2024, that assumption was tested at an unprecedented scale. Over $40 billion in disclosed deal value was terminated, restructured, or allowed to expire — representing the largest wave of partnership dissolutions in industry history.</p>
+<p>The biopharma licensing model depends on a fundamental assumption: that partnerships, once signed, will be executed in good faith through clinical development and commercialization. Our tracking of ${DEAL_STATS.TOTAL_DEALS} disclosed biopharma deals shows that partnership termination rates have increased from 8% to 19% annually since 2021. In 2024, that assumption was tested at an unprecedented scale. Over $40 billion in disclosed deal value was terminated, restructured, or allowed to expire — representing the largest wave of partnership dissolutions in industry history.</p>
 
 <p>For biotech companies preparing out-licensing strategies, this wave of terminations is not merely a cautionary tale. It is a structural shift that should inform how deals are negotiated, what protective provisions are essential, and how to evaluate potential partners. Below, we quantify the trend, identify the patterns, and outline the strategic implications for deal teams.</p>
 
@@ -772,7 +774,7 @@ export const blogPosts: BlogPost[] = [
 
 <h2>Why Partnerships Fail: Root Cause Analysis</h2>
 
-<p>Across the 30+ major terminations we have analyzed — drawn from our database of 2,500+ transactions with full lifecycle tracking — the causes cluster into four categories:</p>
+<p>Across the 30+ major terminations we have analyzed — drawn from our database of ${DEAL_STATS.TOTAL_DEALS} transactions with full lifecycle tracking — the causes cluster into four categories:</p>
 
 <ol>
 <li><strong>Strategic reprioritization (45% of cases).</strong> The most common cause. The large pharma partner shifts its therapeutic area focus, pipeline priorities, or modality strategy, and the partnership no longer aligns with the revised direction. This is largely unrelated to the quality of the partnered asset itself — and is therefore the hardest risk for biotech companies to mitigate through diligence.</li>
@@ -1093,7 +1095,7 @@ export const blogPosts: BlogPost[] = [
   <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Run Comparable Analysis →</a>
 </div>
 
-<p>Across the 2,500+ biopharma transactions in our database, rare disease acquisitions of approved products command a median premium of 52% — making Neurocrine's 34% notably disciplined. The relatively modest premium (compared to the 45-67% range for other rare disease acquisitions of approved products) likely reflects two factors: (1) VYKAT XR's early commercial stage creates uncertainty about peak revenue potential, and (2) Neurocrine's disciplined acquisition approach, consistent with management's track record of value-oriented M&A. The absence of CVRs, however, means Soleno shareholders receive no upside protection — a clean break that favors Neurocrine if the product outperforms.</p>
+<p>Across the ${DEAL_STATS.TOTAL_DEALS} biopharma transactions in our database, rare disease acquisitions of approved products command a median premium of 52% — making Neurocrine's 34% notably disciplined. The relatively modest premium (compared to the 45-67% range for other rare disease acquisitions of approved products) likely reflects two factors: (1) VYKAT XR's early commercial stage creates uncertainty about peak revenue potential, and (2) Neurocrine's disciplined acquisition approach, consistent with management's track record of value-oriented M&A. The absence of CVRs, however, means Soleno shareholders receive no upside protection — a clean break that favors Neurocrine if the product outperforms.</p>
 
 <h2>Risk Assessment</h2>
 

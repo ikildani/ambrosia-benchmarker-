@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Benchmarks Q1 2026 — Free Report | Ambrosia Ventures',
-  description: 'Free report: upfront ranges, milestone structures, and royalty benchmarks across 12 therapeutic areas. Sourced from 2,700+ verified biopharma transactions. Download instantly.',
+  description: `Free report: upfront ranges, milestone structures, and royalty benchmarks across 12 therapeutic areas. Sourced from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions. Download instantly.`,
   keywords: [
     'biopharma deal benchmarks', 'licensing upfront benchmarks', 'pharma deal terms 2026',
     'biotech licensing deal data', 'Phase 2 deal terms', 'ADC licensing benchmarks',
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Biopharma Deal Benchmarks 2026 — Free Report',
-    description: 'Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. 2,700+ verified transactions. Free download.',
+    description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} verified transactions. Free download.`,
     url: 'https://calculator.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
     siteName: 'Ambrosia Ventures',
     type: 'article',
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Biopharma Deal Benchmarks 2026 — Free Report',
-    description: 'Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. 2,700+ verified transactions.',
+    description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
   },
   alternates: {
     canonical: 'https://calculator.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',

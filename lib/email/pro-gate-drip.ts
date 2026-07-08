@@ -11,6 +11,8 @@
 // Email 5 (Day 7):   Personal note from Issa (final push)
 // ---------------------------------------------------------------------------
 
+import { DEAL_STATS } from '@/lib/config/constants';
+
 export interface LeadContext {
   ta: string;
   phase: string;
@@ -279,7 +281,7 @@ export function buildProGateEmail4(
     </table>
   </div>
 
-  <p style="font-size: 15px; color: #334155;">While you're benchmarking manually, teams at mid-cap biotechs, Big Pharma licensing groups, and boutique advisory firms are getting instant deal intelligence backed by 2,500+ verified transactions.</p>
+  <p style="font-size: 15px; color: #334155;">While you're benchmarking manually, teams at mid-cap biotechs, Big Pharma licensing groups, and boutique advisory firms are getting instant deal intelligence backed by ${DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
 
   <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 20px 0; text-align: center;">
     <p style="margin: 0; font-size: 14px; color: #166534; font-weight: 600;">Pro includes a 7-day money-back guarantee.</p>

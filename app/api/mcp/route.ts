@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { z } from 'zod';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 import { validateApiKey, type ApiKeyContext } from '@/lib/api-v1-auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -327,7 +328,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
   const server = new McpServer({
     name: 'Ambrosia Benchmarker',
     version: '2.0.0',
-    description: 'Institutional-grade biopharma deal intelligence — 21 engines, 1,900+ transactions, 850+ companies',
+    description: `Institutional-grade biopharma deal intelligence — 21 engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 850+ companies`,
   });
 
   // ─────────────────────────────────────────────────────────────────────
@@ -335,7 +336,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
   // ─────────────────────────────────────────────────────────────────────
   server.tool(
     'calculate_deal_terms',
-    'Calculate pharmaceutical deal terms (upfront payment, milestones, royalties) for a drug asset based on therapeutic area, development phase, modality, indication, and competitive position. Returns institutional-grade deal structure recommendations calibrated against 2,500+ real transactions.',
+    `Calculate pharmaceutical deal terms (upfront payment, milestones, royalties) for a drug asset based on therapeutic area, development phase, modality, indication, and competitive position. Returns institutional-grade deal structure recommendations calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     {
       therapeuticArea: therapeuticAreaEnum,
       phase: phaseEnum,
@@ -2065,7 +2066,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       contents: [{
         uri: 'ambrosia://engine-capabilities',
         text: JSON.stringify([
-          { name: 'calculate_deal_terms', category: 'Core Valuation', description: 'Calculate deal terms (upfront, milestones, royalties) calibrated against 2,500+ real transactions.' },
+          { name: 'calculate_deal_terms', category: 'Core Valuation', description: `Calculate deal terms (upfront, milestones, royalties) calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.` },
           { name: 'run_rnpv_model', category: 'Core Valuation', description: 'Risk-adjusted NPV with 10,000-iteration Monte Carlo simulation. P10/P50/P90, cash flows, driver sensitivity.' },
           { name: 'optimize_deal_structure', category: 'Core Valuation', description: 'Rank all 5 deal structures by total value to licensor with component breakdown.' },
           { name: 'match_partners', category: 'Intelligence', description: 'Find best-fit partners from 850+ companies scored across 9 dimensions with Pharma Intent signals.' },
@@ -2434,7 +2435,7 @@ export async function GET() {
     version: '3.0.0',
     protocol: 'mcp',
     transport: 'streamable-http',
-    description: 'Institutional-grade biopharma deal intelligence via the Model Context Protocol. 21 tools, 10 resources, and 7 prompt templates covering deal terms, rNPV/Monte Carlo valuation, scenario analysis, deal structure optimization, partner matching, negotiation ZOPA, regulatory risk, competitive dynamics, lifecycle extensions, real options, patent dynamics, CMC risk, royalty stacking, earnout/CVR valuation, cross-border tax, buyer synergy, indication sequencing, and market intelligence — calibrated against 2,500+ real transactions.',
+    description: `Institutional-grade biopharma deal intelligence via the Model Context Protocol. 21 tools, 10 resources, and 7 prompt templates covering deal terms, rNPV/Monte Carlo valuation, scenario analysis, deal structure optimization, partner matching, negotiation ZOPA, regulatory risk, competitive dynamics, lifecycle extensions, real options, patent dynamics, CMC risk, royalty stacking, earnout/CVR valuation, cross-border tax, buyer synergy, indication sequencing, and market intelligence — calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     contact: {
       name: 'Issa Kildani',
       email: 'ikildani@ambrosiaventures.co',
@@ -2457,7 +2458,7 @@ export async function GET() {
       {
         name: 'calculate_deal_terms',
         category: 'Core Valuation',
-        description: 'Calculate pharmaceutical deal terms (upfront, milestones, royalties) calibrated against 2,500+ real transactions.',
+        description: `Calculate pharmaceutical deal terms (upfront, milestones, royalties) calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
       },
       {
         name: 'run_rnpv_model',

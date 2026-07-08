@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useAuth } from '@/contexts/AuthContext';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface VariantCopy {
   id: string;
@@ -17,7 +18,7 @@ const DEFAULT_COPY: VariantCopy = {
   headline: 'Wait — before you go',
   subtext: 'Get a free deal benchmark report for your next calculation.',
   buttonText: 'Send My Free Report',
-  footnote: 'No spam, unsubscribe anytime. 3,000+ deals benchmarked.',
+  footnote: `No spam, unsubscribe anytime. ${DEAL_STATS.TOTAL_DEALS} deals benchmarked.`,
 };
 
 const TA_DISPLAY: Record<string, string> = {

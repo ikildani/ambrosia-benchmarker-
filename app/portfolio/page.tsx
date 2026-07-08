@@ -60,7 +60,7 @@ export const metadata: Metadata = {
 const tierComparison: Array<{ feature: string; pro: string | boolean; growth: string | boolean; scale: string | boolean; enterprise: string | boolean; group?: string }> = [
   // Foundation
   { feature: 'Seats',                                        pro: '1',  growth: '5',  scale: '10', enterprise: '15+', group: 'Foundation' },
-  { feature: 'Deal Benchmarking (1,900+ txns)',              pro: true, growth: true, scale: true, enterprise: true },
+  { feature: `Deal Benchmarking (${DEAL_STATS.TOTAL_DEALS} txns)`,              pro: true, growth: true, scale: true, enterprise: true },
   { feature: 'rNPV & Monte Carlo',                           pro: true, growth: true, scale: true, enterprise: true },
   { feature: 'AI Deal Memo Generator',                       pro: true, growth: true, scale: true, enterprise: true },
   { feature: 'Partner Matching',                             pro: true, growth: true, scale: true, enterprise: true },
@@ -179,7 +179,7 @@ const featureFramework = [
       { icon: FileBarChart, name: 'Quarterly Portfolio Report', desc: 'LP-ready, bespoke per fund — assembled by the Ambrosia advisory team' },
       { icon: Palette, name: 'Fund-Branded White-Label Reports', desc: 'Every deliverable comes out with your fund\'s logo, color palette, and disclaimers' },
       { icon: Library, name: 'Shared Fund Comp Library', desc: 'Saved comp sets, peer sets, and annotations that compound across the fund' },
-      { icon: BookOpen, name: 'Negotiation Playbook Library', desc: 'Term sheet templates and counter-proposal frameworks drawn from 1,900+ real deals' },
+      { icon: BookOpen, name: 'Negotiation Playbook Library', desc: `Term sheet templates and counter-proposal frameworks drawn from ${DEAL_STATS.TOTAL_DEALS} real deals` },
     ],
   },
   {
@@ -537,7 +537,7 @@ export default function PortfolioPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
               {[
-                { icon: BarChart3, label: 'Deal Benchmarking',     sub: '1,900+ transactions' },
+                { icon: BarChart3, label: 'Deal Benchmarking',     sub: '1,500+ transactions' },
                 { icon: LineChart, label: 'rNPV Modeling',         sub: 'TA-specific PoS curves' },
                 { icon: Layers,    label: 'Monte Carlo',           sub: '10,000-iter simulations' },
                 { icon: Brain,     label: 'AI Deal Memos',         sub: 'Institutional-quality' },

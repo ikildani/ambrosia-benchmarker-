@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const useCases = [
   {
@@ -37,7 +38,7 @@ const useCases = [
       </svg>
     ),
     bullets: [
-      'Validate deal terms with rNPV models and benchmarks from 1,900+ deals across 850+ companies',
+      `Validate deal terms with rNPV models and benchmarks from ${DEAL_STATS.TOTAL_DEALS} deals across 850+ companies`,
       'Review Monte Carlo probability distributions and scenario comparisons',
       'Monitor market trends with Market Pulse intelligence and deal alerts',
     ],

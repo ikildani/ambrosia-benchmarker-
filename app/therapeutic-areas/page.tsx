@@ -32,7 +32,7 @@ export default function TherapeuticAreasIndex() {
           Biopharma Deal Benchmarks by Therapeutic Area
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 mb-10">
-          Explore licensing, acquisition, and collaboration deal terms across 12 therapeutic areas, powered by 1,900+ verified transactions.
+          Explore licensing, acquisition, and collaboration deal terms across 12 therapeutic areas, powered by 1,500+ verified transactions.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {TAS.map(ta => (

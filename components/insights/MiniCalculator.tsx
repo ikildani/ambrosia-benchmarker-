@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { calculateDealTerms, formatCurrency, type CalculationInput, type TherapeuticArea, type Phase, type Modality } from '@/lib/calculations';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const TA_OPTIONS: { value: TherapeuticArea; label: string }[] = [
   { value: 'oncology', label: 'Oncology' },
@@ -88,7 +89,7 @@ export function MiniCalculator({ defaultTA = 'oncology', defaultPhase = 'phase2'
           </svg>
           <h3 className="text-lg font-bold text-white">Quick Benchmark</h3>
         </div>
-        <p className="text-sm text-slate-400 mb-5">Live data from 1,900+ deals. Select your parameters:</p>
+        <p className="text-sm text-slate-400 mb-5">Live data from {DEAL_STATS.TOTAL_DEALS} deals. Select your parameters:</p>
 
         <div className="grid sm:grid-cols-3 gap-3 mb-6">
           <div>

@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -78,7 +79,7 @@ function buildDay0Email(name: string): { subject: string; html: string } {
       <ul style="color: #94a3b8; font-size: 15px; line-height: 1.8; padding-left: 20px; margin: 0 0 16px;">
         <li><strong style="color: #e2e8f0;">Benchmark any deal</strong> across 12 therapeutic areas and 17+ modalities</li>
         <li><strong style="color: #e2e8f0;">Get instant valuations</strong> for upfront payments, milestones, and royalties</li>
-        <li><strong style="color: #e2e8f0;">Compare against 1,900+ real deals</strong> sourced from SEC filings, FTC, and regulatory databases</li>
+        <li><strong style="color: #e2e8f0;">Compare against ${DEAL_STATS.TOTAL_DEALS} real deals</strong> sourced from SEC filings, FTC, and regulatory databases</li>
       </ul>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 4px;">

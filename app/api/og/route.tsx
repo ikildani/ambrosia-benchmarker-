@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const runtime = 'edge';
 
@@ -303,7 +304,7 @@ export async function GET(request: NextRequest) {
               }}
             >
               <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
-                3,000+
+                {DEAL_STATS.TOTAL_DEALS}
               </div>
               <div style={{ fontSize: '16px', color: COLORS.slate }}>
                 Deals Analyzed

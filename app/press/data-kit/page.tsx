@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Press Data Kit — Biopharma Deal Benchmarks | Ambrosia Ventures',
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 const stats = [
-  { value: '1,900+', label: 'Verified Deals Analyzed', citation: 'Ambrosia Ventures has analyzed over 1,900 verified biopharma licensing and M&A transactions from 2020 to 2026. Source: Ambrosia Ventures Deal Intelligence Platform.' },
+  { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals Analyzed', citation: `Ambrosia Ventures has analyzed over ${DEAL_STATS.TOTAL_DEALS_RAW.toLocaleString()} verified biopharma licensing and M&A transactions from 2020 to 2026. Source: Ambrosia Ventures Deal Intelligence Platform.` },
   { value: '$120M', label: 'Phase 2 Oncology Median Upfront', citation: 'Phase 2 oncology licensing deals average $120M upfront (median, 2020-2026). Source: Ambrosia Ventures.' },
   { value: '$350M', label: 'Phase 2 Immunology Median Upfront', citation: 'Phase 2 immunology licensing deals average $350M upfront — nearly 3x oncology (median, 2020-2026). Source: Ambrosia Ventures.' },
   { value: '1.60x', label: 'Radiopharmaceutical Modality Premium', citation: 'Radiopharmaceutical licensing deals command a 1.60x premium over small molecule baselines — the highest of any modality (2020-2026). Source: Ambrosia Ventures.' },
@@ -43,7 +44,7 @@ export default function PressDataKitPage() {
     { '@type': 'ListItem', position: 3, name: 'Data Kit' },
   ]};
 
-  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Ambrosia Ventures Biopharma Deal Benchmarks', description: 'Benchmarks for biopharma licensing deal economics across 12 TAs from 1,900+ verified transactions (2020-2026).', creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
+  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Ambrosia Ventures Biopharma Deal Benchmarks', description: `Benchmarks for biopharma licensing deal economics across 12 TAs from ${DEAL_STATS.TOTAL_DEALS} verified transactions (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
 
   return (
     <>
@@ -150,7 +151,7 @@ export default function PressDataKitPage() {
           <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Methodology</h2>
           <p className="text-slate-700 leading-relaxed mb-4">
-            All benchmarks are derived from a proprietary database of 1,900+ verified biopharma licensing and M&amp;A
+            All benchmarks are derived from a proprietary database of {DEAL_STATS.TOTAL_DEALS} verified biopharma licensing and M&amp;A
             transactions executed between 2020 and 2026. Primary sources include SEC filings (8-K, 10-K, 10-Q), FTC premerger filings, company
             press releases, investor presentations, and regulatory databases. Every deal record includes upfront payment,
             milestone structure, royalty terms, development phase, therapeutic area, modality, and territory scope.
@@ -221,7 +222,7 @@ export default function PressDataKitPage() {
                   <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">50-Word Version</p>
                   <div className="bg-slate-50 rounded-lg p-4">
                     <p className="text-sm text-slate-700 leading-relaxed">
-                      Ambrosia Ventures provides data-driven deal intelligence for biopharma licensing professionals. The platform analyzes 1,900+ verified transactions across 12 therapeutic areas, offering real-time benchmarks for upfront payments, milestones, and royalties. Used by BD teams, investors, and consultants to benchmark and structure biopharma partnerships.
+                      Ambrosia Ventures provides data-driven deal intelligence for biopharma licensing professionals. The platform analyzes 1,500+ verified transactions across 12 therapeutic areas, offering real-time benchmarks for upfront payments, milestones, and royalties. Used by BD teams, investors, and consultants to benchmark and structure biopharma partnerships.
                     </p>
                   </div>
                 </div>
@@ -229,7 +230,7 @@ export default function PressDataKitPage() {
                   <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">100-Word Version</p>
                   <div className="bg-slate-50 rounded-lg p-4">
                     <p className="text-sm text-slate-700 leading-relaxed">
-                      Ambrosia Ventures is a life sciences deal intelligence platform that helps biotech founders, BD teams, investors, and consultants benchmark and structure biopharma licensing deals. Drawing from 1,900+ verified transactions across 12 therapeutic areas, the platform provides real-time benchmarks for upfront payments, milestone structures, royalty rates, and total deal values. Features include comparable transaction analysis, risk-adjusted NPV modeling, Monte Carlo simulation, partner matching, and AI-generated negotiation playbooks. The platform tracks 850+ company profiles and ingests new deal data weekly from SEC filings, FTC premerger filings, press releases, and regulatory databases.
+                      Ambrosia Ventures is a life sciences deal intelligence platform that helps biotech founders, BD teams, investors, and consultants benchmark and structure biopharma licensing deals. Drawing from 1,500+ verified transactions across 12 therapeutic areas, the platform provides real-time benchmarks for upfront payments, milestone structures, royalty rates, and total deal values. Features include comparable transaction analysis, risk-adjusted NPV modeling, Monte Carlo simulation, partner matching, and AI-generated negotiation playbooks. The platform tracks 850+ company profiles and ingests new deal data weekly from SEC filings, FTC premerger filings, press releases, and regulatory databases.
                     </p>
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllProgrammaticPages, formatCurrency } from '@/lib/seo/programmatic-pages';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Data by Therapeutic Area, Phase & Territory | Ambrosia Ventures',
@@ -90,7 +91,7 @@ export default function DataIndexPage() {
         <section className="border-t border-slate-800 py-12 text-center">
           <div className="mx-auto max-w-2xl px-6">
             <p className="text-slate-500 text-sm mb-4">
-              Benchmarks powered by 1,900+ real biopharma licensing deals
+              Benchmarks powered by {DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals
             </p>
             <Link
               href="/calculator"

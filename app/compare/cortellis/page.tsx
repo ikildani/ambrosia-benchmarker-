@@ -29,7 +29,7 @@ const FAQ_ITEMS = [
   {
     question: 'How does Ambrosia compare to Clarivate Cortellis?',
     answer:
-      'Cortellis is a comprehensive pipeline and regulatory intelligence platform with deep clinical trial data and patent analytics. Ambrosia focuses on deal economics — benchmarking upfronts, milestones, royalties, and running valuation models across 1,900+ verified biopharma transactions with 14 purpose-built engines.',
+      'Cortellis is a comprehensive pipeline and regulatory intelligence platform with deep clinical trial data and patent analytics. Ambrosia focuses on deal economics — benchmarking upfronts, milestones, royalties, and running valuation models across 1,500+ verified biopharma transactions with 14 purpose-built engines.',
   },
   {
     question: 'What makes Ambrosia different from Cortellis?',

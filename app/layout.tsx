@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { GlobalJsonLd } from "./json-ld";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import CookieConsent from "@/components/CookieConsent";
+import { DEAL_STATS } from "@/lib/config/constants";
 
 
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-sans" });
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     default: "Life Sciences Deal Calculator | Biopharma Licensing Benchmarks | Ambrosia Ventures",
     template: "%s | Ambrosia Ventures",
   },
-  description: "Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and real-time market intelligence for biopharma licensing deals across 12 therapeutic areas. 1,900+ real transactions, 850+ company profiles. Free to start.",
+  description: `Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and real-time market intelligence for biopharma licensing deals across 12 therapeutic areas. ${DEAL_STATS.TOTAL_DEALS} real transactions, 850+ company profiles. Free to start.`,
   keywords: [
     "biotech deal calculator", "pharma licensing benchmarks", "biopharma deal terms",
     "rNPV analysis tool", "Monte Carlo simulation pharma", "deal benchmarking",
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
   category: "Life Sciences",
   openGraph: {
     title: "Life Sciences Deal Calculator — Instant Biopharma Licensing Benchmarks",
-    description: "rNPV modeling, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals. 1,900+ real transactions, 850+ company profiles, 12 therapeutic areas. Free to start.",
+    description: `rNPV modeling, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals. ${DEAL_STATS.TOTAL_DEALS} real transactions, 850+ company profiles, 12 therapeutic areas. Free to start.`,
     type: "website",
     url: "https://calculator.ambrosiaventures.co",
     siteName: "Ambrosia Ventures",
@@ -58,14 +59,14 @@ export const metadata: Metadata = {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "Life Sciences Deal Calculator — Instant benchmarks from 1,900+ real biopharma licensing transactions",
+        alt: `Life Sciences Deal Calculator — Instant benchmarks from ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing transactions`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Life Sciences Deal Calculator — Instant Biopharma Licensing Benchmarks",
-    description: "rNPV, Monte Carlo & AI deal intelligence for biopharma licensing. 1,900+ deals, 850+ companies, 12 TAs. Free to start.",
+    description: `rNPV, Monte Carlo & AI deal intelligence for biopharma licensing. ${DEAL_STATS.TOTAL_DEALS} deals, 850+ companies, 12 TAs. Free to start.`,
     images: ["/api/og"],
     creator: "@AmbrosiaVC",
     site: "@AmbrosiaVC",

@@ -75,7 +75,7 @@ export default function HowToValueBiotechDealPage() {
         name: 'How many comparable deals are needed for a reliable benchmark?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A minimum of 5-8 comparable deals is generally considered sufficient for directional benchmarking, though 15-20+ transactions provide more statistically robust ranges. The Ambrosia Ventures calculator draws from 1,900+ curated biopharma transactions to generate benchmarks adjusted for phase, modality, indication, territory, and competitive dynamics.',
+          text: 'A minimum of 5-8 comparable deals is generally considered sufficient for directional benchmarking, though 15-20+ transactions provide more statistically robust ranges. The Ambrosia Ventures calculator draws from 1,500+ curated biopharma transactions to generate benchmarks adjusted for phase, modality, indication, territory, and competitive dynamics.',
         },
       },
       {
@@ -246,7 +246,7 @@ export default function HowToValueBiotechDealPage() {
               Run Your Own Benchmark
             </h2>
             <p className="text-teal-100 mb-8 text-lg">
-              Apply these valuation principles with real market data. Our calculator generates customized deal benchmarks based on 1,900+ biopharma transactions.
+              Apply these valuation principles with real market data. Our calculator generates customized deal benchmarks based on 1,500+ biopharma transactions.
             </p>
             <Link
               href="/calculator"
@@ -291,7 +291,7 @@ export default function HowToValueBiotechDealPage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  A minimum of 5-8 comparable deals is generally considered sufficient for directional benchmarking, though 15-20+ transactions provide more statistically robust ranges. The Ambrosia Ventures <Link href="/calculator" className="text-teal-600 hover:text-teal-700">calculator</Link> draws from 1,900+ curated biopharma transactions to generate benchmarks adjusted for phase, modality, indication, territory, and competitive dynamics.
+                  A minimum of 5-8 comparable deals is generally considered sufficient for directional benchmarking, though 15-20+ transactions provide more statistically robust ranges. The Ambrosia Ventures <Link href="/calculator" className="text-teal-600 hover:text-teal-700">calculator</Link> draws from 1,500+ curated biopharma transactions to generate benchmarks adjusted for phase, modality, indication, territory, and competitive dynamics.
                 </div>
               </details>
 

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Life Sciences Deal Trends 2026 | Annual Market Report | Ambrosia Ventures',
@@ -126,7 +127,7 @@ export default function DealTrends2026Page() {
             </h1>
 
             <p className="mt-6 text-xl text-slate-300 leading-relaxed max-w-3xl">
-              A data-driven analysis of biopharma licensing and partnership activity, covering deal volume, emerging modalities, phase dynamics, and geographic shifts across 1,900+ transactions.
+              A data-driven analysis of biopharma licensing and partnership activity, covering deal volume, emerging modalities, phase dynamics, and geographic shifts across {DEAL_STATS.TOTAL_DEALS} transactions.
             </p>
           </div>
         </header>
@@ -138,7 +139,7 @@ export default function DealTrends2026Page() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             {[
-              { label: 'Total Deals', value: '1,900+', sub: 'YTD through Q1 2026' },
+              { label: 'Total Deals', value: DEAL_STATS.TOTAL_DEALS, sub: 'YTD through Q1 2026' },
               { label: 'Total Deal Value', value: '$198B', sub: '+14% vs 2025' },
               { label: 'Median Upfront', value: '$85M', sub: '+18% vs 2025' },
               { label: 'Avg Royalty Rate', value: '9.2%', sub: 'Across all phases' },
@@ -193,7 +194,7 @@ export default function DealTrends2026Page() {
             </table>
           </div>
           <p className="mt-4 text-sm text-slate-500">
-            Source: Ambrosia Ventures Deal Database, 1,900+ transactions through Q1 2026. TDV = Total Deal Value.
+            Source: Ambrosia Ventures Deal Database, {DEAL_STATS.TOTAL_DEALS} transactions through Q1 2026. TDV = Total Deal Value.
           </p>
         </section>
 

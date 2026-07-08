@@ -1,6 +1,7 @@
 'use client';
 
 import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface FinancialSummary {
   riskAdjustedNPV: number;
@@ -262,7 +263,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
 
       {/* ── Disclaimer ── */}
       <div className="rounded-xl bg-white/[0.04] border border-white/[0.07] p-4 text-[11px] text-slate-400 leading-relaxed mt-6">
-        <strong className="text-slate-300">Disclaimer:</strong> Estimates derived from 2,700+ biopharma transactions. For informational purposes only — not financial or legal advice.
+        <strong className="text-slate-300">Disclaimer:</strong> Estimates derived from {DEAL_STATS.TOTAL_DEALS} biopharma transactions. For informational purposes only — not financial or legal advice.
       </div>
     </div>
   );

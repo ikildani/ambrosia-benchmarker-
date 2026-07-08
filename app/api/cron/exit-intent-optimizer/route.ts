@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -32,12 +33,12 @@ const VARIANTS: ExitIntentVariant[] = [
     headline: 'Wait — before you go',
     subtext: 'Get a free deal benchmark report for your next calculation.',
     buttonText: 'Send My Free Report',
-    footnote: 'No spam, unsubscribe anytime. 3,000+ deals benchmarked.',
+    footnote: `No spam, unsubscribe anytime. ${DEAL_STATS.TOTAL_DEALS} deals benchmarked.`,
   },
   {
     id: 'B',
     headline: 'Wait — before you go',
-    subtext: 'See how your deal compares to 3,000+ real biopharma transactions.',
+    subtext: `See how your deal compares to ${DEAL_STATS.TOTAL_DEALS} real biopharma transactions.`,
     buttonText: 'Show Me the Data',
     footnote: 'Free benchmarking insight. No credit card required.',
   },
@@ -53,7 +54,7 @@ const VARIANTS: ExitIntentVariant[] = [
     headline: 'Your deal terms may be below market',
     subtext: 'Get a free analysis showing how your terms compare to recent deals in your therapeutic area.',
     buttonText: 'See My Deal Analysis',
-    footnote: 'Instant benchmarking against 3,000+ verified transactions.',
+    footnote: `Instant benchmarking against ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
   },
 ];
 

@@ -29,7 +29,7 @@ const FAQ_ITEMS = [
   {
     question: 'How does Ambrosia compare to EvaluatePharma?',
     answer:
-      'Ambrosia focuses on deal-specific benchmarking — upfront payments, milestones, royalty rates, and partner matching across 1,900+ verified transactions. EvaluatePharma excels at consensus revenue forecasts and pipeline coverage but lacks deal-specific mechanics like Monte Carlo simulation for deal terms, real options valuation, and competitive dynamics engines.',
+      'Ambrosia focuses on deal-specific benchmarking — upfront payments, milestones, royalty rates, and partner matching across 1,500+ verified transactions. EvaluatePharma excels at consensus revenue forecasts and pipeline coverage but lacks deal-specific mechanics like Monte Carlo simulation for deal terms, real options valuation, and competitive dynamics engines.',
   },
   {
     question: 'What makes Ambrosia different from EvaluatePharma?',

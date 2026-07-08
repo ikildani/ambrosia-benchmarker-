@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const DEFAULT_FROM = 'Ambrosia Ventures <info@ambrosiaventures.co>';
 const DEFAULT_REPLY_TO = 'hello@ambrosiaventures.co';
@@ -524,7 +525,7 @@ export async function sendUpgradeConfirmation(to: string, name: string) {
             <li><strong>Save & compare scenarios</strong> side-by-side</li>
             <li><strong>Share calculations</strong> with your team</li>
             <li><strong>Interactive charts</strong> and visualizations</li>
-            <li><strong>Complete deal database</strong> access (2,500+ deals)</li>
+            <li><strong>Complete deal database</strong> access (${DEAL_STATS.TOTAL_DEALS} deals)</li>
             <li><strong>Partner matching</strong> with detailed company profiles</li>
           </ul>
 

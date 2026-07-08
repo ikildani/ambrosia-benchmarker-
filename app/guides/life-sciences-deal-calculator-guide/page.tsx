@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties | Ambrosia Ventures',
@@ -70,7 +71,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
         name: 'Is the life sciences deal calculator free to use?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The calculator requires a free account to run deal benchmarks. Basic deal term benchmarking is available to all registered users. Advanced engines including Monte Carlo simulation, real options valuation, competitive dynamics, and buyer-specific valuation require a Pro subscription ($299/month or $199/month billed annually). All users receive instant deal term comparisons against 1,900+ real transactions.',
+          text: `The calculator requires a free account to run deal benchmarks. Basic deal term benchmarking is available to all registered users. Advanced engines including Monte Carlo simulation, real options valuation, competitive dynamics, and buyer-specific valuation require a Pro subscription ($299/month or $199/month billed annually). All users receive instant deal term comparisons against ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
         },
       },
       {
@@ -78,7 +79,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
         name: 'How many deals does the calculator benchmark against?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The calculator benchmarks against 1,900+ disclosed biopharma transactions spanning 12 therapeutic areas, 23+ modalities, and all clinical phases from discovery through approved products. The dataset is continuously updated through automated ingestion from SEC EDGAR filings, press releases, and regulatory documents. This is the largest proprietary deal benchmarking dataset available for life sciences professionals.',
+          text: `The calculator benchmarks against ${DEAL_STATS.TOTAL_DEALS} disclosed biopharma transactions spanning 12 therapeutic areas, 23+ modalities, and all clinical phases from discovery through approved products. The dataset is continuously updated through automated ingestion from SEC EDGAR filings, press releases, and regulatory documents. This is the largest proprietary deal benchmarking dataset available for life sciences professionals.`,
         },
       },
       {
@@ -94,7 +95,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
         name: 'How is the deal calculator different from a DCF model or spreadsheet?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Unlike a static DCF spreadsheet, the deal calculator combines 14 specialized engines: deal term benchmarking, rNPV, Monte Carlo simulation, tornado sensitivity analysis, partner matching (850+ companies), competitive landscape, market sizing, Pharma Intent Score, deal waterfall, scenario comparison, real options (CRR lattice), competitive dynamics, lifecycle extensions, and buyer-specific valuation. It benchmarks against 1,900+ real transactions rather than relying on assumptions, and generates institutional-quality PDF reports.',
+          text: `Unlike a static DCF spreadsheet, the deal calculator combines 14 specialized engines: deal term benchmarking, rNPV, Monte Carlo simulation, tornado sensitivity analysis, partner matching (850+ companies), competitive landscape, market sizing, Pharma Intent Score, deal waterfall, scenario comparison, real options (CRR lattice), competitive dynamics, lifecycle extensions, and buyer-specific valuation. It benchmarks against ${DEAL_STATS.TOTAL_DEALS} real transactions rather than relying on assumptions, and generates institutional-quality PDF reports.`,
         },
       },
     ],
@@ -107,7 +108,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     url: `${baseUrl}/calculator`,
-    description: 'Life sciences deal benchmarking tool with 14 calculation engines, 1,900+ comparable transactions, and institutional-quality reporting.',
+    description: `Life sciences deal benchmarking tool with 14 calculation engines, ${DEAL_STATS.TOTAL_DEALS} comparable transactions, and institutional-quality reporting.`,
     offers: [
       {
         '@type': 'Offer',
@@ -151,7 +152,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
             </h1>
 
             <p className="mt-6 text-xl text-slate-300 leading-relaxed">
-              Powered by 1,900+ real biopharma transactions. Benchmark upfronts, milestones, royalties, rNPV, and Monte Carlo analysis across 12 therapeutic areas and 562 indications.
+              Powered by {DEAL_STATS.TOTAL_DEALS} real biopharma transactions. Benchmark upfronts, milestones, royalties, rNPV, and Monte Carlo analysis across 12 therapeutic areas and 562 indications.
             </p>
           </div>
         </header>
@@ -247,7 +248,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
             </h2>
 
             <p className="text-slate-600 leading-relaxed">
-              The calculator&apos;s benchmarks are only as good as the data behind them. Our dataset of 1,900+ transactions is built from multiple primary sources with rigorous validation:
+              The calculator&apos;s benchmarks are only as good as the data behind them. Our dataset of {DEAL_STATS.TOTAL_DEALS} transactions is built from multiple primary sources with rigorous validation:
             </p>
 
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
@@ -299,7 +300,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  <tr><td className="px-4 py-3 text-slate-700 font-medium">Comparable deals</td><td className="px-4 py-3 text-slate-600">5-15 manually sourced</td><td className="px-4 py-3 text-slate-600">1,900+ auto-filtered</td></tr>
+                  <tr><td className="px-4 py-3 text-slate-700 font-medium">Comparable deals</td><td className="px-4 py-3 text-slate-600">5-15 manually sourced</td><td className="px-4 py-3 text-slate-600">{DEAL_STATS.TOTAL_DEALS} auto-filtered</td></tr>
                   <tr className="bg-slate-50/50"><td className="px-4 py-3 text-slate-700 font-medium">Time to benchmark</td><td className="px-4 py-3 text-slate-600">2-4 weeks</td><td className="px-4 py-3 text-slate-600">Under 2 minutes</td></tr>
                   <tr><td className="px-4 py-3 text-slate-700 font-medium">Valuation engines</td><td className="px-4 py-3 text-slate-600">1-2 (DCF, comps)</td><td className="px-4 py-3 text-slate-600">14 specialized engines</td></tr>
                   <tr className="bg-slate-50/50"><td className="px-4 py-3 text-slate-700 font-medium">Monte Carlo</td><td className="px-4 py-3 text-slate-600">Rare, requires add-ins</td><td className="px-4 py-3 text-slate-600">Built-in, 10,000 scenarios</td></tr>
@@ -324,7 +325,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
               Start Benchmarking Your Deals
             </h2>
             <p className="text-teal-100 mb-8 text-lg">
-              Join BD teams, investors, and deal advisors using the calculator to benchmark transactions against 1,900+ real biopharma deals. Create a free account and run your first benchmark in minutes.
+              Join BD teams, investors, and deal advisors using the calculator to benchmark transactions against {DEAL_STATS.TOTAL_DEALS} real biopharma deals. Create a free account and run your first benchmark in minutes.
             </p>
             <Link
               href="/calculator"
@@ -369,7 +370,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  The calculator benchmarks against 1,900+ disclosed biopharma transactions spanning 12 therapeutic areas, 23+ modalities, and all clinical phases. The dataset is continuously updated through automated ingestion from SEC EDGAR, press releases, ClinicalTrials.gov, and regulatory filings.
+                  The calculator benchmarks against {DEAL_STATS.TOTAL_DEALS} disclosed biopharma transactions spanning 12 therapeutic areas, 23+ modalities, and all clinical phases. The dataset is continuously updated through automated ingestion from SEC EDGAR, press releases, ClinicalTrials.gov, and regulatory filings.
                 </div>
               </details>
 
@@ -397,7 +398,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  Unlike a static DCF spreadsheet, the calculator combines 14 specialized engines with a continuously updated dataset of 1,900+ real transactions. It benchmarks against actual market data rather than assumptions, runs Monte Carlo simulations with 10,000 scenarios, matches against 850+ potential partners, and generates institutional-quality <Link href="/calculator" className="text-teal-600 hover:text-teal-700">PDF reports</Link> in seconds rather than weeks.
+                  Unlike a static DCF spreadsheet, the calculator combines 14 specialized engines with a continuously updated dataset of {DEAL_STATS.TOTAL_DEALS} real transactions. It benchmarks against actual market data rather than assumptions, runs Monte Carlo simulations with 10,000 scenarios, matches against 850+ potential partners, and generates institutional-quality <Link href="/calculator" className="text-teal-600 hover:text-teal-700">PDF reports</Link> in seconds rather than weeks.
                 </div>
               </details>
             </div>
