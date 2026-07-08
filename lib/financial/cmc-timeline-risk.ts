@@ -162,7 +162,7 @@ function resolveClass(m: Modality): CMCClass {
     case 'adc':
       return 'adc';
 
-    case 'bispecific': case 'tCellEngager': case 'bispecificHeme':
+    case 'bispecific': case 'tCellEngager': case 'bispecificHeme': case 'trispecificAntibody':
       return 'bispec';
 
     case 'carT_heme': case 'carT_solid': case 'carT_autoimmune': case 'carTreg':

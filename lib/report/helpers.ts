@@ -119,6 +119,7 @@ export const modalityLabels: Record<string, string> = {
   smallMolecule: 'Small Molecule',
   mab: 'Monoclonal Antibody',
   bispecific: 'Bispecific Antibody',
+  trispecificAntibody: 'Trispecific Antibody',
   adc: 'Antibody-Drug Conjugate',
   cellTherapy: 'Cell Therapy (CAR-T/NK)',
   geneTherapy: 'Gene Therapy',

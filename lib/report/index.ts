@@ -35,6 +35,9 @@ import { renderEarnoutPage } from './pages/earnoutPage';
 import { renderPricingAccessPage } from './pages/pricingAccessPage';
 import { renderIndicationSequencingPage } from './pages/indicationSequencingPage';
 import { renderBuyerSynergyPage } from './pages/buyerSynergyPage';
+import { renderMAAcquisitionPage } from './pages/maAcquisitionPage';
+import { renderDeliveryRoutePage } from './pages/deliveryRoutePage';
+import { renderTrispecificPage } from './pages/trispecificPage';
 import type { PDFReportData, ReportMeta, TocEntry, BrandConfig } from './types';
 
 export type { PDFReportData, PartnerForPDF, BrandConfig } from './types';
@@ -65,6 +68,9 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
   toc('Executive Dashboard', 'Key metrics, value split, and deal recommendation');
   toc('Deal Structure', 'Payment architecture and milestone waterfall');
   toc('Deal Terms', 'Detailed term ranges, royalties, and modifiers');
+  toc('M&A Acquisition Benchmarks', 'Milestones, earnouts, CVRs, and acquisition value by modality');
+  toc('Trispecific Antibody Analysis', 'Modality deep-dive: multiplier, precedent deals, AD target combos');
+  toc('Delivery Route & Administration', 'SubQ, IV, device lifecycle extensions and deal impact');
   toc('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers');
   toc('Comparable Deals', 'Recent transactions and market benchmarks');
   toc('Partner Matches', 'Top-ranked potential licensing partners');
@@ -119,6 +125,9 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
   addPage(renderExecutiveDashboard);
   addPage(renderDealStructurePage);
   addPage(renderDealTermsPage);
+  addPage(renderMAAcquisitionPage);
+  addPage(renderTrispecificPage);
+  addPage(renderDeliveryRoutePage);
   addPage(renderSensitivityPage);
   addPage(renderComparablesPage);
   addPage(renderPartnersPage);
