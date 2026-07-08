@@ -46,6 +46,9 @@ import { getSubpopulationModifier } from './subpopulation-modifiers';
 import { resolveUpfrontStructure } from './deal-structure-classifier';
 import type { DealStructureClassification } from './deal-structure-classifier';
 import { getPatentCliffAdjustment } from './patent-cliffs';
+import { getTargetCombination, getDefaultCombinationEffect } from './target-combinations';
+import { getTargetPeakSalesModifier, MODALITY_TARGET_OVERLAP } from './target-taxonomy';
+import { getRoutePeakSalesModifier, getRouteCogsMultiplier } from './delivery-routes';
 import { TIER2_FLAGS, TIER4_FLAGS } from '@/lib/feature-flags';
 import { computeEmpiricalMultiplier } from './empirical-multiplier';
 import { getCeiling, clampRange } from './indication-ceilings';
@@ -458,6 +461,8 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     // undefined (falls back to existing multiplicative modifier logic).
     // Default off until the 100-deal backtest validates this change.
     input.timeWindow ?? (TIER2_FLAGS.timeWindowedPoS ? 'most_recent' : undefined),
+    input.molecularTargets,
+    input.deliveryRoute,
   );
 
   // 2b. Apply indication-specific PoS modifiers
@@ -654,6 +659,43 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     adjustedPeakSales.median *= patentCliff.multiplier;
     adjustedPeakSales.high *= patentCliff.multiplier;
   }
+
+  // 4d-target. Target combination peak sales adjustment.
+  // Multi-target assets (bispecifics, ADC with specific antigen, dual-mechanism)
+  // capture different market fractions than mono-target assets. Validated
+  // combinations (PD-1+CTLA-4, GLP-1R+GIPR) get specific modifiers;
+  // unvalidated multi-target assets get a default based on target count.
+  const targets = input.molecularTargets ?? [];
+  const overlapTarget = MODALITY_TARGET_OVERLAP[input.modality];
+  const effectiveTargets = targets.filter(t => t !== overlapTarget);
+  if (effectiveTargets.length > 0) {
+    const combo = effectiveTargets.length >= 2
+      ? getTargetCombination(effectiveTargets, input.indication)
+      : undefined;
+    let targetPeakMod = 1.0;
+    if (combo) {
+      targetPeakMod = combo.peakSalesModifier * combo.complexityPenalty;
+    } else if (effectiveTargets.length >= 2) {
+      const defaultCombo = getDefaultCombinationEffect(effectiveTargets.length);
+      targetPeakMod = defaultCombo.peakSalesModifier * defaultCombo.complexityPenalty;
+    } else {
+      targetPeakMod = getTargetPeakSalesModifier(effectiveTargets[0]);
+    }
+    adjustedPeakSales.low *= targetPeakMod;
+    adjustedPeakSales.median *= targetPeakMod;
+    adjustedPeakSales.high *= targetPeakMod;
+  }
+
+  // 4d-route. Delivery route peak sales adjustment.
+  // Oral-in-IV-class commands 20-30% premium. Intrathecal limits addressable
+  // market. Gene therapy vector commands one-time treatment premium.
+  const routePeakMod = getRoutePeakSalesModifier(input.deliveryRoute);
+  if (routePeakMod !== 1.0) {
+    adjustedPeakSales.low *= routePeakMod;
+    adjustedPeakSales.median *= routePeakMod;
+    adjustedPeakSales.high *= routePeakMod;
+  }
+
   if (competitiveDensity) {
     adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;

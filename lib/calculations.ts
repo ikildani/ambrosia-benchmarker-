@@ -321,6 +321,9 @@ export interface CalculationInput {
   competitivePosition: CompetitivePosition;
   dataQuality: DataQuality;
   regulatoryDesignations: RegulatoryDesignations;
+  // Cross-TA: molecular targets and delivery route
+  molecularTargets?: string[];
+  deliveryRoute?: import('./financial/delivery-routes').DeliveryRoute;
   // Neurology-specific optional fields
   bbbPenetration?: BBBPenetration;
   diseaseProgression?: DiseaseProgression;

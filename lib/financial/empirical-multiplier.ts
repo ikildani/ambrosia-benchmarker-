@@ -49,6 +49,9 @@
  */
 
 import type { RNPVInput } from './types';
+import { getTargetDealPremium, MODALITY_TARGET_OVERLAP } from './target-taxonomy';
+import { getTargetCombination, getDefaultCombinationEffect } from './target-combinations';
+import { getRouteDealPremium } from './delivery-routes';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CALIBRATION SURFACES — adjust via calibration rounds
@@ -297,7 +300,31 @@ export function computeEmpiricalMultiplier(
   const modPremium = (modUpliftRaw - 1.0);
   const phaseDealTypePremium = (phaseDealBaseRaw - 1.0) * tierDampener;
 
-  const rawComposition = taPremium + modPremium + phaseDealTypePremium;
+  // ─── Layer 4: Molecular target deal premium ────────────────────────
+  // Sum of individual target premiums (capped) + combination interaction
+  // premium. Double-counting guard: skip targets already encoded in modality.
+  const targets = input.molecularTargets ?? [];
+  const overlapTarget = MODALITY_TARGET_OVERLAP[input.modality];
+  const effectiveTargets = targets.filter(t => t !== overlapTarget);
+  let targetPremium = 0;
+  if (effectiveTargets.length >= 2) {
+    const combo = getTargetCombination(effectiveTargets, input.indication);
+    targetPremium = combo?.dealPremium ?? getDefaultCombinationEffect(effectiveTargets.length).dealPremium;
+  } else if (effectiveTargets.length === 1) {
+    targetPremium = getTargetDealPremium(effectiveTargets[0]);
+  }
+  targetPremium = Math.min(targetPremium, 0.15);
+
+  // ─── Layer 5: Delivery route deal premium ──────────────────────────
+  // Oral-in-IV-class = positive premium, intrathecal = negative.
+  // Double-counting guard: reduce by 50% if convenientDosing differentiation
+  // factor is also active (both capture route advantage).
+  let routePremium = getRouteDealPremium(input.deliveryRoute);
+  if (input.differentiationFactors?.includes('convenientDosing') && routePremium > 0) {
+    routePremium *= 0.5;
+  }
+
+  const rawComposition = taPremium + modPremium + phaseDealTypePremium + targetPremium + routePremium;
   const additiveCapped = Math.min(rawComposition, ADDITIVE_CAP);
   let combined = 1.0 + additiveCapped;
 
@@ -335,6 +362,12 @@ export function computeEmpiricalMultiplier(
     reason.push(
       `phase×dealType[${dealType}][${phase}]=${phaseDealBaseRaw.toFixed(2)}×`
     );
+  }
+  if (targetPremium !== 0) {
+    reason.push(`target-premium=${targetPremium > 0 ? '+' : ''}${targetPremium.toFixed(3)} (${effectiveTargets.join('+')})`);
+  }
+  if (routePremium !== 0) {
+    reason.push(`route-premium=${routePremium > 0 ? '+' : ''}${routePremium.toFixed(3)} (${input.deliveryRoute})`);
   }
   reason.push(`tier=${tier1 ? 1 : 2} (dampener=${tierDampener.toFixed(2)})`);
   if (rawComposition > ADDITIVE_CAP) {

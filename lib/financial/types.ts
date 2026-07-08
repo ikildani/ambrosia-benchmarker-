@@ -226,6 +226,20 @@ export interface RNPVInput {
   timeWindow?: TimeWindow;
 
   // =========================================================================
+  // Molecular Targets & Delivery Route (cross-TA)
+  // =========================================================================
+
+  /** Molecular target slugs (e.g., ['pd1', 'vegf'] for PD-1/VEGF bispecific).
+   *  Drives target-specific PoS adjustment, peak sales modifier, and deal premium.
+   *  Up to 4 targets. See lib/financial/target-taxonomy.ts for valid slugs. */
+  molecularTargets?: string[];
+
+  /** Universal delivery route. Replaces the metabolic-only routeOfAdministration.
+   *  Drives PoS adjustment, peak sales modifier, COGS, timeline, and deal premium.
+   *  See lib/financial/delivery-routes.ts for valid values. */
+  deliveryRoute?: string;
+
+  // =========================================================================
   // TA-Specific Modifiers — wired from CalculationInput to drive PoS/valuation
   // =========================================================================
 

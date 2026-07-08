@@ -143,6 +143,10 @@ function buildRNPVInput(
     },
     dealType: inputs.dealType,
 
+    // Cross-TA: molecular targets and delivery route
+    molecularTargets: inputs.molecularTargets,
+    deliveryRoute: inputs.deliveryRoute ?? (inputs.routeOfAdministration ? { oral: 'oral', injectable: 'sc', implantable: 'implantable' }[inputs.routeOfAdministration] : undefined),
+
     // TA-specific modifiers — every user selection now moves the numbers
     lineOfTherapy: inputs.lineOfTherapy,
     combinationPotential: inputs.combinationPotential,

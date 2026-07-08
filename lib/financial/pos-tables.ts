@@ -44,6 +44,8 @@ import type { PhaseTransitionRates } from './types';
 import { applyIndicationModifier } from './indication-pos-modifiers';
 import { getTier3CalibratedIndication } from './indication-tier3-calibration';
 import { getTimeWindowedPoS, type TimeWindow } from './pos-time-windows';
+import { getCompositeTargetPosModifier, MODALITY_TARGET_OVERLAP } from './target-taxonomy';
+import { getRoutePosModifier } from './delivery-routes';
 
 // ---------------------------------------------------------------------------
 // Base Transition Rates by Therapeutic Area
@@ -1865,6 +1867,8 @@ export function getCumulativePoS(
   },
   indication?: string,
   timeWindow?: TimeWindow,
+  molecularTargets?: string[],
+  deliveryRoute?: string,
 ): {
   cumulativePoS: number;
   transitions: { phase: string; probability: number; cumulativeProb: number }[];
@@ -1927,6 +1931,16 @@ export function getCumulativePoS(
 
   // Resolve modality adjustment -- default to 1.0 (no adjustment)
   const modalityAdj = POS_MODALITY_ADJUSTMENT[modality] ?? 1.0;
+
+  // Resolve molecular target adjustment — geometric mean of selected targets,
+  // with double-counting guard: if the modality already encodes a specific
+  // target (e.g., tauTargeting → tau), neutralize that target's modifier.
+  const overlapTarget = MODALITY_TARGET_OVERLAP[modality];
+  const filteredTargets = (molecularTargets ?? []).filter(t => t !== overlapTarget);
+  const targetAdj = getCompositeTargetPosModifier(filteredTargets);
+
+  // Resolve delivery route adjustment
+  const routeAdj = getRoutePosModifier(deliveryRoute);
 
   // Resolve biomarker uplift
   const biomarkerAdj =
@@ -1991,7 +2005,7 @@ export function getCumulativePoS(
     // (not approval->launch, which is primarily an administrative/commercial step)
     const isApprovalToLaunch = phaseName.includes('Launch');
     if (!isApprovalToLaunch) {
-      adjustedRate *= modalityAdj * biomarkerAdj;
+      adjustedRate *= modalityAdj * biomarkerAdj * targetAdj * routeAdj;
 
       // Regulatory uplift: strongest at approval transitions, partial at Phase 2→3
       const isApprovalTransition = phaseName.includes('Approval') && !phaseName.includes('Launch');
