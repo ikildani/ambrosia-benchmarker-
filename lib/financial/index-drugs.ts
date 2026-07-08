@@ -3529,14 +3529,8 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
   },
 
   // ---------------------------------------------------------------------------
-  // Hematology (5)
+  // Hematology (4 — cll already exists in oncology heme section above)
   // ---------------------------------------------------------------------------
-  cll: {
-    indication: 'cll', ta: 'hematology', globalTAM_M: 10000, maxDrugPeakSales_M: 6000,
-    typicalAssetPeakSales_M: 2500, estimateYear: 2025,
-    source: 'AbbVie 2024 10-K (Imbruvica $4.5B declining), AZ 2024 (Calquence $2.8B), BeiGene 2024 (Brukinsa $3B+), AbbVie/Roche 2024 (Venclexta $2.5B)',
-    notes: 'BTK class in transition (ibrutinib → zanubrutinib); venetoclax fixed-duration shift',
-  },
   follicularLymphoma: {
     indication: 'follicularLymphoma', ta: 'hematology', globalTAM_M: 5000, maxDrugPeakSales_M: 3000,
     typicalAssetPeakSales_M: 1200, estimateYear: 2025,
@@ -3665,14 +3659,8 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
   },
 
   // ---------------------------------------------------------------------------
-  // Oncology (10 more)
+  // Oncology (7 more — bladder, gastric, mds, endometrial already exist above)
   // ---------------------------------------------------------------------------
-  bladder: {
-    indication: 'bladder', ta: 'oncology', globalTAM_M: 6000, maxDrugPeakSales_M: 4000,
-    typicalAssetPeakSales_M: 1500, estimateYear: 2025,
-    source: 'Seagen/Pfizer 2024 (Padcev $3B+ run rate), Merck 2024 (Keytruda UC), J&J 2024 (erdafitinib)',
-    notes: 'Padcev + Keytruda (EV-302) transforming 1L mUC; ADC+IO paradigm',
-  },
   renal: {
     indication: 'renal', ta: 'oncology', globalTAM_M: 10000, maxDrugPeakSales_M: 5000,
     typicalAssetPeakSales_M: 2000, estimateYear: 2025,
@@ -3685,35 +3673,17 @@ export const INDICATION_MARKET_CAPS: Record<string, IndicationMarketCap> = {
     source: 'Roche 2024 (Tecentriq+Avastin HCC $2B), Eisai/Merck 2024 (lenvatinib+Keytruda), EvaluatePharma 2025',
     notes: 'IO+anti-VEGF first-line; sorafenib genericized; tremelimumab+durvalumab added',
   },
-  gastric: {
-    indication: 'gastric', ta: 'oncology', globalTAM_M: 6000, maxDrugPeakSales_M: 3000,
-    typicalAssetPeakSales_M: 1200, estimateYear: 2025,
-    source: 'Astellas 2024 (Vyloy zolbetuximab $2B peak), AZ/Daiichi 2024 (Enhertu GEJ), Merck 2024 (Keytruda gastric)',
-    notes: 'CLDN18.2 (Vyloy) + HER2+ (Enhertu) + IO (Keytruda) segmentation',
-  },
   lung_sclc: {
     indication: 'lung_sclc', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
     typicalAssetPeakSales_M: 800, estimateYear: 2025,
     source: 'Roche 2024 (Tecentriq SCLC), AZ 2024 (Imfinzi CASPIAN), EvaluatePharma 2025',
     notes: 'IO+chemo only modest OS benefit; DLL3 ADC (ifinatamab) and bispecifics in development',
   },
-  mds: {
-    indication: 'mds', ta: 'oncology', globalTAM_M: 4000, maxDrugPeakSales_M: 2500,
-    typicalAssetPeakSales_M: 800, estimateYear: 2025,
-    source: 'BMS/Celgene 2024 (Revlimid del5q), Geron 2024 (Rytelo imetelstat), BMS 2024 (Reblozyl luspatercept)',
-    notes: 'HMA backbone (azacitidine); luspatercept for RS+ anemia; imetelstat for lower-risk',
-  },
   cervical: {
     indication: 'cervical', ta: 'oncology', globalTAM_M: 3000, maxDrugPeakSales_M: 2000,
     typicalAssetPeakSales_M: 700, estimateYear: 2025,
     source: 'Merck 2024 (Keytruda cervical KEYNOTE-826), Seagen/Genmab 2024 (Tivdak), EvaluatePharma 2025',
     notes: 'IO + ADC; HPV prophylaxis reducing prevalence long-term but current advanced disease unmet',
-  },
-  endometrial: {
-    indication: 'endometrial', ta: 'oncology', globalTAM_M: 3500, maxDrugPeakSales_M: 2000,
-    typicalAssetPeakSales_M: 700, estimateYear: 2025,
-    source: 'Merck/Eisai 2024 (Keytruda+Lenvima), GSK 2024 (dostarlimab), EvaluatePharma 2025',
-    notes: 'IO+TKI first-line advanced; dMMR/MSI-H subset has exceptional IO monotherapy response',
   },
   breast_hr: {
     indication: 'breast_hr', ta: 'oncology', globalTAM_M: 15000, maxDrugPeakSales_M: 8000,
