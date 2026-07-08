@@ -430,8 +430,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    const supabase = createServiceClient();
-    await logCronRun(supabase, 'apollo-auto-enroll', { errors: [message] });
+    const errorSupabase = createServiceClient();
+    await logCronRun(errorSupabase, 'apollo-auto-enroll', { errors: [message] });
 
     // Alert Slack on hard failure
     await sendSlackNotification(
