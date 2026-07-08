@@ -164,7 +164,7 @@ export function getClosestComparables(
   const limit = input.limit ?? 8;
 
   const FAMILY: Record<string, string[]> = {
-    antibody: ['mab', 'antibody', 'bispecific', 'bispecificAntibody', 'adc'],
+    antibody: ['mab', 'antibody', 'bispecific', 'bispecificAntibody', 'trispecificAntibody', 'adc'],
     smallMolecule: ['small_molecule', 'smallMolecule', 'protac'],
     oligonucleotide: ['oligonucleotide', 'rnai', 'aso', 'mrna'],
     cellTherapy: ['cell_therapy', 'cellTherapy', 'car_t', 'carT_heme', 'carT_solid', 'til_therapy'],

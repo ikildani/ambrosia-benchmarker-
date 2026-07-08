@@ -16,7 +16,7 @@ export type DealType = 'licensing' | 'acquisition' | 'codevelopment' | 'option' 
 
 // Modality types (17 oncology + 6 neurology = 23 options)
 export type Modality =
-  | 'smallMolecule' | 'mab' | 'adc' | 'bispecific' | 'tCellEngager'
+  | 'smallMolecule' | 'mab' | 'adc' | 'bispecific' | 'trispecificAntibody' | 'tCellEngager'
   | 'carT_heme' | 'carT_solid' | 'cellTherapy' | 'geneTherapy'
   | 'radiopharmaceutical' | 'mrna' | 'rnai' | 'protac'
   | 'molecularGlue' | 'peptide' | 'therapeuticVaccine' | 'oncolyticVirus'
@@ -817,7 +817,7 @@ function getTherapeuticAreaRiskAdjustment(input: CalculationInput): number {
   } else if (ta === 'hematology') {
     // CAR-T/bispecific complexity
     if (input.modality === 'carT_heme' || input.modality === 'carT_solid') adj += 6;
-    if (input.modality === 'bispecificHeme' || input.modality === 'bispecific') adj += 3;
+    if (input.modality === 'bispecificHeme' || input.modality === 'bispecific' || input.modality === 'trispecificAntibody') adj += 3;
     // MRD endpoints are newer, less validated
     if (input.mrdStatus === 'mrd_endpoint') adj += 4;
     // Transplant-ineligible = larger population, competitive
@@ -2457,6 +2457,7 @@ export const modalityOptions = [
     { value: 'mab', label: 'Monoclonal Antibody (naked)' },
     { value: 'adc', label: 'Antibody-Drug Conjugate (ADC)' },
     { value: 'bispecific', label: 'Bispecific Antibody' },
+    { value: 'trispecificAntibody', label: 'Trispecific Antibody' },
     { value: 'tCellEngager', label: 'T-cell Engager (non-bispecific)' },
   ]},
   { group: 'Cell & Gene Therapy', options: [
@@ -2727,6 +2728,8 @@ export const neurologyModalityOptions = [
   ]},
   { group: 'Biologics', options: [
     { value: 'mab', label: 'Monoclonal Antibody' },
+    { value: 'bispecific', label: 'Bispecific Antibody' },
+    { value: 'trispecificAntibody', label: 'Trispecific Antibody' },
     { value: 'tauTargeting', label: 'Tau-targeting Therapy' },
     { value: 'peptide', label: 'Peptide' },
   ]},
@@ -3582,6 +3585,7 @@ export const hematologyModalityOptions = [
   { group: 'Antibody-Based', options: [
     { value: 'bispecificHeme', label: 'Bispecific Antibody' },
     { value: 'bispecific', label: 'Bispecific (T-Cell Engager)' },
+    { value: 'trispecificAntibody', label: 'Trispecific Antibody' },
     { value: 'adc', label: 'Antibody-Drug Conjugate (ADC)' },
     { value: 'mab', label: 'Monoclonal Antibody' },
   ]},

@@ -97,6 +97,7 @@ export const MODALITY_UPLIFT: Record<string, number> = {
   adc: 1.3,
   bispecific: 1.5,
   bispecificAntibody: 1.5,
+  trispecificAntibody: 1.65,
   rnai: 1.5,
   radiopharmaceutical: 2.2,
   protac: 1.5,

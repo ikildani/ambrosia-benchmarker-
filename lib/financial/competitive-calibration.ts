@@ -78,6 +78,7 @@ export const MODALITY_ENTRY_LAG_MULTIPLIER: Record<string, number> = {
   mab: 1.6,
   adc: 1.5,
   bispecific: 1.5,
+  trispecificAntibody: 1.8,
   mrna: 1.3,
   gene_therapy: 2.0,
   geneTherapy: 2.0,

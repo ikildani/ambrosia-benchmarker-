@@ -125,6 +125,7 @@ const MODALITY_DISPLAY: Record<string, string> = {
   smallMolecule: 'Small Molecule',
   mab: 'Monoclonal Antibody',
   bispecific: 'Bispecific Antibody',
+  trispecificAntibody: 'Trispecific Antibody',
   adc: 'ADC',
   carT_heme: 'CAR-T',
   geneTherapy: 'Gene Therapy',
@@ -158,6 +159,7 @@ const MODALITY_DISPLAY: Record<string, string> = {
 const MODALITY_PAGE_SLUG: Record<string, { slug: string; title: string }> = {
   adc: { slug: 'adc-deal-benchmarks', title: 'ADC Deal Benchmarks' },
   bispecific: { slug: 'bispecific-antibody-deal-benchmarks', title: 'Bispecific Antibody Deals' },
+  trispecificAntibody: { slug: 'trispecific-antibody-deal-benchmarks', title: 'Trispecific Antibody Deals' },
   carT_heme: { slug: 'car-t-deal-benchmarks', title: 'CAR-T Cell Therapy Deals' },
   geneTherapy: { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
   geneTherapyRare: { slug: 'gene-therapy-rare-disease-deal-benchmarks', title: 'Gene Therapy Rare Disease Deals' },

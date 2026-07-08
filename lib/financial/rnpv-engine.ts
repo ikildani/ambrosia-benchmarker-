@@ -1515,7 +1515,7 @@ function getCogsRate(modality: string): number {
   // Comprehensive modality-to-COGS mapping — all biologic-class modalities must be listed
   // to avoid incorrectly defaulting to smallMolecule (10% COGS instead of 18%)
   const biologicModalities = [
-    'mab', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor',
+    'mab', 'bispecific', 'trispecificAntibody', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor',
     'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor',
     's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal',
     'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist',
@@ -1539,7 +1539,7 @@ function getCogsRate(modality: string): number {
  * Source: IQVIA Channel Dynamics — biologics retain more revenue post-LOE
  * than small molecules due to slower biosimilar adoption. */
 function getGenericErosionRate(modality: string): number {
-  const biologicModalities = ['mab', 'antibody', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor', 's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal', 'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist', 'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor'];
+  const biologicModalities = ['mab', 'antibody', 'bispecific', 'trispecificAntibody', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor', 's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal', 'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist', 'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor'];
   const cellTherapyModalities = ['carT_heme', 'carT_solid', 'cellTherapy', 'carT_autoimmune', 'inVivoCarT', 'carTreg', 'stemCell'];
   const geneTherapyModalities = ['geneTherapy', 'geneTherapyOcular', 'aso', 'rnai', 'oligonucleotide', 'mrna'];
   const vaccineModalities = ['therapeuticVaccine', 'vaccinePreventive', 'oncolyticVirus'];

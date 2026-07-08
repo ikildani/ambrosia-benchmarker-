@@ -2657,6 +2657,7 @@ export const MANUFACTURING_WACC_PREMIUM: Record<string, number> = {
   cellTherapy: 0.015,      // +1.5pp (cell processing, cryopreservation)
   adc: 0.005,              // +0.5pp (conjugation chemistry, linker-payload stability)
   bispecific: 0.008,       // +0.8pp (complex manufacturing, low yields)
+  trispecificAntibody: 0.015, // +1.5pp (chain mispairing, 0.5-2.0 g/L yields vs 5-8 g/L standard mAb; Springer Process Dev 2024)
   radiopharmaceutical: 0.012, // +1.2pp (short half-life isotopes, specialized facilities)
   mrna: 0.008,             // +0.8pp (LNP formulation, cold chain)
   // All other modalities: 0 (no additional premium)

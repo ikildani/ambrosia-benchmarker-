@@ -33,6 +33,7 @@ const MODALITY_OPTIONS: { value: Modality; label: string }[] = [
   { value: 'mab', label: 'Monoclonal Antibody' },
   { value: 'adc', label: 'ADC' },
   { value: 'bispecific', label: 'Bispecific Antibody' },
+  { value: 'trispecificAntibody', label: 'Trispecific Antibody' },
   { value: 'carT_solid', label: 'CAR-T (Solid)' },
   { value: 'geneTherapy', label: 'Gene Therapy' },
   { value: 'radiopharmaceutical', label: 'Radiopharmaceutical' },

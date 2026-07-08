@@ -253,7 +253,7 @@ export const EXPANSION_TEMPLATES: Record<string, TAExpansionTemplate> = {
  * expand more easily.
  */
 const MODALITY_EXPANSION_FACTORS: Record<string, number> = {
-  smallMolecule: 1.10, mab: 1.05, bispecific: 0.90, adc: 0.85,
+  smallMolecule: 1.10, mab: 1.05, bispecific: 0.90, trispecificAntibody: 0.80, adc: 0.85,
   carT_heme: 0.70, carT_solid: 0.60, cellTherapy: 0.65,
   geneTherapy: 0.55, geneTherapyRare: 0.55, geneTherapyOcular: 0.60,
   radiopharmaceutical: 0.75, mrna: 0.90, rnai: 0.85, protac: 0.80,

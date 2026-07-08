@@ -14,12 +14,12 @@ import type { BenchmarkPageData } from './benchmarkPages';
 
 const TA_MODALITY_MAP: Record<string, string[]> = {
   oncology: [
-    'smallMolecule', 'mab', 'adc', 'bispecific', 'carT_heme', 'carT_solid',
+    'smallMolecule', 'mab', 'adc', 'bispecific', 'trispecificAntibody', 'carT_heme', 'carT_solid',
     'geneTherapy', 'radiopharmaceutical', 'protac', 'molecularGlue',
     'therapeuticVaccine', 'oncolyticVirus', 'tCellEngager', 'peptide', 'rnai',
   ],
   neurology: [
-    'smallMolecule', 'mab', 'geneTherapy', 'aso', 'bbbPlatform', 'psychedelic',
+    'smallMolecule', 'mab', 'bispecific', 'trispecificAntibody', 'geneTherapy', 'aso', 'bbbPlatform', 'psychedelic',
     'ionChannel', 'tauTargeting', 'stemCell', 'peptide', 'rnai',
   ],
   immunology: [
@@ -49,7 +49,7 @@ const TA_MODALITY_MAP: Record<string, string[]> = {
     'cellTherapy', 'peptide', 'oligonucleotide',
   ],
   hematology: [
-    'carT_heme', 'bispecific', 'smallMolecule', 'mab', 'geneTherapy',
+    'carT_heme', 'bispecific', 'trispecificAntibody', 'smallMolecule', 'mab', 'geneTherapy',
     'cellTherapy', 'rnai', 'aso',
   ],
   dermatology: [
@@ -71,6 +71,7 @@ const MODALITY_LABELS: Record<string, string> = {
   mab: 'Monoclonal Antibody',
   adc: 'ADC (Antibody-Drug Conjugate)',
   bispecific: 'Bispecific Antibody',
+  trispecificAntibody: 'Trispecific Antibody',
   carT_heme: 'CAR-T (Hematologic)',
   carT_solid: 'CAR-T (Solid Tumor)',
   carT_autoimmune: 'CAR-T (Autoimmune)',
@@ -229,6 +230,7 @@ function modalityToSlug(mod: string): string {
     mab: 'monoclonal-antibody',
     adc: 'adc',
     bispecific: 'bispecific-antibody',
+    trispecificAntibody: 'trispecific-antibody',
     carT_heme: 'car-t-heme',
     carT_solid: 'car-t-solid-tumor',
     carT_autoimmune: 'car-t-autoimmune',

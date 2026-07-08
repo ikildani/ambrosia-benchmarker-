@@ -347,6 +347,16 @@ export const MODALITY_PROFILES: Record<string, ModalityProfile> = {
     notes: 'Alias for bispecific.',
     source: 'Manufacturing WACC from index-drugs.ts.',
   },
+  trispecificAntibody: {
+    modality: 'trispecificAntibody',
+    category: 'antibody',
+    platformOptionFloorM: null,
+    narrowMarketCapM: null,
+    topicalFlag: false,
+    manufacturingWACCPremium: 0.015,
+    notes: 'Trispecific antibody (3 targets). 90+ candidates in development, no approvals. AbbVie/Ichnos ISB 2001 $700M upfront/$1.925B TDV (Jul 2025). Higher CMC risk (0.5-2.0 g/L yields, chain mispairing) justifies 1.5% WACC premium.',
+    source: 'AbbVie/Ichnos deal (Jul 2025), Springer Process Dev 2024, Labiotech trispecific review 2025.',
+  },
 
   // ----- ADC -----
   adc: {

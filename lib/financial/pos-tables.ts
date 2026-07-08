@@ -363,6 +363,8 @@ export const POS_MODALITY_ADJUSTMENT: Record<string, number> = {
   adc: 1.20,
   /** Bispecific antibodies -- 4 new approvals in 2024 (tarlatamab, zanidatamab, zenocutuzumab, odronextamab). Still complex manufacturing but accelerating class. */
   bispecific: 0.95,  // Up from 0.80: 4 new approvals in 2024 validates the platform. Still below mAb baseline due to CMC complexity.
+  /** Trispecific antibodies -- no approvals yet; 90+ candidates in development (2026). ISB 2001 (CD38xBCMAxCD3) Phase 1 ORR 79%. Chain mispairing + low yields (0.5-2.0 g/L) vs 5-8 g/L standard mAb = significant CMC risk. */
+  trispecificAntibody: 0.82,
   /** T-cell engagers (BiTE, etc.) -- cytokine release syndrome risk */
   tCellEngager: 0.78,
   /** Peptides -- good oral bioavailability advances, established PK */

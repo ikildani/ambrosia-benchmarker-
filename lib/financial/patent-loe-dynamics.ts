@@ -151,7 +151,7 @@ const MODALITY_TO_CATEGORY: Record<string, string> = {
   s1pModulator: 'small_molecule', sglt2Inhibitor: 'small_molecule',
   anticoagulantNovel: 'small_molecule', antiviral: 'small_molecule', antibioticNovel: 'small_molecule',
   // Antibody / biologic
-  mab: 'antibody', antibody: 'antibody', bispecific: 'antibody', bispecificAntibody: 'antibody',
+  mab: 'antibody', antibody: 'antibody', bispecific: 'antibody', bispecificAntibody: 'antibody', trispecificAntibody: 'antibody',
   tCellEngager: 'antibody', bispecificHeme: 'antibody', fcrnAntagonist: 'antibody',
   complementInhibitor: 'antibody', antiVegf: 'antibody', il17Inhibitor: 'antibody',
   il13Inhibitor: 'antibody', tl1aInhibitor: 'antibody', antiTl1a: 'antibody',

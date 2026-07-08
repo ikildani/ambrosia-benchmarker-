@@ -350,6 +350,7 @@ const MODALITY_EMPIRICAL_UPLIFT: Record<string, number> = {
   adc: 1.3,
   bispecific: 1.5,
   bispecificAntibody: 1.5,
+  trispecificAntibody: 1.65,
   rnai: 1.5,
   radiopharmaceutical: 2.2,   // Heavy uplift — radiopharm had -75% signed
   protac: 1.5,
@@ -436,6 +437,8 @@ const MODALITY_CANONICAL: Record<string, string> = {
   cell_therapy: 'cellTherapy',
   car_t: 'carT_heme',
   bispecificAntibody: 'bispecific',
+  trispecific: 'trispecificAntibody',
+  trispecific_antibody: 'trispecificAntibody',
 };
 function canonicalModality(m: string): string {
   return MODALITY_CANONICAL[m] ?? m;

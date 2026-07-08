@@ -299,7 +299,7 @@ export function computeRoyaltyStacking(
  * Applies default floor provision at 50% of gross.
  */
 const MODALITY_TO_STACKING: Record<string, StackingModality> = {
-  smallMolecule: 'smallMolecule', mab: 'mab', adc: 'adc', bispecific: 'bispecific',
+  smallMolecule: 'smallMolecule', mab: 'mab', adc: 'adc', bispecific: 'bispecific', trispecificAntibody: 'bispecific',
   carT_heme: 'carT', carT_solid: 'carT', carT_autoimmune: 'carT', inVivoCarT: 'carT', carTreg: 'carT',
   geneTherapy: 'geneTherapy_AAV', geneTherapyOcular: 'geneTherapy_AAV', geneTherapyRare: 'geneTherapy_AAV',
   rnai: 'siRNA_ASO', aso: 'siRNA_ASO', oligonucleotide: 'siRNA_ASO', siRNA: 'siRNA_ASO',

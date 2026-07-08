@@ -121,6 +121,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
       adc: ['breast_her2', 'breast_tnbc', 'lung_nsclc', 'ovarian', 'gastric', 'bladder', 'cervical', 'endometrial', 'colorectal', 'dlbcl', 'myeloma'],
       // Bispecifics target hematologic + solid tumors
       bispecific: ['dlbcl', 'myeloma', 'all', 'lung_nsclc', 'breast_her2', 'prostate', 'colorectal', 'aml'],
+      trispecificAntibody: ['myeloma', 'dlbcl', 'aml', 'all', 'lung_nsclc', 'alzheimers'],
       // CAR-T primarily hematologic
       carT_cd19: ['dlbcl', 'all', 'follicular', 'mantleCell', 'cll', 'marginalZone'],
       carT_bcma: ['myeloma'],

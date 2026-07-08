@@ -297,6 +297,7 @@ function mapModality(modality: string): string {
     mab: 'antibody',                   // monoclonal antibody
     adc: 'adc',
     bispecific: 'bispecific',
+    trispecificAntibody: 'bispecific',
     tCellEngager: 'bispecific',        // T-cell engagers are bispecific-adjacent
     carT: 'car_t',
     carT_heme: 'car_t',               // CAR-T hematologic
