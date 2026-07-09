@@ -409,6 +409,12 @@ export interface CalculatorActions {
   setCombinationPotential: (v: CombinationPotential) => void;
   setCompetitivePosition: (v: CompetitivePosition) => void;
   setDataQuality: (v: DataQuality) => void;
+  /** Set molecular targets (array of target slugs). */
+  setMolecularTargets: (v: string[]) => void;
+  /** Set delivery route. */
+  setDeliveryRoute: (v: string) => void;
+  /** Toggle a molecular target on/off (max 4). */
+  toggleMolecularTarget: (slug: string) => void;
   /** Toggle a differentiation factor on/off. */
   toggleDifferentiationFactor: (key: string) => void;
   /** R23: Set asset-specific peak sales override in $M. null = use engine default. */
