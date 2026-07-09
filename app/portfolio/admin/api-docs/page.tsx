@@ -275,15 +275,25 @@ export default function ApiDocsPage() {
               <CodeBlock>{`curl -X GET https://calculator.ambrosiaventures.co/api/portfolio/dashboard \\
   -H "Authorization: Bearer <your-token>" \\
   -H "Content-Type: application/json"`}</CodeBlock>
-              <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+              <div className="bg-slate-800/50 border border-teal-500/20 rounded-lg p-4">
                 <div className="flex items-start gap-2">
-                  <ExternalLink className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                  <Code className="w-4 h-4 text-teal-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-amber-400">Enterprise API Keys</p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Dedicated API keys for service-to-service integration (from the <code className="text-slate-300 bg-slate-700 px-1 py-0.5 rounded">enterprise_api_keys</code> table) are coming soon.
-                      These will provide long-lived tokens for data warehouse and BI tool integration without requiring user sessions.
+                    <p className="text-sm font-medium text-teal-400">Enterprise API Keys &amp; MCP Server</p>
+                    <p className="text-xs text-slate-400 mt-1 mb-3">
+                      Manage your API keys and connect AI agents via the Model Context Protocol.
+                      Go to <a href="/dashboard?tab=api" className="text-teal-400 hover:text-teal-300 underline">Dashboard → API tab</a> to create, view, and revoke keys.
                     </p>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">MCP Endpoint</p>
+                      <code className="block text-xs text-teal-300 bg-slate-900 px-3 py-2 rounded font-mono select-all">https://calculator.ambrosiaventures.co/api/mcp</code>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-3">21 Tools Available</p>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {['Deal Terms', 'rNPV', 'Monte Carlo', 'Deal Optimizer', 'Regulatory Risk', 'Partner Match', 'Royalty Stacking', 'Patent/LOE', 'CMC Risk', 'Earnout/CVR', 'Tax Structure', 'Buyer Synergy', 'Indication Sequence', 'Competitive Dynamics', 'Real Options', 'Lifecycle Extensions', 'Scenario Comparison', 'Defensive Analysis', 'Clinical Readouts', 'AdComm Calendar', 'ZOPA/Negotiation'].map(tool => (
+                          <span key={tool} className="text-[9px] px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded">{tool}</span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
