@@ -157,6 +157,7 @@ const parameterLabels: Record<string, string> = {
   biologicExperience: 'Biologic Experience',
   endoscopicEndpoint: 'Endoscopic Endpoint',
   dealType: 'Deal Structure',
+  deliveryRoute: 'Delivery Route',
 };
 
 // Flatten grouped options (for modality, indication)
@@ -231,6 +232,11 @@ function getOptionsForParameter(
       return weightLossEfficacyOptions;
     case 'routeOfAdministration':
       return routeOfAdministrationOptions;
+    case 'deliveryRoute': {
+      const { deliveryRouteOptionsByTA } = require('./financial/delivery-routes');
+      const ta = isNeurology ? 'neurology' : isImmunology ? 'immunology' : isMetabolic ? 'metabolic' : isCardiovascular ? 'cardiovascular' : isInfectiousDisease ? 'infectiousDisease' : isOphthalmology ? 'ophthalmology' : isWomensHealth ? 'womensHealth' : isRareDisease ? 'rareDisease' : isHematology ? 'hematology' : isDermatology ? 'dermatology' : isGastroenterology ? 'gastroenterology' : 'oncology';
+      return (deliveryRouteOptionsByTA[ta] ?? []).map((o: { value: string; label: string }) => ({ value: o.value, label: o.label }));
+    }
     case 'comorbidityBreadth':
       return comorbidityBreadthOptions;
     case 'metabolicTreatmentApproach':
@@ -1145,6 +1151,7 @@ export function computeSensitivityAnalysis(
     // but still included as they affect total deal value through milestone structure
     'biomarker',
     'combinationPotential',
+    'deliveryRoute' as keyof CalculationInput,
     ...(isNeurology ? ['bbbPenetration' as keyof CalculationInput, 'diseaseProgression' as keyof CalculationInput, 'biomarkerValidation' as keyof CalculationInput] : []),
     ...(isImmunology ? ['immuneResetPotential' as keyof CalculationInput, 'targetSpecificity' as keyof CalculationInput, 'diseaseSeverity' as keyof CalculationInput] : []),
     ...(isMetabolic ? ['mechanismDifferentiation' as keyof CalculationInput, 'weightLossEfficacy' as keyof CalculationInput, 'routeOfAdministration' as keyof CalculationInput, 'comorbidityBreadth' as keyof CalculationInput] : []),

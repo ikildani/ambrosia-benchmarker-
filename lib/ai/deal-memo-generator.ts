@@ -129,6 +129,14 @@ function getTherapeuticAreaFields(inputs: CalculationInput): string {
     if (inputs.whRegulatory) fields.push(`  Regulatory Pathway: ${inputs.whRegulatory}`);
   }
 
+  // Cross-TA: molecular targets and delivery route
+  if (inputs.molecularTargets && inputs.molecularTargets.length > 0) {
+    fields.push(`  Molecular Targets: ${inputs.molecularTargets.join(', ')}`);
+  }
+  if (inputs.deliveryRoute) {
+    fields.push(`  Delivery Route: ${inputs.deliveryRoute}`);
+  }
+
   return fields.length > 0 ? fields.join('\n') : '';
 }
 
