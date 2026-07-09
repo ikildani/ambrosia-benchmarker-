@@ -5,6 +5,7 @@ const footerLinks = {
   Product: [
     { label: 'Deal Calculator', href: '/calculator' },
     { label: 'Pro Plan', href: '/pro' },
+    { label: 'Deal Intelligence Brief', href: '/benchmark' },
     { label: 'Portfolio License', href: '/portfolio' },
     { label: 'Benchmarks', href: '/benchmarks' },
     { label: 'Deal Pulse', href: '/pulse' },

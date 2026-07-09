@@ -249,6 +249,15 @@ export function generatePricingSchema() {
           },
         },
       },
+      {
+        '@type': 'Offer',
+        name: 'Deal Intelligence Brief',
+        price: '2500',
+        priceCurrency: 'USD',
+        description: 'The complete deal landscape for any indication — 52 deal calculations across 13 modalities and 4 deal structures, AI strategic narrative and negotiation playbook, comparable transactions, partner matching with intent scoring, white-label branding, and complimentary walkthrough. Delivered within 24 hours.',
+        url: `${BASE_URL}/benchmark`,
+        availability: 'https://schema.org/InStock',
+      },
     ],
   };
 }
