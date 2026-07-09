@@ -37,6 +37,7 @@ import { renderIndicationSequencingPage } from './pages/indicationSequencingPage
 import { renderBuyerSynergyPage } from './pages/buyerSynergyPage';
 import { renderMAAcquisitionPage } from './pages/maAcquisitionPage';
 import { renderDeliveryRoutePage } from './pages/deliveryRoutePage';
+import { renderMolecularTargetPage } from './pages/molecularTargetPage';
 import { renderTrispecificPage } from './pages/trispecificPage';
 import type { PDFReportData, ReportMeta, TocEntry, BrandConfig } from './types';
 
@@ -128,6 +129,7 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
   addPage(renderMAAcquisitionPage);
   addPage(renderTrispecificPage);
   addPage(renderDeliveryRoutePage);
+  addPage(renderMolecularTargetPage);
   addPage(renderSensitivityPage);
   addPage(renderComparablesPage);
   addPage(renderPartnersPage);
