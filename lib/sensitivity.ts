@@ -234,8 +234,8 @@ function getOptionsForParameter(
       return routeOfAdministrationOptions;
     case 'deliveryRoute': {
       const { deliveryRouteOptionsByTA } = require('./financial/delivery-routes');
-      const ta = isNeurology ? 'neurology' : isImmunology ? 'immunology' : isMetabolic ? 'metabolic' : isCardiovascular ? 'cardiovascular' : isInfectiousDisease ? 'infectiousDisease' : isOphthalmology ? 'ophthalmology' : isWomensHealth ? 'womensHealth' : isRareDisease ? 'rareDisease' : isHematology ? 'hematology' : isDermatology ? 'dermatology' : isGastroenterology ? 'gastroenterology' : 'oncology';
-      return (deliveryRouteOptionsByTA[ta] ?? []).map((o: { value: string; label: string }) => ({ value: o.value, label: o.label }));
+      const taKey = isNeurology ? 'neurology' : isImmunology ? 'immunology' : isMetabolic ? 'metabolic' : isRareDisease ? 'rareDisease' : isHematology ? 'hematology' : isDermatology ? 'dermatology' : isGastroenterology ? 'gastroenterology' : 'oncology';
+      return (deliveryRouteOptionsByTA[taKey] ?? []).map((o: { value: string; label: string }) => ({ value: o.value, label: o.label }));
     }
     case 'comorbidityBreadth':
       return comorbidityBreadthOptions;
