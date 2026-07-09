@@ -364,6 +364,28 @@ export default async function BenchmarkPage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* Brief Upsell */}
+        <section className="py-12 px-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-full">For Funds & Advisors</span>
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Need the full deal landscape?</h3>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 max-w-xl">
+              The Deal Intelligence Brief covers <strong>every modality and deal structure</strong> for this indication — 52 deal calculations, AI strategic narrative, comparable transactions, partner matching, and white-label branding. Delivered in 24 hours.
+            </p>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/benchmark"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-sm rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+              >
+                Configure Brief — $2,500
+              </Link>
+              <span className="text-xs text-slate-400">All-inclusive · White-label · Walkthrough included</span>
+            </div>
+          </div>
+        </section>
+
       </main>
       <SiteFooter />
     </>

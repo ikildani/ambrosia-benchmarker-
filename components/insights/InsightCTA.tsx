@@ -65,6 +65,16 @@ export function InsightCTA({
         <p className="text-sm text-slate-500 mt-6">
           Data updated daily from SEC filings, press releases, and verified sources.
         </p>
+
+        <div className="mt-8 pt-6 border-t border-slate-700">
+          <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">For Funds & Advisors</p>
+          <Link
+            href="/benchmark"
+            className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors"
+          >
+            Need the full landscape? Get a Deal Intelligence Brief — $2,500 →
+          </Link>
+        </div>
       </div>
     </section>
   );
