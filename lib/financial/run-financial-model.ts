@@ -46,6 +46,9 @@ import { DEFAULT_EARNOUT_STRUCTURE, computeEarnoutValue, type EarnoutResult } fr
 import { computePricingConstraints, type PricingConstraintResult } from './pricing-access';
 import { computeIndicationSequence, type IndicationSequenceResult } from './indication-sequencing';
 import { computeBuyerSynergy, BUYER_PROFILES, type BuyerSynergyResult } from './buyer-synergy';
+import { getTargetEntry, getCompositeTargetPosModifier, MODALITY_TARGET_OVERLAP } from './target-taxonomy';
+import { getTargetCombination, getDefaultCombinationEffect } from './target-combinations';
+import { getRouteProfile, type DeliveryRoute } from './delivery-routes';
 
 /** Full output of the financial modeling pipeline */
 export interface FinancialModelResult {
@@ -83,6 +86,35 @@ export interface FinancialModelResult {
   pricingConstraints?: PricingConstraintResult;
   indicationSequence?: IndicationSequenceResult;
   buyerSynergies?: BuyerSynergyResult[];
+
+  /** Cross-TA: molecular target + delivery route impact analysis */
+  targetRouteAnalysis?: {
+    targets: Array<{
+      slug: string;
+      displayName: string;
+      validated: boolean;
+      posModifier: number;
+      peakSalesModifier: number;
+      dealPremium: number;
+    }>;
+    combination?: {
+      key: string;
+      precedentDrug?: string;
+      netEffect: number;
+      rationale: string;
+    };
+    deliveryRoute?: {
+      slug: string;
+      displayName: string;
+      posModifier: number;
+      peakSalesModifier: number;
+      dealPremium: number;
+      timelineModifier: number;
+    };
+    compositePoSImpact: number;
+    compositePeakSalesImpact: number;
+    compositeDealPremium: number;
+  };
 }
 
 /**
@@ -545,6 +577,69 @@ export function runFinancialModel(
     pricingConstraints,
     indicationSequence,
     buyerSynergies: buyerSynergiesResult,
+    targetRouteAnalysis: buildTargetRouteAnalysis(rnpvInput),
+  };
+}
+
+function buildTargetRouteAnalysis(input: RNPVInput): FinancialModelResult['targetRouteAnalysis'] {
+  const targets = input.molecularTargets ?? [];
+  const route = input.deliveryRoute;
+  if (targets.length === 0 && !route) return undefined;
+
+  const overlapTarget = MODALITY_TARGET_OVERLAP[input.modality];
+  const effectiveTargets = targets.filter(t => t !== overlapTarget);
+
+  const targetEntries = effectiveTargets.map(slug => {
+    const entry = getTargetEntry(slug);
+    return {
+      slug,
+      displayName: entry?.displayName ?? slug,
+      validated: entry?.validatedTarget ?? false,
+      posModifier: entry?.posModifier ?? 1.0,
+      peakSalesModifier: entry?.peakSalesModifier ?? 1.0,
+      dealPremium: entry?.dealPremium ?? 0,
+    };
+  });
+
+  const combo = effectiveTargets.length >= 2
+    ? getTargetCombination(effectiveTargets, input.indication)
+    : undefined;
+  const defaultCombo = effectiveTargets.length >= 2 && !combo
+    ? getDefaultCombinationEffect(effectiveTargets.length)
+    : undefined;
+
+  const routeProfile = route ? getRouteProfile(route as DeliveryRoute) : undefined;
+
+  const compositePoS = getCompositeTargetPosModifier(effectiveTargets) * (routeProfile?.posModifier ?? 1.0);
+  const targetPeakMod = combo
+    ? combo.peakSalesModifier * combo.complexityPenalty
+    : effectiveTargets.length === 1
+      ? targetEntries[0]?.peakSalesModifier ?? 1.0
+      : defaultCombo
+        ? defaultCombo.peakSalesModifier * defaultCombo.complexityPenalty
+        : 1.0;
+  const compositePeakSales = targetPeakMod * (routeProfile?.peakSalesModifier ?? 1.0);
+  const compositePremium = (combo?.dealPremium ?? defaultCombo?.dealPremium ?? targetEntries.reduce((s, t) => s + t.dealPremium, 0)) + (routeProfile?.dealPremium ?? 0);
+
+  return {
+    targets: targetEntries,
+    combination: combo ? {
+      key: combo.key,
+      precedentDrug: combo.precedentDrug,
+      netEffect: combo.netEffect,
+      rationale: combo.rationale,
+    } : undefined,
+    deliveryRoute: routeProfile ? {
+      slug: routeProfile.slug,
+      displayName: routeProfile.displayName,
+      posModifier: routeProfile.posModifier,
+      peakSalesModifier: routeProfile.peakSalesModifier,
+      dealPremium: routeProfile.dealPremium,
+      timelineModifier: routeProfile.timelineModifier,
+    } : undefined,
+    compositePoSImpact: compositePoS,
+    compositePeakSalesImpact: compositePeakSales,
+    compositeDealPremium: compositePremium,
   };
 }
 

@@ -104,13 +104,13 @@ function Narrative({ text }: { text?: string }) {
 export default function InstitutionalAnalyticsPanel({ financialModel: fm, tier, onUpgrade, onBuyReport }: Props) {
   const hasAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
-  const hasAny = fm.regulatoryRisk || fm.milestoneProbabilities || fm.taxStructure ||
+  const hasAny = fm.targetRouteAnalysis || fm.regulatoryRisk || fm.milestoneProbabilities || fm.taxStructure ||
     fm.royaltyStacking || fm.patentDynamics || fm.cmcRisk || fm.earnoutValuation ||
     fm.pricingConstraints || fm.indicationSequence || (fm.buyerSynergies && fm.buyerSynergies.length > 0);
 
   if (!hasAny) return null;
 
-  const moduleCount = [fm.regulatoryRisk, fm.milestoneProbabilities, fm.taxStructure,
+  const moduleCount = [fm.targetRouteAnalysis, fm.regulatoryRisk, fm.milestoneProbabilities, fm.taxStructure,
     fm.royaltyStacking, fm.patentDynamics, fm.cmcRisk, fm.earnoutValuation,
     fm.pricingConstraints, fm.indicationSequence, fm.buyerSynergies?.length ? fm.buyerSynergies : null,
   ].filter(Boolean).length;
@@ -165,6 +165,107 @@ export default function InstitutionalAnalyticsPanel({ financialModel: fm, tier, 
         </div>
       ) : (
         <div className="space-y-3">
+          {/* Target & Route Impact */}
+          {fm.targetRouteAnalysis && (
+            <ModulePanel
+              title="Target & Route Impact"
+              subtitle={`${fm.targetRouteAnalysis.targets.length} target${fm.targetRouteAnalysis.targets.length !== 1 ? 's' : ''} · ${fm.targetRouteAnalysis.deliveryRoute?.displayName ?? 'Default route'}`}
+              icon={<Target className="w-5 h-5 text-white" />}
+              gradient="from-teal-500 to-cyan-500"
+              defaultOpen
+            >
+              <KpiGrid>
+                <Kpi
+                  label="PoS Impact"
+                  value={`${fm.targetRouteAnalysis.compositePoSImpact >= 1.0 ? '+' : ''}${((fm.targetRouteAnalysis.compositePoSImpact - 1) * 100).toFixed(1)}%`}
+                  sub="vs. baseline"
+                  accent={fm.targetRouteAnalysis.compositePoSImpact >= 1.0 ? 'teal' : 'amber'}
+                />
+                <Kpi
+                  label="Peak Sales Impact"
+                  value={`${fm.targetRouteAnalysis.compositePeakSalesImpact >= 1.0 ? '+' : ''}${((fm.targetRouteAnalysis.compositePeakSalesImpact - 1) * 100).toFixed(1)}%`}
+                  sub="market capture"
+                  accent={fm.targetRouteAnalysis.compositePeakSalesImpact >= 1.0 ? 'teal' : 'amber'}
+                />
+                <Kpi
+                  label="Deal Premium"
+                  value={`+${(fm.targetRouteAnalysis.compositeDealPremium * 100).toFixed(0)}%`}
+                  sub="empirical multiplier"
+                  accent="blue"
+                />
+                <Kpi
+                  label="Validated"
+                  value={`${fm.targetRouteAnalysis.targets.filter(t => t.validated).length}/${fm.targetRouteAnalysis.targets.length}`}
+                  sub="targets with approved drug"
+                  accent={fm.targetRouteAnalysis.targets.every(t => t.validated) ? 'emerald' : 'amber'}
+                />
+              </KpiGrid>
+
+              {/* Per-target breakdown */}
+              {fm.targetRouteAnalysis.targets.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-[10px] font-semibold text-neutral-400 dark:text-slate-500 uppercase tracking-wider mb-2">Target Breakdown</div>
+                  <div className="space-y-1.5">
+                    {fm.targetRouteAnalysis.targets.map(t => (
+                      <div key={t.slug} className="flex items-center justify-between rounded-lg bg-neutral-50 dark:bg-slate-800/50 px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${t.validated ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'}`}>
+                            {t.validated ? 'Validated' : 'Novel'}
+                          </span>
+                          <span className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{t.displayName}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs tabular-nums">
+                          <span className={t.posModifier >= 1.0 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'}>
+                            PoS {t.posModifier >= 1.0 ? '+' : ''}{((t.posModifier - 1) * 100).toFixed(0)}%
+                          </span>
+                          <span className="text-neutral-400 dark:text-slate-600">|</span>
+                          <span className="text-blue-600 dark:text-blue-400">
+                            +{(t.dealPremium * 100).toFixed(0)}% prem
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Validated combination callout */}
+              {fm.targetRouteAnalysis.combination && (
+                <div className="rounded-lg border border-cyan-200 dark:border-cyan-800/30 bg-cyan-50 dark:bg-cyan-900/10 p-3 mb-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <svg className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
+                    <span className="text-xs font-bold text-cyan-700 dark:text-cyan-300">Validated Combination</span>
+                  </div>
+                  {fm.targetRouteAnalysis.combination.precedentDrug && (
+                    <p className="text-[11px] text-cyan-600 dark:text-cyan-400 mb-1">Precedent: {fm.targetRouteAnalysis.combination.precedentDrug}</p>
+                  )}
+                  <p className="text-[11px] text-neutral-500 dark:text-slate-400">{fm.targetRouteAnalysis.combination.rationale}</p>
+                </div>
+              )}
+
+              {/* Delivery route detail */}
+              {fm.targetRouteAnalysis.deliveryRoute && fm.targetRouteAnalysis.deliveryRoute.slug !== 'iv' && (
+                <div className="rounded-lg bg-neutral-50 dark:bg-slate-800/50 p-3">
+                  <div className="text-[10px] font-semibold text-neutral-400 dark:text-slate-500 uppercase tracking-wider mb-2">Delivery Route</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{fm.targetRouteAnalysis.deliveryRoute.displayName}</span>
+                    <div className="flex items-center gap-3 text-xs tabular-nums">
+                      <span className={fm.targetRouteAnalysis.deliveryRoute.peakSalesModifier >= 1.0 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'}>
+                        Peak {fm.targetRouteAnalysis.deliveryRoute.peakSalesModifier >= 1.0 ? '+' : ''}{((fm.targetRouteAnalysis.deliveryRoute.peakSalesModifier - 1) * 100).toFixed(0)}%
+                      </span>
+                      {fm.targetRouteAnalysis.deliveryRoute.timelineModifier > 0 && (
+                        <>
+                          <span className="text-neutral-400 dark:text-slate-600">|</span>
+                          <span className="text-amber-600 dark:text-amber-400">+{fm.targetRouteAnalysis.deliveryRoute.timelineModifier}mo</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </ModulePanel>
+          )}
+
           {/* Tier 1: Highest impact — default open */}
           {fm.regulatoryRisk && (
             <ModulePanel

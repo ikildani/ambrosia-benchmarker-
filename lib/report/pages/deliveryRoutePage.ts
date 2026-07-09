@@ -70,11 +70,27 @@ const dealStructureData: DealStructureRow[] = [
 // ---------------------------------------------------------------------------
 
 export function renderDeliveryRoutePage(data: PDFReportData, meta: ReportMeta): string {
+  const tra = (data as any).financialModel?.targetRouteAnalysis;
+  const selectedRoute = tra?.deliveryRoute?.slug;
+  const selectedRouteName = tra?.deliveryRoute?.displayName;
+
   return `
     <div class="report-page">
       ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
 
       <div class="section-title-lg">Delivery Route &amp; Administration Analysis</div>
+
+      ${selectedRouteName ? `
+      <div class="card-highlight" style="margin-bottom: 14px;">
+        <div style="font-size: 9px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Selected Route: ${selectedRouteName}</div>
+        <div style="display: flex; gap: 16px; font-size: 10px; color: ${COLORS.navy};">
+          <div>PoS Impact: <strong style="color: ${tra.deliveryRoute.posModifier >= 1.0 ? COLORS.teal : COLORS.amber};">${tra.deliveryRoute.posModifier >= 1.0 ? '+' : ''}${((tra.deliveryRoute.posModifier - 1) * 100).toFixed(0)}%</strong></div>
+          <div>Peak Sales: <strong style="color: ${tra.deliveryRoute.peakSalesModifier >= 1.0 ? COLORS.teal : COLORS.amber};">${tra.deliveryRoute.peakSalesModifier >= 1.0 ? '+' : ''}${((tra.deliveryRoute.peakSalesModifier - 1) * 100).toFixed(0)}%</strong></div>
+          <div>Deal Premium: <strong style="color: ${tra.deliveryRoute.dealPremium >= 0 ? COLORS.teal : COLORS.amber};">${tra.deliveryRoute.dealPremium >= 0 ? '+' : ''}${(tra.deliveryRoute.dealPremium * 100).toFixed(0)}%</strong></div>
+          ${tra.deliveryRoute.timelineModifier > 0 ? `<div>Timeline: <strong style="color: ${COLORS.amber};">+${tra.deliveryRoute.timelineModifier}mo</strong></div>` : ''}
+        </div>
+      </div>
+      ` : ''}
 
       <!-- Route Comparison Table -->
       <div class="section-title">Delivery Route Impact on Deal Economics</div>
@@ -93,11 +109,13 @@ export function renderDeliveryRoutePage(data: PDFReportData, meta: ReportMeta): 
             ${routeData.map((row) => {
               const isBaseline = row.route === 'IV Infusion';
               const isNegative = row.peakSalesImpact.startsWith('-');
+              const isSelected = selectedRouteName && row.route === selectedRouteName;
               const valueColor = isBaseline ? COLORS.gray500 : isNegative ? COLORS.rose : COLORS.green;
               const premiumColor = isBaseline ? COLORS.gray500 : isNegative ? COLORS.rose : COLORS.teal;
+              const rowBg = isSelected ? `background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);` : '';
               return `
-                <tr>
-                  <td style="font-weight: 600; color: ${COLORS.navy};">${row.route}</td>
+                <tr style="${rowBg}">
+                  <td style="font-weight: 600; color: ${COLORS.navy};">${row.route}${isSelected ? ' ←' : ''}</td>
                   <td style="text-align: right; font-weight: 700; color: ${valueColor};">${row.peakSalesImpact}</td>
                   <td style="text-align: right; font-weight: 700; color: ${COLORS.navy};">${row.posModifier}</td>
                   <td style="text-align: right; color: ${COLORS.gray600};">${row.timelineImpact}</td>
