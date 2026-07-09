@@ -46,6 +46,8 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     competitivePosition: s.competitivePosition,
     dataQuality: s.dataQuality,
     regulatoryDesignations: s.regulatoryDesignations,
+    molecularTargets: s.molecularTargets.length > 0 ? s.molecularTargets : undefined,
+    deliveryRoute: s.deliveryRoute || undefined,
     differentiationFactors: s.differentiationFactors.length > 0 ? s.differentiationFactors : undefined,
     peakSalesOverrideM: s.peakSalesOverrideM,  // R23
     ...(s.therapeuticArea === 'neurology' ? { bbbPenetration: s.bbbPenetration, diseaseProgression: s.diseaseProgression, biomarkerValidation: s.biomarkerValidation } : {}),

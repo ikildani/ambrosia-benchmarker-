@@ -42,6 +42,8 @@ import { getPhaseImpactBadge, getModalityImpactBadge, getMultiplierImpactBadge, 
 import { getAvailablePhases, getAvailableDealTypes, dealTypePhaseHints } from '@/lib/input-filters';
 import OptionCardGroup from './OptionCardGroup';
 import SearchableCombobox from './SearchableCombobox';
+import { DeliveryRouteSelector } from './DeliveryRouteSelector';
+import type { DeliveryRoute } from '@/lib/financial/delivery-routes';
 import type { OnboardingStep } from '../OnboardingModal';
 
 interface AssetDetailsSectionProps {
@@ -60,6 +62,8 @@ interface AssetDetailsSectionProps {
   onIndicationChange: (value: Indication) => void;
   onBiomarkerChange: (value: BiomarkerStatus) => void;
   onShowAdvanced: () => void;
+  deliveryRoute?: DeliveryRoute | '';
+  onDeliveryRouteChange?: (value: string) => void;
 }
 
 const AssetDetailsSection = React.memo(function AssetDetailsSection({
@@ -78,6 +82,8 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   onIndicationChange,
   onBiomarkerChange,
   onShowAdvanced,
+  deliveryRoute,
+  onDeliveryRouteChange,
 }: AssetDetailsSectionProps) {
   const modalityMap: Record<TherapeuticArea, typeof modalityOptions> = {
     oncology: modalityOptions,
@@ -274,6 +280,15 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           impactBadge={indicationBadges[indication]}
           optionBadges={indicationBadges}
         />
+
+        {!quickMode && onDeliveryRouteChange && (
+          <DeliveryRouteSelector
+            therapeuticArea={therapeuticArea}
+            modality={modality as string}
+            value={(deliveryRoute || '') as DeliveryRoute | ''}
+            onChange={onDeliveryRouteChange}
+          />
+        )}
 
         {quickMode && (
           <button

@@ -80,6 +80,7 @@ const OnboardingModal = dynamic(() => import('./OnboardingModal'), { ssr: false 
 import { shouldShowOnboarding, markOnboardingComplete, markOnboardingSkipped } from '@/lib/onboarding';
 import { TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, AdvancedOptionsSection, LiveDealPreview, WizardStepper, ValidationWarnings } from './calculator/index';
 import { AssetDifferentiationSection } from './calculator/AssetDifferentiationSection';
+import { MolecularTargetSelector } from './calculator/MolecularTargetSelector';
 import PeakSalesOverrideInput from './calculator/PeakSalesOverrideInput';
 import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
 import { getValidationWarnings } from '@/lib/validationWarnings';
@@ -788,6 +789,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
                           onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}
                           onShowAdvanced={() => { actions.setQuickMode(false); actions.setWizardStep(0); }}
+                          deliveryRoute={state.deliveryRoute}
+                          onDeliveryRouteChange={(newValue) => { actions.setDeliveryRoute(newValue); }}
                         />
                         {/* R23 (2026-04-13): BD-facing peak sales override. Renders only when
                             indication is selected so users see the engine default to compare against. */}
@@ -816,6 +819,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     stepContent = (
                       <div className="space-y-6">
                         <AdvancedOptionsSection column="competitive" {...advancedProps} />
+                        <MolecularTargetSelector
+                          therapeuticArea={state.therapeuticArea}
+                          indication={state.indication}
+                          modality={state.modality}
+                          selectedTargets={state.molecularTargets}
+                          onToggle={actions.toggleMolecularTarget}
+                        />
                         <AssetDifferentiationSection
                           selectedFactors={state.differentiationFactors}
                           onToggle={actions.toggleDifferentiationFactor}
@@ -831,6 +841,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     stepContent = (
                       <div className="space-y-8">
                         <AdvancedOptionsSection column="competitive" {...advancedProps} />
+                        <MolecularTargetSelector
+                          therapeuticArea={state.therapeuticArea}
+                          indication={state.indication}
+                          modality={state.modality}
+                          selectedTargets={state.molecularTargets}
+                          onToggle={actions.toggleMolecularTarget}
+                        />
                         <AssetDifferentiationSection
                           selectedFactors={state.differentiationFactors}
                           onToggle={actions.toggleDifferentiationFactor}

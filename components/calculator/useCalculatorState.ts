@@ -50,6 +50,7 @@ import type {
   BiologicExperience,
   EndoscopicEndpoint,
 } from '@/lib/calculations';
+import type { DeliveryRoute } from '@/lib/financial/delivery-routes';
 import { getFieldResets } from '@/lib/input-filters';
 
 // ── State shape ──────────────────────────────────────────────────────────────
@@ -116,6 +117,10 @@ export interface CalculatorFormState {
   giSegment: GISegment;
   biologicExperience: BiologicExperience;
   endoscopicEndpoint: EndoscopicEndpoint;
+  // Cross-TA: molecular targets and delivery route
+  molecularTargets: string[];
+  deliveryRoute: DeliveryRoute | '';
+
   // Asset differentiation factors — additive premium on competitive position.
   // Array of selected DifferentiationKey values from differentiation-profiles.ts.
   differentiationFactors: string[];
@@ -192,6 +197,8 @@ export const INITIAL_STATE: CalculatorFormState = {
   giSegment: 'colonic',
   biologicExperience: 'biologic_naive',
   endoscopicEndpoint: 'endoscopic_improvement',
+  molecularTargets: [],   // No targets selected by default — engine uses neutral modifier
+  deliveryRoute: '',      // Empty = engine infers from modality or uses neutral
   differentiationFactors: [],  // No differentiation factors selected by default
   peakSalesOverrideM: null,  // R23: null = use engine default
   assetName: '',  // R63: empty = no branded lookup
@@ -551,6 +558,15 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions, b
     setCombinationPotential: (v) => dispatch({ type: 'SET_FIELD', field: 'combinationPotential', value: v }),
     setCompetitivePosition: (v) => dispatch({ type: 'SET_FIELD', field: 'competitivePosition', value: v }),
     setDataQuality: (v) => dispatch({ type: 'SET_FIELD', field: 'dataQuality', value: v }),
+    setMolecularTargets: (v: string[]) => dispatch({ type: 'SET_FIELD', field: 'molecularTargets', value: v }),
+    setDeliveryRoute: (v: string) => dispatch({ type: 'SET_FIELD', field: 'deliveryRoute', value: v }),
+    toggleMolecularTarget: (slug: string) => {
+      const current = state.molecularTargets;
+      const next = current.includes(slug)
+        ? current.filter(t => t !== slug)
+        : current.length < 4 ? [...current, slug] : current;
+      dispatch({ type: 'SET_FIELD', field: 'molecularTargets', value: next });
+    },
     toggleDifferentiationFactor: (key) => dispatch({ type: 'TOGGLE_DIFFERENTIATION', key }),
     setPeakSalesOverrideM: (v) => dispatch({ type: 'SET_FIELD', field: 'peakSalesOverrideM', value: v }),
     setAssetName: (v) => dispatch({ type: 'SET_FIELD', field: 'assetName', value: v }),

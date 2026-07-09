@@ -1436,6 +1436,30 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const indicationExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.85 : isOphthalmology ? 0.90 : isWomensHealth ? 0.85 : 0.80;
   const lotExp = isNeurology ? 0.90 : isImmunology ? 0.85 : isMetabolic ? 0.85 : isCardiovascular ? 0.85 : isInfectiousDisease ? 0.80 : isOphthalmology ? 0.85 : isWomensHealth ? 0.85 : 0.85;
 
+  // Cross-TA: molecular target + delivery route composite multiplier
+  let targetRouteMultiplier = 1.0;
+  if (input.molecularTargets && input.molecularTargets.length > 0) {
+    const { getCompositeTargetPosModifier, MODALITY_TARGET_OVERLAP } = require('./financial/target-taxonomy');
+    const { getTargetCombination, getDefaultCombinationEffect } = require('./financial/target-combinations');
+    const overlapTarget = MODALITY_TARGET_OVERLAP[input.modality];
+    const effectiveTargets = input.molecularTargets.filter((t: string) => t !== overlapTarget);
+    if (effectiveTargets.length > 0) {
+      const posAdj = getCompositeTargetPosModifier(effectiveTargets);
+      const combo = effectiveTargets.length >= 2
+        ? getTargetCombination(effectiveTargets, input.indication) ?? getDefaultCombinationEffect(effectiveTargets.length)
+        : null;
+      const peakAdj = combo ? combo.peakSalesModifier * (combo.complexityPenalty ?? 1) : 1.0;
+      targetRouteMultiplier *= posAdj * peakAdj;
+    }
+  }
+  if (input.deliveryRoute) {
+    const { getRoutePeakSalesModifier } = require('./financial/delivery-routes');
+    targetRouteMultiplier *= getRoutePeakSalesModifier(input.deliveryRoute);
+  }
+  if (targetRouteMultiplier !== 1.0) {
+    modifiers.push({ name: 'Target & Route', multiplier: targetRouteMultiplier, context: 'Molecular target validation + delivery route impact' });
+  }
+
   // For acquisitions, combo potential is already priced into the control premium — dampen by 50%
   const dealType = input.dealType || 'licensing';
   const adjustedComboMultiplier = dealType === 'acquisition'
@@ -1475,7 +1499,8 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     safeMultiplier(Math.pow(whPopMultiplier, 0.75)) *
     safeMultiplier(Math.pow(whRegMultiplier, 0.70)) *
     safeMultiplier(1 + regulatoryBonus) *
-    safeMultiplier(1 + interactionBonus);
+    safeMultiplier(1 + interactionBonus) *
+    safeMultiplier(Math.pow(targetRouteMultiplier, 0.80));
 
   // Calculate total deal value
   const baseTotalValue = phaseBaseline.totalValue;
