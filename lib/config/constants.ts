@@ -99,6 +99,34 @@ export const DEAL_STATS = {
   METABOLIC_TIMEFRAME: '2017-2026',
 };
 
+export const BENCHMARK_PRICING = {
+  PRICE: '$2,500',
+  PRICE_NUM: 2500,
+  PRICE_CENTS: 250000,
+  LABEL: 'Deal Intelligence Brief',
+  TAGLINE: 'Map the landscape',
+  DESCRIPTION: 'The complete deal landscape for any indication. Every modality. Every structure. Every counterparty.',
+  MODALITY_COUNT: 13,
+  DEAL_TYPE_COUNT: 4,
+  CALCULATION_COUNT: 52,
+  INCLUDES: [
+    '52 deal calculations (13 modalities × 4 structures)',
+    'AI-written strategic narrative & negotiation playbook',
+    'Comparable transactions from 2,500+ deal database',
+    'Partner matching with intent scoring (6-10 counterparties)',
+    'Full financial model suite (rNPV, Monte Carlo, scenarios)',
+    'M&A structures with earnout & CVR valuation',
+    'Trispecific, delivery route, stage split, royalty stacking',
+    'White-label branding (your logo, colors, fund name)',
+    'Complimentary 30-minute walkthrough call',
+    'Secure data room with PDF + Excel download',
+  ],
+  DELIVERY_HOURS: 24,
+  PORTFOLIO_DISCOUNT_PRICE: '$1,500',
+  PORTFOLIO_DISCOUNT_PRICE_NUM: 1500,
+  PORTFOLIO_DISCOUNT_LABEL: 'Portfolio License holders',
+} as const;
+
 export const BENCHMARK_VERSION = {
   LABEL: '2025-2026 Market Benchmarks v5.0',
   YEAR_RANGE: '2025-2026',

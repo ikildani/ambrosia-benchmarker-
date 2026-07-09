@@ -413,6 +413,33 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </div>
         </div>
 
+        {/* Deal Intelligence Brief CTA — concierge benchmark product */}
+        <div className="text-center mb-6">
+          <Link
+            href="/benchmark"
+            className="group inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-5 p-4 sm:p-6 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40 rounded-xl sm:rounded-2xl border border-teal-200 dark:border-teal-500/30 hover:border-teal-400 dark:hover:border-teal-400/60 hover:shadow-lg hover:shadow-teal-500/10 transition-all"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="hidden sm:flex w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 items-center justify-center shadow-md shadow-teal-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              </div>
+              <div className="text-center sm:text-left">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <p className="font-semibold text-neutral-900 dark:text-white text-sm sm:text-base">Need the full landscape? Get a Deal Intelligence Brief.</p>
+                  <span className="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-500/15 text-teal-600 dark:text-teal-300 rounded-full border border-teal-500/20">New</span>
+                </div>
+                <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 mt-0.5">
+                  $2,500 — All modalities, all deal structures, AI narrative, white-label branding + walkthrough
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg shadow-md shadow-teal-500/25 group-hover:shadow-teal-500/40 group-hover:-translate-y-0.5 transition-all whitespace-nowrap">
+              Learn More
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </Link>
+        </div>
+
         {/* Portfolio License CTA — multi-seat for VC firms */}
         <div className="text-center">
           <Link
