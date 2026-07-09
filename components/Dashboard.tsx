@@ -11,6 +11,7 @@ import DashboardNav from './dashboard/DashboardNav';
 import OverviewTab from './dashboard/OverviewTab';
 import HistoryTab from './dashboard/HistoryTab';
 import SettingsTab from './dashboard/SettingsTab';
+import ApiTab from './dashboard/ApiTab';
 import type { UserTier } from '@/types/tier';
 
 // Avatar gradient options - premium color combinations
@@ -45,12 +46,12 @@ export default function Dashboard({
   onSignOut,
 }: DashboardProps) {
   const { history, loading: historyLoading, deleteItem: deleteHistoryItem } = useCalculationHistory();
-  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'watchlist' | 'settings'>(() => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'watchlist' | 'settings' | 'api'>(() => {
     // Support deep links: /dashboard?tab=settings from email unsubscribe
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab === 'settings' || tab === 'watchlist' || tab === 'history') return tab;
+      if (tab === 'settings' || tab === 'watchlist' || tab === 'history' || tab === 'api') return tab;
     }
     return 'overview';
   });
@@ -394,7 +395,7 @@ export default function Dashboard({
     onSignOut();
   };
 
-  const handleTabChange = (tab: 'overview' | 'history' | 'watchlist' | 'settings') => {
+  const handleTabChange = (tab: 'overview' | 'history' | 'watchlist' | 'settings' | 'api') => {
     startTransition(() => {
       setActiveTab(tab);
     });
@@ -601,6 +602,15 @@ export default function Dashboard({
               onDeleteAccount={handleDeleteAccount}
               onUpgrade={onUpgrade}
             />
+          </div>
+
+          <div
+            style={{ display: activeTab === 'api' ? 'block' : 'none' }}
+            role="tabpanel"
+            id="tabpanel-api"
+            aria-labelledby="tab-api"
+          >
+            <ApiTab tier={tier} userId={userEmail} />
           </div>
         </div>
       </div>
