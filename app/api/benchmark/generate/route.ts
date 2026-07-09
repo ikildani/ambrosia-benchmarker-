@@ -75,9 +75,8 @@ export async function POST(request: NextRequest) {
       dataQuality: 'strongPhase2',
       biomarker: 'unselected',
       regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
-      peakSalesEstimate: { low: 800, median: 1500, high: 2500 },
-      benchmarkDealValue: { low: 180, median: 335, high: 850 },
-    };
+      peakSalesOverrideM: 1500,
+    } as CalculationInput;
 
     const baseResult = calculateDealTerms(baseInput);
     const sensitivityData = computeSensitivityAnalysis(baseInput, baseResult);
