@@ -768,30 +768,59 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-3">Choose Your Plan</h2>
-            <p className="text-slate-400 max-w-xl mx-auto">One report for a single deal, or unlimited access for your entire pipeline.</p>
+            <p className="text-slate-400 max-w-xl mx-auto">Price a single asset, map an entire landscape, or run your full pipeline.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {/* Report */}
             <Link
               href="/report"
-              className="group relative bg-[#0d1420] border border-white/[0.06] rounded-2xl p-8 hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-1"
+              className="group relative bg-[#0d1420] border border-white/[0.06] rounded-2xl p-7 hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-5">
                 <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-400 bg-violet-500/10 rounded-full border border-violet-500/20">One-Time</span>
                 <span className="text-2xl font-bold text-white font-mono">{PRICING.REPORT_PRICE}</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Deal Intelligence Report</h3>
-              <p className="text-sm text-slate-500 mb-6 leading-relaxed">20-page PDF + Excel for a single deal. Comparable transactions, partner matching, negotiation playbook.</p>
-              <ul className="space-y-2 mb-6">
-                {['rNPV with index drug validation', 'Multi-buyer valuation', 'Monte Carlo + VaR/CVaR', 'Negotiation playbook'].map(item => (
-                  <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
-                    <Check className="w-3.5 h-3.5 text-violet-500 flex-shrink-0" />
+              <h3 className="text-lg font-bold text-white mb-1">Deal Report</h3>
+              <p className="text-xs text-slate-500 mb-1 font-medium text-violet-400/70">Price your asset</p>
+              <p className="text-xs text-slate-500 mb-5 leading-relaxed">Single-asset PDF + Excel. Comparable transactions, partner matching, negotiation playbook.</p>
+              <ul className="space-y-2 mb-5">
+                {['rNPV with index drug validation', 'Monte Carlo + VaR/CVaR', 'Multi-buyer valuation', 'Negotiation playbook'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <Check className="w-3 h-3 text-violet-500 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
-                View report details <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
+                Get report <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+
+            {/* Deal Intelligence Brief */}
+            <Link
+              href="/benchmark"
+              className="group relative bg-gradient-to-b from-teal-500/[0.03] to-[#0d1420] border border-teal-500/20 rounded-2xl p-7 hover:border-teal-500/40 transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#080d16] bg-teal-500 rounded-full">Concierge</span>
+              </div>
+              <div className="flex items-center justify-between mb-5">
+                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 rounded-full border border-teal-500/20">One-Time</span>
+                <span className="text-2xl font-bold text-white font-mono">$2,500</span>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">Intelligence Brief</h3>
+              <p className="text-xs text-slate-500 mb-1 font-medium text-teal-400/70">Map the landscape</p>
+              <p className="text-xs text-slate-500 mb-5 leading-relaxed">All modalities, all deal structures, AI narrative, white-label branding + walkthrough.</p>
+              <ul className="space-y-2 mb-5">
+                {['52 deal calculations (13 × 4)', 'M&A, CVR & earnout structures', 'White-label + walkthrough included', 'Concierge 24-hour delivery'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <Check className="w-3 h-3 text-teal-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-teal-400 group-hover:text-teal-300 transition-colors">
+                Configure Brief <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </span>
             </Link>
 
