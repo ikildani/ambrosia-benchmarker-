@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       indication: req.indication as any,
       territory: (req.territory || 'global') as any,
       competitivePosition: 'racing',
-      dataQuality: 'robust',
+      dataQuality: 'strongPhase2',
       biomarkerStatus: 'unselected',
       regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
       peakSalesEstimate: { low: 800, median: 1500, high: 2500 },
