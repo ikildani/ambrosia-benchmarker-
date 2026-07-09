@@ -108,7 +108,6 @@ export async function POST(request: NextRequest) {
       });
       if (!memoData.confidence_level) memoData.confidence_level = 'medium';
       if (!memoData.market_context) memoData.market_context = '';
-      if (!memoData.deal_recommendation) memoData.deal_recommendation = '';
     } catch (err) {
       console.error('[Benchmark Gen] AI memo failed:', err);
     }
