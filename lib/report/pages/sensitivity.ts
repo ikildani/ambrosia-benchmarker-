@@ -18,7 +18,7 @@ function impactBadge(level: string): string {
 export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): string {
   const { sensitivityData } = data;
   const topDriver = sensitivityData.topValueDriver;
-  const params = sensitivityData.parameters;
+  const params = Array.isArray(sensitivityData.parameters) ? sensitivityData.parameters : [];
 
   const tornadoHtml = renderTornado(params, 560, 300);
 
