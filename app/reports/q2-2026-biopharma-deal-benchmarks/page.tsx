@@ -773,7 +773,6 @@ export default async function Q2BenchmarkReportPage() {
                 { year: '2025', value: 36.7 },
               ]}
               yLabel="Total ADC Deal Value ($B)"
-              formatY={(v: number) => `$${v.toFixed(0)}B`}
               referenceLine={{ value: 104, label: 'Post-peak normalization' }}
             />
 
