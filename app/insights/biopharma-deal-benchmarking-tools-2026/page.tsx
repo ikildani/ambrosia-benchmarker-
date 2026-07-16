@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -7,7 +8,15 @@ import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
   title: 'Best Biopharma Deal Benchmarking Tools in 2026 — Platform Comparison | Ambrosia Ventures',
@@ -45,35 +54,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
       <div className="text-3xl sm:text-4xl font-bold text-slate-900">{value}</div>
       <div className="text-sm font-medium text-slate-600 mt-1">{label}</div>
       {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
@@ -214,6 +194,17 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="biopharma-deal-benchmarking-tools-2026" />
+      <StickyTOC sections={[
+        { id: 'approaches', label: 'Three Approaches', number: 1 },
+        { id: 'what-to-look-for', label: 'What to Look For', number: 2 },
+        { id: 'feature-comparison', label: 'Feature Comparison', number: 3 },
+        { id: 'why-dataset-size', label: 'Dataset Size', number: 4 },
+        { id: 'pricing', label: 'Pricing Context', number: 5 },
+        { id: 'faq', label: 'FAQ', number: 6 },
+      ]} />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -274,6 +265,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
             <h2 id="approaches">Three Approaches to Deal Benchmarking</h2>
 
             <p>
@@ -305,22 +297,27 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Deal Benchmarking Approaches Compared</h3>
-            <DataTable
-              headers={['Dimension', 'Manual Research', 'Consulting', 'Platform (Ambrosia)']}
-              rows={[
-                ['Cost', 'Internal time only', '$50K-$150K per deal', `${PRICING.PRO_MONTHLY} or ${PRICING.REPORT_PRICE}/report`],
-                ['Turnaround', '2-4 weeks', '4-8 weeks', 'Minutes'],
-                ['Deal Database', '10-30 comps', '50-100 comps', `${DEAL_STATS.TOTAL_DEALS} verified`],
-                ['Data Freshness', 'Point-in-time', 'Point-in-time', 'Weekly updates'],
-                ['Valuation Models', 'Spreadsheet', 'Custom models', '8 engines (rNPV, Monte Carlo, etc.)'],
-                ['Partner Matching', 'Manual', 'Limited', `${DEAL_STATS.TOTAL_COMPANIES} scored`],
-                ['Scenario Analysis', 'Ad hoc', 'Bear/base/bull', 'Tornado + Monte Carlo'],
-                ['Repeatability', 'Low', 'Low', 'Unlimited analyses'],
-              ]}
-            />
+          {/* Exhibit 1A: Approaches Compared */}
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Deal Benchmarking Approaches Compared</h3>
           </div>
+
+          <GatedBenchmarkTable
+            headers={['Dimension', 'Manual Research', 'Consulting', 'Platform (Ambrosia)']}
+            rows={[
+              ['Cost', 'Internal time only', '$50K-$150K per deal', `${PRICING.PRO_MONTHLY} or ${PRICING.REPORT_PRICE}/report`],
+              ['Turnaround', '2-4 weeks', '4-8 weeks', 'Minutes'],
+              ['Deal Database', '10-30 comps', '50-100 comps', `${DEAL_STATS.TOTAL_DEALS} verified`],
+              ['Data Freshness', 'Point-in-time', 'Point-in-time', 'Weekly updates'],
+              ['Valuation Models', 'Spreadsheet', 'Custom models', '8 engines (rNPV, Monte Carlo, etc.)'],
+              ['Partner Matching', 'Manual', 'Limited', `${DEAL_STATS.TOTAL_COMPANIES} scored`],
+              ['Scenario Analysis', 'Ad hoc', 'Bear/base/bull', 'Tornado + Monte Carlo'],
+              ['Repeatability', 'Low', 'Low', 'Unlimited analyses'],
+            ]}
+            freeRows={8}
+            footnote={`Source: Ambrosia Ventures analysis. Pricing reflects 2026 market rates across enterprise platforms, boutique advisory, and specialized benchmarking tools.`}
+          />
 
           <div className="my-8 grid sm:grid-cols-3 gap-4">
             <StatCard value="95%" label="Cost Savings" sub="vs. consulting engagement" />
@@ -328,7 +325,26 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             <StatCard value="50x" label="More Comparables" sub="vs. manual research" />
           </div>
 
+          {/* Key Insight: Approaches */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The consulting engagement model was designed for an era when deal data was genuinely scarce. Today, the same SEC filings and FTC notifications that feed consultant analyses are available through automated platforms in real time. The remaining value of consulting is strategic interpretation — but platforms that pair data with scenario engines and sensitivity analysis are closing that gap at 95% lower cost.
+            </p>
+          </div>
+
+          {/* Pull Quote 1 */}
+          <section className="bg-slate-900 rounded-xl my-10">
+            <div className="max-w-2xl mx-auto px-6 py-10 text-center">
+              <blockquote className="text-xl sm:text-2xl font-bold text-white leading-snug tracking-tight">
+                &ldquo;A platform that delivers benchmarks in 60 seconds with {DEAL_STATS.TOTAL_DEALS} comparables has fundamentally different economics than a consultant who delivers in 6 weeks with 50.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Cost-performance analysis across 3 benchmarking approaches</p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
             <h2 id="what-to-look-for">What to Look for in a Deal Benchmarking Tool</h2>
 
             <p>
@@ -356,6 +372,14 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </p>
           </div>
 
+          {/* Key Insight: Database threshold */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The 2,000-deal threshold is not arbitrary. When you filter by therapeutic area (12 options), development phase (5 stages), modality (7+ types), and deal structure (licensing vs. acquisition vs. collaboration), a 200-deal database fractures into cohorts of 1-3 transactions. Statistical benchmarking requires density — and density requires scale. Below 2,000 deals, your &ldquo;benchmark&rdquo; is really just an anecdote.
+            </p>
+          </div>
+
           <InsightEmailCapture slug="biopharma-deal-benchmarking-tools-2026" />
 
           <InsightCTA
@@ -365,6 +389,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
             <h2 id="feature-comparison">Feature Comparison: Ambrosia Ventures vs. Alternatives</h2>
 
             <p>
@@ -372,8 +397,13 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </p>
           </div>
 
+          {/* Exhibit 1B: Feature Comparison */}
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Platform Feature Comparison</h3>
+          </div>
+
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Platform Feature Comparison</h3>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm">
                 <thead>
@@ -417,36 +447,14 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </div>
           </div>
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="why-dataset-size">Why {DEAL_STATS.TOTAL_DEALS} Deals Matters</h2>
-
-            <p>
-              Dataset size directly affects benchmark reliability. With a 200-deal database, a query for &ldquo;Phase 2, ADC, oncology, licensing&rdquo; might return 2-3 transactions — not enough to establish a reliable range. With {DEAL_STATS.TOTAL_DEALS} deals, the same query returns 15-25 transactions, enabling statistically meaningful P25/median/P75 ranges and identification of outlier patterns.
-            </p>
-
-            <p>
-              The density advantage compounds across dimensions. When you add modality-specific filters (ADC vs. bispecific vs. small molecule), geography filters (US rights vs. ex-US vs. global), and deal structure filters (licensing vs. co-development vs. option), a small database quickly runs out of comparables. The minimum viable dataset for multi-dimensional benchmarking is approximately 2,000 verified transactions.
-            </p>
-
-            <p>
-              Data verification matters as much as volume. Ambrosia Ventures sources deal data from SEC EDGAR 8-K filings, FTC premerger notifications, FDA databases, and verified press releases. Each deal is extracted using AI-assisted parsing with structured validation against 143 quality checks across 75 parameter combinations.
-            </p>
-
-            <h2 id="pricing">Platform Pricing Context</h2>
-
-            <p>
-              For BD teams evaluating tools, here is the pricing landscape in 2026:
-            </p>
-
-            <ul>
-              <li><strong>Enterprise platforms</strong> (GlobalData Pharma Intelligence, Evaluate Pharma, Citeline): $50,000-$200,000/year. Comprehensive datasets but limited analytical tools — you export data and build your own models.</li>
-              <li><strong>Boutique consulting</strong> (per engagement): $50,000-$150,000 per deal analysis. Deep strategic context but slow turnaround (4-8 weeks) and non-repeatable.</li>
-              <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all 8 engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses. Or {PRICING.REPORT_PRICE} for a single deal report.</li>
-            </ul>
+          {/* Exhibit 2A: Annual Cost Comparison */}
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Annual Cost Comparison</h3>
+            <p className="text-xs text-slate-400 mb-4">Ambrosia Pro delivers 8 engines + {DEAL_STATS.TOTAL_DEALS} deals at 95% less than enterprise alternatives.</p>
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Annual Cost Comparison</h3>
             <HorizontalBarChart
               maxValue={500}
               color="#6366f1"
@@ -458,12 +466,16 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
                 { label: 'Ambrosia Pro', value: 3.6, displayValue: '$3.6K/yr' },
               ]}
             />
-            <p className="text-xs text-slate-400 mt-4 text-center">Ambrosia Pro delivers 8 engines + {DEAL_STATS.TOTAL_DEALS} deals at 95% less than enterprise alternatives.</p>
+          </div>
+
+          {/* Exhibit 2B: Key Differentiators */}
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">At-a-Glance: Key Differentiators</h3>
           </div>
 
           {/* Visual feature comparison with check/X marks */}
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-5">At-a-Glance: Key Differentiators</h3>
             <div className="space-y-3">
               {[
                 { feature: 'Real-time deal data (weekly updates)', ambrosia: true, enterprise: false, consultant: false },
@@ -509,12 +521,71 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </div>
           </div>
 
+          {/* Key Insight: Feature gap */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Enterprise platforms excel at breadth — broad market intelligence across thousands of companies and indications. But for the specific use case of deal benchmarking and negotiation preparation, specialized platforms outperform on the dimensions that matter: valuation engines, partner scoring, and scenario analysis. The feature gap is widest in predictive analytics, where no enterprise platform offers partner intent scoring or deal probability modeling.
+            </p>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
+            <h2 id="why-dataset-size">Why {DEAL_STATS.TOTAL_DEALS} Deals Matters</h2>
+
+            <p>
+              Dataset size directly affects benchmark reliability. With a 200-deal database, a query for &ldquo;Phase 2, ADC, oncology, licensing&rdquo; might return 2-3 transactions — not enough to establish a reliable range. With {DEAL_STATS.TOTAL_DEALS} deals, the same query returns 15-25 transactions, enabling statistically meaningful P25/median/P75 ranges and identification of outlier patterns.
+            </p>
+
+            <p>
+              The density advantage compounds across dimensions. When you add modality-specific filters (ADC vs. bispecific vs. small molecule), geography filters (US rights vs. ex-US vs. global), and deal structure filters (licensing vs. co-development vs. option), a small database quickly runs out of comparables. The minimum viable dataset for multi-dimensional benchmarking is approximately 2,000 verified transactions.
+            </p>
+
+            <p>
+              Data verification matters as much as volume. Ambrosia Ventures sources deal data from SEC EDGAR 8-K filings, FTC premerger notifications, FDA databases, and verified press releases. Each deal is extracted using AI-assisted parsing with structured validation against 143 quality checks across 75 parameter combinations.
+            </p>
+
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
+            <h2 id="pricing">Platform Pricing Context</h2>
+
+            <p>
+              For BD teams evaluating tools, here is the pricing landscape in 2026:
+            </p>
+
+            <ul>
+              <li><strong>Enterprise platforms</strong> (GlobalData Pharma Intelligence, Evaluate Pharma, Citeline): $50,000-$200,000/year. Comprehensive datasets but limited analytical tools — you export data and build your own models.</li>
+              <li><strong>Boutique consulting</strong> (per engagement): $50,000-$150,000 per deal analysis. Deep strategic context but slow turnaround (4-8 weeks) and non-repeatable.</li>
+              <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all 8 engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses. Or {PRICING.REPORT_PRICE} for a single deal report.</li>
+            </ul>
+          </div>
+
           <div className="prose prose-slate prose-lg max-w-none">
 
             <p>
               The ROI calculation is straightforward: if a platform helps you negotiate even 1% higher upfront on a $100M deal, it has paid for itself for the next 28 years at {PRICING.PRO_MONTHLY}.
             </p>
+          </div>
 
+          {/* Pull Quote 2 */}
+          <section className="bg-slate-900 rounded-xl my-10">
+            <div className="max-w-2xl mx-auto px-6 py-10 text-center">
+              <blockquote className="text-xl sm:text-2xl font-bold text-white leading-snug tracking-tight">
+                &ldquo;If a platform helps you negotiate 1% higher upfront on a $100M deal, it has paid for itself for 28 years.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">ROI analysis at {PRICING.PRO_MONTHLY} annual subscription cost</p>
+            </div>
+          </section>
+
+          {/* Interactive Calculator */}
+          <div className="my-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Model Your Own Deal</h3>
+            <p className="text-slate-500 text-sm mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
             <h2 id="faq">Frequently Asked Questions</h2>
 
             <h3>What is the best biopharma deal benchmarking tool?</h3>
@@ -541,6 +612,23 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             <p>
               At minimum weekly. Deal terms shift based on recent mega-deals, market sentiment, and competitive dynamics. A database updated quarterly may miss significant market repricing events. Ambrosia Ventures updates weekly from SEC EDGAR, FTC filings, and verified press releases, with daily quality validation across 143 checks.
             </p>
+          </div>
+
+          {/* Inline Email Capture */}
+          <div className="my-12">
+            <InlineEmailCapture
+              heading="Get Weekly Deal Intelligence"
+              description={`Join 2,000+ BD professionals who receive our weekly analysis of biopharma licensing trends, new deal benchmarks, and negotiation insights from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              source="biopharma-deal-benchmarking-tools-2026"
+            />
+          </div>
+
+          {/* Cite This Data */}
+          <div className="my-12">
+            <CiteThisData
+              title="Best Biopharma Deal Benchmarking Tools in 2026 — Platform Comparison"
+              pageUrl="/insights/biopharma-deal-benchmarking-tools-2026"
+            />
           </div>
 
           <RelatedInsights articles={[

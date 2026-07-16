@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GatedBenchmarkTableProps {
   headers: string[];
@@ -19,8 +20,17 @@ export function GatedBenchmarkTable({
   ctaHref = '/#pricing',
   footnote,
 }: GatedBenchmarkTableProps) {
-  const visibleRows = rows.slice(0, freeRows);
-  const gatedRows = rows.slice(freeRows);
+  let tier = 'free';
+  try {
+    const auth = useAuth();
+    tier = auth.tier;
+  } catch {
+    // Outside AuthProvider (e.g. static render) — default to free
+  }
+
+  const isPaid = tier === 'pro' || tier === 'report' || tier === 'portfolio' || tier === 'starter';
+  const visibleRows = isPaid ? rows : rows.slice(0, freeRows);
+  const gatedRows = isPaid ? [] : rows.slice(freeRows);
 
   return (
     <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">

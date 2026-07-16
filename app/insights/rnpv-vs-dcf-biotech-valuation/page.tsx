@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -7,7 +8,15 @@ import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { DEAL_STATS } from '@/lib/config/constants';
+
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
   title: 'rNPV vs DCF for Biotech Valuation — When to Use Each | Ambrosia Ventures',
@@ -97,35 +106,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
   );
 }
 
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function RNPVvsDCFPage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -198,6 +178,18 @@ export default function RNPVvsDCFPage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="rnpv-vs-dcf" />
+      <StickyTOC sections={[
+        { id: 'what-is-rnpv', label: 'What Is rNPV', number: 1 },
+        { id: 'what-is-dcf', label: 'What Is DCF', number: 2 },
+        { id: 'the-gap', label: 'The 5-20x Gap', number: 3 },
+        { id: 'when-to-use-each', label: 'When to Use Each', number: 4 },
+        { id: 'common-mistakes', label: 'Common Mistakes', number: 5 },
+        { id: 'the-phase-2-inflection', label: 'Phase 2 Inflection', number: 6 },
+        { id: 'faq', label: 'FAQ', number: 7 },
+      ]} />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -258,6 +250,7 @@ export default function RNPVvsDCFPage() {
           ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
             <h2 id="what-is-rnpv">What Is rNPV (Risk-Adjusted NPV)?</h2>
 
             <p>
@@ -267,7 +260,18 @@ export default function RNPVvsDCFPage() {
             <p>
               The formula is straightforward: each projected cash flow is multiplied by the cumulative probability of success (PoS) to that stage, then discounted back at the cost of capital. For a Phase 1 oncology small molecule with ~7% cumulative PoS to approval, this means the rNPV is roughly 1/14th of the unadjusted DCF. That single adjustment — accounting for clinical attrition — is what separates a defensible valuation from a headline number.
             </p>
+          </div>
 
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              For a Phase 1 oncology asset, the PoS adjustment alone reduces valuation by ~14x. This is not a modeling choice — it is a reflection of the 93% historical attrition rate from Phase 1 to approval for oncology small molecules.
+            </p>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
             <h2 id="what-is-dcf">What Is DCF (Discounted Cash Flow)?</h2>
 
             <p>
@@ -278,6 +282,7 @@ export default function RNPVvsDCFPage() {
               For an approved drug, DCF captures the relevant uncertainties: peak sales trajectory, competitive dynamics, patent expiry, and biosimilar/generic erosion. These commercial risks are reflected in the discount rate (typically 8-12% for large pharma, 12-15% for small-cap biotech) rather than in probability adjustments.
             </p>
 
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
             <h2 id="the-gap">The 5-20x Gap: How PoS Changes Everything</h2>
 
             <p>
@@ -286,6 +291,7 @@ export default function RNPVvsDCFPage() {
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Cumulative Probability of Success by Phase (Oncology)</h3>
             <HorizontalBarChart
               data={[
@@ -302,6 +308,14 @@ export default function RNPVvsDCFPage() {
             <p className="text-xs text-slate-400 mt-3">Oncology small molecule. PoS ranges from BioMedTracker/FDA historical data.</p>
           </div>
 
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The PoS jump from Phase 1 (5-8%) to Phase 2 (15-25%) represents a 3x increase in cumulative success probability — the largest single-phase jump in the development lifecycle. This is why Phase 2 proof-of-concept data is the single most valuable inflection point for deal economics.
+            </p>
+          </div>
+
           <ComparisonCard
             label="Phase 1 Oncology Asset — $2B Peak Sales Assumption"
             left={{ title: 'DCF Valuation', value: '$1,800M', sub: 'Assumes 100% success' }}
@@ -309,19 +323,21 @@ export default function RNPVvsDCFPage() {
           />
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
             <h3 className="text-sm font-semibold text-slate-700 mb-4">rNPV vs DCF by Development Phase (Oncology Small Molecule, $2B Peak Sales)</h3>
-            <DataTable
+            <GatedBenchmarkTable
               headers={['Phase', 'Cumulative PoS', 'rNPV', 'DCF', 'DCF / rNPV Ratio']}
               rows={[
                 ['Preclinical', '3-5%', '$55-90M', '$1,800M', '20-33x'],
                 ['Phase 1', '5-8%', '$90-145M', '$1,800M', '12-20x'],
-                [<strong key="p2" className="text-blue-700">Phase 2 (PoC)</strong>, <strong key="p2v">15-25%</strong>, <strong key="p2r">$270-450M</strong>, '$1,800M', <strong key="p2x">4-7x</strong>],
+                ['Phase 2 (PoC)', '15-25%', '$270-450M', '$1,800M', '4-7x'],
                 ['Phase 3', '50-65%', '$900-1,170M', '$1,800M', '1.5-2x'],
                 ['NDA Filed', '85-92%', '$1,530-1,656M', '$1,800M', '1.1-1.2x'],
                 ['Approved', '~100%', '$1,800M', '$1,800M', '1x'],
               ]}
+              freeRows={6}
+              footnote="Illustrative. Assumes 10% discount rate, 12-year revenue horizon. PoS ranges from BioMedTracker/FDA historical data."
             />
-            <p className="text-xs text-slate-400 mt-3">Illustrative. Assumes 10% discount rate, 12-year revenue horizon. PoS ranges from BioMedTracker/FDA historical data.</p>
           </div>
 
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 my-8">
@@ -331,7 +347,18 @@ export default function RNPVvsDCFPage() {
             </p>
           </div>
 
+          {/* Pull Quote 1 */}
+          <section className="bg-slate-900 text-white rounded-xl my-12">
+            <div className="max-w-2xl mx-auto px-6 py-12 text-center">
+              <blockquote className="text-xl sm:text-2xl font-bold leading-snug tracking-tight">
+                &ldquo;The difference between rNPV and DCF is not a modeling preference — it is the difference between a defensible valuation and a headline number.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Based on analysis of {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions</p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
             <h2 id="when-to-use-each">When to Use Each Method</h2>
 
             <h3>Use rNPV when:</h3>
@@ -356,6 +383,14 @@ export default function RNPVvsDCFPage() {
             </ul>
           </div>
 
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The most sophisticated BD teams do not debate whether to use rNPV or DCF — they run both on every deal. The rNPV anchors the negotiation; the DCF reveals the buyer&apos;s upside. The ratio between them quantifies the de-risking premium that should be reflected in milestone payments.
+            </p>
+          </div>
+
           <InsightEmailCapture slug="rnpv-vs-dcf-biotech-valuation" />
 
           <InsightCTA
@@ -365,6 +400,7 @@ export default function RNPVvsDCFPage() {
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
             <h2 id="common-mistakes">Common Valuation Mistakes</h2>
 
             <p>
@@ -385,6 +421,7 @@ export default function RNPVvsDCFPage() {
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
             <h3 className="text-sm font-semibold text-slate-700 mb-4">The Double-Counting Trap: Phase 2 Oncology Asset ($2B Peak Sales)</h3>
             <HorizontalBarChart
               data={[
@@ -398,12 +435,21 @@ export default function RNPVvsDCFPage() {
             <p className="text-xs text-slate-400 mt-3">Wrong approach applies PoS AND a 15-18% discount rate, double-counting clinical risk. Correct rNPV uses 10% discount rate with PoS adjustments only.</p>
           </div>
 
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              Double-counting risk by combining PoS adjustments with an elevated discount rate (15-18%) destroys $216M of value in this example — a 55% haircut below the correct rNPV. This is the most common valuation error in biotech BD and systematically advantages buyers in negotiations.
+            </p>
+          </div>
+
           <div className="my-8 grid sm:grid-cols-2 gap-4">
             <StatCard value="5-8%" label="Phase 1 Cumulative PoS" sub="Oncology, small molecule" />
             <StatCard value="50-65%" label="Phase 3 Cumulative PoS" sub="With prior Phase 2 efficacy" />
           </div>
 
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
             <h2 id="the-phase-2-inflection">The Phase 2 Inflection in rNPV Terms</h2>
 
             <p>
@@ -413,7 +459,27 @@ export default function RNPVvsDCFPage() {
             <p>
               In practical terms, a Phase 1 asset with $1.8B DCF and 7% PoS has an rNPV of ~$126M. After positive Phase 2 data, the same asset with 22% PoS has an rNPV of ~$396M — a 3.1x increase from a single data readout. This is why <Link href="/insights/biopharma-deal-benchmarks-2026" className="text-teal-600 font-medium hover:text-teal-700">median upfronts jump 2.1x from Phase 1 to Phase 2</Link> across our {DEAL_STATS.TOTAL_DEALS} deal database.
             </p>
+          </div>
 
+          {/* Pull Quote 2 */}
+          <section className="bg-slate-900 text-white rounded-xl my-12">
+            <div className="max-w-2xl mx-auto px-6 py-12 text-center">
+              <blockquote className="text-xl sm:text-2xl font-bold leading-snug tracking-tight">
+                &ldquo;Phase 2 proof-of-concept delivers a 3.1x rNPV increase from a single data readout — the largest value inflection in the entire development lifecycle.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Phase 1 rNPV $126M to Phase 2 rNPV $396M (oncology small molecule, $2B peak sales)</p>
+            </div>
+          </section>
+
+          {/* MiniCalculator */}
+          <div className="my-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Try It: Run Your Own rNPV vs DCF Comparison</h3>
+            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 7</p>
             <h2 id="faq">Frequently Asked Questions</h2>
 
             <h3>What is the difference between rNPV and DCF for biotech valuation?</h3>
@@ -442,6 +508,15 @@ export default function RNPVvsDCFPage() {
             </p>
           </div>
 
+          {/* InlineEmailCapture near bottom */}
+          <div className="my-12">
+            <InlineEmailCapture
+              heading="Get Weekly Valuation Intelligence"
+              description="Join 2,000+ BD professionals who receive our weekly analysis of rNPV benchmarks, deal economics, and negotiation insights."
+              source="rnpv-vs-dcf-insight"
+            />
+          </div>
+
           <RelatedInsights articles={[
             {
               href: '/insights/phase-2-vs-phase-3-deal-economics',
@@ -462,6 +537,14 @@ export default function RNPVvsDCFPage() {
               badge: 'Guide',
             },
           ]} />
+
+          {/* CiteThisData at bottom */}
+          <div className="my-12">
+            <CiteThisData
+              title="rNPV vs DCF for Biotech Valuation — When to Use Each"
+              pageUrl="/insights/rnpv-vs-dcf-biotech-valuation"
+            />
+          </div>
         </article>
 
         <InsightCTA

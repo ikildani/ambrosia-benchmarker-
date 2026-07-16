@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -7,7 +8,15 @@ import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { DEAL_STATS } from '@/lib/config/constants';
+
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
   title: 'Licensing vs Acquisition Deal Terms Compared — 2026 Data | Ambrosia Ventures',
@@ -110,35 +119,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
   );
 }
 
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function LicensingVsAcquisitionPage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -211,6 +191,18 @@ export default function LicensingVsAcquisitionPage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="licensing-vs-acquisition" />
+      <StickyTOC sections={[
+        { id: 'head-to-head', label: 'Head-to-Head', number: 1 },
+        { id: 'licensing-economics', label: 'Licensing Economics', number: 2 },
+        { id: 'acquisition-economics', label: 'Acquisition Economics', number: 3 },
+        { id: 'when-to-license', label: 'When to License', number: 4 },
+        { id: 'when-to-sell', label: 'When to Sell', number: 5 },
+        { id: 'real-examples', label: 'Market Examples', number: 6 },
+        { id: 'faq', label: 'FAQ', number: 7 },
+      ]} />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -270,7 +262,9 @@ export default function LicensingVsAcquisitionPage() {
             'The decision is not purely financial: pipeline breadth, investor pressure, team retention, and commercial ambition all factor into the optimal structure.',
           ]} />
 
+          {/* ── SECTION 1: HEAD-TO-HEAD ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
             <h2 id="head-to-head">Head-to-Head: Licensing vs Acquisition Economics</h2>
 
             <p>
@@ -278,24 +272,35 @@ export default function LicensingVsAcquisitionPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Side-by-Side: Licensing vs Acquisition Deal Terms</h3>
-            <DataTable
-              headers={['Dimension', 'Licensing', 'Acquisition']}
-              rows={[
-                ['Upfront (% of TDV)', '15-20%', '100%'],
-                ['Milestones', '55-65% of TDV', 'CVRs in ~15-20% of deals'],
-                ['Royalties', '8-15% of net sales', 'N/A (buyer captures 100%)'],
-                ['Timeline to close', '4-8 months', '3-6 months (9-12 with FTC)'],
-                ['Risk allocation', 'Shared: licensor retains milestone/royalty risk', 'Transferred: buyer assumes all risk'],
-                ['Control retention', 'Partial (co-development, territory splits)', 'None (full transfer)'],
-                ['Pipeline impact', 'Fund other programs with upfront', 'Company ceases to exist'],
-                ['Investor liquidity', 'Partial (upfront cash)', 'Full exit'],
-                ['Median deal value (Ph2)', '$1.2-1.8B TDV', '$1.5-3.5B purchase price'],
-                ['Upside capture', 'Royalties on $2B+ blockbusters', 'Premium at close, no further upside'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Side-by-Side: Licensing vs Acquisition Deal Terms</h3>
+            <p className="text-xs text-slate-400 mb-4">Comprehensive comparison across 10 dimensions from {DEAL_STATS.TOTAL_DEALS} transactions (2020&ndash;2026).</p>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Dimension', 'Licensing', 'Acquisition']}
+            rows={[
+              ['Upfront (% of TDV)', '15-20%', '100%'],
+              ['Milestones', '55-65% of TDV', 'CVRs in ~15-20% of deals'],
+              ['Royalties', '8-15% of net sales', 'N/A (buyer captures 100%)'],
+              ['Timeline to close', '4-8 months', '3-6 months (9-12 with FTC)'],
+              ['Risk allocation', 'Shared: licensor retains milestone/royalty risk', 'Transferred: buyer assumes all risk'],
+              ['Control retention', 'Partial (co-development, territory splits)', 'None (full transfer)'],
+              ['Pipeline impact', 'Fund other programs with upfront', 'Company ceases to exist'],
+              ['Investor liquidity', 'Partial (upfront cash)', 'Full exit'],
+              ['Median deal value (Ph2)', '$1.2-1.8B TDV', '$1.5-3.5B purchase price'],
+              ['Upside capture', 'Royalties on $2B+ blockbusters', 'Premium at close, no further upside'],
+            ]}
+            freeRows={5}
+            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The fundamental tradeoff is certainty vs magnitude. Acquisitions deliver 100% of value at close with zero execution risk. Licensing delivers 15-20% at close but can generate 1.5-3x total value for blockbuster assets through milestones and royalties over 8-15 years. The right choice depends on your asset&apos;s commercial trajectory and your organization&apos;s risk tolerance.
+            </p>
           </div>
 
           <ComparisonCard
@@ -304,8 +309,13 @@ export default function LicensingVsAcquisitionPage() {
             right={{ title: 'Acquisition', value: '100%', sub: 'Full purchase price at close' }}
           />
 
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Upfront Payment as % of Total Deal Value by Deal Type</h3>
+            <p className="text-xs text-slate-400 mb-4">Median upfront as percentage of total deal value across 5 deal structures.</p>
+          </div>
+
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Upfront Payment as % of Total Deal Value by Deal Type</h3>
             <HorizontalBarChart
               data={[
                 { label: 'Acquisition', value: 100, displayValue: '100%' },
@@ -317,7 +327,7 @@ export default function LicensingVsAcquisitionPage() {
               maxValue={100}
               color="#0d9488"
             />
-            <p className="text-xs text-slate-400 mt-3">Median upfront as percentage of total deal value. Source: Ambrosia Benchmarker.</p>
+            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
           </div>
 
           <VisualStatRow stats={[
@@ -326,7 +336,19 @@ export default function LicensingVsAcquisitionPage() {
             { value: '8-15%', label: 'Royalty Rate Range', color: 'text-blue-700' },
           ]} />
 
+          {/* ── PULL QUOTE ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:rounded-xl sm:mx-0 my-12">
+            <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;For a drug that achieves $3B+ in peak annual sales, licensing economics can deliver $4-6B in total value &mdash; potentially exceeding a $3B acquisition price.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+            </div>
+          </section>
+
+          {/* ── SECTION 2: LICENSING ECONOMICS ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
             <h2 id="licensing-economics">Licensing Economics in Detail</h2>
 
             <p>
@@ -334,48 +356,72 @@ export default function LicensingVsAcquisitionPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Licensing Deal Economics by Phase</h3>
-            <DataTable
-              headers={['Phase at Signing', 'Median Upfront', 'Median TDV', 'Upfront %', 'Royalty Range']}
-              rows={[
-                ['Preclinical', '$50-80M', '$500-900M', '9-11%', '3-8%'],
-                ['Phase 1', '$100-180M', '$800-1,400M', '11-13%', '6-12%'],
-                [<strong key="p2" className="text-blue-700">Phase 2</strong>, <strong key="p2u">$200-400M</strong>, <strong key="p2t">$1.2-2.5B</strong>, <strong key="p2p">14-18%</strong>, '8-15%'],
-                ['Phase 3', '$400-900M', '$2.0-5.0B', '16-20%', '12-20%'],
-                ['Approved', '$1.0-3.0B', '$3.0-8.0B', '25-35%', '18-25%'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Ranges reflect 25th-75th percentile. Oncology, immunology, neurology, metabolic TAs.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Licensing Deal Economics by Phase</h3>
+            <p className="text-xs text-slate-400 mb-4">Median upfront, total deal value, upfront percentage, and royalty range across all development stages.</p>
           </div>
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="acquisition-economics">Acquisition Economics in Detail</h2>
+          <GatedBenchmarkTable
+            headers={['Phase at Signing', 'Median Upfront', 'Median TDV', 'Upfront %', 'Royalty Range']}
+            rows={[
+              ['Preclinical', '$50-80M', '$500-900M', '9-11%', '3-8%'],
+              ['Phase 1', '$100-180M', '$800-1,400M', '11-13%', '6-12%'],
+              ['Phase 2', '$200-400M', '$1.2-2.5B', '14-18%', '8-15%'],
+              ['Phase 3', '$400-900M', '$2.0-5.0B', '16-20%', '12-20%'],
+              ['Approved', '$1.0-3.0B', '$3.0-8.0B', '25-35%', '18-25%'],
+            ]}
+            freeRows={3}
+            footnote="Ranges reflect 25th-75th percentile. Oncology, immunology, neurology, metabolic TAs."
+          />
 
-            <p>
-              Acquisitions deliver the entire purchase price at close (or shortly after regulatory approval of the transaction). The key metric is the premium to unaffected market cap — the price target before any deal speculation began to influence the stock.
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The Phase 1 to Phase 2 inflection is the single largest value jump in licensing economics. Median upfront doubles from $100-180M to $200-400M, and royalty rates step up from 6-12% to 8-15%. This reflects the market&apos;s premium for proof-of-concept data &mdash; the moment clinical risk is meaningfully de-risked.
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Acquisition Premiums by Clinical Stage</h3>
-            <DataTable
-              headers={['Stage', 'Median Premium', 'Median Deal Size', 'CVR Frequency']}
-              rows={[
-                ['Preclinical / Platform', '35-50%', '$500M-$2B', '~25%'],
-                ['Phase 1', '40-55%', '$800M-$3B', '~20%'],
-                [<strong key="p2" className="text-blue-700">Phase 2 (PoC+)</strong>, <strong key="p2p">50-75%</strong>, <strong key="p2s">$1.5-$5B</strong>, '~15%'],
-                ['Phase 3', '60-100%+', '$3-$15B', '~10%'],
-                ['Approved / Commercial', '25-45%', '$5-$50B+', '<5%'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Approved assets show lower premiums because market cap already reflects commercial value.</p>
+          {/* ── SECTION 3: ACQUISITION ECONOMICS ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
+            <h2 id="acquisition-economics">Acquisition Economics in Detail</h2>
+
+            <p>
+              Acquisitions deliver the entire purchase price at close (or shortly after regulatory approval of the transaction). The key metric is the premium to unaffected market cap &mdash; the price target before any deal speculation began to influence the stock.
+            </p>
+          </div>
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 3A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Acquisition Premiums by Clinical Stage</h3>
+            <p className="text-xs text-slate-400 mb-4">Median premium, deal size, and CVR frequency across development stages.</p>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Stage', 'Median Premium', 'Median Deal Size', 'CVR Frequency']}
+            rows={[
+              ['Preclinical / Platform', '35-50%', '$500M-$2B', '~25%'],
+              ['Phase 1', '40-55%', '$800M-$3B', '~20%'],
+              ['Phase 2 (PoC+)', '50-75%', '$1.5-$5B', '~15%'],
+              ['Phase 3', '60-100%+', '$3-$15B', '~10%'],
+              ['Approved / Commercial', '25-45%', '$5-$50B+', '<5%'],
+            ]}
+            freeRows={3}
+            footnote="Approved assets show lower premiums because market cap already reflects commercial value."
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              CVR (Contingent Value Rights) usage declines sharply with stage: ~25% at preclinical vs &lt;5% for approved assets. This reflects the diminishing uncertainty in later-stage deals. When the data is clear, buyers are willing to pay the full premium upfront rather than deferring value to uncertain contingencies.
+            </p>
           </div>
 
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 my-8">
             <p className="text-sm font-semibold text-blue-900 mb-1">The blockbuster crossover</p>
             <p className="text-sm text-blue-800 leading-relaxed">
-              For a drug that achieves $3B+ in peak annual sales, licensing economics (upfront + milestones + 12% royalties over 12 years) can deliver $4-6B in total value — potentially exceeding a $3B acquisition price. But this requires commercial success, which is never guaranteed. The licensing vs acquisition decision is fundamentally a bet on your asset&apos;s commercial trajectory.
+              For a drug that achieves $3B+ in peak annual sales, licensing economics (upfront + milestones + 12% royalties over 12 years) can deliver $4-6B in total value &mdash; potentially exceeding a $3B acquisition price. But this requires commercial success, which is never guaranteed. The licensing vs acquisition decision is fundamentally a bet on your asset&apos;s commercial trajectory.
             </p>
           </div>
 
@@ -387,7 +433,12 @@ export default function LicensingVsAcquisitionPage() {
             description="Model licensing, acquisition, co-dev, option, and collaboration structures side-by-side for your specific asset."
           />
 
+          {/* ── MINI CALCULATOR ── */}
+          <MiniCalculator />
+
+          {/* ── SECTION 4: WHEN TO LICENSE ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
             <h2 id="when-to-license">When to License</h2>
 
             <ul>
@@ -396,7 +447,18 @@ export default function LicensingVsAcquisitionPage() {
               <li><strong>Geographic optionality.</strong> License ex-US rights while retaining US commercial rights (or vice versa). This is increasingly common in oncology, where the US market alone can support a $1B+ revenue asset.</li>
               <li><strong>Early stage with upcoming catalysts.</strong> If positive Phase 2 data could 2-3x your valuation, licensing at Phase 1 (preserving upside through milestones) may outperform a Phase 1 acquisition.</li>
             </ul>
+          </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              Geographic splits are increasingly the &ldquo;best of both worlds&rdquo; strategy. By licensing ex-US rights while retaining US commercial rights, a biotech can capture a $200-400M upfront plus royalties on 40-50% of the global market &mdash; while building commercial infrastructure for the US launch. This structure is now seen in approximately 30% of Phase 2+ oncology licensing deals.
+            </p>
+          </div>
+
+          {/* ── SECTION 5: WHEN TO SELL ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
             <h2 id="when-to-sell">When to Sell</h2>
 
             <ul>
@@ -405,7 +467,21 @@ export default function LicensingVsAcquisitionPage() {
               <li><strong>Competitive risk.</strong> If 3+ competing programs are in similar stages, an acquisition locks in value before a competitor readout could compress your premium.</li>
               <li><strong>Valuation peak.</strong> If your stock is at an all-time high following positive data and you believe the market is fully pricing the opportunity, selling captures maximum value with certainty.</li>
             </ul>
+          </div>
 
+          {/* ── PULL QUOTE ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:rounded-xl sm:mx-0 my-12">
+            <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;The licensing vs acquisition decision is not purely financial &mdash; pipeline breadth, investor pressure, team retention, and commercial ambition all factor into the optimal structure.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Based on structural analysis of {DEAL_STATS.TOTAL_DEALS} biopharma transactions</p>
+            </div>
+          </section>
+
+          {/* ── SECTION 6: RECENT EXAMPLES ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
             <h2 id="real-examples">Recent Market Examples</h2>
 
             <p>
@@ -413,11 +489,22 @@ export default function LicensingVsAcquisitionPage() {
             </p>
 
             <ul>
-              <li><strong>Licensing: AbbVie/Celsius (TL1A, immunology)</strong> — $250M upfront, $3.2B TDV at Phase 2. AbbVie acquired rights while Celsius retained royalty upside on what could be a $5B+ franchise. If the drug succeeds, Celsius captures more value than an outright sale.</li>
-              <li><strong>Acquisition: AbbVie/Cerevel (neuroscience)</strong> — $8.7B, 73% premium. Single-asset neuroscience company with Phase 3 schizophrenia data. Clean exit, full liquidity, no execution risk for Cerevel shareholders.</li>
-              <li><strong>Hybrid: Merck/Daiichi Sankyo (ADC collaboration)</strong> — $4B upfront, $22B TDV. Structured as a collaboration rather than acquisition, allowing Daiichi to retain 50% economics on one of the most valuable ADC platforms in development.</li>
+              <li><strong>Licensing: AbbVie/Celsius (TL1A, immunology)</strong> &mdash; $250M upfront, $3.2B TDV at Phase 2. AbbVie acquired rights while Celsius retained royalty upside on what could be a $5B+ franchise. If the drug succeeds, Celsius captures more value than an outright sale.</li>
+              <li><strong>Acquisition: AbbVie/Cerevel (neuroscience)</strong> &mdash; $8.7B, 73% premium. Single-asset neuroscience company with Phase 3 schizophrenia data. Clean exit, full liquidity, no execution risk for Cerevel shareholders.</li>
+              <li><strong>Hybrid: Merck/Daiichi Sankyo (ADC collaboration)</strong> &mdash; $4B upfront, $22B TDV. Structured as a collaboration rather than acquisition, allowing Daiichi to retain 50% economics on one of the most valuable ADC platforms in development.</li>
             </ul>
+          </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The Merck/Daiichi Sankyo deal ($4B upfront, $22B TDV) illustrates why collaboration structures are growing: Daiichi retained 50% of economics on a platform worth potentially $40B+ over its lifecycle. Had Daiichi sold outright at $22B, they would have left substantial value on the table. The collaboration structure let both parties share in the upside.
+            </p>
+          </div>
+
+          {/* ── SECTION 7: FAQ ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 7</p>
             <h2 id="faq">Frequently Asked Questions</h2>
 
             <h3>What is the typical upfront in a licensing deal vs an acquisition?</h3>
@@ -445,6 +532,19 @@ export default function LicensingVsAcquisitionPage() {
               Licensing deals close in 4-8 months. Acquisitions take 3-6 months from announcement, but the full process (banker engagement, auction, FTC review) can extend to 9-12 months. Deals above $200M face FTC premerger filing requirements adding 30-45 days.
             </p>
           </div>
+
+          {/* ── INLINE EMAIL CAPTURE ── */}
+          <InlineEmailCapture
+            heading="Get Weekly Deal Intelligence"
+            description="Join 2,000+ BD professionals who receive our weekly analysis of biopharma licensing trends, deal benchmarks, and negotiation insights."
+            source="licensing-vs-acquisition-insight"
+          />
+
+          {/* ── CITE THIS DATA ── */}
+          <CiteThisData
+            title="Licensing vs Acquisition Deal Terms Compared — 2026 Data"
+            pageUrl="/insights/licensing-vs-acquisition-deal-terms"
+          />
 
           <RelatedInsights articles={[
             {

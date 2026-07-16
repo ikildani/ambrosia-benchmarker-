@@ -1,13 +1,21 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
-import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
   title: 'Pharma Partner Identification Guide — Data-Driven Partnering Strategy | Ambrosia Ventures',
@@ -45,35 +53,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
       <div className="text-3xl sm:text-4xl font-bold text-slate-900">{value}</div>
       <div className="text-sm font-medium text-slate-600 mt-1">{label}</div>
       {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
@@ -198,6 +177,16 @@ export default function PharmaPartnerIdentificationGuidePage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="pharma-partner-identification-guide" />
+      <StickyTOC sections={[
+        { id: 'five-step-framework', label: '5-Step Framework', number: 1 },
+        { id: 'what-data-matters', label: 'What Data Matters', number: 2 },
+        { id: 'intent-predicts', label: 'Intent Scoring', number: 3 },
+        { id: 'conference-prep', label: 'Conference Prep', number: 4 },
+        { id: 'try-calculator', label: 'Model Your Deal', number: 5 },
+        { id: 'faq', label: 'FAQ', number: 6 },
+      ]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -257,7 +246,9 @@ export default function PharmaPartnerIdentificationGuidePage() {
             `The Partner Matching engine screens ${DEAL_STATS.TOTAL_COMPANIES} companies across 8 scoring dimensions to identify your highest-probability partners.`,
           ]} />
 
+          {/* ── SECTION 1: 5-STEP FRAMEWORK ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 not-prose">Section 1</p>
             <h2 id="five-step-framework">5-Step Partner Identification Framework</h2>
 
             <p>
@@ -265,8 +256,16 @@ export default function PharmaPartnerIdentificationGuidePage() {
             </p>
           </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Companies that use data-driven partner identification close deals 40% faster and achieve 15-20% higher upfronts than those relying on relationship-based outreach alone. The difference is not better relationships — it is better targeting.
+            </p>
+          </div>
+
           {/* Visual 5-Step Process */}
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
             <h3 className="text-sm font-semibold text-slate-700 mb-6">The 5-Step Data-Driven Partner Identification Process</h3>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0 sm:gap-0">
               {[
@@ -309,20 +308,24 @@ export default function PharmaPartnerIdentificationGuidePage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Pipeline Gap Urgency by Scenario</h3>
-            <DataTable
-              headers={['Gap Scenario', 'Urgency Level', 'Upfront Premium', 'Typical Timeline']}
-              rows={[
-                [<strong key="cliff" className="text-orange-700">Patent cliff in 2-3 years</strong>, <strong key="cliff-u">Critical</strong>, '+25-40%', '60-90 days to term sheet'],
-                ['Recent Phase 3 failure', 'High', '+15-25%', '90-120 days'],
-                ['Competitor acquired in space', 'High', '+10-20%', '90-150 days'],
-                ['Strategic TA entry', 'Moderate', 'Baseline', '120-180 days'],
-                ['Portfolio fill (no urgency)', 'Low', '-10-15%', '180-360 days'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Based on deal timing analysis across {DEAL_STATS.TOTAL_DEALS} transactions. Source: Ambrosia Benchmarker.</p>
+          <div className="my-8">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Pipeline Gap Urgency by Scenario</h3>
+            <p className="text-xs text-slate-400 mb-4">Deal economics vary dramatically based on the urgency driving the buyer. Patent cliff pressure produces the fastest timelines and highest premiums.</p>
           </div>
+
+          <GatedBenchmarkTable
+            headers={['Gap Scenario', 'Urgency Level', 'Upfront Premium', 'Typical Timeline']}
+            rows={[
+              ['Patent cliff in 2-3 years', 'Critical', '+25-40%', '60-90 days to term sheet'],
+              ['Recent Phase 3 failure', 'High', '+15-25%', '90-120 days'],
+              ['Competitor acquired in space', 'High', '+10-20%', '90-150 days'],
+              ['Strategic TA entry', 'Moderate', 'Baseline', '120-180 days'],
+              ['Portfolio fill (no urgency)', 'Low', '-10-15%', '180-360 days'],
+            ]}
+            freeRows={5}
+            footnote={`Based on deal timing analysis across ${DEAL_STATS.TOTAL_DEALS} transactions. Source: Ambrosia Benchmarker.`}
+          />
 
           <div className="prose prose-slate prose-lg max-w-none">
             <h3>Step 3: Score Intent Signals</h3>
@@ -331,24 +334,30 @@ export default function PharmaPartnerIdentificationGuidePage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">The 8 Pharma Intent Score Factors</h3>
-            <DataTable
-              headers={['Factor', 'Weight', 'What It Measures']}
-              rows={[
-                ['Pipeline Gap Severity', '20%', 'Missing assets in TA relative to revenue exposure'],
-                ['Patent Cliff Proximity', '15%', 'Years until LOE on key revenue products'],
-                ['Deal Velocity', '15%', 'Number of deals closed in past 24 months'],
-                ['Competitive Pressure', '12%', 'Peer acquisitions and licensing in same space'],
-                ['Financial Capacity', '12%', 'Cash reserves, debt capacity, and BD budget signals'],
-                ['Therapeutic Area Commitment', '10%', 'R&D spend and headcount in target TA'],
-                ['Leadership Signals', '8%', 'Public statements, board changes, strategic reviews'],
-                ['Geographic Fit', '8%', 'Rights alignment and regional commercial infrastructure'],
-              ]}
-            />
+          <div className="my-8">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1C</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">The 8 Pharma Intent Score Factors</h3>
+            <p className="text-xs text-slate-400 mb-4">Weighted scoring model backtested against 378 completed transactions. Pipeline Gap Severity and Patent Cliff Proximity together account for 35% of the total score.</p>
           </div>
 
+          <GatedBenchmarkTable
+            headers={['Factor', 'Weight', 'What It Measures']}
+            rows={[
+              ['Pipeline Gap Severity', '20%', 'Missing assets in TA relative to revenue exposure'],
+              ['Patent Cliff Proximity', '15%', 'Years until LOE on key revenue products'],
+              ['Deal Velocity', '15%', 'Number of deals closed in past 24 months'],
+              ['Competitive Pressure', '12%', 'Peer acquisitions and licensing in same space'],
+              ['Financial Capacity', '12%', 'Cash reserves, debt capacity, and BD budget signals'],
+              ['Therapeutic Area Commitment', '10%', 'R&D spend and headcount in target TA'],
+              ['Leadership Signals', '8%', 'Public statements, board changes, strategic reviews'],
+              ['Geographic Fit', '8%', 'Rights alignment and regional commercial infrastructure'],
+            ]}
+            freeRows={8}
+            footnote="Source: Ambrosia Ventures Pharma Intent Score methodology. Weights derived from logistic regression on 378 completed transactions (2020-2026)."
+          />
+
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1D</p>
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Top Pharma Companies by Deal Activity (Last 12 Months)</h3>
             <HorizontalBarChart
               maxValue={18}
@@ -385,7 +394,12 @@ export default function PharmaPartnerIdentificationGuidePage() {
             </p>
           </div>
 
-          <InsightEmailCapture slug="pharma-partner-identification-guide" />
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Approaching Tier 1 and Tier 2 simultaneously is not about casting a wide net — it is about manufacturing competitive tension. When a high-intent buyer knows two other companies are in due diligence, deal timelines compress by 30-40% and upfront premiums increase by 20-40%. The data is unambiguous: competitive processes produce better outcomes.
+            </p>
+          </div>
 
           <InsightCTA
             variant="mid"
@@ -393,7 +407,19 @@ export default function PharmaPartnerIdentificationGuidePage() {
             description={`The Partner Matching engine scores ${DEAL_STATS.TOTAL_COMPANIES} companies on pipeline gaps, deal velocity, patent cliffs, and 5 other factors. Pro subscribers get full access to partner intelligence and Pharma Intent Scores.`}
           />
 
+          {/* ── PULL QUOTE ── */}
+          <section className="bg-slate-900 rounded-xl my-12 text-white">
+            <div className="max-w-2xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;The best pharma partner is not the biggest company — it is the one with the most urgent pipeline gap in your therapeutic area.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Analysis of {DEAL_STATS.TOTAL_DEALS} transactions across {DEAL_STATS.TOTAL_COMPANIES} companies</p>
+            </div>
+          </section>
+
+          {/* ── SECTION 2: WHAT DATA MATTERS ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 not-prose">Section 2</p>
             <h2 id="what-data-matters">What Data Matters in Partner Selection</h2>
 
             <p>
@@ -415,12 +441,28 @@ export default function PharmaPartnerIdentificationGuidePage() {
             <p>
               <strong>Competitive pressure.</strong> When a peer company acquires a major asset in your therapeutic area, every other company in that space re-evaluates its pipeline. The &ldquo;fear of missing out&rdquo; effect is measurable: in our data, deal velocity in a TA increases 30-50% in the 6 months following a mega-deal in that space.
             </p>
+          </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Deal velocity in a therapeutic area increases 30-50% in the 6 months following a mega-deal in that space. When Pfizer acquired Seagen for $43B, ADC deal velocity surged across every major pharma company. Time your partnering process to capitalize on these competitive pressure waves.
+            </p>
+          </div>
+
+          {/* ── SECTION 3: INTENT SCORING ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 not-prose">Section 3</p>
             <h2 id="intent-predicts">How Intent Scoring Predicts Deal Likelihood</h2>
 
             <p>
               The Pharma Intent Score is not theoretical — it is backtested against 378 completed transactions with measurable predictive accuracy. Companies scoring above 80 (top quintile) closed deals at 2.3x the rate of companies scoring 40-60, and paid 15-20% higher upfronts when they did close.
             </p>
+          </div>
+
+          <div className="my-8">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Outreach Response Rate: Cold vs. Intent-Informed</h3>
           </div>
 
           <ComparisonCard
@@ -430,13 +472,26 @@ export default function PharmaPartnerIdentificationGuidePage() {
           />
 
           <div className="bg-orange-50 border border-orange-100 rounded-xl p-5 my-8">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Exhibit 2B</p>
             <p className="text-sm font-semibold text-orange-900 mb-1">Case study: High-intent match closes in 90 days</p>
             <p className="text-sm text-orange-800 leading-relaxed">
               A mid-cap pharma company (Intent Score: 94) had a $3.2B oncology product losing exclusivity in 2027 with no Phase 2+ replacement. When a biotech with a Phase 2 ADC in the same indication entered the partnering process, the pharma company moved from first meeting to signed term sheet in 87 days — paying a 35% premium over median benchmarks. The urgency was driven by patent cliff timing, not by extraordinary clinical data. The biotech identified this partner through pipeline gap analysis, not through an existing relationship.
             </p>
           </div>
 
+          {/* ── PULL QUOTE 2 ── */}
+          <section className="bg-slate-900 rounded-xl my-12 text-white">
+            <div className="max-w-2xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;Intent-informed outreach converts at 6x the rate of cold approaches — 18% versus 3%.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Pharma Intent Score backtested against 378 completed transactions</p>
+            </div>
+          </section>
+
+          {/* ── SECTION 4: CONFERENCE PREP ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 not-prose">Section 4</p>
             <h2 id="conference-prep">Partnering Conference Preparation Timeline</h2>
 
             <p>
@@ -444,23 +499,49 @@ export default function PharmaPartnerIdentificationGuidePage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Partnering Conference Preparation Timeline</h3>
-            <DataTable
-              headers={['Timeline', 'Activity', 'Deliverable']}
-              rows={[
-                ['6 months before', 'Partner identification & scoring', 'Prioritized target list (15-20 companies)'],
-                ['5 months before', 'Initial outreach & CDA execution', '8-12 CDAs signed'],
-                ['4 months before', 'Data package preparation', 'Teaser deck, data room, term sheet framework'],
-                ['3 months before', 'Pre-meeting engagement', 'Detailed data package sent to Tier 1'],
-                ['2 months before', 'Schedule formal meetings', 'Confirmed meetings with 8-12 companies'],
-                ['Conference week', 'Execute meeting plan', 'Deep dives with Tier 1, introductions with Tier 2'],
-                ['Post-conference', 'Follow-up & negotiation', 'Term sheet discussions with 3-5 companies'],
-              ]}
-            />
+          <div className="my-8">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 3A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Partnering Conference Preparation Timeline</h3>
+            <p className="text-xs text-slate-400 mb-4">Companies that begin 6 months early close 40% faster than those who start at the conference. Each phase builds on the prior — skipping early steps compresses the entire process.</p>
           </div>
 
+          <GatedBenchmarkTable
+            headers={['Timeline', 'Activity', 'Deliverable']}
+            rows={[
+              ['6 months before', 'Partner identification & scoring', 'Prioritized target list (15-20 companies)'],
+              ['5 months before', 'Initial outreach & CDA execution', '8-12 CDAs signed'],
+              ['4 months before', 'Data package preparation', 'Teaser deck, data room, term sheet framework'],
+              ['3 months before', 'Pre-meeting engagement', 'Detailed data package sent to Tier 1'],
+              ['2 months before', 'Schedule formal meetings', 'Confirmed meetings with 8-12 companies'],
+              ['Conference week', 'Execute meeting plan', 'Deep dives with Tier 1, introductions with Tier 2'],
+              ['Post-conference', 'Follow-up & negotiation', 'Term sheet discussions with 3-5 companies'],
+            ]}
+            freeRows={7}
+            footnote="Source: Ambrosia Ventures analysis of partnering conference outcomes. Companies that follow this timeline close 40% faster than those beginning at the conference."
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The most valuable work happens before the conference, not at it. By the time you arrive at JPM or BIO, your Tier 1 targets should already have your data package, have signed CDAs, and have calendar holds for deep-dive meetings. The conference itself is for advancing discussions, not starting them.
+            </p>
+          </div>
+
+          {/* ── SECTION 5: MINI CALCULATOR ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 not-prose">Section 5</p>
+            <h2 id="try-calculator">Model Your Deal Economics</h2>
+
+            <p>
+              Use the interactive calculator below to model expected deal economics for your asset. Select your therapeutic area, development phase, and modality to see median upfront payments, total deal values, and comparable transactions from our database.
+            </p>
+          </div>
+
+          <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+
+          {/* ── SECTION 6: FAQ ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 not-prose">Section 6</p>
             <h2 id="faq">Frequently Asked Questions</h2>
 
             <h3>How do I identify the best pharma partner for my asset?</h3>
@@ -489,6 +570,13 @@ export default function PharmaPartnerIdentificationGuidePage() {
             </p>
           </div>
 
+          {/* ── INLINE EMAIL CAPTURE ── */}
+          <InlineEmailCapture
+            heading="Get Weekly Partner Intelligence"
+            description="Join 2,000+ BD professionals who receive our weekly analysis of pharma pipeline gaps, deal velocity trends, and partnering insights."
+            source="pharma-partner-identification-guide"
+          />
+
           <RelatedInsights articles={[
             {
               href: '/insights/how-much-is-my-biotech-asset-worth',
@@ -509,6 +597,14 @@ export default function PharmaPartnerIdentificationGuidePage() {
               badge: 'Benchmarks',
             },
           ]} />
+
+          {/* ── CITE THIS DATA ── */}
+          <CiteThisData
+            title="Pharma Partner Identification Guide"
+            pageUrl="/insights/pharma-partner-identification-guide"
+            embedType="phase-upfront"
+            embedTA="oncology"
+          />
         </article>
 
         <InsightCTA

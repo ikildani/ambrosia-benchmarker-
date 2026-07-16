@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -7,7 +8,15 @@ import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
   title: 'Biotech Fundraising vs Licensing — Deal Benchmarks & Decision Framework | Ambrosia Ventures',
@@ -45,59 +54,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
       <div className="text-3xl sm:text-4xl font-bold text-slate-900">{value}</div>
       <div className="text-sm font-medium text-slate-600 mt-1">{label}</div>
       {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
-  data: { label: string; value: number; displayValue: string }[];
-  maxValue: number;
-  color?: string;
-}) {
-  return (
-    <div className="space-y-3">
-      {data.map((item, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <div className="w-36 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
-          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden">
-            <div
-              className="h-full rounded-md flex items-center justify-end px-2"
-              style={{ width: `${Math.max((item.value / maxValue) * 100, 8)}%`, backgroundColor: color, opacity: 0.8 }}
-            >
-              <span className="text-xs font-bold text-white">{item.displayValue}</span>
-            </div>
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
@@ -198,6 +154,16 @@ export default function BiotechFundraisingDealBenchmarksPage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="biotech-fundraising-benchmarks" />
+      <StickyTOC sections={[
+        { id: 'value-comparison', label: 'Value Comparison', number: 1 },
+        { id: 'when-to-license', label: 'When to License', number: 2 },
+        { id: 'licensing-strengthens-fundraising', label: 'Licensing + Fundraising', number: 3 },
+        { id: 'pitch-deck-benchmarks', label: 'Pitch Deck', number: 4 },
+        { id: 'faq', label: 'FAQ', number: 5 },
+      ]} />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -257,7 +223,9 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             'The decision framework hinges on three variables: probability of success, dilution trajectory, and time-to-value-inflection. Low PoS + high dilution + long timeline = license. High PoS + low dilution + near-term catalyst = raise.',
           ]} />
 
+          {/* ── SECTION 1: VALUE COMPARISON ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
             <h2 id="value-comparison">Fundraising vs. Licensing: Value Comparison by Phase</h2>
 
             <p>
@@ -265,19 +233,31 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Fundraising vs. Licensing Economics by Phase</h3>
-            <DataTable
-              headers={['Phase', 'Typical Raise', 'Pre-Money Valuation', 'Licensing Upfront', 'Licensing TDV', 'Dilution (Raise)']}
-              rows={[
-                ['Preclinical / Series A', '$30-80M', '$80-250M', '$15-40M', '$150-500M', '25-40%'],
-                ['Phase 1 / Series B', '$80-200M', '$300-600M', '$30-120M', '$300M-$1.2B', '20-35%'],
-                [<strong key="p2" className="text-emerald-700">Phase 2 / Series C</strong>, <strong key="p2r">$150-300M</strong>, '$600M-$1.2B', <strong key="p2u">$80-450M</strong>, <strong key="p2t">$500M-$3.5B</strong>, '15-25%'],
-                ['Phase 3 / Pre-IPO', '$200-500M', '$1.0B-$3.0B', '$200M-$1.0B', '$1.0B-$5.0B', '10-20%'],
-                ['Filed / IPO', 'IPO: $200-400M', '$2.0B-$8.0B', '$500M-$4.0B', '$2.0B-$10B+', '10-15% (IPO)'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Fundraising ranges reflect oncology/immunology. Licensing from Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Fundraising vs. Licensing Economics by Phase</h3>
+            <p className="text-xs text-slate-400 mb-4">Side-by-side comparison of equity fundraising and licensing deal economics at each development stage. Phase 2 is the crossover point where licensing upfronts match typical raise sizes with zero dilution.</p>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Phase', 'Typical Raise', 'Pre-Money Valuation', 'Licensing Upfront', 'Licensing TDV', 'Dilution (Raise)']}
+            rows={[
+              ['Preclinical / Series A', '$30-80M', '$80-250M', '$15-40M', '$150-500M', '25-40%'],
+              ['Phase 1 / Series B', '$80-200M', '$300-600M', '$30-120M', '$300M-$1.2B', '20-35%'],
+              ['Phase 2 / Series C', '$150-300M', '$600M-$1.2B', '$80-450M', '$500M-$3.5B', '15-25%'],
+              ['Phase 3 / Pre-IPO', '$200-500M', '$1.0B-$3.0B', '$200M-$1.0B', '$1.0B-$5.0B', '10-20%'],
+              ['Filed / IPO', 'IPO: $200-400M', '$2.0B-$8.0B', '$500M-$4.0B', '$2.0B-$10B+', '10-15% (IPO)'],
+            ]}
+            freeRows={5}
+            footnote={`Fundraising ranges reflect oncology/immunology. Licensing from Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+          />
+
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              At Phase 2, licensing upfronts ($80-450M) match or exceed a typical Series C raise ($150-300M) while preserving 100% of founder equity. This is the only stage where the non-dilutive path delivers comparable near-term capital to the equity path. Before Phase 2, licensing upfronts are too small; after Phase 2, both paths deliver large sums but licensing still avoids dilution.
+            </p>
           </div>
 
           <ComparisonCard
@@ -292,7 +272,9 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             <StatCard value="2-4x" label="PoC Value Inflection" sub="Pre- to post-PoC data" />
           </div>
 
+          {/* ── SECTION 2: WHEN TO LICENSE ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
             <h2 id="when-to-license">When to Out-License vs. Develop Internally</h2>
 
             <p>
@@ -319,21 +301,32 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Founder Value Created by Path (Phase 2 Oncology Asset)</h3>
-            <HorizontalBarChart
-              maxValue={2500}
-              color="#059669"
-              data={[
-                { label: 'License (high PoS)', value: 1800, displayValue: '$1.8B cumulative' },
-                { label: 'License (med PoS)', value: 900, displayValue: '$900M cumulative' },
-                { label: 'IPO Path', value: 2500, displayValue: '$2.5B (if successful)' },
-                { label: 'Series C + Phase 3', value: 1200, displayValue: '$1.2B (risk-adj.)' },
-                { label: 'License (low PoS)', value: 450, displayValue: '$450M cumulative' },
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Risk-adjusted founder value after dilution. Licensing cumulative = upfront + milestones + royalty NPV. Source: Ambrosia Ventures modeling.</p>
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The three variables are multiplicative, not additive. A biotech with low PoS (below 30%), high dilution (founders below 15%), AND a long timeline (3+ years to inflection) should almost certainly license. If only one factor is unfavorable, the decision is less clear and depends on competitive dynamics and management conviction.
+            </p>
           </div>
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Founder Value Created by Path (Phase 2 Oncology Asset)</h3>
+            <p className="text-xs text-slate-400 mb-4">Risk-adjusted founder value after dilution. Licensing cumulative = upfront + milestones + royalty NPV. Source: Ambrosia Ventures modeling.</p>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Path', 'Expected Founder Value', 'Risk Profile']}
+            rows={[
+              ['IPO Path', '$2.5B (if successful)', 'Highest upside, highest risk'],
+              ['License (high PoS)', '$1.8B cumulative', 'Strong upside, moderate risk'],
+              ['Series C + Phase 3', '$1.2B (risk-adj.)', 'Dilutive, trial risk'],
+              ['License (med PoS)', '$900M cumulative', 'Balanced risk/return'],
+              ['License (low PoS)', '$450M cumulative', 'Risk transfer, certain value'],
+            ]}
+            freeRows={5}
+            footnote="Risk-adjusted founder value after dilution. Licensing cumulative = upfront + milestones + royalty NPV. Source: Ambrosia Ventures modeling."
+          />
 
           {/* Visual Decision Framework */}
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
@@ -387,21 +380,36 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             </div>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Decision Framework: License or Raise?</h3>
-            <DataTable
-              headers={['Factor', 'Favors Licensing', 'Favors Fundraising']}
-              rows={[
-                ['Probability of Success', 'Below 30%', 'Above 50%'],
-                ['Founder Dilution', 'Already below 15%', 'Above 25%'],
-                ['Capital Required', '$300M+ for next inflection', 'Under $150M'],
-                ['Time to Inflection', '3+ years', 'Under 18 months'],
-                ['Commercial Complexity', 'Global launch, specialty + primary', 'US orphan/specialty'],
-                ['Competitive Risk', 'Multiple competitors in Phase 2-3', 'First-in-class with BTD'],
-                ['IPO Market', 'Closed or adverse', 'Open and favorable'],
-              ]}
-            />
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Decision Framework: License or Raise?</h3>
+            <p className="text-xs text-slate-400 mb-4">Seven factors that determine whether licensing or fundraising creates more shareholder value at each decision point.</p>
           </div>
+
+          <GatedBenchmarkTable
+            headers={['Factor', 'Favors Licensing', 'Favors Fundraising']}
+            rows={[
+              ['Probability of Success', 'Below 30%', 'Above 50%'],
+              ['Founder Dilution', 'Already below 15%', 'Above 25%'],
+              ['Capital Required', '$300M+ for next inflection', 'Under $150M'],
+              ['Time to Inflection', '3+ years', 'Under 18 months'],
+              ['Commercial Complexity', 'Global launch, specialty + primary', 'US orphan/specialty'],
+              ['Competitive Risk', 'Multiple competitors in Phase 2-3', 'First-in-class with BTD'],
+              ['IPO Market', 'Closed or adverse', 'Open and favorable'],
+            ]}
+            freeRows={7}
+            footnote="Framework based on analysis of founder outcomes across licensing vs. fundraising cohorts. Source: Ambrosia Ventures."
+          />
+
+          {/* ── PULL QUOTE ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:-mx-0 sm:rounded-xl my-12">
+            <div className="max-w-2xl mx-auto px-6 py-12 text-center">
+              <blockquote className="text-xl sm:text-2xl font-bold leading-snug tracking-tight">
+                &ldquo;A Phase 2 biotech founder choosing between a $200M Series C and a $200M licensing upfront is choosing between 30% dilution and 0% dilution for the same near-term cash.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Decision framework analysis from {DEAL_STATS.TOTAL_DEALS} verified transactions</p>
+            </div>
+          </section>
 
           <InsightEmailCapture slug="biotech-fundraising-deal-benchmarks" />
 
@@ -412,7 +420,15 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             calculatorHref="/report"
           />
 
+          {/* ── MINI CALCULATOR ── */}
+          <div className="my-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-4">Interactive Tool</p>
+            <MiniCalculator />
+          </div>
+
+          {/* ── SECTION 3: LICENSING STRENGTHENS FUNDRAISING ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
             <h2 id="licensing-strengthens-fundraising">How Licensing Data Strengthens Fundraising</h2>
 
             <p>
@@ -436,6 +452,14 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             </p>
           </div>
 
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              Biotechs that present licensing comparables in fundraising decks typically achieve 10-20% higher valuations. The floor value established by comparable deal data reduces the perceived risk of total loss, which is the primary concern for late-stage biotech investors. This is not theoretical — it is a quantifiable pricing effect across hundreds of fundraising rounds.
+            </p>
+          </div>
+
           <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 my-8">
             <p className="text-sm font-semibold text-emerald-900 mb-1">The hybrid approach: License ex-US, fund US development</p>
             <p className="text-sm text-emerald-800 leading-relaxed">
@@ -443,7 +467,19 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             </p>
           </div>
 
+          {/* ── PULL QUOTE ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:-mx-0 sm:rounded-xl my-12">
+            <div className="max-w-2xl mx-auto px-6 py-12 text-center">
+              <blockquote className="text-xl sm:text-2xl font-bold leading-snug tracking-tight">
+                &ldquo;Proof-of-concept is the single highest-value inflection point in drug development. Post-PoC assets command 2-4x the deal value of pre-PoC assets.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Phase-by-phase analysis from {DEAL_STATS.TOTAL_DEALS} biopharma transactions (2020&ndash;2026)</p>
+            </div>
+          </section>
+
+          {/* ── SECTION 4: PITCH DECK BENCHMARKS ── */}
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
             <h2 id="pitch-deck-benchmarks">What Deal Benchmarks to Include in Your Pitch Deck</h2>
 
             <p>
@@ -465,7 +501,28 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             <p>
               <strong>4. Valuation premium from partnering optionality.</strong> Cite data showing that biotechs with demonstrated licensing interest trade at 10-20% premiums in fundraising rounds. The option value of a licensing exit path is quantifiable and should be reflected in your ask.
             </p>
+          </div>
 
+          {/* Key Insight callout */}
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-sm font-semibold text-slate-900 mb-1">Key Insight</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              The most effective fundraising decks present licensing data as optionality, not as a fallback. Framing it as &ldquo;our asset has a quantifiable floor value of $X in a licensing transaction, and we are choosing to capture the full upside through internal development&rdquo; positions the raise as the preferred path while demonstrating downside protection. This reframing is worth the effort — it changes the investor conversation from &ldquo;what if this fails?&rdquo; to &ldquo;how much more can we capture?&rdquo;
+            </p>
+          </div>
+
+          {/* ── INLINE EMAIL CAPTURE ── */}
+          <div className="my-12">
+            <InlineEmailCapture
+              heading="Get Weekly Deal Intelligence"
+              description="Join BD professionals who receive our weekly analysis of biopharma licensing trends, deal benchmarks, and capital strategy insights."
+              source="biotech-fundraising-benchmarks"
+            />
+          </div>
+
+          {/* ── SECTION 5: FAQ ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
             <h2 id="faq">Frequently Asked Questions</h2>
 
             <h3>Should my biotech raise capital or out-license?</h3>
@@ -514,6 +571,14 @@ export default function BiotechFundraisingDealBenchmarksPage() {
               badge: 'Strategy',
             },
           ]} />
+
+          {/* ── CITE THIS DATA ── */}
+          <div className="my-12">
+            <CiteThisData
+              title="Biotech Fundraising vs Licensing — Deal Benchmarks & Decision Framework"
+              pageUrl="/insights/biotech-fundraising-deal-benchmarks"
+            />
+          </div>
         </article>
 
         <InsightCTA
