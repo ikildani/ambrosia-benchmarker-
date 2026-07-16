@@ -45,7 +45,10 @@ function isUserFacing(message: string): boolean {
 
 async function fetchCommitsSince(since: string): Promise<GitHubCommit[]> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error('GITHUB_TOKEN not configured');
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   const commits: GitHubCommit[] = [];
   let page = 1;
@@ -53,12 +56,7 @@ async function fetchCommitsSince(since: string): Promise<GitHubCommit[]> {
   while (page <= 5) {
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/commits?sha=main&since=${since}&per_page=100&page=${page}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      }
+      { headers }
     );
 
     if (!res.ok) {
