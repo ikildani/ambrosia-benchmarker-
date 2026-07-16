@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -7,7 +8,37 @@ import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { DEAL_STATS } from '@/lib/config/constants';
+
+const ChartSkeleton = () => (
+  <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+    <div className="h-64 sm:h-80 flex items-end gap-2 px-8 pb-8 animate-pulse">
+      {[35, 50, 65, 80, 95].map((h, i) => (
+        <div key={i} className="flex-1 bg-slate-100 rounded-t" style={{ height: `${h}%` }} />
+      ))}
+    </div>
+  </div>
+);
+
+const PhaseUpfrontChart = dynamic(
+  () => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const TrendLineChart = dynamic(
+  () => import('@/components/insights/TrendLineChart').then(m => ({ default: m.TrendLineChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const WaterfallChart = dynamic(
+  () => import('@/components/insights/WaterfallChart').then(m => ({ default: m.WaterfallChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
 
 export const metadata: Metadata = {
   title: 'ADC vs Bispecific Antibody Deal Benchmarks — 2026 Market Data | Ambrosia Ventures',
@@ -97,35 +128,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
   );
 }
 
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function ADCvsBispecificPage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -198,6 +200,20 @@ export default function ADCvsBispecificPage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="adc-vs-bispecific-2026" />
+      <StickyTOC sections={[
+        { id: 'head-to-head', label: 'Head-to-Head', number: 1 },
+        { id: 'why-adc-premium', label: 'ADC Premium', number: 2 },
+        { id: 'adc-deal-evolution', label: 'ADC Market', number: 3 },
+        { id: 'bispecific-momentum', label: 'Bispecific Momentum', number: 4 },
+        { id: 'china-licensing', label: 'China Licensing', number: 5 },
+        { id: 'where-bispecifics-win', label: 'Where Bispecifics Win', number: 6 },
+        { id: 'modality-comparison', label: 'Full Comparison', number: 7 },
+        { id: 'mega-deals', label: 'Mega-Deals', number: 8 },
+        { id: 'faq', label: 'FAQ', number: 9 },
+      ]} />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -257,30 +273,47 @@ export default function ADCvsBispecificPage() {
             'Bispecifics are gaining ground in hematology (T-cell engagers) and immunology, but ADCs retain the premium in solid tumors.',
           ]} />
 
+          {/* ── SECTION 1: HEAD-TO-HEAD ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="head-to-head">Head-to-Head: ADC vs Bispecific Deal Economics</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="head-to-head">Head-to-Head: ADC vs Bispecific Deal Economics</h2>
 
             <p>
               ADCs and bispecific antibodies are the two most active modalities in biopharma deal-making, together accounting for over 25% of all oncology licensing transactions in 2024-2026. Both are platform technologies capable of generating multiple clinical candidates from a single core technology. But their deal economics diverge meaningfully — and understanding why is critical for licensors, buyers, and investors.
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">ADC vs Bispecific: Deal Economics Compared</h3>
-            <DataTable
-              headers={['Metric', 'ADCs', 'Bispecifics']}
-              rows={[
-                ['Median Upfront (all phases)', <strong key="adc-up">$361M</strong>, '$281M'],
-                ['Median TDV (all phases)', '$2,800M', '$2,100M'],
-                ['Upfront % of TDV', '13-16%', '12-15%'],
-                ['Phase 2 Median Upfront', '$350-550M', '$250-400M'],
-                ['Platform Deal Upfront', '$500M-$4B', '$200M-$1.5B'],
-                ['Annual Deal Volume (2025)', '35-40 deals', '25-30 deals'],
-                ['Royalty Range', '10-18%', '8-15%'],
-                ['Median Time to Close', '5-7 months', '4-6 months'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">ADC vs Bispecific: Deal Economics Compared</h3>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Metric', 'ADCs', 'Bispecifics']}
+            rows={[
+              ['Median Upfront (all phases)', '$361M', '$281M'],
+              ['Median TDV (all phases)', '$2,800M', '$2,100M'],
+              ['Upfront % of TDV', '13-16%', '12-15%'],
+              ['Phase 2 Median Upfront', '$350-550M', '$250-400M'],
+              ['Platform Deal Upfront', '$500M-$4B', '$200M-$1.5B'],
+              ['Annual Deal Volume (2025)', '35-40 deals', '25-30 deals'],
+              ['Royalty Range', '10-18%', '8-15%'],
+              ['Median Time to Close', '5-7 months', '4-6 months'],
+            ]}
+            freeRows={8}
+            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              ADCs command higher deal values on every metric &mdash; but the gap is narrowing in specific therapeutic contexts. The 25-30% upfront premium reflects structural advantages in commercial validation, platform economics, and supply scarcity. Bispecifics are closing the gap where they have their own clinical champions: hematology and immunology.
+            </p>
+          </div>
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Median Upfront Payment Comparison</h3>
           </div>
 
           <ComparisonCard
@@ -294,8 +327,20 @@ export default function ADCvsBispecificPage() {
             <StatCard value="$281M" label="Bispecific Median Upfront" sub="All phases, 2020-2026" />
           </div>
 
-          <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="why-adc-premium">Why ADCs Command a Premium</h2>
+          {/* ── PULL QUOTE 1 ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-24">
+            <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;ADCs command a 25-30% upfront premium over bispecifics &mdash; the largest sustained modality gap in oncology deal-making.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Based on {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+            </div>
+          </section>
+
+          {/* ── SECTION 2: WHY ADC PREMIUM ── */}
+          <div className="prose prose-slate prose-lg max-w-none mt-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="why-adc-premium">Why ADCs Command a Premium</h2>
 
             <p>
               The 25-30% ADC upfront premium over bispecifics is driven by three structural factors that are unlikely to change in the near term:
@@ -314,8 +359,13 @@ export default function ADCvsBispecificPage() {
             </p>
           </div>
 
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Oncology Modality Premium (Median Upfront vs. Small Molecule Baseline)</h3>
+            <p className="text-xs text-slate-400 mb-4">All phases combined. ADCs lead, followed by bispecifics and radiopharmaceuticals. The hierarchy reflects commercial validation maturity and supply-side dynamics.</p>
+          </div>
+
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Oncology Modality Premium (Median Upfront vs. Small Molecule Baseline)</h3>
             <HorizontalBarChart
               data={[
                 { label: 'ADC', value: 361, displayValue: '$361M' },
@@ -332,6 +382,13 @@ export default function ADCvsBispecificPage() {
             <p className="text-xs text-slate-400 mt-3">All phases combined. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
           </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The ADC-to-bispecific premium ($361M vs $281M, 28% gap) is the most persistent modality spread in oncology deal economics. Unlike radiopharmaceutical premiums, which surged recently on supply constraints, the ADC premium has been stable for three years &mdash; suggesting it reflects fundamental platform economics rather than cyclical enthusiasm.
+            </p>
+          </div>
+
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 my-8">
             <p className="text-sm font-semibold text-blue-900 mb-1">The Enhertu effect</p>
             <p className="text-sm text-blue-800 leading-relaxed">
@@ -339,50 +396,95 @@ export default function ADCvsBispecificPage() {
             </p>
           </div>
 
+          {/* ── SECTION 3: ADC DEAL EVOLUTION ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="adc-deal-evolution">ADC Deal Market: 2019-2026</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="adc-deal-evolution">ADC Deal Market: 2019-2026</h2>
 
             <p>
               The ADC deal market has gone through three distinct phases: the pre-Seagen era (2019-2021), the mega-deal peak (2022-2023), and the normalized market (2024-2026). Understanding this evolution is essential for calibrating expectations.
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">ADC Deal Market Evolution</h3>
-            <DataTable
-              headers={['Year', 'ADC Deals', 'Median TDV', 'Total Value', 'Largest Deal']}
-              rows={[
-                ['2019', '17', '$1,339M', '$46.2B', 'AstraZeneca-Daiichi ($6.9B)'],
-                ['2020', '20', '$2,663M', '$136.8B', 'Gilead-Immunomedics ($21B)'],
-                ['2021', '18', '$1,686M', '$76.8B', 'Merck-Seagen ($1.7B collab)'],
-                ['2022', '25', '$3,302M', '$105.1B', 'Pfizer-Seagen ($43B acq.)'],
-                [<strong key="23" className="text-blue-700">2023</strong>, <strong key="23n">32</strong>, <strong key="23t">$5,932M</strong>, <strong key="23v">$371.8B</strong>, 'Pfizer-Seagen close + AbbVie-ImmunoGen ($10.1B)'],
-                ['2024', '35', '$1,824M', '$104.4B', 'Merck-Daiichi Sankyo ($22B TDV)'],
-                ['2025*', '17', '$1,598M', '$36.7B', 'BMS-TERN ($1.2B)'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">*2025 data through Q3. Source: Ambrosia Benchmarker.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 3A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">ADC Deal Market Evolution</h3>
           </div>
 
+          <GatedBenchmarkTable
+            headers={['Year', 'ADC Deals', 'Median TDV', 'Total Value', 'Largest Deal']}
+            rows={[
+              ['2019', '17', '$1,339M', '$46.2B', 'AstraZeneca-Daiichi ($6.9B)'],
+              ['2020', '20', '$2,663M', '$136.8B', 'Gilead-Immunomedics ($21B)'],
+              ['2021', '18', '$1,686M', '$76.8B', 'Merck-Seagen ($1.7B collab)'],
+              ['2022', '25', '$3,302M', '$105.1B', 'Pfizer-Seagen ($43B acq.)'],
+              ['2023', '32', '$5,932M', '$371.8B', 'Pfizer-Seagen close + AbbVie-ImmunoGen ($10.1B)'],
+              ['2024', '35', '$1,824M', '$104.4B', 'Merck-Daiichi Sankyo ($22B TDV)'],
+              ['2025*', '17', '$1,598M', '$36.7B', 'BMS-TERN ($1.2B)'],
+            ]}
+            freeRows={7}
+            footnote="*2025 data through Q3. Source: Ambrosia Benchmarker."
+          />
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 3B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">ADC Total Deal Value Trend (2019&ndash;2025)</h3>
+            <p className="text-xs text-slate-400 mb-4">The 2023 Pfizer/Seagen acquisition ($43B) created a once-in-a-generation peak. Deal values have since normalized to $100&ndash;105B annually.</p>
+          </div>
+
+          <TrendLineChart
+            data={[
+              { year: '2019', value: 46.2 },
+              { year: '2020', value: 136.8 },
+              { year: '2021', value: 76.8 },
+              { year: '2022', value: 105.1 },
+              { year: '2023', value: 371.8 },
+              { year: '2024', value: 104.4 },
+              { year: '2025', value: 36.7 },
+            ]}
+            yLabel="Total ADC Deal Value ($B)"
+            referenceLine={{ value: 104, label: 'Post-peak normalization' }}
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              ADC deal volume peaked at $371.8B in 2023 &mdash; an anomaly driven by the $43B Pfizer-Seagen acquisition. Post-peak normalization to $104B (2024) represents the market&apos;s true equilibrium. Deal <em>count</em> continues to grow (17&rarr;35 deals, 2019&ndash;2024), but the market has shifted from platform mega-acquisitions to focused single-asset licensing with greater emphasis on target differentiation and payload novelty.
+            </p>
+          </div>
+
+          {/* ── SECTION 4: BISPECIFIC MOMENTUM ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="bispecific-momentum">Bispecific Antibody Momentum</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="bispecific-momentum">Bispecific Antibody Momentum</h2>
 
             <p>
               While ADCs dominate on absolute deal value, bispecifics are the fastest-growing modality by deal count growth rate. Bispecific deal volume has approximately doubled from 2021 to 2025, driven by clinical validation of T-cell engagers in hematology and the emergence of novel bispecific formats in solid tumors and immunology.
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Bispecific Antibody Deal Economics by Indication Type</h3>
-            <DataTable
-              headers={['Category', 'Median Upfront', 'Median TDV', 'Key Targets']}
-              rows={[
-                [<strong key="heme" className="text-blue-700">Hematology (T-cell engagers)</strong>, '$250-400M', '$1.5-3.0B', 'BCMA, CD20, GPRC5D'],
-                ['Solid Tumor (T-cell engagers)', '$150-300M', '$1.0-2.5B', 'DLL3, CLDN18.2, MUC16'],
-                ['Immunology (dual-target)', '$200-500M', '$1.2-3.5B', 'IL-4/IL-13, TNF/IL-17, TSLP/IL-13'],
-                ['Next-gen Formats', '$100-250M', '$800M-2.0B', 'Trispecifics, conditional activation'],
-              ]}
-            />
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 4A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Bispecific Antibody Deal Economics by Indication Type</h3>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Category', 'Median Upfront', 'Median TDV', 'Key Targets']}
+            rows={[
+              ['Hematology (T-cell engagers)', '$250-400M', '$1.5-3.0B', 'BCMA, CD20, GPRC5D'],
+              ['Solid Tumor (T-cell engagers)', '$150-300M', '$1.0-2.5B', 'DLL3, CLDN18.2, MUC16'],
+              ['Immunology (dual-target)', '$200-500M', '$1.2-3.5B', 'IL-4/IL-13, TNF/IL-17, TSLP/IL-13'],
+              ['Next-gen Formats', '$100-250M', '$800M-2.0B', 'Trispecifics, conditional activation'],
+            ]}
+            freeRows={4}
+            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Bispecific deal economics vary dramatically by indication type. Hematology T-cell engagers command upfronts ($250-400M) that rival ADCs &mdash; driven by the clinical validation of teclistamab, glofitamab, and epcoritamab. Immunology dual-target bispecifics are the fastest-growing subcategory, with $200-500M upfronts reflecting the massive addressable markets in chronic inflammatory disease.
+            </p>
           </div>
 
           <InsightEmailCapture slug="adc-vs-bispecific-deal-benchmarks-2026" />
@@ -393,8 +495,10 @@ export default function ADCvsBispecificPage() {
             description="Model deal terms for your specific modality, target, phase, and therapeutic area — with real comparable transactions."
           />
 
+          {/* ── SECTION 5: CHINA LICENSING ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="china-licensing">The China-to-West Licensing Wave</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="china-licensing">The China-to-West Licensing Wave</h2>
 
             <p>
               One of the most significant developments in ADC deal-making since 2023 has been the China-to-West licensing wave. Chinese biotech companies — many of which built sophisticated ADC platforms during the 2020-2022 investment boom — are now licensing assets to Western pharma at terms that rival or exceed domestically-originated deals.
@@ -407,11 +511,25 @@ export default function ADCvsBispecificPage() {
             <p>
               For ADC licensors globally, the China wave has two effects: it increases competition for buyer attention (more assets available), but it also validates the modality premium (buyers are willing to pay $100M+ upfronts for Phase 1 ADCs from Chinese companies they may have limited due diligence history with — a strong signal of modality conviction).
             </p>
+          </div>
 
+          {/* ── PULL QUOTE 2 ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-24">
+            <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;Six of the top 10 pharma companies have licensed ADC or bispecific assets from Chinese biotechs in the last 12 months. This is no longer an emerging trend &mdash; it is a structural feature of the global deal landscape.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">China-to-West out-licensing reached $136B in 2025 (+162% YoY)</p>
+            </div>
+          </section>
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 5A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Notable China-to-West ADC Licensing Deals (Total Deal Value)</h3>
+            <p className="text-xs text-slate-400 mb-4">Selected mega-deals. Total deal values include milestones and contingent payments. The scale of these transactions reflects Western pharma&apos;s urgency to build ADC portfolios.</p>
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Notable China-to-West ADC Licensing Deals (Total Deal Value)</h3>
             <HorizontalBarChart
               data={[
                 { label: 'AZ / CSPC', value: 18500, displayValue: '$18.5B' },
@@ -426,8 +544,17 @@ export default function ADCvsBispecificPage() {
             <p className="text-xs text-slate-400 mt-3">Selected mega-deals. Total deal values include milestones and contingent payments.</p>
           </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The China-to-West ADC licensing wave has compressed deal timelines and increased competition among buyers. Western pharma is paying $100M+ upfronts for Phase 1 ADCs from Chinese companies &mdash; a level of conviction that would have been unthinkable three years ago. For all ADC licensors, this validates the modality premium even as it increases competitive pressure for buyer attention.
+            </p>
+          </div>
+
+          {/* ── SECTION 6: WHERE BISPECIFICS WIN ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="where-bispecifics-win">Where Bispecifics Close the Gap</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="where-bispecifics-win">Where Bispecifics Close the Gap</h2>
 
             <p>
               Bispecifics outperform ADCs on deal economics in two specific contexts:
@@ -437,29 +564,64 @@ export default function ADCvsBispecificPage() {
               <li><strong>Hematology.</strong> T-cell engaging bispecifics have become the dominant modality for relapsed/refractory multiple myeloma and B-cell lymphomas. In this space, bispecific upfronts and TDVs match or exceed ADC levels, because the clinical and commercial validation (teclistamab, glofitamab, epcoritamab) is equally strong.</li>
               <li><strong>Immunology/autoimmune.</strong> Bispecific antibodies targeting two inflammatory cytokines (e.g., IL-4/IL-13, TNF/IL-17) are a growing category in immunology deal-making, where ADCs have limited relevance. These deals can command $200-500M upfronts at Phase 2 due to the large market opportunity in chronic inflammatory diseases.</li>
             </ul>
-
-            <h2 id="modality-comparison">Full Modality Comparison: Oncology Upfronts</h2>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Median Upfront by Oncology Modality</h3>
-            <DataTable
-              headers={['Modality', 'Median Upfront', 'Median TDV', 'Deal Count (2020-2026)']}
-              rows={[
-                [<strong key="adc" className="text-blue-700">ADC</strong>, <strong key="adc-u">$361M</strong>, '$2,800M', '~165'],
-                ['Bispecific', '$281M', '$2,100M', '~120'],
-                ['Radiopharmaceutical', '$220M', '$1,600M', '~45'],
-                ['CAR-T (hematologic)', '$185M', '$1,400M', '~60'],
-                ['mRNA (oncology)', '$156M', '$1,200M', '~30'],
-                ['CAR-T (solid tumor)', '$140M', '$1,100M', '~25'],
-                ['Gene Therapy', '$100M', '$900M', '~20'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">All phases combined. Deal counts are approximate. Source: Ambrosia Benchmarker.</p>
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The ADC premium is an oncology solid-tumor phenomenon. In hematology and immunology, bispecifics match or exceed ADC deal economics. BD teams should evaluate modality premiums within their specific therapeutic context rather than applying the overall 25-30% ADC premium across all indications.
+            </p>
           </div>
 
+          {/* ── SECTION 7: FULL MODALITY COMPARISON ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="mega-deals">Recent Mega-Deals: Case Studies</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 7</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="modality-comparison">Full Modality Comparison: Oncology Upfronts</h2>
+          </div>
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 7A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Median Upfront by Oncology Modality</h3>
+            <p className="text-xs text-slate-400 mb-4">ADCs lead on median upfront at every development phase. The hierarchy reflects commercial validation maturity, manufacturing complexity, and platform scalability.</p>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Modality', 'Median Upfront', 'Median TDV', 'Deal Count (2020-2026)']}
+            rows={[
+              ['ADC', '$361M', '$2,800M', '~165'],
+              ['Bispecific', '$281M', '$2,100M', '~120'],
+              ['Radiopharmaceutical', '$220M', '$1,600M', '~45'],
+              ['CAR-T (hematologic)', '$185M', '$1,400M', '~60'],
+              ['mRNA (oncology)', '$156M', '$1,200M', '~30'],
+              ['CAR-T (solid tumor)', '$140M', '$1,100M', '~25'],
+              ['Gene Therapy', '$100M', '$900M', '~20'],
+            ]}
+            freeRows={7}
+            footnote={`All phases combined. Deal counts are approximate. Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+          />
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 7B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Oncology Modality Upfront Waterfall</h3>
+            <p className="text-xs text-slate-400 mb-4">Median upfront payments by modality, arranged from highest to lowest. ADCs and bispecifics together account for over 60% of deal volume.</p>
+          </div>
+
+          <WaterfallChart
+            data={[
+              { phase: 'ADC', value: 361, n: 165 },
+              { phase: 'Bispecific', value: 281, n: 120 },
+              { phase: 'Radiopharm', value: 220, n: 45 },
+              { phase: 'CAR-T (heme)', value: 185, n: 60 },
+              { phase: 'mRNA', value: 156, n: 30 },
+              { phase: 'CAR-T (solid)', value: 140, n: 25 },
+              { phase: 'Gene Therapy', value: 100, n: 20 },
+            ]}
+          />
+
+          {/* ── SECTION 8: MEGA-DEALS ── */}
+          <div className="prose prose-slate prose-lg max-w-none mt-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 8</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="mega-deals">Recent Mega-Deals: Case Studies</h2>
 
             <ul>
               <li><strong>Merck-Daiichi Sankyo (2024):</strong> $4B upfront, $22B TDV. ADC collaboration across three programs. The largest single upfront in ADC licensing history, reflecting platform-level conviction.</li>
@@ -468,34 +630,63 @@ export default function ADCvsBispecificPage() {
               <li><strong>BMS-BioNTech (2024):</strong> Bispecific collaboration. $1.2B upfront for multiple T-cell engaging bispecifics in solid tumors, demonstrating growing confidence in the format beyond hematology.</li>
               <li><strong>AstraZeneca-Daiichi Sankyo (2023 expansion):</strong> $2B additional upfront to expand the Enhertu collaboration to additional tumor types. Platform expansion deal that validated the multi-indication ADC thesis.</li>
             </ul>
+          </div>
 
-            <h2 id="faq">Frequently Asked Questions</h2>
-
-            <h3>Why do ADCs command higher deal valuations than bispecifics?</h3>
-            <p>
-              ADCs benefit from validated commercial models (Enhertu approaching $10B+ peak sales), platform scalability across 5-10+ tumor types, and manufacturing scarcity that creates supply-side premium. The 25-30% upfront gap reflects these structural advantages.
-            </p>
-
-            <h3>What are typical ADC upfronts in 2026?</h3>
-            <p>
-              Median ADC upfront is $361M across all phases. Phase 2 ADC upfronts range from $200-600M depending on target differentiation, payload novelty, and therapeutic area. Platform deals (multiple targets) command $500M-$4B upfronts, as seen in the Merck-Daiichi collaboration.
-            </p>
-
-            <h3>How has the China licensing wave affected ADC deal terms?</h3>
-            <p>
-              Chinese-origin ADCs are being licensed to Western pharma at $50-200M upfronts for Phase 1-2 assets. This increases buyer options but also validates modality conviction. The wave has compressed deal timelines and created competitive dynamics that benefit all ADC licensors.
-            </p>
-
-            <h3>Are bispecific deal values catching up?</h3>
-            <p>
-              Bispecific deal volume is growing faster than ADC deal volume, but the absolute valuation gap has remained stable at 25-30%. Bispecifics are gaining in hematology and immunology, where they match or exceed ADC deal values. In solid tumors, ADCs retain the premium.
-            </p>
-
-            <h3>What modality has the highest deal valuations in oncology?</h3>
-            <p>
-              ADCs lead with $361M median upfront, followed by bispecifics ($281M), radiopharmaceuticals ($220M), and CAR-T for hematologic malignancies ($185M). Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> to model deal terms for your specific modality.
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The five largest ADC/bispecific deals of 2023-2024 total $78.3B in transaction value. These mega-deals have reshaped valuation benchmarks for the entire sector &mdash; every licensor now anchors to these precedents when negotiating deal terms. The shift from platform acquisitions (Pfizer-Seagen, $43B) to single-asset licensing (Merck-Daiichi, $22B TDV) signals a maturing market where buyers want targeted access rather than wholesale platform ownership.
             </p>
           </div>
+
+          {/* ── INTERACTIVE CALCULATOR ── */}
+          <section className="my-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your ADC or Bispecific Deal</h2>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="adc" />
+          </section>
+
+          {/* ── SECTION 9: FAQ ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 9</p>
+            <h2 className="text-lg font-bold text-slate-900 mb-4" id="faq">Frequently Asked Questions</h2>
+          </div>
+
+          <div className="divide-y divide-slate-200 mb-12">
+            {[
+              { q: 'Why do ADCs command higher deal valuations than bispecifics?', a: 'ADCs benefit from validated commercial models (Enhertu approaching $10B+ peak sales), platform scalability across 5-10+ tumor types, and manufacturing scarcity that creates supply-side premium. The 25-30% upfront gap reflects these structural advantages.' },
+              { q: 'What are typical ADC upfronts in 2026?', a: `Median ADC upfront is $361M across all phases. Phase 2 ADC upfronts range from $200-600M depending on target differentiation, payload novelty, and therapeutic area. Platform deals (multiple targets) command $500M-$4B upfronts, as seen in the Merck-Daiichi collaboration.` },
+              { q: 'How has the China licensing wave affected ADC deal terms?', a: 'Chinese-origin ADCs are being licensed to Western pharma at $50-200M upfronts for Phase 1-2 assets. This increases buyer options but also validates modality conviction. The wave has compressed deal timelines and created competitive dynamics that benefit all ADC licensors.' },
+              { q: 'Are bispecific deal values catching up?', a: 'Bispecific deal volume is growing faster than ADC deal volume, but the absolute valuation gap has remained stable at 25-30%. Bispecifics are gaining in hematology and immunology, where they match or exceed ADC deal values. In solid tumors, ADCs retain the premium.' },
+              { q: 'What modality has the highest deal valuations in oncology?', a: `ADCs lead with $361M median upfront, followed by bispecifics ($281M), radiopharmaceuticals ($220M), and CAR-T for hematologic malignancies ($185M). Use the Ambrosia Benchmarker to model deal terms for your specific modality.` },
+            ].map(({ q, a }, i) => (
+              <details key={i} className="group py-4">
+                <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-slate-800 hover:text-teal-700">
+                  <span>{q}</span>
+                  <svg className="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{a}</p>
+              </details>
+            ))}
+          </div>
+
+          {/* ── EMAIL CAPTURE ── */}
+          <section className="mb-12">
+            <InlineEmailCapture
+              heading="Get Weekly ADC & Bispecific Deal Intelligence"
+              description={`Join 2,000+ BD professionals who receive our weekly analysis of modality-specific licensing trends, new deal benchmarks, and negotiation insights from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              source="adc-vs-bispecific-insight"
+            />
+          </section>
+
+          {/* ── CITE THIS DATA ── */}
+          <section className="mb-12">
+            <CiteThisData
+              title="ADC vs Bispecific Antibody Deal Benchmarks — 2026 Market Data"
+              pageUrl="/insights/adc-vs-bispecific-deal-benchmarks-2026"
+            />
+          </section>
 
           <RelatedInsights articles={[
             {
