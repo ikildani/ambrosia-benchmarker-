@@ -318,6 +318,17 @@ export const profileUpdateSchema = z.object({
     .optional(),
   deal_role: z.string().max(50, 'Deal role too long').optional(),
   avatar_gradient: z.string().max(100, 'Gradient value too long').optional(),
+  weekly_digest: z.boolean().optional(),
+  platform_updates: z.boolean().optional(),
+}).strip();
+
+// Platform update admin POST/PATCH body
+export const platformUpdateSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200),
+  body: z.string().min(1, 'Body is required').max(5000),
+  category: z.enum(['feature', 'improvement', 'data', 'fix', 'announcement']),
+  cta_url: z.string().url().max(500).optional().nullable(),
+  cta_label: z.string().max(100).optional().nullable(),
 }).strip();
 
 // Email send POST body

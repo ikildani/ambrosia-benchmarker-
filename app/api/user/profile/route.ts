@@ -19,22 +19,42 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       return apiError(formatZodErrors(parsed.error), 400);
     }
 
-    const updateData = parsed.data;
+    const { weekly_digest, platform_updates, ...profileFields } = parsed.data;
 
-    if (Object.keys(updateData).length === 0) {
+    const hasProfileFields = Object.keys(profileFields).length > 0;
+    const hasEmailPrefs = weekly_digest !== undefined || platform_updates !== undefined;
+
+    if (!hasProfileFields && !hasEmailPrefs) {
       return apiError('No fields to update', 400);
     }
 
-    // Use service client for the update (bypasses RLS for profile writes)
     const supabase = createServiceClient();
-    const { error: updateError } = await supabase
-      .from('user_profiles')
-      .update(updateData)
-      .eq('id', user.id);
 
-    if (updateError) {
-      captureApiError(updateError, 'profile-update');
-      return apiError('Failed to save profile', 500);
+    if (hasProfileFields) {
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update(profileFields)
+        .eq('id', user.id);
+
+      if (updateError) {
+        captureApiError(updateError, 'profile-update');
+        return apiError('Failed to save profile', 500);
+      }
+    }
+
+    if (hasEmailPrefs) {
+      const prefData: Record<string, unknown> = { user_id: user.id };
+      if (weekly_digest !== undefined) prefData.weekly_digest = weekly_digest;
+      if (platform_updates !== undefined) prefData.platform_updates = platform_updates;
+
+      const { error: prefError } = await supabase
+        .from('email_preferences')
+        .upsert(prefData, { onConflict: 'user_id' });
+
+      if (prefError) {
+        captureApiError(prefError, 'email-preferences-update');
+        return apiError('Failed to save email preferences', 500);
+      }
     }
 
     return apiSuccess({});

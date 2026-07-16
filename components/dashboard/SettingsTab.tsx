@@ -183,11 +183,14 @@ const SettingsTab = React.memo(function SettingsTab({
     const saved = localStorage.getItem('email_pref_weekly_digest');
     return saved !== null ? saved === 'true' : true; // default on
   });
+  const [platformUpdates, setPlatformUpdates] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    const saved = localStorage.getItem('email_pref_platform_updates');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [savingPrefs, setSavingPrefs] = useState(false);
 
-  const handleToggleWeeklyDigest = useCallback(async (enabled: boolean) => {
-    setWeeklyDigest(enabled);
-    localStorage.setItem('email_pref_weekly_digest', String(enabled));
+  const saveEmailPref = useCallback(async (field: string, enabled: boolean) => {
     setSavingPrefs(true);
     try {
       const { createClient } = await import('@/lib/supabase/client');
@@ -201,11 +204,10 @@ const SettingsTab = React.memo(function SettingsTab({
               'Content-Type': 'application/json',
               Authorization: `Bearer ${session.access_token}`,
             },
-            body: JSON.stringify({ weekly_digest: enabled }),
+            body: JSON.stringify({ [field]: enabled }),
           });
         }
       }
-      toast.success(enabled ? 'Weekly digest enabled' : 'Weekly digest disabled');
     } catch (err) {
       captureClientError(err, 'SettingsTab', { context: 'Failed to save email preferences' });
       toast.error('Failed to save preference');
@@ -213,6 +215,20 @@ const SettingsTab = React.memo(function SettingsTab({
       setSavingPrefs(false);
     }
   }, []);
+
+  const handleToggleWeeklyDigest = useCallback(async (enabled: boolean) => {
+    setWeeklyDigest(enabled);
+    localStorage.setItem('email_pref_weekly_digest', String(enabled));
+    await saveEmailPref('weekly_digest', enabled);
+    toast.success(enabled ? 'Weekly digest enabled' : 'Weekly digest disabled');
+  }, [saveEmailPref]);
+
+  const handleTogglePlatformUpdates = useCallback(async (enabled: boolean) => {
+    setPlatformUpdates(enabled);
+    localStorage.setItem('email_pref_platform_updates', String(enabled));
+    await saveEmailPref('platform_updates', enabled);
+    toast.success(enabled ? 'Platform updates enabled' : 'Platform updates disabled');
+  }, [saveEmailPref]);
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -535,6 +551,36 @@ const SettingsTab = React.memo(function SettingsTab({
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
                   weeklyDigest ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between px-4 py-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-slate-900 dark:text-white">Platform Updates</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">New features, improvements, and data updates</p>
+              </div>
+            </div>
+            <button
+              onClick={() => handleTogglePlatformUpdates(!platformUpdates)}
+              disabled={savingPrefs}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                platformUpdates ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-600'
+              } ${savingPrefs ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+              role="switch"
+              aria-checked={platformUpdates}
+              aria-label="Toggle platform update emails"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                  platformUpdates ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>

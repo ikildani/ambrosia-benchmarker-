@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   FileText,
   Sparkles,
+  Bell,
   Settings,
   LogOut,
   Menu,
@@ -62,6 +63,7 @@ export default function AdminLayoutClient({
   const navItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/admin/content', icon: FileText, label: 'Content' },
+    { href: '/admin/updates', icon: Bell, label: 'Updates' },
     { href: '/admin/generate', icon: Sparkles, label: 'Generate' },
   ];
 

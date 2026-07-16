@@ -79,6 +79,10 @@
       "schedule": "0 14 * * 1"
     },
     {
+      "path": "/api/cron/platform-updates",
+      "schedule": "0 15 1,15 * *"
+    },
+    {
       "path": "/api/cron/admin-deal-digest",
       "schedule": "0 8 * * 1"
     },
