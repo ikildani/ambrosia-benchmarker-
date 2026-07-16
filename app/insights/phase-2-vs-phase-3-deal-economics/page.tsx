@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
@@ -8,6 +10,30 @@ import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { DEAL_STATS } from '@/lib/config/constants';
+
+const ChartSkeleton = () => (
+  <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
+    <div className="h-64 sm:h-80 flex items-end gap-2 px-8 pb-8 animate-pulse">
+      {[35, 50, 65, 80, 95].map((h, i) => (
+        <div key={i} className="flex-1 bg-slate-100 rounded-t" style={{ height: `${h}%` }} />
+      ))}
+    </div>
+  </div>
+);
+const WaterfallChart = dynamic(
+  () => import('@/components/insights/WaterfallChart').then(m => ({ default: m.WaterfallChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const PhaseUpfrontChart = dynamic(
+  () => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })),
+  { loading: () => <ChartSkeleton /> }
+);
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
   title: 'Phase 2 vs Phase 3 Deal Economics — The Proof-of-Concept Inflection | Ambrosia Ventures',
@@ -39,105 +65,6 @@ export const metadata: Metadata = {
   },
 };
 
-function HorizontalBarChart({ data, maxValue, color = '#0d9488' }: {
-  data: { label: string; value: number; displayValue: string }[];
-  maxValue: number;
-  color?: string;
-}) {
-  return (
-    <div className="space-y-3">
-      {data.map((item, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <div className="w-32 text-right text-sm font-medium text-slate-600 flex-shrink-0">{item.label}</div>
-          <div className="flex-1 h-8 bg-slate-100 rounded-md overflow-hidden relative">
-            <div
-              className="h-full rounded-md flex items-center justify-end px-2"
-              style={{ width: `${(item.value / maxValue) * 100}%`, backgroundColor: color, opacity: 0.85 }}
-            >
-              <span className="text-xs font-bold text-white">{item.displayValue}</span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ComparisonCard({ left, right, label }: {
-  left: { title: string; value: string; sub?: string };
-  right: { title: string; value: string; sub?: string };
-  label: string;
-}) {
-  return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 my-6">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{label}</p>
-      <div className="grid grid-cols-2 gap-6">
-        <div className="text-center p-4 bg-slate-50 rounded-lg">
-          <div className="text-2xl font-bold text-slate-700">{left.value}</div>
-          <div className="text-sm font-medium text-slate-500 mt-1">{left.title}</div>
-          {left.sub && <div className="text-xs text-slate-400 mt-1">{left.sub}</div>}
-        </div>
-        <div className="text-center p-4 bg-teal-50 rounded-lg border-2 border-teal-200">
-          <div className="text-2xl font-bold text-teal-700">{right.value}</div>
-          <div className="text-sm font-medium text-teal-600 mt-1">{right.title}</div>
-          {right.sub && <div className="text-xs text-teal-500 mt-1">{right.sub}</div>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function VisualStatRow({ stats }: { stats: { value: string; label: string; color?: string }[] }) {
-  return (
-    <div className="grid gap-4 my-8" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
-      {stats.map((s, i) => (
-        <div key={i} className="text-center py-6 px-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-100">
-          <div className={`text-3xl sm:text-4xl font-extrabold ${s.color || 'text-slate-900'}`}>{s.value}</div>
-          <div className="text-sm text-slate-500 mt-2 font-medium">{s.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StatCard({ value, label, sub }: { value: string; label: string; sub?: string }) {
-  return (
-    <div className="bg-slate-50 rounded-xl p-6 text-center">
-      <div className="text-3xl sm:text-4xl font-bold text-slate-900">{value}</div>
-      <div className="text-sm font-medium text-slate-600 mt-1">{label}</div>
-      {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 export default function Phase2VsPhase3Page() {
   const breadcrumbSchema = {
@@ -211,6 +138,16 @@ export default function Phase2VsPhase3Page() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="phase-2-vs-phase-3" />
+      <StickyTOC sections={[
+        { id: 'the-inflection', label: 'The PoC Inflection', number: 1 },
+        { id: 'by-therapeutic-area', label: 'By Therapeutic Area', number: 2 },
+        { id: 'risk-reward', label: 'Risk/Reward Calculus', number: 3 },
+        { id: 'upfront-ratios', label: 'Upfront Ratios', number: 4 },
+        { id: 'the-option-alternative', label: 'Option Structure', number: 5 },
+        { id: 'faq', label: 'FAQ', number: 6 },
+      ]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -271,7 +208,8 @@ export default function Phase2VsPhase3Page() {
           ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="the-inflection">The Proof-of-Concept Inflection</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="the-inflection">The Proof-of-Concept Inflection</h2>
 
             <p>
               Every biopharma BD professional understands that Phase 2 proof-of-concept is the most important data readout in a drug&apos;s lifecycle. But the deal economics data quantifies exactly how much value that readout creates — and reveals why the Phase 2 to Phase 3 decision is the most consequential timing choice in out-licensing strategy.
@@ -282,59 +220,75 @@ export default function Phase2VsPhase3Page() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Deal Economics by Development Phase</h3>
-            <DataTable
-              headers={['Phase', 'Median Upfront', 'Median TDV', 'Upfront % of TDV', 'Phase-over-Phase Multiple']}
-              rows={[
-                ['Preclinical', '$82M', '$888M', '9.7%', '--'],
-                ['Phase 1', '$140M', '$1,209M', '11.1%', '1.7x'],
-                [<strong key="p2" className="text-blue-700">Phase 2</strong>, <strong key="p2u">$300M</strong>, <strong key="p2t">$1,801M</strong>, <strong key="p2p">14.2%</strong>, <strong key="p2m">2.1x</strong>],
-                [<strong key="p3" className="text-blue-700">Phase 3</strong>, <strong key="p3u">$678M</strong>, <strong key="p3t">$3,500M</strong>, <strong key="p3p">16.8%</strong>, <strong key="p3m">2.3x</strong>],
-                ['Approved', '$1,964M', '$6,750M', '26.5%', '2.9x'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions 2020-2026. All therapeutic areas.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Deal Economics by Development Phase</h3>
+            <p className="text-xs text-slate-400 mb-4">Phase-by-phase upfronts, TDV, and multiples across all therapeutic areas. The Phase 1 to Phase 2 jump (2.1x) is the largest single value inflection.</p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Median Upfront Payment by Development Phase</h3>
-            <HorizontalBarChart
-              data={[
-                { label: 'Preclinical', value: 82, displayValue: '$82M' },
-                { label: 'Phase 1', value: 140, displayValue: '$140M' },
-                { label: 'Phase 2', value: 300, displayValue: '$300M' },
-                { label: 'Phase 3', value: 678, displayValue: '$678M' },
-                { label: 'Approved', value: 1964, displayValue: '$1,964M' },
-              ]}
-              maxValue={1964}
-              color="#3b82f6"
-            />
-            <p className="text-xs text-slate-400 mt-3">All therapeutic areas combined. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
-          </div>
-
-          <ComparisonCard
-            label="The PoC Inflection: Phase 2 vs Phase 3"
-            left={{ title: 'Phase 2 Deal', value: '$300M', sub: '15-25% PoS, $1.8B median TDV' }}
-            right={{ title: 'Phase 3 Deal', value: '$678M', sub: '50-65% PoS, $3.5B median TDV' }}
+          <GatedBenchmarkTable
+            headers={['Phase', 'Median Upfront', 'Median TDV', 'Upfront % of TDV', 'Phase-over-Phase Multiple']}
+            rows={[
+              ['Preclinical', '$82M', '$888M', '9.7%', '--'],
+              ['Phase 1', '$140M', '$1.21B', '11.1%', '1.7x'],
+              ['Phase 2', '$300M', '$1.80B', '14.2%', '2.1x'],
+              ['Phase 3', '$678M', '$3.50B', '16.8%', '2.3x'],
+              ['Approved', '$1.96B', '$6.75B', '26.5%', '2.9x'],
+            ]}
+            freeRows={5}
+            footnote={`Source: Ambrosia Ventures analysis of ${DEAL_STATS.TOTAL_DEALS} transactions (2020-2026). All therapeutic areas. TDV = Total Deal Value. Medians minimize mega-deal distortion.`}
           />
 
-          <VisualStatRow stats={[
-            { value: '2.1x', label: 'Ph1 to Ph2 Inflection', color: 'text-blue-700' },
-            { value: '2.3x', label: 'Ph2 to Ph3 Inflection', color: 'text-teal-700' },
-            { value: '40-50%', label: 'Phase 3 Failure Rate', color: 'text-red-600' },
-          ]} />
-
-          <div className="my-8 grid sm:grid-cols-3 gap-4">
-            <StatCard value="$300M" label="Phase 2 Median Upfront" sub="All TAs combined" />
-            <StatCard value="$678M" label="Phase 3 Median Upfront" sub="All TAs combined" />
-            <StatCard value="$378M" label="Incremental Value" sub="Ph3 upfront minus Ph2" />
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The Phase 1 to Phase 2 transition delivers the largest single-phase multiplier in the entire development lifecycle (2.1x). No subsequent phase transition &mdash; including Phase 2 to Phase 3 &mdash; delivers as much proportional de-risking per dollar of clinical investment. This is why Phase 2 PoC data is the single most valuable inflection point in biopharma deal economics.
+            </p>
           </div>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 my-8">
-            <p className="text-sm font-semibold text-blue-900 mb-1">The core question</p>
-            <p className="text-sm text-blue-800 leading-relaxed">
-              Is the $378M incremental upfront at Phase 3 worth the $200-500M+ Phase 3 trial cost, 2-3 years of additional development time, and 40-50% probability of complete failure? For most single-asset biotechs without Phase 3 capital, the answer is no — Phase 2 is the optimal deal point.
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Median Upfront Payment by Development Phase</h3>
+            <p className="text-xs text-slate-400 mb-4">Waterfall visualization showing the compounding value at each clinical stage. Based on {DEAL_STATS.TOTAL_DEALS} transactions across all therapeutic areas.</p>
+          </div>
+
+          <WaterfallChart
+            data={[
+              { phase: 'Preclinical', value: 82, n: 420 },
+              { phase: 'Phase 1', value: 140, n: 350 },
+              { phase: 'Phase 2', value: 300, n: 426 },
+              { phase: 'Phase 3', value: 678, n: 345 },
+              { phase: 'Approved', value: 1964, n: 364 },
+            ]}
+          />
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 my-8">
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <div className="text-3xl font-bold text-slate-900 tabular-nums">$300M</div>
+              <div className="text-sm text-slate-500 mt-1">Phase 2 median upfront</div>
+              <div className="text-xs text-teal-600 font-semibold mt-1">Certain value at signing</div>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <div className="text-3xl font-bold text-slate-900 tabular-nums">$678M</div>
+              <div className="text-sm text-slate-500 mt-1">Phase 3 median upfront</div>
+              <div className="text-xs text-amber-600 font-semibold mt-1">Contingent on trial success</div>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <div className="text-3xl font-bold text-red-700 tabular-nums">40&ndash;50%</div>
+              <div className="text-sm text-slate-500 mt-1">Phase 3 failure rate</div>
+              <div className="text-xs text-red-600 font-semibold mt-1">Across all therapeutic areas</div>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <div className="text-3xl font-bold text-slate-900 tabular-nums">$378M</div>
+              <div className="text-sm text-slate-500 mt-1">Incremental upfront</div>
+              <div className="text-xs text-slate-400 font-semibold mt-1">Ph3 minus Ph2</div>
+            </div>
+          </div>
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">The Core Question</p>
+            <p className="text-slate-700 leading-relaxed">
+              Is the $378M incremental upfront at Phase 3 worth the $200&ndash;500M+ Phase 3 trial cost, 2&ndash;3 years of additional development time, and 40&ndash;50% probability of complete failure? For most single-asset biotechs without Phase 3 capital, the answer is no &mdash; Phase 2 is the optimal deal point.
             </p>
           </div>
 
@@ -387,8 +341,29 @@ export default function Phase2VsPhase3Page() {
             </p>
           </div>
 
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Phase 2 Upfront Ranges by Therapeutic Area</h3>
+            <p className="text-xs text-slate-400 mb-4">P25&ndash;P75 interquartile ranges showing the spread of Phase 2 upfront payments. Metabolic and immunology show the widest ranges, reflecting deal-to-deal variability in these high-premium TAs.</p>
+          </div>
+
+          <PhaseUpfrontChart
+            data={[
+              { phase: 'Metabolic', low: 800, median: 1300, high: 2100 },
+              { phase: 'Immunology', low: 750, median: 1250, high: 1900 },
+              { phase: 'Neurology', low: 150, median: 302, high: 520 },
+              { phase: 'Oncology', low: 140, median: 281, high: 480, highlight: true },
+              { phase: 'Hematology', low: 90, median: 175, high: 310 },
+              { phase: 'Rare Disease', low: 75, median: 150, high: 280 },
+            ]}
+            title=""
+            yLabel="Phase 2 Median Upfront ($M)"
+          />
+
+          {/* ── SECTION 3: RISK/REWARD CALCULUS ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="risk-reward">The Risk/Reward Calculus</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2 mt-16">Section 3</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="risk-reward">The Risk/Reward Calculus</h2>
 
             <p>
               The decision to deal at Phase 2 vs wait for Phase 3 is a risk/reward calculation with four variables: the incremental value from Phase 3 data, the cost of running the trial, the probability of Phase 3 success, and the time value of money.
@@ -411,7 +386,16 @@ export default function Phase2VsPhase3Page() {
             <p>
               The math is often marginal. For oncology, waiting for Phase 3 has a positive expected value only if Phase 3 costs are below ~$350M and your asset-specific PoS is above 55%. For many biotechs — especially those facing competitive pressure or capital constraints — Phase 2 is the rational deal point.
             </p>
+          </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The net expected incremental value of holding to Phase 3 ranges from &minus;$34M to +$216M for an oncology asset &mdash; a calculation that is positive only under favorable assumptions. For single-asset biotechs, the risk-adjusted case for exiting at Phase 2 is overwhelming: $300M certain value versus a gamble with downside exposure.
+            </p>
+          </div>
+
+          <div className="prose prose-slate prose-lg max-w-none">
             <h3>When Phase 2 is the clear winner</h3>
 
             <ul>
@@ -432,15 +416,39 @@ export default function Phase2VsPhase3Page() {
           </div>
 
           <InsightEmailCapture slug="phase-2-vs-phase-3-deal-economics" />
+        </article>
 
+        {/* ── PULL QUOTE 2 ── */}
+        <section className="bg-slate-900 text-white">
+          <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+            <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+              &ldquo;The founders who capture the most value are not the ones who hold longest &mdash; they are the ones who recognize when their risk-adjusted value has peaked.&rdquo;
+            </blockquote>
+            <p className="mt-4 text-sm text-slate-400">Phase 2 delivers $300M certain value vs. $38M expected value from holding to Phase 3</p>
+          </div>
+        </section>
+
+        {/* ── INTERACTIVE CALCULATOR ── */}
+        <section className="bg-slate-50 border-y border-slate-200">
+          <div className="max-w-3xl mx-auto px-4 py-16">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your Own Deal</h2>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+          </div>
+        </section>
+
+        <article className="max-w-3xl mx-auto px-4 py-12">
           <InsightCTA
             variant="mid"
             heading="See Your Asset's Value at Each Phase"
             description="Model upfronts, milestones, and total deal value at Phase 2 and Phase 3 side-by-side — for your specific TA, modality, and indication."
           />
 
+          {/* ── SECTION 4: UPFRONT RATIOS ── */}
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="upfront-ratios">Upfront Ratios: What the Percentages Mean</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="upfront-ratios">Upfront Ratios: What the Percentages Mean</h2>
 
             <p>
               A subtle but important distinction: the Phase 2-to-Phase 3 upfront jump is driven by <em>both</em> a higher upfront percentage and a larger total deal value. At Phase 2, upfronts represent 14-18% of TDV. At Phase 3, they represent 16-20%. The absolute increase comes from the compounding effect: a larger TDV multiplied by a higher upfront ratio.
@@ -449,14 +457,65 @@ export default function Phase2VsPhase3Page() {
             <p>
               This matters for negotiation. If a buyer offers you 12% upfront on a Phase 2 deal, you have data showing the market median is 14-18%. That 2-6 percentage point gap on a $1.8B TDV represents $36-108M in additional upfront value. For specific TA-level data on upfront ratios, see our <Link href="/insights/biopharma-deal-benchmarks-2026" className="text-teal-600 font-medium hover:text-teal-700">deal benchmarks analysis</Link>.
             </p>
+          </div>
 
-            <h2 id="the-option-alternative">The Option Structure Alternative</h2>
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              A 2&ndash;6 percentage point gap in upfront ratio on a $1.8B Phase 2 TDV represents $36&ndash;108M in additional upfront value. BD teams with benchmark data can identify and close this gap in term sheet negotiations &mdash; this is where deal intelligence translates directly to captured value.
+            </p>
+          </div>
+
+          {/* ── SECTION 5: OPTION STRUCTURE ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="the-option-alternative">The Option Structure Alternative</h2>
 
             <p>
               For biotechs caught between Phase 2 and Phase 3, option deals offer a hybrid path. Structure a deal with a 5-10% option fee at Phase 2, an exercise payment of 15-25% triggered by Phase 3 initiation or data, and full licensing economics post-exercise. This locks in a partner (and cash) at Phase 2 while capturing Phase 3 upside if the data supports it. For more on this structure, see our <Link href="/insights/licensing-vs-acquisition-deal-terms" className="text-teal-600 font-medium hover:text-teal-700">licensing vs acquisition comparison</Link>.
             </p>
+          </div>
 
-            <h2 id="faq">Frequently Asked Questions</h2>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 3A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Option Deal Structure: Phase 2 Entry with Phase 3 Upside</h3>
+            <p className="text-xs text-slate-400 mb-4">Option agreements grew from 8% of deal structures in 2020 to 18% in 2025 &mdash; a hybrid path that captures Phase 2 certainty with Phase 3 upside potential.</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 my-8">
+            <div className="grid sm:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-teal-50 rounded-lg border border-teal-200">
+                <div className="text-[10px] text-teal-600 uppercase tracking-wider font-semibold mb-2">At Phase 2</div>
+                <div className="text-2xl font-bold text-teal-700">5&ndash;10%</div>
+                <div className="text-xs text-teal-600 mt-1">Option fee</div>
+                <div className="text-[10px] text-slate-500 mt-2">Non-refundable payment at signing</div>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-[10px] text-blue-600 uppercase tracking-wider font-semibold mb-2">At Phase 3 Data</div>
+                <div className="text-2xl font-bold text-blue-700">15&ndash;25%</div>
+                <div className="text-xs text-blue-600 mt-1">Exercise payment</div>
+                <div className="text-[10px] text-slate-500 mt-2">Triggered by data readout</div>
+              </div>
+              <div className="text-center p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold mb-2">Post-Exercise</div>
+                <div className="text-2xl font-bold text-slate-700">Full</div>
+                <div className="text-xs text-slate-600 mt-1">Licensing economics</div>
+                <div className="text-[10px] text-slate-500 mt-2">Milestones + royalties</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Option deals are the fastest-growing deal structure in biopharma &mdash; up from 8% (2020) to 18% (2025). For biotechs with strong Phase 2 data but capital constraints, this structure provides non-dilutive funding while preserving Phase 3 upside. The risk of option lapse is the trade-off: if Phase 3 data disappoints, the buyer walks with only the option fee paid.
+            </p>
+          </div>
+
+          {/* ── SECTION 6: FAQ ── */}
+          <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 6</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="faq">Frequently Asked Questions</h2>
 
             <h3>How much does deal value increase from Phase 2 to Phase 3?</h3>
             <p>
@@ -482,6 +541,23 @@ export default function Phase2VsPhase3Page() {
             <p>
               Phase 2 deals allocate 14-18% of TDV as upfront. Phase 3 deals allocate 16-20%. The absolute upfront increase is driven by both a higher percentage and a larger TDV base — the compounding effect.
             </p>
+          </div>
+
+          {/* ── INLINE EMAIL CAPTURE ── */}
+          <div className="my-12">
+            <InlineEmailCapture
+              heading="Get Deal Intelligence Weekly"
+              description={`Join 2,000+ BD professionals who receive phase-by-phase benchmarks and deal timing analysis from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              source="phase-2-vs-phase-3-insight"
+            />
+          </div>
+
+          {/* ── CITE THIS DATA ── */}
+          <div className="my-12">
+            <CiteThisData
+              title="Phase 2 vs Phase 3 Deal Economics — The Proof-of-Concept Inflection"
+              pageUrl="/insights/phase-2-vs-phase-3-deal-economics"
+            />
           </div>
 
           <RelatedInsights articles={[

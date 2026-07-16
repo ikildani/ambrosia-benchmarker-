@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -7,8 +8,15 @@ import { AuthorByline } from '@/components/insights/AuthorByline';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
+import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 
+const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
+const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
+const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
+const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
+const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
+const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 export const metadata: Metadata = {
   title: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide | Ambrosia Ventures',
   description: `Biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions. Phase-by-phase deal values for licensing, upfront payments, milestones, and royalties across 12 therapeutic areas.`,
@@ -110,34 +118,6 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub?: s
   );
 }
 
-function DataTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
-  return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-200">
-            {headers.map((h, i) => (
-              <th key={i} className={`py-3 px-4 font-semibold text-slate-700 ${i === 0 ? 'text-left' : 'text-right'}`}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50">
-              {row.map((cell, j) => (
-                <td key={j} className={`py-3 px-4 ${j === 0 ? 'text-left font-medium text-slate-800' : 'text-right text-slate-600 tabular-nums'}`}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 export default function HowMuchIsBiotechAssetWorthPage() {
   const breadcrumbSchema = {
@@ -211,6 +191,15 @@ export default function HowMuchIsBiotechAssetWorthPage() {
 
   return (
     <>
+      <ScrollProgress />
+      <ReportViewTracker report="how-much-is-my-biotech-asset-worth" />
+      <StickyTOC sections={[
+        { id: 'phase-by-phase', label: 'Phase Benchmarks', number: 1 },
+        { id: 'five-factors', label: 'Five Value Factors', number: 2 },
+        { id: 'increase-value', label: 'Increase Your Value', number: 3 },
+        { id: 'model-your-deal', label: 'Model Your Deal', number: 4 },
+        { id: 'faq', label: 'FAQ', number: 5 },
+      ]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -271,6 +260,7 @@ export default function HowMuchIsBiotechAssetWorthPage() {
           ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 1</p>
             <h2 id="phase-by-phase">Phase-by-Phase Asset Valuation Benchmarks</h2>
 
             <p>
@@ -278,23 +268,31 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Biotech Asset Valuation by Development Phase</h3>
-            <DataTable
-              headers={['Phase', 'Median TDV', 'Upfront Range', 'Upfront % of TDV', 'Royalty Range']}
-              rows={[
-                ['Preclinical', '$150-$500M', '$15-$40M', '8-12%', '4-8%'],
-                ['Phase 1', '$300M-$1.2B', '$30-$120M', '10-14%', '6-12%'],
-                [<strong key="p2" className="text-teal-700">Phase 2</strong>, <strong key="p2t">$500M-$3.5B</strong>, <strong key="p2u">$80-$450M</strong>, '12-16%', '8-15%'],
-                ['Phase 3', '$1.0B-$5.0B', '$200M-$1.0B', '15-20%', '12-20%'],
-                ['Approved / Filed', '$2.0B-$10B+', '$500M-$4.0B', '20-40%', '15-25%'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Biotech Asset Valuation by Development Phase</h3>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Phase', 'Median TDV', 'Upfront Range', 'Upfront % of TDV', 'Royalty Range']}
+            rows={[
+              ['Preclinical', '$150-$500M', '$15-$40M', '8-12%', '4-8%'],
+              ['Phase 1', '$300M-$1.2B', '$30-$120M', '10-14%', '6-12%'],
+              ['Phase 2', '$500M-$3.5B', '$80-$450M', '12-16%', '8-15%'],
+              ['Phase 3', '$1.0B-$5.0B', '$200M-$1.0B', '15-20%', '12-20%'],
+              ['Approved / Filed', '$2.0B-$10B+', '$500M-$4.0B', '20-40%', '15-25%'],
+            ]}
+            freeRows={5}
+            footnote={`All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Ventures analysis of ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+          />
+
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1B</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Median Total Deal Value by Development Phase</h3>
+            <p className="text-xs text-slate-400 mb-4">Each phase transition approximately doubles total deal value. The Phase 1 to Phase 2 jump is the largest single value inflection in biopharma deal economics.</p>
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Median Total Deal Value by Development Phase</h3>
             <HorizontalBarChart
               data={[
                 { label: 'Preclinical', value: 325, displayValue: '$150-500M' },
@@ -306,7 +304,14 @@ export default function HowMuchIsBiotechAssetWorthPage() {
               maxValue={6000}
               color="#0d9488"
             />
-            <p className="text-xs text-slate-400 mt-3">All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+            <p className="text-xs text-slate-400 mt-3">All TAs combined. Oncology skews to upper ranges. Source: Ambrosia Ventures analysis of {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+          </div>
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Each phase transition approximately doubles total deal value, but the largest single jump occurs at proof-of-concept (Phase 2a data readout), where assets with positive PoC data see 2&ndash;4x valuation increases. For single-asset biotechs, Phase 2 proof-of-concept is the risk-adjusted optimal exit point &mdash; Phase 3 upside must be weighed against $200&ndash;500M trial costs and 40&ndash;50% failure rates.
+            </p>
           </div>
 
           <VisualStatRow stats={[
@@ -321,7 +326,18 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             <StatCard value="12%" label="Median Royalty Rate" sub="Phase 2, tiered" />
           </div>
 
+          {/* ── PULL QUOTE ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:-mx-0 sm:rounded-xl my-12">
+            <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;A Phase 2 oncology asset is worth $800M&ndash;$2.5B in total deal value &mdash; but the difference between the low and high end is positioning, not data.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Analysis of {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020&ndash;2026)</p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
             <h2 id="five-factors">The 5 Factors That Determine Your Asset&apos;s Value</h2>
 
             <p>
@@ -383,6 +399,13 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             </p>
           </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Biomarker validation is the single highest-ROI lever for increasing asset value before licensing. A companion diagnostic strategy or biomarker-enriched trial design signals efficient development in a defined patient population, reducing Phase 3 risk for buyers. Assets with biomarker-validated endpoints command 40&ndash;60% premiums &mdash; equivalent to advancing an entire development phase without the associated cost and timeline.
+            </p>
+          </div>
+
           <InsightEmailCapture slug="how-much-is-my-biotech-asset-worth" />
 
           <InsightCTA
@@ -392,7 +415,18 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             calculatorHref="/report"
           />
 
+          {/* ── PULL QUOTE 2 ── */}
+          <section className="bg-slate-900 text-white -mx-4 sm:-mx-0 sm:rounded-xl my-12">
+            <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+                &ldquo;The difference between a $500M deal and a $1.5B deal often comes down to positioning, not clinical data.&rdquo;
+              </blockquote>
+              <p className="mt-4 text-sm text-slate-400">Five strategies can increase your asset&apos;s value by 30&ndash;80% without additional clinical investment</p>
+            </div>
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 3</p>
             <h2 id="increase-value">How to Increase Your Asset&apos;s Value Before Licensing</h2>
 
             <p>
@@ -420,6 +454,12 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             </p>
           </div>
 
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 3A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Value Impact of Regulatory Designation</h3>
+            <p className="text-xs text-slate-400 mb-4">Breakthrough therapy designation (BTD) adds 25&ndash;35% to median deal value. The premium reflects FDA alignment and reduced regulatory risk for buyers.</p>
+          </div>
+
           <ComparisonCard
             label="Impact of Breakthrough Therapy Designation on Deal Value"
             left={{ title: 'Without BTD', value: '$1.0B', sub: 'Phase 2 oncology, standard pathway' }}
@@ -433,7 +473,23 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             </p>
           </div>
 
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              The five value-creation strategies above are additive. An asset with biomarker validation (+40&ndash;60%), BTD designation (+25&ndash;35%), and a competitive process (+20&ndash;40%) can command 2&ndash;3x the valuation of an identical asset positioned without these advantages. The most successful out-licensing processes invest 6&ndash;12 months in value-creation activities before engaging buyers.
+            </p>
+          </div>
+
+          {/* ── INTERACTIVE CALCULATOR ── */}
+          <section className="my-12">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4 &middot; Interactive</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2" id="model-your-deal">Model Your Own Deal</h2>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
+          </section>
+
           <div className="prose prose-slate prose-lg max-w-none">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 5</p>
             <h2 id="faq">Frequently Asked Questions</h2>
 
             <h3>How much is a Phase 2 biotech asset worth?</h3>
@@ -461,6 +517,23 @@ export default function HowMuchIsBiotechAssetWorthPage() {
               Significantly. Oncology commands the highest deal values (35% above average), followed by immunology (+15%), hematology (+10%), and neurology (baseline). Within TAs, indication matters — an oncology asset in NSCLC is worth more than one in pancreatic cancer due to market size. See our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by TA</Link> analysis.
             </p>
           </div>
+
+          {/* ── EMAIL CAPTURE ── */}
+          <section className="my-12">
+            <InlineEmailCapture
+              heading="Get Valuation Benchmarks First"
+              description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              source="how-much-is-my-biotech-asset-worth"
+            />
+          </section>
+
+          {/* ── CITE THIS DATA ── */}
+          <section className="my-12">
+            <CiteThisData
+              title="How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide"
+              pageUrl="/insights/how-much-is-my-biotech-asset-worth"
+            />
+          </section>
 
           <RelatedInsights articles={[
             {
