@@ -259,8 +259,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     captureApiError(error, 'cron-generate-platform-updates');
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Generate platform updates failed' },
+      { error: 'Generate platform updates failed', detail: message },
       { status: 500 }
     );
   }
