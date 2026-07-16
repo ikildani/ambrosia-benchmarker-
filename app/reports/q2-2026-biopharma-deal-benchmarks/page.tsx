@@ -404,7 +404,15 @@ export default async function Q2BenchmarkReportPage() {
             <p className="text-xs text-slate-400 mb-4">Transaction count surged 99% from 2020 to 2024 while average deal size compressed 42%. 2026 is pacing for ~760&ndash;800 deals &mdash; a new annual record.</p>
           </div>
 
-          <DealVolumeStackedChart />
+          <DealVolumeStackedChart data={[
+            { year: '2020', licensing: 142, acquisitions: 38, collaborations: 51, other: 12, total: 243 },
+            { year: '2021', licensing: 198, acquisitions: 47, collaborations: 63, other: 18, total: 326 },
+            { year: '2022', licensing: 221, acquisitions: 52, collaborations: 74, other: 21, total: 368 },
+            { year: '2023', licensing: 256, acquisitions: 61, collaborations: 82, other: 24, total: 423 },
+            { year: '2024', licensing: 289, acquisitions: 68, collaborations: 91, other: 36, total: 484 },
+            { year: '2025', licensing: 348, acquisitions: 79, collaborations: 108, other: 42, total: 577 },
+            { year: '2026 YTD', licensing: 231, acquisitions: 48, collaborations: 68, other: 27, total: 374 },
+          ]} />
         </section>
 
         {/* ── DRAMATIC PULL QUOTE ── */}
