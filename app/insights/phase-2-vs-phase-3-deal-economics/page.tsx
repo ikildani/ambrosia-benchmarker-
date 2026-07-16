@@ -338,28 +338,53 @@ export default function Phase2VsPhase3Page() {
             </p>
           </div>
 
+        </article>
+
+        {/* Pull Quote */}
+        <section className="bg-slate-900 text-white">
+          <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+            <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
+              &ldquo;Phase 2 proof-of-concept is the single most valuable inflection point in biopharma deal economics.&rdquo;
+            </blockquote>
+            <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+          </div>
+        </section>
+
+        <article className="max-w-3xl mx-auto px-4 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
-            <h2 id="by-therapeutic-area">Phase 2 vs Phase 3 by Therapeutic Area</h2>
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 2</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" id="by-therapeutic-area">Phase 2 vs Phase 3 by Therapeutic Area</h2>
 
             <p>
               The Phase 2-to-Phase 3 value increment varies dramatically by therapeutic area. In areas with large, well-characterized patient populations (oncology, immunology), Phase 3 de-risking commands a significant premium. In areas with smaller trials and faster timelines (rare disease, hematology), the Phase 3 increment is more modest because the incremental cost and time are lower.
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Phase 2 vs Phase 3 Upfront by Therapeutic Area</h3>
-            <DataTable
-              headers={['Therapeutic Area', 'Ph2 Median Upfront', 'Ph3 Median Upfront', 'Ph2-to-Ph3 Multiple', 'Ph3 Trial Cost']}
-              rows={[
-                [<strong key="met" className="text-blue-700">Metabolic</strong>, '$1,300M', '$4,500M', '3.5x', '$300-600M'],
-                [<strong key="imm" className="text-blue-700">Immunology</strong>, '$1,250M', '$3,200M', '2.6x', '$200-400M'],
-                ['Neurology', '$302M', '$838M', '2.8x', '$250-500M'],
-                ['Oncology', '$281M', '$714M', '2.5x', '$200-450M'],
-                ['Hematology', '$175M', '$420M', '2.4x', '$150-300M'],
-                ['Rare Disease', '$150M', '$340M', '2.3x', '$100-250M'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Trial cost ranges reflect pivotal Phase 3 in the relevant indication. Rare disease costs are lower due to smaller trial sizes.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Phase 2 vs Phase 3 Upfront by Therapeutic Area</h3>
+            <p className="text-xs text-slate-400 mb-4">All therapeutic areas show a 2.3x&ndash;3.5x multiplier from Phase 2 to Phase 3 upfront. Metabolic commands the highest multiplier (3.5x) but also carries the highest absolute Phase 3 trial costs.</p>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Therapeutic Area', 'Ph2 Median Upfront', 'Ph3 Median Upfront', 'Ph2-to-Ph3 Multiple', 'Ph3 Trial Cost']}
+            rows={[
+              ['Metabolic', '$1,300M', '$4,500M', '3.5x', '$300-600M'],
+              ['Immunology', '$1,250M', '$3,200M', '2.6x', '$200-400M'],
+              ['Neurology', '$302M', '$838M', '2.8x', '$250-500M'],
+              ['Oncology', '$281M', '$714M', '2.5x', '$200-450M'],
+              ['Hematology', '$175M', '$420M', '2.4x', '$150-300M'],
+              ['Rare Disease', '$150M', '$340M', '2.3x', '$100-250M'],
+            ]}
+            freeRows={4}
+            footnote="Source: Ambrosia Ventures deal database. Trial cost ranges reflect pivotal Phase 3 in the relevant indication. Rare disease costs are lower due to smaller trial sizes."
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Immunology and metabolic TAs show Phase 2 upfronts ($1,250M and $1,300M respectively) that already exceed Phase 3 oncology upfronts ($714M). If your asset is in one of these high-premium therapeutic areas, the case for dealing at Phase 2 is even stronger &mdash; you capture outsized value without Phase 3 risk.
+            </p>
           </div>
 
           <div className="prose prose-slate prose-lg max-w-none">

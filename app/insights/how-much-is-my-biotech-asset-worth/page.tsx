@@ -334,21 +334,31 @@ export default function HowMuchIsBiotechAssetWorthPage() {
             </p>
           </div>
 
-          <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">Asset Valuation by Therapeutic Area (Phase 2)</h3>
-            <DataTable
-              headers={['Therapeutic Area', 'Median TDV', 'Median Upfront', 'Premium vs. Average']}
-              rows={[
-                [<strong key="onc" className="text-teal-700">Oncology</strong>, <strong key="onc-t">$1.5B</strong>, '$180M', '+35%'],
-                ['Immunology', '$1.2B', '$140M', '+15%'],
-                ['Neurology', '$1.0B', '$110M', 'Baseline'],
-                ['Metabolic', '$950M', '$100M', '-5%'],
-                ['Rare Disease', '$800M', '$130M', 'Higher upfront ratio'],
-                ['Cardiovascular', '$750M', '$85M', '-15%'],
-                ['Hematology', '$1.1B', '$125M', '+10%'],
-              ]}
-            />
-            <p className="text-xs text-slate-400 mt-3">Phase 2 assets, all modalities. Source: Ambrosia Benchmarker.</p>
+          <div className="mt-10 mb-2">
+            <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
+            <h3 className="text-base font-bold text-slate-900 mb-4">Asset Valuation by Therapeutic Area (Phase 2)</h3>
+          </div>
+
+          <GatedBenchmarkTable
+            headers={['Therapeutic Area', 'Median TDV', 'Median Upfront', 'Premium vs. Average']}
+            rows={[
+              ['Oncology', '$1.5B', '$180M', '+35%'],
+              ['Immunology', '$1.2B', '$140M', '+15%'],
+              ['Hematology', '$1.1B', '$125M', '+10%'],
+              ['Neurology', '$1.0B', '$110M', 'Baseline'],
+              ['Metabolic', '$950M', '$100M', '-5%'],
+              ['Rare Disease', '$800M', '$130M', 'Higher upfront ratio'],
+              ['Cardiovascular', '$750M', '$85M', '-15%'],
+            ]}
+            freeRows={5}
+            footnote={`Phase 2 assets, all modalities. Source: Ambrosia Ventures analysis of ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+          />
+
+          <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
+            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
+            <p className="text-slate-700 leading-relaxed">
+              Oncology commands a 35% premium over the all-TA average, but rare disease assets show disproportionately high upfront ratios (16% of TDV vs. 12% average) due to accelerated regulatory pathways and pricing power. When benchmarking your asset, start with the therapeutic area median, then layer in modality premiums and competitive positioning.
+            </p>
           </div>
 
           <div className="prose prose-slate prose-lg max-w-none">
