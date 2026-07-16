@@ -79,6 +79,10 @@
       "schedule": "0 14 * * 1"
     },
     {
+      "path": "/api/cron/generate-platform-updates",
+      "schedule": "0 10 13,28 * *"
+    },
+    {
       "path": "/api/cron/platform-updates",
       "schedule": "0 15 1,15 * *"
     },
