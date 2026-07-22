@@ -130,3 +130,23 @@ export async function syncUsageFromDatabase(userId: string): Promise<UsageData> 
 }
 
 export const FREE_LIMIT = FREE_TIER_LIMIT;
+
+const POWER_CALC_KEY = 'deal_calculator_power_used';
+
+export function hasPowerCalcBeenUsed(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(POWER_CALC_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function markPowerCalcUsed(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(POWER_CALC_KEY, 'true');
+  } catch {
+    // Silently fail
+  }
+}

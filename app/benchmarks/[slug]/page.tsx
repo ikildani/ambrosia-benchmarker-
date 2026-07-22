@@ -62,7 +62,11 @@ export default async function BenchmarkPage({ params }: PageProps) {
   if (page.calculatorPrefill.modality) calculatorParams.set('modality', page.calculatorPrefill.modality);
   if (page.calculatorPrefill.indication) calculatorParams.set('indication', page.calculatorPrefill.indication);
   if (page.calculatorPrefill.therapeuticArea) calculatorParams.set('therapeuticArea', page.calculatorPrefill.therapeuticArea);
-  const calculatorUrl = `/calculator${calculatorParams.toString() ? `?${calculatorParams.toString()}` : ''}`;
+  // Add UTM attribution params for benchmark pages
+  calculatorParams.set('utm_source', 'seo');
+  calculatorParams.set('utm_medium', 'benchmark_page');
+  calculatorParams.set('utm_content', slug);
+  const calculatorUrl = `/calculator?${calculatorParams.toString()}`;
 
   // JSON-LD: FAQ schema
   const faqSchema = {
@@ -345,7 +349,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Ready to Calculate Your Deal Terms?
             </h2>
             <p className="text-slate-300 mb-8">
-              Get instant, customized benchmarks based on real market data from 600+ biopharma licensing deals.
+              Get instant, customized benchmarks based on real market data from 1,600+ biopharma licensing deals.
             </p>
             <Link
               href={calculatorUrl}

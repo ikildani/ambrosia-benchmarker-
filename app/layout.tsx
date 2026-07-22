@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     google: "iAzMTWYwwCcC_foIWu0oPFBXKfYOT61aCgqs3vQ0r4c",
   },
   alternates: {
-    canonical: "https://calculator.ambrosiaventures.co",
+    canonical: "/",
     types: {
       "application/rss+xml": "/feed.xml",
     },

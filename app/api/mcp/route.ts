@@ -6,8 +6,9 @@
  * transport. Each tool wraps one of the core calculation engines that power
  * calculator.ambrosiaventures.co.
  *
- * Auth: Enterprise API keys only (Pro + Portfolio tiers).
- * Rate limits: pilot 1K/mo, growth 10K/mo, enterprise 100K/mo.
+ * Auth: Enterprise API keys (Growth / Scale / Enterprise tiers).
+ * Rate limits: Growth 5K/mo, Scale 15K/mo, Enterprise 100K/mo.
+ * Tool access: Growth gets 14 core tools, Scale/Enterprise get all 21.
  *
  * Transport: JSON-RPC over HTTP (POST). GET returns server capabilities.
  *
@@ -23,6 +24,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 import { validateApiKey, type ApiKeyContext } from '@/lib/api-v1-auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { currentPeriodMonth } from '@/lib/enterprise-api';
+import { resolveApiTierToMcpTier, assertToolAccess, type McpTier } from '@/lib/mcp-tiers';
 
 // ── Engine imports ──────────────────────────────────────────────────────
 import { calculateDealTerms } from '@/lib/calculations';
@@ -278,7 +280,7 @@ const regulatoryDesignationsSchema = z.object({
 
 async function authenticateRequest(
   request: NextRequest,
-): Promise<{ context: ApiKeyContext } | { error: string; status: number }> {
+): Promise<{ context: ApiKeyContext; mcpTier: McpTier } | { error: string; status: number }> {
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ambk_')) {
     return { error: 'API key required. Use Authorization: Bearer ambk_<your_key>', status: 401 };
@@ -289,15 +291,16 @@ async function authenticateRequest(
     return { error: 'Invalid, expired, or rate-limited API key', status: 401 };
   }
 
-  // Tier gate: Portfolio License only — MCP is an enterprise feature
-  if (context.tier !== 'portfolio') {
+  // Map API key tier to MCP tier (growth, scale, enterprise, or legacy portfolio)
+  const mcpTier = resolveApiTierToMcpTier(context.tier);
+  if (!mcpTier) {
     return {
-      error: 'MCP access requires a Portfolio License. Contact ikildani@ambrosiaventures.co for access.',
+      error: `MCP access requires a Growth ($30K/yr), Scale ($60K/yr), or Enterprise tier. Your current tier "${context.tier}" does not include MCP access. Contact ikildani@ambrosiaventures.co to upgrade.`,
       status: 403,
     };
   }
 
-  return { context };
+  return { context, mcpTier };
 }
 
 async function trackToolUsage(keyId: string, toolName: string): Promise<void> {
@@ -314,6 +317,20 @@ async function trackToolUsage(keyId: string, toolName: string): Promise<void> {
 }
 
 // ═════════════════════════════════════════════════════════════════════════
+// Response Metadata — appended to every tool response
+// ═════════════════════════════════════════════════════════════════════════
+
+function getResponseMeta(): object {
+  return {
+    data_as_of: new Date().toISOString().split('T')[0],
+    deal_count: DEAL_STATS.TOTAL_DEALS,
+    engine_version: '2.0.0',
+    source: 'Ambrosia Ventures Proprietary Database',
+    verification: 'Primary-source-verified from SEC EDGAR, FTC filings, and direct research',
+  };
+}
+
+// ═════════════════════════════════════════════════════════════════════════
 // MCP Server Factory
 // ═════════════════════════════════════════════════════════════════════════
 
@@ -324,7 +341,7 @@ async function trackToolUsage(keyId: string, toolName: string): Promise<void> {
  * against the caller's quota. A new server is created per request
  * because the StreamableHTTPServerTransport is stateless (no session).
  */
-function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
+function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier): McpServer {
   const server = new McpServer({
     name: 'Ambrosia Benchmarker',
     version: '2.0.0',
@@ -410,6 +427,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               labels: result.labels,
               phase: result.phase,
               warnings: result.warnings,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -508,6 +526,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
                 iterations: mcResult.iterations,
                 keyDriverSensitivity: mcResult.keyDriverSensitivity,
               },
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -576,6 +595,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               rankings: result.rankings,
               recommendation: result.recommendation,
               userSelectedDealType: result.userSelectedDealType,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -646,6 +666,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               total_matches: matchResult.total_matches,
               matches,
               generated_at: matchResult.generated_at,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -761,6 +782,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
                 totalDealMedian_M: Math.round(totalDealMedian),
               },
               buyers: buyerResults,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -852,6 +874,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               adcommFavorableVoteProbability: result.adcommFavorableVoteProbability,
               prvEligible: result.prvEligible,
               prvValue_M: result.prvValue_M,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -911,6 +934,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
                 scoreBreakdown: d.scoreBreakdown,
                 patentCliffContext: d.patent_cliff_context,
               })),
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -980,6 +1004,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
                   ...m,
                 })),
               },
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1078,6 +1103,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
                 bull: params.bullWeight ?? scenarioComparison.bullWeight,
               },
               narrative: scenarioComparison.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1113,6 +1139,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       companyType: z.enum(['largePharma', 'midPharma', 'biotech', 'clinicalStageBiotech', 'academic']).optional(),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'analyze_lifecycle_extensions');
       await trackToolUsage(apiKeyContext.keyId, 'analyze_lifecycle_extensions');
 
       const peakSalesMedian = params.peakSalesMedian;
@@ -1150,6 +1177,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               extendedRNPV_M: lifecycle.extendedRNPV,
               incrementalValue_M: lifecycle.incrementalValue,
               incrementalPercent: lifecycle.incrementalPercent,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1185,6 +1213,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       companyType: z.enum(['largePharma', 'midPharma', 'biotech', 'clinicalStageBiotech', 'academic']).optional(),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'model_competitive_dynamics');
       await trackToolUsage(apiKeyContext.keyId, 'model_competitive_dynamics');
 
       const peakSalesMedian = params.peakSalesMedian;
@@ -1228,6 +1257,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               peakErosionYear: dynamics.peakErosionYear,
               confidence: dynamics.confidence,
               narrative: dynamics.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1263,6 +1293,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       companyType: z.enum(['largePharma', 'midPharma', 'biotech', 'clinicalStageBiotech', 'academic']).optional(),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'value_real_options');
       await trackToolUsage(apiKeyContext.keyId, 'value_real_options');
 
       const peakSalesMedian = params.peakSalesMedian;
@@ -1307,6 +1338,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               latticeSteps: realOptions.latticeSteps,
               converged: realOptions.converged,
               narrative: realOptions.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1394,6 +1426,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               walkAwayThreshold_M: defensive.walkAwayThreshold,
               baseRNPV_M: baseResult.riskAdjustedNPV,
               narrative: defensive.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1427,6 +1460,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       })).optional().describe('Anti-stacking provisions in the license agreement.'),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'analyze_royalty_stacking');
       await trackToolUsage(apiKeyContext.keyId, 'analyze_royalty_stacking');
 
       try {
@@ -1464,6 +1498,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               impactOnDealValue_pct: result.impactOnDealValue_pct,
               stackedObligations: result.stackedObligations,
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1536,6 +1571,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               paragraphIVRisk: result.paragraphIVRisk,
               authorizedGenericImpact: result.authorizedGenericImpact,
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1580,6 +1616,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               scalabilityScore: result.scalabilityScore,
               regulatoryComplexity: result.regulatoryComplexity,
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1654,6 +1691,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               tranches: JSON.parse(JSON.stringify(result.tranches)),
               discountRateApplied: discountRate,
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1680,6 +1718,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       royaltyRate: z.number().min(0.01).max(0.50).optional().describe('Royalty rate as decimal (e.g., 0.12 for 12%). Defaults to 0.10.'),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'analyze_cross_border_tax');
       await trackToolUsage(apiKeyContext.keyId, 'analyze_cross_border_tax');
 
       try {
@@ -1706,6 +1745,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               pillarTwoImpact: result.pillarTwoImpact,
               structureBreakdown: result.structureBreakdown,
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1757,6 +1797,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
                   topTherapeuticAreas: staticMatch.topTAs,
                   source: 'static_reference',
                   note: 'Data from curated buyer premium reference. Real-time database entry not found.',
+                  _meta: getResponseMeta(),
                 }, null, 2),
               }],
             };
@@ -1779,6 +1820,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               phaseBreakdown: primary.phase_breakdown ?? null,
               lastUpdated: primary.updated_at ?? null,
               source: 'counterparty_premiums_db',
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1804,6 +1846,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       primaryPeakSales_M: z.number().positive().describe('Peak annual sales estimate for primary indication in $M'),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'sequence_indications');
       await trackToolUsage(apiKeyContext.keyId, 'sequence_indications');
 
       try {
@@ -1831,6 +1874,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               franchisePremium_pct: result.franchisePremium_pct,
               optimalSequencing: result.optimalSequencing,
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -1859,6 +1903,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
       numberOfBidders: z.number().min(1).max(10).optional().describe('Number of competing bidders (affects auction premium). Defaults to 1.'),
     },
     async (params) => {
+      assertToolAccess(mcpTier, 'analyze_buyer_synergy');
       await trackToolUsage(apiKeyContext.keyId, 'analyze_buyer_synergy');
 
       try {
@@ -1925,6 +1970,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext): McpServer {
               integrationRisk: result.integrationRisk,
               synergySources: JSON.parse(JSON.stringify(result.synergySources)),
               narrative: result.narrative,
+              _meta: getResponseMeta(),
             }, null, 2),
           }],
         };
@@ -2398,10 +2444,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { context: apiKeyContext } = authResult;
+  const { context: apiKeyContext, mcpTier } = authResult;
 
   // ── Build MCP server + transport ──
-  const server = createMcpServerInstance(apiKeyContext);
+  const server = createMcpServerInstance(apiKeyContext, mcpTier);
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined, // Stateless — no session persistence
   });

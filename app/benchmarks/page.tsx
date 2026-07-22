@@ -167,7 +167,7 @@ export default function BenchmarksIndex() {
                 Upfronts, milestones, royalties, and deal structures.
               </p>
               <Link
-                href="/calculator"
+                href="/calculator?utm_source=seo&utm_medium=benchmarks_index&utm_content=hero_cta"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25"
               >
                 Try the Calculator
@@ -248,7 +248,7 @@ export default function BenchmarksIndex() {
               competitive position, and more &mdash; and get instant deal term estimates.
             </p>
             <Link
-              href="/calculator"
+              href="/calculator?utm_source=seo&utm_medium=benchmarks_index&utm_content=bottom_cta"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25"
             >
               Start Calculating

@@ -68,7 +68,7 @@ export default function InsightsIndexPage() {
 
         <div className="mt-12 text-center">
           <Link
-            href="/calculator"
+            href="/calculator?utm_source=seo&utm_medium=insights_index&utm_content=bottom_cta"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all text-sm"
           >
             Run Your Own Benchmark

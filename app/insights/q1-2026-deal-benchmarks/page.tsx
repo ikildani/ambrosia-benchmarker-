@@ -101,7 +101,7 @@ export default function Q1BenchmarksReport() {
                   <div className="mt-8 pt-6 border-t border-white/[0.06]">
                     <p className="text-sm text-slate-400 mb-3">Want to run the numbers yourself?</p>
                     <Link
-                      href="/calculator"
+                      href="/calculator?utm_source=seo&utm_medium=insight_page&utm_content=q1-2026-deal-benchmarks"
                       className="inline-flex items-center gap-2 text-teal-400 text-sm font-medium hover:text-teal-300 transition-colors"
                     >
                       Open the deal calculator

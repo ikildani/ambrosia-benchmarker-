@@ -6,6 +6,7 @@ import { getAllTermSlugs } from '@/lib/glossaryTerms';
 import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 import { SEO_INSIGHT_SLUGS } from '@/lib/insights/seo-pages';
 import { getAllProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
+import { getAllPseoSlugs } from '@/lib/pseoPages';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://calculator.ambrosiaventures.co';
@@ -420,5 +421,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages, ...seoInsightPages, ...programmaticPages, ...backlinkPages];
+  // pSEO benchmark data pages (modality x phase)
+  const pseoSlugs = getAllPseoSlugs();
+  const pseoPages: MetadataRoute.Sitemap = pseoSlugs.map(slug => ({
+    url: `${baseUrl}/benchmarks/data/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages, ...seoInsightPages, ...programmaticPages, ...backlinkPages, ...pseoPages];
 }

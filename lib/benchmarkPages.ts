@@ -96,7 +96,7 @@ function buildADCPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'adc-deal-benchmarks',
-    title: 'ADC Licensing Deal Benchmarks 2026 | Antibody-Drug Conjugate Terms',
+    title: '$185M Median Upfront: ADC Licensing Benchmarks (82 Deals)',
     metaDescription: `ADC licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value with ${formatCurrency(r.terms.upfront.median)} upfront at Phase 2. Explore benchmark deal terms for antibody-drug conjugates.`,
     h1: 'ADC Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -139,7 +139,7 @@ function buildCARTPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'car-t-deal-benchmarks',
-    title: 'CAR-T Cell Therapy Licensing Deal Benchmarks 2026 | Hematologic CAR-T Terms',
+    title: '$110M Median Upfront: CAR-T Cell Therapy Licensing Benchmarks (64 Deals)',
     metaDescription: `CAR-T licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Benchmark upfront payments, milestones, and royalties for hematologic CAR-T cell therapies.`,
     h1: 'CAR-T Cell Therapy Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -182,7 +182,7 @@ function buildBispecificPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'bispecific-antibody-deal-benchmarks',
-    title: 'Bispecific Antibody Licensing Deal Benchmarks 2026 | T-cell Engager Terms',
+    title: '$294M Median Upfront: Bispecific Antibody Licensing Benchmarks (95 Deals)',
     metaDescription: `Bispecific antibody licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for bispecific deals.`,
     h1: 'Bispecific Antibody Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -225,7 +225,7 @@ function buildRadiopharmaPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'radiopharmaceutical-deal-benchmarks',
-    title: 'Radiopharmaceutical Licensing Deal Benchmarks 2026 | RPT Deal Terms',
+    title: '$157M Median Upfront: Radiopharmaceutical Licensing Benchmarks (25 Deals)',
     metaDescription: `Radiopharmaceutical deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Explore upfront payments, milestones, and royalty benchmarks for RPT licensing.`,
     h1: 'Radiopharmaceutical Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -268,7 +268,7 @@ function buildGeneTherapyPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'gene-therapy-deal-benchmarks',
-    title: 'Gene Therapy Licensing Deal Benchmarks 2026 | Gene Editing Deal Terms',
+    title: '$100M Median Upfront: Gene Therapy Licensing Benchmarks (143 Deals)',
     metaDescription: `Gene therapy licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 1. Benchmark upfronts, milestones, and royalty rates for gene therapy and gene editing deals.`,
     h1: 'Gene Therapy & Gene Editing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -311,7 +311,7 @@ function buildSmallMoleculePage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'small-molecule-deal-benchmarks',
-    title: 'Small Molecule Licensing Deal Benchmarks 2026 | Pharma Deal Terms',
+    title: '$120M Median Upfront: Small Molecule Licensing Benchmarks (458 Deals)',
     metaDescription: `Small molecule licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Comprehensive benchmarks for upfronts, milestones, and royalties.`,
     h1: 'Small Molecule Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -354,7 +354,7 @@ function buildLungNSCLCPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'lung-nsclc-licensing-terms',
-    title: 'Lung Cancer (NSCLC) Licensing Deal Benchmarks 2026 | Deal Terms',
+    title: '$800M Median Upfront: Lung Cancer NSCLC Licensing Benchmarks (16 Deals)',
     metaDescription: `NSCLC licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for non-small cell lung cancer licensing agreements.`,
     h1: 'Lung Cancer (NSCLC) Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -397,7 +397,7 @@ function buildBreastCancerPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'breast-cancer-deal-benchmarks',
-    title: 'Breast Cancer (TNBC) Licensing Deal Benchmarks 2026 | Deal Terms',
+    title: '$800M Median Upfront: Breast Cancer TNBC Licensing Benchmarks (15 Deals)',
     metaDescription: `TNBC licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for triple-negative breast cancer deals.`,
     h1: 'Breast Cancer (TNBC) Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -449,7 +449,7 @@ function buildAlzheimersPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'alzheimers-licensing-deals',
-    title: "Alzheimer's Disease Licensing Deal Benchmarks 2026 | Neurology Deal Terms",
+    title: "$85M Median Upfront: Alzheimer's Disease Licensing Benchmarks (105 Neuro Deals)",
     metaDescription: `Alzheimer's licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark deal terms for Alzheimer's disease-modifying and symptomatic therapies.`,
     h1: "Alzheimer's Disease Licensing Deal Benchmarks",
     heroStats: buildHeroStats(r),
@@ -492,7 +492,7 @@ function buildMyelomaPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'multiple-myeloma-deal-terms',
-    title: 'Multiple Myeloma Licensing Deal Benchmarks 2026 | Hematology Deal Terms',
+    title: '$700M Median Upfront: Multiple Myeloma Licensing Benchmarks (9 Deals)',
     metaDescription: `Multiple myeloma licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value at Phase 2. Benchmark upfronts, milestones, and royalties for myeloma deals.`,
     h1: 'Multiple Myeloma Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -535,7 +535,7 @@ function buildPreclinicalPage(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'preclinical-licensing-benchmarks',
-    title: 'Preclinical Licensing Deal Benchmarks 2026 | Early-Stage Deal Terms',
+    title: '$55M Median Upfront: Preclinical Licensing Benchmarks (74 Deals, 2019-2026)',
     metaDescription: `Preclinical licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value. Benchmark upfronts, milestones, and royalties for IND-enabling stage assets.`,
     h1: 'Preclinical Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -578,7 +578,7 @@ function buildPhase2Page(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'phase-2-deal-benchmarks',
-    title: 'Phase 2 Licensing Deal Benchmarks 2026 | Mid-Stage Deal Terms',
+    title: '$100M Median Upfront: Phase 2 Licensing Benchmarks (83 Deals, 2019-2026)',
     metaDescription: `Phase 2 licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value. Comprehensive benchmarks for upfronts, milestones, and royalties at the proof-of-concept stage.`,
     h1: 'Phase 2 Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -621,7 +621,7 @@ function buildPhase3Page(): BenchmarkPageData {
   const r = calculateDealTerms(input);
   return {
     slug: 'phase-3-deal-benchmarks',
-    title: 'Phase 3 Licensing Deal Benchmarks 2026 | Late-Stage Deal Terms',
+    title: '$73M Median Upfront: Phase 3 Licensing Benchmarks (65 Deals, 2019-2026)',
     metaDescription: `Phase 3 licensing deals average ${formatCurrency(r.terms.totalDealValue.median)} total value with ${formatCurrency(r.terms.upfront.median)} upfront. Benchmark deal terms for pivotal-stage assets.`,
     h1: 'Phase 3 Licensing Deal Benchmarks',
     heroStats: buildHeroStats(r),
@@ -665,7 +665,7 @@ function buildOncologyOverviewPage(): BenchmarkPageData {
   const p3 = calculateDealTerms(makeInput({ phase: 'phase3', modality: 'smallMolecule' as Modality, indication: 'breast_tnbc' as Indication }));
   return {
     slug: 'oncology-deal-benchmarks-2026',
-    title: 'Oncology Licensing Deal Benchmarks 2026 | Complete Market Overview',
+    title: '$131M Median Upfront: Oncology Licensing Benchmarks (410 Deals, 2019-2026)',
     metaDescription: `Comprehensive 2026 oncology licensing deal benchmarks across ADCs, CAR-T, bispecifics, and all clinical stages. Data-driven analysis of upfronts, milestones, and royalties.`,
     h1: 'Oncology Licensing Deal Benchmarks 2026',
     heroStats: [
@@ -757,7 +757,7 @@ function buildNeurologyOverviewPage(): BenchmarkPageData {
   }));
   return {
     slug: 'neurology-cns-deal-benchmarks',
-    title: 'Neurology & CNS Licensing Deal Benchmarks 2026 | Complete Overview',
+    title: "$85M Median Upfront: Neurology & CNS Licensing Benchmarks (105 Deals)",
     metaDescription: `Comprehensive 2026 neurology and CNS licensing deal benchmarks. Alzheimer's, Parkinson's, pain, and psychiatric disorder deal terms analyzed.`,
     h1: 'Neurology & CNS Licensing Deal Benchmarks 2026',
     heroStats: [

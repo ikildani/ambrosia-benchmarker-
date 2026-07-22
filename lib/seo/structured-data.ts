@@ -422,7 +422,7 @@ export function generateDatasetSchema(): DatasetSchema {
       name: 'Ambrosia Ventures',
       url: BASE_URL,
     },
-    temporalCoverage: '2018/..',
+    temporalCoverage: '2011/2026',
     variableMeasured: [
       'Upfront Payment (USD)',
       'Total Deal Value (USD)',
