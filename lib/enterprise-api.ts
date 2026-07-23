@@ -21,9 +21,10 @@ export function hashApiKey(key: string): string {
   return createHash('sha256').update(key).digest('hex');
 }
 
-export const TIER_QUOTAS: Record<'pilot' | 'growth' | 'enterprise', number> = {
+export const TIER_QUOTAS: Record<'pilot' | 'growth' | 'scale' | 'enterprise', number> = {
   pilot: 1000,
-  growth: 10000,
+  growth: 5000,
+  scale: 15000,
   enterprise: 100000,
 };
 

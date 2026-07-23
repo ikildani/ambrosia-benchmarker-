@@ -2,9 +2,9 @@
  * MCP Tier definitions — tool access, rate limits, and feature flags
  * per subscription tier.
  *
- * Growth:     14 core tools, 5K calls/mo
- * Scale:      All 21 tools, 15K calls/mo, batch operations
- * Enterprise: All 21 tools, 100K calls/mo, batch + white-label
+ * Growth:     15 core tools, 5K calls/mo
+ * Scale:      All 22 tools, 15K calls/mo, batch operations
+ * Enterprise: All 22 tools, 100K calls/mo, batch + white-label
  *
  * @module lib/mcp-tiers
  */
@@ -22,7 +22,7 @@ const SCALE_ONLY_TOOLS = [
   'analyze_buyer_synergy',
 ] as const;
 
-/** Tools available at Growth tier and above (14 tools). */
+/** Tools available at Growth tier and above (15 tools). */
 const GROWTH_TOOLS = [
   'calculate_deal_terms',
   'run_rnpv_model',
@@ -38,6 +38,7 @@ const GROWTH_TOOLS = [
   'assess_cmc_risk',
   'value_earnout_cvr',
   'score_pharma_intent',
+  'query_deal_database',
 ] as const;
 
 interface TierConfig {

@@ -1,7 +1,7 @@
 /**
  * MCP Server — Ambrosia Benchmarker v3.0
  *
- * Exposes 21 institutional-grade tools, 10 read-only resources, and 7 prompt
+ * Exposes 22 institutional-grade tools, 10 read-only resources, and 7 prompt
  * templates over the Model Context Protocol (MCP) using the Streamable HTTP
  * transport. Each tool wraps one of the core calculation engines that power
  * calculator.ambrosiaventures.co.
@@ -335,7 +335,7 @@ function getResponseMeta(): object {
 // ═════════════════════════════════════════════════════════════════════════
 
 /**
- * Build a fresh McpServer instance with all 21 tools registered.
+ * Build a fresh McpServer instance with all 22 tools registered.
  *
  * The API key context is threaded through so each tool can track usage
  * against the caller's quota. A new server is created per request
@@ -1983,6 +1983,84 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
     },
   );
 
+  // ── Tool 22: Natural Language Deal Query ────────────────────────────
+  server.tool(
+    'query_deal_database',
+    'Natural language query against the biopharma deal database. Ask any question in plain English about deal economics, company activity, trends, comparisons, or specific transactions. Returns a data-backed answer with supporting deal data. Examples: "What is the largest ADC deal?", "How have oncology upfronts trended?", "Which pharma is most active in gene therapy?"',
+    {
+      question: z.string().min(5).max(500).describe('Natural language question about biopharma deals. Be specific for best results.'),
+    },
+    async (params) => {
+      assertToolAccess(mcpTier, 'query_deal_database');
+      await trackToolUsage(apiKeyContext.keyId, 'query_deal_database');
+
+      try {
+        const { default: Anthropic } = await import('@anthropic-ai/sdk');
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+
+        const anthropic = new Anthropic({ apiKey });
+        const supabase = createServiceClient();
+
+        // Schema for SQL generation
+        const schema = `Table: deals. Key columns: licensor_name, licensee_name, asset_name, modality, indication_category, indication_specific, therapeutic_area, target, mechanism_of_action, phase_at_signing (preclinical/phase_1/phase_2/phase_3/approved), territory, deal_type (license/acquisition/collaboration/co_development/option), upfront_usd (raw USD), milestones_total_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, announced_date, terms_disclosed, is_synthetic. All USD in raw dollars (not millions). Always filter is_synthetic = false. LIMIT 50.`;
+
+        const sqlResponse = await anthropic.messages.create({
+          model: 'claude-opus-4-6-20250610',
+          max_tokens: 1024,
+          messages: [{
+            role: 'user',
+            content: `Generate a PostgreSQL SELECT query for: "${params.question}"\n\nSchema: ${schema}\n\nRespond with ONLY JSON: {"sql": "SELECT...", "query_type": "ranking|trend|comparison|aggregation|single_deal|company_activity"}`,
+          }],
+        });
+
+        const sqlText = sqlResponse.content[0].type === 'text' ? sqlResponse.content[0].text : '';
+        const parsed = JSON.parse(sqlText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+
+        // Validate SQL safety
+        const upper = parsed.sql.toUpperCase();
+        if (!upper.startsWith('SELECT') && !upper.startsWith('WITH')) throw new Error('Only SELECT allowed');
+        if (/\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE)\b/.test(upper)) throw new Error('Mutations not allowed');
+
+        // Execute
+        const { data, error } = await supabase.rpc('execute_readonly_query', { query_text: parsed.sql });
+        if (error) throw new Error(`Query failed: ${error.message}`);
+
+        const results = (data as Record<string, unknown>[]) || [];
+
+        // Synthesize answer
+        const answerResponse = await anthropic.messages.create({
+          model: 'claude-opus-4-6-20250610',
+          max_tokens: 2048,
+          messages: [{
+            role: 'user',
+            content: `Answer this biopharma deal question: "${params.question}"\n\nQuery results (${results.length} deals): ${JSON.stringify(results.slice(0, 30))}\n\nBe specific with dollar amounts (convert raw USD to $M/$B), company names, and dates. USD values are in raw dollars.`,
+          }],
+        });
+
+        const answer = answerResponse.content[0].type === 'text' ? answerResponse.content[0].text : '';
+
+        return {
+          content: [{
+            type: 'text' as const,
+            text: JSON.stringify({
+              answer,
+              deal_count: results.length,
+              query_type: parsed.query_type,
+              data: results.slice(0, 20),
+              _meta: getResponseMeta(),
+            }, null, 2),
+          }],
+        };
+      } catch (err) {
+        return {
+          content: [{ type: 'text' as const, text: `Error querying deal database: ${err instanceof Error ? err.message : 'Query failed'}. Try rephrasing your question.` }],
+          isError: true,
+        };
+      }
+    },
+  );
+
   // ═════════════════════════════════════════════════════════════════════
   // MCP Resources (read-only data for AI agents to browse)
   // ═════════════════════════════════════════════════════════════════════
@@ -2107,7 +2185,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
   server.resource(
     'engine-capabilities',
     'ambrosia://engine-capabilities',
-    { description: 'Complete list of all 21 MCP tools with descriptions and what each computes. Use to understand the full analytical surface area available.', mimeType: 'application/json' },
+    { description: 'Complete list of all 22 MCP tools with descriptions and what each computes. Use to understand the full analytical surface area available.', mimeType: 'application/json' },
     async () => ({
       contents: [{
         uri: 'ambrosia://engine-capabilities',
@@ -2133,6 +2211,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
           { name: 'score_pharma_intent', category: 'Intelligence', description: 'Company-specific Pharma Intent Score with counterparty premium multiplier and TA breakdown.' },
           { name: 'sequence_indications', category: 'Intelligence', description: 'Franchise expansion modeling with cannibalization analysis and optimal sequencing.' },
           { name: 'analyze_buyer_synergy', category: 'Intelligence', description: 'Buyer-specific cost and revenue synergies, integration risk, total premium uplift.' },
+          { name: 'query_deal_database', category: 'Intelligence', description: 'Natural language query against the full deal database. Ask any question in plain English and get a data-backed answer.' },
         ], null, 2),
         mimeType: 'application/json',
       }],
@@ -2481,7 +2560,7 @@ export async function GET() {
     version: '3.0.0',
     protocol: 'mcp',
     transport: 'streamable-http',
-    description: `Institutional-grade biopharma deal intelligence via the Model Context Protocol. 21 tools, 10 resources, and 7 prompt templates covering deal terms, rNPV/Monte Carlo valuation, scenario analysis, deal structure optimization, partner matching, negotiation ZOPA, regulatory risk, competitive dynamics, lifecycle extensions, real options, patent dynamics, CMC risk, royalty stacking, earnout/CVR valuation, cross-border tax, buyer synergy, indication sequencing, and market intelligence — calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
+    description: `Institutional-grade biopharma deal intelligence via the Model Context Protocol. 22 tools, 10 resources, and 7 prompt templates covering deal terms, rNPV/Monte Carlo valuation, scenario analysis, deal structure optimization, partner matching, negotiation ZOPA, regulatory risk, competitive dynamics, lifecycle extensions, real options, patent dynamics, CMC risk, royalty stacking, earnout/CVR valuation, cross-border tax, buyer synergy, indication sequencing, natural language deal queries, and market intelligence — calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     contact: {
       name: 'Issa Kildani',
       email: 'ikildani@ambrosiaventures.co',
@@ -2611,6 +2690,11 @@ export async function GET() {
         category: 'Deal Structure',
         description: 'Territory-specific tax structuring, withholding impact, optimal IP holding structure.',
       },
+      {
+        name: 'query_deal_database',
+        category: 'Intelligence',
+        description: 'Natural language query against 1,500+ deals. Ask any question and get a data-backed answer with supporting deal data.',
+      },
     ],
     resources: [
       {
@@ -2679,7 +2763,7 @@ export async function GET() {
       },
       {
         name: 'full_deal_analysis',
-        description: 'Complete IC memo using ALL 21 tools. Produces executive summary, valuation range, competitive position, regulatory path, franchise potential, real options, risk analysis, and partner rankings.',
+        description: 'Complete IC memo using ALL 22 tools. Produces executive summary, valuation range, competitive position, regulatory path, franchise potential, real options, risk analysis, and partner rankings.',
       },
       {
         name: 'competitive_landscape',

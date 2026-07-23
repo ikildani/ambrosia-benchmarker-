@@ -1,8 +1,11 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { formatDate, type CalculationHistoryItem } from '@/lib/history';
 import ActivityHeatmap from './ActivityHeatmap';
 import InsightsSummary from './InsightsSummary';
 import type { UserTier } from '@/types/tier';
+
+const DealQuery = dynamic(() => import('../DealQuery'), { ssr: false });
 
 interface OverviewTabProps {
   history: CalculationHistoryItem[];
@@ -156,6 +159,13 @@ const OverviewTab = React.memo(function OverviewTab({
 
       {/* Activity Heatmap */}
       <ActivityHeatmap history={history} />
+
+      {/* Deal Intelligence Query */}
+      <DealQuery
+        showBlurredPreview={true}
+        onUpgrade={onUpgrade}
+        compact={true}
+      />
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {/* Stats Cards */}
