@@ -232,9 +232,13 @@ export default function Header({
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center group"
+            className="flex items-center gap-3 group"
           >
             <AmbrosiaLogo variant="auto" height={40} />
+            <span className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-neutral-400 dark:text-slate-500">
+              <span className="w-px h-4 bg-neutral-200 dark:bg-slate-700" />
+              <span className="text-neutral-700 dark:text-slate-300">Solidus</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

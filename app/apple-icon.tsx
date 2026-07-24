@@ -12,7 +12,7 @@ export default function AppleIcon() {
           width: 180,
           height: 180,
           borderRadius: 40,
-          background: 'transparent',
+          background: '#0D5261',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -20,14 +20,13 @@ export default function AppleIcon() {
       >
         <span
           style={{
-            fontSize: 120,
-            fontWeight: 700,
+            fontSize: 110,
+            fontWeight: 400,
             fontFamily: 'Georgia, Times New Roman, serif',
-            color: '#0f172a',
-            letterSpacing: '-4px',
+            color: '#F0EDE6',
           }}
         >
-          AV
+          S
         </span>
       </div>
     ),
