@@ -1508,7 +1508,7 @@ export default async function Q2BenchmarkReportPage() {
             <div>
               <h3 className="text-sm font-bold text-slate-900 mb-2">Update Frequency</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                The full dataset is refreshed continuously; this quarterly report provides point-in-time narrative analysis as of July 15, 2026. The interactive deal calculator reflects real-time data. This page revalidates every 6 hours via ISR.
+                The full dataset is refreshed continuously; this quarterly report provides point-in-time narrative analysis as of July 15, 2026. The interactive Solidus platform reflects real-time data. This page revalidates every 6 hours via ISR.
               </p>
             </div>
 

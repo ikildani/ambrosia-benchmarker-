@@ -24,7 +24,7 @@ export default function CalculatorError({
         </div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Calculator Error</h1>
         <p className="text-slate-600 dark:text-slate-400 mb-6">
-          Something went wrong with the deal calculator. Your inputs have been preserved — try again.
+          Something went wrong with the Solidus. Your inputs have been preserved — try again.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button

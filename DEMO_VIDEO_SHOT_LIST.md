@@ -326,7 +326,7 @@ Frame 5-6 (4-6s):
 │            │   Try Free Today →      │                     │
 │            └─────────────────────────┘                     │
 │                                                            │
-│          ambrosia-benchmarker.vercel.app                   │
+│          solidus.ambrosiaventures.co                   │
 │                                                            │
 │            No credit card required.                        │
 │                                                            │

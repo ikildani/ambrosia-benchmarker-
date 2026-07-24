@@ -222,7 +222,7 @@ export default function BiotechLicensingDealStructurePage() {
             </ul>
 
             <p className="text-slate-600 leading-relaxed">
-              Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">deal calculator</Link> to model different allocation scenarios and see how the structure affects probability-weighted deal value for both parties.
+              Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to model different allocation scenarios and see how the structure affects probability-weighted deal value for both parties.
             </p>
 
             {/* Deal Terms by Deal Type */}

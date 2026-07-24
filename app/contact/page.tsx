@@ -5,7 +5,7 @@ import { PORTFOLIO_DEMO_URL } from '@/lib/config/constants';
 export const metadata: Metadata = {
   title: 'Contact Ambrosia Ventures | Biopharma Deal Intelligence',
   description:
-    'Get in touch with Ambrosia Ventures. Questions about pricing, enterprise plans, partnership opportunities, or technical support for the biopharma deal calculator.',
+    'Get in touch with Ambrosia Ventures. Questions about pricing, enterprise plans, partnership opportunities, or technical support for the Solidus deal intelligence platform.',
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/contact',
   },

@@ -189,7 +189,7 @@ How do you know what's fair?"
 
 **Final Frame:**
 - Logo prominent
-- URL: ambrosia-benchmarker.vercel.app
+- URL: solidus.ambrosiaventures.co
 - CTA Button mockup: "Try Free →"
 
 **Caption:** `"Free to start. No credit card required."`

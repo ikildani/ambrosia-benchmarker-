@@ -1,6 +1,6 @@
 # Load Tests
 
-Performance and stress testing for the Ambrosia Benchmarker API using [k6](https://k6.io/).
+Performance and stress testing for the Solidus API using [k6](https://k6.io/).
 
 ## Install k6
 

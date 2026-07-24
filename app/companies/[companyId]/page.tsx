@@ -888,7 +888,7 @@ export default async function CompanyPage({ params }: Props) {
                 See How Your Asset Matches {company.name}&apos;s Portfolio
               </h2>
               <p className="text-slate-300 text-base mb-6 leading-relaxed">
-                Use our deal calculator to benchmark upfront payments, milestones, and royalties
+                Use Solidus to benchmark upfront payments, milestones, and royalties
                 {topTA ? ` for ${fmtTA(topTA[0])} assets` : ''} — powered by data from 3,500+ real biopharma transactions.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -1021,7 +1021,7 @@ export default async function CompanyPage({ params }: Props) {
             <p>
               Ambrosia Ventures tracks deal terms, pipeline data, patent expirations, and competitive
               positioning for {company.name} and 850+ other biopharma companies. Use our{' '}
-              <Link href="/calculator" className="text-teal-600 dark:text-teal-400 hover:underline">deal calculator</Link>{' '}
+              <Link href="/calculator" className="text-teal-600 dark:text-teal-400 hover:underline">Solidus</Link>{' '}
               to benchmark your asset against {company.name}&apos;s historical deal terms, or explore{' '}
               <Link href="/companies" className="text-teal-600 dark:text-teal-400 hover:underline">all company profiles</Link>{' '}
               to find the best partner match for your pipeline.

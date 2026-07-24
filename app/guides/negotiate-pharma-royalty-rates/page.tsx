@@ -221,7 +221,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             </ul>
 
             <p className="text-slate-600 leading-relaxed">
-              The number of tiers, threshold amounts, and step-down triggers are all negotiable. Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">deal calculator</Link> to model how different tier structures affect total licensor economics under various peak sales scenarios.
+              The number of tiers, threshold amounts, and step-down triggers are all negotiable. Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to model how different tier structures affect total licensor economics under various peak sales scenarios.
             </p>
 
             {/* Section 2 */}

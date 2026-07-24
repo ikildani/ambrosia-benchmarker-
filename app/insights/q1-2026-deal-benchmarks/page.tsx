@@ -104,7 +104,7 @@ export default function Q1BenchmarksReport() {
                       href="/calculator?utm_source=seo&utm_medium=insight_page&utm_content=q1-2026-deal-benchmarks"
                       className="inline-flex items-center gap-2 text-teal-400 text-sm font-medium hover:text-teal-300 transition-colors"
                     >
-                      Open the deal calculator
+                      Open Solidus
                       <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>

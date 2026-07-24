@@ -157,7 +157,7 @@ export default function DealTrends2026Page() {
               The biopharma deal landscape in 2026 is characterized by record deal values driven by patent cliff urgency, a shift toward novel modalities (ADCs, bispecifics, and radiopharmaceuticals), and accelerating cross-border activity with China-origin assets. Oncology remains the dominant therapeutic area at 34% of deal volume, but neurology (+22% YoY) and metabolic diseases (+18% YoY) are the fastest-growing segments.
             </p>
             <p className="text-slate-600 leading-relaxed">
-              Median upfront payments increased 18% year-over-year, reflecting both asset-level inflation and a competitive environment where multiple bidders drive up prices for de-risked assets. Royalty rates have remained relatively stable, with a slight upward trend for oncology and rare disease assets. Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">deal calculator</Link> to benchmark your specific deal parameters against these market averages.
+              Median upfront payments increased 18% year-over-year, reflecting both asset-level inflation and a competitive environment where multiple bidders drive up prices for de-risked assets. Royalty rates have remained relatively stable, with a slight upward trend for oncology and rare disease assets. Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to benchmark your specific deal parameters against these market averages.
             </p>
           </div>
         </section>

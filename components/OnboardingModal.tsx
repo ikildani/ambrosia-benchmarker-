@@ -429,7 +429,7 @@ export default function OnboardingModal({
         {/* Screen reader only title that updates with each step */}
         <h1 id="onboarding-title" className="sr-only">{getStepTitle()}</h1>
         <p id="onboarding-description" className="sr-only">
-          Interactive tutorial to help you use the deal calculator. Step {
+          Interactive tutorial to help you use Solidus. Step {
             currentStep === 'welcome' ? '0' :
             currentStep === 'big-three' ? '1' :
             currentStep === 'modifiers' ? '2' : '3'

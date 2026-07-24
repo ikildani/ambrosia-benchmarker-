@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description:
     'Unlock 14 deal engines, 12 therapeutic areas, and unlimited calculations. rNPV, Monte Carlo, real options, partner matching, and more for biopharma BD professionals.',
   keywords: [
-    'biotech deal calculator pro',
+    'solidus biotech deal intelligence pro',
     'biopharma deal intelligence platform',
     'pharma licensing analytics tool',
     'rNPV biotech valuation tool',

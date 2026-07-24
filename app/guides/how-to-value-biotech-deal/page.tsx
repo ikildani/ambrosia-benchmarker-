@@ -211,7 +211,7 @@ export default function HowToValueBiotechDealPage() {
             </ul>
 
             <p className="text-slate-600 leading-relaxed">
-              The output is a distribution curve showing the probability-weighted range of deal values, typically presented as the 25th, 50th (median), and 75th percentile outcomes. This framework directly maps to the low/median/high ranges provided by our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">deal calculator</Link>.
+              The output is a distribution curve showing the probability-weighted range of deal values, typically presented as the 25th, 50th (median), and 75th percentile outcomes. This framework directly maps to the low/median/high ranges provided by our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link>.
             </p>
 
             {/* Step 5 */}

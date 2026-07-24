@@ -323,7 +323,7 @@ export default function RnpvBiotechValuationPage() {
             </ul>
 
             <p className="text-slate-600 leading-relaxed">
-              Our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">deal calculator</Link> automates much of this modeling with pre-built assumptions by therapeutic area and modality, while allowing you to override any parameter for custom analysis.
+              Our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> automates much of this modeling with pre-built assumptions by therapeutic area and modality, while allowing you to override any parameter for custom analysis.
             </p>
 
             {/* Section 4 */}

@@ -1042,7 +1042,7 @@ export default async function Q1BenchmarkReportPage() {
             <div>
               <h3 className="text-sm font-bold text-slate-900 mb-2">Update Frequency</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                New transactions are ingested weekly via automated SEC EDGAR monitoring (8-K filings) supplemented by manual verification. The full dataset is refreshed continuously; this quarterly report provides point-in-time narrative analysis as of March 30, 2026. The interactive deal calculator reflects real-time data.
+                New transactions are ingested weekly via automated SEC EDGAR monitoring (8-K filings) supplemented by manual verification. The full dataset is refreshed continuously; this quarterly report provides point-in-time narrative analysis as of March 30, 2026. The interactive Solidus platform reflects real-time data.
               </p>
             </div>
 
@@ -1097,7 +1097,7 @@ export default async function Q1BenchmarkReportPage() {
               { q: 'How should I interpret small sample sizes?', a: 'Cohorts with n>100 (e.g., oncology Phase 2, n=236) produce stable medians with tight interquartile ranges. Cohorts with n<20 (e.g., immunology Phase 2, n=15) are directional — the median is real but the confidence interval is wide. Cohorts with n<10 (e.g., hematology Phase 2, n=5) should be treated as indicative only. We report sample sizes and P25-P75 ranges throughout to enable readers to calibrate confidence.' },
               { q: 'Why are upfront percentages rising?', a: 'Average upfront as % of TDV increased from 20.3% (2021) to 29.0% (2026 YTD). Three factors drive this: (1) tighter biotech capital markets requiring larger upfronts to fund operations, (2) competitive intensity among buyers for differentiated assets, and (3) seller sophistication in negotiating upfront-weighted structures that reduce milestone risk.' },
               { q: 'What does conditional value mean?', a: 'Conditional value is the share of total deal value tied to milestones and contingent payments (regulatory, commercial, sales-based). A 71% conditional value means 71 cents of every deal dollar is contingent on future events. The declining trend (from 80% in 2021 to 71% in 2026) means more value is shifting to upfront payments.' },
-              { q: 'How often are benchmarks updated?', a: 'The full dataset is updated weekly via automated SEC EDGAR monitoring plus manual verification. This quarterly report provides point-in-time analysis as of March 30, 2026. The interactive deal calculator reflects the latest available data.' },
+              { q: 'How often are benchmarks updated?', a: 'The full dataset is updated weekly via automated SEC EDGAR monitoring plus manual verification. This quarterly report provides point-in-time analysis as of March 30, 2026. The interactive Solidus platform reflects the latest available data.' },
             ].map(({ q, a }, i) => (
               <details key={i} className="group py-4">
                 <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-slate-800 hover:text-teal-700">

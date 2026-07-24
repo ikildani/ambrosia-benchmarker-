@@ -205,7 +205,7 @@ async function generateAISummaries(
     };
 
     // Generate modality insight
-    const modalityPrompt = `Based on this biopharma deal calculator usage data for ${periodStr}:
+    const modalityPrompt = `Based on this Solidus platform usage data for ${periodStr}:
 Modality breakdown: ${JSON.stringify(data.modalityTrends)}
 Total calculations: ${data.totalCalculations}
 
@@ -214,7 +214,7 @@ Provide a 2-3 sentence market insight about modality trends in biopharma deal-ma
     summaries.modality = await callClaude(anthropicApiKey, modalityPrompt);
 
     // Generate phase insight
-    const phasePrompt = `Based on this biopharma deal calculator usage data for ${periodStr}:
+    const phasePrompt = `Based on this Solidus platform usage data for ${periodStr}:
 Development phase distribution: ${JSON.stringify(data.phaseDistribution)}
 Total calculations: ${data.totalCalculations}
 
@@ -223,7 +223,7 @@ Provide a 2-3 sentence market insight about which development phases are most ac
     summaries.phase = await callClaude(anthropicApiKey, phasePrompt);
 
     // Generate territory insight
-    const territoryPrompt = `Based on this biopharma deal calculator usage data for ${periodStr}:
+    const territoryPrompt = `Based on this Solidus platform usage data for ${periodStr}:
 Territory preferences: ${JSON.stringify(data.territoryPreferences)}
 Total calculations: ${data.totalCalculations}
 
@@ -232,7 +232,7 @@ Provide a 2-3 sentence market insight about territorial deal structures being ex
     summaries.territory = await callClaude(anthropicApiKey, territoryPrompt);
 
     // Generate indication insight
-    const indicationPrompt = `Based on this biopharma deal calculator usage data for ${periodStr}:
+    const indicationPrompt = `Based on this Solidus platform usage data for ${periodStr}:
 Indication categories: ${JSON.stringify(data.indicationPopularity)}
 Total calculations: ${data.totalCalculations}
 

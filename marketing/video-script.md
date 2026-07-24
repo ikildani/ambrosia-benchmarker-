@@ -1,4 +1,4 @@
-# Ambrosia Benchmarker — Product Video Package
+# Solidus — Product Video Package
 
 ## Overview
 - **LinkedIn version:** 60–90 seconds, landscape (1920×1080)
@@ -62,11 +62,11 @@ Card 3: "No standardized benchmarks"
 
 **Text overlay (bottom-left):**
 ```
-Ambrosia Benchmarker
+Solidus
 600+ real deals. Instant benchmarks.
 ```
 
-**Voiceover:** *"Ambrosia Benchmarker changes that. Built on 600+ real biopharma licensing transactions."*
+**Voiceover:** *"Solidus changes that. Built on 600+ real biopharma licensing transactions."*
 
 ---
 
@@ -273,7 +273,7 @@ Step 7: End on landing page hero
 ```
 We just shipped something we're really proud of.
 
-Ambrosia Benchmarker now covers 600+ real biopharma licensing deals across 12 therapeutic areas — with AI-powered deal memos, rNPV modeling, Monte Carlo simulation, and company intelligence for 600+ pharma and biotech companies.
+Solidus now covers 600+ real biopharma licensing deals across 12 therapeutic areas — with AI-powered deal memos, rNPV modeling, Monte Carlo simulation, and company intelligence for 600+ pharma and biotech companies.
 
 What it does:
 → Instant deal benchmarks (upfront, milestones, royalties, total deal value)
@@ -300,7 +300,7 @@ BD teams spend 2-3 weeks researching comparable deals for a single asset evaluat
 
 We built a tool that does it in 30 seconds.
 
-Ambrosia Benchmarker analyzes 600+ real biopharma licensing transactions to give you instant benchmarks — upfront payments, milestone structures, royalty rates, comparable deals, and AI-powered negotiation insights.
+Solidus analyzes 600+ real biopharma licensing transactions to give you instant benchmarks — upfront payments, milestone structures, royalty rates, comparable deals, and AI-powered negotiation insights.
 
 The same analysis that used to require a team of analysts and a Bloomberg terminal.
 

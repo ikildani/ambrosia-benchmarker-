@@ -178,7 +178,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'Can I benchmark deals without an enterprise platform?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Ambrosia Ventures provide targeted deal benchmarking at a fraction of the cost. A single deal report ($499) delivers comparable transactions, rNPV valuation, partner matching, and negotiation playbook. Pro subscriptions ($299/month) provide ongoing access to all 8 calculation engines for teams running multiple evaluations.',
+          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. A single deal report ($499) delivers comparable transactions, rNPV valuation, partner matching, and negotiation playbook. Pro subscriptions ($299/month) provide ongoing access to all 8 calculation engines for teams running multiple evaluations.',
         },
       },
       {
@@ -186,7 +186,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'How often should deal benchmarking data be updated?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Deal benchmarking data should be updated at least weekly. Biopharma deal terms shift quarterly based on market conditions, competitive dynamics, and recent mega-deals. Platforms using monthly or quarterly updates risk providing stale benchmarks that don\'t reflect current market pricing. Ambrosia Ventures updates data weekly from SEC EDGAR 8-K filings, FTC premerger notifications, and verified press releases.',
+          text: 'Deal benchmarking data should be updated at least weekly. Biopharma deal terms shift quarterly based on market conditions, competitive dynamics, and recent mega-deals. Platforms using monthly or quarterly updates risk providing stale benchmarks that don\'t reflect current market pricing. Solidus updates data weekly from SEC EDGAR 8-K filings, FTC premerger notifications, and verified press releases.',
         },
       },
     ],
@@ -277,7 +277,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           <ComparisonCard
             label="Time & Cost to First Benchmark"
             left={{ title: 'Manual Research', value: '$0 + 40hrs', sub: 'Internal analyst time, 2-4 weeks' }}
-            right={{ title: 'Ambrosia Ventures', value: `${PRICING.PRO_MONTHLY} + 30s`, sub: 'Instant results, weekly updates' }}
+            right={{ title: 'Solidus', value: `${PRICING.PRO_MONTHLY} + 30s`, sub: 'Instant results, weekly updates' }}
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
@@ -316,7 +316,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
               ['Repeatability', 'Low', 'Low', 'Unlimited analyses'],
             ]}
             freeRows={8}
-            footnote={`Source: Ambrosia Ventures analysis. Pricing reflects 2026 market rates across enterprise platforms, boutique advisory, and specialized benchmarking tools.`}
+            footnote={`Source: Solidus analysis. Pricing reflects 2026 market rates across enterprise platforms, boutique advisory, and specialized benchmarking tools.`}
           />
 
           <div className="my-8 grid sm:grid-cols-3 gap-4">
@@ -352,7 +352,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </p>
 
             <p>
-              <strong>1. Data verification and sourcing.</strong> The best platforms source data from primary filings (SEC 8-K, FTC premerger notifications) rather than relying solely on press releases. Press releases omit critical deal terms — milestone structures, royalty tiers, option exercise prices — that are disclosed in regulatory filings. Ambrosia Ventures sources from SEC EDGAR, FTC filings, OpenFDA, and verified press releases, with AI-assisted extraction and human verification.
+              <strong>1. Data verification and sourcing.</strong> The best platforms source data from primary filings (SEC 8-K, FTC premerger notifications) rather than relying solely on press releases. Press releases omit critical deal terms — milestone structures, royalty tiers, option exercise prices — that are disclosed in regulatory filings. Solidus sources from SEC EDGAR, FTC filings, OpenFDA, and verified press releases, with AI-assisted extraction and human verification.
             </p>
 
             <p>
@@ -393,7 +393,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             <h2 id="feature-comparison">Feature Comparison: Ambrosia Ventures vs. Alternatives</h2>
 
             <p>
-              Here is how the Ambrosia Ventures platform compares to enterprise alternatives and traditional approaches across the capabilities that matter most to BD teams.
+              Here is how the Solidus platform compares to enterprise alternatives and traditional approaches across the capabilities that matter most to BD teams.
             </p>
           </div>
 
@@ -590,12 +590,12 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>What is the best biopharma deal benchmarking tool?</h3>
             <p>
-              The best tool depends on your needs. For enterprise teams needing broad market intelligence, platforms like GlobalData or Evaluate offer comprehensive datasets. For BD teams focused on deal execution — benchmarking, valuation, partner identification, and negotiation preparation — <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Ventures</Link> provides {DEAL_STATS.TOTAL_DEALS} deals, 8 calculation engines, and predictive partner scoring at {PRICING.PRO_MONTHLY}.
+              The best tool depends on your needs. For enterprise teams needing broad market intelligence, platforms like GlobalData or Evaluate offer comprehensive datasets. For BD teams focused on deal execution — benchmarking, valuation, partner identification, and negotiation preparation — <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> provides {DEAL_STATS.TOTAL_DEALS} deals, 8 calculation engines, and predictive partner scoring at {PRICING.PRO_MONTHLY}.
             </p>
 
             <h3>How much do pharma deal intelligence platforms cost?</h3>
             <p>
-              Enterprise platforms range from $50,000-$200,000/year. Consulting engagements cost $50,000-$150,000 per deal. Specialized benchmarking platforms like Ambrosia Ventures cost {PRICING.PRO_MONTHLY} for full access or {PRICING.REPORT_PRICE} for a single deal report. The cost-performance ratio strongly favors platforms that combine data with analytical engines.
+              Enterprise platforms range from $50,000-$200,000/year. Consulting engagements cost $50,000-$150,000 per deal. Specialized benchmarking platforms like Solidus costs {PRICING.PRO_MONTHLY} for full access or {PRICING.REPORT_PRICE} for a single deal report. The cost-performance ratio strongly favors platforms that combine data with analytical engines.
             </p>
 
             <h3>What should I look for in a deal benchmarking tool?</h3>
