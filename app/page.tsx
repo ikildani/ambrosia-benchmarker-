@@ -346,7 +346,14 @@ export default function Home() {
         <div className={`relative max-w-7xl mx-auto w-full transition-all duration-1000 lg:flex lg:items-center lg:gap-16 xl:gap-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center lg:text-left lg:flex-1">
 
-          {/* Headline — answers one question in 5 seconds */}
+          {/* Product eyebrow */}
+          <div className={`flex items-center gap-2 mb-6 justify-center lg:justify-start transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <span className="text-sm font-semibold tracking-wide text-slate-900 dark:text-white">Solidus</span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span className="text-sm text-slate-400 dark:text-slate-500">The gold standard for deal intelligence</span>
+          </div>
+
+          {/* Headline */}
           <h1 className={`text-4xl sm:text-5xl lg:text-[64px] xl:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight leading-[1.08] transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="text-slate-900 dark:text-white">Know what your</span>
             <br />
@@ -354,10 +361,10 @@ export default function Home() {
             <span className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">worth</span>
           </h1>
 
-          {/* Subheadline — pain point, then solution */}
+          {/* Subheadline */}
           <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             Stop guessing on upfronts, milestones, and royalties.
-            {' '}Benchmark your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} real transactions</span> in seconds.
+            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified transactions</span> — in seconds.
           </p>
 
           {/* Single clear CTA */}
@@ -502,13 +509,13 @@ export default function Home() {
               <svg className="w-4 h-4 text-blue-700 dark:text-blue-400 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span className="text-sm font-medium text-blue-800 dark:text-blue-400">Why Use This Tool</span>
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-400">21 Engines · 12 Therapeutic Areas</span>
             </div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3 sm:mb-4">
-              Built for Life Sciences Professionals
+              What Solidus Does
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-neutral-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Whether you&apos;re a biotech founder, BD executive, or investor, get instant benchmarks for your deals
+              Institutional-grade deal intelligence for biotech founders, BD executives, and life sciences investors
             </p>
           </div>
 
@@ -742,9 +749,9 @@ export default function Home() {
           }} />
         </div>
         <div className="max-w-4xl xl:max-w-5xl mx-auto relative text-center">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Built for Life Sciences Deal-Making</h2>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Primary-Source Verified Data</h2>
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-            Benchmarks derived from {DEAL_STATS.TOTAL_DEALS} publicly disclosed licensing deals sourced from SEC filings, press releases, and FTC pre-merger filings. Updated daily with new transactions.
+            Solidus is built on {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions — sourced from regulatory filings and direct research. No secondary data. No scraped estimates. Updated daily.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-8">
             {[
@@ -876,7 +883,7 @@ export default function Home() {
               { href: '/guides/biopharma-licensing-benchmarks', title: 'Biopharma Licensing Benchmarks 2026', desc: 'Upfront, milestone, and royalty benchmarks by phase, modality, and TA', tag: 'Data' },
               { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Biotech Valuation Guide', desc: 'Phase transition probabilities, cash flow modeling, and Monte Carlo enhancement', tag: 'Methodology' },
               { href: '/guides/negotiate-pharma-royalty-rates', title: 'Pharma Royalty Rate Benchmarks', desc: 'Royalty rates by phase and modality with negotiation strategies', tag: 'Benchmarks' },
-              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: '14 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
+              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: '21 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
               { href: '/guides/biotech-licensing-deal-structure', title: 'Deal Structure Guide', desc: 'Upfront, milestone, and royalty allocation by deal type and stage', tag: 'Strategy' },
               { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
             ].map(guide => (
