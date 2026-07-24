@@ -39,6 +39,14 @@ function getRateLimitConfig(pathname: string): RateLimitConfig | null {
 }
 
 export async function middleware(request: NextRequest) {
+  // 301 redirect old domain to new domain
+  const host = request.headers.get('host') || '';
+  if (host === 'calculator.ambrosiaventures.co') {
+    const url = new URL(request.url);
+    url.host = 'solidus.ambrosiaventures.co';
+    return NextResponse.redirect(url.toString(), 301);
+  }
+
   const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
 
   // --- CSRF Protection: Origin validation for mutating API requests ---
