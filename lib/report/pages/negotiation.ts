@@ -17,7 +17,7 @@ export function renderNegotiationPage(data: PDFReportData, meta: ReportMeta): st
 
         <div class="callout" style="margin-top: 24px;">
           <strong>Not Available:</strong> The Negotiation Playbook was not generated for this analysis.
-          Visit calculator.ambrosiaventures.co to generate a negotiation strategy tailored to your deal parameters.
+          Visit solidus.ambrosiaventures.co to generate a negotiation strategy tailored to your deal parameters.
         </div>
 
         ${pageFooter(meta.reportId)}

@@ -423,7 +423,7 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
 
       const response = await fetchWithTimeout(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
         headers: {
-          'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
+          'User-Agent': 'Solidus research@ambrosiaventures.co',
           'Accept': 'application/json',
         },
         timeoutMs: 20_000,
@@ -472,7 +472,7 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
 export async function fetchFilingContent(url: string): Promise<string> {
   const response = await fetchWithTimeout(url, {
     headers: {
-      'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
+      'User-Agent': 'Solidus research@ambrosiaventures.co',
       'Accept': 'text/html,application/xhtml+xml',
     },
     timeoutMs: 20_000,

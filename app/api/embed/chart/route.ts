@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
   <div class="chart-container">
     ${svg}
     <div class="attribution">
-      <a href="https://calculator.ambrosiaventures.co" target="_blank" rel="noopener">
+      <a href="https://solidus.ambrosiaventures.co" target="_blank" rel="noopener">
         Powered by Ambrosia Ventures &mdash; Biopharma Deal Benchmarks
       </a>
     </div>
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       'X-Frame-Options': 'ALLOWALL',
-      'Access-Control-Allow-Origin': 'https://calculator.ambrosiaventures.co',
+      'Access-Control-Allow-Origin': 'https://solidus.ambrosiaventures.co',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },
@@ -110,7 +110,7 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': 'https://calculator.ambrosiaventures.co',
+      'Access-Control-Allow-Origin': 'https://solidus.ambrosiaventures.co',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

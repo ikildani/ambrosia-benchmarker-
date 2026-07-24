@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Biotech Licensing Deal Terms in Europe: Benchmarks & Regional Deal Dynamics',
     description: 'European out-licensing has distinct dynamics. See how territory splits, EMA pathways, and regional deal structures affect deal economics.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/biotech-licensing-europe',
+    url: 'https://solidus.ambrosiaventures.co/insights/biotech-licensing-europe',
     images: [{ url: '/api/og?title=Biotech%20Licensing%20Deal%20Terms%20in%20Europe&subtitle=Regional%20Deal%20Dynamics%20%26%20Benchmarks&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,12 +44,12 @@ export const metadata: Metadata = {
     description: 'EU-only deals capture 25-35% of global value. Ex-US rights reach 55-65%. Territory split economics and EMA arbitrage data inside.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/biotech-licensing-europe',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/biotech-licensing-europe',
   },
 };
 
 export default function BiotechLicensingEuropePage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -476,7 +476,7 @@ export default function BiotechLicensingEuropePage() {
             <h2 id="methodology">Methodology and Data Sources</h2>
 
             <p>
-              This analysis is based on Ambrosia Ventures' proprietary deal database of 280+ biopharma licensing and collaboration transactions from 2020 through Q1 2026, supplemented by data from SEC filings, EMA regulatory documents, and verified press releases. Territory value multipliers are derived from matched-pair analysis of global versus regional deals for comparable assets. All benchmark ranges represent interquartile ranges unless otherwise specified. For deal-specific modeling, use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Deal Benchmarker</Link> to input your asset's specific parameters.
+              This analysis is based on Ambrosia Ventures' proprietary deal database of 280+ biopharma licensing and collaboration transactions from 2020 through Q1 2026, supplemented by data from SEC filings, EMA regulatory documents, and verified press releases. Territory value multipliers are derived from matched-pair analysis of global versus regional deals for comparable assets. All benchmark ranges represent interquartile ranges unless otherwise specified. For deal-specific modeling, use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to input your asset's specific parameters.
             </p>
           </div>
 

@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
   const secondary = searchParams.get('secondary') || '';
   const attribution = searchParams.get('attribution') || '';
 
-  const host = request.headers.get('host') || 'calculator.ambrosiaventures.co';
+  const host = request.headers.get('host') || 'solidus.ambrosiaventures.co';
 
   return new ImageResponse(
     (
@@ -197,7 +197,7 @@ export async function GET(request: NextRequest) {
           }}
         >
           <div style={{ fontSize: '18px', color: COLORS.slateDark }}>
-            calculator.ambrosiaventures.co
+            solidus.ambrosiaventures.co
           </div>
           <div style={{ fontSize: '14px', color: COLORS.slateDark, letterSpacing: '0.05em' }}>
             Institutional biopharma deal intelligence

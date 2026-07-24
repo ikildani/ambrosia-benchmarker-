@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Licensing vs Acquisition Deal Terms Compared — 2026 Data',
     description: `Side-by-side comparison from ${DEAL_STATS.TOTAL_DEALS} biopharma transactions. When to license vs sell.`,
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',
+    url: 'https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',
     images: [{ url: '/api/og?title=Licensing%20vs%20Acquisition%20Deal%20Terms&subtitle=2026%20Market%20Data&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: `Upfront %, milestones, royalties, timelines. Side-by-side from ${DEAL_STATS.TOTAL_DEALS} real deals.`,
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',
   },
 };
 
@@ -124,9 +124,9 @@ export default function LicensingVsAcquisitionPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Licensing vs Acquisition Deal Terms', item: 'https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Licensing vs Acquisition Deal Terms', item: 'https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms' },
     ],
   };
 
@@ -135,11 +135,11 @@ export default function LicensingVsAcquisitionPage() {
     '@type': 'Article',
     headline: 'Licensing vs Acquisition Deal Terms Compared — 2026 Data',
     description: 'Side-by-side comparison of licensing vs acquisition deal structures across upfront, milestones, royalties, timelines, and risk allocation.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-02',
     dateModified: '2026-04-02',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms',
   };
 
   const faqSchema = {
@@ -293,7 +293,7 @@ export default function LicensingVsAcquisitionPage() {
               ['Upside capture', 'Royalties on $2B+ blockbusters', 'Premium at close, no further upside'],
             ]}
             freeRows={5}
-            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
+            footnote={`Source: Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
           />
 
           <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
@@ -327,7 +327,7 @@ export default function LicensingVsAcquisitionPage() {
               maxValue={100}
               color="#0d9488"
             />
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+            <p className="text-xs text-slate-400 mt-3">Source: Solidus, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
           </div>
 
           <VisualStatRow stats={[

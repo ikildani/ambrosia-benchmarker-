@@ -215,7 +215,7 @@ async function searchSECForTA(
 
   const response = await fetchWithTimeout(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
     headers: {
-      'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
+      'User-Agent': 'Solidus research@ambrosiaventures.co',
       'Accept': 'application/json',
     },
     timeoutMs: 20_000,

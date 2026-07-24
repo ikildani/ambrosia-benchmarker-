@@ -1,7 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server';
 import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 
-const SITE_URL = 'https://calculator.ambrosiaventures.co';
+const SITE_URL = 'https://solidus.ambrosiaventures.co';
 
 export async function GET() {
   let items = '';

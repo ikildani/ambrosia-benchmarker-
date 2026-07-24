@@ -45,13 +45,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.title,
     description: page.meta_description || undefined,
     alternates: {
-      canonical: `https://calculator.ambrosiaventures.co/${page.slug}`,
+      canonical: `https://solidus.ambrosiaventures.co/${page.slug}`,
     },
     openGraph: {
       title: page.title,
       description: page.meta_description || undefined,
       type: 'website',
-      url: `https://calculator.ambrosiaventures.co/${page.slug}`,
+      url: `https://solidus.ambrosiaventures.co/${page.slug}`,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
@@ -133,7 +133,7 @@ export default async function LandingPageRoute({ params }: PageProps) {
           <div className="relative max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-full text-teal-300 text-sm mb-8">
               <Calculator className="w-4 h-4" />
-              Free Deal Calculator
+              Free Solidus
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">

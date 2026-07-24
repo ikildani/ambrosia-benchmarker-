@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
   if (isMutatingRequest && isApiRoute && !isWebhook && !isCron) {
     const origin = request.headers.get('origin');
     const allowedOrigins = [
-      'https://calculator.ambrosiaventures.co',
+      'https://solidus.ambrosiaventures.co',
       process.env.NEXT_PUBLIC_APP_URL,
     ].filter(Boolean);
 

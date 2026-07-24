@@ -15,7 +15,7 @@ function redirect(url: string, base: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
   const token = request.nextUrl.searchParams.get('token') || '';
 
   const verified = verifyTrialToken(token);

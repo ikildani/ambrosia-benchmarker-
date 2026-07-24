@@ -30,7 +30,7 @@ export default function EmailCapture({ onClose }: EmailCaptureProps) {
           email,
           name,
           company,
-          source: 'Deal Calculator',
+          source: 'Solidus',
           timestamp: new Date().toISOString(),
         }),
       });

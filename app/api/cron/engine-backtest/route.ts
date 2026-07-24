@@ -5,7 +5,7 @@
  * Slack if validation metrics drift below defensible thresholds.
  *
  * Run manually via:
- *   curl -H "Authorization: Bearer $CRON_SECRET" https://calculator.ambrosiaventures.co/api/cron/engine-backtest
+ *   curl -H "Authorization: Bearer $CRON_SECRET" https://solidus.ambrosiaventures.co/api/cron/engine-backtest
  *
  * Or via /api/cron/engine-backtest?format=markdown for the full report
  */

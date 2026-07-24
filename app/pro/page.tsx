@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     title: 'Pro Plan | Unlimited Deal Intelligence | Ambrosia Ventures',
     description: 'Unlock 14 deal engines, 12 therapeutic areas, and unlimited calculations for biopharma deal professionals.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/pro',
+    url: 'https://solidus.ambrosiaventures.co/pro',
     images: [{ url: '/api/og?title=Pro%20Plan&subtitle=Unlimited%20Deal%20Intelligence&type=landing' }],
   },
   twitter: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: 'Pro Plan | Unlimited Deal Intelligence',
     description: 'Unlock 14 deal engines, 12 therapeutic areas, and unlimited biopharma deal calculations.',
   },
-  alternates: { canonical: 'https://calculator.ambrosiaventures.co/pro' },
+  alternates: { canonical: 'https://solidus.ambrosiaventures.co/pro' },
 };
 
 // ---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ export default function ProPage() {
     '@context': 'https://schema.org', '@type': 'Product',
     name: 'Ambrosia Ventures Pro Plan',
     description: `Unlimited biopharma deal intelligence with 14 calculation engines, 12 therapeutic areas, and ${DEAL_STATS.TOTAL_DEALS} transaction benchmarks.`,
-    url: 'https://calculator.ambrosiaventures.co/pro',
+    url: 'https://solidus.ambrosiaventures.co/pro',
     brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     offers: [
       { '@type': 'Offer', price: PRICING.PRO_PRICE_NUM, priceCurrency: 'USD', priceValidUntil: '2026-12-31', availability: 'https://schema.org/InStock', name: 'Pro Monthly' },
@@ -93,7 +93,7 @@ export default function ProPage() {
   const breadcrumbSchema = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
       { '@type': 'ListItem', position: 2, name: 'Pro' },
     ],
   };
@@ -1018,7 +1018,7 @@ export default function ProPage() {
                 </div>
                 <div className="flex flex-col items-center sm:items-end gap-3 flex-shrink-0">
                   <Link
-                    href="mailto:ikildani@ambrosiaventures.co?subject=Team%20access%20—%20Ambrosia%20Benchmarker&body=Hi%20Issa%2C%0A%0AWe%27re%20interested%20in%20multi-seat%20Pro%20access%20for%20our%20team.%0A%0ATeam%20size%3A%20%0ATherapeutic%20focus%3A%20%0ATimeline%3A%20%0A%0AThanks"
+                    href="mailto:ikildani@ambrosiaventures.co?subject=Team%20access%20—%20Solidus&body=Hi%20Issa%2C%0A%0AWe%27re%20interested%20in%20multi-seat%20Pro%20access%20for%20our%20team.%0A%0ATeam%20size%3A%20%0ATherapeutic%20focus%3A%20%0ATimeline%3A%20%0A%0AThanks"
                     className="inline-flex items-center gap-2.5 px-8 py-4 bg-indigo-500 text-white text-base font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-400 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all duration-200"
                   >
                     Contact for team pricing

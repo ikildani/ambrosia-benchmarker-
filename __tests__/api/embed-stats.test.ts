@@ -26,7 +26,7 @@ describe('/api/embed/stats', () => {
       expect(data.avg_upfront_rare_disease).toBe(35);
       expect(data.modalities_covered).toBe(15);
       expect(data.source).toBe('Ambrosia Ventures');
-      expect(data.source_url).toBe('https://calculator.ambrosiaventures.co');
+      expect(data.source_url).toBe('https://solidus.ambrosiaventures.co');
       expect(data.last_updated).toBeDefined();
     });
 

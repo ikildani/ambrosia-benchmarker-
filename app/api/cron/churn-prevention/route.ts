@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 // Sends personalized email with recent deals from their most-used TA.
 // ---------------------------------------------------------------------------
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 function formatLabel(value: string): string {
   return value

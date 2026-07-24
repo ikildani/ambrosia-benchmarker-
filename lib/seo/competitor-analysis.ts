@@ -62,7 +62,7 @@ export async function analyzeCompetitorContent(
     )
     .join('\n\n');
 
-  const prompt = `You are a competitive intelligence analyst for a biopharma deal benchmarking platform (Ambrosia Benchmarker). Analyze these competitor content pieces.
+  const prompt = `You are a competitive intelligence analyst for a biopharma deal benchmarking platform (Solidus). Analyze these competitor content pieces.
 
 ## Our Target Keywords
 ${TARGET_KEYWORDS.map((k) => `- ${k}`).join('\n')}

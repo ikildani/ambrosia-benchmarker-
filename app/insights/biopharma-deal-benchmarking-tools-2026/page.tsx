@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Best Biopharma Deal Benchmarking Tools in 2026',
     description: 'How modern deal intelligence platforms compare to consultants and manual research. Feature comparison and selection guide.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026',
+    url: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026',
     images: [{ url: '/api/og?title=Biopharma%20Deal%20Benchmarking%20Tools&subtitle=2026%20Platform%20Comparison&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'Platform comparison: data freshness, TA coverage, valuation models, and predictive analytics.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026',
   },
 };
 
@@ -127,9 +127,9 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Biopharma Deal Benchmarking Tools 2026', item: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Biopharma Deal Benchmarking Tools 2026', item: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026' },
     ],
   };
 
@@ -138,11 +138,11 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
     '@type': 'Article',
     headline: 'Best Biopharma Deal Benchmarking Tools in 2026 — Platform Comparison',
     description: 'How modern deal intelligence platforms compare to consultants and manual research for biopharma BD teams.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-03',
     dateModified: '2026-04-03',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarking-tools-2026',
   };
 
   const faqSchema = {

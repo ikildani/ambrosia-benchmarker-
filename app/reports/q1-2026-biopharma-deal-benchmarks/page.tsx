@@ -43,7 +43,7 @@ const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculato
 const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEmailCapture').then(m => ({ default: m.InlineEmailCapture })));
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
 const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
-const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
+const ReportEmailGate = dynamic(() => import('@/components/insights/ReportEmailGate').then(m => ({ default: m.ReportEmailGate })));
 const EmailGatedDownload = dynamic(() => import('@/components/insights/EmailGatedDownload').then(m => ({ default: m.EmailGatedDownload })));
 const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
 
@@ -55,11 +55,11 @@ export const metadata: Metadata = {
     title: 'Q1 2026 Biopharma Deal Benchmarks Report',
     description: `Institutional-grade analysis of biopharma deal economics from ${DEAL_STATS.TOTAL_DEALS} verified transactions (2020-2026). Phase-by-phase medians with sample sizes across 13 therapeutic areas.`,
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks',
     images: [{ url: '/api/og?title=Q1%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Analysis%20of%202%2C600%2B%20Transactions&type=insight', width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', title: `Q1 2026 Biopharma Deal Benchmarks: ${DEAL_STATS.TOTAL_DEALS} Transactions Analyzed`, description: 'Immunology Phase 2 median upfront reaches $400M (n=15). Licensing surpasses acquisitions. Conditional value share declines to 71%.' },
-  alternates: { canonical: 'https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks' },
+  alternates: { canonical: 'https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks' },
 };
 
 // Revalidate every 6 hours so new deals appear without a full redeploy
@@ -170,11 +170,11 @@ async function getTopDeals() {
 export default async function Q1BenchmarkReportPage() {
   const topDeals = await getTopDeals();
   const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-    { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://calculator.ambrosiaventures.co/reports' },
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+    { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://solidus.ambrosiaventures.co/reports' },
     { '@type': 'ListItem', position: 3, name: 'Q1 2026 Biopharma Deal Benchmarks' },
   ]};
-  const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-03-30', dateModified: '2026-03-30', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
+  const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' }, datePublished: '2026-03-30', dateModified: '2026-03-30', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } } };
   const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, total deal values, and deal structure economics from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
     { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, press releases, and ClinicalTrials.gov. Deals with undisclosed terms are excluded. Updated weekly via automated ingestion plus manual verification.` } },
@@ -185,7 +185,6 @@ export default async function Q1BenchmarkReportPage() {
   return (
     <>
       <ScrollProgress />
-      <ReportViewTracker report="q1-2026" />
       <StickyTOC sections={[
         { id: 'market-overview', label: 'Market Overview', number: 1 },
         { id: 'therapeutic-areas', label: 'Therapeutic Areas', number: 2 },
@@ -295,6 +294,7 @@ export default async function Q1BenchmarkReportPage() {
         </div>
       </section>
 
+      <ReportEmailGate report="q1-2026">
       <main className="bg-white">
 
         {/* ── SECTION 1: MARKET OVERVIEW ── */}
@@ -1111,6 +1111,7 @@ export default async function Q1BenchmarkReportPage() {
         </section>
       </main>
 
+      </ReportEmailGate>
       <InsightCTA variant="bottom" />
       <SiteFooter />
     </>

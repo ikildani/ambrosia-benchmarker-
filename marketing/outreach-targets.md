@@ -1,4 +1,4 @@
-# Outreach Target List for calculator.ambrosiaventures.co
+# Outreach Target List for solidus.ambrosiaventures.co
 
 ## Priority Order
 1. **BD consultants/advisory firms** — they build rNPV models daily, need benchmarking data

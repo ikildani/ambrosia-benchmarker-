@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     'Get in touch with Ambrosia Ventures. Questions about pricing, enterprise plans, partnership opportunities, or technical support for the biopharma deal calculator.',
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/contact',
+    canonical: 'https://solidus.ambrosiaventures.co/contact',
   },
   openGraph: {
     title: 'Contact Ambrosia Ventures | Biopharma Deal Intelligence',
     description:
       'Questions about pricing, enterprise plans, or partnership opportunities? Reach out to the Ambrosia Ventures team.',
-    url: 'https://calculator.ambrosiaventures.co/contact',
+    url: 'https://solidus.ambrosiaventures.co/contact',
     type: 'website',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
   },

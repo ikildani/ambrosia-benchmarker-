@@ -130,7 +130,7 @@ This is reactive content — concise but substantive. Every paragraph must earn 
    - If you're a BD professional evaluating a similar deal, what precedent does this set?
    - What should your deal committee know about this?
 
-6. **CTA paragraph**: Natural mention that readers can benchmark their own deal using the calculator at calculator.ambrosiaventures.co. Not salesy — informational.
+6. **CTA paragraph**: Natural mention that readers can benchmark their own deal using the calculator at solidus.ambrosiaventures.co. Not salesy — informational.
 
 ### Structure (adapt H2s to fit the specific news)
 - Opening paragraph (news lead + analytical take)

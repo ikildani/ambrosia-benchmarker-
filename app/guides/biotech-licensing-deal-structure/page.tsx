@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: 'Biotech Licensing Deal Structure: Upfront, Milestones & Royalties Explained',
     description: 'Complete guide to structuring biopharma licensing deals with real benchmarks on upfronts, milestones, and royalties.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
+    url: 'https://solidus.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
     images: [{ url: '/api/og?title=Biotech%20Licensing%20Deal%20Structure&subtitle=Upfront%2C%20Milestones%20%26%20Royalties&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -33,12 +33,12 @@ export const metadata: Metadata = {
     description: 'Complete guide to structuring biopharma licensing deals with real benchmarks.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
   },
 };
 
 export default function BiotechLicensingDealStructurePage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -398,7 +398,7 @@ export default function BiotechLicensingDealStructurePage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { href: '/benchmarks', title: 'Deal Benchmarks', desc: 'Browse deal terms by modality, phase & TA' },
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Model custom deal structures instantly' },
+                { href: '/calculator', title: 'Solidus', desc: 'Model custom deal structures instantly' },
                 { href: '/glossary/upfront-payment', title: 'Upfront Payment', desc: 'Definition and benchmarks' },
                 { href: '/glossary/milestone-payment', title: 'Milestone Payment', desc: 'Types and typical ranges' },
               ].map((resource) => (

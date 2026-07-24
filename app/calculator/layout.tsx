@@ -5,12 +5,12 @@ import { generateHowToSchema, generatePricingSchema, generateBreadcrumbSchema } 
 const howToSchema = generateHowToSchema();
 const pricingSchema = generatePricingSchema();
 const breadcrumbSchema = generateBreadcrumbSchema([
-  { name: 'Home', url: 'https://calculator.ambrosiaventures.co' },
-  { name: 'Deal Calculator' },
+  { name: 'Home', url: 'https://solidus.ambrosiaventures.co' },
+  { name: 'Solidus' },
 ]);
 
 export const metadata: Metadata = {
-  title: 'Deal Terms Calculator — Biotech & Pharma Licensing Benchmarks',
+  title: 'Solidus — Biotech & Pharma Licensing Benchmarks',
   description: `Calculate upfront payments, milestone structures, and royalty rates for biopharma licensing deals. rNPV analysis, Monte Carlo simulation, sensitivity analysis, and AI deal memos across oncology, neurology, immunology, metabolic, cardiovascular, and more. Powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
   keywords: [
     'biotech deal calculator', 'pharma licensing calculator', 'drug deal valuation tool',
@@ -25,26 +25,26 @@ export const metadata: Metadata = {
     'pharma licensing negotiation', 'biotech term sheet benchmarks',
   ],
   openGraph: {
-    title: 'Deal Terms Calculator — Instant Biopharma Licensing Benchmarks',
+    title: 'Solidus — Instant Biopharma Licensing Benchmarks',
     description: `Calculate upfront payments, milestones, and royalties with rNPV analysis and Monte Carlo simulation. ${DEAL_STATS.TOTAL_DEALS} real biopharma transactions, 12 therapeutic areas.`,
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/calculator',
+    url: 'https://solidus.ambrosiaventures.co/calculator',
     images: [
       {
         url: '/api/og?title=Deal%20Terms%20Calculator&subtitle=rNPV%20%C2%B7%20Monte%20Carlo%20%C2%B7%202%2C600%2B%20Real%20Transactions',
         width: 1200,
         height: 630,
-        alt: `Ambrosia Ventures Deal Calculator — rNPV, Monte Carlo, and benchmarks from ${DEAL_STATS.TOTAL_DEALS} real biopharma deals`,
+        alt: `Solidus — rNPV, Monte Carlo, and benchmarks from ${DEAL_STATS.TOTAL_DEALS} real biopharma deals`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Terms Calculator — Instant Biopharma Licensing Benchmarks',
+    title: 'Solidus — Instant Biopharma Licensing Benchmarks',
     description: `rNPV analysis, Monte Carlo simulation, and AI deal intelligence from ${DEAL_STATS.TOTAL_DEALS} real transactions. 12 therapeutic areas.`,
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/calculator',
+    canonical: 'https://solidus.ambrosiaventures.co/calculator',
   },
 };
 

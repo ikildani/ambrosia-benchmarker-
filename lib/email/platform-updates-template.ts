@@ -102,7 +102,7 @@ export function buildPlatformUpdatesHtml(
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Platform Updates — Ambrosia Deal Calculator</title>
+        <title>Platform Updates — Solidus</title>
       </head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 660px; margin: 0 auto; padding: 0; background: #f1f5f9;">
 
@@ -123,10 +123,10 @@ export function buildPlatformUpdatesHtml(
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td align="center">
-                          <img src="https://calculator.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="160" style="display: block; margin: 0 auto 16px; width: 160px; height: auto;" />
+                          <img src="https://solidus.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="160" style="display: block; margin: 0 auto 16px; width: 160px; height: auto;" />
                           <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">What's New</h1>
                           <div style="width: 40px; height: 3px; background: linear-gradient(90deg, #14b8a6, #06b6d4); margin: 14px auto; border-radius: 2px;"></div>
-                          <p style="color: #94a3b8; margin: 0; font-size: 13px; font-weight: 400;">Deal Calculator &middot; ${dateFormatted}</p>
+                          <p style="color: #94a3b8; margin: 0; font-size: 13px; font-weight: 400;">Solidus &middot; ${dateFormatted}</p>
                         </td>
                       </tr>
                     </table>
@@ -159,7 +159,7 @@ export function buildPlatformUpdatesHtml(
 
                     <!-- Bottom CTA -->
                     <div style="padding: 28px 32px 36px; text-align: center;">
-                      <a href="https://calculator.ambrosiaventures.co" style="display: inline-block; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 10px; font-size: 14px; font-weight: 700; letter-spacing: -0.2px;">Open Deal Calculator &rarr;</a>
+                      <a href="https://solidus.ambrosiaventures.co" style="display: inline-block; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 10px; font-size: 14px; font-weight: 700; letter-spacing: -0.2px;">Open Solidus &rarr;</a>
                       <p style="font-size: 12px; color: #94a3b8; margin: 12px 0 0;">Questions or feedback? Reply directly to this email.</p>
                     </div>
 
@@ -169,11 +169,11 @@ export function buildPlatformUpdatesHtml(
                 <!-- Footer -->
                 <tr>
                   <td style="background: #0f172a; padding: 28px 32px; border-radius: 0 0 16px 16px; text-align: center;">
-                    <img src="https://calculator.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="110" style="display: block; margin: 0 auto 14px; width: 110px; height: auto; opacity: 0.6;" />
+                    <img src="https://solidus.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="110" style="display: block; margin: 0 auto 14px; width: 110px; height: auto; opacity: 0.6;" />
                     <div style="margin-bottom: 14px;">
                       <a href="https://ambrosiaventures.co" style="color: #64748b; text-decoration: none; font-size: 11px; margin: 0 8px;">ambrosiaventures.co</a>
                       <span style="color: #334155;">&middot;</span>
-                      <a href="https://calculator.ambrosiaventures.co" style="color: #64748b; text-decoration: none; font-size: 11px; margin: 0 8px;">Deal Calculator</a>
+                      <a href="https://solidus.ambrosiaventures.co" style="color: #64748b; text-decoration: none; font-size: 11px; margin: 0 8px;">Solidus</a>
                     </div>
                     <p style="color: #475569; font-size: 10px; margin: 0 0 8px;">Ambrosia Ventures &middot; Biopharma Deal Intelligence</p>
                     <a href="${escapeHtml(unsubscribeUrl)}" style="color: #475569; text-decoration: underline; font-size: 10px;">Unsubscribe from platform updates</a>

@@ -14,7 +14,7 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
         <div class="section-title-lg">Partner Landscape</div>
         <div class="card" style="text-align: center; padding: 40px;">
           <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">Partner matching not available for this report.</div>
-          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit calculator.ambrosiaventures.co to run the full partner analysis.</div>
+          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit solidus.ambrosiaventures.co to run the full partner analysis.</div>
         </div>
         ${pageFooter(meta.reportId)}
       </div>

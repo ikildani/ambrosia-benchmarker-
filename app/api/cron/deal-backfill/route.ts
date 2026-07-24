@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
 
   const searchResponse = await fetchWithTimeout(`${SEC_SEARCH}?${params}`, {
     headers: {
-      'User-Agent': 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co',
+      'User-Agent': 'Solidus research@ambrosiaventures.co',
       'Accept': 'application/json',
     },
     timeoutMs: 20_000,

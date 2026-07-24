@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
  * Generate ERC Deal Materials as World-Class PDFs
- * Uses the Ambrosia report styling system (same as calculator.ambrosiaventures.co)
+ * Uses the Ambrosia report styling system (same as solidus.ambrosiaventures.co)
  * Uploads to Google Drive VDR folder
  */
 

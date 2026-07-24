@@ -26,7 +26,7 @@ export const dynamic = 'force-dynamic';
 // Auth: Bearer $CRON_SECRET
 // ---------------------------------------------------------------------------
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 function buildExtensionEmail(
   firstName: string,
@@ -60,7 +60,7 @@ function buildExtensionEmail(
       <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi${firstName ? ` ${firstName}` : ''},</p>
 
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        We noticed you have been actively using the Benchmarker, so we extended your Pro access by another 7 days, free.
+        We noticed you have been actively using Solidus, so we extended your Pro access by another 7 days, free.
       </p>
 
       <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">

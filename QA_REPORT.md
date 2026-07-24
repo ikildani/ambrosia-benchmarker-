@@ -1,6 +1,6 @@
 # QA/QC Audit Report: Ambrosia Deal Calculator
 
-**Application**: calculator.ambrosiaventures.co
+**Application**: solidus.ambrosiaventures.co
 **Repository**: github.com/ikildani/ambrosia-benchmarker-
 **Audit Date**: February 2026
 **Auditor**: Claude Code QA Team
@@ -50,7 +50,7 @@ This comprehensive QA/QC audit identified **9 security vulnerabilities** (4 crit
 
 **Attack Vector**:
 ```
-https://calculator.ambrosiaventures.co?success=true
+https://solidus.ambrosiaventures.co?success=true
 ```
 
 **Impact**: Any user could access Pro features worth $99/month for free.

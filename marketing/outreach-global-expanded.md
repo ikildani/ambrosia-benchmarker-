@@ -2,7 +2,7 @@ Here is the comprehensive global outreach list compiled from extensive web resea
 
 ---
 
-# GLOBAL OUTREACH LIST: calculator.ambrosiaventures.co
+# GLOBAL OUTREACH LIST: solidus.ambrosiaventures.co
 
 ## SEGMENT A: BD CONSULTING FIRMS
 

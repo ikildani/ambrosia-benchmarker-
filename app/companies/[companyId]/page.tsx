@@ -8,7 +8,7 @@ import CompanyPageClient from './CompanyPageClient';
 // ISR: regenerate company pages every hour
 export const revalidate = 3600;
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface Props {
@@ -432,7 +432,7 @@ export default async function CompanyPage({ params }: Props) {
     url: `${BASE_URL}/companies/${companyId}`,
     isPartOf: {
       '@type': 'WebSite',
-      name: 'Ambrosia Ventures Deal Calculator',
+      name: 'Solidus',
       url: BASE_URL,
     },
     about: {

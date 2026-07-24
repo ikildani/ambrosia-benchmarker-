@@ -19,11 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await loadPlaybookBuyer(slug);
   if (!data) {
-    return { title: 'Buyer not found | Ambrosia Benchmarker' };
+    return { title: 'Buyer not found | Solidus' };
   }
   const { buyer } = data;
   return {
-    title: `${buyer.companyName} — Counterparty Playbook | Ambrosia Benchmarker`,
+    title: `${buyer.companyName} — Counterparty Playbook | Solidus`,
     description: `${buyer.companyName} pays ${buyer.premiumMultiplier > 1 ? '+' : ''}${((buyer.premiumMultiplier - 1) * 100).toFixed(0)}% vs. comparable medians across ${buyer.sampleSize} disclosed deals. Per-TA and per-phase breakdowns sourced from public filings.`,
   };
 }

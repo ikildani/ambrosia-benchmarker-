@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: `Biotech Licensing Glossary — ${glossaryTerms.length}+ Deal Terms Explained`,
     description: 'Master the language of biotech licensing deals — upfront payments, milestones, royalties, CVRs, ADCs, CAR-T, and more.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/glossary',
+    url: 'https://solidus.ambrosiaventures.co/glossary',
     images: [{ url: '/api/og?title=Biotech%20Licensing%20Glossary&subtitle=30%2B%20Essential%20Deal%20Terms%20Explained&type=landing' }],
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     description: `Comprehensive glossary of ${glossaryTerms.length}+ biotech licensing deal terms for BD professionals.`,
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/glossary',
+    canonical: 'https://solidus.ambrosiaventures.co/glossary',
   },
 };
 
@@ -33,12 +33,12 @@ export default function GlossaryPage() {
     '@type': 'DefinedTermSet',
     name: 'Biotech Licensing Glossary',
     description: 'Comprehensive glossary of biotech and pharmaceutical licensing deal terminology',
-    url: 'https://calculator.ambrosiaventures.co/glossary',
+    url: 'https://solidus.ambrosiaventures.co/glossary',
     hasDefinedTerm: glossaryTerms.map(term => ({
       '@type': 'DefinedTerm',
       name: term.term,
       description: term.definition,
-      url: `https://calculator.ambrosiaventures.co/glossary/${term.slug}`,
+      url: `https://solidus.ambrosiaventures.co/glossary/${term.slug}`,
     })),
   };
 

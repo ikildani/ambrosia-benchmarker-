@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   description:
     'Compare Ambrosia Ventures to S&P Capital IQ for biotech deal analysis. Deal-specific depth vs general financial data.',
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/compare/capital-iq',
+    canonical: 'https://solidus.ambrosiaventures.co/compare/capital-iq',
   },
   openGraph: {
     title: 'Ambrosia vs S&P Capital IQ | Biotech Deal Benchmarking',
     description:
       'Compare Ambrosia Ventures to S&P Capital IQ for biotech deal analysis. Deal-specific depth vs general financial data.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/compare/capital-iq',
+    url: 'https://solidus.ambrosiaventures.co/compare/capital-iq',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
   },
   twitter: {

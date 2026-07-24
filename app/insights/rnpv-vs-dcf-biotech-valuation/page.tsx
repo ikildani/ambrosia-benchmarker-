@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'rNPV vs DCF for Biotech Valuation — When to Use Each',
     description: 'How PoS adjustment changes asset value by 5-20x, and why the best BD teams run both models.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
+    url: 'https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
     images: [{ url: '/api/og?title=rNPV%20vs%20DCF%20for%20Biotech%20Valuation&subtitle=When%20to%20Use%20Each&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'PoS adjustment changes asset value by 5-20x. When to use each method — backed by real deal data.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
   },
 };
 
@@ -111,9 +111,9 @@ export default function RNPVvsDCFPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'rNPV vs DCF for Biotech Valuation', item: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'rNPV vs DCF for Biotech Valuation', item: 'https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation' },
     ],
   };
 
@@ -122,11 +122,11 @@ export default function RNPVvsDCFPage() {
     '@type': 'Article',
     headline: 'rNPV vs DCF for Biotech Valuation — When to Use Each',
     description: 'Analysis of how probability-of-success adjustment changes biotech asset value by 5-20x, and when each valuation method applies.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-02',
     dateModified: '2026-04-02',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation',
   };
 
   const faqSchema = {
@@ -170,7 +170,7 @@ export default function RNPVvsDCFPage() {
         name: 'Can I run both rNPV and DCF on the same biotech asset?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes — running both models is best practice. The Ambrosia Benchmarker calculates rNPV and DCF simultaneously, allowing you to see the risk-adjusted base case (rNPV) alongside the success-case valuation (DCF). The ratio between the two tells you how much clinical de-risking value remains. If rNPV is $200M and DCF is $2B, there is 10x upside from clinical success — which informs milestone structuring and royalty negotiation.',
+          text: 'Yes — running both models is best practice. Solidus calculates rNPV and DCF simultaneously, allowing you to see the risk-adjusted base case (rNPV) alongside the success-case valuation (DCF). The ratio between the two tells you how much clinical de-risking value remains. If rNPV is $200M and DCF is $2B, there is 10x upside from clinical success — which informs milestone structuring and royalty negotiation.',
         },
       },
     ],
@@ -396,7 +396,7 @@ export default function RNPVvsDCFPage() {
           <InsightCTA
             variant="mid"
             heading="Run Both Models on Your Asset"
-            description="The Ambrosia Benchmarker calculates rNPV and DCF simultaneously, with Monte Carlo simulation across 10,000 scenarios."
+            description="Solidus calculates rNPV and DCF simultaneously, with Monte Carlo simulation across 10,000 scenarios."
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
@@ -504,7 +504,7 @@ export default function RNPVvsDCFPage() {
 
             <h3>Can I run both rNPV and DCF on the same asset?</h3>
             <p>
-              Yes — this is best practice. The ratio between DCF and rNPV tells you how much clinical de-risking value remains. If rNPV is $200M and DCF is $2B, there is 10x upside from clinical success, which informs milestone structuring and royalty negotiation. The <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> calculates both simultaneously.
+              Yes — this is best practice. The ratio between DCF and rNPV tells you how much clinical de-risking value remains. If rNPV is $200M and DCF is $2B, there is 10x upside from clinical success, which informs milestone structuring and royalty negotiation. The <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> calculates both simultaneously.
             </p>
           </div>
 

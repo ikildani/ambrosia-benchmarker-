@@ -26,7 +26,7 @@ export async function generateMetadata({
   const page = getProgrammaticPageData(slug);
   if (!page) return {};
 
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   return {
     title: page.title,
@@ -65,7 +65,7 @@ export default async function ProgrammaticDataPage({
   const page = getProgrammaticPageData(slug);
   if (!page) notFound();
 
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
   const calcUrl = `/calculator?ta=${page.ta.key}&phase=${page.phase.key}&territory=${page.territory.key}`;
 
   const breadcrumbSchema = {
@@ -455,7 +455,7 @@ export default async function ProgrammaticDataPage({
               href={calcUrl}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold hover:from-teal-700 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20"
             >
-              Open Deal Calculator
+              Open Solidus
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

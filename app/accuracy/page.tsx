@@ -7,12 +7,12 @@ import { CalibrationTimeline } from '@/components/accuracy/CalibrationTimeline';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Benchmark Accuracy | Ambrosia Benchmarker',
+  title: 'Benchmark Accuracy | Solidus',
   description:
-    'Honest accuracy disclosure for the Ambrosia Benchmarker directional BD tool. Live backtest against 574+ real disclosed deals from 2017-2026. Model view, hit rates, calibration journey — fully transparent.',
+    'Honest accuracy disclosure for the Solidus directional BD tool. Live backtest against 574+ real disclosed deals from 2017-2026. Model view, hit rates, calibration journey — fully transparent.',
   keywords: [
     'pharma deal benchmark range',
     'biotech licensing directional tool',
@@ -21,24 +21,24 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `${BASE_URL}/accuracy` },
   openGraph: {
-    title: 'Benchmark Accuracy | Ambrosia Benchmarker',
+    title: 'Benchmark Accuracy | Solidus',
     description:
       'Directional benchmark accuracy vs. 574+ verified real disclosed deals. Model view hit rates, calibration journey — fully public.',
     type: 'website',
     url: `${BASE_URL}/accuracy`,
-    siteName: 'Ambrosia Benchmarker',
+    siteName: 'Solidus',
     images: [
       {
         url: '/api/og?title=Benchmark%20Accuracy&subtitle=Honest%20directional%20context%20vs%20574%2B%20real%20deals',
         width: 1200,
         height: 630,
-        alt: 'Ambrosia Benchmarker accuracy dashboard',
+        alt: 'Solidus accuracy dashboard',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Benchmark Accuracy | Ambrosia Benchmarker',
+    title: 'Benchmark Accuracy | Solidus',
     description:
       'Directional benchmark accuracy vs. 574+ verified real disclosed deals. No inflated metrics.',
   },
@@ -104,7 +104,7 @@ export default function AccuracyDashboard() {
             Benchmark Accuracy — Fully Public
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
-            The Benchmarker is a directional tool for BD professionals: it shows where your
+            Solidus is a directional tool for BD professionals: it shows where your
             deal sits in the distribution of real comparable transactions, not a prediction
             of a specific dollar amount. Below is the honest track record against{' '}
             <span className="text-slate-200">{data.fullScope.n} real disclosed licensing, co-development, and acquisition deals</span>{' '}
@@ -112,7 +112,7 @@ export default function AccuracyDashboard() {
           </p>
           <p className="mt-4 max-w-3xl text-sm text-slate-500">
             <span className="text-teal-400 font-semibold">How to read this page:</span>{' '}
-            The Benchmarker shows a directional range from real comparable deals, not a
+            Solidus shows a directional range from real comparable deals, not a
             point prediction. Comparable-deal upfronts genuinely span $20M&ndash;$1B+ within
             any TA segment — the wide range IS the market reality, not a modeling deficiency.
             For deal-specific predictive forecasting, see AlaricAI.

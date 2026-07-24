@@ -110,7 +110,7 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
         <!-- Footer bar -->
         <div style="background: #f8fafc; border-radius: 4px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0;">
           <span style="font-size: 8px; color: ${COLORS.gray500}; font-weight: 600;">${meta.reportId} &middot; Generated ${formatDate()}</span>
-          <span style="font-size: 8px; color: ${COLORS.gray400};">Ambrosia Ventures &middot; calculator.ambrosiaventures.co</span>
+          <span style="font-size: 8px; color: ${COLORS.gray400};">Ambrosia Ventures &middot; solidus.ambrosiaventures.co</span>
         </div>
       </div>
     </div>

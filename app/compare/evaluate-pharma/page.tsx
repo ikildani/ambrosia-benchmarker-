@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   description:
     'Compare Ambrosia Ventures to EvaluatePharma for biopharma deal benchmarking. See how deal coverage, pricing, and analytics compare.',
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/compare/evaluate-pharma',
+    canonical: 'https://solidus.ambrosiaventures.co/compare/evaluate-pharma',
   },
   openGraph: {
     title: 'Ambrosia vs EvaluatePharma | Biopharma Deal Intelligence Comparison',
     description:
       'Compare Ambrosia Ventures to EvaluatePharma for biopharma deal benchmarking. See how deal coverage, pricing, and analytics compare.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/compare/evaluate-pharma',
+    url: 'https://solidus.ambrosiaventures.co/compare/evaluate-pharma',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
   },
   twitter: {

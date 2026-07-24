@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Biopharma Deal Benchmarks 2026 — Free Report',
     description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} verified transactions. Free download.`,
-    url: 'https://calculator.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
     siteName: 'Ambrosia Ventures',
     type: 'article',
     images: [{
-      url: 'https://calculator.ambrosiaventures.co/og/deal-benchmarks-2026.png',
+      url: 'https://solidus.ambrosiaventures.co/og/deal-benchmarks-2026.png',
       width: 1200,
       height: 630,
       alt: 'Biopharma Deal Benchmarks 2026 — Ambrosia Ventures',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
   },
   robots: {
     index: true,
@@ -52,11 +52,11 @@ const jsonLd = {
   publisher: {
     '@type': 'Organization',
     name: 'Ambrosia Ventures',
-    url: 'https://calculator.ambrosiaventures.co',
+    url: 'https://solidus.ambrosiaventures.co',
   },
   datePublished: '2026-04-01',
   dateModified: '2026-04-29',
-  url: 'https://calculator.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
+  url: 'https://solidus.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
   isAccessibleForFree: true,
   keywords: 'biopharma deal benchmarks, licensing upfront, milestone structure, royalty rates, deal valuation, pharma deal terms',
   about: {

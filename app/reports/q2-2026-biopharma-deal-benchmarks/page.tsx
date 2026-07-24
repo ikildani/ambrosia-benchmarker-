@@ -55,11 +55,11 @@ export const metadata: Metadata = {
     title: 'Q2 2026 Biopharma Deal Benchmarks Report',
     description: `Institutional-grade analysis of biopharma deal economics from ${DEAL_STATS.TOTAL_DEALS} verified transactions. Risk-adjusted phase economics, royalty benchmarks, modality cycles, and 4 market themes reshaping dealmaking.`,
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/reports/q2-2026-biopharma-deal-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/reports/q2-2026-biopharma-deal-benchmarks',
     images: [{ url: '/api/og?title=Q2%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Risk-Adjusted%20Phase%20Economics%20%7C%20Royalty%20Rates%20%7C%20Modality%20Cycles&type=insight', width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', title: `Q2 2026 Biopharma Deal Benchmarks: ${DEAL_STATS.TOTAL_DEALS} Transactions Analyzed`, description: 'Phase 2 is the risk-adjusted optimal exit. Radiopharms +1,408%. ADC premiums normalizing. Royalty rates 3-25% by phase. 4 themes reshaping biopharma dealmaking.' },
-  alternates: { canonical: 'https://calculator.ambrosiaventures.co/reports/q2-2026-biopharma-deal-benchmarks' },
+  alternates: { canonical: 'https://solidus.ambrosiaventures.co/reports/q2-2026-biopharma-deal-benchmarks' },
 };
 
 export const revalidate = 21600;
@@ -194,11 +194,11 @@ export default async function Q2BenchmarkReportPage() {
   const q2Count = await getQ2DealCount();
 
   const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-    { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://calculator.ambrosiaventures.co/reports' },
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+    { '@type': 'ListItem', position: 2, name: 'Reports', item: 'https://solidus.ambrosiaventures.co/reports' },
     { '@type': 'ListItem', position: 3, name: 'Q2 2026 Biopharma Deal Benchmarks' },
   ]};
-  const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q2 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' }, datePublished: '2026-07-15', dateModified: '2026-07-15', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } } };
+  const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q2 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' }, datePublished: '2026-07-15', dateModified: '2026-07-15', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } } };
   const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q2 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, risk-adjusted economics, royalty rates, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
     { '@type': 'Question', name: 'What is the risk-adjusted optimal exit point for biotech assets?', acceptedAnswer: { '@type': 'Answer', text: 'Based on analysis of 1,500+ deals, Phase 2 proof-of-concept is the risk-adjusted optimal exit for most single-asset biotechs. Phase 3 median upfront is $678M vs $300M at Phase 2, but after subtracting $200-500M in trial costs and accounting for 40-50% Phase 3 failure rates, the expected value of holding to Phase 3 is lower than the certain Phase 2 exit value.' } },

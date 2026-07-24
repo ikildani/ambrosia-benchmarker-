@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       details: { invitedEmail: email, role: inviteRole, teamName: team.name },
     });
 
-    const joinUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co'}/portfolio/join?token=${token}`;
+    const joinUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co'}/portfolio/join?token=${token}`;
     await sendPortfolioInviteEmail(email, team.name, inviteRole, joinUrl);
 
     return apiSuccess({

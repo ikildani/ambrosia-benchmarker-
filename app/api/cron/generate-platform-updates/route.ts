@@ -90,7 +90,7 @@ async function generateUpdates(commits: GitHubCommit[]): Promise<GeneratedUpdate
     messages: [
       {
         role: 'user',
-        content: `You are the product communications writer for Ambrosia Ventures, a biopharma deal intelligence platform (calculator.ambrosiaventures.co). The platform helps BD executives, investors, and advisors benchmark licensing deal terms across 1,500+ biopharma transactions.
+        content: `You are the product communications writer for Ambrosia Ventures, a biopharma deal intelligence platform (solidus.ambrosiaventures.co). The platform helps BD executives, investors, and advisors benchmark licensing deal terms across 1,500+ biopharma transactions.
 
 Analyze these recent git commits and produce platform update announcements for our users:
 
@@ -104,7 +104,7 @@ RULES:
 5. Category must be one of: feature, improvement, data, fix, announcement.
 6. Body should be 2-3 sentences max. Direct, specific, institutional tone. No exclamation marks. No marketing fluff. Write like Bloomberg or Refinitiv would announce a terminal update.
 7. Title should be declarative and specific (e.g., "Molecular Target Valuations Are Live", not "New Feature Added").
-8. cta_url should only be set if there's a specific page the user should visit. Use https://calculator.ambrosiaventures.co as the base. Set to null if no specific page applies.
+8. cta_url should only be set if there's a specific page the user should visit. Use https://solidus.ambrosiaventures.co as the base. Set to null if no specific page applies.
 9. cta_label should be action-oriented if set (e.g., "Run a Calculation", "View API Access"). Max 3 words.
 
 Respond with ONLY a JSON array of objects, no markdown, no explanation:

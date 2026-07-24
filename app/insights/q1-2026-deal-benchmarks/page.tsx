@@ -69,7 +69,7 @@ export default function Q1BenchmarksReport() {
               </h1>
 
               <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-lg">
-                Upfront ranges, milestone structures, royalty benchmarks, and deal-flow trends across all 12 therapeutic areas — sourced from {DEAL_STATS.TOTAL_DEALS} verified transactions in the Ambrosia Benchmarker corpus.
+                Upfront ranges, milestone structures, royalty benchmarks, and deal-flow trends across all 12 therapeutic areas — sourced from {DEAL_STATS.TOTAL_DEALS} verified transactions in the Solidus corpus.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
@@ -271,7 +271,7 @@ export default function Q1BenchmarksReport() {
         <div className="max-w-4xl mx-auto text-center">
           <Image src="/logo-white.png" alt="Ambrosia Ventures" width={160} height={32} className="h-6 w-auto mx-auto opacity-40 mb-6" />
           <p className="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            Report data sourced from the Ambrosia Benchmarker deal intelligence platform — {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions,
+            Report data sourced from the Solidus deal intelligence platform — {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions,
             1,308 company profiles, 14 valuation engines. Updated weekly from SEC EDGAR, ClinicalTrials.gov, press disclosures,
             and proprietary calibration corpus.
           </p>

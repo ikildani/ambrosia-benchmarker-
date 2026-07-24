@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     title: 'ADC vs Bispecific Antibody Deal Benchmarks — 2026 Market Data',
     description: 'ADCs command 25-30% upfront premiums over bispecifics. Mega-deal analysis and China licensing wave data.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026',
+    url: 'https://solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026',
     images: [{ url: '/api/og?title=ADC%20vs%20Bispecific%20Deal%20Benchmarks&subtitle=2026%20Market%20Data&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     description: 'ADCs command 25-30% higher upfronts. China licensing wave, mega-deal analysis, and modality premiums.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026',
   },
 };
 
@@ -133,9 +133,9 @@ export default function ADCvsBispecificPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'ADC vs Bispecific Deal Benchmarks 2026', item: 'https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'ADC vs Bispecific Deal Benchmarks 2026', item: 'https://solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026' },
     ],
   };
 
@@ -144,11 +144,11 @@ export default function ADCvsBispecificPage() {
     '@type': 'Article',
     headline: 'ADC vs Bispecific Antibody Deal Benchmarks — 2026 Market Data',
     description: 'How ADC and bispecific antibody deal economics compare across upfronts, total deal values, and recent mega-transactions.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-02',
     dateModified: '2026-04-02',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026',
   };
 
   const faqSchema = {
@@ -301,7 +301,7 @@ export default function ADCvsBispecificPage() {
               ['Median Time to Close', '5-7 months', '4-6 months'],
             ]}
             freeRows={8}
-            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
+            footnote={`Source: Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
           />
 
           <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
@@ -379,7 +379,7 @@ export default function ADCvsBispecificPage() {
               maxValue={361}
               color="#0d9488"
             />
-            <p className="text-xs text-slate-400 mt-3">All phases combined. Source: Ambrosia Benchmarker, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
+            <p className="text-xs text-slate-400 mt-3">All phases combined. Source: Solidus, {DEAL_STATS.TOTAL_DEALS} transactions.</p>
           </div>
 
           <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
@@ -423,7 +423,7 @@ export default function ADCvsBispecificPage() {
               ['2025*', '17', '$1,598M', '$36.7B', 'BMS-TERN ($1.2B)'],
             ]}
             freeRows={7}
-            footnote="*2025 data through Q3. Source: Ambrosia Benchmarker."
+            footnote="*2025 data through Q3. Source: Solidus."
           />
 
           <div className="mt-10 mb-2">
@@ -477,7 +477,7 @@ export default function ADCvsBispecificPage() {
               ['Next-gen Formats', '$100-250M', '$800M-2.0B', 'Trispecifics, conditional activation'],
             ]}
             freeRows={4}
-            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+            footnote={`Source: Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
           />
 
           <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
@@ -597,7 +597,7 @@ export default function ADCvsBispecificPage() {
               ['Gene Therapy', '$100M', '$900M', '~20'],
             ]}
             freeRows={7}
-            footnote={`All phases combined. Deal counts are approximate. Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+            footnote={`All phases combined. Deal counts are approximate. Source: Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
           />
 
           <div className="mt-10 mb-2">
@@ -659,7 +659,7 @@ export default function ADCvsBispecificPage() {
               { q: 'What are typical ADC upfronts in 2026?', a: `Median ADC upfront is $361M across all phases. Phase 2 ADC upfronts range from $200-600M depending on target differentiation, payload novelty, and therapeutic area. Platform deals (multiple targets) command $500M-$4B upfronts, as seen in the Merck-Daiichi collaboration.` },
               { q: 'How has the China licensing wave affected ADC deal terms?', a: 'Chinese-origin ADCs are being licensed to Western pharma at $50-200M upfronts for Phase 1-2 assets. This increases buyer options but also validates modality conviction. The wave has compressed deal timelines and created competitive dynamics that benefit all ADC licensors.' },
               { q: 'Are bispecific deal values catching up?', a: 'Bispecific deal volume is growing faster than ADC deal volume, but the absolute valuation gap has remained stable at 25-30%. Bispecifics are gaining in hematology and immunology, where they match or exceed ADC deal values. In solid tumors, ADCs retain the premium.' },
-              { q: 'What modality has the highest deal valuations in oncology?', a: `ADCs lead with $361M median upfront, followed by bispecifics ($281M), radiopharmaceuticals ($220M), and CAR-T for hematologic malignancies ($185M). Use the Ambrosia Benchmarker to model deal terms for your specific modality.` },
+              { q: 'What modality has the highest deal valuations in oncology?', a: `ADCs lead with $361M median upfront, followed by bispecifics ($281M), radiopharmaceuticals ($220M), and CAR-T for hematologic malignancies ($185M). Use Solidus to model deal terms for your specific modality.` },
             ].map(({ q, a }, i) => (
               <details key={i} className="group py-4">
                 <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-slate-800 hover:text-teal-700">

@@ -113,7 +113,7 @@ ${data.mechanismOfAction ? `- **Mechanism of Action**: ${data.mechanismOfAction}
 6. **CTA paragraph**: "Benchmark your own ${data.therapeuticArea || ''} deal against ${DEAL_STATS.TOTAL_DEALS} comparable transactions" — link to <a href="/calculator">the Ambrosia calculator</a>.
 
 ## INTERNAL LINKS (weave naturally)
-- <a href="/calculator">Deal Calculator</a> — custom benchmarks
+- <a href="/calculator">Solidus</a> — custom benchmarks
 ${data.therapeuticArea ? `- <a href="/benchmarks?ta=${data.therapeuticArea}">${data.therapeuticArea} Deal Benchmarks</a>` : ''}
 
 ## FAQ SECTION
@@ -196,7 +196,7 @@ ${sampleDealsTable}
 7. **CTA paragraph**: "Run your own benchmark with the Ambrosia calculator" — link to <a href="/calculator">the calculator</a>. Mention that the platform has ${DEAL_STATS.TOTAL_DEALS} deals.
 
 ## INTERNAL LINKS (weave naturally)
-- <a href="/calculator">Deal Calculator</a>
+- <a href="/calculator">Solidus</a>
 - <a href="/benchmarks?ta=${data.therapeuticArea}">${data.taLabel} Benchmarks</a>
 
 ## FAQ SECTION
@@ -271,7 +271,7 @@ ${recentDealsRows}
 
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Partner Matching</a> — find your best buyer fit
-- <a href="/calculator">Deal Calculator</a> — benchmark your terms
+- <a href="/calculator">Solidus</a> — benchmark your terms
 ${data.therapeuticAreas[0] ? `- <a href="/benchmarks?ta=${data.therapeuticAreas[0]}">${data.therapeuticAreas[0]} Benchmarks</a>` : ''}
 
 ## FAQ SECTION
@@ -356,7 +356,7 @@ ${topDealsRows}
 7. **CTA paragraph**: "Benchmark your deal against current market rates" — link to <a href="/calculator">the Ambrosia calculator</a>.
 
 ## INTERNAL LINKS (weave naturally)
-- <a href="/calculator">Deal Calculator</a>
+- <a href="/calculator">Solidus</a>
 - <a href="/benchmarks">Deal Benchmarks</a>
 
 ## FAQ SECTION

@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: 'Israel Biotech Deal Benchmarks: Licensing & Partnership Data for the Startup Nation',
     description: '1,600+ life sciences companies. $2.5B+ annual venture funding. Disproportionate innovation per capita. See how Israeli biotech deals benchmark.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/israel-biotech-deal-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/israel-biotech-deal-benchmarks',
     images: [{ url: '/api/og?title=Israel%20Biotech%20Deal%20Benchmarks&subtitle=Licensing%20%26%20Partnership%20Data&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -46,12 +46,12 @@ export const metadata: Metadata = {
     description: 'Israeli biotechs out-license 1-2 phases earlier than US counterparts. Smaller upfronts, heavier milestones, option-heavy structures. Full data inside.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/israel-biotech-deal-benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/israel-biotech-deal-benchmarks',
   },
 };
 
 export default function IsraelBiotechDealBenchmarksPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -471,7 +471,7 @@ export default function IsraelBiotechDealBenchmarksPage() {
             <h2 id="methodology">Methodology and Data Sources</h2>
 
             <p>
-              This analysis is based on Ambrosia Ventures' proprietary deal database of 280+ biopharma licensing and collaboration transactions from 2020 through Q1 2026, with specific focus on Israeli-originated assets and Israel-US partnership structures. Israeli deal benchmarks are derived from a subset of 40+ transactions with Israeli licensors or Israeli-linked development programs, supplemented by Israel Innovation Authority data, TASE (Tel Aviv Stock Exchange) filings, and interviews with Israeli biotech BD professionals. All benchmark ranges represent interquartile ranges unless otherwise specified. For asset-specific deal modeling, use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Deal Benchmarker</Link> to input your parameters and generate calibrated benchmarks.
+              This analysis is based on Ambrosia Ventures' proprietary deal database of 280+ biopharma licensing and collaboration transactions from 2020 through Q1 2026, with specific focus on Israeli-originated assets and Israel-US partnership structures. Israeli deal benchmarks are derived from a subset of 40+ transactions with Israeli licensors or Israeli-linked development programs, supplemented by Israel Innovation Authority data, TASE (Tel Aviv Stock Exchange) filings, and interviews with Israeli biotech BD professionals. All benchmark ranges represent interquartile ranges unless otherwise specified. For asset-specific deal modeling, use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to input your parameters and generate calibrated benchmarks.
             </p>
           </div>
 

@@ -117,7 +117,7 @@ async function main() {
       expires_at: expiresAt,
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
     console.log(`\nAdmin invite created (user not yet registered):`);
     console.log(`  Join URL: ${appUrl}/portfolio/join?token=${token}`);
     console.log(`  Expires:  ${expiresAt}`);

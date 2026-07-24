@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'Life Sciences Deal Trends 2026 | Annual Market Report',
     description: 'Data-driven analysis of biopharma deal activity in 2026: volume, modalities, geography, and outlook.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/reports/deal-trends-2026',
+    url: 'https://solidus.ambrosiaventures.co/reports/deal-trends-2026',
     images: [{ url: '/api/og?title=Deal%20Trends%202026&subtitle=Annual%20Market%20Report&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     description: 'Data-driven analysis of biopharma deal activity in 2026.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/reports/deal-trends-2026',
+    canonical: 'https://solidus.ambrosiaventures.co/reports/deal-trends-2026',
   },
 };
 
 export default function DealTrends2026Page() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -344,7 +344,7 @@ export default function DealTrends2026Page() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { href: '/benchmarks', title: 'Deal Benchmarks', desc: 'Browse real-time deal term benchmarks' },
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Model custom deal parameters' },
+                { href: '/calculator', title: 'Solidus', desc: 'Model custom deal parameters' },
                 { href: '/guides', title: 'Deal Guides', desc: 'In-depth valuation & structuring guides' },
                 { href: '/therapeutic-areas', title: 'Therapeutic Areas', desc: 'TA-specific deal intelligence' },
               ].map((resource) => (

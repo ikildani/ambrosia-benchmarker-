@@ -14,19 +14,19 @@ import { CompetitiveCluster } from '@/components/intelligence/CompetitiveCluster
 import { DealImpactSection } from '@/components/intelligence/DealImpactSection';
 import { createServerClient } from '@/lib/supabase/server';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Live Market Intelligence | Ambrosia Benchmarker',
+  title: 'Live Market Intelligence | Solidus',
   description:
     'Upcoming Phase 3 readouts that will move your deal pricing. Live from ClinicalTrials.gov, sliced by therapeutic area.',
   alternates: { canonical: `${BASE_URL}/intelligence` },
   openGraph: {
-    title: 'Live Market Intelligence | Ambrosia Benchmarker',
+    title: 'Live Market Intelligence | Solidus',
     description: 'Upcoming Phase 3 readouts that will move your deal pricing. Live from ClinicalTrials.gov.',
     type: 'website',
     url: `${BASE_URL}/intelligence`,
-    siteName: 'Ambrosia Benchmarker',
+    siteName: 'Solidus',
     images: [{
       url: '/api/og?title=Live%20Intelligence&subtitle=Upcoming%20readouts%20that%20move%20deal%20pricing',
       width: 1200,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Live Market Intelligence | Ambrosia Benchmarker',
+    title: 'Live Market Intelligence | Solidus',
     description: 'Upcoming Phase 3 readouts. Live from ClinicalTrials.gov.',
   },
 };

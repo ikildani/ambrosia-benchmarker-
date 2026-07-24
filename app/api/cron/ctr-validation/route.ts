@@ -75,7 +75,7 @@ async function getPagePerformance(
   }>;
 
   // Find all entries matching this page path
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
   const fullUrl = pagePath.startsWith('http') ? pagePath : `${baseUrl}${pagePath}`;
 
   const pageEntries = topQueries.filter(

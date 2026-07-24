@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Initiate the Supabase SSO flow
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
 
     try {
       const { data, error } = await supabase.auth.signInWithSSO({

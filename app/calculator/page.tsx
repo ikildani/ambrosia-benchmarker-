@@ -62,7 +62,7 @@ export default function CalculatorPage() {
         <div className="max-w-6xl mx-auto mb-6 sm:mb-8">
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">
-              Deal Terms Calculator
+              Solidus
             </h1>
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto px-2">
               Data-driven estimates for upfront payments, milestones, and royalties across oncology, neurology, immunology, and metabolic/obesity licensing deals

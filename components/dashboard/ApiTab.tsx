@@ -26,7 +26,7 @@ const TIER_OPTIONS = [
   { value: 'enterprise', label: 'Enterprise', quota: '100K/mo' },
 ] as const;
 
-const MCP_ENDPOINT = 'https://calculator.ambrosiaventures.co/api/mcp';
+const MCP_ENDPOINT = 'https://solidus.ambrosiaventures.co/api/mcp';
 
 const CURL_EXAMPLE = `curl -X POST ${MCP_ENDPOINT} \\
   -H "Content-Type: application/json" \\

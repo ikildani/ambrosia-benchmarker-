@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { report, referrer, ua } = body;
+    const { report, referrer, ua, email: submittedEmail } = body;
 
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const geo = request.headers.get('x-vercel-ip-country') || '';
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         else if (host.includes('twitter') || host.includes('x.com')) source = 'Twitter/X';
         else if (host.includes('mail') || host.includes('outlook') || host.includes('gmail')) source = 'Email';
         else if (host.includes('endpts') || host.includes('statnews') || host.includes('fierce') || host.includes('biopharmadive')) source = `Press: ${host}`;
-        else if (host !== 'calculator.ambrosiaventures.co') source = host;
+        else if (host !== 'solidus.ambrosiaventures.co') source = host;
       } catch {
         source = 'Unknown';
       }
@@ -68,11 +68,18 @@ export async function POST(request: NextRequest) {
     let viewerIdentity = 'Anonymous';
     let viewerEmail: string | null = null;
 
-    // Check if they're a logged-in user
-    const authHeader = request.headers.get('cookie') || '';
-    if (authHeader.includes('sb-')) {
+    // Check if email was submitted via the report gate
+    if (submittedEmail && typeof submittedEmail === 'string' && submittedEmail.includes('@')) {
+      viewerEmail = submittedEmail;
+      viewerIdentity = submittedEmail;
+    }
+
+    // Check if they're a logged-in user (use cookie-aware client, not service client)
+    const cookieHeader = request.headers.get('cookie') || '';
+    if (viewerIdentity === 'Anonymous' && cookieHeader.includes('sb-')) {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const authClient = await createServerClient();
+        const { data: { user } } = await authClient.auth.getUser();
         if (user?.email) {
           viewerEmail = user.email;
           viewerIdentity = user.email;
@@ -83,10 +90,11 @@ export async function POST(request: NextRequest) {
     }
 
     // If anonymous, try to match IP to a known user from sessions table
-    if (viewerIdentity === 'Anonymous') {
+    if (viewerIdentity === 'Anonymous' && ip !== 'unknown') {
       const { data: sessionMatch } = await supabase
         .from('sessions')
         .select('user_id')
+        .eq('ip', ip)
         .not('user_id', 'is', null)
         .order('started_at', { ascending: false })
         .limit(1)

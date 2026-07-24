@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     title: 'Deal Intelligence Brief — Full Indication Deal Landscape | Ambrosia Ventures',
     description:
       `The complete deal landscape for any biopharma indication. 52 deal calculations, AI narrative, partner matching, rNPV + Monte Carlo valuation. Calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions. $2,500 all-inclusive with white-label branding.`,
-    url: 'https://calculator.ambrosiaventures.co/benchmark',
+    url: 'https://solidus.ambrosiaventures.co/benchmark',
     type: 'website',
     images: [{
       url: '/api/og?title=Deal%20Intelligence%20Brief&subtitle=52%20Deal%20Calculations%20%C2%B7%20AI%20Narrative%20%C2%B7%2024hr%20Delivery',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     images: ['/api/og?title=Deal%20Intelligence%20Brief&subtitle=52%20Deal%20Calculations%20%C2%B7%20AI%20Narrative%20%C2%B7%2024hr%20Delivery'],
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/benchmark',
+    canonical: 'https://solidus.ambrosiaventures.co/benchmark',
   },
 };
 
@@ -51,7 +51,7 @@ const briefProductSchema = {
   '@type': 'Product',
   name: 'Deal Intelligence Brief',
   description: 'Comprehensive biopharma deal landscape report covering 52 deal calculations across 13 modalities and 4 deal structures for any indication. Includes AI strategic narrative, comparable transactions, partner matching, rNPV valuation, Monte Carlo simulation, and negotiation playbook. White-label branding and walkthrough included.',
-  url: 'https://calculator.ambrosiaventures.co/benchmark',
+  url: 'https://solidus.ambrosiaventures.co/benchmark',
   brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
   offers: {
     '@type': 'Offer',

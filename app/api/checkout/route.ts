@@ -15,7 +15,7 @@ import { notifyCheckoutStarted } from '@/lib/slack/notify';
 export async function POST(request: NextRequest) {
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
 
     if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
       console.error('[checkout] STRIPE_SECRET_KEY not configured or invalid');

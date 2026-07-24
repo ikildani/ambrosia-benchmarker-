@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   title: 'Compare Ambrosia Ventures | Biopharma Deal Intelligence Alternatives',
   description: `Compare Ambrosia Ventures to EvaluatePharma, S&P Capital IQ, and Cortellis for biopharma deal benchmarking. ${DEAL_STATS.TOTAL_DEALS} deals, 14 engines, transparent pricing.`,
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/compare',
+    canonical: 'https://solidus.ambrosiaventures.co/compare',
   },
   openGraph: {
     title: 'Compare Ambrosia Ventures | Biopharma Deal Intelligence Alternatives',
     description: 'See how Ambrosia stacks up against legacy pharma data platforms for deal benchmarking, valuation, and partner matching.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/compare',
+    url: 'https://solidus.ambrosiaventures.co/compare',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
   },
   twitter: {

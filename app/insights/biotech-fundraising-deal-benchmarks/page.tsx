@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Biotech Fundraising vs Licensing — Deal Benchmarks & Decision Framework',
     description: 'A Phase 2 biotech can raise $200M Series C or sign a $1.5B licensing deal with $200M upfront. How to choose the right path.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks',
     images: [{ url: '/api/og?title=Biotech%20Fundraising%20vs%20Licensing&subtitle=Deal%20Benchmarks%20%26%20Decision%20Framework&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'Raise capital or out-license? Phase-by-phase value comparison and decision framework.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks',
   },
 };
 
@@ -87,9 +87,9 @@ export default function BiotechFundraisingDealBenchmarksPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Biotech Fundraising vs Licensing Benchmarks', item: 'https://calculator.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Biotech Fundraising vs Licensing Benchmarks', item: 'https://solidus.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks' },
     ],
   };
 
@@ -98,11 +98,11 @@ export default function BiotechFundraisingDealBenchmarksPage() {
     '@type': 'Article',
     headline: 'Biotech Fundraising vs Licensing — Deal Benchmarks & Decision Framework',
     description: 'Should you raise a Series C or sign a licensing deal? Phase-by-phase value comparison, dilution analysis, and decision frameworks.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-03',
     dateModified: '2026-04-03',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/biotech-fundraising-deal-benchmarks',
   };
 
   const faqSchema = {
@@ -249,7 +249,7 @@ export default function BiotechFundraisingDealBenchmarksPage() {
               ['Filed / IPO', 'IPO: $200-400M', '$2.0B-$8.0B', '$500M-$4.0B', '$2.0B-$10B+', '10-15% (IPO)'],
             ]}
             freeRows={5}
-            footnote={`Fundraising ranges reflect oncology/immunology. Licensing from Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
+            footnote={`Fundraising ranges reflect oncology/immunology. Licensing from Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions.`}
           />
 
           {/* Key Insight callout */}
@@ -487,7 +487,7 @@ export default function BiotechFundraisingDealBenchmarksPage() {
             </p>
 
             <p>
-              <strong>1. Comparable licensing transactions.</strong> Show 3-5 recent deals in your TA and phase with upfronts, total deal values, and deal types. This establishes the market price for assets like yours. Source from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> for verified transaction data.
+              <strong>1. Comparable licensing transactions.</strong> Show 3-5 recent deals in your TA and phase with upfronts, total deal values, and deal types. This establishes the market price for assets like yours. Source from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> for verified transaction data.
             </p>
 
             <p>

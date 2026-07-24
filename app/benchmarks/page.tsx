@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     'royalty rates',
   ],
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/benchmarks',
   },
   openGraph: {
     title: 'Biopharma Deal Benchmarks 2026',
     description:
       'Comprehensive licensing deal benchmarks across 12 therapeutic areas and all major modalities.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/benchmarks',
     images: [
       {
         url: '/api/og?title=Biopharma%20Deal%20Benchmarks%202026&subtitle=12%20Therapeutic%20Areas%20%E2%80%A2%20600%2B%20Deals',
@@ -92,7 +92,7 @@ export default function BenchmarksIndex() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://calculator.ambrosiaventures.co',
+        item: 'https://solidus.ambrosiaventures.co',
       },
       {
         '@type': 'ListItem',
@@ -113,7 +113,7 @@ export default function BenchmarksIndex() {
       '@type': 'ListItem',
       position: index + 1,
       name: page.h1 || page.title,
-      url: `https://calculator.ambrosiaventures.co/benchmarks/${page.slug}`,
+      url: `https://solidus.ambrosiaventures.co/benchmarks/${page.slug}`,
     })),
   };
 

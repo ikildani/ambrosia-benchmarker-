@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: '3 Data Insights from 3,447 Biopharma Deals (2020-2026)',
     description: 'The Phase 2 inflection, immunology\'s hidden premium, and ADC normalization — backed by real deal data.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026',
+    url: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026',
     images: [{ url: '/api/og?title=3%20Deal%20Insights%20from%203%2C447%20Transactions&subtitle=Biopharma%20Benchmarks%202026&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description: 'Phase 2 upfronts jump 2.1x. Immunology beats oncology 4:1. ADCs normalize post-2023.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026',
   },
 };
 
@@ -76,10 +76,10 @@ export default function DealInsightsReport() {
     '@type': 'Article',
     headline: '3 Data-Backed Insights from 3,447 Biopharma Deals (2020-2026)',
     description: 'Analysis of biopharma licensing deal economics across phase, therapeutic area, and modality.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-23',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026',
   };
 
   return (

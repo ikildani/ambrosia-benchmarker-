@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description:
       '16 fund-level capabilities for biotech and pharma VCs. Admin dashboard, white-label reports, dedicated analyst hours, cross-portfolio partner matching, and enterprise infrastructure — from $30,000/yr.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/portfolio',
+    url: 'https://solidus.ambrosiaventures.co/portfolio',
     siteName: 'Ambrosia Ventures',
     images: [{
       url: '/api/og?title=Portfolio%20License&subtitle=The%20Deal%20Intelligence%20Layer%20for%20Biotech%20%26%20Pharma%20VCs&type=landing',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     description: '16 fund-level capabilities. White-label reports. Dedicated analyst hours. Built for biotech VC operating partners.',
     images: ['/api/og?title=Portfolio%20License&subtitle=The%20Deal%20Intelligence%20Layer%20for%20Biotech%20%26%20Pharma%20VCs&type=landing'],
   },
-  alternates: { canonical: 'https://calculator.ambrosiaventures.co/portfolio' },
+  alternates: { canonical: 'https://solidus.ambrosiaventures.co/portfolio' },
 };
 
 // ---------------------------------------------------------------------------
@@ -246,7 +246,7 @@ export default function PortfolioPage() {
     '@type': 'Product',
     name: 'Ambrosia Ventures Portfolio License',
     description: 'The deal intelligence layer for biotech and pharma VC firms. Multi-seat Pro access plus 16 fund-level capabilities: admin dashboard, quarterly portfolio benchmarking reports, fund-branded white-label deliverables, dedicated analyst hours, cross-portfolio partner matching, and enterprise infrastructure.',
-    url: 'https://calculator.ambrosiaventures.co/portfolio',
+    url: 'https://solidus.ambrosiaventures.co/portfolio',
     brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     offers: [
       {
@@ -283,8 +283,8 @@ export default function PortfolioPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Portfolio License', item: 'https://calculator.ambrosiaventures.co/portfolio' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Portfolio License', item: 'https://solidus.ambrosiaventures.co/portfolio' },
     ],
   };
 
@@ -656,7 +656,7 @@ export default function PortfolioPage() {
                     Built on the platform used by <span className="text-teal-400">850+ biopharma BD professionals.</span>
                   </h2>
                   <p className="text-slate-400 leading-relaxed">
-                    Portfolio License is the multi-seat extension of the Ambrosia Ventures Deal Calculator —
+                    Portfolio License is the multi-seat extension of Solidus —
                     the same database, same engines, same {DEAL_STATS.TOTAL_DEALS} transactions trusted by individual BD pros at every major biotech and pharma.
                     Your portfolio companies aren&apos;t getting a separate product — they&apos;re getting the institutional version of what their counterparts at Pfizer, Merck, and Sanofi already use.
                   </p>

@@ -38,6 +38,6 @@ What's the first thing you look at on a term sheet?
 
 I built a platform that models deal structure automatically — upfronts, milestone splits, and royalties by phase, modality, and deal type.
 
-Free to try: calculator.ambrosiaventures.co
+Free to try: solidus.ambrosiaventures.co
 
 3,500+ real transactions from SEC filings, press releases, and regulatory databases.

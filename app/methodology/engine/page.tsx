@@ -7,19 +7,19 @@ import { LiveAccuracyDashboard } from '@/components/methodology/LiveAccuracyDash
 import { FailureCaseExplorer } from '@/components/methodology/FailureCaseExplorer';
 import { DimensionExplorer } from '@/components/methodology/DimensionExplorer';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Engine Methodology | Ambrosia Benchmarker',
+  title: 'Engine Methodology | Solidus',
   description:
     'Technical methodology for the Ambrosia rNPV engine — 14 modeling dimensions, calibration framework, held-out validation, honest limitations. For BD professionals and buy-side analysts who need a defensible model.',
   alternates: { canonical: `${BASE_URL}/methodology/engine` },
   openGraph: {
-    title: 'Engine Methodology | Ambrosia Benchmarker',
+    title: 'Engine Methodology | Solidus',
     description: '14 modeling dimensions, Option B rigor, held-out validation, honest limitations.',
     type: 'article',
     url: `${BASE_URL}/methodology/engine`,
-    siteName: 'Ambrosia Benchmarker',
+    siteName: 'Solidus',
     images: [
       {
         url: '/api/og?title=Engine%20Methodology&subtitle=Finance-grade%20technical%20doc',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engine Methodology | Ambrosia Benchmarker',
+    title: 'Engine Methodology | Solidus',
     description: '14 dimensions, Option B rigor, held-out validation, honest limitations.',
   },
 };

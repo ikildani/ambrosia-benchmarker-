@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'Pharma M&A vs. Licensing: When to Acquire vs. License',
     description: 'Strategic framework for choosing between M&A and licensing in biopharma, with case studies and decision criteria.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/pharma-ma-vs-licensing',
+    url: 'https://solidus.ambrosiaventures.co/guides/pharma-ma-vs-licensing',
     images: [{ url: '/api/og?title=Pharma%20M%26A%20vs.%20Licensing&subtitle=When%20to%20Acquire%20vs.%20License&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     description: 'Strategic framework for choosing between M&A and licensing in biopharma.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/pharma-ma-vs-licensing',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/pharma-ma-vs-licensing',
   },
 };
 
 export default function PharmaMaVsLicensingPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -306,7 +306,7 @@ export default function PharmaMaVsLicensingPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { href: '/benchmarks', title: 'Deal Benchmarks', desc: 'Compare licensing deal terms across TAs' },
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Model licensing vs acquisition economics' },
+                { href: '/calculator', title: 'Solidus', desc: 'Model licensing vs acquisition economics' },
                 { href: '/glossary/total-deal-value', title: 'Total Deal Value', desc: 'Definition and calculation methodology' },
               ].map((resource) => (
                 <Link

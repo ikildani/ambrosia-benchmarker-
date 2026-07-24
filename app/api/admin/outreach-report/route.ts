@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create share link' }, { status: 500 });
     }
 
-    const shareUrl = `https://calculator.ambrosiaventures.co/share/${shareToken}`;
+    const shareUrl = `https://solidus.ambrosiaventures.co/share/${shareToken}`;
 
     return NextResponse.json({
       success: true,

@@ -87,7 +87,7 @@ async function generateEmail(r: OutreachResult): Promise<{ subject: string; body
   const ta = TA_DISPLAY[p.therapeuticArea] || p.therapeuticArea;
   const modality = MODALITY_DISPLAY[p.modality] || p.modality;
   const phase = PHASE_DISPLAY[p.phase] || p.phase;
-  const shareUrl = r.shareUrl || 'https://calculator.ambrosiaventures.co/report';
+  const shareUrl = r.shareUrl || 'https://solidus.ambrosiaventures.co/report';
 
   const isFounder = /founder|ceo|president|chief executive/i.test(c.title);
   const isBD = /business development|licensing|bd|alliance|partnerships/i.test(c.title);

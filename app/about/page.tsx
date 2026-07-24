@@ -4,7 +4,7 @@ import { generateAboutPageSchema, generateBreadcrumbSchema } from '@/lib/seo/str
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'About Ambrosia Ventures | Life Sciences M&A Advisory',
@@ -165,7 +165,7 @@ export default function AboutPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Deal Calculator</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Solidus</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">
                     Instant benchmarks for upfront payments, milestones, royalties, and total deal
                     value — calibrated by therapeutic area, modality, and clinical phase.

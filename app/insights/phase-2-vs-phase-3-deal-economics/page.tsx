@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: 'Phase 2 vs Phase 3 Deal Economics — The Proof-of-Concept Inflection',
     description: 'Phase 2 upfronts jump 2.1x from Phase 1. Phase 3 adds another 2.3x. When to deal at each stage.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics',
+    url: 'https://solidus.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics',
     images: [{ url: '/api/og?title=Phase%202%20vs%20Phase%203%20Deal%20Economics&subtitle=The%20PoC%20Inflection%20Point&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     description: 'The PoC inflection: 2.1x upfront jump at Phase 2, 2.3x more at Phase 3. When to deal.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics',
   },
 };
 
@@ -71,9 +71,9 @@ export default function Phase2VsPhase3Page() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Phase 2 vs Phase 3 Deal Economics', item: 'https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Phase 2 vs Phase 3 Deal Economics', item: 'https://solidus.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics' },
     ],
   };
 
@@ -82,11 +82,11 @@ export default function Phase2VsPhase3Page() {
     '@type': 'Article',
     headline: 'Phase 2 vs Phase 3 Deal Economics — The Proof-of-Concept Inflection',
     description: 'How deal value inflects at proof-of-concept and the risk/reward tradeoff of timing your out-license at Phase 2 vs Phase 3.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-02',
     dateModified: '2026-04-02',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics',
   };
 
   const faqSchema = {

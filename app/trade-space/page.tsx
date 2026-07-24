@@ -7,19 +7,19 @@ import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 import { TradeSpaceForm } from '@/components/trade-space/TradeSpaceForm';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Deal Structure Trade Space | Ambrosia Benchmarker',
+  title: 'Deal Structure Trade Space | Solidus',
   description:
     'Every asset has five possible deal structures — licensing, acquisition, co-development, option, and collaboration. The Ambrosia engine runs all five and ranks them by total value to the licensor.',
   alternates: { canonical: `${BASE_URL}/trade-space` },
   openGraph: {
-    title: 'Deal Structure Trade Space | Ambrosia Benchmarker',
+    title: 'Deal Structure Trade Space | Solidus',
     description: 'The same asset under 5 deal structures, ranked by value. Licensing isn\'t always the answer.',
     type: 'website',
     url: `${BASE_URL}/trade-space`,
-    siteName: 'Ambrosia Benchmarker',
+    siteName: 'Solidus',
     images: [
       {
         url: '/api/og?title=Trade%20Space&subtitle=5%20structures%2C%20ranked%20by%20value',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Structure Trade Space | Ambrosia Benchmarker',
+    title: 'Deal Structure Trade Space | Solidus',
     description: '5 deal structures ranked for each asset. Licensing isn\'t always the answer.',
   },
 };

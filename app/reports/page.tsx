@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: 'Life Sciences Deal Reports | Market Intelligence',
     description: 'Data-driven reports on biopharma licensing trends, deal volume, and market outlook.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/reports',
+    url: 'https://solidus.ambrosiaventures.co/reports',
     images: [{ url: '/api/og?title=Deal%20Reports&subtitle=Market%20Intelligence&type=landing' }],
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     description: 'Data-driven reports on biopharma licensing trends and market outlook.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/reports',
+    canonical: 'https://solidus.ambrosiaventures.co/reports',
   },
 };
 
@@ -55,7 +55,7 @@ export default function ReportsPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
       { '@type': 'ListItem', position: 2, name: 'Reports' },
     ],
   };

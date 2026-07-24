@@ -4,7 +4,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 
 const faqs = [
   {
-    question: "How does the Deal Terms Calculator work?",
+    question: "How does Solidus work?",
     answer: `Enter your asset's details — modality, development phase, indication, and deal type — and our engine analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions to generate benchmark ranges for upfront payments, milestones, royalties, and total deal value. Pro subscribers also get risk-adjusted NPV (rNPV) with Monte Carlo simulation, AI-generated deal memos, negotiation playbooks, partner matching, and branded exports. Results are generated in under 30 seconds.`
   },
   {
@@ -37,7 +37,7 @@ const faqs = [
   },
   {
     question: "Who built this?",
-    answer: "The Deal Terms Calculator is built by Ambrosia Ventures, a life sciences strategy and M&A advisory firm. Our deal experience across biotech licensing, M&A, partnerships, and fundraising is embedded in every calculation. We built the tool we wished existed when advising on real transactions."
+    answer: "Solidus is built by Ambrosia Ventures, a life sciences strategy and M&A advisory firm. Our deal experience across biotech licensing, M&A, partnerships, and fundraising is embedded in every calculation. We built the tool we wished existed when advising on real transactions."
   },
 ];
 

@@ -93,6 +93,7 @@ import { UsageCounter } from './calculator/UsageCounter';
 import type { UserTier } from '@/types/tier';
 
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
+const DealQuery = dynamic(() => import('./DealQuery'), { ssr: false });
 
 const FULL_STEPS: WizardStep[] = [
   { id: 'asset', label: 'Your Asset', shortLabel: 'Asset' },
@@ -532,7 +533,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold font-display text-white truncate">
-                  {state.therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : state.therapeuticArea === 'neurology' ? 'Neurology / CNS' : state.therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : state.therapeuticArea === 'rareDisease' ? 'Rare Disease' : state.therapeuticArea === 'hematology' ? 'Hematology' : state.therapeuticArea === 'dermatology' ? 'Dermatology' : state.therapeuticArea === 'gastroenterology' ? 'Gastroenterology / IBD' : 'Oncology'} Deal Terms Calculator
+                  {state.therapeuticArea === 'metabolic' ? 'Metabolic / Obesity' : state.therapeuticArea === 'neurology' ? 'Neurology / CNS' : state.therapeuticArea === 'immunology' ? 'Immunology / Autoimmune' : state.therapeuticArea === 'rareDisease' ? 'Rare Disease' : state.therapeuticArea === 'hematology' ? 'Hematology' : state.therapeuticArea === 'dermatology' ? 'Dermatology' : state.therapeuticArea === 'gastroenterology' ? 'Gastroenterology / IBD' : 'Oncology'} Solidus
                 </h2>
                 <p className="text-neutral-400 text-xs sm:text-sm mt-0.5">
                   {BENCHMARK_VERSION.LABEL}
@@ -970,6 +971,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
           </ul>
         </div>
       )}
+
+      {/* Deal Intelligence Query */}
+      <div className="mt-8">
+        <DealQuery
+          showBlurredPreview={true}
+          onUpgrade={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+          compact={false}
+        />
+      </div>
 
       {/* Results */}
       <AnimatePresence>

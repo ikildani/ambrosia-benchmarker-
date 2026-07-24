@@ -185,7 +185,7 @@ export function buildWeeklyDigestHtml(
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td align="center">
-                          <img src="https://calculator.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="160" style="display: block; margin: 0 auto 16px; width: 160px; height: auto;" />
+                          <img src="https://solidus.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="160" style="display: block; margin: 0 auto 16px; width: 160px; height: auto;" />
                           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Weekly Market Pulse</h1>
                           <div style="width: 40px; height: 3px; background: linear-gradient(90deg, #14b8a6, #06b6d4); margin: 16px auto; border-radius: 2px;"></div>
                           <p style="color: #94a3b8; margin: 0; font-size: 14px; font-weight: 400;">Week of ${snapshotDateFormatted}</p>
@@ -344,7 +344,7 @@ export function buildWeeklyDigestHtml(
 
                     <!-- CTA -->
                     <div style="padding: 8px 32px 36px; text-align: center;">
-                      <a href="https://calculator.ambrosiaventures.co/pulse" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);">
+                      <a href="https://solidus.ambrosiaventures.co/pulse" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);">
                         View Full Market Pulse &#8594;
                       </a>
                     </div>
@@ -355,7 +355,7 @@ export function buildWeeklyDigestHtml(
                 <!-- Footer -->
                 <tr>
                   <td style="background: #0f172a; padding: 28px 32px; border-radius: 0 0 16px 16px; text-align: center;">
-                    <img src="https://calculator.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="120" style="display: block; margin: 0 auto 8px; width: 120px; height: auto;" />
+                    <img src="https://solidus.ambrosiaventures.co/logo-white.png" alt="Ambrosia Ventures" width="120" style="display: block; margin: 0 auto 8px; width: 120px; height: auto;" />
                     <p style="margin: 0 0 16px; font-size: 12px; color: #64748b;">
                       Data-driven deal intelligence for biopharma
                     </p>
@@ -364,9 +364,9 @@ export function buildWeeklyDigestHtml(
                         <td align="center">
                           <a href="https://ambrosiaventures.co" style="color: #14b8a6; text-decoration: none; font-size: 12px; font-weight: 500;">ambrosiaventures.co</a>
                           <span style="color: #334155; margin: 0 8px;">&middot;</span>
-                          <a href="https://calculator.ambrosiaventures.co" style="color: #14b8a6; text-decoration: none; font-size: 12px; font-weight: 500;">Deal Calculator</a>
+                          <a href="https://solidus.ambrosiaventures.co" style="color: #14b8a6; text-decoration: none; font-size: 12px; font-weight: 500;">Solidus</a>
                           <span style="color: #334155; margin: 0 8px;">&middot;</span>
-                          <a href="https://calculator.ambrosiaventures.co/dashboard?tab=settings" style="color: #64748b; text-decoration: none; font-size: 12px;">Unsubscribe</a>
+                          <a href="https://solidus.ambrosiaventures.co/dashboard?tab=settings" style="color: #64748b; text-decoration: none; font-size: 12px;">Unsubscribe</a>
                         </td>
                       </tr>
                     </table>

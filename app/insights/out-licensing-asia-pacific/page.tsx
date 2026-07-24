@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: 'Out-Licensing Benchmarks Asia Pacific: Japan, China & Regional Deal Data',
     description: 'APAC accounts for 20-30% of global deal value. Japan commands a premium. China is evolving from license-in to license-out. See the data.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/out-licensing-asia-pacific',
+    url: 'https://solidus.ambrosiaventures.co/insights/out-licensing-asia-pacific',
     images: [{ url: '/api/og?title=Out-Licensing%20Benchmarks%20Asia%20Pacific&subtitle=Japan%2C%20China%20%26%20Regional%20Deal%20Data&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -46,12 +46,12 @@ export const metadata: Metadata = {
     description: 'Japan-only deals = 12-18% of global value. China license-in = 8-15%. Full APAC territory data and comparable deals inside.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/out-licensing-asia-pacific',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/out-licensing-asia-pacific',
   },
 };
 
 export default function OutLicensingAsiaPacificPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -456,7 +456,7 @@ export default function OutLicensingAsiaPacificPage() {
             <h2 id="methodology">Methodology and Data Sources</h2>
 
             <p>
-              This analysis draws on Ambrosia Ventures' proprietary deal database of 280+ biopharma licensing and collaboration transactions from 2020 through Q1 2026, with specific focus on deals with APAC territory components. Territory value multipliers are derived from matched-pair analysis of global versus regional deals for comparable assets, supplemented by PMDA, NMPA, and MFDS regulatory data. All benchmark ranges represent interquartile ranges unless otherwise specified. For our full <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">methodology</Link> and <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark data</Link>, see the dedicated pages. For deal-specific APAC territory modeling, use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Deal Benchmarker</Link> to input your asset's parameters and generate region-calibrated benchmarks.
+              This analysis draws on Ambrosia Ventures' proprietary deal database of 280+ biopharma licensing and collaboration transactions from 2020 through Q1 2026, with specific focus on deals with APAC territory components. Territory value multipliers are derived from matched-pair analysis of global versus regional deals for comparable assets, supplemented by PMDA, NMPA, and MFDS regulatory data. All benchmark ranges represent interquartile ranges unless otherwise specified. For our full <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">methodology</Link> and <Link href="/benchmarks" className="text-teal-600 font-medium hover:text-teal-700">benchmark data</Link>, see the dedicated pages. For deal-specific APAC territory modeling, use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to input your asset's parameters and generate region-calibrated benchmarks.
             </p>
           </div>
 

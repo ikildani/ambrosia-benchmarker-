@@ -42,7 +42,7 @@ export const dynamic = 'force-dynamic';
 
 const BATCH_SIZE = 20;
 const SEC_USER_AGENT =
-  'Ambrosia Benchmarker research@ambrosiaventures.co';
+  'Solidus research@ambrosiaventures.co';
 
 /**
  * Convert SEC accession number to filing directory URL.

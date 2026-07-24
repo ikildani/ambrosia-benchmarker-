@@ -19,7 +19,7 @@ Full analysis with embeddable charts: [quarterly report URL]
 You can embed our benchmark chart directly in your article —
 one line of HTML:
 
-<iframe src="https://calculator.ambrosiaventures.co/api/embed/chart?type=phase-upfront&ta=oncology"
+<iframe src="https://solidus.ambrosiaventures.co/api/embed/chart?type=phase-upfront&ta=oncology"
   width="600" height="400" frameborder="0"></iframe>
 
 Happy to share the underlying dataset or provide commentary
@@ -27,7 +27,7 @@ for any story on deal economics.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 **Follow-up (Day 5, if no reply):**
@@ -40,7 +40,7 @@ One additional data point that might be relevant to your coverage:
 [DIFFERENT data hook from data-hooks.md — never repeat the same one].
 
 Our press data kit has citation-ready stats if useful:
-https://calculator.ambrosiaventures.co/press/data-kit
+https://solidus.ambrosiaventures.co/press/data-kit
 
 Happy to be a source anytime.
 
@@ -139,7 +139,7 @@ Latest data: [quarterly report URL]
 
 — Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -251,7 +251,7 @@ We'd be glad to:
 - Provide complimentary member access to our benchmarking tool
 
 Our press data kit with citation-ready statistics:
-https://calculator.ambrosiaventures.co/press/data-kit
+https://solidus.ambrosiaventures.co/press/data-kit
 
 Latest quarterly report:
 [quarterly report link]
@@ -286,7 +286,7 @@ The piece would be 1,200-1,500 words with original data
 visualizations your readers can reference.
 
 All data sourced from our verified transaction database:
-https://calculator.ambrosiaventures.co/press/data-kit
+https://solidus.ambrosiaventures.co/press/data-kit
 
 Let me know if this would be a fit for your editorial calendar.
 

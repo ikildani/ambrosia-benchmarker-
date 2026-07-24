@@ -5,7 +5,7 @@ import { SiteFooter } from '@/components/seo/SiteFooter';
 export const metadata: Metadata = {
   title: 'Therapeutic Area Deal Benchmarks — All 12 TAs | Ambrosia Ventures',
   description: 'Explore biopharma deal benchmarks across 12 therapeutic areas: oncology, neurology, immunology, cardiovascular, metabolic, rare disease, infectious disease, ophthalmology, dermatology, women\'s health, gastroenterology, and hematology.',
-  alternates: { canonical: 'https://calculator.ambrosiaventures.co/therapeutic-areas' },
+  alternates: { canonical: 'https://solidus.ambrosiaventures.co/therapeutic-areas' },
 };
 
 const TAS = [

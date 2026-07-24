@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
               ${body.whiteLabel ? `<li>White-label branding under ${body.brandName || 'your firm name'}</li>` : ''}
             </ul>
             <p>If you have any questions in the meantime, reply directly to this email.</p>
-            <p style="margin-top: 24px;">Best,<br><strong>Issa Kildani</strong><br>Ambrosia Ventures<br>calculator.ambrosiaventures.co</p>
+            <p style="margin-top: 24px;">Best,<br><strong>Issa Kildani</strong><br>Ambrosia Ventures<br>solidus.ambrosiaventures.co</p>
           </div>
         `,
         replyTo: 'ikildani@ambrosiaventures.co',

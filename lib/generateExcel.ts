@@ -757,7 +757,7 @@ export async function generateExcelReport(
     '',
     'Consult qualified professionals before making business decisions.',
     '',
-    '\u00A9 Ambrosia Ventures - calculator.ambrosiaventures.co',
+    '\u00A9 Ambrosia Ventures - solidus.ambrosiaventures.co',
   ];
   methLines.forEach((line, i) => {
     ws6.getCell(2 + i, 1).value = line;
@@ -885,7 +885,7 @@ export async function generateDealsExcel(deals: DealForExcel[], filters?: Record
     'This data is for informational purposes only.',
     'Deal terms are based on publicly available information.',
     'Some financial details may be undisclosed or estimated.',
-    '', '\u00A9 Ambrosia Ventures - calculator.ambrosiaventures.co',
+    '', '\u00A9 Ambrosia Ventures - solidus.ambrosiaventures.co',
   ].forEach(line => ws3.addRow([line]));
 
   // Generate and download

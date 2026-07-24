@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Average Upfront Payments in Oncology Licensing Deals (2020-2026)',
     description: 'Oncology upfronts range 57x from $14M discovery to $800M approved. Benchmark data across 7 phases and 8 modalities.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
     images: [{ url: '/api/og?title=Oncology%20Upfront%20Payment%20Benchmarks&subtitle=2020%E2%80%932026%20Licensing%20Deal%20Data&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: `Benchmark data across 7 development phases and 8 modalities from ${DEAL_STATS.TOTAL_DEALS} real biopharma transactions.`,
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
   },
 };
 
@@ -53,9 +53,9 @@ export default function OncologyUpfrontBenchmarksPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Oncology Upfront Benchmarks', item: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Oncology Upfront Benchmarks', item: 'https://solidus.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks' },
     ],
   };
 
@@ -64,11 +64,11 @@ export default function OncologyUpfrontBenchmarksPage() {
     '@type': 'Article',
     headline: 'Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks',
     description: 'Oncology licensing deal upfronts range from $14M at discovery to $800M for approved assets. Benchmark data across 7 development phases and 8 modalities.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-24',
     dateModified: '2026-03-24',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
   };
 
   const faqSchema = {
@@ -123,10 +123,10 @@ export default function OncologyUpfrontBenchmarksPage() {
     '@type': 'Dataset',
     name: 'Oncology Licensing Deal Upfront Payments (2020-2026)',
     description: 'Benchmark data for upfront payments in oncology licensing deals across 7 development phases and 8 modalities.',
-    url: 'https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks',
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     temporalCoverage: '2020/2026',
-    distribution: { '@type': 'DataDownload', contentUrl: 'https://calculator.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
+    distribution: { '@type': 'DataDownload', contentUrl: 'https://solidus.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
     variableMeasured: [
       { '@type': 'PropertyValue', name: 'Upfront Payment', unitText: 'USD millions' },
       { '@type': 'PropertyValue', name: 'Total Deal Value', unitText: 'USD millions' },
@@ -207,7 +207,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             </p>
 
             <p>
-              This analysis presents the complete upfront payment benchmarks for <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology licensing deals</Link> from 2020 through early 2026, drawing on over 3,500 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link>. We cover every development phase from discovery through approved, every major modality from small molecules to radiopharmaceuticals, and the real deal comps that define the current market. For a broader view of deal economics across all therapeutic areas, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
+              This analysis presents the complete upfront payment benchmarks for <Link href="/therapeutic-areas/oncology" className="text-teal-600 font-medium hover:text-teal-700">oncology licensing deals</Link> from 2020 through early 2026, drawing on over 3,500 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link>. We cover every development phase from discovery through approved, every major modality from small molecules to radiopharmaceuticals, and the real deal comps that define the current market. For a broader view of deal economics across all therapeutic areas, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
             </p>
 
             <h2 id="why-oncology-upfronts-vary">Why Oncology Upfronts Vary 57x by Phase</h2>
@@ -245,7 +245,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             freeRows={4}
             ctaText="Unlock all 7 phases — Free calculator"
             ctaHref="/calculator"
-            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026. Median values.`}
+            footnote={`Source: Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026. Median values.`}
           />
         </div>
 
@@ -456,7 +456,7 @@ export default function OncologyUpfrontBenchmarksPage() {
             <h2 id="methodology">Methodology and Data Sources</h2>
 
             <p>
-              The benchmarks in this analysis are derived from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset, which tracks over 3,500 biopharma transactions from 2020 through Q1 2026. Data sources include SEC filings (8-K, 10-K, and 10-Q), company press releases, and verified third-party databases. All values are reported as medians unless otherwise noted. Modality multipliers are calculated as the ratio of modality-specific median upfronts to small molecule baselines at equivalent phases. The <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">companion analysis on deal structure terms</Link> provides additional context on <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">milestone</Link> and royalty benchmarks. For details on how our calculations work, see our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">full methodology documentation</Link>.
+              The benchmarks in this analysis are derived from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> dataset, which tracks over 3,500 biopharma transactions from 2020 through Q1 2026. Data sources include SEC filings (8-K, 10-K, and 10-Q), company press releases, and verified third-party databases. All values are reported as medians unless otherwise noted. Modality multipliers are calculated as the ratio of modality-specific median upfronts to small molecule baselines at equivalent phases. The <Link href="/insights/biotech-out-licensing-deal-terms-2025-2026" className="text-teal-600 font-medium hover:text-teal-700">companion analysis on deal structure terms</Link> provides additional context on <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">milestone</Link> and royalty benchmarks. For details on how our calculations work, see our <Link href="/methodology" className="text-teal-600 font-medium hover:text-teal-700">full methodology documentation</Link>.
             </p>
 
             <h2 id="faq">Frequently Asked Questions</h2>

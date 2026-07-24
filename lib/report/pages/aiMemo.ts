@@ -18,7 +18,7 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
         </div>
         <div class="card" style="text-align: center; padding: 40px;">
           <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">Deal analysis not yet generated for this report.</div>
-          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit calculator.ambrosiaventures.co to generate a negotiation playbook and deal memo.</div>
+          <div style="font-size: 10px; color: ${COLORS.gray400};">Visit solidus.ambrosiaventures.co to generate a negotiation playbook and deal memo.</div>
         </div>
         ${pageFooter(meta.reportId)}
       </div>

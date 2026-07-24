@@ -8,19 +8,19 @@ import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 import { SimulatorForm } from '@/components/simulator/SimulatorForm';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Negotiation Simulator (ZOPA) | Ambrosia Benchmarker',
+  title: 'Negotiation Simulator (ZOPA) | Solidus',
   description:
     'Where should you open? The Ambrosia engine combines rNPV base valuation, counterparty historical premiums, and your cash-runway BATNA to show the zone of agreement and recommended opening position.',
   alternates: { canonical: `${BASE_URL}/simulator` },
   openGraph: {
-    title: 'Negotiation Simulator | Ambrosia Benchmarker',
+    title: 'Negotiation Simulator | Solidus',
     description: 'Where should you open? Engine computes ZOPA from rNPV, buyer premium, and your BATNA.',
     type: 'website',
     url: `${BASE_URL}/simulator`,
-    siteName: 'Ambrosia Benchmarker',
+    siteName: 'Solidus',
     images: [
       {
         url: '/api/og?title=Negotiation%20Simulator&subtitle=ZOPA%20%2B%20recommended%20opening',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Negotiation Simulator | Ambrosia Benchmarker',
+    title: 'Negotiation Simulator | Solidus',
     description: 'Engine computes ZOPA from rNPV, buyer premium, and your BATNA. See where to open.',
   },
 };

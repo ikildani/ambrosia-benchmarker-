@@ -69,7 +69,7 @@ function JoinPageContent() {
             <span className="text-xs font-semibold text-teal-300 uppercase tracking-wider">Team Invite</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Join Your Team</h1>
-          <p className="text-sm text-slate-400 mt-2">Accept the invite to get started with Ambrosia Benchmarker</p>
+          <p className="text-sm text-slate-400 mt-2">Accept the invite to get started with Solidus</p>
         </div>
 
         {/* Card */}

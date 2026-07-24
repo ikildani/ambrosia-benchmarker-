@@ -32,7 +32,7 @@ export function AuthorSchema({
       url: 'https://ambrosiaventures.co',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://calculator.ambrosiaventures.co/logo.png',
+        url: 'https://solidus.ambrosiaventures.co/logo.png',
       },
     },
     publisher: {
@@ -41,7 +41,7 @@ export function AuthorSchema({
       url: 'https://ambrosiaventures.co',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://calculator.ambrosiaventures.co/logo.png',
+        url: 'https://solidus.ambrosiaventures.co/logo.png',
       },
     },
     mainEntityOfPage: {

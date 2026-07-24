@@ -10,7 +10,7 @@ import sgMail from '@sendgrid/mail';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY!;
-const APP_URL = 'https://calculator.ambrosiaventures.co';
+const APP_URL = 'https://solidus.ambrosiaventures.co';
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
@@ -47,7 +47,7 @@ function buildWelcomeEmail(name: string, magicLink?: string | null): string {
   </div>
   <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
     <p style="font-size: 16px;">Hi ${name},</p>
-    <p>Your <strong>Pro account</strong> on the Ambrosia Deal Benchmarker is live. You now have full access to:</p>
+    <p>Your <strong>Pro account</strong> on Solidus is live. You now have full access to:</p>
     <ul style="padding-left: 20px; color: #334155;">
       <li><strong>14 valuation engines</strong> — rNPV, Monte Carlo, Real Options, Buyer-Specific Valuation, and more</li>
       <li><strong>1,900+ verified deals</strong> — sourced from SEC 8-K filings across 12 therapeutic areas</li>
@@ -61,7 +61,7 @@ function buildWelcomeEmail(name: string, magicLink?: string | null): string {
     <p style="color: #64748b; font-size: 14px;">${ctaNote}</p>
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
     <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-      Ambrosia Ventures · <a href="${APP_URL}" style="color: #0d9488;">calculator.ambrosiaventures.co</a><br>
+      Ambrosia Ventures · <a href="${APP_URL}" style="color: #0d9488;">solidus.ambrosiaventures.co</a><br>
       Questions? Reply to this email or reach us at hello@ambrosiaventures.co
     </p>
   </div>

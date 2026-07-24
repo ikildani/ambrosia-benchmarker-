@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation: Complete Guide',
     description: 'Master the industry-standard rNPV methodology for valuing biotech assets and licensing deals.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/rnpv-biotech-valuation',
+    url: 'https://solidus.ambrosiaventures.co/guides/rnpv-biotech-valuation',
     images: [{ url: '/api/og?title=rNPV%20Biotech%20Valuation&subtitle=Complete%20Guide&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -33,12 +33,12 @@ export const metadata: Metadata = {
     description: 'Master the industry-standard rNPV methodology for valuing biotech assets.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/rnpv-biotech-valuation',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/rnpv-biotech-valuation',
   },
 };
 
 export default function RnpvBiotechValuationPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -446,7 +446,7 @@ export default function RnpvBiotechValuationPage() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Run rNPV-based deal benchmarks' },
+                { href: '/calculator', title: 'Solidus', desc: 'Run rNPV-based deal benchmarks' },
                 { href: '/methodology', title: 'Methodology', desc: 'PoS rates and model assumptions' },
                 { href: '/glossary/risk-adjusted-npv', title: 'rNPV Glossary', desc: 'Definition and industry context' },
               ].map((resource) => (

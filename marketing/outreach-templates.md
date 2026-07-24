@@ -16,7 +16,7 @@ What makes it different:
 - **AI-generated negotiation playbooks** and deal memos
 - **Scenario planner** with 28 stress-test scenarios and defensive analysis
 
-It's free to try: https://calculator.ambrosiaventures.co/calculator
+It's free to try: https://solidus.ambrosiaventures.co/calculator
 
 We're exploring partnerships with advisory firms. Would love 15 minutes to show you how [Firm] could use it — or white-label it for client work.
 
@@ -43,7 +43,7 @@ We built a tool that gives BD teams instant deal term benchmarks from 600+ real 
 - rNPV analysis with Monte Carlo simulation
 - Top 15 comparable deals
 
-Try it free: https://calculator.ambrosiaventures.co/calculator
+Try it free: https://solidus.ambrosiaventures.co/calculator
 
 Would a 15-minute demo be useful for your BD team?
 
@@ -66,7 +66,7 @@ When evaluating licensing terms for portfolio companies, having real benchmark d
 - Stress-test valuations with 28 scenario templates
 - Compare across 12 therapeutic areas and all major modalities
 
-Free to try: https://calculator.ambrosiaventures.co/calculator
+Free to try: https://solidus.ambrosiaventures.co/calculator
 
 Worth a look next time you're evaluating a licensing term sheet.
 
@@ -93,7 +93,7 @@ Would you be open to a 20-minute conversation?
 
 Best,
 [Your name]
-https://calculator.ambrosiaventures.co
+https://solidus.ambrosiaventures.co
 
 ---
 
@@ -116,7 +116,7 @@ Happy to provide:
 - Guest article on deal benchmarking trends
 - Data insights (e.g., "How ADC deal terms have evolved 2020-2026")
 
-Try it: https://calculator.ambrosiaventures.co
+Try it: https://solidus.ambrosiaventures.co
 
 Best,
 [Your name]
@@ -136,7 +136,7 @@ I'd love to discuss:
 - **Sponsorship**: booth or tool demo at [Event Name]
 - **Content partnership**: co-branded deal term analysis for your members
 
-Our tool: https://calculator.ambrosiaventures.co
+Our tool: https://solidus.ambrosiaventures.co
 
 Would this be of interest for [upcoming event]?
 
@@ -147,14 +147,14 @@ Best,
 
 ## LinkedIn DM Template (Short)
 
-Hi [Name] — I noticed your work in [biopharma BD / licensing / deal advisory]. We built a free tool that gives instant deal term benchmarks from 600+ real biopharma transactions (rNPV, Monte Carlo, AI deal memos). Would love your feedback: calculator.ambrosiaventures.co
+Hi [Name] — I noticed your work in [biopharma BD / licensing / deal advisory]. We built a free tool that gives instant deal term benchmarks from 600+ real biopharma transactions (rNPV, Monte Carlo, AI deal memos). Would love your feedback: solidus.ambrosiaventures.co
 
 ---
 
 ## X/Twitter Post Ideas
 
-1. "We analyzed 600+ biopharma licensing deals. Here's what Phase 2 oncology ADC upfronts look like in 2026: [screenshot of calculator results]. Try it free: calculator.ambrosiaventures.co"
+1. "We analyzed 600+ biopharma licensing deals. Here's what Phase 2 oncology ADC upfronts look like in 2026: [screenshot of calculator results]. Try it free: solidus.ambrosiaventures.co"
 
-2. "Building an rNPV model for a licensing deal? We built a free Monte Carlo simulator with 10,000 iterations, 28 scenario templates, and AI deal memos. calculator.ambrosiaventures.co"
+2. "Building an rNPV model for a licensing deal? We built a free Monte Carlo simulator with 10,000 iterations, 28 scenario templates, and AI deal memos. solidus.ambrosiaventures.co"
 
-3. "BD teams: stop spending 2 weeks on manual deal comps. Get instant benchmarks from 600+ real transactions in 30 seconds. Free: calculator.ambrosiaventures.co"
+3. "BD teams: stop spending 2 weeks on manual deal comps. Get instant benchmarks from 600+ real transactions in 30 seconds. Free: solidus.ambrosiaventures.co"

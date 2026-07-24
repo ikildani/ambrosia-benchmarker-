@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     // Step 5: Partner matches
     let partnerMatches;
     try {
-      const response = await fetch('https://calculator.ambrosiaventures.co/api/partners/match', {
+      const response = await fetch('https://solidus.ambrosiaventures.co/api/partners/match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
       briefToken,
       pdfUrl,
       pageCount: Math.round(pdfBuffer.length / 25000),
-      dataRoomUrl: `https://calculator.ambrosiaventures.co/brief/${briefToken}`,
+      dataRoomUrl: `https://solidus.ambrosiaventures.co/brief/${briefToken}`,
     });
   } catch (error) {
     console.error('[Benchmark Gen] Fatal error:', error);

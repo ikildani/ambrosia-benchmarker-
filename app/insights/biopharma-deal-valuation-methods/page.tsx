@@ -17,7 +17,7 @@ const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEma
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const PAGE_URL = `${BASE_URL}/insights/biopharma-deal-valuation-methods`;
 
 export const metadata: Metadata = {

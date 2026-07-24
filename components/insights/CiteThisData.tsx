@@ -13,8 +13,8 @@ interface CiteThisDataProps {
 export function CiteThisData({ title, pageUrl, embedType = 'phase-upfront', embedTA = 'oncology' }: CiteThisDataProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
-  const fullUrl = pageUrl.startsWith('http') ? pageUrl : `https://calculator.ambrosiaventures.co${pageUrl}`;
-  const embedUrl = `https://calculator.ambrosiaventures.co/api/embed/chart?type=${embedType}&ta=${embedTA}&theme=light`;
+  const fullUrl = pageUrl.startsWith('http') ? pageUrl : `https://solidus.ambrosiaventures.co${pageUrl}`;
+  const embedUrl = `https://solidus.ambrosiaventures.co/api/embed/chart?type=${embedType}&ta=${embedTA}&theme=light`;
 
   const apaText = `Ambrosia Ventures. (2026). ${title}. Retrieved from ${fullUrl}`;
   const htmlText = `<a href="${fullUrl}">${title}</a> — Ambrosia Ventures (2026)`;

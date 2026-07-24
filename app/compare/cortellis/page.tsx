@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   description:
     'Compare Ambrosia Ventures to Clarivate Cortellis for pharma deal intelligence. Pricing, deal mechanics depth, and real-time analytics.',
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/compare/cortellis',
+    canonical: 'https://solidus.ambrosiaventures.co/compare/cortellis',
   },
   openGraph: {
     title: 'Ambrosia vs Cortellis | Pharmaceutical Deal Terms & Valuation',
     description:
       'Compare Ambrosia Ventures to Clarivate Cortellis for pharma deal intelligence. Pricing, deal mechanics depth, and real-time analytics.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/compare/cortellis',
+    url: 'https://solidus.ambrosiaventures.co/compare/cortellis',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
   },
   twitter: {

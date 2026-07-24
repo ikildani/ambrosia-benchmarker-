@@ -789,7 +789,7 @@ async function generateComparison(
     const topicKey = `comparison:${competitor.slug}`;
     if (usedKeys.has(topicKey)) continue;
 
-    const title = `Ambrosia Benchmarker vs. ${competitor.name}: ${competitor.angle.charAt(0).toUpperCase() + competitor.angle.slice(1)}`;
+    const title = `Solidus vs. ${competitor.name}: ${competitor.angle.charAt(0).toUpperCase() + competitor.angle.slice(1)}`;
     const targetKeyword =
       `${competitor.name} alternative pharma deal benchmarking`.toLowerCase();
 

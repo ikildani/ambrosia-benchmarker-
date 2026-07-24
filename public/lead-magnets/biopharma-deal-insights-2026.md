@@ -69,9 +69,9 @@ Antibody-drug conjugates had a once-in-a-generation moment in 2023, driven by th
 
 These insights are drawn from the Ambrosia Ventures deal database — 3,447 biopharma licensing, acquisition, co-development, and option deals from 2017-2026. All figures represent disclosed financial terms from public filings, press releases, and verified sources.
 
-**Run your own analysis:** calculator.ambrosiaventures.co
+**Run your own analysis:** solidus.ambrosiaventures.co
 
 ---
 
 *Ambrosia Ventures | Biopharma Deal Intelligence*
-*calculator.ambrosiaventures.co*
+*solidus.ambrosiaventures.co*

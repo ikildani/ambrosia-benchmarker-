@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Deal Committee Presentation Guide — How to Get BD Deals Approved',
     description: 'Comparable transactions, rNPV scenarios, and the negotiation playbook framework that gets deals through committee.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/deal-committee-presentation-guide',
+    url: 'https://solidus.ambrosiaventures.co/insights/deal-committee-presentation-guide',
     images: [{ url: '/api/og?title=Deal%20Committee%20Presentation%20Guide&subtitle=How%20to%20Get%20BD%20Deals%20Approved&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'The 3 things every deal committee needs: comparable transactions, risk-adjusted valuation, and a negotiation playbook.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/deal-committee-presentation-guide',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/deal-committee-presentation-guide',
   },
 };
 
@@ -111,9 +111,9 @@ export default function DealCommitteePresentationGuidePage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Deal Committee Presentation Guide', item: 'https://calculator.ambrosiaventures.co/insights/deal-committee-presentation-guide' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Deal Committee Presentation Guide', item: 'https://solidus.ambrosiaventures.co/insights/deal-committee-presentation-guide' },
     ],
   };
 
@@ -122,11 +122,11 @@ export default function DealCommitteePresentationGuidePage() {
     '@type': 'Article',
     headline: 'Deal Committee Presentation Guide — How to Get BD Deals Approved',
     description: 'How to build a deal committee presentation with comparable transactions, rNPV scenarios, and negotiation playbooks that get deals approved.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-03',
     dateModified: '2026-04-03',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/deal-committee-presentation-guide',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/deal-committee-presentation-guide',
   };
 
   const faqSchema = {
@@ -245,7 +245,7 @@ export default function DealCommitteePresentationGuidePage() {
             'Deal committees evaluate five things: comparable transactions, risk-adjusted valuation, competitive landscape, strategic rationale, and negotiation parameters. Missing any one can delay or kill a deal.',
             'The most common reason deals fail at committee is cherry-picked comparables. Present the full range with 5-8 primary comps and explain where the proposed deal should fall and why.',
             'Bear/base/bull rNPV scenarios with a tornado sensitivity chart demonstrate rigor. Committees distrust single-point valuations.',
-            `A board-ready deal report with all five elements can be generated in 60 seconds from the Ambrosia Benchmarker for ${PRICING.REPORT_PRICE}.`,
+            `A board-ready deal report with all five elements can be generated in 60 seconds from Solidus for ${PRICING.REPORT_PRICE}.`,
           ]} />
 
           {/* ── SECTION 1: WHAT DEAL COMMITTEES EVALUATE ── */}
@@ -406,7 +406,7 @@ export default function DealCommitteePresentationGuidePage() {
                 ['Proposed Deal', '2026', '$300M', '$2.0B', '15.0%', 'At median — defensible'],
               ]}
               freeRows={7}
-              footnote="Illustrative example. Real comparables available through Ambrosia Benchmarker."
+              footnote="Illustrative example. Real comparables available through Solidus."
             />
           </div>
 

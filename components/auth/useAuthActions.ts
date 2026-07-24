@@ -96,7 +96,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email, name, company,
-            source: 'Deal Calculator Sign Up',
+            source: 'Solidus Sign Up',
             timestamp: new Date().toISOString(),
           }),
         });
@@ -154,7 +154,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email, name, company,
-            source: 'Deal Calculator Sign Up',
+            source: 'Solidus Sign Up',
             timestamp: new Date().toISOString(),
           }),
         });

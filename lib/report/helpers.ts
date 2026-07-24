@@ -89,7 +89,7 @@ export function pageFooter(reportId: string): string {
   return `
     <div style="position: absolute; bottom: 24px; left: 48px; right: 48px; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 2px solid #e2e8f0;">
       <span style="font-size: 7px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">Confidential &middot; ${now}</span>
-      <span style="font-size: 7px; color: #64748b; letter-spacing: 0.04em;">Powered by <span style="color: #0d9488; font-weight: 700;">Ambrosia Ventures</span> &middot; calculator.ambrosiaventures.co</span>
+      <span style="font-size: 7px; color: #64748b; letter-spacing: 0.04em;">Powered by <span style="color: #0d9488; font-weight: 700;">Ambrosia Ventures</span> &middot; solidus.ambrosiaventures.co</span>
       <span style="font-size: 7px; color: #0d9488; font-weight: 700; letter-spacing: 0.04em;">${reportId}</span>
     </div>
   `;

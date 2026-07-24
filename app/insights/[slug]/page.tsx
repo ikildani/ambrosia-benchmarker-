@@ -19,7 +19,7 @@ export async function generateMetadata({
   const insight = getInsightBySlug(slug);
   if (!insight) return {};
 
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
   const ogUrl = `${baseUrl}/api/og?type=insight&stat=${encodeURIComponent(insight.stat)}&title=${encodeURIComponent(insight.title)}`;
 
   return {
@@ -53,7 +53,7 @@ export default async function InsightPage({
   const insight = getInsightBySlug(slug);
   if (!insight) notFound();
 
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
   const calcUrl = `${baseUrl}/calculator?${new URLSearchParams(
     Object.entries(insight.calculatorPrefill).filter(([, v]) => v) as [string, string][]
   ).toString()}`;
@@ -67,8 +67,8 @@ export default async function InsightPage({
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://calculator.ambrosiaventures.co" },
-          { "@type": "ListItem", "position": 2, "name": "Insights", "item": "https://calculator.ambrosiaventures.co/insights" },
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://solidus.ambrosiaventures.co" },
+          { "@type": "ListItem", "position": 2, "name": "Insights", "item": "https://solidus.ambrosiaventures.co/insights" },
           { "@type": "ListItem", "position": 3, "name": insight.title }
         ]
       })}} />
@@ -77,10 +77,10 @@ export default async function InsightPage({
         "@type": "Article",
         "headline": `${insight.stat} — ${insight.title}`,
         "description": insight.context,
-        "author": { "@type": "Organization", "name": "Ambrosia Ventures", "url": "https://calculator.ambrosiaventures.co" },
-        "publisher": { "@type": "Organization", "name": "Ambrosia Ventures", "url": "https://calculator.ambrosiaventures.co", "logo": { "@type": "ImageObject", "url": "https://calculator.ambrosiaventures.co/logo.png" } },
-        "mainEntityOfPage": `https://calculator.ambrosiaventures.co/insights/${slug}`,
-        "image": `https://calculator.ambrosiaventures.co/api/og?type=insight&stat=${encodeURIComponent(insight.stat)}&title=${encodeURIComponent(insight.title)}`,
+        "author": { "@type": "Organization", "name": "Ambrosia Ventures", "url": "https://solidus.ambrosiaventures.co" },
+        "publisher": { "@type": "Organization", "name": "Ambrosia Ventures", "url": "https://solidus.ambrosiaventures.co", "logo": { "@type": "ImageObject", "url": "https://solidus.ambrosiaventures.co/logo.png" } },
+        "mainEntityOfPage": `https://solidus.ambrosiaventures.co/insights/${slug}`,
+        "image": `https://solidus.ambrosiaventures.co/api/og?type=insight&stat=${encodeURIComponent(insight.stat)}&title=${encodeURIComponent(insight.title)}`,
         "articleSection": "Biopharma Deal Intelligence",
         "keywords": "biopharma deals, licensing benchmarks, deal intelligence",
       })}} />
@@ -173,7 +173,7 @@ export default async function InsightPage({
             href="/calculator"
             className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors"
           >
-            Try the Deal Calculator →
+            Try Solidus →
           </Link>
         </div>
       </section>

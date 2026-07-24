@@ -152,7 +152,7 @@ ${ft('Competitive Landscape — MastOnorm / Lesion Free Skin',4)}
 </div></div>
 
 <div class="card mt3" style="text-align:center">
-<p class="xxs sc">Data Sources: Ambrosia Ventures proprietary database (1,900+ transactions), SEC EDGAR, FDA Orange Book, ClinicalTrials.gov, IQVIA, Grand View Research. Engine: calculator.ambrosiaventures.co — 14 integrated engines calibrated quarterly.</p>
+<p class="xxs sc">Data Sources: Ambrosia Ventures proprietary database (1,900+ transactions), SEC EDGAR, FDA Orange Book, ClinicalTrials.gov, IQVIA, Grand View Research. Engine: solidus.ambrosiaventures.co — 14 integrated engines calibrated quarterly.</p>
 <p class="xxs sc mt1">© 2026 Ambrosia Ventures. Strictly Confidential.</p>
 </div>
 ${ft('Competitive Landscape — Portfolio Summary',5)}

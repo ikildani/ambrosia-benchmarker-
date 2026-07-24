@@ -9,7 +9,7 @@ import { getAllProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
 import { getAllPseoSlugs } from '@/lib/pseoPages';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

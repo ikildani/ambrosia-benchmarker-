@@ -34,6 +34,6 @@ If you could choose your TA purely on deal economics, would you still pick oncol
 
 I built a platform that models deal structure by therapeutic area — upfronts, milestones, royalties, by phase, modality, and deal type.
 
-Free to try: calculator.ambrosiaventures.co
+Free to try: solidus.ambrosiaventures.co
 
 3,500+ real transactions from SEC filings, press releases, and regulatory databases.

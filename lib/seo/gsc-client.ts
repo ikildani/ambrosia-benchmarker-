@@ -34,7 +34,7 @@ export class GSCClient {
   private authMethod: 'service_account' | 'oauth2' | 'none' = 'none';
 
   constructor() {
-    this.siteUrl = process.env.GSC_SITE_URL || 'https://calculator.ambrosiaventures.co';
+    this.siteUrl = process.env.GSC_SITE_URL || 'https://solidus.ambrosiaventures.co';
 
     // Method 1: Service account (existing — preferred if available)
     const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;

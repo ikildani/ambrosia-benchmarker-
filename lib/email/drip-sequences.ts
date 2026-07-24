@@ -64,7 +64,7 @@ export function buildDay0Email(
   <p style="font-size: 15px; color: #334155;">This is the kind of structural insight that moves deals. The headline numbers get you in the room — the structure is what determines whether you leave money on the table.</p>
 
   <div style="text-align: center; margin: 28px 0 20px;">
-    <a href="https://calculator.ambrosiaventures.co/calculator" style="display: inline-block; background: #0f172a; color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+    <a href="https://solidus.ambrosiaventures.co/calculator" style="display: inline-block; background: #0f172a; color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
       Explore more benchmarks
     </a>
   </div>
@@ -74,7 +74,7 @@ export function buildDay0Email(
 
 <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
   <p style="margin: 0;">Ambrosia Ventures · <a href="https://ambrosiaventures.co" style="color: #94a3b8;">ambrosiaventures.co</a></p>
-  <p style="margin: 6px 0 0;"><a href="https://calculator.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
+  <p style="margin: 6px 0 0;"><a href="https://solidus.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
 </div>
 
 </body></html>`;
@@ -136,7 +136,7 @@ export function buildDay3Email(
   <p style="font-size: 15px; color: #334155;">Seeing a modality or indication you haven't explored? Run a benchmark to see where your deal stacks up.</p>
 
   <div style="text-align: center; margin: 28px 0 20px;">
-    <a href="https://calculator.ambrosiaventures.co/calculator" style="display: inline-block; background: #0f172a; color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+    <a href="https://solidus.ambrosiaventures.co/calculator" style="display: inline-block; background: #0f172a; color: #fff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
       See the full deal breakdown
     </a>
   </div>
@@ -146,7 +146,7 @@ export function buildDay3Email(
 
 <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
   <p style="margin: 0;">Ambrosia Ventures · <a href="https://ambrosiaventures.co" style="color: #94a3b8;">ambrosiaventures.co</a></p>
-  <p style="margin: 6px 0 0;"><a href="https://calculator.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
+  <p style="margin: 6px 0 0;"><a href="https://solidus.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
 </div>
 
 </body></html>`;
@@ -228,7 +228,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
   </div>
 
   <div style="text-align: center; margin: 28px 0 20px;">
-    <a href="https://calculator.ambrosiaventures.co/report" style="display: inline-block; background: #0f172a; color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+    <a href="https://solidus.ambrosiaventures.co/report" style="display: inline-block; background: #0f172a; color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
       Get Your Deal Report
     </a>
   </div>
@@ -238,7 +238,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
 
 <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
   <p style="margin: 0;">Ambrosia Ventures · <a href="https://ambrosiaventures.co" style="color: #94a3b8;">ambrosiaventures.co</a></p>
-  <p style="margin: 6px 0 0;"><a href="https://calculator.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
+  <p style="margin: 6px 0 0;"><a href="https://solidus.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
 </div>
 
 </body></html>`;

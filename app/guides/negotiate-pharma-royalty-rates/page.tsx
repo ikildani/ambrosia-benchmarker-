@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: 'How to Negotiate Pharma Licensing Royalty Rates',
     description: `Data-backed strategies for negotiating royalty rates in biopharma licensing deals, with benchmarks from ${DEAL_STATS.TOTAL_DEALS} transactions.`,
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',
+    url: 'https://solidus.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',
     images: [{ url: '/api/og?title=Negotiate%20Pharma%20Royalty%20Rates&subtitle=A%20Data-Backed%20Guide&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -33,12 +33,12 @@ export const metadata: Metadata = {
     description: 'Data-backed strategies for negotiating royalty rates in biopharma licensing deals.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',
   },
 };
 
 export default function NegotiatePharmaRoyaltyRatesPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -383,7 +383,7 @@ export default function NegotiatePharmaRoyaltyRatesPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { href: '/benchmarks', title: 'Deal Benchmarks', desc: 'Royalty rate ranges by modality, phase & TA' },
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Model royalty scenarios with real data' },
+                { href: '/calculator', title: 'Solidus', desc: 'Model royalty scenarios with real data' },
                 { href: '/glossary/royalty-rate', title: 'Royalty Rate', desc: 'Definition and industry context' },
                 { href: '/glossary/tiered-royalties', title: 'Tiered Royalties', desc: 'How escalating royalties work' },
               ].map((resource) => (

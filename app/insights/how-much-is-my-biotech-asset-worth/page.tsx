@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: `How Much Is My Biotech Asset Worth? — Data from ${DEAL_STATS.TOTAL_DEALS} Deals`,
     description: 'A Phase 2 oncology asset is worth $800M-$2.5B in total deal value. See phase-by-phase benchmarks from real transactions.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
+    url: 'https://solidus.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
     images: [{ url: '/api/og?title=How%20Much%20Is%20My%20Biotech%20Asset%20Worth%3F&subtitle=Phase-by-Phase%20Valuation%20Guide&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     description: `Phase-by-phase biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
   },
 };
 
@@ -124,9 +124,9 @@ export default function HowMuchIsBiotechAssetWorthPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'How Much Is My Biotech Asset Worth?', item: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'How Much Is My Biotech Asset Worth?', item: 'https://solidus.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth' },
     ],
   };
 
@@ -135,11 +135,11 @@ export default function HowMuchIsBiotechAssetWorthPage() {
     '@type': 'Article',
     headline: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide',
     description: `Biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions. Phase-by-phase deal values, the 5 factors that determine value, and how to increase your asset price before partnering.`,
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-03',
     dateModified: '2026-04-03',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/how-much-is-my-biotech-asset-worth',
   };
 
   const faqSchema = {

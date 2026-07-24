@@ -36,7 +36,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const APOLLO_API_KEY = process.env.APOLLO_API_KEY!;
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 // Your user ID (Issa) for share link ownership
 const SHARE_OWNER_ID = process.env.SHARE_OWNER_USER_ID || '';

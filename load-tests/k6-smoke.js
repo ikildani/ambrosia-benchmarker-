@@ -10,7 +10,7 @@ const healthDuration = new Trend('health_duration', true);
 const financialDuration = new Trend('financial_duration', true);
 
 // ---------------------------------------------------------------------------
-// Configurable base URL  (k6 run -e BASE_URL=https://calculator.ambrosiaventures.co)
+// Configurable base URL  (k6 run -e BASE_URL=https://solidus.ambrosiaventures.co)
 // ---------------------------------------------------------------------------
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 

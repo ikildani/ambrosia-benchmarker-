@@ -28,13 +28,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: page.title,
     description: page.metaDescription,
     alternates: {
-      canonical: `https://calculator.ambrosiaventures.co/benchmarks/${slug}`,
+      canonical: `https://solidus.ambrosiaventures.co/benchmarks/${slug}`,
     },
     openGraph: {
       title: page.title,
       description: page.metaDescription,
       type: 'article',
-      url: `https://calculator.ambrosiaventures.co/benchmarks/${slug}`,
+      url: `https://solidus.ambrosiaventures.co/benchmarks/${slug}`,
       images: [
         {
           url: `/api/og?title=${encodeURIComponent(page.h1)}&subtitle=${encodeURIComponent(page.metaDescription.slice(0, 90))}&type=landing`,
@@ -91,21 +91,21 @@ export default async function BenchmarkPage({ params }: PageProps) {
     author: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',
-      url: 'https://calculator.ambrosiaventures.co',
+      url: 'https://solidus.ambrosiaventures.co',
     },
     publisher: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://calculator.ambrosiaventures.co/logo.png',
+        url: 'https://solidus.ambrosiaventures.co/logo.png',
       },
     },
     datePublished: '2026-01-15',
     dateModified: '2026-03-06',
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://calculator.ambrosiaventures.co/benchmarks/${slug}`,
+      '@id': `https://solidus.ambrosiaventures.co/benchmarks/${slug}`,
     },
   };
 

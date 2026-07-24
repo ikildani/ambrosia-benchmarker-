@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 // Tracks sent emails in events table to prevent duplicates.
 // ---------------------------------------------------------------------------
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 function buildEmailWrapper(content: string): string {
   return `<!DOCTYPE html>

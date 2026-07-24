@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
     description: `${DEAL_STATS.TOTAL_DEALS} deals analyzed. Benchmark terms for licensing, acquisition, co-dev, option, and collaboration structures.`,
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
+    url: 'https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
     images: [{ url: '/api/og?title=Out-Licensing%20Deal%20Terms%202025%E2%80%932026&subtitle=What%20the%20Data%20Shows&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'Benchmark data on upfronts, milestones, royalties across 5 deal types and 12 therapeutic areas.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
   },
 };
 
@@ -53,9 +53,9 @@ export default function BiotechOutLicensingPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Out-Licensing Deal Terms 2025-2026', item: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Out-Licensing Deal Terms 2025-2026', item: 'https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026' },
     ],
   };
 
@@ -64,11 +64,11 @@ export default function BiotechOutLicensingPage() {
     '@type': 'Article',
     headline: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
     description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures.`,
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-24',
     dateModified: '2026-03-24',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
   };
 
   const faqSchema = {
@@ -123,10 +123,10 @@ export default function BiotechOutLicensingPage() {
     '@type': 'Dataset',
     name: 'Biotech Out-Licensing Deal Terms (2025-2026)',
     description: 'Benchmark data for biotech out-licensing deal terms across 5 deal types and 12 therapeutic areas.',
-    url: 'https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
+    url: 'https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026',
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     temporalCoverage: '2020/2026',
-    distribution: { '@type': 'DataDownload', contentUrl: 'https://calculator.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
+    distribution: { '@type': 'DataDownload', contentUrl: 'https://solidus.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
     variableMeasured: [
       { '@type': 'PropertyValue', name: 'Upfront Payment', unitText: 'USD millions' },
       { '@type': 'PropertyValue', name: 'Total Deal Value', unitText: 'USD millions' },
@@ -207,7 +207,7 @@ export default function BiotechOutLicensingPage() {
             </p>
 
             <p>
-              This analysis breaks down the five dominant deal structures in biopharma out-licensing — licensing, acquisition, co-development, option, and collaboration — with benchmark economics for each, cross-referenced against 12 therapeutic areas and 7 development phases. The data is drawn from over 3,500 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> from 2020 through Q1 2026. For a deeper dive into how to evaluate these structures for your specific situation, see our guide on <Link href="/guides/biotech-licensing-deal-structure" className="text-teal-600 font-medium hover:text-teal-700">biotech licensing deal structure</Link>.
+              This analysis breaks down the five dominant deal structures in biopharma out-licensing — licensing, acquisition, co-development, option, and collaboration — with benchmark economics for each, cross-referenced against 12 therapeutic areas and 7 development phases. The data is drawn from over 3,500 transactions tracked in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> from 2020 through Q1 2026. For a deeper dive into how to evaluate these structures for your specific situation, see our guide on <Link href="/guides/biotech-licensing-deal-structure" className="text-teal-600 font-medium hover:text-teal-700">biotech licensing deal structure</Link>.
             </p>
 
             <h2 id="market-snapshot">Market Snapshot: 2025-2026 Deal Environment</h2>
@@ -249,7 +249,7 @@ export default function BiotechOutLicensingPage() {
             freeRows={5}
             ctaText="Model any deal type — Free calculator"
             ctaHref="/calculator"
-            footnote={`Source: Ambrosia Benchmarker, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
+            footnote={`Source: Solidus, ${DEAL_STATS.TOTAL_DEALS} transactions 2020-2026.`}
           />
         </div>
 
@@ -480,7 +480,7 @@ export default function BiotechOutLicensingPage() {
                 What are typical upfront payments in biotech out-licensing deals?
               </summary>
               <p className="text-slate-600">
-                Upfronts vary dramatically by phase and TA. At Phase 2, median upfronts range from $40M (women&apos;s health) to $150M (metabolic). In licensing structures, upfronts represent 15-20% of total deal value. Co-development structures are lower at 10-15%, while option deals start with 5-10% option fees. Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> to model your specific scenario.
+                Upfronts vary dramatically by phase and TA. At Phase 2, median upfronts range from $40M (women&apos;s health) to $150M (metabolic). In licensing structures, upfronts represent 15-20% of total deal value. Co-development structures are lower at 10-15%, while option deals start with 5-10% option fees. Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to model your specific scenario.
               </p>
             </details>
 

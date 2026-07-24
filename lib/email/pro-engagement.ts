@@ -24,7 +24,7 @@ function emailWrapper(content: string): string {
           </div>
           ${content}
           <div style="margin-top:40px; padding-top:24px; border-top:1px solid rgba(244,241,232,0.08);">
-            <p style="font-size:12px; color:#475569; margin:0;">Ambrosia Ventures · calculator.ambrosiaventures.co</p>
+            <p style="font-size:12px; color:#475569; margin:0;">Ambrosia Ventures · solidus.ambrosiaventures.co</p>
             <p style="font-size:12px; color:#475569; margin:4px 0 0;">Detroit & New York</p>
           </div>
         </div>
@@ -57,7 +57,7 @@ export async function sendProEngagementConfirmation(opts: {
       <p style="font-size:16px; color:${TEXT_SECONDARY}; margin:0 0 24px; line-height:1.6;">
         Full access to all 14 engines, unlimited calculations, PDF & Excel exports, partner intelligence, and Market Pulse — active through <strong style="color:${TEXT_PRIMARY};">${expiresFormatted}</strong>.
       </p>
-      <a href="https://calculator.ambrosiaventures.co/calculator" style="display:inline-block; padding:14px 28px; background:${BRAND_COLOR}; color:white; font-size:15px; font-weight:600; border-radius:10px; text-decoration:none;">
+      <a href="https://solidus.ambrosiaventures.co/calculator" style="display:inline-block; padding:14px 28px; background:${BRAND_COLOR}; color:white; font-size:15px; font-weight:600; border-radius:10px; text-decoration:none;">
         Open the platform →
       </a>
     </div>
@@ -121,7 +121,7 @@ export async function sendProExpirationWarning(opts: {
       <p style="font-size:15px; color:${TEXT_SECONDARY}; margin:0 0 24px; line-height:1.6;">
         To continue with Pro access, reply to this email with the engagement you'd like — monthly, annual, or another custom term.
       </p>
-      <a href="https://calculator.ambrosiaventures.co/pro" style="display:inline-block; padding:14px 28px; background:${BRAND_COLOR}; color:white; font-size:15px; font-weight:600; border-radius:10px; text-decoration:none;">
+      <a href="https://solidus.ambrosiaventures.co/pro" style="display:inline-block; padding:14px 28px; background:${BRAND_COLOR}; color:white; font-size:15px; font-weight:600; border-radius:10px; text-decoration:none;">
         View Pro plans →
       </a>
     </div>

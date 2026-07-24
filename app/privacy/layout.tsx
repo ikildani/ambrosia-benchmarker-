@@ -2,15 +2,15 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | Ambrosia Ventures',
-  description: 'Privacy policy for Ambrosia Ventures Deal Calculator. Learn how we collect, use, and protect your data.',
+  description: 'Privacy policy for Solidus. Learn how we collect, use, and protect your data.',
   openGraph: {
     title: 'Privacy Policy | Ambrosia Ventures',
-    description: 'Privacy policy for Ambrosia Ventures Deal Calculator.',
+    description: 'Privacy policy for Solidus.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/privacy',
+    url: 'https://solidus.ambrosiaventures.co/privacy',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/privacy',
+    canonical: 'https://solidus.ambrosiaventures.co/privacy',
   },
   robots: {
     index: true,

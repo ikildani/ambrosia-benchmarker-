@@ -53,13 +53,13 @@ function footer(email: string): string {
 
 <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
   <p style="margin: 0;">Ambrosia Ventures · <a href="https://ambrosiaventures.co" style="color: #94a3b8;">ambrosiaventures.co</a></p>
-  <p style="margin: 6px 0 0;"><a href="https://calculator.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
+  <p style="margin: 6px 0 0;"><a href="https://solidus.ambrosiaventures.co/unsubscribe?email=${encodeURIComponent(email)}" style="color: #94a3b8;">Unsubscribe</a></p>
 </div>
 
 </body></html>`;
 }
 
-const PRO_URL = 'https://calculator.ambrosiaventures.co/pro';
+const PRO_URL = 'https://solidus.ambrosiaventures.co/pro';
 
 // ---------------------------------------------------------------------------
 // Email 1 — Hour 0: "Here's your benchmark data"
@@ -249,7 +249,7 @@ export function buildProGateEmail4(
   const count = proCount && proCount > 20 ? proCount : 127;
   const subject = `${count} BD teams upgraded this quarter`;
 
-  const html = `${header('${count} BD teams upgraded this quarter')}
+  const html = `${header(`${count} BD teams upgraded this quarter`)}
 
   <p style="font-size: 15px; color: #334155; margin-top: 0;">Since you looked at ${context.ta} ${context.phase} benchmarks, ${count} business development teams have upgraded to Pro this quarter.</p>
 
@@ -451,7 +451,7 @@ export function buildProGateEmail8(
 
   <p style="font-size: 15px; color: #334155;">The free benchmarks are always available. And when you need the full analysis — comparable deals, negotiation playbooks, Monte Carlo valuations — Pro is there.</p>
 
-  ${cta('See Updated Benchmarks', 'https://calculator.ambrosiaventures.co/data/' + context.page)}
+  ${cta('See Updated Benchmarks', 'https://solidus.ambrosiaventures.co/data/' + context.page)}
 
   <div style="margin: 24px 0; padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center;">
     <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;">Need full deal intelligence?</p>

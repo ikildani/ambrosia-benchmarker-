@@ -29,7 +29,7 @@ The upfront-as-percentage-of-total-deal-value also shifts:
 
 Translation: as clinical risk drops, licensees pay proportionally more upfront and less in milestones. The risk premium compresses.
 
-Full analysis of all 3,447 deals at calculator.ambrosiaventures.co
+Full analysis of all 3,447 deals at solidus.ambrosiaventures.co
 
 #biopharma #licensing #dealmaking #biotech #pharma #businessdevelopment
 
@@ -66,7 +66,7 @@ If your pipeline spans multiple TAs, your deal timing strategy should factor in 
 
 Data from 335 Phase 2 deals with disclosed upfronts (2020-2026).
 
-Explore the full dataset: calculator.ambrosiaventures.co
+Explore the full dataset: solidus.ambrosiaventures.co
 
 #biopharma #immunology #oncology #licensing #dealterms #businessdevelopment
 
@@ -99,7 +99,7 @@ For ADC licensors: stop positioning on platform breadth. Focus on target differe
 
 Analysis of 169 ADC deals (2019-2026) from the Ambrosia Ventures deal database.
 
-Run your own benchmark: calculator.ambrosiaventures.co
+Run your own benchmark: solidus.ambrosiaventures.co
 
 #ADC #biopharma #licensing #oncology #dealmaking #antibodydrugconjugate
 

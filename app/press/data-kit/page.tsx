@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     title: 'Press Data Kit — Biopharma Deal Benchmarks',
     description: 'Citation-ready data, embeddable charts, and brand assets for journalists and analysts.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/press/data-kit',
+    url: 'https://solidus.ambrosiaventures.co/press/data-kit',
     images: [{ url: '/api/og?title=Press%20Data%20Kit&subtitle=Citation-Ready%20Biopharma%20Deal%20Data&type=insight', width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', title: 'Press Data Kit — Biopharma Deal Benchmarks' },
-  alternates: { canonical: 'https://calculator.ambrosiaventures.co/press/data-kit' },
+  alternates: { canonical: 'https://solidus.ambrosiaventures.co/press/data-kit' },
 };
 
 const stats = [
@@ -39,8 +39,8 @@ const embedCharts = [
 
 export default function PressDataKitPage() {
   const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-    { '@type': 'ListItem', position: 2, name: 'Press', item: 'https://calculator.ambrosiaventures.co/press' },
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+    { '@type': 'ListItem', position: 2, name: 'Press', item: 'https://solidus.ambrosiaventures.co/press' },
     { '@type': 'ListItem', position: 3, name: 'Data Kit' },
   ]};
 
@@ -116,7 +116,7 @@ export default function PressDataKitPage() {
 
             <div className="space-y-8">
               {embedCharts.map((chart) => {
-                const embedCode = `<iframe src="https://calculator.ambrosiaventures.co/api/embed/chart?type=${chart.type}&theme=light" width="100%" height="400" style="border:1px solid #e2e8f0;border-radius:12px;" title="${chart.title}" loading="lazy"></iframe>`;
+                const embedCode = `<iframe src="https://solidus.ambrosiaventures.co/api/embed/chart?type=${chart.type}&theme=light" width="100%" height="400" style="border:1px solid #e2e8f0;border-radius:12px;" title="${chart.title}" loading="lazy"></iframe>`;
                 return (
                   <div key={chart.type} className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                     <div className="p-5 border-b border-slate-100">
@@ -207,7 +207,7 @@ export default function PressDataKitPage() {
                 <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Usage</h3>
                 <ul className="text-sm text-slate-600 space-y-2">
                   <li className="flex items-start gap-2"><span className="text-teal-600 mt-0.5">&#10003;</span><span>Use &quot;Ambrosia Ventures&quot; in full</span></li>
-                  <li className="flex items-start gap-2"><span className="text-teal-600 mt-0.5">&#10003;</span><span>Link to calculator.ambrosiaventures.co</span></li>
+                  <li className="flex items-start gap-2"><span className="text-teal-600 mt-0.5">&#10003;</span><span>Link to solidus.ambrosiaventures.co</span></li>
                   <li className="flex items-start gap-2"><span className="text-teal-600 mt-0.5">&#10003;</span><span>Cite source when quoting data</span></li>
                   <li className="flex items-start gap-2"><span className="text-red-500 mt-0.5">&#10007;</span><span>Do not alter logo colors or proportions</span></li>
                 </ul>

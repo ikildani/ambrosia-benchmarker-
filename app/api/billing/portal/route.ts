@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
 
     if (!stripeSecretKey) {
       return NextResponse.json(

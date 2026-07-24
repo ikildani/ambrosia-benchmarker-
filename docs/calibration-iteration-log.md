@@ -905,7 +905,7 @@ Rules:
 
 **Why:** R41 attempted this migration and was blocked by the `upfront ≤ totalDeal` invariant; R42 resolves this by scaling both sides of the impliedDealValue off a shared `calibratedRNPV` local variable. The returned `RNPVResult.riskAdjustedNPV` field is unchanged, so the 110 golden-master snapshots (which test the raw rNPV field) remain stable.
 
-**The architectural win:** before R42, production calculator (used by `calculator.ambrosiaventures.co` BD users) produced engine-only numbers without any of the 30+ rounds of empirical calibration. Backtest numbers (harness + engine) showed ~25% core-scope ±25%, but live users saw ~10-15% accuracy because harness corrections never fired. R42 closes this gap: engine alone now produces the calibrated values.
+**The architectural win:** before R42, production calculator (used by `solidus.ambrosiaventures.co` BD users) produced engine-only numbers without any of the 30+ rounds of empirical calibration. Backtest numbers (harness + engine) showed ~25% core-scope ±25%, but live users saw ~10-15% accuracy because harness corrections never fired. R42 closes this gap: engine alone now produces the calibrated values.
 
 **Source:** Empirical calibration chain R29-R37b against 206 core-scope deals from combined DealForma curated + Supabase-expanded corpus (1,067 deals total). All multipliers are one-for-one ports from harness to engine — no new numbers introduced.
 

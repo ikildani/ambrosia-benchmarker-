@@ -5,7 +5,7 @@
  * METHODOLOGY
  * =============================================================================
  *
- * The Ambrosia Benchmarker has 562 total indications across 12 therapeutic
+ * Solidus has 562 total indications across 12 therapeutic
  * areas. Tier 1 manual calibration covered ~50 top-priority indications (by
  * deal volume / commercial importance). The remaining 512 fall back to
  * TA-level defaults, which is technically correct but produces many identical

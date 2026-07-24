@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   keywords: ['biopharma deal methodology', 'deal benchmarking methodology', 'rNPV methodology', 'Monte Carlo pharma', 'hedonic regression deals', 'semantic deal matching'],
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/methodology',
+    canonical: 'https://solidus.ambrosiaventures.co/methodology',
   },
 };
 

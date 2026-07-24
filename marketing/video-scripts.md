@@ -21,7 +21,7 @@ Brand colors: Navy #0c0e1f, Teal #0EA5A5, Cyan #06B6D4
 
 [15-20s] DEMO — Screen recording of landing page
 "On Ambrosia Ventures, you select your therapeutic area..."
-**SCREEN:** Show the landing page at calculator.ambrosiaventures.co. The hero section is visible — the large "Deal Terms Calculator" headline with the teal-to-cyan gradient on the word "Calculator", the subheadline about 600+ deals, and the two CTA buttons ("Try Calculator Free" in teal gradient, "See How It Works" in outline). Click "Try Calculator Free" — the page scrolls or navigates to /calculator.
+**SCREEN:** Show the landing page at solidus.ambrosiaventures.co. The hero section is visible — the large "Deal Terms Calculator" headline with the teal-to-cyan gradient on the word "Calculator", the subheadline about 600+ deals, and the two CTA buttons ("Try Calculator Free" in teal gradient, "See How It Works" in outline). Click "Try Calculator Free" — the page scrolls or navigates to /calculator.
 
 [20-25s] DEMO — Calculator page loads
 **SCREEN:** The calculator page loads showing the navy gradient header with "Deal Terms Calculator" title and benchmark version label. Below is the 8-button therapeutic area grid. Each button is a rounded card with a colored icon circle and TA name. Slowly move the cursor to the Oncology button (teal, microscope icon, labeled "Solid tumors & hematologic malignancies") and click it. The button gets a teal border-2 highlight, a teal background tint, and a small checkmark appears in its top-right corner. The other buttons stay unselected (neutral border).
@@ -64,7 +64,7 @@ Pause the cursor over the cards for 3-4 seconds so viewers can read the values. 
 
 [78-85s] CTA
 "Free to start. No credit card required. Link in the description."
-**SCREEN:** Cut to a clean end card: navy background, Ambrosia Ventures logo (white/teal) centered, "calculator.ambrosiaventures.co" below in white text with a teal underline accent. Add subtle animated teal particles or gradient glow in the background. Hold for 5 seconds.
+**SCREEN:** Cut to a clean end card: navy background, Ambrosia Ventures logo (white/teal) centered, "solidus.ambrosiaventures.co" below in white text with a teal underline accent. Add subtle animated teal particles or gradient glow in the background. Hold for 5 seconds.
 
 ---
 
@@ -103,8 +103,8 @@ Each appears with a 0.5s stagger.
 **SCREEN:** Transition wipe to a screenshot of the Ambrosia Ventures calculator results page. Show the 2x2 metric grid (Upfront in teal, TDV in cyan, Milestones in emerald, Royalties in purple) with a clean white background. Overlay text at the top: "600+ Real Deals" in teal. Then cut to a split-screen where both the "Big Pharma" and "Biotech Founder" columns now show identical tool stacks (same teal icons, same data access). Text overlay: "Level Playing Field" in white on teal gradient bar.
 
 [50-60s] CTA
-"Free to start. calculator.ambrosiaventures.co"
-**SCREEN:** Navy background. Ambrosia Ventures logo fades in (centered). Below it: "Free to start." in white. Below that: "calculator.ambrosiaventures.co" in teal. Subtle teal gradient pulse animation behind the logo. Hold 4 seconds.
+"Free to start. solidus.ambrosiaventures.co"
+**SCREEN:** Navy background. Ambrosia Ventures logo fades in (centered). Below it: "Free to start." in white. Below that: "solidus.ambrosiaventures.co" in teal. Subtle teal gradient pulse animation behind the logo. Hold 4 seconds.
 
 ---
 
@@ -139,8 +139,8 @@ Each appears with a 0.5s stagger.
 **SCREEN:** Large "05" in teal. Transition to a screenshot of the comparable deals table from the calculator — show the header row (Company, Partner, Deal Value, Modality, Phase, Date) and 4-5 rows of real deal data with alternating backgrounds and teal links. Overlay text fading in at the top: "Data is Leverage" in large white bold text.
 
 [70-80s] CTA
-"All of these insights come from our database. Explore it free at calculator.ambrosiaventures.co."
-**SCREEN:** All 5 insight numbers ("01" through "05") shrink and arrange in a horizontal row across the top. Below: Ambrosia Ventures logo. Below that: "calculator.ambrosiaventures.co" in white. Teal gradient accent line below the URL. Hold 5 seconds.
+"All of these insights come from our database. Explore it free at solidus.ambrosiaventures.co."
+**SCREEN:** All 5 insight numbers ("01" through "05") shrink and arrange in a horizontal row across the top. Below: Ambrosia Ventures logo. Below that: "solidus.ambrosiaventures.co" in white. Teal gradient accent line below the URL. Hold 5 seconds.
 
 ---
 
@@ -171,7 +171,7 @@ Each appears with a 0.5s stagger.
 
 [30-40s] CTA
 "Get weekly deal intelligence with Market Pulse on Ambrosia Ventures. Link in bio."
-**SCREEN:** Cut to end card: navy background, "MARKET PULSE" in white, "Updated Every Week" in teal, Ambrosia Ventures logo, "calculator.ambrosiaventures.co/pulse" as the URL. Hold 4 seconds.
+**SCREEN:** Cut to end card: navy background, "MARKET PULSE" in white, "Updated Every Week" in teal, Ambrosia Ventures logo, "solidus.ambrosiaventures.co/pulse" as the URL. Hold 4 seconds.
 
 ---
 
@@ -183,10 +183,10 @@ Each appears with a 0.5s stagger.
 
 [0-5s]
 "Here's how to benchmark a biopharma deal in under 60 seconds."
-**SCREEN:** Navy background with stopwatch icon (teal). "60 Seconds" in large white bold text. Cut to browser at calculator.ambrosiaventures.co.
+**SCREEN:** Navy background with stopwatch icon (teal). "60 Seconds" in large white bold text. Cut to browser at solidus.ambrosiaventures.co.
 
 [5-15s] STEP 1
-"Step one: Go to calculator.ambrosiaventures.co and click 'Try Calculator Free.'"
+"Step one: Go to solidus.ambrosiaventures.co and click 'Try Calculator Free.'"
 **SCREEN:** Show the landing page hero section. The hero has a gradient background (from white via slate-50/50 to teal-50/30) with animated teal/cyan blurred circles in the background. The headline "Deal Terms Calculator" is in large bold text with "Calculator" in teal-to-cyan gradient. Below: the subheadline mentioning 600+ deals and 12 therapeutic areas. Two CTA buttons are visible: "Try Calculator Free" (teal-to-cyan gradient background, white text, shadow-glow) and "See How It Works" (white/outline). Four feature pills sit below the buttons showing "600+ Deals", "12 TAs", "120+ Profiles", "Bank-Grade Security" with small icons. Move cursor to "Try Calculator Free" and click. Use a yellow circle highlight or cursor emphasis effect on the button.
 
 [15-25s] STEP 2
@@ -212,7 +212,7 @@ Each card number animates in with a smooth counting transition. Pause for 4 seco
 
 [55-60s] CTA
 "Free to start. Link in the description."
-**SCREEN:** Navy end card. Ambrosia Ventures logo (teal+white). "Free to start. No credit card." in white. "calculator.ambrosiaventures.co" in teal below. Subtle animated teal gradient glow behind the logo.
+**SCREEN:** Navy end card. Ambrosia Ventures logo (teal+white). "Free to start. No credit card." in white. "solidus.ambrosiaventures.co" in teal below. Subtle animated teal gradient glow behind the logo.
 
 ---
 
@@ -236,7 +236,7 @@ Each card number animates in with a smooth counting transition. Pause for 4 seco
 
 [35-45s]
 "If you're in biotech BD, you need this. Free to start."
-**SCREEN:** Speaking to camera, then cut to end card: navy background, Ambrosia Ventures logo, "calculator.ambrosiaventures.co" in teal below, "Free to start" in white above the URL.
+**SCREEN:** Speaking to camera, then cut to end card: navy background, Ambrosia Ventures logo, "solidus.ambrosiaventures.co" in teal below, "Free to start" in white above the URL.
 
 ---
 

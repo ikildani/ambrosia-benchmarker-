@@ -10,21 +10,21 @@ export function GlobalJsonLd() {
   const pricingSchema = generatePricingSchema();
 
   const calculatorPageSchema = generateWebPageSchema({
-    name: 'Life Sciences Deal Calculator',
+    name: 'Solidus',
     description: `Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
-    url: 'https://calculator.ambrosiaventures.co/calculator',
+    url: 'https://solidus.ambrosiaventures.co/calculator',
   });
 
   const benchmarksPageSchema = generateWebPageSchema({
     name: 'Biopharma Deal Benchmarks 2026',
     description: 'Comprehensive licensing deal benchmarks across oncology, neurology, ADCs, CAR-T, bispecifics, and more. Data-driven deal term analysis for biopharma professionals.',
-    url: 'https://calculator.ambrosiaventures.co/benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/benchmarks',
   });
 
   const companiesPageSchema = generateWebPageSchema({
     name: 'Biopharma Company Profiles & Deal Activity',
     description: 'Explore 850+ biopharma company profiles with deal history, pipeline activity, and licensing track records across 12 therapeutic areas.',
-    url: 'https://calculator.ambrosiaventures.co/companies',
+    url: 'https://solidus.ambrosiaventures.co/companies',
   });
 
   return (

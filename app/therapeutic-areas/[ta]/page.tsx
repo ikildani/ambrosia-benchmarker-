@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ ta: strin
       description: config.description,
       images: [{ url: `/api/og?title=${encodeURIComponent(config.name + ' Deals')}&subtitle=Biopharma+Deal+Benchmarks`, width: 1200, height: 630 }],
     },
-    alternates: { canonical: `https://calculator.ambrosiaventures.co/therapeutic-areas/${ta}` },
+    alternates: { canonical: `https://solidus.ambrosiaventures.co/therapeutic-areas/${ta}` },
   };
 }
 
@@ -206,7 +206,7 @@ export default async function TherapeuticAreaPage({ params }: { params: Promise<
         "@type": "Dataset",
         "name": `${config.name} Biopharma Deal Database`,
         "description": `${totalDeals} verified ${config.name.toLowerCase()} licensing, acquisition, and collaboration deals with financial terms.`,
-        "url": `https://calculator.ambrosiaventures.co/therapeutic-areas/${ta}`,
+        "url": `https://solidus.ambrosiaventures.co/therapeutic-areas/${ta}`,
         "creator": { "@type": "Organization", "name": "Ambrosia Ventures" },
         "variableMeasured": ["Upfront Payment", "Total Deal Value", "Milestones", "Royalty Rate"],
       })}} />

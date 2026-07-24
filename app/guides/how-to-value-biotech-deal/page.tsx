@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'How to Value a Biotech Deal: A Complete Guide',
     description: 'Learn how to value biopharma licensing deals using comparable transactions, rNPV analysis, and Monte Carlo simulation.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/how-to-value-biotech-deal',
+    url: 'https://solidus.ambrosiaventures.co/guides/how-to-value-biotech-deal',
     images: [{ url: '/api/og?title=How%20to%20Value%20a%20Biotech%20Deal&subtitle=A%20Complete%20Guide%20for%20BD%20Professionals&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     description: 'Step-by-step guide to valuing biopharma licensing deals with real benchmarks.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/how-to-value-biotech-deal',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/how-to-value-biotech-deal',
   },
 };
 
 export default function HowToValueBiotechDealPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -321,7 +321,7 @@ export default function HowToValueBiotechDealPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { href: '/benchmarks', title: 'Deal Benchmarks', desc: 'Browse benchmarks by modality, phase & indication' },
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Model custom deal terms instantly' },
+                { href: '/calculator', title: 'Solidus', desc: 'Model custom deal terms instantly' },
                 { href: '/glossary', title: 'Deal Glossary', desc: 'Master licensing terminology' },
                 { href: '/methodology', title: 'Methodology', desc: 'How our benchmarks are calculated' },
               ].map((resource) => (

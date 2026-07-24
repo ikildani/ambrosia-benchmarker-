@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         else if (host.includes('linkedin')) source = 'LinkedIn';
         else if (host.includes('twitter') || host.includes('x.com')) source = 'Twitter/X';
         else if (host.includes('mail') || host.includes('outlook') || host.includes('gmail')) source = 'Email';
-        else if (host !== 'calculator.ambrosiaventures.co') source = host;
+        else if (host !== 'solidus.ambrosiaventures.co') source = host;
       } catch { source = 'Unknown'; }
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       timeStyle: 'short',
     });
 
-    const shareUrl = `https://calculator.ambrosiaventures.co/share/${token}`;
+    const shareUrl = `https://solidus.ambrosiaventures.co/share/${token}`;
     const assetDesc = [modality, indication, phase].filter(Boolean).join(' · ');
     const companyStr = company || 'Unknown company';
 

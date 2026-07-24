@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     ${email} has been removed from Ambrosia ${typeLabel} emails.
     You can resubscribe anytime from your dashboard settings.
   </p>
-  <p style="margin-top:32px;"><a href="https://calculator.ambrosiaventures.co" style="color:#14b8a6;">← Back to Deal Calculator</a></p>
+  <p style="margin-top:32px;"><a href="https://solidus.ambrosiaventures.co" style="color:#14b8a6;">← Back to Solidus</a></p>
 </body></html>
 `.trim();
 

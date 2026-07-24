@@ -92,7 +92,7 @@ export async function fetchCompetitorContent(): Promise<CompetitorEntry[]> {
       const response = await fetch(feed.url, {
         signal: controller.signal,
         headers: {
-          'User-Agent': 'AmbrosiaBot/1.0 (+https://calculator.ambrosiaventures.co)',
+          'User-Agent': 'AmbrosiaBot/1.0 (+https://solidus.ambrosiaventures.co)',
         },
       });
       clearTimeout(timeout);

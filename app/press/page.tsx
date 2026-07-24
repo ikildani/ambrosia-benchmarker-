@@ -54,7 +54,7 @@ export default function PressPage() {
               benchmark deal terms and identify optimal partners.
             </p>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              The Deal Calculator enables biotech executives, business development professionals, and investors
+              Solidus enables biotech executives, business development professionals, and investors
               to estimate upfront payments, milestone structures, and royalty rates based on real market data
               across therapeutic areas including oncology, neurology, immunology, and metabolic/obesity.
             </p>
@@ -171,7 +171,7 @@ export default function PressPage() {
               When citing Ambrosia Ventures data or analysis, please use the following format:
             </p>
             <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 font-mono text-sm text-slate-700 dark:text-slate-300">
-              Source: Ambrosia Ventures Deal Calculator (calculator.ambrosiaventures.co), [Month Year]
+              Source: Solidus (solidus.ambrosiaventures.co), [Month Year]
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
               For custom data requests or exclusive analysis, please contact our press team.

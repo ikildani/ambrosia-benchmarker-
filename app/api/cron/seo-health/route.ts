@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // 2. Validate sitemap
-    const healthResult = await validateSitemap('https://calculator.ambrosiaventures.co', 75);
+    const healthResult = await validateSitemap('https://solidus.ambrosiaventures.co', 75);
 
     // 3. Auto-resolve issues
     const resolved: string[] = [];

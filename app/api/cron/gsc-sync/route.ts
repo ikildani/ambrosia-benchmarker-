@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     );
 
     // 4. Submit sitemap
-    await gsc.submitSitemap('https://calculator.ambrosiaventures.co/sitemap.xml');
+    await gsc.submitSitemap('https://solidus.ambrosiaventures.co/sitemap.xml');
 
     // 4b. Auto-indexing: find unindexed pages and request indexing (up to 10 per run)
     let indexingResults: { submitted: number; failed: number; urls: string[] } = {
@@ -323,7 +323,7 @@ const PAGE_PRIORITY: { pattern: RegExp; priority: number }[] = [
 ];
 
 function getPagePriority(url: string): number {
-  const path = url.replace('https://calculator.ambrosiaventures.co', '');
+  const path = url.replace('https://solidus.ambrosiaventures.co', '');
   for (const { pattern, priority } of PAGE_PRIORITY) {
     if (pattern.test(path)) return priority;
   }
@@ -337,7 +337,7 @@ async function autoIndexUnindexedPages(
   gsc: GSCClient,
   performanceData: GSCPerformanceRow[]
 ): Promise<{ submitted: number; failed: number; urls: string[] }> {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   // 1. Build the set of pages that have impressions (i.e., Google knows about them)
   const pagesWithImpressions = new Set<string>();

@@ -26,7 +26,7 @@ const COMPARISON_SLUGS = [
   '/compare/cortellis',
 ];
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 // Competitor names we already have pages for (lowercase for matching)
 const EXISTING_COMPETITORS = new Set([

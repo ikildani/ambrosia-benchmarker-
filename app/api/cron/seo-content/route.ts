@@ -277,7 +277,7 @@ async function notifyReactiveBlogPublished(
                   {
                     type: 'button',
                     text: { type: 'plain_text', text: 'View Post' },
-                    url: `https://calculator.ambrosiaventures.co/blog/${slug}`,
+                    url: `https://solidus.ambrosiaventures.co/blog/${slug}`,
                   },
                 ],
               },

@@ -5,7 +5,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const SEC_SUBMISSIONS_API = 'https://data.sec.gov/submissions';
-const USER_AGENT = 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co';
+const USER_AGENT = 'Solidus research@ambrosiaventures.co';
 
 export interface ProductRevenue {
   drug_name: string;

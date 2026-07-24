@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Ambrosia Ventures Deal Calculator',
-    short_name: 'Deal Calculator',
+    name: 'Solidus',
+    short_name: 'Solidus',
     description:
       'Instant deal benchmarks, rNPV analysis, and AI market intelligence for biopharma licensing deals.',
     start_url: '/',

@@ -58,7 +58,7 @@ export default function PrivacyPage() {
                 <h3 className="font-semibold text-teal-800 mb-2 text-sm sm:text-base">Our Commitment to Your Privacy</h3>
                 <p className="text-xs sm:text-sm text-teal-700">
                   Ambrosia Ventures is committed to protecting your privacy. This policy explains how we collect,
-                  use, and safeguard your information when you use our Deal Calculator service.
+                  use, and safeguard your information when you use our Solidus service.
                 </p>
               </div>
             </div>

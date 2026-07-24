@@ -71,14 +71,31 @@ export async function GET(request: NextRequest) {
             counts[c.modality] = (counts[c.modality] || 0) + 1;
           });
 
+          // Get prior week counts for real week-over-week comparison
+          const { data: priorWeek } = await supabase
+            .from('calculations')
+            .select('modality')
+            .gte('created_at', new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString())
+            .lt('created_at', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString())
+            .limit(500);
+
+          const priorCounts: Record<string, number> = {};
+          (priorWeek || []).forEach((c: { modality: string }) => {
+            priorCounts[c.modality] = (priorCounts[c.modality] || 0) + 1;
+          });
+
           const trendingBenchmarks = Object.entries(counts)
             .sort(([, a], [, b]) => b - a)
             .slice(0, 5)
-            .map(([name, searches]) => ({
-              name: name.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim(),
-              searches,
-              change: `+${Math.floor(Math.random() * 30 + 5)}%`, // TODO: compute real week-over-week
-            }));
+            .map(([name, searches]) => {
+              const prior = priorCounts[name] || 0;
+              const pctChange = prior > 0 ? Math.round(((searches - prior) / prior) * 100) : 100;
+              return {
+                name: name.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim(),
+                searches,
+                change: pctChange >= 0 ? `+${pctChange}%` : `${pctChange}%`,
+              };
+            });
 
           if (trendingBenchmarks.length === 0) {
             trendingBenchmarks.push(

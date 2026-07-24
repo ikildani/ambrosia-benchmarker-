@@ -22,7 +22,7 @@ import { runCronIntelligence } from '@/lib/cron-intelligence';
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
-const PERPLEXITY_API = 'https://api.perplexity.ai/v1/responses';
+const PERPLEXITY_API = 'https://api.perplexity.ai/chat/completions';
 const MAX_RUNTIME_MS = 250_000;
 
 export async function GET(request: NextRequest) {
@@ -94,19 +94,18 @@ export async function GET(request: NextRequest) {
       const response = await fetchWithTimeout(PERPLEXITY_API, {
         timeoutMs: 20_000, retries: 1, method: 'POST',
         headers: { 'Authorization': `Bearer ${perplexityKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ preset: 'fast-search', input: searchQuery }),
+        body: JSON.stringify({
+          model: 'sonar',
+          messages: [{ role: 'user', content: searchQuery }],
+        }),
       });
 
       if (!response.ok) { result.processed++; continue; }
 
       const data = await response.json();
       let text = '';
-      for (const item of data.output || []) {
-        if (item.type === 'message') {
-          for (const c of item.content || []) {
-            if (c.type === 'output_text') text += c.text + '\n';
-          }
-        }
+      for (const choice of data.choices || []) {
+        if (choice.message?.content) text += choice.message.content + '\n';
       }
 
       if (text.length < 50) { result.processed++; continue; }

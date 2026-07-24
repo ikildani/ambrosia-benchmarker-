@@ -61,7 +61,7 @@ k6 run -e SCENARIO=stress load-tests/k6-smoke.js
 k6 run -e SCENARIO=load -e BASE_URL=https://your-preview-url.vercel.app load-tests/k6-smoke.js
 
 # Production
-k6 run -e SCENARIO=smoke -e BASE_URL=https://calculator.ambrosiaventures.co load-tests/k6-smoke.js
+k6 run -e SCENARIO=smoke -e BASE_URL=https://solidus.ambrosiaventures.co load-tests/k6-smoke.js
 ```
 
 **Warning:** Only run `smoke` against production. Running `load` or `stress` against production will trigger rate limiting and may affect real users.

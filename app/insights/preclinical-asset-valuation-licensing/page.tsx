@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Preclinical Asset Valuation for Licensing: Benchmark Data',
     description: 'Preclinical deals: $22M median upfront, $400M total value. Benchmarks across 12 TAs, platform vs. single-asset, and rNPV methodology.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
+    url: 'https://solidus.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
     images: [{ url: '/api/og?title=Preclinical%20Asset%20Valuation&subtitle=Licensing%20Benchmarks%20%26%20Deal%20Structures&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'Benchmark data across 12 therapeutic areas. Platform vs. single-asset. rNPV methodology. What licensees actually pay.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
   },
 };
 
@@ -53,9 +53,9 @@ export default function PreclinicalValuationPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Preclinical Asset Valuation', item: 'https://calculator.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Preclinical Asset Valuation', item: 'https://solidus.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing' },
     ],
   };
 
@@ -64,11 +64,11 @@ export default function PreclinicalValuationPage() {
     '@type': 'Article',
     headline: 'Preclinical Asset Valuation for Licensing: Benchmark Data & Deal Structures',
     description: 'Preclinical licensing deals command $22M median upfront and $400M total value. Benchmark data across 12 therapeutic areas.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-24',
     dateModified: '2026-03-24',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
   };
 
   const faqSchema = {
@@ -123,10 +123,10 @@ export default function PreclinicalValuationPage() {
     '@type': 'Dataset',
     name: 'Preclinical Asset Valuation for Licensing (2020-2026)',
     description: 'Benchmark data for preclinical licensing deal terms across 12 therapeutic areas, platform vs. single-asset structures.',
-    url: 'https://calculator.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
+    url: 'https://solidus.ambrosiaventures.co/insights/preclinical-asset-valuation-licensing',
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     temporalCoverage: '2020/2026',
-    distribution: { '@type': 'DataDownload', contentUrl: 'https://calculator.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
+    distribution: { '@type': 'DataDownload', contentUrl: 'https://solidus.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
     variableMeasured: [
       { '@type': 'PropertyValue', name: 'Upfront Payment', unitText: 'USD millions' },
       { '@type': 'PropertyValue', name: 'Total Deal Value', unitText: 'USD millions' },
@@ -211,7 +211,7 @@ export default function PreclinicalValuationPage() {
             </p>
 
             <p>
-              This analysis presents the complete preclinical valuation benchmarks from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> dataset of {DEAL_STATS.TOTAL_DEALS} transactions. We cover every major therapeutic area, the key drivers of above-median valuations, the distinction between platform and single-asset deals, and the rNPV methodology that licensees use to calculate your asset&apos;s worth. For context on how preclinical terms compare to later-stage deals, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
+              This analysis presents the complete preclinical valuation benchmarks from the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> dataset of {DEAL_STATS.TOTAL_DEALS} transactions. We cover every major therapeutic area, the key drivers of above-median valuations, the distinction between platform and single-asset deals, and the rNPV methodology that licensees use to calculate your asset&apos;s worth. For context on how preclinical terms compare to later-stage deals, see our <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms by therapeutic area</Link> analysis.
             </p>
 
             <h2 id="preclinical-baselines">Preclinical Baselines by Therapeutic Area</h2>
@@ -501,7 +501,7 @@ export default function PreclinicalValuationPage() {
                 What is the typical upfront payment for a preclinical licensing deal?
               </summary>
               <p className="text-slate-600">
-                The median upfront payment is $22M in oncology, ranging from $9M (women&apos;s health) to $35M (metabolic) across therapeutic areas. Platform technology deals command 2-3x premiums over single-asset baselines. Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> to model your specific scenario with TA and premium adjustments.
+                The median upfront payment is $22M in oncology, ranging from $9M (women&apos;s health) to $35M (metabolic) across therapeutic areas. Platform technology deals command 2-3x premiums over single-asset baselines. Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to model your specific scenario with TA and premium adjustments.
               </p>
             </details>
 

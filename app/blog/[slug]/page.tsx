@@ -11,7 +11,7 @@ import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -423,7 +423,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     href="/calculator"
                     className="inline-flex items-center px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-colors text-sm shadow-sm"
                   >
-                    Open the Deal Calculator
+                    Open Solidus
                   </Link>
                   <Link
                     href="/pro"

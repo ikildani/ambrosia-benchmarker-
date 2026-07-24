@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: 'Pharma Partner Identification Guide — Data-Driven Partnering',
     description: 'The best pharma partner isn\'t the biggest company — it\'s the one with the most urgent pipeline gap. 5-step identification framework.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/pharma-partner-identification-guide',
+    url: 'https://solidus.ambrosiaventures.co/insights/pharma-partner-identification-guide',
     images: [{ url: '/api/og?title=Pharma%20Partner%20Identification%20Guide&subtitle=Data-Driven%20Partnering%20Strategy&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     description: 'How to find the right licensing partner using pipeline gap analysis, intent scoring, and deal velocity data.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/pharma-partner-identification-guide',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/pharma-partner-identification-guide',
   },
 };
 
@@ -110,9 +110,9 @@ export default function PharmaPartnerIdentificationGuidePage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Pharma Partner Identification Guide', item: 'https://calculator.ambrosiaventures.co/insights/pharma-partner-identification-guide' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Pharma Partner Identification Guide', item: 'https://solidus.ambrosiaventures.co/insights/pharma-partner-identification-guide' },
     ],
   };
 
@@ -121,11 +121,11 @@ export default function PharmaPartnerIdentificationGuidePage() {
     '@type': 'Article',
     headline: 'Pharma Partner Identification Guide — Data-Driven Partnering Strategy',
     description: 'A 5-step framework for identifying the right pharma licensing partner using pipeline gap analysis, intent scoring, and deal velocity data.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-04-03',
     dateModified: '2026-04-03',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/pharma-partner-identification-guide',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/pharma-partner-identification-guide',
   };
 
   const faqSchema = {
@@ -324,7 +324,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
               ['Portfolio fill (no urgency)', 'Low', '-10-15%', '180-360 days'],
             ]}
             freeRows={5}
-            footnote={`Based on deal timing analysis across ${DEAL_STATS.TOTAL_DEALS} transactions. Source: Ambrosia Benchmarker.`}
+            footnote={`Based on deal timing analysis across ${DEAL_STATS.TOTAL_DEALS} transactions. Source: Solidus.`}
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
@@ -373,7 +373,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
                 { label: 'AbbVie', value: 9, displayValue: '9 deals' },
               ]}
             />
-            <p className="text-xs text-slate-400 mt-3">Deal velocity = licensing, acquisition, co-development, and option deals. Source: Ambrosia Benchmarker.</p>
+            <p className="text-xs text-slate-400 mt-3">Deal velocity = licensing, acquisition, co-development, and option deals. Source: Solidus.</p>
           </div>
 
           <div className="my-8 grid sm:grid-cols-3 gap-4">

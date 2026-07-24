@@ -647,7 +647,7 @@ async function getLowPerformingInsightPages(): Promise<LowPerformingPage[]> {
       // Flag pages ranking on page 1-2 (position < 20) with CTR below 3%
       if (avgPosition < 20 && avgCtr < 0.03) {
         results.push({
-          url: url.replace('https://calculator.ambrosiaventures.co', ''),
+          url: url.replace('https://solidus.ambrosiaventures.co', ''),
           impressions: data.impressions,
           clicks: data.clicks,
           ctr: avgCtr,

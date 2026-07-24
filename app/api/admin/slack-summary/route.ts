@@ -121,7 +121,7 @@ async function handleRequest(request: NextRequest) {
       attachments: [{
         color: '#0f172a',
         blocks: [
-          { type: 'header', text: { type: 'plain_text', text: 'Deal Calculator — Full Summary' } },
+          { type: 'header', text: { type: 'plain_text', text: 'Solidus — Full Summary' } },
           { type: 'section', fields: [
             { type: 'mrkdwn', text: `*Total Users:*\n${allUsers.length}` },
             { type: 'mrkdwn', text: `*Pro Users:*\n${proUsers.length}` },

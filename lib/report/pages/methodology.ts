@@ -22,7 +22,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
           <div class="section-title">How the Model Works</div>
           <div class="card" style="font-size: 10px; color: ${COLORS.gray700}; line-height: 1.7;">
             <p style="margin-bottom: 7px;">
-              The Ambrosia Deal Benchmarker uses a proprietary multi-factor valuation model calibrated against ${DEAL_STATS.TOTAL_DEALS} publicly disclosed pharmaceutical licensing transactions from 2017\u20132026.
+              Solidus uses a proprietary multi-factor valuation model calibrated against ${DEAL_STATS.TOTAL_DEALS} publicly disclosed pharmaceutical licensing transactions from 2017\u20132026.
             </p>
             <p style="margin-bottom: 7px;">
               <strong>Base Valuation:</strong> Initial deal value ranges are established using therapeutic area-specific benchmarks derived from actual transaction data, stratified by development phase.
@@ -78,7 +78,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
       <div class="disclaimer-box">
         <div style="font-weight: 700; margin-bottom: 6px; font-size: 10px; color: ${COLORS.gray600};">ABOUT THESE BENCHMARKS</div>
         <p style="margin-bottom: 5px;">
-          This report is produced by the Ambrosia Deal Benchmarker, calibrated against ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
+          This report is produced by Solidus, calibrated against ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
         </p>
         <p style="margin-bottom: 5px;">
           Individual deal outcomes depend on asset-specific factors including proprietary clinical data, IP landscape, competitive dynamics, regulatory interactions, and negotiation leverage. These benchmarks provide data-driven anchor points for deal strategy — for definitive structuring, engage qualified financial and legal advisors.
@@ -95,7 +95,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
           <span style="font-size: 9px; font-weight: 700; color: ${COLORS.gray500};">Ambrosia Ventures</span>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 8px; color: ${COLORS.gray400};">calculator.ambrosiaventures.co</div>
+          <div style="font-size: 8px; color: ${COLORS.gray400};">solidus.ambrosiaventures.co</div>
           <div style="font-size: 8px; color: ${COLORS.gray400};">${meta.reportId} &middot; \u00A9 ${new Date().getFullYear()} Ambrosia Ventures LLC</div>
         </div>
       </div>

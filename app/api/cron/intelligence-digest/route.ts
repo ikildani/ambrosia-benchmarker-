@@ -31,7 +31,7 @@ function formatDigestHtml(payload: {
   adCommRows: Array<{ sponsor: string; application: string; indication: string; daysFromToday: number; meetingDate: string }>;
   unsubscribeEmail: string;
 }): string {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
   const { monthLabel, ctgRows, adCommRows, unsubscribeEmail } = payload;
 
   const ctgSection = ctgRows.length === 0

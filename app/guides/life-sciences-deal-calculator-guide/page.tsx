@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties | Ambrosia Ventures',
+  title: 'Solidus: Benchmark Upfronts, Milestones & Royalties | Ambrosia Ventures',
   description: 'Free life sciences deal calculator benchmarking tool. Model upfronts, milestones, royalties, rNPV, and Monte Carlo analysis across 12 therapeutic areas and 23+ modalities.',
   keywords: [
     'life sciences deal calculator',
@@ -20,30 +20,30 @@ export const metadata: Metadata = {
     'pharma transaction calculator',
   ],
   openGraph: {
-    title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties',
+    title: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
     description: 'Model upfronts, milestones, royalties, rNPV, and Monte Carlo analysis across 12 therapeutic areas and 23+ modalities.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/life-sciences-deal-calculator-guide',
+    url: 'https://solidus.ambrosiaventures.co/guides/life-sciences-deal-calculator-guide',
     images: [{ url: '/api/og?title=Life%20Sciences%20Deal%20Calculator&subtitle=Benchmark%20Tool%20Guide&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties',
+    title: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
     description: 'Model deal terms, rNPV, and Monte Carlo analysis across 12 therapeutic areas.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/life-sciences-deal-calculator-guide',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/life-sciences-deal-calculator-guide',
   },
 };
 
 export default function LifeSciencesDealCalculatorGuidePage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties',
-    description: 'Complete guide to the life sciences deal calculator covering all 14 engines, step-by-step usage, and methodology.',
+    headline: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
+    description: 'Complete guide to Solidus covering all 14 engines, step-by-step usage, and methodology.',
     author: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',
@@ -104,7 +104,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
   const softwareSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Ambrosia Ventures Life Sciences Deal Calculator',
+    name: 'Solidus',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     url: `${baseUrl}/calculator`,
@@ -140,7 +140,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
             <Breadcrumbs items={[
               { label: 'Home', href: '/' },
               { label: 'Guides', href: '/guides' },
-              { label: 'Life Sciences Deal Calculator Guide' },
+              { label: 'Solidus Guide' },
             ]} />
 
             <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 text-sm font-medium rounded-full mb-4">
@@ -148,7 +148,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
             </span>
 
             <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
-              The Life Sciences Deal Calculator
+              Solidus
             </h1>
 
             <p className="mt-6 text-xl text-slate-300 leading-relaxed">
@@ -161,7 +161,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
         <article className="max-w-3xl mx-auto px-4 py-12">
           <div className="prose prose-slate prose-lg max-w-none">
             <p className="text-xl text-slate-700 leading-relaxed">
-              Every biopharma deal negotiation starts with the same question: what are fair terms? Business development teams spend weeks assembling comparable transactions, building bespoke models, and debating assumptions with finance. The Ambrosia Ventures Deal Calculator compresses that process into seconds, delivering institutional-quality benchmarks and valuations backed by the largest proprietary dataset of disclosed biopharma transactions available.
+              Every biopharma deal negotiation starts with the same question: what are fair terms? Business development teams spend weeks assembling comparable transactions, building bespoke models, and debating assumptions with finance. Solidus compresses that process into seconds, delivering institutional-quality benchmarks and valuations backed by the largest proprietary dataset of disclosed biopharma transactions available.
             </p>
 
             <p className="text-slate-600 leading-relaxed">

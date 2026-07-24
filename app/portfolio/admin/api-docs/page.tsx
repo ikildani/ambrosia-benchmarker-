@@ -272,7 +272,7 @@ export default function ApiDocsPage() {
                 All API requests require authentication via a Bearer token from your active session.
                 Include the token in the <code className="text-teal-400 bg-slate-800 px-1.5 py-0.5 rounded text-xs">Authorization</code> header of every request.
               </p>
-              <CodeBlock>{`curl -X GET https://calculator.ambrosiaventures.co/api/portfolio/dashboard \\
+              <CodeBlock>{`curl -X GET https://solidus.ambrosiaventures.co/api/portfolio/dashboard \\
   -H "Authorization: Bearer <your-token>" \\
   -H "Content-Type: application/json"`}</CodeBlock>
               <div className="bg-slate-800/50 border border-teal-500/20 rounded-lg p-4">
@@ -286,7 +286,7 @@ export default function ApiDocsPage() {
                     </p>
                     <div className="space-y-2">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">MCP Endpoint</p>
-                      <code className="block text-xs text-teal-300 bg-slate-900 px-3 py-2 rounded font-mono select-all">https://calculator.ambrosiaventures.co/api/mcp</code>
+                      <code className="block text-xs text-teal-300 bg-slate-900 px-3 py-2 rounded font-mono select-all">https://solidus.ambrosiaventures.co/api/mcp</code>
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-3">21 Tools Available</p>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {['Deal Terms', 'rNPV', 'Monte Carlo', 'Deal Optimizer', 'Regulatory Risk', 'Partner Match', 'Royalty Stacking', 'Patent/LOE', 'CMC Risk', 'Earnout/CVR', 'Tax Structure', 'Buyer Synergy', 'Indication Sequence', 'Competitive Dynamics', 'Real Options', 'Lifecycle Extensions', 'Scenario Comparison', 'Defensive Analysis', 'Clinical Readouts', 'AdComm Calendar', 'ZOPA/Negotiation'].map(tool => (

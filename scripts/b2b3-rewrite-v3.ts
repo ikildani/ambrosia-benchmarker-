@@ -62,7 +62,7 @@ Matthew —
 
 The Allist co-development is the cleanest structural model in oncology partnering this year. I built the furmonertinib comp set against it: $286M–$698M upfront, $1.9B median TDV.
 
-Counterparty view + full benchmark: https://calculator.ambrosiaventures.co/share/VD6VuISG8Jrd
+Counterparty view + full benchmark: https://solidus.ambrosiaventures.co/share/VD6VuISG8Jrd
 
 Open Pro for a week if you want your partner pipeline pre-loaded against it.
 
@@ -76,7 +76,7 @@ Joshua —
 
 The lysosomal ERT acquisition set has held a $13.4B–$21.5B upfront band across the last cycle. I pulled the comp universe for your portfolio against it: $19.3B median TDV.
 
-Numbers your committee can defend: https://calculator.ambrosiaventures.co/share/QCehNOtHoyeP
+Numbers your committee can defend: https://solidus.ambrosiaventures.co/share/QCehNOtHoyeP
 
 Full comp universe is in the Q1 2026 Benchmarks Report ($499).
 
@@ -90,7 +90,7 @@ Nick —
 
 Off-the-shelf iPSC manufacturing is the Denali playbook applied to neurology, and that's the right anchor for pricing this. I built the cell therapy comp set: $73M–$296M upfront, $928M median TDV.
 
-Where Kenai sits in the buyer set: https://calculator.ambrosiaventures.co/share/rbwx0tYttXQw
+Where Kenai sits in the buyer set: https://solidus.ambrosiaventures.co/share/rbwx0tYttXQw
 
 15 minutes if useful — I can walk through where you sit against the buyer set.
 

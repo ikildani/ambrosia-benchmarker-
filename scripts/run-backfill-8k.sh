@@ -11,7 +11,7 @@
 # Runtime: ~30 minutes per full pass (all deal types, first 5 pages each)
 
 ADMIN_KEY="${ADMIN_API_KEY:-bdf61d1734c6aa78539533b6ae83f9e359f50e5056dac99601369aa13dbfa166}"
-BASE_URL="${BASE_URL:-https://calculator.ambrosiaventures.co}"
+BASE_URL="${BASE_URL:-https://solidus.ambrosiaventures.co}"
 MAX_PAGES="${MAX_PAGES:-10}"  # Pages per deal type (20 filings per page)
 
 DEAL_TYPES=("license" "collaboration" "option" "acquisition" "codevelopment" "royalty")

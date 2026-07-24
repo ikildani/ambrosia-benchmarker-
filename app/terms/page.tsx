@@ -57,7 +57,7 @@ export default function TermsPage() {
               <div>
                 <h3 className="font-semibold text-amber-800 mb-1 text-sm sm:text-base">Important Notice</h3>
                 <p className="text-xs sm:text-sm text-amber-700">
-                  Please read these Terms and Conditions carefully before using the Ambrosia Ventures Deal Calculator.
+                  Please read these Terms and Conditions carefully before using Solidus.
                   By accessing or using this service, you agree to be bound by these terms.
                 </p>
               </div>
@@ -69,7 +69,7 @@ export default function TermsPage() {
             <p className="text-sm sm:text-base mb-4">
               These Terms and Conditions (&quot;Terms&quot;) constitute a legally binding agreement between you (&quot;User,&quot; &quot;you,&quot; or &quot;your&quot;)
               and Ambrosia Ventures LLC (&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) governing your access to and use of the
-              Deal Calculator tool available at calculator.ambrosiaventures.co (the &quot;Service&quot;).
+              Solidus tool available at solidus.ambrosiaventures.co (the &quot;Service&quot;).
             </p>
             <p className="text-sm sm:text-base">
               By accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms.
@@ -80,7 +80,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-lg sm:text-xl font-bold mb-4">2. Description of Service</h2>
             <p className="text-sm sm:text-base mb-4">
-              The Ambrosia Ventures Deal Calculator is an informational tool that provides estimated deal term benchmarks
+              Solidus is an informational tool that provides estimated deal term benchmarks
               for oncology and life sciences licensing and M&amp;A transactions. The Service generates estimates based on
               publicly available deal data, industry benchmarks, and algorithmic analysis of user-provided inputs.
             </p>

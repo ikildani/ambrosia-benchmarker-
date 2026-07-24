@@ -130,7 +130,7 @@ export const blogPosts: BlogPost[] = [
       },
     ],
     relatedLinks: [
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/blog/adc-deal-trends-2026', label: 'ADC Deal Trends 2026' },
       { href: '/blog/gilead-tubulis-adc-deal-analysis-2026', label: 'Gilead-Tubulis ADC Deal Analysis' },
       { href: '/blog/biopharma-partnership-terminations-impact-deal-terms-2026', label: 'How Partnership Terminations Reshape Deal Terms' },
@@ -213,7 +213,7 @@ export const blogPosts: BlogPost[] = [
     ],
     relatedLinks: [
       { href: '/benchmarks/adc-deal-benchmarks', label: 'ADC Deal Benchmarks' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/glossary/upfront-payment', label: 'Upfront Payment Glossary' },
       { href: '/guides/biopharma-licensing-benchmarks', label: 'Biopharma Licensing Benchmarks 2026' },
     ],
@@ -293,7 +293,7 @@ export const blogPosts: BlogPost[] = [
     relatedLinks: [
       { href: '/benchmarks/glp1-obesity-deal-benchmarks-2026', label: 'GLP-1 Obesity Deal Benchmarks 2026' },
       { href: '/benchmarks/obesity-weight-loss-deal-benchmarks', label: 'Obesity & Weight Loss Deal Benchmarks' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/guides/how-to-value-biotech-deal', label: 'How to Value a Biotech Deal' },
     ],
   },
@@ -383,7 +383,7 @@ export const blogPosts: BlogPost[] = [
     relatedLinks: [
       { href: '/benchmarks/phase-2-deal-benchmarks', label: 'Phase 2 Deal Benchmarks' },
       { href: '/guides/how-to-value-biotech-deal', label: 'How to Value a Biotech Deal' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
     ],
   },
   {
@@ -499,7 +499,7 @@ export const blogPosts: BlogPost[] = [
     ],
     relatedLinks: [
       { href: '/guides/negotiate-pharma-royalty-rates', label: 'How to Negotiate Pharma Royalty Rates' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/glossary/milestone-payment', label: 'Milestone Payment Glossary' },
     ],
   },
@@ -613,7 +613,7 @@ export const blogPosts: BlogPost[] = [
 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
   <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Benchmark your ADC deal against ${DEAL_STATS.TOTAL_DEALS} transactions</p>
   <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Run rNPV, Monte Carlo, and scenario analysis for any ADC asset — calibrated against real disclosed deal economics.</p>
-  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Solidus →</a>
 </div>
 
 <p>The asymmetry is striking. Gilead's maximum downside is $20M (the upfront) if both programs fail and the option is never exercised. The upside, if the Tubutecan platform delivers even one approved product in a major solid tumor indication, is measured in hundreds of millions. This is textbook option value — and it explains why Gilead accepted an apparently low total deal value. For a deeper dive into rNPV methodology, see our <a href="/guides/rnpv-biotech-valuation">complete rNPV valuation guide</a>.</p>
@@ -647,7 +647,7 @@ export const blogPosts: BlogPost[] = [
 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
   <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Model this deal with your own assumptions</p>
   <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Adjust milestone probabilities, peak sales, and royalty tiers — our rNPV engine recalculates in real time across \${DEAL_COUNT} comparable transactions.</p>
-  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Solidus →</a>
 </div>
 
 <p>The probability-weighted milestone value of $90-155M, combined with the $20M upfront, gives a risk-adjusted total of $110-175M — which is more in line with current Phase 1 ADC deal benchmarks when accounting for the early stage and option structure. Tubulis has effectively traded a higher upfront for back-loaded milestone payments, accepting more execution risk in exchange for greater total potential value.</p>
@@ -707,7 +707,7 @@ export const blogPosts: BlogPost[] = [
     ],
     relatedLinks: [
       { href: '/benchmarks/adc-deal-benchmarks', label: 'ADC Deal Benchmarks' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/glossary/upfront-payment', label: 'Upfront Payment Glossary' },
       { href: '/guides/rnpv-biotech-valuation', label: 'rNPV Biotech Valuation Guide' },
     ],
@@ -751,7 +751,7 @@ export const blogPosts: BlogPost[] = [
 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
   <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Model termination scenarios for your partnership</p>
   <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Our deal calculator incorporates termination probability adjustments by TA, deal type, and partner track record — stress-test your deal economics before signing.</p>
-  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Solidus →</a>
 </div>
 
 <p>The combined original deal value of these top 10 terminations alone exceeds $26.6 billion. When extended to include the full set of disclosed terminations, restructurings, and option lapses in 2024, the total surpasses $40 billion — a figure that represents approximately 25-30% of all active partnership deal value at the start of the year.</p>
@@ -902,7 +902,7 @@ export const blogPosts: BlogPost[] = [
     ],
     relatedLinks: [
       { href: '/insights/deal-benchmarks', label: 'Deal Benchmarks Dashboard' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/glossary/milestone-payment', label: 'Milestone Payment Glossary' },
       { href: '/guides/biotech-licensing-deal-structure', label: 'Biotech Deal Structure Guide' },
     ],
@@ -1017,7 +1017,7 @@ export const blogPosts: BlogPost[] = [
 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
   <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Run rare disease acquisition premium analysis</p>
   <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Model orphan drug economics with peak revenue, patient penetration, and competitive entry scenarios — calibrated against 48 rare disease M&A transactions.</p>
-  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Solidus →</a>
 </div>
 
 <p>Under the base case, Neurocrine is acquiring VYKAT XR at a modest discount to risk-adjusted NPV — suggesting the $2.9B price is reasonable if the product achieves mid-range commercial projections. The bull case reveals substantial value capture potential if diagnosis rates improve and ex-US expansion succeeds. The bear case, however, highlights the downside risk: if competition emerges or patient penetration stalls, the $2.9B price could prove aggressive.</p>
@@ -1143,7 +1143,7 @@ export const blogPosts: BlogPost[] = [
     ],
     relatedLinks: [
       { href: '/insights/rare-disease-landscape', label: 'Rare Disease Landscape Analysis' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/glossary/risk-adjusted-npv', label: 'Risk-Adjusted NPV Glossary' },
       { href: '/guides/rnpv-biotech-valuation', label: 'rNPV Biotech Valuation Guide' },
     ],
@@ -1241,7 +1241,7 @@ export const blogPosts: BlogPost[] = [
 <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(45,212,191,0.15); border-radius: 12px; padding: 20px 24px; margin: 24px 0;">
   <p style="color: #2dd4bf; font-weight: 700; font-size: 14px; margin: 0 0 6px 0;">Generate phase-stratified benchmarks for your asset</p>
   <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0;">Input your clinical stage, modality, and therapeutic area — our engine returns median upfronts, milestone ranges, and royalty tiers from 847 oncology comparables.</p>
-  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Deal Calculator →</a>
+  <a href="/calculator" style="display: inline-block; background: #0d9488; color: white; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">Open Solidus →</a>
 </div>
 
 <p>Two patterns warrant attention. First, the upfront-as-percentage-of-total ratio increases with clinical stage, from 6.6% for preclinical deals to 19.2% for Phase 3 assets. This reflects the decreasing risk profile and increasing willingness of acquirers to commit guaranteed capital. Second, the jump from Phase 1/2 to Phase 2 ($2.1B to $3.5B median, a 67% increase) remains the largest single-phase premium in oncology M&A — consistent with the <a href="/insights/phase-transition-premiums">phase transition premium analysis</a> we have published previously.</p>
@@ -1423,7 +1423,7 @@ export const blogPosts: BlogPost[] = [
     ],
     relatedLinks: [
       { href: '/benchmarks/adc-deal-benchmarks', label: 'ADC Deal Benchmarks' },
-      { href: '/calculator', label: 'Deal Calculator' },
+      { href: '/calculator', label: 'Solidus' },
       { href: '/insights/deal-benchmarks', label: 'Deal Benchmarks Dashboard' },
       { href: '/guides/biopharma-licensing-benchmarks', label: 'Biopharma Licensing Benchmarks 2026' },
     ],

@@ -150,7 +150,7 @@ export async function findOptimizationCandidates(
     } else {
       // Derive a default title from the page path
       const slug = candidate.pagePath.replace(/^\//, '').replace(/\//g, ' - ') || 'Home';
-      candidate.currentTitle = `${slug} | Ambrosia Benchmarker`;
+      candidate.currentTitle = `${slug} | Solidus`;
       candidate.currentDescription = 'Biopharma deal benchmarks and licensing analytics.';
     }
   }

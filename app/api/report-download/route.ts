@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Send follow-up email with download link
-    const reportUrl = `https://calculator.ambrosiaventures.co/reports/${report_slug}.pdf`;
+    const reportUrl = `https://solidus.ambrosiaventures.co/reports/${report_slug}.pdf`;
     try {
       await sendEmail({
         to: normalizedEmail,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             </a>
             <p style="font-size: 13px; color: #94a3b8; margin-top: 24px; line-height: 1.6;">
               Want the interactive version? Every number in this report is live-modifiable on
-              <a href="https://calculator.ambrosiaventures.co/calculator" style="color: #5fd4e3;">calculator.ambrosiaventures.co</a>
+              <a href="https://solidus.ambrosiaventures.co/calculator" style="color: #5fd4e3;">solidus.ambrosiaventures.co</a>
               — adjust phase, modality, indication, and see how the comp set shifts in real time.
             </p>
             <hr style="border: none; border-top: 1px solid rgba(244,241,232,0.08); margin: 24px 0;" />

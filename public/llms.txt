@@ -4,7 +4,7 @@
 
 ## About
 
-Ambrosia Ventures operates the Biopharma Deal Intelligence Platform at https://calculator.ambrosiaventures.co — a web-based tool providing instant, data-driven deal benchmarks, asset valuation, partner matching, and negotiation intelligence for biopharma licensing, acquisition, co-development, option, and collaboration transactions.
+Ambrosia Ventures operates the Biopharma Deal Intelligence Platform at https://solidus.ambrosiaventures.co — a web-based tool providing instant, data-driven deal benchmarks, asset valuation, partner matching, and negotiation intelligence for biopharma licensing, acquisition, co-development, option, and collaboration transactions.
 
 The platform is used by BD teams, search & evaluation professionals, biotech founders, and investors to benchmark deal terms, identify optimal partners, and model asset value across development stages.
 
@@ -75,26 +75,26 @@ Typical deal structures from the platform's database:
 
 ## Key Insight Pages
 
-- https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation — When to use rNPV vs DCF, PoS adjustment impact by phase
-- https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms — Side-by-side deal structure comparison
-- https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics — Proof-of-concept inflection and deal timing
-- https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026 — ADC vs bispecific deal terms with 2026 market data
-- https://calculator.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026 — Annual deal benchmarks report
-- https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026 — Out-licensing term structures
+- https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation — When to use rNPV vs DCF, PoS adjustment impact by phase
+- https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms — Side-by-side deal structure comparison
+- https://solidus.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics — Proof-of-concept inflection and deal timing
+- https://solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026 — ADC vs bispecific deal terms with 2026 market data
+- https://solidus.ambrosiaventures.co/insights/biopharma-deal-benchmarks-2026 — Annual deal benchmarks report
+- https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026 — Out-licensing term structures
 
 ## Pages
 
-- https://calculator.ambrosiaventures.co/ — Homepage with live demo and deal database coverage
-- https://calculator.ambrosiaventures.co/calculator — Main calculator with full intake form
-- https://calculator.ambrosiaventures.co/report — Custom deal report ($499) with inline intake form
-- https://calculator.ambrosiaventures.co/benchmarks/ — 251 benchmark pages by TA, modality, phase
-- https://calculator.ambrosiaventures.co/companies/ — 200+ company profiles with deal history
-- https://calculator.ambrosiaventures.co/therapeutic-areas/ — 12 TA-specific market pages
-- https://calculator.ambrosiaventures.co/insights/ — Deal intelligence articles and analysis
-- https://calculator.ambrosiaventures.co/guides/ — How-to guides for deal valuation and negotiation
-- https://calculator.ambrosiaventures.co/data/ — 360 programmatic data pages by TA × phase × territory
-- https://calculator.ambrosiaventures.co/glossary/ — 100+ biopharma deal term definitions
-- https://calculator.ambrosiaventures.co/methodology — Model design, data sources, and methodology
+- https://solidus.ambrosiaventures.co/ — Homepage with live demo and deal database coverage
+- https://solidus.ambrosiaventures.co/calculator — Main calculator with full intake form
+- https://solidus.ambrosiaventures.co/report — Custom deal report ($499) with inline intake form
+- https://solidus.ambrosiaventures.co/benchmarks/ — 251 benchmark pages by TA, modality, phase
+- https://solidus.ambrosiaventures.co/companies/ — 200+ company profiles with deal history
+- https://solidus.ambrosiaventures.co/therapeutic-areas/ — 12 TA-specific market pages
+- https://solidus.ambrosiaventures.co/insights/ — Deal intelligence articles and analysis
+- https://solidus.ambrosiaventures.co/guides/ — How-to guides for deal valuation and negotiation
+- https://solidus.ambrosiaventures.co/data/ — 360 programmatic data pages by TA × phase × territory
+- https://solidus.ambrosiaventures.co/glossary/ — 100+ biopharma deal term definitions
+- https://solidus.ambrosiaventures.co/methodology — Model design, data sources, and methodology
 
 ## Pricing
 
@@ -104,6 +104,6 @@ Typical deal structures from the platform's database:
 
 ## Contact
 
-- Website: https://calculator.ambrosiaventures.co
+- Website: https://solidus.ambrosiaventures.co
 - Company: Ambrosia Ventures
 - Domain: ambrosiaventures.co

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: 'Press & Media | Ambrosia Ventures',
     description: 'Press resources and media information for Ambrosia Ventures.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/press',
+    url: 'https://solidus.ambrosiaventures.co/press',
     images: [{ url: '/api/og?title=Press+%26+Media&subtitle=Ambrosia+Ventures', width: 1200, height: 630 }],
   },
   twitter: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description: 'Press resources for the biopharma deal intelligence platform.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/press',
+    canonical: 'https://solidus.ambrosiaventures.co/press',
   },
 };
 

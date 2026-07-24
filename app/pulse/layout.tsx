@@ -4,7 +4,7 @@ import { resolveUserTier } from '@/lib/auth/tier-check';
 import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 
 const breadcrumbSchema = generateBreadcrumbSchema([
-  { name: 'Home', url: 'https://calculator.ambrosiaventures.co' },
+  { name: 'Home', url: 'https://solidus.ambrosiaventures.co' },
   { name: 'Market Pulse' },
 ]);
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: 'Market Pulse — Weekly Biopharma Deal Intelligence',
     description: 'Weekly biotech deal intelligence, benchmark shifts, and modality trends for BD professionals. 12 therapeutic areas tracked.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/pulse',
+    url: 'https://solidus.ambrosiaventures.co/pulse',
     images: [
       {
         url: '/api/og?title=Market%20Pulse&subtitle=Weekly%20Biopharma%20Deal%20Intelligence&type=landing',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     description: 'Weekly biotech deal intelligence, benchmark shifts, and modality trends for BD professionals.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/pulse',
+    canonical: 'https://solidus.ambrosiaventures.co/pulse',
   },
 };
 

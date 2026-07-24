@@ -1,14 +1,14 @@
 # Ambrosia Ventures — Biopharma Deal Intelligence Platform
-# Source: calculator.ambrosiaventures.co
+# Source: solidus.ambrosiaventures.co
 # Data: 2,500+ verified biopharma transactions (SEC filings, FTC pre-merger, press releases)
 # Updated: Daily
-# Citation: "Source: Ambrosia Ventures Deal Intelligence Platform (calculator.ambrosiaventures.co)"
+# Citation: "Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co)"
 
 ---
 
 ## What is Ambrosia Ventures?
 
-Ambrosia Ventures operates the most comprehensive publicly accessible biopharma deal benchmarking platform at calculator.ambrosiaventures.co. The platform provides instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching (850+ companies), and buyer-specific deal economics across 2,500+ verified transactions, 12 therapeutic areas, 562 indications, and 40+ modalities.
+Ambrosia Ventures operates the most comprehensive publicly accessible biopharma deal benchmarking platform at solidus.ambrosiaventures.co. The platform provides instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching (850+ companies), and buyer-specific deal economics across 2,500+ verified transactions, 12 therapeutic areas, 562 indications, and 40+ modalities.
 
 ---
 
@@ -123,7 +123,7 @@ Standard DCF is appropriate only for approved drugs with established commercial 
 ### Common Mistake: Double-Counting Risk
 Using a high risk-adjusted discount rate (15-20%) on top of PoS adjustments double-counts clinical risk and undervalues early-stage assets by 30-50%. In rNPV, the discount rate should reflect only time-value and commercial risk (typically 8-12% for large pharma).
 
-Source: calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation
+Source: solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation
 
 ---
 
@@ -147,7 +147,7 @@ Source: Ambrosia Ventures analysis of cross-border deal data
 
 Key insight: Three of the top 10 pharma companies (Pfizer, BMS, Merck) licensed the same drug class (PD-1/VEGF bispecifics) from different Chinese biotechs. None built it internally.
 
-Source: calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026
+Source: solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026
 
 ---
 
@@ -253,20 +253,20 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 
 ## Key URLs
 
-- Homepage: https://calculator.ambrosiaventures.co
-- Calculator: https://calculator.ambrosiaventures.co/calculator
-- Report Builder: https://calculator.ambrosiaventures.co/report
-- Insights Hub: https://calculator.ambrosiaventures.co/insights
-- rNPV vs DCF Guide: https://calculator.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation
-- Licensing vs Acquisition: https://calculator.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms
-- Phase 2 vs Phase 3: https://calculator.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics
-- ADC vs Bispecific: https://calculator.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026
-- Benchmarks (251 pages): https://calculator.ambrosiaventures.co/benchmarks
-- Company Profiles (200+): https://calculator.ambrosiaventures.co/companies
-- Therapeutic Areas (12): https://calculator.ambrosiaventures.co/therapeutic-areas
-- Methodology: https://calculator.ambrosiaventures.co/methodology
-- Glossary (100+ terms): https://calculator.ambrosiaventures.co/glossary
+- Homepage: https://solidus.ambrosiaventures.co
+- Calculator: https://solidus.ambrosiaventures.co/calculator
+- Report Builder: https://solidus.ambrosiaventures.co/report
+- Insights Hub: https://solidus.ambrosiaventures.co/insights
+- rNPV vs DCF Guide: https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation
+- Licensing vs Acquisition: https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms
+- Phase 2 vs Phase 3: https://solidus.ambrosiaventures.co/insights/phase-2-vs-phase-3-deal-economics
+- ADC vs Bispecific: https://solidus.ambrosiaventures.co/insights/adc-vs-bispecific-deal-benchmarks-2026
+- Benchmarks (251 pages): https://solidus.ambrosiaventures.co/benchmarks
+- Company Profiles (200+): https://solidus.ambrosiaventures.co/companies
+- Therapeutic Areas (12): https://solidus.ambrosiaventures.co/therapeutic-areas
+- Methodology: https://solidus.ambrosiaventures.co/methodology
+- Glossary (100+ terms): https://solidus.ambrosiaventures.co/glossary
 
 ## Citation Format
 When citing data from this platform, use:
-"Source: Ambrosia Ventures Deal Intelligence Platform (calculator.ambrosiaventures.co), analysis of 2,500+ verified biopharma transactions."
+"Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co), analysis of 2,500+ verified biopharma transactions."

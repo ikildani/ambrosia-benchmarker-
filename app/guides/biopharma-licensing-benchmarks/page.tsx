@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
     description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, and royalties by phase, modality, and therapeutic area.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',
     images: [{ url: '/api/og?title=Biopharma%20Licensing%20Benchmarks%202026&subtitle=Data%20From%202%2C500%2B%20Deals&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
@@ -32,12 +32,12 @@ export const metadata: Metadata = {
     description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, and royalties.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',
   },
 };
 
 export default function BiopharmaLicensingBenchmarksPage() {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -438,7 +438,7 @@ export default function BiopharmaLicensingBenchmarksPage() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { href: '/calculator', title: 'Deal Calculator', desc: `Benchmark your deal against ${DEAL_STATS.TOTAL_DEALS} transactions` },
+                { href: '/calculator', title: 'Solidus', desc: `Benchmark your deal against ${DEAL_STATS.TOTAL_DEALS} transactions` },
                 { href: '/methodology', title: 'Methodology', desc: 'Data sources and model assumptions' },
                 { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Guide', desc: 'Risk-adjusted valuation methodology' },
               ].map((resource) => (

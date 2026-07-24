@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
 
 const breadcrumbSchema = generateBreadcrumbSchema([
-  { name: 'Home', url: 'https://calculator.ambrosiaventures.co' },
+  { name: 'Home', url: 'https://solidus.ambrosiaventures.co' },
   { name: 'Company Profiles' },
 ]);
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Biopharma Company Profiles — Competitive Intelligence & Deal History',
     description: '120+ biotech and pharma company profiles — deal history, pipelines, licensing appetite, and competitive benchmarks.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/companies',
+    url: 'https://solidus.ambrosiaventures.co/companies',
     images: [
       {
         url: '/api/og?title=Company%20Profiles&subtitle=120%2B%20Biopharma%20Companies%20%E2%80%94%20Deal%20History%20%26%20Pipeline%20Intel&type=landing',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     description: '120+ biotech and pharma company profiles with deal history, pipelines, and competitive benchmarks.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/companies',
+    canonical: 'https://solidus.ambrosiaventures.co/companies',
   },
 };
 

@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Phase 2 Milestone Payments: How Much Should You Expect?',
     description: 'Phase 2 milestones split 40% clinical, 25% regulatory, 35% commercial. Benchmark data across 6 therapeutic areas and 8 modalities.',
     type: 'article',
-    url: 'https://calculator.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
     images: [{ url: '/api/og?title=Phase%202%20Milestone%20Benchmarks&subtitle=Clinical%20%C2%B7%20Regulatory%20%C2%B7%20Commercial&type=insight', width: 1200, height: 630 }],
   },
   twitter: {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'How milestones split across clinical (40%), regulatory (25%), and commercial (35%) triggers in Phase 2 licensing deals.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
+    canonical: 'https://solidus.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
   },
 };
 
@@ -53,9 +53,9 @@ export default function Phase2MilestoneBenchmarksPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://calculator.ambrosiaventures.co/insights' },
-      { '@type': 'ListItem', position: 3, name: 'Phase 2 Milestone Benchmarks', item: 'https://calculator.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: 'https://solidus.ambrosiaventures.co/insights' },
+      { '@type': 'ListItem', position: 3, name: 'Phase 2 Milestone Benchmarks', item: 'https://solidus.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks' },
     ],
   };
 
@@ -64,11 +64,11 @@ export default function Phase2MilestoneBenchmarksPage() {
     '@type': 'Article',
     headline: 'Phase 2 Licensing Milestone Payments: How Much Should You Expect?',
     description: 'Benchmark analysis of milestone payment structures in Phase 2 licensing deals across therapeutic areas and modalities.',
-    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
-    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://calculator.ambrosiaventures.co/logo.png' } },
+    author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
+    publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } },
     datePublished: '2026-03-24',
     dateModified: '2026-03-24',
-    mainEntityOfPage: 'https://calculator.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
+    mainEntityOfPage: 'https://solidus.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
   };
 
   const faqSchema = {
@@ -123,10 +123,10 @@ export default function Phase2MilestoneBenchmarksPage() {
     '@type': 'Dataset',
     name: 'Phase 2 Licensing Milestone Payment Benchmarks (2020-2026)',
     description: 'Benchmark data for milestone payment structures in Phase 2 licensing deals across 6 therapeutic areas and 8 modalities.',
-    url: 'https://calculator.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
+    url: 'https://solidus.ambrosiaventures.co/insights/phase-2-milestone-payment-benchmarks',
     creator: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     temporalCoverage: '2020/2026',
-    distribution: { '@type': 'DataDownload', contentUrl: 'https://calculator.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
+    distribution: { '@type': 'DataDownload', contentUrl: 'https://solidus.ambrosiaventures.co/calculator', encodingFormat: 'text/html' },
     variableMeasured: [
       { '@type': 'PropertyValue', name: 'Upfront Payment', unitText: 'USD millions' },
       { '@type': 'PropertyValue', name: 'Total Deal Value', unitText: 'USD millions' },
@@ -211,7 +211,7 @@ export default function Phase2MilestoneBenchmarksPage() {
             </p>
 
             <p>
-              This analysis draws on over 3,500 transactions in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> to present the definitive guide to Phase 2 milestone payment benchmarks. We cover milestone splits by category, benchmark structures by therapeutic area, modality-adjusted values, and the specific trigger definitions that maximize total deal economics. For the broader context of how these milestones fit into overall <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms across therapeutic areas</Link>, see our companion analysis.
+              This analysis draws on over 3,500 transactions in the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to present the definitive guide to Phase 2 milestone payment benchmarks. We cover milestone splits by category, benchmark structures by therapeutic area, modality-adjusted values, and the specific trigger definitions that maximize total deal economics. For the broader context of how these milestones fit into overall <Link href="/insights/deal-terms-by-therapeutic-area" className="text-teal-600 font-medium hover:text-teal-700">deal terms across therapeutic areas</Link>, see our companion analysis.
             </p>
 
             <h2 id="phase-2-inflection">Phase 2 as the Inflection Point: The Numbers</h2>
@@ -455,7 +455,7 @@ export default function Phase2MilestoneBenchmarksPage() {
                 What is the total milestone value for a Phase 2 oncology licensing deal?
               </summary>
               <p className="text-slate-600">
-                The median total milestone pool for a Phase 2 oncology licensing deal is approximately $660M (derived from $1.1B median TDV minus $95M upfront and royalty NPV). Clinical milestones account for $264-297M, regulatory milestones $132-198M, and commercial milestones $198-264M. Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Benchmarker</Link> for modality-adjusted values.
+                The median total milestone pool for a Phase 2 oncology licensing deal is approximately $660M (derived from $1.1B median TDV minus $95M upfront and royalty NPV). Clinical milestones account for $264-297M, regulatory milestones $132-198M, and commercial milestones $198-264M. Use the <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> for modality-adjusted values.
               </p>
             </details>
 

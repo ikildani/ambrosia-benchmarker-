@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
   const stat = searchParams.get('stat');
 
   // Resolve host so the logo image can be fetched from the right deployment
-  const host = request.headers.get('host') || 'calculator.ambrosiaventures.co';
+  const host = request.headers.get('host') || 'solidus.ambrosiaventures.co';
 
   // --- Insight type: bold stat + title (for LinkedIn sharing) ---
   if (type === 'insight' && stat) {
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
               fontSize: '18px',
             }}
           >
-            calculator.ambrosiaventures.co
+            solidus.ambrosiaventures.co
           </div>
           <AccentBar from={COLORS.amber} to={COLORS.teal} />
         </div>
@@ -357,7 +357,7 @@ export async function GET(request: NextRequest) {
             color: COLORS.slateDark,
           }}
         >
-          calculator.ambrosiaventures.co
+          solidus.ambrosiaventures.co
         </div>
 
         {/* Accent bar */}

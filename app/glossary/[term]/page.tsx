@@ -17,7 +17,7 @@ export async function generateMetadata({
   const entry = getTermBySlug(slug);
   if (!entry) return {};
 
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
   const title = `${entry.term} — Biotech Deal Term Explained | Ambrosia Ventures`;
   const description = entry.definition.length > 155
     ? entry.definition.substring(0, 152) + '...'
@@ -61,7 +61,7 @@ export default async function GlossaryTermPage({
   if (!entry) notFound();
 
   const related = getRelatedTermEntries(entry.relatedTerms);
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const definedTermSchema = {
     '@context': 'https://schema.org',

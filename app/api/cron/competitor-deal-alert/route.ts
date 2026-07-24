@@ -106,7 +106,7 @@ function buildAlertEmailHtml(deal: {
           <p><strong>Your negotiating leverage may have changed.</strong> This deal could shift the benchmark ranges for ${ta} assets at your stage. Run an updated calculation to see where your deal stands.</p>
 
           <div style="text-align: center; margin: 32px 0;">
-            <a href="https://calculator.ambrosiaventures.co" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
+            <a href="https://solidus.ambrosiaventures.co" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
               See Updated Benchmarks
             </a>
           </div>
@@ -121,7 +121,7 @@ function buildAlertEmailHtml(deal: {
             Ambrosia Ventures | <a href="https://ambrosiaventures.co" style="color: #14b8a6;">ambrosiaventures.co</a>
           </p>
           <p style="margin: 8px 0 0;">
-            <a href="https://calculator.ambrosiaventures.co/unsubscribe" style="color: #64748b;">Unsubscribe</a>
+            <a href="https://solidus.ambrosiaventures.co/unsubscribe" style="color: #64748b;">Unsubscribe</a>
           </p>
         </div>
       </body>

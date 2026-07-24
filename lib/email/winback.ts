@@ -1,4 +1,4 @@
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export function buildSubscriptionWinbackEmail(name: string): { subject: string; html: string } {
   const firstName = name?.split(' ')[0] || 'there';

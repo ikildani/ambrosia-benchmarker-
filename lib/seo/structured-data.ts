@@ -77,7 +77,7 @@ export interface BreadcrumbSchema {
   }>;
 }
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export function generateOrganizationSchema(): OrganizationSchema {
   return {
@@ -98,8 +98,8 @@ export function generateWebSiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Ambrosia Ventures Deal Calculator',
-    alternateName: 'Life Sciences Deal Calculator',
+    name: 'Solidus',
+    alternateName: 'Life Sciences Deal Intelligence',
     url: BASE_URL,
     description: 'Data-driven deal benchmarking, rNPV analysis, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals.',
     publisher: {
@@ -122,7 +122,7 @@ export function generateSoftwareApplicationSchema(): SoftwareApplicationSchema {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Life Sciences Deal Calculator',
+    name: 'Solidus',
     description: `Estimate upfront payments, milestones, and royalties for biopharma licensing deals across 12 therapeutic areas with data-driven benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     url: `${BASE_URL}/calculator`,
     applicationCategory: 'BusinessApplication',
@@ -190,7 +190,7 @@ export function generatePricingSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: 'Life Sciences Deal Calculator',
+    name: 'Solidus',
     description: 'Data-driven deal benchmarking and valuation tool for biotech licensing transactions.',
     url: `${BASE_URL}/calculator`,
     brand: {
@@ -267,10 +267,10 @@ export function generateHowToSchema() {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
     name: 'How to Benchmark a Biopharma Licensing Deal',
-    description: `Use the Ambrosia Ventures Deal Calculator to get instant benchmarks for upfront payments, milestones, and royalties based on ${DEAL_STATS.TOTAL_DEALS} real biopharma transactions.`,
+    description: `Use the Solidus to get instant benchmarks for upfront payments, milestones, and royalties based on ${DEAL_STATS.TOTAL_DEALS} real biopharma transactions.`,
     totalTime: 'PT2M',
     tool: [
-      { '@type': 'HowToTool', name: 'Ambrosia Ventures Deal Calculator' },
+      { '@type': 'HowToTool', name: 'Solidus' },
     ],
     step: [
       {
@@ -318,7 +318,7 @@ export function generateWebPageSchema(page: {
     url: page.url,
     isPartOf: {
       '@type': 'WebSite',
-      name: 'Ambrosia Ventures Deal Calculator',
+      name: 'Solidus',
       url: BASE_URL,
     },
     publisher: {
@@ -342,7 +342,7 @@ export function generateAboutPageSchema() {
     url: `${BASE_URL}/about`,
     isPartOf: {
       '@type': 'WebSite',
-      name: 'Ambrosia Ventures Deal Calculator',
+      name: 'Solidus',
       url: BASE_URL,
     },
     publisher: {

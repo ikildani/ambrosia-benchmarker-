@@ -1,4 +1,4 @@
-# Top 50 Outreach Email — calculator.ambrosiaventures.co
+# Top 50 Outreach Email — solidus.ambrosiaventures.co
 
 ## The Rules
 - Under 90 words in the body. These people get 200 emails/day.
@@ -22,7 +22,7 @@ After your team's work on {{RECENT_DEAL_OR_CONTEXT}}, thought this might be usef
 
 We built a free deal benchmarking calculator that models upfront, milestones, royalties, and risk-adjusted NPV by indication and modality in under 60 seconds:
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 It pulls from 2,800+ curated biopharma deals. No login required to try it.
 
@@ -45,7 +45,7 @@ Saw your work on {{RECENT_DEAL_OR_PUBLICATION}} — impressive scope.
 
 We built a biopharma deal benchmarking calculator that generates risk-adjusted deal terms (upfront, milestones, royalties, NPV) by indication and modality in under a minute:
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 It's free to try, no login. A few LS practices are using it to sanity-check term sheets before negotiations.
 
@@ -66,7 +66,7 @@ If it's useful, happy to set up access for your team.
 
 Building deal comps for pharma licensing is tedious. We automated it.
 
-calculator.ambrosiaventures.co models risk-adjusted upfront, milestones, royalties, and NPV across 200+ indications and 8 modalities — in 60 seconds. Pulls from 2,800+ curated deals.
+solidus.ambrosiaventures.co models risk-adjusted upfront, milestones, royalties, and NPV across 200+ indications and 8 modalities — in 60 seconds. Pulls from 2,800+ curated deals.
 
 No login to try it. A few healthcare IB teams are using it for early-stage screening before building full models.
 
@@ -89,7 +89,7 @@ Big fan of {{PUBLICATION_OR_WORK}}. Your coverage of {{TOPIC}} is consistently t
 
 We built a free biopharma deal benchmarking calculator — models upfront, milestones, royalties, and NPV by indication and modality. 2,800+ curated deals. Takes 60 seconds:
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 Would your audience find this useful? Happy to do an exclusive walkthrough or provide data for a piece.
 
@@ -108,7 +108,7 @@ Would your audience find this useful? Happy to do an exclusive walkthrough or pr
 
 Pricing a pharma license without market comps is guesswork. We built a tool that fixes that.
 
-calculator.ambrosiaventures.co models risk-adjusted deal terms (upfront, milestones, royalties) across 200+ indications — benchmarked against 2,800+ real biopharma deals. Free, no login.
+solidus.ambrosiaventures.co models risk-adjusted deal terms (upfront, milestones, royalties) across 200+ indications — benchmarked against 2,800+ real biopharma deals. Free, no login.
 
 A few TTOs are using it to anchor negotiations with pharma partners. Worth 60 seconds to see if it's useful for {{UNIVERSITY}}'s licensing team.
 
@@ -129,7 +129,7 @@ When your portfolio companies negotiate their first pharma deal, they're flying 
 
 We built a calculator that benchmarks upfront, milestones, royalties, and NPV by indication and modality — based on 2,800+ real deals. Takes 60 seconds:
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 No login. A few VC-backed biotechs are using it before entering BD conversations. Might be worth sharing with your companies.
 
@@ -148,7 +148,7 @@ No login. A few VC-backed biotechs are using it before entering BD conversations
 
 Before your team models a deal in Excel, this gives you the ballpark in 60 seconds.
 
-calculator.ambrosiaventures.co benchmarks upfront, milestones, royalties, and risk-adjusted NPV across 200+ indications and 8 modalities. Based on 2,800+ curated biopharma deals.
+solidus.ambrosiaventures.co benchmarks upfront, milestones, royalties, and risk-adjusted NPV across 200+ indications and 8 modalities. Based on 2,800+ curated biopharma deals.
 
 Free, no login. A few biotech finance teams use it to gut-check BD proposals before building full models.
 
@@ -169,7 +169,7 @@ Worth a quick look.
 
 Your team builds pharma deal comps constantly. We made it faster.
 
-calculator.ambrosiaventures.co generates risk-adjusted deal benchmarks (upfront, milestones, royalties, NPV) across 200+ indications in 60 seconds. 2,800+ curated deals.
+solidus.ambrosiaventures.co generates risk-adjusted deal benchmarks (upfront, milestones, royalties, NPV) across 200+ indications in 60 seconds. 2,800+ curated deals.
 
 No login needed. A few biopharma advisory firms are using it for early screening before client presentations.
 
@@ -214,7 +214,7 @@ If useful, happy to discuss a white-label or bulk access setup for {{FIRM}}.
 **Day 7:** Send 15 CFOs + TTOs + VCs (Templates E, F, G)
 
 **Follow-up (Day 5 after each batch):** One line only:
-> "Bumping this — did you get a chance to try it? calculator.ambrosiaventures.co"
+> "Bumping this — did you get a chance to try it? solidus.ambrosiaventures.co"
 
 **Second follow-up (Day 12):** Only if no response:
 > "Last note — a few [peers at similar companies] found this useful for [specific use case]. No worries if the timing isn't right."

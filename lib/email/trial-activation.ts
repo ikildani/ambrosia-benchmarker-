@@ -1,7 +1,7 @@
 import { sendEmail } from './client';
 
-const LOGO_URL = 'https://calculator.ambrosiaventures.co/logo.png';
-const APP_URL = 'https://calculator.ambrosiaventures.co';
+const LOGO_URL = 'https://solidus.ambrosiaventures.co/logo.png';
+const APP_URL = 'https://solidus.ambrosiaventures.co';
 
 function header(title: string, subtitle?: string): string {
   return `

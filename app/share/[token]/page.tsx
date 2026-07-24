@@ -15,7 +15,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
   const ogImageUrl = `${baseUrl}/api/og/share/${token}`;
 
   let title = 'Deal Analysis | Ambrosia Ventures';
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 async function getSharedCalculation(token: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calculator.ambrosiaventures.co';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
     const response = await fetch(`${baseUrl}/api/share/${token}`, { cache: 'no-store' });
     if (!response.ok) return null;
     return response.json();

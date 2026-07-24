@@ -23,7 +23,7 @@ const resolveMx = promisify(dns.resolveMx);
 
 const INPUT_CSV = '/Users/issakildani/Desktop/ambrosia_400_corrected.csv';
 const OUTPUT_CSV = '/Users/issakildani/Desktop/ambrosia_400_enriched.csv';
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 if (!CRON_SECRET) {

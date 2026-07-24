@@ -8,7 +8,7 @@ import { runCronIntelligence } from '@/lib/cron-intelligence';
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 function formatLabel(value: string): string {
   return value

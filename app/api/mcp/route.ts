@@ -1,10 +1,10 @@
 /**
- * MCP Server — Ambrosia Benchmarker v3.0
+ * MCP Server — Solidus v3.0
  *
  * Exposes 22 institutional-grade tools, 10 read-only resources, and 7 prompt
  * templates over the Model Context Protocol (MCP) using the Streamable HTTP
  * transport. Each tool wraps one of the core calculation engines that power
- * calculator.ambrosiaventures.co.
+ * solidus.ambrosiaventures.co.
  *
  * Auth: Enterprise API keys (Growth / Scale / Enterprise tiers).
  * Rate limits: Growth 5K/mo, Scale 15K/mo, Enterprise 100K/mo.
@@ -343,7 +343,7 @@ function getResponseMeta(): object {
  */
 function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier): McpServer {
   const server = new McpServer({
-    name: 'Ambrosia Benchmarker',
+    name: 'Solidus',
     version: '2.0.0',
     description: `Institutional-grade biopharma deal intelligence — 21 engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 850+ companies`,
   });
@@ -2234,7 +2234,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are an institutional-grade biopharma deal advisor. Using the Ambrosia Benchmarker MCP tools, generate a comprehensive deal benchmark for: ${params.asset_description}
+          text: `You are an institutional-grade biopharma deal advisor. Using the Solidus MCP tools, generate a comprehensive deal benchmark for: ${params.asset_description}
 
 Steps:
 1. Call calculate_deal_terms with the appropriate parameters
@@ -2270,7 +2270,7 @@ Territory: ${params.territory || 'global'}`,
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are a biopharma business development expert. Using the Ambrosia Benchmarker MCP tools, identify and rank the best licensing partners for: ${params.asset_description}
+          text: `You are a biopharma business development expert. Using the Solidus MCP tools, identify and rank the best licensing partners for: ${params.asset_description}
 
 Steps:
 1. Read the buyer-premiums resource to understand premium multipliers
@@ -2305,7 +2305,7 @@ Territory: ${params.territory || 'global'}`,
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are a senior biopharma deal negotiation strategist. Using the Ambrosia Benchmarker MCP tools, prepare a comprehensive negotiation strategy for: ${params.asset_description}
+          text: `You are a senior biopharma deal negotiation strategist. Using the Solidus MCP tools, prepare a comprehensive negotiation strategy for: ${params.asset_description}
 
 Target buyers: ${params.buyers}
 
@@ -2346,7 +2346,7 @@ BATNA upfront: $${params.batna_upfront_m || '0'}M`,
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are a senior biopharma investment analyst. Using ALL available Ambrosia Benchmarker MCP tools, produce a comprehensive Investment Committee memo for: ${params.asset_description}
+          text: `You are a senior biopharma investment analyst. Using ALL available Solidus MCP tools, produce a comprehensive Investment Committee memo for: ${params.asset_description}
 
 Run the following analyses in logical order:
 1. calculate_deal_terms — baseline deal structure
@@ -2393,7 +2393,7 @@ Territory: ${params.territory || 'global'}`,
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are a biopharma competitive intelligence analyst. Using the Ambrosia Benchmarker MCP tools, produce a comprehensive competitive landscape analysis for: ${params.indication}
+          text: `You are a biopharma competitive intelligence analyst. Using the Solidus MCP tools, produce a comprehensive competitive landscape analysis for: ${params.indication}
 
 Steps:
 1. Call get_market_intelligence for ${params.therapeutic_area || 'the relevant therapeutic area'} to identify upcoming readouts and AdComm meetings
@@ -2429,7 +2429,7 @@ ${params.modality ? `Modality focus: ${params.modality}` : ''}`,
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are a biopharma regulatory and IP strategy advisor. Using the Ambrosia Benchmarker MCP tools, produce a comprehensive IP and regulatory strategy assessment for: ${params.asset_description}
+          text: `You are a biopharma regulatory and IP strategy advisor. Using the Solidus MCP tools, produce a comprehensive IP and regulatory strategy assessment for: ${params.asset_description}
 
 Steps:
 1. Call get_regulatory_risk to assess regulatory pathway across target territories
@@ -2467,7 +2467,7 @@ Target territories: ${params.territories || 'global (all major markets)'}`,
         role: 'user' as const,
         content: {
           type: 'text' as const,
-          text: `You are a senior biopharma deal structuring advisor. Using the Ambrosia Benchmarker MCP tools, find the optimal deal structure for: ${params.asset_description}
+          text: `You are a senior biopharma deal structuring advisor. Using the Solidus MCP tools, find the optimal deal structure for: ${params.asset_description}
 
 Target buyers: ${params.buyers}
 
@@ -2556,7 +2556,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   return NextResponse.json({
-    name: 'Ambrosia Benchmarker MCP Server',
+    name: 'Solidus MCP Server',
     version: '3.0.0',
     protocol: 'mcp',
     transport: 'streamable-http',
@@ -2779,7 +2779,7 @@ export async function GET() {
       },
     ],
     endpoint: 'POST /api/mcp',
-    documentation: 'https://calculator.ambrosiaventures.co/docs/api/mcp',
+    documentation: 'https://solidus.ambrosiaventures.co/docs/api/mcp',
   });
 }
 

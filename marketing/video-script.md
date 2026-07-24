@@ -14,7 +14,7 @@
 Before you record anything:
 
 1. **Browser:** Chrome, dark mode, 100% zoom, no extensions visible
-2. **URL bar:** Clean — just shows `calculator.ambrosiaventures.co`
+2. **URL bar:** Clean — just shows `solidus.ambrosiaventures.co`
 3. **Sign in as Pro user** so all features are unlocked
 4. **Close all other tabs**
 5. **Screen resolution:** 1920×1080 (retina looks best)
@@ -166,14 +166,14 @@ Ambrosia Benchmarker
 
 **Text (centered, large):**
 ```
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 Free to use. No account required.
 
 Pro: $99/mo — Unlimited reports, AI memos, market pulse
 ```
 
-**Voiceover:** *"Try it free at calculator.ambrosiaventures.co. No signup required."*
+**Voiceover:** *"Try it free at solidus.ambrosiaventures.co. No signup required."*
 
 **Final frame (2 sec):** Ambrosia Ventures logo + tagline
 
@@ -215,7 +215,7 @@ Same content, tighter cuts. Key differences:
 Use this as your recording guide. Practice the flow 2-3 times before recording.
 
 ### Setup
-1. Go to `calculator.ambrosiaventures.co`
+1. Go to `solidus.ambrosiaventures.co`
 2. Sign in as Pro user
 3. Navigate to Calculator
 
@@ -286,7 +286,7 @@ What it does:
 
 Built for BD professionals, investment bankers, and licensing teams who are tired of spending weeks on deal research that should take minutes.
 
-Free to use at calculator.ambrosiaventures.co — no signup required.
+Free to use at solidus.ambrosiaventures.co — no signup required.
 
 Pro tier ($99/mo) unlocks unlimited reports, AI memos, market pulse, and full company intelligence.
 
@@ -304,7 +304,7 @@ Ambrosia Benchmarker analyzes 600+ real biopharma licensing transactions to give
 
 The same analysis that used to require a team of analysts and a Bloomberg terminal.
 
-Try it free → calculator.ambrosiaventures.co
+Try it free → solidus.ambrosiaventures.co
 
 No signup. No credit card. Just select your modality, phase, and indication.
 
@@ -320,7 +320,7 @@ We built the Bloomberg Terminal for biopharma deal benchmarking.
 
 600+ real deals. 12 therapeutic areas. AI-powered analysis. Instant results.
 
-Free at calculator.ambrosiaventures.co
+Free at solidus.ambrosiaventures.co
 
 #biotech #pharma #BD #licensing #dealmaking
 ```
@@ -372,7 +372,7 @@ Free to use. Link in bio.
 ### Story 5 (CTA slide)
 ```
 "Try it free → link in bio"
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---

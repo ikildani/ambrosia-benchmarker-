@@ -20,7 +20,7 @@ Ambrosia Ventures analyzes 600+ real biopharma licensing transactions across 12 
 
 Free to start. No credit card required.
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 #biotech #pharma #licensing #dealmaking #businessdevelopment #biopharma
 
@@ -46,7 +46,7 @@ This is exactly the kind of insight BD teams need before entering a negotiation.
 
 Know your asset's market value before the deal room.
 
-Try it free: calculator.ambrosiaventures.co
+Try it free: solidus.ambrosiaventures.co
 
 #ADC #oncology #biotech #licensing #drugdevelopment #pharma
 
@@ -73,7 +73,7 @@ That's why we built a deal benchmarking tool that levels the playing field:
 
 Whether you're a 5-person biotech or a Fortune 500 pharma, you deserve data-backed terms.
 
-Free to start: calculator.ambrosiaventures.co
+Free to start: solidus.ambrosiaventures.co
 
 #biotech #startups #founders #licensing #negotiation #fairvalue
 
@@ -99,7 +99,7 @@ Think of it as your weekly briefing before the board meeting.
 
 Market Pulse answers all of this. Updated weekly.
 
-Available for Pro subscribers: calculator.ambrosiaventures.co
+Available for Pro subscribers: solidus.ambrosiaventures.co
 
 #pharma #biotech #marketintelligence #dealflow #businessdevelopment
 
@@ -125,7 +125,7 @@ How BD teams analyze deals in 2026:
 
 The tools have changed. The teams using them will win.
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 #biotech #pharma #innovation #dealmaking #BD #technology
 
@@ -156,7 +156,7 @@ For M&A Advisors:
 
 12 therapeutic areas. 15+ modalities. 600+ real transactions.
 
-Free to start: calculator.ambrosiaventures.co
+Free to start: solidus.ambrosiaventures.co
 
 #biotech #pharma #BD #licensing #partnerships
 
@@ -185,7 +185,7 @@ Teams that walk in with comparable deal data consistently negotiate better terms
 
 All of these insights come from our database of 600+ real biopharma transactions.
 
-Explore the data: calculator.ambrosiaventures.co
+Explore the data: solidus.ambrosiaventures.co
 
 #biotech #pharma #licensing #dealterms #insights #data
 
@@ -194,7 +194,7 @@ Explore the data: calculator.ambrosiaventures.co
 - Slide 2: Large "1" in teal gradient text, then "Phase > Modality for upfront size" as the headline, with "Phase 3 = 3-5x the upfront of Phase 1" as subtext in slate-300.
 - Slide 3: Large "2" in teal, "Neurology is catching up" headline, "$45.9B in partnerships since 2024" subtext.
 - Slide 4: Large "3" in teal, "Territory swings TDV by 40-60%" headline, "Global vs. regional is the most underrated lever" subtext.
-- Slide 5: Large "5" in teal, "Data is leverage" headline, "calculator.ambrosiaventures.co" as the CTA with a teal accent underline.
+- Slide 5: Large "5" in teal, "Data is leverage" headline, "solidus.ambrosiaventures.co" as the CTA with a teal accent underline.
 
 ---
 
@@ -213,7 +213,7 @@ The result: 600+ deals across 12 therapeutic areas, 15+ modalities, continuously
 
 No stale data. No paywalled databases. No $50K/year subscriptions.
 
-Free to start: calculator.ambrosiaventures.co
+Free to start: solidus.ambrosiaventures.co
 
 #biotech #pharma #data #AI #dealintelligence #transparency
 
@@ -236,7 +236,7 @@ Every deal has a market rate. Do you know yours?
 
 30 seconds. Free. No credit card.
 
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 
 #biotech #pharma #licensing #negotiation #dealterms
 
@@ -260,4 +260,4 @@ Stop guessing on deal terms.
 
 - **Slide 4:** Navy background. Large white text: "How does my deal compare to 600+ real transactions?" Below, show a cropped screenshot of the comparable deals table — the header row with column labels (Company, Deal Value, Modality, Phase, Date) and 3-4 visible data rows with alternating backgrounds and teal-accented links.
 
-- **Slide 5:** Teal-to-cyan gradient background. Large white bold text: "Get answers in 30 seconds." Below: "Free. No credit card." At the bottom: "calculator.ambrosiaventures.co" in white with a subtle underline. Ambrosia Ventures logo centered above the URL.
+- **Slide 5:** Teal-to-cyan gradient background. Large white bold text: "Get answers in 30 seconds." Below: "Free. No credit card." At the bottom: "solidus.ambrosiaventures.co" in white with a subtle underline. Ambrosia Ventures logo centered above the URL.

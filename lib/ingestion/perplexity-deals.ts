@@ -420,7 +420,7 @@ export async function runPerplexityDealDiscovery(
               milestones_total_usd: deal.milestones_total_usd,
               total_deal_value_usd: deal.total_deal_value_usd,
               announced_date: announcedDate,
-              source_type: 'press_release',
+              source_type: 'perplexity_discovery',
               terms_disclosed: (deal.upfront_usd !== null) || (deal.total_deal_value_usd !== null),
               confidence_score: deal.confidence || 85,
               verified: false,

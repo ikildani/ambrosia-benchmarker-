@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     'Browse 300+ data pages covering biopharma deal benchmarks across every therapeutic area, clinical phase, and territory combination. Upfront payments, total deal values, royalty rates, and comparable transactions.',
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/data',
+    canonical: 'https://solidus.ambrosiaventures.co/data',
   },
 };
 
@@ -97,7 +97,7 @@ export default function DataIndexPage() {
               href="/calculator"
               className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors"
             >
-              Try the Deal Calculator &rarr;
+              Try Solidus &rarr;
             </Link>
           </div>
         </section>

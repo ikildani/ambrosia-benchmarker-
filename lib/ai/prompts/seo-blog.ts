@@ -135,7 +135,7 @@ Short articles get penalized by Google and fail to demonstrate authority. This a
 - **H2: What Comes Next** (predictions + actionable conclusion)
 
 ### Internal links (weave naturally, 3-5 total)
-- [Deal Calculator](/calculator) — custom benchmarks
+- [Solidus](/calculator) — custom benchmarks
 - [${taLabel} Deal Benchmarks](/benchmarks?ta=${therapeuticArea}) — TA-specific data
 - [Therapeutic Area Overview](/therapeutic-areas/${therapeuticArea}) — ${taLabel} landscape
 - [Get a Full Deal Report](/report) — personalized analysis

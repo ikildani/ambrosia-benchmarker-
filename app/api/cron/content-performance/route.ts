@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
 async function getContentAttribution(
   supabase: ReturnType<typeof createServiceClient>,
 ): Promise<ContentAttribution[]> {
-  const baseUrl = 'https://calculator.ambrosiaventures.co';
+  const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   // 1a. Get GSC performance data from seo_metrics (last 7 days of stored data)
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];

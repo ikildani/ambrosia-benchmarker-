@@ -315,7 +315,7 @@ export async function GET(request: NextRequest) {
       { type: 'section', text: { type: 'mrkdwn', text: `:chart_with_downwards_trend: *Declining Pages:*\n${decliningLines}` } },
       {
         type: 'context',
-        elements: [{ type: 'mrkdwn', text: `${formatTimestamp()} | Data from Google Search Console | calculator.ambrosiaventures.co` }],
+        elements: [{ type: 'mrkdwn', text: `${formatTimestamp()} | Data from Google Search Console | solidus.ambrosiaventures.co` }],
       },
     ];
 

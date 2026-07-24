@@ -304,14 +304,14 @@ REAL DATA FOR THIS WEEK (use ONLY these — do not fabricate):
 
 Generate exactly 3 post drafts. Each needs a DIFFERENT angle from the data above. If the data doesn't support a strong post, say so — don't force weak content.
 
-Each post must include a "first_comment" field — the text Issa posts as the FIRST COMMENT immediately after publishing. This is where the link goes. Format it naturally: "Full deal comps across ${DEAL_STATS.TOTAL_DEALS} transactions → calculator.ambrosiaventures.co/benchmarks" — not a bare URL.
+Each post must include a "first_comment" field — the text Issa posts as the FIRST COMMENT immediately after publishing. This is where the link goes. Format it naturally: "Full deal comps across ${DEAL_STATS.TOTAL_DEALS} transactions → solidus.ambrosiaventures.co/benchmarks" — not a bare URL.
 
 FORMAT (return ONLY this JSON array, nothing else):
 [{
   "title": "Internal reference title",
   "body": "Full post text with \\n\\n between paragraphs",
   "first_comment": "Natural comment text with the link",
-  "link_url": "https://calculator.ambrosiaventures.co/..."
+  "link_url": "https://solidus.ambrosiaventures.co/..."
 }]`;
 
   const response = await client.messages.create({
@@ -363,8 +363,8 @@ FORMAT (return ONLY this JSON array, nothing else):
     return {
       title: d.title || 'Untitled Draft',
       body,
-      first_comment: d.first_comment || `Deal benchmarks across ${DEAL_STATS.TOTAL_DEALS} verified transactions → ${d.link_url || 'calculator.ambrosiaventures.co'}`,
-      link_url: d.link_url || 'https://calculator.ambrosiaventures.co/pulse',
+      first_comment: d.first_comment || `Deal benchmarks across ${DEAL_STATS.TOTAL_DEALS} verified transactions → ${d.link_url || 'solidus.ambrosiaventures.co'}`,
+      link_url: d.link_url || 'https://solidus.ambrosiaventures.co/pulse',
     };
   });
 }

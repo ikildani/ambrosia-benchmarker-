@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Biotech Deal Guides — Licensing & Valuation Resources',
     description: 'In-depth guides on biopharma licensing deal valuation, comparable transactions analysis, and deal benchmarking.',
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/guides',
+    url: 'https://solidus.ambrosiaventures.co/guides',
     images: [{ url: '/api/og?title=Biotech%20Deal%20Guides&subtitle=Licensing%20%26%20Valuation%20Resources&type=landing' }],
   },
   twitter: {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: 'In-depth guides on biopharma licensing deal valuation and benchmarking.',
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/guides',
+    canonical: 'https://solidus.ambrosiaventures.co/guides',
   },
 };
 
@@ -70,8 +70,8 @@ const guides = [
   },
   {
     slug: 'life-sciences-deal-calculator-guide',
-    title: 'Life Sciences Deal Calculator: Benchmark Upfronts, Milestones & Royalties',
-    description: 'How to use the Ambrosia deal calculator to model rNPV, Monte Carlo, partner matching, and buyer-specific valuations across 12 TAs and 23+ modalities.',
+    title: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
+    description: 'How to use Solidus to model rNPV, Monte Carlo, partner matching, and buyer-specific valuations across 12 TAs and 23+ modalities.',
     readTime: '10 min read',
     tags: ['Calculator', 'Tutorial', 'rNPV', 'Monte Carlo'],
   },
@@ -105,7 +105,7 @@ export default function GuidesPage() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
       { '@type': 'ListItem', position: 2, name: 'Guides' },
     ],
   };

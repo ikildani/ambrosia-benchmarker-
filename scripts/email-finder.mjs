@@ -24,7 +24,7 @@ const resolve4 = promisify(dns.resolve4);
 
 const INPUT_CSV = '/Users/issakildani/Desktop/ambrosia_400_enriched.csv';
 const OUTPUT_CSV = '/Users/issakildani/Desktop/ambrosia_400_final.csv';
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 // Load env
 const envFile = fs.readFileSync('/Users/issakildani/ambrosia-benchmarker/.env.local', 'utf8');

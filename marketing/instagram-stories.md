@@ -21,7 +21,7 @@ Format: 1080x1920px (9:16 vertical)
 **Divider:** A thin white horizontal line between the halves.
 
 ### Story 3 (Solution)
-**Background:** Screen recording (vertical, phone-sized) of the calculator at calculator.ambrosiaventures.co/calculator.
+**Background:** Screen recording (vertical, phone-sized) of the calculator at solidus.ambrosiaventures.co/calculator.
 **Recording sequence:** Start on the calculator page showing the therapeutic area selector grid — the 8 color-coded buttons (Oncology with teal microscope, Neurology with indigo brain, etc.) in a 2x4 grid on mobile. Tap "Oncology" — it highlights with a teal border and checkmark. The wizard Step 1 appears with dropdowns. Select Phase 2 > ADC > NSCLC. Tap "Next" (teal gradient button). Speed through Steps 2-4. The results appear: four metric cards stacked vertically on mobile — Upfront Payment (teal-50 bg, "$85M" in teal gradient), Total Deal Value (cyan-50 bg, "$450M" in cyan gradient), Dev Milestones (emerald-50 bg, "$120M" in emerald gradient), Royalties (purple-50 bg, "8-12%" in purple gradient).
 **Overlay text:** "Or... 30 seconds on Ambrosia." in white bold text at the top of the screen on a semi-transparent navy bar. A small stopwatch icon next to "30 seconds."
 
@@ -43,7 +43,7 @@ Each card should feel like it's sliding up from the bottom with a spring bounce.
 **Center:** Ambrosia Ventures logo (white version) at 30% of screen width.
 **Below logo:** "Free to start." in large bold white text.
 **Below that:** "No credit card required." in smaller white text at 70% opacity.
-**Link sticker:** Place the Instagram link sticker with "calculator.ambrosiaventures.co" in the lower third — use the teal-colored link sticker style.
+**Link sticker:** Place the Instagram link sticker with "solidus.ambrosiaventures.co" in the lower third — use the teal-colored link sticker style.
 
 ---
 
@@ -79,7 +79,7 @@ Each circle matches the therapeutic area colors from the site's selector buttons
 ### Story 4 (CTA)
 **Background:** A full-screen screenshot of the calculator results page (mobile view). The screenshot shows: the navy gradient header with "Oncology Deal Terms Calculator", the 4 result cards stacked vertically (Upfront Payment in teal-50, Total Deal Value in cyan-50, Dev Milestones in emerald-50, Royalties in purple-50), each with their large gradient-colored metric values.
 **Overlay:** Semi-transparent navy gradient overlay from bottom (70% opacity at bottom, 0% at top) with white bold text: "Get your benchmarks" centered in the bottom third.
-**Link sticker:** calculator.ambrosiaventures.co
+**Link sticker:** solidus.ambrosiaventures.co
 
 ---
 
@@ -113,7 +113,7 @@ Each circle matches the therapeutic area colors from the site's selector buttons
 **Center:** "M&A Advisors" in large bold white text.
 **Below:** "Branded reports + AI playbooks for your clients" in white text at 85% opacity.
 **Below that:** A cropped screenshot showing the PDF export preview — the branded report cover page with the Ambrosia Ventures header in teal, the deal title, and key metrics visible. Show just the top portion of the PDF in a rounded card with a shadow. Or show the "Download PDF" and "Download Excel" buttons side by side — teal gradient buttons with file icons.
-**Link sticker:** calculator.ambrosiaventures.co
+**Link sticker:** solidus.ambrosiaventures.co
 
 ---
 
@@ -145,7 +145,7 @@ This card should be centered on screen, sized at ~85% screen width. The navy bac
 **Center:** "Get weekly intelligence" in large white bold text.
 **Below:** "Market Pulse — Pro feature" in white text at 80% opacity.
 **Bottom:** Small lock icon next to "PRO" in amber text.
-**Link sticker:** calculator.ambrosiaventures.co/pulse
+**Link sticker:** solidus.ambrosiaventures.co/pulse
 
 ---
 
@@ -187,7 +187,7 @@ An amber arrow or highlight between them labeled "2x difference."
 **Center:** "Always bring comparable deals to the negotiation" in large white bold text.
 **Below:** "Data is leverage. Teams with comps negotiate better terms." in slate-300 text.
 **Visual:** A cropped screenshot of the comparable deals table from the calculator — show the header row (Company, Partner, Deal Value, Modality, Phase) and 3 data rows. The table sits in a white rounded-xl card with subtle shadow, centered on screen at ~85% width. The company names are in teal link color.
-**Link sticker:** calculator.ambrosiaventures.co
+**Link sticker:** solidus.ambrosiaventures.co
 
 ---
 
@@ -229,7 +229,7 @@ Each line should align horizontally across the divide so the contrast is immedia
 **Background:** Full-screen screenshot of the calculator results page (mobile view) — showing the navy header, the 4 stacked result cards (Upfront in teal-50, TDV in cyan-50, Milestones in emerald-50, Royalties in purple-50), and the "Deal Structure" bar at the bottom showing the animated progress bar split (e.g., "25% Upfront / 75% Milestones" with a teal/cyan split bar).
 **Overlay:** Semi-transparent teal gradient from the bottom (60% opacity at bottom, 0% at top).
 **Text:** "Your turn." in large bold white text, centered in the bottom third.
-**Link sticker:** calculator.ambrosiaventures.co
+**Link sticker:** solidus.ambrosiaventures.co
 
 ---
 
@@ -254,7 +254,7 @@ Size: 1080x1080px. Icon should be ~40% of the circle diameter, centered. Use 3px
 [Screen recording with voiceover — record vertically on phone or use mobile preview in browser DevTools]
 
 [0-3s] "Negotiating a biotech licensing deal? Here's how to get instant benchmarks."
-**SCREEN:** Navy text card with white text, then cut to phone-view screen recording of calculator.ambrosiaventures.co/calculator.
+**SCREEN:** Navy text card with white text, then cut to phone-view screen recording of solidus.ambrosiaventures.co/calculator.
 
 [3-15s] Show the calculator page on mobile:
 **SCREEN:** The therapeutic area selector shows as a 2-column grid of color-coded buttons. Tap "Oncology" (teal microscope icon) — it highlights with teal border. The wizard appears. Tap through the dropdowns: Phase 2 > ADC > NSCLC. The dropdowns are mobile-optimized select elements. Tap the teal gradient "Next" button to advance through steps. On the final step, tap the larger "Calculate" button — a spinner appears inside it.

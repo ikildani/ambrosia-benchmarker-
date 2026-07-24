@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
     description: `Board-ready biopharma deal benchmarking. Comparable deals, partner matching, sensitivity analysis, and negotiation playbook from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     type: 'website',
-    url: 'https://calculator.ambrosiaventures.co/report',
+    url: 'https://solidus.ambrosiaventures.co/report',
     images: [{ url: '/api/og', width: 1200, height: 630, alt: 'Ambrosia Ventures Deal Intelligence Report' }],
   },
   twitter: {
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     images: ['/api/og'],
   },
   alternates: {
-    canonical: 'https://calculator.ambrosiaventures.co/report',
+    canonical: 'https://solidus.ambrosiaventures.co/report',
   },
 };
 

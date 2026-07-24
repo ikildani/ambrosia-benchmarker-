@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     ${email} has been removed from the Ambrosia monthly intelligence digest.
     You can resubscribe anytime on the intelligence page.
   </p>
-  <p style="margin-top:32px;"><a href="https://calculator.ambrosiaventures.co/intelligence" style="color:#34c2c2;">← Back to intelligence</a></p>
+  <p style="margin-top:32px;"><a href="https://solidus.ambrosiaventures.co/intelligence" style="color:#34c2c2;">← Back to intelligence</a></p>
 </body></html>
 `.trim();
 

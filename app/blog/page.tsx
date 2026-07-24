@@ -6,7 +6,7 @@ import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'Life Sciences Deal Intelligence Blog | Ambrosia Ventures',
@@ -309,7 +309,7 @@ export default async function BlogPage() {
                 href="/calculator"
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-teal-500 hover:bg-teal-400 text-[#0a0f1a] font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-teal-500/20 hover:shadow-teal-400/30"
               >
-                Try the Deal Calculator
+                Try Solidus
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     modalities_covered: 25,
     last_updated: '2026-03',
     source: 'Ambrosia Ventures',
-    source_url: 'https://calculator.ambrosiaventures.co',
+    source_url: 'https://solidus.ambrosiaventures.co',
   };
 
   if (format === 'html') {

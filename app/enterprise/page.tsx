@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { EnterpriseKeyManager } from '@/components/enterprise/EnterpriseKeyManager';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Enterprise API | Ambrosia Benchmarker',
+  title: 'Enterprise API | Solidus',
   description:
     'API keys, usage dashboard, and integration docs for enterprise pilot customers.',
   alternates: { canonical: `${BASE_URL}/enterprise` },
@@ -21,7 +21,7 @@ export default function EnterprisePage() {
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-5xl px-6 py-12">
           <nav className="mb-4 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-slate-300">← Ambrosia Benchmarker</Link>
+            <Link href="/" className="text-slate-500 hover:text-slate-300">← Solidus</Link>
           </nav>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50">
             Enterprise API

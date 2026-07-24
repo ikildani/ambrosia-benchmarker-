@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       type: 'article',
-      url: `https://calculator.ambrosiaventures.co/benchmarks/data/${slug}`,
+      url: `https://solidus.ambrosiaventures.co/benchmarks/data/${slug}`,
       images: [{
         url: `/api/og?title=${encodeURIComponent(`${page.modalityLabel} ${page.phaseLabel}`)}&subtitle=${encodeURIComponent(`${formatDollar(page.medianUpfrontM)} median upfront · ${page.totalDeals} deals`)}&type=landing`,
         width: 1200,
@@ -109,18 +109,18 @@ export default async function PseoPage({ params }: PageProps) {
     '@type': 'Dataset',
     name: `${page.modalityLabel} ${page.phaseLabel} Licensing Deal Benchmarks`,
     description: `Benchmark data for ${page.totalDeals} ${page.modalityLabel} licensing deals at ${page.phaseLabel} stage, including upfront payments, milestones, royalties, and total deal values.`,
-    url: `https://calculator.ambrosiaventures.co/benchmarks/data/${slug}`,
+    url: `https://solidus.ambrosiaventures.co/benchmarks/data/${slug}`,
     temporalCoverage: `${page.earliestDeal}/${page.latestDeal}`,
     variableMeasured: ['Upfront Payment (USD)', 'Total Deal Value (USD)', 'Royalty Rates', 'Milestone Payments'],
-    creator: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://calculator.ambrosiaventures.co' },
+    creator: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' },
   };
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://calculator.ambrosiaventures.co' },
-      { '@type': 'ListItem', position: 2, name: 'Benchmarks', item: 'https://calculator.ambrosiaventures.co/benchmarks' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
+      { '@type': 'ListItem', position: 2, name: 'Benchmarks', item: 'https://solidus.ambrosiaventures.co/benchmarks' },
       { '@type': 'ListItem', position: 3, name: `${page.modalityLabel} ${page.phaseLabel}` },
     ],
   };

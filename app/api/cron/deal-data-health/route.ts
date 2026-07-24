@@ -336,7 +336,7 @@ export async function GET(request: NextRequest) {
       },
       {
         type: 'context',
-        elements: [{ type: 'mrkdwn', text: `${formatTimestamp()} | Monthly audit | calculator.ambrosiaventures.co` }],
+        elements: [{ type: 'mrkdwn', text: `${formatTimestamp()} | Monthly audit | solidus.ambrosiaventures.co` }],
       },
     ];
 

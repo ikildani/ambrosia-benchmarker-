@@ -37,7 +37,7 @@ export async function notifyDealAlert(webhookUrl: string, payload: DealAlertPayl
     {
       type: 'context',
       elements: [
-        { type: 'mrkdwn', text: 'Powered by Ambrosia Ventures · <https://calculator.ambrosiaventures.co|Open Calculator>' },
+        { type: 'mrkdwn', text: 'Powered by Ambrosia Ventures · <https://solidus.ambrosiaventures.co|Open Calculator>' },
       ],
     },
   ];

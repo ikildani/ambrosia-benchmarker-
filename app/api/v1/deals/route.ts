@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const apiKey = await validateApiKey(request);
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'Invalid or exhausted API key', docs: 'https://calculator.ambrosiaventures.co/docs/api' },
+      { error: 'Invalid or exhausted API key', docs: 'https://solidus.ambrosiaventures.co/docs/api' },
       { status: 401 }
     );
   }

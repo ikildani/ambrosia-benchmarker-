@@ -52,7 +52,7 @@ describe('/api/checkout', () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_123';
     process.env.STRIPE_PRICE_ID = 'price_sub_123';
     process.env.STRIPE_REPORT_PRICE_ID = 'price_report_456';
-    process.env.NEXT_PUBLIC_APP_URL = 'https://calculator.ambrosiaventures.co';
+    process.env.NEXT_PUBLIC_APP_URL = 'https://solidus.ambrosiaventures.co';
     mockGetAuthenticatedUser.mockResolvedValue({ id: 'user-1', email: 'test@example.com' });
   });
 

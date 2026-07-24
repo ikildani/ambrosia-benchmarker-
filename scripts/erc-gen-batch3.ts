@@ -10,7 +10,7 @@ ${cover('Deal Terms Valuation','14-Engine Analysis — Powered by Ambrosia Ventu
 <div class="pg">
 <p class="tag">Track 1 — OTC Platform Bundle</p>
 <p class="st">Engine Outputs: WartOlyze + DandrOheal + MastOnorm</p>
-<p class="h3">Engine 1: Deal Terms Calculator</p>
+<p class="h3">Engine 1: Solidus Deal Intelligence</p>
 <table class="dt mb3">
 <tr><th>Component</th><th style="text-align:right">Low</th><th style="text-align:right">Median</th><th style="text-align:right">High</th></tr>
 <tr><td class="b">Upfront Cash</td><td class="vc">$55M</td><td class="vc">$75M</td><td class="vc">$110M</td></tr>
@@ -146,7 +146,7 @@ ${ft('Deal Terms — Track 2 Engines',4)}
 </div>
 <p class="xs mt3" style="color:#94a3b8">With $1.2B+ headline milestone structure: see Strategic Valuation Roadmap</p>
 </div>
-<div class="card mt3" style="text-align:center"><p class="xxs sc">Valuation powered by Ambrosia Ventures proprietary platform (calculator.ambrosiaventures.co). 14 integrated engines · 1,900+ verified transactions · Calibrated quarterly. © 2026 Ambrosia Ventures.</p></div>
+<div class="card mt3" style="text-align:center"><p class="xxs sc">Valuation powered by Ambrosia Ventures proprietary platform (solidus.ambrosiaventures.co). 14 integrated engines · 1,900+ verified transactions · Calibrated quarterly. © 2026 Ambrosia Ventures.</p></div>
 ${ft('Deal Terms — Summary',5)}
 </div>
 `);
@@ -237,7 +237,7 @@ ${ft('Roadmap — Execution Actions',3)}
 <tr><td class="b">ROI on Investment</td><td class="vc" style="font-size:14px;color:#14b8a6">1,650x — 1,790x</td></tr>
 <tr><td class="b">Timeline</td><td class="vc">6 months</td></tr>
 </table>
-<div class="card mt3" style="text-align:center"><p class="xxs sc">© 2026 Ambrosia Ventures. Strictly Confidential. Powered by Ambrosia Ventures proprietary engine (calculator.ambrosiaventures.co).</p></div>
+<div class="card mt3" style="text-align:center"><p class="xxs sc">© 2026 Ambrosia Ventures. Strictly Confidential. Powered by Ambrosia Ventures proprietary engine (solidus.ambrosiaventures.co).</p></div>
 ${ft('Roadmap — $1B+ Structure',4)}
 </div>
 `);

@@ -3,7 +3,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 
 const footerLinks = {
   Product: [
-    { label: 'Deal Calculator', href: '/calculator' },
+    { label: 'Solidus', href: '/calculator' },
     { label: 'Pro Plan', href: '/pro' },
     { label: 'Deal Intelligence Brief', href: '/benchmark' },
     { label: 'Portfolio License', href: '/portfolio' },

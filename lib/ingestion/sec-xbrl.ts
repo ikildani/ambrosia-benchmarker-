@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { PHARMA_CIKS } from './sec-edgar';
 
 const SEC_XBRL_API = 'https://data.sec.gov/api/xbrl/companyfacts';
-const USER_AGENT = 'Ambrosia Ventures Deal Calculator research@ambrosiaventures.co';
+const USER_AGENT = 'Solidus research@ambrosiaventures.co';
 
 // Revenue tags to try, in priority order
 const REVENUE_TAGS = [

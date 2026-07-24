@@ -3,19 +3,19 @@ import Link from 'next/link';
 import { OnboardingWizard } from '@/components/start/OnboardingWizard';
 import { SiteFooter } from '@/components/seo/SiteFooter';
 
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Get Started — Plain-English Onboarding | Ambrosia Benchmarker',
+  title: 'Get Started — Plain-English Onboarding | Solidus',
   description:
     'Six plain-English questions to value any biopharma asset. No need to know what biomarkerStatus or competitivePosition mean — we translate.',
   alternates: { canonical: `${BASE_URL}/start` },
   openGraph: {
-    title: 'Get Started | Ambrosia Benchmarker',
+    title: 'Get Started | Solidus',
     description: 'Six plain-English questions, then a full institutional valuation.',
     type: 'website',
     url: `${BASE_URL}/start`,
-    siteName: 'Ambrosia Benchmarker',
+    siteName: 'Solidus',
     images: [
       {
         url: '/api/og?title=Get%20Started&subtitle=Plain-English%20valuation%20in%2060%20seconds',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Get Started | Ambrosia Benchmarker',
+    title: 'Get Started | Solidus',
     description: 'Six plain-English questions, then a full institutional valuation.',
   },
 };
@@ -39,7 +39,7 @@ export default function StartPage() {
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-3xl px-6 py-12">
           <nav className="mb-4 text-sm">
-            <Link href="/" className="text-slate-500 hover:text-slate-300">← Ambrosia Benchmarker</Link>
+            <Link href="/" className="text-slate-500 hover:text-slate-300">← Solidus</Link>
           </nav>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50">
             Get started in 60 seconds

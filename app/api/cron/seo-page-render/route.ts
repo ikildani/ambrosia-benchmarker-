@@ -24,7 +24,7 @@ export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 const PAGES_PER_RUN = 5;
-const BASE_URL = 'https://calculator.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 // ── Label maps ──────────────────────────────────────────────────────────────
 
@@ -231,7 +231,7 @@ ${dealsList || 'No directly comparable deals available.'}
 - Take positions backed by data
 
 ### Internal links (weave naturally, 2-3)
-- [Deal Calculator](/calculator) - custom benchmarks
+- [Solidus](/calculator) - custom benchmarks
 - [${taLabel} Benchmarks](/benchmarks?ta=${ta}) - TA-specific data
 - [Therapeutic Area Overview](/therapeutic-areas/${ta}) - ${taLabel} landscape
 

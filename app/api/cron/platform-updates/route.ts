@@ -125,14 +125,14 @@ export async function GET(request: NextRequest) {
             .replace(/\b\w/g, (c: string) => c.toUpperCase());
 
           const unsubscribeUrl = user.id
-            ? 'https://calculator.ambrosiaventures.co/dashboard?tab=settings'
-            : `https://calculator.ambrosiaventures.co/api/newsletter/unsubscribe?email=${encodeURIComponent(user.email)}&type=platform_updates`;
+            ? 'https://solidus.ambrosiaventures.co/dashboard?tab=settings'
+            : `https://solidus.ambrosiaventures.co/api/newsletter/unsubscribe?email=${encodeURIComponent(user.email)}&type=platform_updates`;
 
           const html = buildPlatformUpdatesHtml(updates, userName, unsubscribeUrl);
 
           const result = await sendEmail({
             to: user.email,
-            subject: `What's New: ${updates.length} update${updates.length !== 1 ? 's' : ''} to the Deal Calculator`,
+            subject: `What's New: ${updates.length} update${updates.length !== 1 ? 's' : ''} to Solidus`,
             html,
           });
 

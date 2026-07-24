@@ -260,7 +260,7 @@ export function renderChartSVG(params: ChartRenderParams): string {
 ${bars}
   <text x="${width / 2}" y="${height - 12}" text-anchor="middle"
         font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="${colors.subtext}">
-    Source: Ambrosia Ventures | calculator.ambrosiaventures.co
+    Source: Ambrosia Ventures | solidus.ambrosiaventures.co
   </text>
 </svg>`;
 }

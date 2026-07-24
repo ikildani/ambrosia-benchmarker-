@@ -36,18 +36,18 @@ reaching $350M. The Phase 1-to-2 jump remains a 2.0x multiplier —
 the single largest value inflection in biopharma deal economics.
 
 Full report with charts and comparable deals:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 You can also embed any of our benchmark charts directly in your
 coverage — one line of HTML:
-https://calculator.ambrosiaventures.co/press/data-kit
+https://solidus.ambrosiaventures.co/press/data-kit
 
 Happy to provide the underlying dataset or commentary for any
 story on oncology deal economics.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -79,14 +79,14 @@ Three numbers from our Q1 2026 analysis that surprised us:
    new leader, overtaking ADCs (1.45x).
 
 Full quarterly report:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 Every number is sourced from SEC filings and press releases.
 Happy to share specific benchmarks for any deal you're covering.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -121,10 +121,10 @@ Key findings:
   US retention vs ex-US licensing
 
 The full report with 5 exhibits and comparable deal data:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 Citation-ready stats and embeddable charts:
-https://calculator.ambrosiaventures.co/press/data-kit
+https://solidus.ambrosiaventures.co/press/data-kit
 
 Anytime you need a quick benchmark for a deal you're covering —
 phase-specific upfronts, modality premiums, territory economics
@@ -133,7 +133,7 @@ standing data source.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -163,16 +163,16 @@ with preclinical and Phase 1 deals now 34% of total volume
 approaches are commanding premiums.
 
 Full neurology benchmarks in our quarterly report:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 We also have a dedicated neurology insight page:
-https://calculator.ambrosiaventures.co/insights/biopharma-deal-valuation-methods
+https://solidus.ambrosiaventures.co/insights/biopharma-deal-valuation-methods
 
 Happy to pull specific CNS deal comps anytime.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -204,16 +204,16 @@ now nearly 3x oncology. Buyers are more disciplined on oncology
 valuations unless there's clear differentiation from SOC.
 
 Full report:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 Oncology-specific benchmarks:
-https://calculator.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks
+https://solidus.ambrosiaventures.co/insights/oncology-upfront-payment-benchmarks
 
 Happy to be a data source anytime.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -242,18 +242,18 @@ Our Q1 2026 quarterly report just went live. Three headline numbers:
 
 Full report with exhibits, comparable deals, and interactive
 benchmarking tool:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 We also have embeddable charts if you ever want a "by the numbers"
 sidebar in your deal coverage:
-https://calculator.ambrosiaventures.co/press/data-kit
+https://solidus.ambrosiaventures.co/press/data-kit
 
 Happy to pull specific benchmarks for any deal you're covering —
 phase/modality/TA-specific. Takes me 30 seconds.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -288,14 +288,14 @@ The big picture: pharma BD teams moved from "buy the platform"
 smaller bets, earlier stage.
 
 Full Q1 2026 quarterly report:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 Deal structure benchmarks:
-https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026
+https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -327,13 +327,13 @@ The therapeutic area reordering is also striking:
 • Oncology ($120M upfront) is stable but no longer the top-valued TA
 
 Full report with 5 exhibits:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 Happy to discuss any of the underlying data.
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---
@@ -369,14 +369,14 @@ Medicare negotiation provisions made US-centric valuations less
 predictable, increasing the appeal of territory-split structures.
 
 Full analysis:
-https://calculator.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
+https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks
 
 Deal structure benchmarks:
-https://calculator.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026
+https://solidus.ambrosiaventures.co/insights/biotech-out-licensing-deal-terms-2025-2026
 
 Issa Kildani
 Ambrosia Ventures
-calculator.ambrosiaventures.co
+solidus.ambrosiaventures.co
 ```
 
 ---

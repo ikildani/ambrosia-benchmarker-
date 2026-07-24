@@ -9,7 +9,7 @@
  *
  * Manual:
  *   curl -H "Authorization: Bearer $CRON_SECRET" \
- *     https://calculator.ambrosiaventures.co/api/cron/rwe-tuning
+ *     https://solidus.ambrosiaventures.co/api/cron/rwe-tuning
  */
 
 import { NextRequest, NextResponse } from 'next/server';

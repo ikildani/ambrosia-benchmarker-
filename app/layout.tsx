@@ -17,7 +17,7 @@ const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap", var
 
 export const metadata: Metadata = {
   title: {
-    default: "Life Sciences Deal Calculator | Biopharma Licensing Benchmarks | Ambrosia Ventures",
+    default: "Solidus | Life Sciences Deal Intelligence | Ambrosia Ventures",
     template: "%s | Ambrosia Ventures",
   },
   description: `Instant deal benchmarks, rNPV analysis, Monte Carlo simulation, and real-time market intelligence for biopharma licensing deals across 12 therapeutic areas. ${DEAL_STATS.TOTAL_DEALS} real transactions, 850+ company profiles. Free to start.`,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Ambrosia Ventures" }],
   creator: "Ambrosia Ventures",
   publisher: "Ambrosia Ventures",
-  metadataBase: new URL("https://calculator.ambrosiaventures.co"),
+  metadataBase: new URL("https://solidus.ambrosiaventures.co"),
   verification: {
     google: "iAzMTWYwwCcC_foIWu0oPFBXKfYOT61aCgqs3vQ0r4c",
   },
@@ -48,10 +48,10 @@ export const metadata: Metadata = {
   },
   category: "Life Sciences",
   openGraph: {
-    title: "Life Sciences Deal Calculator — Instant Biopharma Licensing Benchmarks",
+    title: "Solidus | Life Sciences Deal Intelligence — Instant Biopharma Licensing Benchmarks",
     description: `rNPV modeling, Monte Carlo simulation, and AI market intelligence for biopharma licensing deals. ${DEAL_STATS.TOTAL_DEALS} real transactions, 850+ company profiles, 12 therapeutic areas. Free to start.`,
     type: "website",
-    url: "https://calculator.ambrosiaventures.co",
+    url: "https://solidus.ambrosiaventures.co",
     siteName: "Ambrosia Ventures",
     locale: "en_US",
     images: [
@@ -59,13 +59,13 @@ export const metadata: Metadata = {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: `Life Sciences Deal Calculator — Instant benchmarks from ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing transactions`,
+        alt: `Solidus — Instant benchmarks from ${DEAL_STATS.TOTAL_DEALS} real biopharma licensing transactions`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Life Sciences Deal Calculator — Instant Biopharma Licensing Benchmarks",
+    title: "Solidus | Life Sciences Deal Intelligence — Instant Biopharma Licensing Benchmarks",
     description: `rNPV, Monte Carlo & AI deal intelligence for biopharma licensing. ${DEAL_STATS.TOTAL_DEALS} deals, 850+ companies, 12 TAs. Free to start.`,
     images: ["/api/og"],
     creator: "@AmbrosiaVC",

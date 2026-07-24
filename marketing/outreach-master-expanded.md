@@ -1,4 +1,4 @@
-# MASTER OUTREACH LIST: calculator.ambrosiaventures.co
+# MASTER OUTREACH LIST: solidus.ambrosiaventures.co
 
 **Compiled: March 6, 2026 | Total: 350 targets | 250+ emails across 23 segments**
 

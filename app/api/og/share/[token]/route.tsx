@@ -98,7 +98,7 @@ function renderFallbackImage() {
               display: 'flex',
             }}
           >
-            Biotech Deal Calculator
+            Solidus
           </div>
           <div
             style={{
@@ -465,7 +465,7 @@ export async function GET(
                   display: 'flex',
                 }}
               >
-                calculator.ambrosiaventures.co
+                solidus.ambrosiaventures.co
               </div>
               <div
                 style={{
