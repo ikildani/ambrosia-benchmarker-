@@ -413,7 +413,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { href: '/calculator', title: 'Deal Calculator', desc: 'Run your first benchmark now' },
+                { href: '/calculator', title: 'Solidus', desc: 'Run your first benchmark now' },
                 { href: '/guides/biopharma-licensing-benchmarks', title: 'Licensing Benchmarks', desc: '2026 deal terms by phase and modality' },
                 { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Guide', desc: 'Risk-adjusted valuation methodology' },
               ].map((resource) => (

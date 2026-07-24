@@ -876,7 +876,7 @@ export default function Home() {
               { href: '/guides/biopharma-licensing-benchmarks', title: 'Biopharma Licensing Benchmarks 2026', desc: 'Upfront, milestone, and royalty benchmarks by phase, modality, and TA', tag: 'Data' },
               { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Biotech Valuation Guide', desc: 'Phase transition probabilities, cash flow modeling, and Monte Carlo enhancement', tag: 'Methodology' },
               { href: '/guides/negotiate-pharma-royalty-rates', title: 'Pharma Royalty Rate Benchmarks', desc: 'Royalty rates by phase and modality with negotiation strategies', tag: 'Benchmarks' },
-              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Deal Calculator Guide', desc: '14 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
+              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: '14 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
               { href: '/guides/biotech-licensing-deal-structure', title: 'Deal Structure Guide', desc: 'Upfront, milestone, and royalty allocation by deal type and stage', tag: 'Strategy' },
               { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
             ].map(guide => (

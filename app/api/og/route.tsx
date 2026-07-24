@@ -19,7 +19,7 @@ const COLORS = {
   cyan: '#06b6d4',
 };
 
-// Shared Ambrosia Ventures branding block — uses the real logo wordmark
+// Shared Solidus — Ambrosia Ventures branding block — uses the real logo wordmark
 // The logo is fetched from production at render time so preview deployments
 // share the same canonical asset.
 function AmbrosiaBranding({ host }: { host: string }) {
@@ -39,10 +39,14 @@ function AmbrosiaBranding({ host }: { host: string }) {
       <img
         src={logoUrl}
         alt="Ambrosia Ventures"
-        width={280}
-        height={58}
+        width={240}
+        height={50}
         style={{ objectFit: 'contain' }}
       />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '16px' }}>
+        <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.2)' }} />
+        <span style={{ fontSize: '18px', fontWeight: 500, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.02em' }}>Solidus</span>
+      </div>
     </div>
   );
 }
@@ -229,7 +233,7 @@ export async function GET(request: NextRequest) {
           position: 'relative',
         }}
       >
-        {/* Ambrosia Ventures branding — top left */}
+        {/* Solidus — Ambrosia Ventures branding — top left */}
         <AmbrosiaBranding host={host} />
 
         {/* Main content */}
