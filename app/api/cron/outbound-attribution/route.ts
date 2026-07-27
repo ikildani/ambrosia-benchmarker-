@@ -115,28 +115,64 @@ export async function GET(request: NextRequest) {
     const proSignups = recentUsers.filter(u => u.tier === 'pro').length;
     const alreadyAttributed = recentUsers.filter(u => u.attribution_source).length;
 
+    // 5b. Per-campaign breakdown (re-fetch to include newly attributed)
+    const { data: attributedUsers } = await supabase
+      .from('user_profiles')
+      .select('tier, attribution_campaign')
+      .gte('created_at', sevenDaysAgo)
+      .not('attribution_campaign', 'is', null);
+
+    const campaignBreakdown = new Map<string, Record<string, number>>();
+    for (const u of attributedUsers || []) {
+      const campaign = u.attribution_campaign as string;
+      const tier = u.tier || 'free';
+      if (!campaignBreakdown.has(campaign)) campaignBreakdown.set(campaign, {});
+      const counts = campaignBreakdown.get(campaign)!;
+      counts[tier] = (counts[tier] || 0) + 1;
+    }
+
+    const campaignLines: string[] = [];
+    for (const [campaign, tiers] of [...campaignBreakdown.entries()].sort((a, b) => {
+      const totalA = Object.values(a[1]).reduce((s, n) => s + n, 0);
+      const totalB = Object.values(b[1]).reduce((s, n) => s + n, 0);
+      return totalB - totalA;
+    })) {
+      const total = Object.values(tiers).reduce((s, n) => s + n, 0);
+      const parts = Object.entries(tiers)
+        .sort((a, b) => b[1] - a[1])
+        .map(([t, n]) => `${n} ${t}`)
+        .join(', ');
+      campaignLines.push(`• *${campaign}*: ${total} signup${total !== 1 ? 's' : ''} (${parts})`);
+    }
+
     // 6. Slack digest
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (webhookUrl) {
+      const blocks: Array<Record<string, unknown>> = [
+        { type: 'header', text: { type: 'plain_text', text: 'Weekly Outbound Attribution' } },
+        { type: 'section', text: { type: 'mrkdwn', text: [
+          `*Signups (7d):* ${totalSignups}`,
+          `*Pro conversions:* ${proSignups}`,
+          `*Apollo-attributed:* ${attributed} (${proFromOutbound} Pro)`,
+          `*UTM backfilled:* ${utmBackfilled}`,
+          `*Already attributed:* ${alreadyAttributed}`,
+          `*Apollo domains tracked:* ${apolloDomains.size}`,
+        ].join('\n') } },
+      ];
+
+      if (campaignLines.length > 0) {
+        blocks.push(
+          { type: 'divider' },
+          { type: 'section', text: { type: 'mrkdwn', text: `*Attribution by Campaign (7d):*\n${campaignLines.join('\n')}` } },
+        );
+      }
+
       await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: ':dart: Outbound Attribution Report',
-          attachments: [{
-            color: '#14b8a6',
-            blocks: [
-              { type: 'header', text: { type: 'plain_text', text: 'Weekly Outbound Attribution' } },
-              { type: 'section', text: { type: 'mrkdwn', text: [
-                `*Signups (7d):* ${totalSignups}`,
-                `*Pro conversions:* ${proSignups}`,
-                `*Apollo-attributed:* ${attributed} (${proFromOutbound} Pro)`,
-                `*UTM backfilled:* ${utmBackfilled}`,
-                `*Already attributed:* ${alreadyAttributed}`,
-                `*Apollo domains tracked:* ${apolloDomains.size}`,
-              ].join('\n') } },
-            ],
-          }],
+          attachments: [{ color: '#14b8a6', blocks }],
         }),
       }).catch(() => {});
     }
