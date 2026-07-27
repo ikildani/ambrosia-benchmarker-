@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { OnboardingWizard } from '@/components/start/OnboardingWizard';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -61,7 +60,6 @@ export default function StartPage() {
 
       <OnboardingWizard />
 
-      <SiteFooter />
     </main>
   );
 }

@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import CompaniesPageClient from './CompaniesPageClient';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { resolveUserTier } from '@/lib/auth/tier-check';
 import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 
@@ -49,7 +48,6 @@ export default async function CompaniesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
       <CompaniesPageClient />
-      <SiteFooter />
     </>
   );
 }

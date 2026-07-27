@@ -5,7 +5,6 @@ import { HitRateCards } from '@/components/accuracy/HitRateCards';
 import { SliceTable } from '@/components/accuracy/SliceTable';
 import { CalibrationTimeline } from '@/components/accuracy/CalibrationTimeline';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -520,7 +519,6 @@ export default function AccuracyDashboard() {
         </div>
       </section>
 
-      <SiteFooter />
     </main>
   );
 }

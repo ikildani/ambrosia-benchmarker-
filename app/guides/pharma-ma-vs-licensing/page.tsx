@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
@@ -324,7 +323,6 @@ export default function PharmaMaVsLicensingPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

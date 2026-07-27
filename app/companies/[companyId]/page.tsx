@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/server';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import CompanyPageClient from './CompanyPageClient';
 
 // ISR: regenerate company pages every hour
@@ -1030,7 +1029,6 @@ export default async function CompanyPage({ params }: Props) {
         </section>
       </div>
 
-      <SiteFooter />
     </>
   );
 }

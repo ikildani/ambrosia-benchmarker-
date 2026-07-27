@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { blogPosts, type BlogPost } from '@/lib/blogPosts';
 import { createServiceClient } from '@/lib/supabase/server';
 import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
@@ -318,7 +317,6 @@ export default async function BlogPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

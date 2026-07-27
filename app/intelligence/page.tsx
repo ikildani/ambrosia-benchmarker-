@@ -8,7 +8,6 @@ import { DigestSignup } from '@/components/intelligence/DigestSignup';
 import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 import { resolveUserTier } from '@/lib/auth/tier-check';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { ReadoutImpactEstimate } from '@/components/intelligence/ReadoutImpactEstimate';
 import { CompetitiveCluster } from '@/components/intelligence/CompetitiveCluster';
 import { DealImpactSection } from '@/components/intelligence/DealImpactSection';
@@ -280,7 +279,6 @@ export default async function IntelligencePage({ searchParams }: Props) {
         </div>
       </section>
 
-      <SiteFooter />
     </main>
   );
 }

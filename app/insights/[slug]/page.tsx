@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllInsightSlugs, getInsightBySlug } from '@/lib/insightPages';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 
@@ -178,7 +177,6 @@ export default async function InsightPage({
         </div>
       </section>
     </main>
-    <SiteFooter />
     </>
   );
 }

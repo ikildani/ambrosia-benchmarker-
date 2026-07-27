@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { PRICING, DEAL_STATS, PORTFOLIO_PRICING, PORTFOLIO_DEMO_URL } from '@/lib/config/constants';
 import {
   Users, LayoutDashboard, FileBarChart, Network, Bell,
@@ -985,7 +984,6 @@ export default function PortfolioPage() {
         </section>
 
       </main>
-      <SiteFooter />
     </>
   );
 }

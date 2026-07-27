@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
@@ -526,7 +525,6 @@ export default function Phase2MilestoneBenchmarksPage() {
           description="Calculate clinical, regulatory, and commercial milestone splits for any phase, modality, and therapeutic area."
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

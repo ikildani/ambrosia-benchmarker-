@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { EnterpriseKeyManager } from '@/components/enterprise/EnterpriseKeyManager';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -106,7 +105,6 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      <SiteFooter />
     </main>
   );
 }

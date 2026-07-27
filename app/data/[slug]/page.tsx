@@ -6,7 +6,6 @@ import {
   getProgrammaticPageData,
   formatCurrency,
 } from '@/lib/seo/programmatic-pages';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { ProGate } from '@/components/seo/ProGate';
 import { DEAL_STATS } from '@/lib/config/constants';
 import dynamic from 'next/dynamic';
@@ -474,7 +473,6 @@ export default async function ProgrammaticDataPage({
         </section>
       </main>
 
-      <SiteFooter />
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { generateAboutPageSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
@@ -324,7 +323,6 @@ export default function AboutPage() {
           </div>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

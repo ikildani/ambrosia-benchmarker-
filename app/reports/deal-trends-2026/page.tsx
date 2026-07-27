@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
@@ -363,7 +362,6 @@ export default function DealTrends2026Page() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

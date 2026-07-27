@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import ProCheckoutButton from '@/components/ProCheckoutButton';
 import AuthModalGlobal from '@/components/AuthModalGlobal';
@@ -1110,7 +1109,6 @@ export default function ProPage() {
         </section>
 
       </main>
-      <SiteFooter />
       <AuthModalGlobal />
     </>
   );

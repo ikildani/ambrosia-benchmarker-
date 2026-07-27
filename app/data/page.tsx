@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllProgrammaticPages, formatCurrency } from '@/lib/seo/programmatic-pages';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
@@ -103,7 +102,6 @@ export default function DataIndexPage() {
         </section>
       </main>
 
-      <SiteFooter />
     </>
   );
 }

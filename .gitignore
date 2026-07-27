@@ -40,3 +40,5 @@ next-env.d.ts
 *.swp
 *.swo
 .github/workflows/lighthouse.yml
+.env.prod
+.env.resend

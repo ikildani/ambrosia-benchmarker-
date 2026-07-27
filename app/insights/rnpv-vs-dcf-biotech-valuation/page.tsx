@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
@@ -553,7 +552,6 @@ export default function RNPVvsDCFPage() {
           description={`Model rNPV and DCF simultaneously for any phase, modality, and therapeutic area — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

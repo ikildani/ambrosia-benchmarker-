@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 
 export const metadata: Metadata = {
@@ -287,7 +286,6 @@ export default function DealInsightsReport() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

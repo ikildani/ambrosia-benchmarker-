@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { GlobalJsonLd } from "./json-ld";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import CookieConsent from "@/components/CookieConsent";
+import { SiteFooter } from "@/components/seo/SiteFooter";
 import { DEAL_STATS } from "@/lib/config/constants";
 
 
@@ -122,6 +123,7 @@ export default function RootLayout({
           <AuthProvider>
             <TrackingProvider>{children}</TrackingProvider>
           </AuthProvider>
+          <SiteFooter />
           <Toaster richColors position="top-right" />
           <ProgressBarProvider />
           <Analytics />

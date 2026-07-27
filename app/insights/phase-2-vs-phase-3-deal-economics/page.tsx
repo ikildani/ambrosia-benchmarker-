@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
@@ -588,7 +587,6 @@ export default function Phase2VsPhase3Page() {
           description={`Model deal economics at Phase 2 and Phase 3 for any TA, modality, and indication — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

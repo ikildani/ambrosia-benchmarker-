@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { loadTradeSpaceScenarios } from '@/lib/trade-space-data';
 import { StructureCards } from '@/components/trade-space/StructureCards';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 import { TradeSpaceForm } from '@/components/trade-space/TradeSpaceForm';
 
@@ -169,7 +168,6 @@ export default function TradeSpacePage() {
         <IntelligenceEmailCapture context="trade-space" />
       </div>
 
-      <SiteFooter />
     </main>
   );
 }

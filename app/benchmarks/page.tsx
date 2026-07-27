@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllBenchmarkPages } from '@/lib/benchmarkPages';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Benchmarks 2026',
@@ -260,7 +259,6 @@ export default function BenchmarksIndex() {
         </section>
 
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -7,7 +7,6 @@ import {
   generateArticleSchema,
   generateFAQSchema,
 } from '@/lib/seo/structured-data';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -437,7 +436,6 @@ export default async function BlogPostPage({ params }: PageProps) {
           </article>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

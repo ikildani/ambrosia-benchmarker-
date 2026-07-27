@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { BookOpen } from 'lucide-react';
 import { glossaryTerms, glossaryCategories } from '@/lib/glossaryTerms';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'Biotech Licensing Glossary | Deal Terms Explained | Ambrosia Ventures',
@@ -175,7 +174,6 @@ export default function GlossaryPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { ProGate } from '@/components/seo/ProGate';
 import {
@@ -391,7 +390,6 @@ export default async function BenchmarkPage({ params }: PageProps) {
         </section>
 
       </main>
-      <SiteFooter />
     </>
   );
 }

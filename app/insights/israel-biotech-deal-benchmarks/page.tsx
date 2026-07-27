@@ -10,7 +10,6 @@ import { TableOfContents } from '@/components/insights/TableOfContents';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const PhaseUpfrontChart = dynamic(() => import('@/components/insights/PhaseUpfrontChart').then(m => ({ default: m.PhaseUpfrontChart })));
@@ -521,7 +520,6 @@ export default function IsraelBiotechDealBenchmarksPage() {
           description="Model upfronts, milestones, and royalties for any phase and therapeutic area — with deal structure adjustments calibrated for the Israeli biotech ecosystem."
         />
 
-        <SiteFooter />
       </main>
     </>
   );

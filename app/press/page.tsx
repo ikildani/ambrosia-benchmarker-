@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export default function PressPage() {
@@ -181,7 +180,6 @@ export default function PressPage() {
       </div>
 
     </main>
-    <SiteFooter />
     </>
   );
 }

@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { DEAL_STATS } from '@/lib/config/constants';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 
 export default function MethodologyPage() {
   return (
@@ -197,7 +196,6 @@ export default function MethodologyPage() {
         </div>
       </div>
     </main>
-    <SiteFooter />
     </>
   );
 }

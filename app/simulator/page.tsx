@@ -4,7 +4,6 @@ import { loadNegotiationScenarios } from '@/lib/negotiation-data';
 import { ZOPAChart } from '@/components/simulator/ZOPAChart';
 import { PeerBenchmarkPanel } from '@/components/peer-benchmark/PeerBenchmarkPanel';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 import { SimulatorForm } from '@/components/simulator/SimulatorForm';
 
@@ -286,7 +285,6 @@ export default async function SimulatorPage() {
         <IntelligenceEmailCapture context="simulator" />
       </div>
 
-      <SiteFooter />
     </main>
   );
 }

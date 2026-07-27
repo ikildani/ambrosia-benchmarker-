@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { BarChart3, ArrowRight } from 'lucide-react';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
@@ -136,7 +135,6 @@ export default function ReportsPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

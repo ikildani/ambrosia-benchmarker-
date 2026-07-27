@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase/server';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 const TA_CONFIG: Record<string, { name: string; description: string; keywords: string[] }> = {
@@ -211,7 +210,6 @@ export default async function TherapeuticAreaPage({ params }: { params: Promise<
         "variableMeasured": ["Upfront Payment", "Total Deal Value", "Milestones", "Royalty Rate"],
       })}} />
     </main>
-    <SiteFooter />
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
@@ -716,7 +715,6 @@ export default function ADCvsBispecificPage() {
           description={`Model deal terms for ADCs, bispecifics, and 20+ other modalities — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
@@ -613,7 +612,6 @@ export default function PharmaPartnerIdentificationGuidePage() {
           description={`Screen ${DEAL_STATS.TOTAL_COMPANIES} companies for pipeline gaps, deal velocity, and intent signals. Pro access at ${PRICING.PRO_MONTHLY} or get a full partner report for ${PRICING.REPORT_PRICE}.`}
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

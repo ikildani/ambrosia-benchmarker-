@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { DEAL_STATS } from '@/lib/config/constants';
@@ -262,7 +261,6 @@ export default function PressDataKitPage() {
         <InsightCTA variant="bottom" />
       </main>
 
-      <SiteFooter />
     </>
   );
 }

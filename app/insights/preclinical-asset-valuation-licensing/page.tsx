@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
@@ -581,7 +580,6 @@ export default function PreclinicalValuationPage() {
           description="Model upfronts, milestones, and royalties for preclinical assets across 12 therapeutic areas with platform and premium adjustments."
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

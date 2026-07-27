@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
@@ -566,7 +565,6 @@ export default function BiotechOutLicensingPage() {
           description={`Compare licensing, co-development, option, and collaboration economics for your specific asset — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

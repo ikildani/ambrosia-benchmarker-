@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { KeyTakeaways } from '@/components/insights/KeyTakeaways';
 import { TrustBar } from '@/components/insights/TrustBar';
 import { AuthorByline } from '@/components/insights/AuthorByline';
@@ -659,7 +658,6 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           description={`Access ${DEAL_STATS.TOTAL_DEALS} verified transactions, 8 calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Free calculator or Pro at ${PRICING.PRO_MONTHLY}.`}
         />
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 import { LiveAccuracyDashboard } from '@/components/methodology/LiveAccuracyDashboard';
 import { FailureCaseExplorer } from '@/components/methodology/FailureCaseExplorer';
@@ -289,7 +288,6 @@ git diff __tests__/backtest/baseline-errors.json`}</code>
         <IntelligenceEmailCapture context="methodology" />
       </div>
 
-      <SiteFooter />
     </main>
   );
 }

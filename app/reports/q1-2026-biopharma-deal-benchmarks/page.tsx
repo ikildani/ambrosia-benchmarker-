@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import { AuthorByline } from '@/components/insights/AuthorByline';
@@ -1113,7 +1112,6 @@ export default async function Q1BenchmarkReportPage() {
 
       </ReportEmailGate>
       <InsightCTA variant="bottom" />
-      <SiteFooter />
     </>
   );
 }

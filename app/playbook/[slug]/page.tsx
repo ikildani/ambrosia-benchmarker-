@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { loadPlaybookBuyer, listAllSlugs } from '@/lib/playbook-data';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { SiteFooter } from '@/components/seo/SiteFooter';
 import { BuyerStrategyNarrative } from '@/components/playbook/BuyerStrategyNarrative';
 import { PremiumTrendChart } from '@/components/playbook/PremiumTrendChart';
 import { PipelineGapViz } from '@/components/playbook/PipelineGapViz';
@@ -25,6 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${buyer.companyName} — Counterparty Playbook | Solidus`,
     description: `${buyer.companyName} pays ${buyer.premiumMultiplier > 1 ? '+' : ''}${((buyer.premiumMultiplier - 1) * 100).toFixed(0)}% vs. comparable medians across ${buyer.sampleSize} disclosed deals. Per-TA and per-phase breakdowns sourced from public filings.`,
+    alternates: {
+      canonical: `https://solidus.ambrosiaventures.co/playbook/${slug}`,
+    },
   };
 }
 
@@ -246,7 +248,6 @@ export default async function PlaybookDetail({ params }: Props) {
         </div>
       </section>
 
-      <SiteFooter />
     </main>
   );
 }
