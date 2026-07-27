@@ -153,49 +153,41 @@ Respond with ONLY the answer text. No JSON, no markdown headers, just the natura
 }
 
 // ── SQL safety validation ───────────────────────────────────────────────
-const FORBIDDEN_KEYWORDS = [
-  'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE', 'CREATE',
-  'GRANT', 'REVOKE', 'EXECUTE', 'EXEC', 'CALL', 'MERGE', 'UPSERT',
-  'SET ', 'VACUUM', 'REINDEX', 'CLUSTER', 'COPY', 'LOAD', 'IMPORT',
-  'pg_', 'information_schema', 'pg_catalog',
-  '--', '/*', '*/', ';',  // comment injection and statement chaining
+const FORBIDDEN_PATTERNS = [
+  /\bINSERT\b/, /\bUPDATE\b/, /\bDELETE\b/, /\bDROP\b/, /\bALTER\b/,
+  /\bTRUNCATE\b/, /\bCREATE\b/, /\bGRANT\b/, /\bREVOKE\b/,
+  /\bEXECUTE\s/, /\bMERGE\b/, /\bUPSERT\b/,
+  /\bVACUUM\b/, /\bREINDEX\b/, /\bCOPY\b/,
+  /\bpg_/, /\binformation_schema\b/, /\bpg_catalog\b/,
+  /--/, /\/\*/, /\*\//, /;\s*$/,
 ];
 
 function validateSQL(sql: string): { valid: boolean; reason?: string } {
   const upper = sql.toUpperCase().trim();
 
-  // Must start with SELECT or WITH (for CTEs)
   if (!upper.startsWith('SELECT') && !upper.startsWith('WITH')) {
     return { valid: false, reason: 'Query must be a SELECT statement' };
   }
 
-  // Check for forbidden keywords
-  for (const keyword of FORBIDDEN_KEYWORDS) {
-    if (upper.includes(keyword.toUpperCase())) {
-      // Allow 'SET' only within CASE expressions and offset/fetch
-      if (keyword === 'SET ' && (upper.includes('CASE') || upper.includes('OFFSET'))) continue;
-      // Allow '--' if it's inside a string literal (very basic check)
-      if (keyword === '--' && !upper.includes('--')) continue;
-      return { valid: false, reason: `Forbidden keyword detected: ${keyword.trim()}` };
+  for (const pattern of FORBIDDEN_PATTERNS) {
+    const upperPattern = new RegExp(pattern.source, 'i');
+    if (upperPattern.test(sql)) {
+      return { valid: false, reason: 'Forbidden SQL pattern detected' };
     }
   }
 
-  // Must reference the deals table
   if (!upper.includes('DEALS')) {
     return { valid: false, reason: 'Query must reference the deals table' };
   }
 
-  // Must include is_synthetic filter
   if (!upper.includes('IS_SYNTHETIC')) {
     return { valid: false, reason: 'Query must filter on is_synthetic' };
   }
 
-  // Must have a LIMIT clause
   if (!upper.includes('LIMIT')) {
     return { valid: false, reason: 'Query must include a LIMIT clause' };
   }
 
-  // Check LIMIT value doesn't exceed 50
   const limitMatch = upper.match(/LIMIT\s+(\d+)/);
   if (limitMatch && parseInt(limitMatch[1]) > 50) {
     return { valid: false, reason: 'LIMIT must not exceed 50' };
@@ -336,14 +328,9 @@ export async function POST(request: NextRequest): Promise<Response> {
       });
 
       if (error) {
-        // If the RPC function doesn't exist, fall back to parsing the SQL
-        // and using Supabase query builder — or handle gracefully
-        console.error('[query] RPC execution failed:', error.message);
-
-        // Fall back: try executing via a direct REST call to PostgREST
-        // This is safer — just return a helpful error
+        console.error('[query] RPC execution failed:', error.message, 'SQL:', parsedSQL.sql);
         return apiError(
-          'Query execution failed. The question may be too complex for our current system. Try rephrasing with simpler terms.',
+          'Query execution failed. Try rephrasing with simpler terms.',
           422,
           'QUERY_EXECUTION_ERROR'
         );
