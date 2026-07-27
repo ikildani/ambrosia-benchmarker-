@@ -9,7 +9,7 @@ import {
   type Modality,
   type Indication,
 } from '@/lib/calculations';
-import { incrementUsage, getUsage } from '@/lib/usage';
+import { incrementUsage, getUsage, incrementServerUsage, checkServerUsage, type ServerUsageResult } from '@/lib/usage';
 import { addToHistory } from '@/lib/history';
 import type { CalculatorFormState } from './useCalculatorState';
 import { clearSavedFormState } from './useCalculatorState';
@@ -111,15 +111,13 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
   const [limitHit, setLimitHit] = useState(false);
   const [remainingCalcs, setRemainingCalcs] = useState<number | null>(null);
 
-  // Check limit on mount
+  // Check limit on mount — server-side is the source of truth
   useEffect(() => {
-    if (isAuthenticated && (tier === 'free' || tier === 'starter') && userId && calcLimit !== Infinity) {
-      fetch(`/api/calculations?user_id=${userId}&count=true&month=true`)
-        .then(r => r.json())
-        .then(data => {
-          const count = data.data?.count || 0;
-          setRemainingCalcs(Math.max(0, calcLimit - count));
-          if (count >= calcLimit) {
+    if (tier === 'free' || tier === 'starter') {
+      checkServerUsage()
+        .then((result: ServerUsageResult) => {
+          setRemainingCalcs(result.remaining);
+          if (!result.allowed) {
             setLimitHit(true);
           }
         })
@@ -278,14 +276,24 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       sessionStorage.removeItem('wizard_progress');
       clearSavedFormState();
 
-      // Increment usage + check if limit reached (free tier only)
+      // Increment usage on server + check if limit reached (free/starter tier)
       if (tier === 'free' || tier === 'starter') {
+        // Optimistic local update (fast UI feedback)
         incrementUsage();
-        calculationCountRef.current++;
         setRemainingCalcs(prev => prev !== null ? Math.max(0, prev - 1) : null);
-        if (calculationCountRef.current >= calcLimit) {
-          setLimitHit(true);
-        }
+
+        // Server-side increment is the source of truth
+        incrementServerUsage()
+          .then((serverResult: ServerUsageResult) => {
+            // Reconcile with server state
+            setRemainingCalcs(serverResult.remaining);
+            if (!serverResult.allowed) {
+              setLimitHit(true);
+            }
+          })
+          .catch(() => {
+            // Already incremented locally as fallback
+          });
       }
 
       // Scroll to results (deferred to next frame so DOM updates first)
@@ -310,6 +318,12 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     newInputs: Partial<CalculationInput>,
     bulkSet: (fields: Partial<CalculatorFormState>) => void,
   ) => {
+    // Gate sensitivity recalculations behind the same server-side limit
+    if ((tier === 'free' || tier === 'starter') && limitHit) {
+      onLimitReached?.();
+      return;
+    }
+
     try {
       // Merge new inputs with current state
       const mergedInputs: CalculationInput = {
@@ -380,10 +394,22 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       } catch (trackError) {
         console.error('Error tracking sensitivity calculation:', trackError);
       }
+
+      // Increment server-side usage for sensitivity recalculations too
+      if (tier === 'free' || tier === 'starter') {
+        incrementServerUsage()
+          .then((serverResult: ServerUsageResult) => {
+            setRemainingCalcs(serverResult.remaining);
+            if (!serverResult.allowed) {
+              setLimitHit(true);
+            }
+          })
+          .catch(() => {});
+      }
     } catch (error) {
       console.error('Error applying sensitivity changes:', error);
     }
-  }, [trackCalculation]);
+  }, [trackCalculation, tier, limitHit, onLimitReached]);
 
   return {
     result,

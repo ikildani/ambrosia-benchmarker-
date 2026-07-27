@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface ReportCTAProps {
   modality?: string;
   phase?: string;
@@ -35,14 +37,53 @@ const phaseLabels: Record<string, string> = {
 };
 
 export default function ReportCTA({ modality, phase, dealCount, className = '' }: ReportCTAProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const modalityLabel = modality ? modalityLabels[modality] || modality : '';
   const phaseLabel = phase ? phaseLabels[phase] || phase : '';
   const context = [modalityLabel, phaseLabel].filter(Boolean).join(' ');
   const dealText = dealCount ? `${dealCount} deals` : 'verified deals';
 
-  const subject = encodeURIComponent(`Report Request: ${context || 'Custom'} Deal Benchmarks`);
-  const body = encodeURIComponent(`Hi Issa,\n\nI'd like to request a deal benchmarks report for: ${context || '[please specify modality/phase]'}\n\nPlease send details on the $499 standard report and $2,500 custom analysis options.\n\nThank you`);
-  const mailto = `mailto:issa@ambrosiaventures.co?subject=${subject}&body=${body}`;
+  const enterpriseMailto = `mailto:issa@ambrosiaventures.co?subject=${encodeURIComponent('Custom Analysis Inquiry')}&body=${encodeURIComponent(`Hi Issa,\n\nI'm interested in a custom deal analysis. Please share details on the $2,500 engagement.\n\nContext: ${context || '[please describe your deal/asset]'}\n\nThank you`)}`;
+
+  async function handleCheckout() {
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          purchaseType: 'report',
+          calculationData: {
+            inputs: {
+              modality: modality || '',
+              development_phase: phase || '',
+              source: 'pseo',
+              context: context || 'Custom',
+            },
+            results: {},
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error) {
+        setError(data.error);
+      } else {
+        setError('Unable to start checkout. Please try again.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again or contact us directly.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className={`relative overflow-hidden rounded-xl border border-teal-200 dark:border-teal-500/30 bg-gradient-to-br from-white via-teal-50/30 to-white dark:from-navy-800 dark:via-teal-900/10 dark:to-navy-800 ${className}`}>
@@ -67,22 +108,41 @@ export default function ReportCTA({ modality, phase, dealCount, className = '' }
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <a
-            href={mailto}
-            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-soft hover:shadow-glow text-sm"
+          <button
+            onClick={handleCheckout}
+            disabled={loading}
+            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-soft hover:shadow-glow text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Get Report ($499)
-          </a>
+            {loading ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Processing...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Purchase Report — $499
+              </>
+            )}
+          </button>
           <a
-            href={`mailto:issa@ambrosiaventures.co?subject=${encodeURIComponent('Custom Analysis Inquiry')}&body=${encodeURIComponent(`Hi Issa,\n\nI'm interested in a custom deal analysis. Please share details on the $2,500 engagement.\n\nContext: ${context || '[please describe your deal/asset]'}\n\nThank you`)}`}
+            href={enterpriseMailto}
             className="flex-1 flex items-center justify-center gap-2 px-5 py-3 border border-neutral-300 dark:border-slate-600 text-neutral-700 dark:text-slate-200 font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-slate-700 transition-all text-sm"
           >
-            Custom Analysis ($2,500)
+            Contact Us for Enterprise Pricing
           </a>
         </div>
+
+        {error && (
+          <p className="text-xs text-red-500 dark:text-red-400 mt-2 text-center">
+            {error}
+          </p>
+        )}
 
         <p className="text-xs text-neutral-500 dark:text-slate-400 mt-3 text-center">
           Primary-source-verified from SEC EDGAR, FTC filings, and direct research

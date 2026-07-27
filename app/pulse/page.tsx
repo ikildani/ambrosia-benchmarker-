@@ -81,7 +81,7 @@ function PulsePageInner() {
             isPro={tier === 'pro' || tier === 'portfolio'}
             userId={user?.id}
             week={weekParam || undefined}
-            onUpgrade={() => router.push('/#pricing')}
+            onUpgrade={() => router.push('/pro')}
           />
         )}
       </div>

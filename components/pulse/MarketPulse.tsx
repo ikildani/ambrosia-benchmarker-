@@ -202,7 +202,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
       )}
 
       {/* Weekly Highlights — 4 stat cards */}
-      <WeeklyHighlights snapshot={snapshot} isPro={isPro} />
+      <WeeklyHighlights snapshot={snapshot} isPro={isPro} onUpgrade={onUpgrade} />
 
       {/* Two-column layout on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -214,12 +214,12 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
         {/* Right sidebar: Modality + TA breakdown */}
         <div className="space-y-8">
           <ModalityHeatMap snapshot={snapshot} isPro={isPro} />
-          <TherapeuticAreaBreakdown snapshot={snapshot} isPro={isPro} />
+          <TherapeuticAreaBreakdown snapshot={snapshot} isPro={isPro} onUpgrade={onUpgrade} />
         </div>
       </div>
 
       {/* Benchmark Sparklines — full width */}
-      <BenchmarkSparklines snapshots={historySnapshots} isPro={isPro} />
+      <BenchmarkSparklines snapshots={historySnapshots} isPro={isPro} onUpgrade={onUpgrade} />
 
       {/* Data Freshness */}
       <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">

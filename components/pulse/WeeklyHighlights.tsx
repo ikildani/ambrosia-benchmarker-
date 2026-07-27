@@ -5,6 +5,7 @@ import { formatModality } from '@/lib/config/modality-display';
 interface WeeklyHighlightsProps {
   snapshot: any;
   isPro: boolean;
+  onUpgrade?: () => void;
 }
 
 function formatUsd(amount: number | null): string {
@@ -14,7 +15,7 @@ function formatUsd(amount: number | null): string {
   return `$${(amount / 1e3).toFixed(0)}K`;
 }
 
-export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsProps) {
+export default function WeeklyHighlights({ snapshot, isPro, onUpgrade }: WeeklyHighlightsProps) {
   if (!snapshot) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -102,7 +103,7 @@ export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsPr
       {cards.map((card, i) => (
         <div
           key={i}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm"
+          className={`bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm ${card.locked ? 'relative group' : ''}`}
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
@@ -121,7 +122,20 @@ export default function WeeklyHighlights({ snapshot, isPro }: WeeklyHighlightsPr
           <div className={`text-2xl font-bold ${card.locked ? 'text-slate-300 dark:text-slate-600' : 'text-slate-900 dark:text-white'}`}>
             {card.value}
           </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{card.sub}</div>
+          {card.locked ? (
+            <a
+              href="/pro"
+              onClick={(e) => { if (onUpgrade) { e.preventDefault(); onUpgrade(); } }}
+              className="inline-flex items-center gap-1 text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium mt-1 transition-colors"
+            >
+              Unlock with Pro
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          ) : (
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{card.sub}</div>
+          )}
         </div>
       ))}
     </div>

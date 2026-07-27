@@ -464,12 +464,12 @@ export default function CompaniesPageClient() {
                 See acquisition appetite, deal financials, patent cliffs, pipeline data, and competitive peer comparisons for every company.
               </p>
             </div>
-            <button
-              onClick={() => openAuthModal('signup')}
-              className="shrink-0 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25"
+            <a
+              href="/pro"
+              className="shrink-0 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/25 inline-block"
             >
               Upgrade to Pro
-            </button>
+            </a>
           </div>
         )}
       </div>

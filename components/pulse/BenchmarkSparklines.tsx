@@ -13,6 +13,7 @@ interface PulseSnapshot {
 interface BenchmarkSparklinesProps {
   snapshots: PulseSnapshot[];
   isPro: boolean;
+  onUpgrade?: () => void;
 }
 
 const MODALITIES_TO_TRACK = ['adc', 'radiopharmaceutical', 'bispecific_antibody', 'car_t', 'small_molecule', 'gene_therapy'];
@@ -56,7 +57,7 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSparklinesProps) {
+export default function BenchmarkSparklines({ snapshots, isPro, onUpgrade }: BenchmarkSparklinesProps) {
   if (!snapshots || snapshots.length === 0) return null;
 
   if (snapshots.length < 3) {
@@ -188,11 +189,18 @@ export default function BenchmarkSparklines({ snapshots, isPro }: BenchmarkSpark
               </div>
               {/* Blur overlay for free */}
               {!isPro && (
-                <div className="absolute inset-0 top-8 flex items-center justify-center">
+                <div className="absolute inset-0 top-8 flex flex-col items-center justify-center">
                   <div className="absolute inset-0 backdrop-blur-[2px] bg-white/30 dark:bg-slate-800/30 rounded-lg" />
-                  <svg className="w-5 h-5 text-slate-400 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                  <a
+                    href="/pro"
+                    onClick={(e) => { if (onUpgrade) { e.preventDefault(); onUpgrade(); } }}
+                    className="relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 dark:bg-slate-700/80 text-white text-xs font-medium hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors shadow-sm"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Unlock trends
+                  </a>
                 </div>
               )}
             </div>

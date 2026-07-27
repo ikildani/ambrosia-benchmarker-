@@ -3,6 +3,7 @@
 interface TherapeuticAreaBreakdownProps {
   snapshot: any;
   isPro: boolean;
+  onUpgrade?: () => void;
 }
 
 const TA_DISPLAY: Record<string, { label: string; color: string; bgColor: string; hexColor: string }> = {
@@ -39,7 +40,7 @@ const CANONICAL_TAS = [
   'hematology', 'dermatology', 'gastroenterology',
 ];
 
-export default function TherapeuticAreaBreakdown({ snapshot, isPro }: TherapeuticAreaBreakdownProps) {
+export default function TherapeuticAreaBreakdown({ snapshot, isPro, onUpgrade }: TherapeuticAreaBreakdownProps) {
   const taData = snapshot.therapeutic_area_breakdown || {};
 
   // Build entries from snapshot data
@@ -164,6 +165,25 @@ export default function TherapeuticAreaBreakdown({ snapshot, isPro }: Therapeuti
           );
         })}
       </div>
+
+      {/* Inline upgrade CTA for free users */}
+      {!isPro && totalDeals > 0 && (
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <a
+            href="/pro"
+            onClick={(e) => { if (onUpgrade) { e.preventDefault(); onUpgrade(); } }}
+            className="flex items-center gap-2 text-xs text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Unlock avg upfront data per TA
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      )}
 
       {/* Screen reader table */}
       <table className="sr-only">

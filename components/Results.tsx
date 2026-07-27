@@ -493,20 +493,54 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   const isPro = tier === 'pro' || tier === 'portfolio';
   const isReport = tier === 'report';
 
-  // Power Calculation: first-ever free calc gets full unblurred access
-  // After the first calc, localStorage is set and all subsequent calcs are gated
-  const isPowerCalc = useMemo(() => {
+  // Power Calculation: first-ever free calc gets full unblurred access.
+  // Server-side is the source of truth; localStorage is a fast cache.
+  const [isPowerCalc, setIsPowerCalc] = useState(() => {
     if (typeof window === 'undefined') return false;
     if (tier !== 'free') return false;
+    // Fast initial value from localStorage cache
     return !localStorage.getItem('power_calc_used');
-  }, [tier, result]); // re-evaluates when result changes (new calculation)
+  });
 
-  // Mark power calc as used immediately so the NEXT calculation is gated
+  // Verify power calc status from server on mount
   useEffect(() => {
-    if (tier === 'free' && typeof window !== 'undefined' && !localStorage.getItem('power_calc_used')) {
-      localStorage.setItem('power_calc_used', 'true');
+    if (tier !== 'free') {
+      setIsPowerCalc(false);
+      return;
     }
+
+    // Check server-side usage to determine if power calc is available
+    fetch('/api/usage/calc')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          const serverTotal = data.total ?? 0;
+          // Power calc is available only when server says 0 prior calcs.
+          // If server says calcs were used but localStorage says otherwise
+          // (incognito/cleared), trust the server.
+          const powerAvailable = serverTotal === 0;
+          setIsPowerCalc(powerAvailable);
+
+          // Sync localStorage cache with server state
+          if (!powerAvailable) {
+            try { localStorage.setItem('power_calc_used', 'true'); } catch {}
+          }
+        }
+      })
+      .catch(() => {
+        // On network error, keep the localStorage-based value
+      });
   }, [tier]);
+
+  // Mark power calc as used on server + localStorage after this calc renders
+  useEffect(() => {
+    if (tier === 'free' && isPowerCalc && typeof window !== 'undefined') {
+      // Mark locally immediately
+      try { localStorage.setItem('power_calc_used', 'true'); } catch {}
+      // Server-side marking happens via the POST to /api/usage/calc
+      // in useCalculation.handleCalculate -- no need to duplicate here
+    }
+  }, [tier, isPowerCalc]);
 
   // Build per-field warning text from non-critical guardrail warnings
   const fieldWarnings = useMemo(() => {

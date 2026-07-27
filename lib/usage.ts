@@ -150,3 +150,107 @@ export function markPowerCalcUsed(): void {
     // Silently fail
   }
 }
+
+// ── Server-side usage tracking ──────────────────────────────────────────────
+
+export interface ServerUsageResult {
+  allowed: boolean;
+  remaining: number;
+  total: number;
+  limit: number;
+  tier: string;
+}
+
+/**
+ * Check server-side usage status.
+ * This is the source of truth -- localStorage is only a fast cache.
+ */
+export async function checkServerUsage(): Promise<ServerUsageResult> {
+  try {
+    const response = await fetch('/api/usage/calc');
+    if (!response.ok) {
+      throw new Error('Failed to check server usage');
+    }
+    const data = await response.json();
+    return {
+      allowed: data.allowed ?? true,
+      remaining: data.remaining ?? FREE_TIER_LIMIT,
+      total: data.total ?? 0,
+      limit: data.limit ?? FREE_TIER_LIMIT,
+      tier: data.tier ?? 'free',
+    };
+  } catch (error) {
+    console.error('Server usage check failed, falling back to localStorage:', error);
+    // Fall back to localStorage on network error
+    const usage = getUsage();
+    return {
+      allowed: usage.count < FREE_TIER_LIMIT,
+      remaining: Math.max(0, FREE_TIER_LIMIT - usage.count),
+      total: usage.count,
+      limit: FREE_TIER_LIMIT,
+      tier: 'free',
+    };
+  }
+}
+
+/**
+ * Increment usage on the server and update localStorage cache.
+ * Returns the updated usage status from the server.
+ */
+export async function incrementServerUsage(): Promise<ServerUsageResult> {
+  try {
+    const response = await fetch('/api/usage/calc', { method: 'POST' });
+    if (!response.ok) {
+      throw new Error('Failed to increment server usage');
+    }
+    const data = await response.json();
+    const result: ServerUsageResult = {
+      allowed: data.allowed ?? true,
+      remaining: data.remaining ?? 0,
+      total: data.total ?? 0,
+      limit: data.limit ?? FREE_TIER_LIMIT,
+      tier: data.tier ?? 'free',
+    };
+
+    // Sync localStorage cache with server state
+    try {
+      const newUsage = { count: result.total, month: getCurrentMonth() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUsage));
+      // Also mark power calc as used if count >= 1
+      if (result.total >= 1) {
+        localStorage.setItem(POWER_CALC_KEY, 'true');
+      }
+    } catch {
+      // localStorage unavailable
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Server usage increment failed, falling back to localStorage:', error);
+    // Fall back to localStorage
+    const usage = incrementUsage();
+    markPowerCalcUsed();
+    return {
+      allowed: usage.count < FREE_TIER_LIMIT,
+      remaining: Math.max(0, FREE_TIER_LIMIT - usage.count),
+      total: usage.count,
+      limit: FREE_TIER_LIMIT,
+      tier: 'free',
+    };
+  }
+}
+
+/**
+ * Check server-side power calc status.
+ * Returns true if this is the user's first-ever calculation (power calc available).
+ */
+export async function checkPowerCalcAvailable(): Promise<boolean> {
+  try {
+    const result = await checkServerUsage();
+    // Power calc is available when the user has 0 calculations
+    return result.total === 0;
+  } catch {
+    // Fall back to localStorage
+    return !hasPowerCalcBeenUsed();
+  }
+}

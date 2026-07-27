@@ -227,6 +227,31 @@ export default function CompanyDealHistory({ deals, isPro, dealsByModality }: Co
           </table>
         </div>
       )}
+
+      {/* Inline upgrade CTA for free users */}
+      {!isPro && filteredDeals.length > 0 && (
+        <div className="px-6 py-5 border-t border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-teal-50/30 dark:from-slate-800/80 dark:to-teal-900/10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Unlock deal financials</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">See upfront payments, milestones, and royalty rates for every deal.</p>
+              </div>
+            </div>
+            <a
+              href="/pro"
+              className="shrink-0 px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 transition-all shadow-sm"
+            >
+              Upgrade to Pro
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
