@@ -124,18 +124,29 @@ SMART PATTERNS:
 
 Also determine the query_type from: 'single_deal', 'comparison', 'trend', 'ranking', 'aggregation', 'company_activity', 'benchmark'
 
+DUAL-QUERY SYSTEM:
+In addition to the main query, generate a second "context_sql" query that provides benchmark context. This makes every answer smarter:
+- If the main query is about a specific company → context query gets market-wide stats for comparison
+- If about a specific modality → context gets all-modality benchmarks
+- If about a specific phase → context gets adjacent phase data
+- If about a ranking → context gets the overall median/average for perspective
+- If the question is already broad/benchmark → context_sql can be null
+
 Respond with ONLY a JSON object (no markdown, no backticks):
 {
   "sql": "SELECT ... FROM deals WHERE is_synthetic = false AND ... LIMIT 50",
+  "context_sql": "SELECT ... FROM deals WHERE is_synthetic = false AND ... LIMIT 20",
   "query_type": "single_deal|comparison|trend|ranking|aggregation|company_activity|benchmark",
-  "explanation": "Brief explanation of what the query does"
+  "explanation": "Brief explanation of what the query does",
+  "context_explanation": "What the context query adds"
 }`;
 }
 
 // ── Answer synthesis prompt ─────────────────────────────────────────────
-function buildAnswerPrompt(question: string, data: Record<string, unknown>[], queryType: string): string {
+function buildAnswerPrompt(question: string, data: Record<string, unknown>[], queryType: string, contextData?: Record<string, unknown>[]): string {
   const dataStr = JSON.stringify(data.slice(0, 30), null, 2);
   const totalResults = data.length;
+  const contextStr = contextData && contextData.length > 0 ? JSON.stringify(contextData.slice(0, 15), null, 2) : null;
 
   return `You are a senior biopharma BD analyst at Ambrosia Ventures — an elite life sciences advisory firm. You have just queried a proprietary database of ${formatDealCount(LIVE_DEAL_COUNT)} verified deals. Provide an answer that demonstrates deep market intelligence.
 
@@ -145,6 +156,7 @@ QUERY TYPE: ${queryType}
 
 QUERY RESULTS (${totalResults} ${totalResults === 1 ? 'deal' : 'deals'} found):
 ${dataStr}
+${contextStr ? `\nBENCHMARK CONTEXT (for comparison — use this to add depth to your answer):\n${contextStr}` : ''}
 
 INSTRUCTIONS:
 1. Lead with the key finding — the single most important number or insight.
@@ -160,6 +172,8 @@ INSTRUCTIONS:
 11. Keep it tight: 2-4 sentences for simple questions, up to 6 for complex analyses. Never ramble.
 12. Speak with authority. No hedging ("it appears", "it seems"), no disclaimers ("based on available data"). You KNOW this market.
 13. Use deal terminology naturally: upfront, TDV, milestones, CVR, royalty, option, bolt-on, platform deal, out-licensing.
+14. If BENCHMARK CONTEXT is provided, use it to add a comparison layer: "For context, the market-wide median is..." or "This is Xx higher/lower than the broader market." This is what makes the answer intelligent, not just informational.
+15. Always mention sample size when the stat is based on fewer than 10 deals: "(n=7)" — this signals analytical rigor.
 
 Respond with ONLY the answer text. No JSON, no markdown headers, no bullet points — flowing prose that reads like a senior analyst briefing.`;
 }
@@ -231,6 +245,62 @@ function validateQuestion(question: string): { valid: boolean; reason?: string }
   }
 
   return { valid: true };
+}
+
+// ── Highlight extraction ──────────────────────────────────────────────
+interface Highlight {
+  label: string;
+  value: string;
+  context?: string;
+}
+
+function extractHighlights(data: Record<string, unknown>[], queryType: string): Highlight[] {
+  if (data.length === 0) return [];
+  const highlights: Highlight[] = [];
+
+  const formatVal = (v: unknown): string => {
+    if (v === null || v === undefined) return '-';
+    const n = Number(v);
+    if (isNaN(n)) return String(v);
+    if (Math.abs(n) >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
+    if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
+    if (Math.abs(n) >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
+    return n % 1 !== 0 ? `${n.toFixed(1)}%` : String(n);
+  };
+
+  const row = data[0];
+  const keys = Object.keys(row);
+
+  if (queryType === 'aggregation' || queryType === 'benchmark') {
+    for (const key of keys) {
+      if (key.includes('median') || key.includes('avg') || key.includes('average')) {
+        highlights.push({ label: key.replace(/_/g, ' '), value: formatVal(row[key]) });
+      }
+      if (key.includes('count') || key.includes('deal_count')) {
+        highlights.push({ label: 'Deals Analyzed', value: String(row[key]) });
+      }
+    }
+  }
+
+  if (queryType === 'ranking' && data.length > 0) {
+    const valKey = keys.find(k => k.includes('usd') || k.includes('value') || k.includes('upfront') || k.includes('count'));
+    const nameKey = keys.find(k => k.includes('name') || k.includes('licens'));
+    if (valKey && nameKey) {
+      highlights.push({ label: '#1', value: formatVal(row[valKey]), context: String(row[nameKey]) });
+      if (data.length > 1) {
+        highlights.push({ label: `Total in ranking`, value: String(data.length) });
+      }
+    }
+  }
+
+  if (queryType === 'company_activity') {
+    const countKey = keys.find(k => k.includes('count'));
+    const valKey = keys.find(k => k.includes('usd') || k.includes('total'));
+    if (countKey) highlights.push({ label: 'Deal Count', value: String(row[countKey]) });
+    if (valKey) highlights.push({ label: 'Total Value', value: formatVal(row[valKey]) });
+  }
+
+  return highlights.slice(0, 3);
 }
 
 // ── Follow-up suggestion generator ────────────────────────────────────
@@ -354,9 +424,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     const sqlText = sqlResponse.content[0].type === 'text' ? sqlResponse.content[0].text : '';
 
     // Parse the JSON response
-    let parsedSQL: { sql: string; query_type: string; explanation: string };
+    let parsedSQL: { sql: string; context_sql?: string | null; query_type: string; explanation: string; context_explanation?: string };
     try {
-      // Strip any markdown formatting if present
       const cleanedText = sqlText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       parsedSQL = JSON.parse(cleanedText);
     } catch {
@@ -369,40 +438,43 @@ export async function POST(request: NextRequest): Promise<Response> {
       return apiError(`Query safety check failed: ${sqlValidation.reason}`, 400, 'UNSAFE_QUERY');
     }
 
-    // 7. Execute the query against Supabase using raw SQL via rpc
-    // We use Supabase's rpc to call a server-side function, or fall back to direct query
-    let queryData: Record<string, unknown>[];
-    try {
-      // Use Supabase's PostgreSQL function for raw queries
-      // The service client has full access
-      const { data, error } = await supabase.rpc('execute_readonly_query', {
-        query_text: parsedSQL.sql,
-      });
-
-      if (error) {
-        console.error('[query] RPC execution failed:', error.message, 'SQL:', parsedSQL.sql);
-        return apiError(
-          'Query execution failed. Try rephrasing with simpler terms.',
-          422,
-          'QUERY_EXECUTION_ERROR'
-        );
-      }
-
-      queryData = (data as Record<string, unknown>[]) || [];
-    } catch (queryError) {
-      console.error('[query] Query execution error:', queryError);
-      return apiError(
-        'Query execution failed. Try rephrasing your question.',
-        500,
-        'QUERY_EXECUTION_ERROR'
-      );
+    // Validate context SQL if present
+    let hasContextQuery = false;
+    if (parsedSQL.context_sql) {
+      const ctxValidation = validateSQL(parsedSQL.context_sql);
+      hasContextQuery = ctxValidation.valid;
     }
 
-    // 8. Synthesize answer with Claude
+    // 7. Execute queries in parallel (main + context benchmark)
+    let queryData: Record<string, unknown>[];
+    let contextData: Record<string, unknown>[] = [];
+    try {
+      const mainPromise = supabase.rpc('execute_readonly_query', { query_text: parsedSQL.sql });
+      const contextPromise = hasContextQuery
+        ? supabase.rpc('execute_readonly_query', { query_text: parsedSQL.context_sql! })
+        : Promise.resolve({ data: [], error: null });
+
+      const [mainResult, contextResult] = await Promise.all([mainPromise, contextPromise]);
+
+      if (mainResult.error) {
+        console.error('[query] RPC execution failed:', mainResult.error.message, 'SQL:', parsedSQL.sql);
+        return apiError('Query execution failed. Try rephrasing with simpler terms.', 422, 'QUERY_EXECUTION_ERROR');
+      }
+
+      queryData = (mainResult.data as Record<string, unknown>[]) || [];
+      if (!contextResult.error && contextResult.data) {
+        contextData = (contextResult.data as Record<string, unknown>[]) || [];
+      }
+    } catch (queryError) {
+      console.error('[query] Query execution error:', queryError);
+      return apiError('Query execution failed. Try rephrasing your question.', 500, 'QUERY_EXECUTION_ERROR');
+    }
+
+    // 8. Synthesize answer with Claude (including context data for richer insights)
     const answerResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2048,
-      messages: [{ role: 'user', content: buildAnswerPrompt(question, queryData, parsedSQL.query_type) }],
+      messages: [{ role: 'user', content: buildAnswerPrompt(question, queryData, parsedSQL.query_type, contextData) }],
     });
 
     const answer = answerResponse.content[0].type === 'text' ? answerResponse.content[0].text : '';
@@ -420,10 +492,13 @@ export async function POST(request: NextRequest): Promise<Response> {
       // Non-critical — don't fail the request
     }
 
-    // 10. Generate follow-up suggestions
+    // 10. Extract highlight stats from the data
+    const highlights = extractHighlights(queryData, parsedSQL.query_type);
+
+    // 11. Generate follow-up suggestions
     const followUps = generateFollowUps(question, parsedSQL.query_type, queryData.length);
 
-    // 11. Return response
+    // 12. Return response
     return apiSuccess({
       answer,
       data: queryData.slice(0, 20),
@@ -431,6 +506,8 @@ export async function POST(request: NextRequest): Promise<Response> {
       deal_count: queryData.length,
       execution_time_ms: Date.now() - startTime,
       follow_ups: followUps,
+      highlights,
+      has_context: contextData.length > 0,
     });
 
   } catch (error) {

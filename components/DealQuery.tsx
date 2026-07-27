@@ -5,6 +5,12 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 
 // ── Types ───────────────────────────────────────────────────────────────
+interface Highlight {
+  label: string;
+  value: string;
+  context?: string;
+}
+
 interface QueryResult {
   answer: string;
   data: Record<string, unknown>[];
@@ -12,6 +18,8 @@ interface QueryResult {
   deal_count: number;
   execution_time_ms: number;
   follow_ups?: string[];
+  highlights?: Highlight[];
+  has_context?: boolean;
 }
 
 interface DealQueryProps {
@@ -198,6 +206,8 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
         deal_count: data.deal_count,
         execution_time_ms: data.execution_time_ms,
         follow_ups: data.follow_ups || [],
+        highlights: data.highlights || [],
+        has_context: data.has_context || false,
       });
 
       // Add to history (keep last 10)
@@ -388,8 +398,21 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
               transition={{ type: 'spring', stiffness: 200, damping: 24 }}
               className="px-4 sm:px-6 pb-4"
             >
+              {/* Highlight Cards */}
+              {result.highlights && result.highlights.length > 0 && (
+                <div className="flex gap-3 mb-3 overflow-x-auto pb-1">
+                  {result.highlights.map((h, i) => (
+                    <div key={i} className="flex-shrink-0 border border-slate-700/50 bg-slate-800/50 px-4 py-3 min-w-[120px]">
+                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">{h.label}</p>
+                      <p className="text-lg font-semibold text-teal-400 tabular-nums">{h.value}</p>
+                      {h.context && <p className="text-[11px] text-slate-400 mt-0.5 truncate">{h.context}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Answer */}
-              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-4 sm:p-5">
+              <div className="border border-slate-700/50 bg-slate-800/30 p-4 sm:p-5">
                 <div className="prose prose-invert prose-sm max-w-none">
                   <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                     {formatAnswer(result.answer)}
