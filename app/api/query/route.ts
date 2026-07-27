@@ -84,37 +84,50 @@ IMPORTANT NOTES:
 
 // ── SQL parsing prompt ──────────────────────────────────────────────────
 function buildSQLPrompt(question: string): string {
-  return `You are a senior biopharma BD analyst with deep expertise in pharma deal economics. You have access to a comprehensive database of biopharma licensing, acquisition, and collaboration deals.
+  return `You are a senior biopharma BD analyst at Ambrosia Ventures with 15+ years of deal experience. You have access to one of the most comprehensive proprietary databases of biopharma licensing, acquisition, and collaboration deals in the industry.
 
 SCHEMA:
 ${DEALS_SCHEMA}
 
 USER QUESTION: "${question}"
 
-Generate a PostgreSQL SELECT query to answer this question. Follow these rules strictly:
+Your job is to generate the BEST possible PostgreSQL query to answer this question. Think step by step:
 
-1. ONLY generate SELECT statements. Never INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE, or any DDL/DML.
-2. Always include WHERE is_synthetic = false
-3. LIMIT to 50 rows maximum
-4. For financial values, remember they are stored in raw USD (not millions)
-5. Use appropriate aggregations (AVG, MEDIAN via percentile_cont, SUM, COUNT, MIN, MAX)
-6. For trend analysis, group by EXTRACT(YEAR FROM announced_date)
-7. For company activity, group by licensor_name or licensee_name
-8. For comparison queries, use CASE WHEN or subqueries
-9. Order results meaningfully (by value DESC, by date DESC, by count DESC)
-10. Select only the columns needed to answer the question — don't SELECT *
-11. For "largest" or "biggest" queries, order by the relevant value DESC and LIMIT appropriately
-12. When the user asks about a specific company, use ILIKE for case-insensitive matching
-13. When filtering by modality or indication, use ILIKE with % wildcards for flexible matching
-14. For date ranges like "last 2 years", use announced_date >= NOW() - INTERVAL '2 years'
-15. Always alias computed columns with meaningful names
+1. What is the user really asking? Map their natural language to the right columns and filters.
+2. What context would make the answer most useful? (e.g., if they ask about a company's deals, also pull the deal types, phases, and values — not just counts)
+3. Would a comparison or benchmark make the answer more insightful? (e.g., if they ask about ADC upfronts, also compute the overall median for context)
 
-Also determine the query_type from: 'single_deal', 'comparison', 'trend', 'ranking', 'aggregation', 'company_activity'
+QUERY RULES:
+- ONLY SELECT statements. Never INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE, or DDL.
+- Always include WHERE is_synthetic = false
+- LIMIT to 50 rows maximum
+- USD values are stored in RAW DOLLARS (not millions). $500M = 500000000.
+- Use percentile_cont(0.5) WITHIN GROUP (ORDER BY col) for medians — not AVG
+- For trend analysis, use EXTRACT(YEAR FROM announced_date)
+- Use ILIKE with % wildcards for fuzzy matching on company names, modalities, indications
+- For date ranges like "last 2 years", use announced_date >= NOW() - INTERVAL '2 years'
+- For "recent" or "latest", order by announced_date DESC
+- Always alias computed columns with meaningful names
+- When querying specific deals, include: licensor_name, licensee_name, asset_name, deal_type, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date
+- When aggregating, include COUNT(*) as deal_count alongside averages/medians
+- Prefer percentile_cont for financial medians over AVG (medians resist outlier skew)
+- For modality matching: 'ADC' = antibody-drug conjugate, 'mAb' = monoclonal antibody, 'CAR-T' = CAR-T cell therapy
+- For company matching: try both licensor_name and licensee_name when the question says "company" without specifying buyer/seller
+- NULL-safe: use COALESCE or filter WHERE column IS NOT NULL for financial aggregations
+
+SMART PATTERNS:
+- "How does X compare to Y?" → Use CASE WHEN or two CTEs side by side
+- "What's the trend?" → Group by year, show count + median value per year
+- "Who is most active?" → COUNT(*) GROUP BY company, but also SUM(total_deal_value_usd) for context
+- "What's the average/typical deal?" → Use percentile_cont(0.5) for median, also show 25th and 75th percentile
+- "Largest deals" → ORDER BY total_deal_value_usd DESC, include deal details not just numbers
+
+Also determine the query_type from: 'single_deal', 'comparison', 'trend', 'ranking', 'aggregation', 'company_activity', 'benchmark'
 
 Respond with ONLY a JSON object (no markdown, no backticks):
 {
   "sql": "SELECT ... FROM deals WHERE is_synthetic = false AND ... LIMIT 50",
-  "query_type": "single_deal|comparison|trend|ranking|aggregation|company_activity",
+  "query_type": "single_deal|comparison|trend|ranking|aggregation|company_activity|benchmark",
   "explanation": "Brief explanation of what the query does"
 }`;
 }
@@ -124,7 +137,7 @@ function buildAnswerPrompt(question: string, data: Record<string, unknown>[], qu
   const dataStr = JSON.stringify(data.slice(0, 30), null, 2);
   const totalResults = data.length;
 
-  return `You are a senior biopharma BD analyst at a top investment bank. You have just queried a comprehensive deal database to answer a question. Provide a precise, data-backed answer.
+  return `You are a senior biopharma BD analyst at Ambrosia Ventures — an elite life sciences advisory firm. You have just queried a proprietary database of ${formatDealCount(LIVE_DEAL_COUNT)} verified deals. Provide an answer that demonstrates deep market intelligence.
 
 USER QUESTION: "${question}"
 
@@ -134,22 +147,21 @@ QUERY RESULTS (${totalResults} ${totalResults === 1 ? 'deal' : 'deals'} found):
 ${dataStr}
 
 INSTRUCTIONS:
-1. Answer the question directly and specifically. Lead with the key finding.
-2. Reference specific dollar amounts, company names, dates, and deal details from the data.
-3. All USD values in the data are in RAW DOLLARS. Convert to millions ($XXM) or billions ($X.XB) for display.
-4. For trend questions, describe the direction and magnitude of changes.
-5. For ranking questions, list the top entries with their values.
-6. For comparison questions, highlight the key differences with specific numbers.
-7. If no results were found, say so clearly and suggest why (e.g., no disclosed terms, niche area).
-8. Keep the answer concise but complete — 2-5 sentences for simple questions, up to a short paragraph for complex analyses.
-9. Use professional BD/pharma terminology naturally.
-10. If the data shows something surprising or noteworthy, mention it.
-11. Do NOT hedge or say "based on our database" — speak with authority as if you know the market.
-12. When mentioning dollar amounts, use bold formatting: **$X.XB** or **$XXXM**
-13. When mentioning company names, use bold: **Pfizer**, **AbbVie**, etc.
-14. When mentioning key metrics, use bold for emphasis.
+1. Lead with the key finding — the single most important number or insight.
+2. All USD values in the data are RAW DOLLARS. Convert: $500M not $500000000. Use **$X.XB** or **$XXXM** bold formatting.
+3. Bold company names: **Pfizer**, **AbbVie**, etc.
+4. Bold key metrics and percentages for emphasis.
+5. After the direct answer, add ONE sentence of strategic context — what does this mean for someone doing deals in this space? This is what separates a database lookup from intelligence.
+6. For trend questions: describe direction, magnitude, AND what's driving it.
+7. For ranking questions: list top entries with values, then note any pattern (e.g., "dominated by Big Pharma buyers" or "mostly preclinical platform deals").
+8. For comparison questions: lead with the delta, then explain WHY the difference exists.
+9. If no results found: say so, explain why (undisclosed terms, niche area, or suggest rephrasing), and offer what adjacent data IS available.
+10. If the data shows something surprising or counter-intuitive, call it out explicitly — that's the insight the user came for.
+11. Keep it tight: 2-4 sentences for simple questions, up to 6 for complex analyses. Never ramble.
+12. Speak with authority. No hedging ("it appears", "it seems"), no disclaimers ("based on available data"). You KNOW this market.
+13. Use deal terminology naturally: upfront, TDV, milestones, CVR, royalty, option, bolt-on, platform deal, out-licensing.
 
-Respond with ONLY the answer text. No JSON, no markdown headers, just the natural language answer.`;
+Respond with ONLY the answer text. No JSON, no markdown headers, no bullet points — flowing prose that reads like a senior analyst briefing.`;
 }
 
 // ── SQL safety validation ───────────────────────────────────────────────
@@ -219,6 +231,46 @@ function validateQuestion(question: string): { valid: boolean; reason?: string }
   }
 
   return { valid: true };
+}
+
+// ── Follow-up suggestion generator ────────────────────────────────────
+function generateFollowUps(question: string, queryType: string, resultCount: number): string[] {
+  const q = question.toLowerCase();
+  const suggestions: string[] = [];
+
+  if (queryType === 'ranking' || queryType === 'aggregation') {
+    if (q.includes('upfront')) suggestions.push('How do these upfronts compare to total deal values?');
+    if (q.includes('oncology')) suggestions.push('How does this compare to immunology deals?');
+    if (q.includes('phase 2')) suggestions.push('What about Phase 3 — how do the economics change?');
+    if (q.includes('phase 3')) suggestions.push('How do Phase 2 economics compare?');
+    if (!q.includes('trend')) suggestions.push('How has this trended over the last 3 years?');
+  }
+
+  if (queryType === 'company_activity') {
+    suggestions.push('What modalities are they most active in?');
+    suggestions.push('How do their deal sizes compare to competitors?');
+  }
+
+  if (queryType === 'single_deal') {
+    suggestions.push('What are comparable deals in this therapeutic area?');
+    suggestions.push('What is the median upfront for this modality and phase?');
+  }
+
+  if (queryType === 'trend') {
+    suggestions.push('Which companies are driving this trend?');
+    suggestions.push('How does this compare across different modalities?');
+  }
+
+  if (q.includes('adc')) suggestions.push('How do ADC deal terms compare to bispecifics?');
+  if (q.includes('car-t') || q.includes('cell therapy')) suggestions.push('What are the largest CAR-T deals by total value?');
+  if (q.includes('lilly') || q.includes('eli lilly')) suggestions.push('How does Lilly\'s deal activity compare to Pfizer and AbbVie?');
+
+  if (suggestions.length === 0) {
+    suggestions.push('What are the largest deals in this space?');
+    suggestions.push('How have deal values trended over the last 3 years?');
+  }
+
+  return suggestions.slice(0, 3);
 }
 
 // ── Main handler ────────────────────────────────────────────────────────
@@ -368,13 +420,17 @@ export async function POST(request: NextRequest): Promise<Response> {
       // Non-critical — don't fail the request
     }
 
-    // 10. Return response
+    // 10. Generate follow-up suggestions
+    const followUps = generateFollowUps(question, parsedSQL.query_type, queryData.length);
+
+    // 11. Return response
     return apiSuccess({
       answer,
-      data: queryData.slice(0, 20), // Limit data payload for frontend
+      data: queryData.slice(0, 20),
       query_type: parsedSQL.query_type,
       deal_count: queryData.length,
       execution_time_ms: Date.now() - startTime,
+      follow_ups: followUps,
     });
 
   } catch (error) {

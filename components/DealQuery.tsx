@@ -11,6 +11,7 @@ interface QueryResult {
   query_type: string;
   deal_count: number;
   execution_time_ms: number;
+  follow_ups?: string[];
 }
 
 interface DealQueryProps {
@@ -196,6 +197,7 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
         query_type: data.query_type,
         deal_count: data.deal_count,
         execution_time_ms: data.execution_time_ms,
+        follow_ups: data.follow_ups || [],
       });
 
       // Add to history (keep last 10)
@@ -402,6 +404,21 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
                   <span className="w-1 h-1 rounded-full bg-slate-700" />
                   <span className="capitalize">{result.query_type.replace('_', ' ')}</span>
                 </div>
+
+                {/* Follow-up suggestions */}
+                {result.follow_ups && result.follow_ups.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {result.follow_ups.map((fu, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setQuestion(fu); handleQuery(fu); }}
+                        className="text-[11px] px-3 py-1.5 border border-slate-700 text-slate-400 hover:border-teal-500/50 hover:text-teal-400 transition-colors"
+                      >
+                        {fu}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Data Table Toggle */}
                 {result.data.length > 0 && (
