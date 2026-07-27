@@ -228,130 +228,115 @@ export async function GET(request: NextRequest) {
           alignItems: 'flex-start',
           justifyContent: 'center',
           backgroundColor: COLORS.bgDark,
-          backgroundImage: `radial-gradient(circle at 85% 20%, rgba(14,165,165,0.08) 0%, transparent 50%)`,
+          backgroundImage: `radial-gradient(circle at 80% 15%, rgba(14,165,165,0.06) 0%, transparent 50%), radial-gradient(circle at 20% 85%, rgba(14,165,165,0.04) 0%, transparent 40%)`,
           padding: '60px 60px 60px 80px',
           position: 'relative',
         }}
       >
-        {/* Solidus — Ambrosia Ventures branding — top left */}
         <AmbrosiaBranding host={host} />
 
-        {/* Main content */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '24px',
+            gap: '28px',
             marginTop: '60px',
           }}
         >
-          {/* Title */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div
               style={{
-                fontSize: '64px',
-                fontWeight: 900,
+                fontSize: '22px',
+                fontWeight: 500,
+                color: COLORS.tealBright,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const,
+                marginBottom: '12px',
+              }}
+            >
+              Solidus
+            </div>
+            <div
+              style={{
+                fontSize: '58px',
+                fontWeight: 800,
                 color: COLORS.white,
                 lineHeight: 1.1,
                 letterSpacing: '-1px',
               }}
             >
-              Deal Terms
+              Life Sciences Deal
             </div>
             <div
               style={{
-                fontSize: '64px',
-                fontWeight: 900,
-                color: COLORS.tealBright,
+                fontSize: '58px',
+                fontWeight: 800,
+                color: COLORS.white,
                 lineHeight: 1.1,
                 letterSpacing: '-1px',
               }}
             >
-              Calculator
+              Intelligence
             </div>
           </div>
 
-          {/* Tagline */}
           <div
             style={{
-              fontSize: '26px',
+              fontSize: '24px',
               color: COLORS.slate,
-              lineHeight: 1.4,
+              lineHeight: 1.5,
               maxWidth: '700px',
             }}
           >
-            rNPV modeling, Monte Carlo simulation & market intelligence for biopharma licensing deals
+            Benchmarks, deal structures, and valuation engines across {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions
           </div>
 
-          {/* Credibility pills */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              marginTop: '8px',
+              gap: '32px',
+              marginTop: '4px',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: `1.5px solid ${COLORS.teal}60`,
-                borderRadius: '100px',
-                padding: '8px 20px',
-              }}
-            >
-              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: COLORS.tealBright }}>
                 {DEAL_STATS.TOTAL_DEALS}
               </div>
-              <div style={{ fontSize: '16px', color: COLORS.slate }}>
-                Deals Analyzed
+              <div style={{ fontSize: '14px', color: COLORS.slateDark, letterSpacing: '0.04em' }}>
+                Verified Deals
               </div>
             </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: `1.5px solid ${COLORS.teal}60`,
-                borderRadius: '100px',
-                padding: '8px 20px',
-              }}
-            >
-              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
+            <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: COLORS.tealBright }}>
+                21
+              </div>
+              <div style={{ fontSize: '14px', color: COLORS.slateDark, letterSpacing: '0.04em' }}>
+                Engines
+              </div>
+            </div>
+            <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: COLORS.tealBright }}>
                 12
               </div>
-              <div style={{ fontSize: '16px', color: COLORS.slate }}>
+              <div style={{ fontSize: '14px', color: COLORS.slateDark, letterSpacing: '0.04em' }}>
                 Therapeutic Areas
               </div>
             </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: `1.5px solid ${COLORS.teal}60`,
-                borderRadius: '100px',
-                padding: '8px 20px',
-              }}
-            >
-              <div style={{ fontSize: '18px', fontWeight: 700, color: COLORS.tealBright }}>
-                850+
+            <div style={{ width: '1px', height: '36px', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: COLORS.tealBright }}>
+                23+
               </div>
-              <div style={{ fontSize: '16px', color: COLORS.slate }}>
-                Company Profiles
+              <div style={{ fontSize: '14px', color: COLORS.slateDark, letterSpacing: '0.04em' }}>
+                Modalities
               </div>
             </div>
           </div>
         </div>
 
-        {/* Domain — bottom right */}
         <div
           style={{
             position: 'absolute',
@@ -364,7 +349,6 @@ export async function GET(request: NextRequest) {
           solidus.ambrosiaventures.co
         </div>
 
-        {/* Accent bar */}
         <AccentBar />
       </div>
     ),
