@@ -118,31 +118,39 @@ export async function GET(request: NextRequest) {
     // 5b. Per-campaign breakdown (re-fetch to include newly attributed)
     const { data: attributedUsers } = await supabase
       .from('user_profiles')
-      .select('tier, attribution_campaign')
+      .select('email, tier, attribution_campaign, created_at')
       .gte('created_at', sevenDaysAgo)
-      .not('attribution_campaign', 'is', null);
+      .not('attribution_campaign', 'is', null)
+      .order('created_at', { ascending: false });
 
-    const campaignBreakdown = new Map<string, Record<string, number>>();
+    type CampaignEntry = { email: string; tier: string; created_at: string };
+    const campaignDetails = new Map<string, CampaignEntry[]>();
     for (const u of attributedUsers || []) {
       const campaign = u.attribution_campaign as string;
-      const tier = u.tier || 'free';
-      if (!campaignBreakdown.has(campaign)) campaignBreakdown.set(campaign, {});
-      const counts = campaignBreakdown.get(campaign)!;
-      counts[tier] = (counts[tier] || 0) + 1;
+      if (!campaignDetails.has(campaign)) campaignDetails.set(campaign, []);
+      campaignDetails.get(campaign)!.push({
+        email: u.email || 'unknown',
+        tier: u.tier || 'free',
+        created_at: u.created_at,
+      });
     }
 
-    const campaignLines: string[] = [];
-    for (const [campaign, tiers] of [...campaignBreakdown.entries()].sort((a, b) => {
-      const totalA = Object.values(a[1]).reduce((s, n) => s + n, 0);
-      const totalB = Object.values(b[1]).reduce((s, n) => s + n, 0);
-      return totalB - totalA;
-    })) {
-      const total = Object.values(tiers).reduce((s, n) => s + n, 0);
-      const parts = Object.entries(tiers)
+    const campaignBlocks: Array<Record<string, unknown>> = [];
+    for (const [campaign, users] of [...campaignDetails.entries()].sort((a, b) => b[1].length - a[1].length)) {
+      const tierCounts: Record<string, number> = {};
+      for (const u of users) tierCounts[u.tier] = (tierCounts[u.tier] || 0) + 1;
+      const summary = Object.entries(tierCounts)
         .sort((a, b) => b[1] - a[1])
         .map(([t, n]) => `${n} ${t}`)
         .join(', ');
-      campaignLines.push(`• *${campaign}*: ${total} signup${total !== 1 ? 's' : ''} (${parts})`);
+
+      const userLines = users
+        .map(u => `  ${u.email} — _${u.tier}_`)
+        .join('\n');
+
+      campaignBlocks.push(
+        { type: 'section', text: { type: 'mrkdwn', text: `*${campaign}* — ${users.length} signup${users.length !== 1 ? 's' : ''} (${summary})\n${userLines}` } },
+      );
     }
 
     // 6. Slack digest
@@ -160,10 +168,11 @@ export async function GET(request: NextRequest) {
         ].join('\n') } },
       ];
 
-      if (campaignLines.length > 0) {
+      if (campaignBlocks.length > 0) {
         blocks.push(
           { type: 'divider' },
-          { type: 'section', text: { type: 'mrkdwn', text: `*Attribution by Campaign (7d):*\n${campaignLines.join('\n')}` } },
+          { type: 'section', text: { type: 'mrkdwn', text: '*Attribution by Campaign (7d):*' } },
+          ...campaignBlocks,
         );
       }
 
