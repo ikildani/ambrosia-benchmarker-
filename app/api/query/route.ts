@@ -302,7 +302,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const anthropic = new Anthropic({ apiKey });
 
     const sqlResponse = await anthropic.messages.create({
-      model: 'claude-opus-4-6-20250610',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildSQLPrompt(question) }],
     });
@@ -361,7 +361,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // 8. Synthesize answer with Claude
     const answerResponse = await anthropic.messages.create({
-      model: 'claude-opus-4-6-20250610',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
       messages: [{ role: 'user', content: buildAnswerPrompt(question, queryData, parsedSQL.query_type) }],
     });
