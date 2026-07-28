@@ -115,25 +115,46 @@ QUERY RULES:
 - For company matching: try both licensor_name and licensee_name when the question says "company" without specifying buyer/seller
 - NULL-safe: use COALESCE or filter WHERE column IS NOT NULL for financial aggregations
 
-ACTUAL MODALITY VALUES IN DATABASE (use these exact strings — NOT natural language):
-  'smallMolecule', 'small_molecule' — small molecule drugs (search BOTH: modality IN ('smallMolecule','small_molecule'))
-  'antibody', 'mab' — monoclonal antibodies (search BOTH)
-  'gene_therapy', 'geneTherapy' — gene therapy (search BOTH)
-  'bispecific' — bispecific antibodies
-  'adc' — antibody-drug conjugates (also 'adc_her2', 'adc_trop2' for subtypes)
-  'oligonucleotide' — ASO/oligonucleotide
-  'mrna' — mRNA therapeutics
-  'peptide' — peptide drugs
-  'cell_therapy' — cell therapy (non-CAR-T)
-  'car_t' — CAR-T cell therapy
-  'rnai' — RNAi/siRNA
-  'protac' — targeted protein degraders
-  'radiopharmaceutical', 'radiopharm' — radiopharmaceuticals (search BOTH)
-  'vaccine', 'vaccinePreventive' — vaccines (search BOTH)
-  IMPORTANT: Always use IN (...) with both variants when a modality has two forms. NEVER search with spaces like 'gene therapy' — that will return 0 results.
+CRITICAL — EXACT DATABASE ENUM VALUES (never use natural language variants — always use these exact strings):
 
-ACTUAL THERAPEUTIC AREA VALUES (use these exact strings):
-  'oncology', 'neurology', 'immunology', 'metabolic', 'cardiovascular', 'infectiousDisease', 'ophthalmology', 'womensHealth', 'rareDisease', 'hematology', 'dermatology', 'gastroenterology'
+MODALITY VALUES (many have dual forms — ALWAYS use IN (...) with ALL variants):
+  Small molecule → modality IN ('smallMolecule', 'small_molecule')
+  Antibody/mAb → modality IN ('antibody', 'mab')
+  Gene therapy → modality IN ('gene_therapy', 'geneTherapy', 'geneTherapyOcular')
+  Bispecific → modality = 'bispecific'
+  ADC → modality IN ('adc', 'adc_her2', 'adc_trop2')
+  Oligonucleotide/ASO → modality = 'oligonucleotide'
+  mRNA → modality = 'mrna'
+  Peptide → modality = 'peptide'
+  Cell therapy → modality = 'cell_therapy'
+  CAR-T → modality = 'car_t'
+  RNAi/siRNA → modality = 'rnai'
+  PROTAC/degrader → modality = 'protac'
+  Radiopharmaceutical → modality IN ('radiopharmaceutical', 'radiopharm')
+  Vaccine → modality IN ('vaccine', 'vaccinePreventive')
+  NEVER use spaces: 'gene therapy' → 0 results. Must be 'gene_therapy' or 'geneTherapy'.
+  For broad questions ("what modalities"), don't filter by modality — group by it instead.
+
+THERAPEUTIC AREA VALUES:
+  'oncology' (428 deals), 'infectiousDisease' (145), 'neurology' (129), 'rareDisease' (123),
+  'immunology' (115), 'cardiovascular' (76), 'metabolic' (74), 'womensHealth' (66),
+  'ophthalmology' (64), 'gastroenterology' (62), 'dermatology' (55), 'hematology' (54)
+  Special collections: '_mega_deals' (64), '_codev_deals' (60), '_option_deals' (42)
+  NEVER use spaces: 'infectious disease' → 0 results. Must be 'infectiousDisease'.
+
+PHASE VALUES: 'discovery', 'preclinical', 'phase_1', 'phase_2', 'phase_3', 'approved', 'unknown'
+  NEVER use 'Phase 1' or 'Phase 2' — must be 'phase_1', 'phase_2' etc.
+  401 deals have phase = 'unknown'. Exclude these from phase-based analysis unless counting total deals.
+
+DEAL TYPE VALUES: 'license' (522), 'acquisition' (433), 'collaboration' (323), 'option' (171), 'co_development' (150)
+
+TOP TARGETS: 'TIM-3', 'PD-1', 'LAG-3', 'Nectin-4', 'PD-L1', 'B7-H3', 'Claudin 6', 'CD19', 'CD38', 'CLDN18.2', 'PSMA', 'CD47', 'CTLA-4', 'HER2', 'EGFR', 'GLP-1R'
+
+FUZZY MATCHING STRATEGY:
+  When searching company names, modalities, indications, or targets — ALWAYS use ILIKE with % wildcards.
+  When searching modalities, prefer the IN (...) approach with exact enum values over ILIKE.
+  For questions about "pharma" or "big pharma" as buyers, search licensee_name.
+  For questions about "biotech" as sellers, search licensor_name.
 
 SMART PATTERNS:
 - "How does X compare to Y?" → Use CASE WHEN or two CTEs side by side
