@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { blogPosts, getBlogPost, getAllBlogSlugs, type BlogPost } from '@/lib/blogPosts';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -220,7 +220,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = await resolvePost(slug);
 
-  if (!post) notFound();
+  if (!post) redirect('/blog');
 
   const htmlContent = addHeadingIds(markdownToHtml(post.content));
   const toc = extractTOC(htmlContent);

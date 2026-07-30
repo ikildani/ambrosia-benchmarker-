@@ -30,6 +30,11 @@ const nextConfig = {
         destination: '/?utm_source=abd_capital_connect&utm_medium=webinar&utm_campaign=market_terms_june2026',
         permanent: false,
       },
+      {
+        source: '/playbook/n-a-standalone',
+        destination: '/playbook',
+        permanent: true,
+      },
     ];
   },
   // Security headers configuration
