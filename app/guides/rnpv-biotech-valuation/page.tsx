@@ -4,9 +4,12 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation: Complete Guide | Ambrosia Ventures',
-  description: 'Master rNPV biotech valuation with this complete guide. Covers phase transition probabilities, cash flow modeling, Monte Carlo enhancement, and interpreting results for licensing and investment decisions.',
+  title: 'How to Calculate rNPV for Biotech: Risk-Adjusted NPV Guide With PoS Rates by TA | Ambrosia Ventures',
+  description: `Phase 1 oncology PoS: ~8%. Rare disease: ~15%. Learn rNPV calculation step by step with PoS rates across 12 TAs, calibrated against ${DEAL_STATS.TOTAL_DEALS} real deals. Free rNPV calculator included.`,
   keywords: [
+    'rNPV calculation',
+    'risk-adjusted NPV pharma',
+    'biotech rNPV',
     'rNPV biotech valuation',
     'risk-adjusted NPV',
     'biotech valuation model',
@@ -18,18 +21,20 @@ export const metadata: Metadata = {
     'risk adjusted NPV pharma',
     'biotech drug valuation model',
     'probability of success pharma',
+    'rNPV formula biotech',
+    'biotech rNPV calculator',
   ],
   openGraph: {
-    title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation: Complete Guide',
-    description: 'Master the industry-standard rNPV methodology for valuing biotech assets and licensing deals.',
+    title: 'How to Calculate rNPV for Biotech: Risk-Adjusted NPV Guide With PoS Rates by TA',
+    description: `Phase 1 oncology PoS: ~8%. Rare disease: ~15%. Step-by-step rNPV calculation with PoS rates across 12 TAs from ${DEAL_STATS.TOTAL_DEALS} real deals.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/rnpv-biotech-valuation',
     images: [{ url: '/api/og?title=rNPV%20Biotech%20Valuation&subtitle=Complete%20Guide&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Risk-Adjusted NPV (rNPV) for Biotech Valuation: Complete Guide',
-    description: 'Master the industry-standard rNPV methodology for valuing biotech assets.',
+    title: 'How to Calculate rNPV for Biotech: Risk-Adjusted NPV Guide With PoS Rates by TA',
+    description: `Phase 1 oncology PoS: ~8%. Rare disease: ~15%. Step-by-step rNPV calculation from ${DEAL_STATS.TOTAL_DEALS} real deals.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/rnpv-biotech-valuation',

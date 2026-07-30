@@ -24,11 +24,20 @@ export const metadata: Metadata = {
 
 const COMPARISONS = [
   {
+    slug: 'dealforma',
+    name: 'DealForma',
+    tagline: 'Deal comps database vs integrated deal intelligence',
+    description:
+      'DealForma is a well-established licensing deal comps database used across BD. Solidus integrates deal benchmarks with 21 analytical engines — rNPV, Monte Carlo, AI deal memos, and partner matching — so you go from data to decision in one platform.',
+    strengths: ['Established deal comps', 'Licensing deal data'],
+    ambrosiaEdge: ['21 analytical engines', 'AI deal memos', 'Partner matching'],
+  },
+  {
     slug: 'evaluate-pharma',
     name: 'EvaluatePharma',
     tagline: 'Consensus forecasts vs deal-specific benchmarking',
     description:
-      'EvaluatePharma excels at consensus revenue forecasts and pipeline analytics. Ambrosia focuses on deal-specific mechanics — upfronts, milestones, royalties, and real-time comparable deal intelligence.',
+      'EvaluatePharma excels at consensus revenue forecasts and pipeline analytics. Solidus focuses on deal-specific mechanics — upfronts, milestones, royalties, and real-time comparable deal intelligence.',
     strengths: ['Consensus revenue forecasts', 'Pipeline coverage'],
     ambrosiaEdge: ['Deal-specific benchmarking', 'Monte Carlo simulation', 'Partner matching'],
   },
@@ -37,17 +46,17 @@ const COMPARISONS = [
     name: 'S&P Capital IQ',
     tagline: 'Broad financial data vs deal-specific depth',
     description:
-      'Capital IQ covers M&A, equity, and credit data across all industries. Ambrosia goes deep on biopharma licensing deal terms — the economics that drive BD decisions.',
+      'Capital IQ covers M&A, equity, and credit data across all industries. Solidus goes deep on biopharma licensing deal terms — the economics that drive BD decisions.',
     strengths: ['Broad financial data', 'M&A screening'],
     ambrosiaEdge: ['Pharma-specific engines', 'Licensing deal terms', 'rNPV & real options'],
   },
   {
     slug: 'cortellis',
     name: 'Clarivate Cortellis',
-    tagline: 'Pipeline intelligence vs deal economics',
+    tagline: 'Enterprise data platform vs deal modeling workbench',
     description:
-      'Cortellis provides deep pipeline and regulatory intelligence. Ambrosia delivers the deal economics layer — benchmarking, valuation, and competitive dynamics that Cortellis does not cover.',
-    strengths: ['Pipeline/regulatory data', 'Patent intelligence'],
+      'Cortellis provides deep pipeline, regulatory, and patent intelligence with 15,500+ deal records. Solidus delivers the deal economics and modeling layer — 21 engines for valuation, competitive dynamics, and partner matching.',
+    strengths: ['Pipeline/regulatory data', 'Patent intelligence', '15,500+ deal records'],
     ambrosiaEdge: ['Deal valuation engines', 'Competitive dynamics', 'Transparent pricing'],
   },
 ];

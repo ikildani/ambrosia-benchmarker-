@@ -4,31 +4,33 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Solidus: Benchmark Upfronts, Milestones & Royalties | Ambrosia Ventures',
-  description: 'Free life sciences deal calculator benchmarking tool. Model upfronts, milestones, royalties, rNPV, and Monte Carlo analysis across 12 therapeutic areas and 23+ modalities.',
+  title: `Biotech Deal Calculator: 14 Engines, ${DEAL_STATS.TOTAL_DEALS} Deals, Instant Benchmarks | Ambrosia Ventures`,
+  description: `Replace weeks of spreadsheet modeling with 14 specialized engines. Benchmark upfronts, milestones, royalties, rNPV, and Monte Carlo against ${DEAL_STATS.TOTAL_DEALS} real biopharma deals in under 2 minutes.`,
   keywords: [
-    'life sciences deal calculator',
     'biotech deal calculator',
+    'pharma deal valuation tool',
+    'life sciences deal calculator',
     'pharma deal calculator',
     'drug licensing calculator',
     'biopharma deal benchmarking tool',
-    'pharma deal valuation tool',
     'biotech licensing calculator',
     'drug deal benchmark calculator',
     'life sciences deal modeling',
     'pharma transaction calculator',
+    'biotech deal valuation tool',
+    'pharma deal benchmark tool',
   ],
   openGraph: {
-    title: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
-    description: 'Model upfronts, milestones, royalties, rNPV, and Monte Carlo analysis across 12 therapeutic areas and 23+ modalities.',
+    title: `Biotech Deal Calculator: 14 Engines, ${DEAL_STATS.TOTAL_DEALS} Deals, Instant Benchmarks`,
+    description: `Replace weeks of spreadsheet modeling. Benchmark upfronts, milestones, royalties, rNPV, and Monte Carlo against ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/life-sciences-deal-calculator-guide',
     images: [{ url: '/api/og?title=Life%20Sciences%20Deal%20Calculator&subtitle=Benchmark%20Tool%20Guide&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
-    description: 'Model deal terms, rNPV, and Monte Carlo analysis across 12 therapeutic areas.',
+    title: `Biotech Deal Calculator: 14 Engines, ${DEAL_STATS.TOTAL_DEALS} Deals, Instant Benchmarks`,
+    description: `Replace weeks of spreadsheet modeling. Benchmark against ${DEAL_STATS.TOTAL_DEALS} real biopharma deals in under 2 minutes.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/life-sciences-deal-calculator-guide',

@@ -4,32 +4,34 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biotech Licensing Deal Structure: Upfront, Milestones & Royalties Explained | Ambrosia Ventures',
-  description: 'Complete guide to biotech licensing deal structure including upfront payments, development and commercial milestones, royalty structures, and strategies for maximizing deal value.',
+  title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked | Ambrosia Ventures',
+  description: `Option/license deals now account for 35% of new transactions, up from 5% in 2023. See how upfronts, milestones, and royalties are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
   keywords: [
     'biotech licensing deal structure',
+    'biotech licensing deal structure 2026',
     'pharma deal structure',
     'upfront payment licensing',
     'milestone payment pharma',
     'licensing deal components',
     'biopharma deal terms',
     'drug licensing agreement structure',
-    'biotech licensing deal terms 2026',
     'biotech out-licensing deal terms',
     'pharma licensing deal structure',
     'biopharma deal terms benchmark',
+    'option license deal biotech',
+    'pharma deal terms 2026',
   ],
   openGraph: {
-    title: 'Biotech Licensing Deal Structure: Upfront, Milestones & Royalties Explained',
-    description: 'Complete guide to structuring biopharma licensing deals with real benchmarks on upfronts, milestones, and royalties.',
+    title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked',
+    description: `Option/license deals now account for 35% of new transactions. See how deal economics are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
     images: [{ url: '/api/og?title=Biotech%20Licensing%20Deal%20Structure&subtitle=Upfront%2C%20Milestones%20%26%20Royalties&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Biotech Licensing Deal Structure: Upfront, Milestones & Royalties',
-    description: 'Complete guide to structuring biopharma licensing deals with real benchmarks.',
+    title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked',
+    description: `Option/license deals now account for 35% of new transactions. See how deal economics are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/biotech-licensing-deal-structure',

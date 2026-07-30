@@ -4,10 +4,12 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'How to Negotiate Pharma Licensing Royalty Rates | Ambrosia Ventures',
-  description: 'Learn how to negotiate pharma royalty rates with data-backed benchmarks. Covers tiered royalties, territory adjustments, comparable deal analysis, and common pitfalls in biopharma licensing.',
+  title: 'Pharma Royalty Rates by Phase & Modality: 2026 Benchmarks and Negotiation Guide | Ambrosia Ventures',
+  description: `Preclinical: 3% median. Phase 2: 7%. Approved: 16%. See biopharma royalty benchmarks by phase and modality from ${DEAL_STATS.TOTAL_DEALS} real deals, plus negotiation strategies that work.`,
   keywords: [
     'pharma royalty rates',
+    'biopharma royalty rates',
+    'biotech royalty benchmarks',
     'negotiate royalty rate',
     'pharma licensing royalty',
     'tiered royalties biopharma',
@@ -18,18 +20,20 @@ export const metadata: Metadata = {
     'biotech licensing royalty rates',
     'pharma royalty rate by phase',
     'biopharma royalty benchmarks 2026',
+    'pharma royalty rates 2026',
+    'biotech royalty rate by modality',
   ],
   openGraph: {
-    title: 'How to Negotiate Pharma Licensing Royalty Rates',
-    description: `Data-backed strategies for negotiating royalty rates in biopharma licensing deals, with benchmarks from ${DEAL_STATS.TOTAL_DEALS} transactions.`,
+    title: 'Pharma Royalty Rates by Phase & Modality: 2026 Benchmarks and Negotiation Guide',
+    description: `Preclinical: 3% median. Phase 2: 7%. Approved: 16%. Biopharma royalty benchmarks from ${DEAL_STATS.TOTAL_DEALS} real deals.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',
     images: [{ url: '/api/og?title=Negotiate%20Pharma%20Royalty%20Rates&subtitle=A%20Data-Backed%20Guide&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'How to Negotiate Pharma Licensing Royalty Rates',
-    description: 'Data-backed strategies for negotiating royalty rates in biopharma licensing deals.',
+    title: 'Pharma Royalty Rates by Phase & Modality: 2026 Benchmarks and Negotiation Guide',
+    description: `Preclinical: 3% median. Phase 2: 7%. Approved: 16%. Biopharma royalty benchmarks from ${DEAL_STATS.TOTAL_DEALS} real deals.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/negotiate-pharma-royalty-rates',

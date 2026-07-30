@@ -3,28 +3,33 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'How to Value a Biotech Deal: A Complete Guide | Ambrosia Ventures',
-  description: 'Learn how to value biopharma licensing deals using comparable transactions, rNPV analysis, and Monte Carlo simulation. Step-by-step guide with real benchmarks.',
+  title: 'How to Value a Biotech Deal: 5-Step Framework With rNPV, Comps & Monte Carlo | Ambrosia Ventures',
+  description: 'Phase 2 oncology deals command $50M median upfronts. Learn the 5-step biotech valuation framework used by top BD teams: comps, value drivers, rNPV, Monte Carlo, and deal structure benchmarking.',
   keywords: [
-    'how to value a biotech deal',
+    'biotech valuation',
+    'how to value a biotech company',
     'biotech deal valuation',
+    'how to value a biotech deal',
     'biopharma licensing valuation',
     'rNPV analysis biotech',
     'monte carlo simulation drug deals',
     'comparable transactions pharma',
     'biotech deal benchmarks',
+    'biotech deal valuation method',
+    'pharma deal valuation framework',
+    'biopharma deal pricing',
   ],
   openGraph: {
-    title: 'How to Value a Biotech Deal: A Complete Guide',
-    description: 'Learn how to value biopharma licensing deals using comparable transactions, rNPV analysis, and Monte Carlo simulation.',
+    title: 'How to Value a Biotech Deal: 5-Step Framework With rNPV, Comps & Monte Carlo',
+    description: 'The 5-step biotech valuation framework used by top BD teams: comps, value drivers, rNPV, Monte Carlo, and deal structure benchmarking.',
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/how-to-value-biotech-deal',
     images: [{ url: '/api/og?title=How%20to%20Value%20a%20Biotech%20Deal&subtitle=A%20Complete%20Guide%20for%20BD%20Professionals&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'How to Value a Biotech Deal: A Complete Guide',
-    description: 'Step-by-step guide to valuing biopharma licensing deals with real benchmarks.',
+    title: 'How to Value a Biotech Deal: 5-Step Framework With rNPV, Comps & Monte Carlo',
+    description: 'The 5-step biotech valuation framework used by top BD teams, with real deal benchmarks.',
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/how-to-value-biotech-deal',

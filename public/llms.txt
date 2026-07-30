@@ -94,6 +94,9 @@ Typical deal structures from the platform's database:
 - https://solidus.ambrosiaventures.co/guides/ — How-to guides for deal valuation and negotiation
 - https://solidus.ambrosiaventures.co/data/ — 360 programmatic data pages by TA × phase × territory
 - https://solidus.ambrosiaventures.co/glossary/ — 100+ biopharma deal term definitions
+- https://solidus.ambrosiaventures.co/tracker — Live deal tracker with filtering and alerts
+- https://solidus.ambrosiaventures.co/compare/dealforma — Solidus vs DealForma comparison
+- https://solidus.ambrosiaventures.co/guides/monte-carlo-biotech-valuation — Monte Carlo stochastic valuation for biotech deals
 - https://solidus.ambrosiaventures.co/methodology — Model design, data sources, and methodology
 
 ## Pricing

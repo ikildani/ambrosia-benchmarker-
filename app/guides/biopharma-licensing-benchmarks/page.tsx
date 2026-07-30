@@ -4,12 +4,12 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals | Ambrosia Ventures`,
-  description: `Comprehensive biopharma licensing benchmarks for 2026 including upfront payments, milestones, royalties by phase, modality, and therapeutic area. Based on ${DEAL_STATS.TOTAL_DEALS} disclosed transactions.`,
+  title: `Pharma Licensing Benchmarks 2026: Upfronts, Royalties & Milestones From ${DEAL_STATS.TOTAL_DEALS} Deals | Ambrosia Ventures`,
+  description: `Median Phase 2 upfront: $50M. Phase 3: $150M. See 2026 biopharma deal benchmarks by phase, modality, and TA from ${DEAL_STATS.TOTAL_DEALS} disclosed transactions. Free calculator included.`,
   keywords: [
-    'biopharma licensing benchmarks',
-    'pharma deal benchmarks',
-    'licensing deal benchmarks 2026',
+    'pharma licensing benchmarks',
+    'biopharma deal benchmarks',
+    'pharma licensing benchmarks 2026',
     'biotech deal terms data',
     'pharma licensing upfront benchmarks',
     'biopharma deal terms',
@@ -17,18 +17,21 @@ export const metadata: Metadata = {
     'biotech milestone benchmarks',
     'drug licensing deal data',
     'pharma deal comparables',
+    'biopharma licensing benchmarks',
+    'pharma deal benchmarks 2026',
+    'biotech deal benchmarks',
   ],
   openGraph: {
-    title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
-    description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, and royalties by phase, modality, and therapeutic area.',
+    title: `Pharma Licensing Benchmarks 2026: Upfronts, Royalties & Milestones From ${DEAL_STATS.TOTAL_DEALS} Deals`,
+    description: `Median Phase 2 upfront: $50M. Phase 3: $150M. See 2026 biopharma deal benchmarks by phase, modality, and TA from ${DEAL_STATS.TOTAL_DEALS} disclosed transactions.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',
     images: [{ url: '/api/og?title=Biopharma%20Licensing%20Benchmarks%202026&subtitle=Data%20From%202%2C500%2B%20Deals&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Biopharma Licensing Benchmarks 2026: Data From ${DEAL_STATS.TOTAL_DEALS} Deals`,
-    description: 'Comprehensive biopharma licensing benchmarks including upfront payments, milestones, and royalties.',
+    title: `Pharma Licensing Benchmarks 2026: Upfronts, Royalties & Milestones From ${DEAL_STATS.TOTAL_DEALS} Deals`,
+    description: `Median Phase 2 upfront: $50M. Phase 3: $150M. See 2026 biopharma deal benchmarks from ${DEAL_STATS.TOTAL_DEALS} disclosed transactions.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/biopharma-licensing-benchmarks',

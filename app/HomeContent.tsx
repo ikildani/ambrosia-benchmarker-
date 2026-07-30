@@ -886,6 +886,7 @@ export default function HomeContent() {
               { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: '21 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
               { href: '/guides/biotech-licensing-deal-structure', title: 'Deal Structure Guide', desc: 'Upfront, milestone, and royalty allocation by deal type and stage', tag: 'Strategy' },
               { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
+              { href: '/guides/monte-carlo-biotech-valuation', title: 'Monte Carlo Biotech Valuation', desc: '10,000-iteration stochastic modeling with correlated variables and phase-dependent risk', tag: 'Methodology' },
             ].map(guide => (
               <Link
                 key={guide.href}
@@ -964,6 +965,7 @@ export default function HomeContent() {
                 { label: 'Guides', href: '/guides', external: false },
                 { label: 'Glossary', href: '/glossary', external: false },
                 { label: 'Therapeutic Areas', href: '/therapeutic-areas', external: false },
+                { label: 'Deal Tracker', href: '/tracker', external: false },
                 { label: 'Reports', href: '/reports', external: false },
                 { label: 'Terms', href: '/terms', external: false },
                 { label: 'Privacy', href: '/privacy', external: false },

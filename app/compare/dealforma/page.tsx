@@ -3,56 +3,58 @@ import Link from 'next/link';
 import { DEAL_STATS, PRICING } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Solidus vs Cortellis Deals Intelligence — Platform Comparison | 2026',
+  title: 'Solidus vs DealForma — Biopharma Deal Intelligence Comparison | 2026',
   description:
-    'Compare Solidus to Clarivate Cortellis Deals Intelligence for biopharma deal analysis. See how analytical depth, pricing, workflow, and deal coverage compare.',
+    'Compare Solidus to DealForma for biopharma deal benchmarking. See how deal coverage, analytical engines, pricing, and workflow compare for BD teams.',
   keywords: [
-    'Cortellis alternative',
-    'Cortellis Deals Intelligence alternative',
-    'Clarivate deals alternative',
-    'Cortellis competitor',
-    'biopharma deal intelligence platform',
-    'pharma deal database comparison',
+    'DealForma alternative',
+    'DealForma vs',
+    'biopharma deal database comparison',
+    'DealForma competitor',
+    'biopharma deal intelligence',
+    'licensing deal comps',
+    'deal benchmarking platform',
   ],
   alternates: {
-    canonical: 'https://solidus.ambrosiaventures.co/compare/cortellis',
+    canonical: 'https://solidus.ambrosiaventures.co/compare/dealforma',
   },
   openGraph: {
-    title: 'Solidus vs Cortellis Deals Intelligence — Platform Comparison | 2026',
+    title: 'Solidus vs DealForma — Biopharma Deal Intelligence Comparison | 2026',
     description:
-      'Compare Solidus to Clarivate Cortellis for biopharma deal intelligence. Purpose-built modeling vs enterprise data platform.',
+      'Compare Solidus to DealForma for biopharma deal benchmarking. Integrated rNPV modeling, 21 analytical engines, and real-time benchmarking vs established deal comps.',
     type: 'article',
-    url: 'https://solidus.ambrosiaventures.co/compare/cortellis',
+    url: 'https://solidus.ambrosiaventures.co/compare/dealforma',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Solidus vs Cortellis | Biopharma Deal Intelligence',
+    title: 'Solidus vs DealForma | Biopharma Deal Intelligence',
     description:
-      'Biopharma deal intelligence for modern teams. How Solidus and Cortellis compare.',
+      'Which biopharma deal platform fits your workflow? Feature-by-feature comparison.',
   },
 };
 
 const FAQ_ITEMS = [
   {
-    question: 'What is the main difference between Solidus and Cortellis Deals Intelligence?',
+    question: 'Is Solidus a good alternative to DealForma for biopharma deal comps?',
     answer:
-      'Cortellis Deals Intelligence is part of the Clarivate ecosystem and provides a massive database of 15,500+ deal records with contract-level access, regulatory data, and patent analytics. Solidus is purpose-built for deal teams who need to move from data to decision — integrating deal benchmarks with 21 analytical engines including rNPV modeling, Monte Carlo simulation, AI deal memos, and partner matching. Cortellis covers breadth; Solidus covers analytical depth.',
+      'Yes. DealForma is well-established for licensing deal comparables, particularly upfront and milestone data. Solidus goes further by integrating deal comps with 21 analytical engines — rNPV modeling, Monte Carlo simulation, competitive dynamics, partner matching, and AI-generated deal memos — so you move from data to decision in one workflow. If your team needs more than a reference database, Solidus is built for that.',
   },
   {
-    question: 'Is Solidus a cheaper alternative to Cortellis?',
+    question: 'How does Solidus pricing compare to DealForma?',
     answer:
-      'Substantially. Solidus Pro starts at $199/month (annual) or $299/month with no contract required, and includes a free tier for core benchmarking. Cortellis enterprise licenses typically run $100,000-$150,000+ per year depending on modules, with multi-year commitments and per-seat pricing. For teams that need deal modeling capabilities rather than enterprise-wide data access, Solidus delivers more analytical depth at a fraction of the cost.',
+      'DealForma subscriptions typically run $15,000-$30,000+ per year depending on modules and seat count, with annual contracts. Solidus Pro starts at $199/month (annual) or $299/month with no contract required. Both platforms offer tiered access, but Solidus provides transparent self-serve pricing with a free tier that includes core benchmarking across 12 therapeutic areas.',
   },
   {
-    question: 'Can Solidus and Cortellis be used together?',
+    question: 'Can I use Solidus and DealForma together?',
     answer:
-      'Yes, and many sophisticated pharma BD teams do exactly this. Cortellis provides the upstream pipeline intelligence, regulatory context, and patent landscape data. Solidus provides the downstream deal economics — valuation models, competitive dynamics, partner matching, and negotiation analytics. Together they cover the full deal evaluation workflow from target identification through term sheet negotiation.',
+      'Absolutely. Some BD teams use DealForma as a reference database for historical deal comps and Solidus for active deal modeling — running rNPV scenarios, Monte Carlo simulations, and partner matching against their specific asset parameters. The platforms are complementary: DealForma for looking up precedent, Solidus for building the analytical case around a live transaction.',
   },
 ];
 
 const FEATURES = [
-  { feature: 'Deal Terms Database', solidus: true, competitor: true },
+  { feature: 'Licensing Deal Comps Database', solidus: true, competitor: true },
+  { feature: 'Upfront/Milestone Benchmarking', solidus: true, competitor: true },
   { feature: 'rNPV Valuation Engine', solidus: true, competitor: false },
   { feature: 'Monte Carlo Simulation (10K iterations)', solidus: true, competitor: false },
   { feature: 'AI Deal Memos & Narratives', solidus: true, competitor: false },
@@ -61,16 +63,12 @@ const FEATURES = [
   { feature: 'Real Options Valuation', solidus: true, competitor: false },
   { feature: 'Pharma Intent Scoring', solidus: true, competitor: false },
   { feature: 'Deal Waterfall Analysis', solidus: true, competitor: false },
-  { feature: 'Real-time Deal Benchmarking', solidus: true, competitor: false },
-  { feature: 'Pipeline Intelligence (global)', solidus: false, competitor: true },
-  { feature: 'Regulatory & Clinical Trial Data', solidus: false, competitor: true },
-  { feature: 'Patent Analytics', solidus: false, competitor: true },
-  { feature: 'Contract-Level Document Access', solidus: false, competitor: true },
+  { feature: 'Royalty Rate Benchmarking', solidus: true, competitor: true },
+  { feature: 'Therapeutic Area Filtering', solidus: true, competitor: true },
   { feature: 'PDF/Excel Export', solidus: true, competitor: true },
-  { feature: 'Self-Serve Signup (No Sales Call)', solidus: true, competitor: false },
   { feature: 'Free Tier Available', solidus: true, competitor: false },
+  { feature: 'Self-Serve Signup (No Sales Call)', solidus: true, competitor: false },
   { feature: 'API Access', solidus: true, competitor: true },
-  { feature: 'Pricing Transparency', solidus: true, competitor: false },
 ];
 
 function Check() {
@@ -89,7 +87,7 @@ function Cross() {
   );
 }
 
-export default function CortellisComparePage() {
+export default function DealFormaComparePage() {
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -119,7 +117,7 @@ export default function CortellisComparePage() {
       {
         '@type': 'ListItem',
         position: 3,
-        name: 'vs Cortellis',
+        name: 'vs DealForma',
       },
     ],
   };
@@ -150,32 +148,31 @@ export default function CortellisComparePage() {
           Platform Comparison
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-          Solidus vs Cortellis: Biopharma Deal Intelligence for Modern Teams
+          Solidus vs DealForma: Which Biopharma Deal Platform Fits Your Workflow?
         </h1>
         <p className="text-lg text-slate-400 max-w-3xl">
-          Clarivate Cortellis is an enterprise standard for pipeline and regulatory intelligence
-          with 15,500+ deal records. Solidus delivers the deal economics and modeling layer
-          that modern BD teams need — {DEAL_STATS.TOTAL_DEALS} verified transactions, 21
-          analytical engines, and pricing starting at {PRICING.PRO_ANNUAL_MONTHLY}.
+          DealForma has been a go-to for biopharma licensing comps since 2013. Solidus takes the
+          deal intelligence layer further with {DEAL_STATS.TOTAL_DEALS} verified transactions, 21
+          integrated analytical engines, and real-time benchmarking starting at{' '}
+          {PRICING.PRO_ANNUAL_MONTHLY}.
         </p>
       </section>
 
       {/* Overview */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Enterprise Data Platform vs Purpose-Built Deal Workbench</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Two Different Approaches to Deal Intelligence</h2>
           <p className="text-sm text-slate-400 leading-relaxed mb-4">
-            Cortellis Deals Intelligence sits within the broader Clarivate ecosystem — connecting deal
-            data to pipeline intelligence, regulatory filings, clinical trial databases, and patent
-            analytics. It is built for organizations that need enterprise-wide data access across
-            research, regulatory, and commercial functions.
+            DealForma built its reputation as a curated licensing deal database. It excels at
+            providing searchable deal comps with clean upfront, milestone, and royalty data points
+            that BD professionals have relied on for term sheet benchmarking.
           </p>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Solidus is built specifically for deal teams. Rather than covering the full R&D
-            intelligence landscape, it goes deep on the deal economics workflow: benchmarking
-            deal terms, modeling valuations, matching partners, scoring buyer intent, and
-            generating the analytical narratives that drive board presentations and partner
-            negotiations. Different problems. Different tools.
+            Solidus was built by practitioners who needed more than a reference database. It
+            integrates deal comps with valuation engines, partner matching, competitive dynamics
+            modeling, and AI-powered analysis — so your team goes from &ldquo;what did comparable
+            deals pay?&rdquo; to &ldquo;what should this deal be worth, and who should we talk
+            to?&rdquo; in one platform.
           </p>
         </div>
       </section>
@@ -189,7 +186,7 @@ export default function CortellisComparePage() {
               <tr className="border-b border-white/[0.06]">
                 <th className="text-left py-4 px-5 text-slate-400 font-medium">Feature</th>
                 <th className="text-center py-4 px-5 text-teal-400 font-semibold">Solidus</th>
-                <th className="text-center py-4 px-5 text-slate-400 font-medium">Cortellis</th>
+                <th className="text-center py-4 px-5 text-slate-400 font-medium">DealForma</th>
               </tr>
             </thead>
             <tbody>
@@ -214,23 +211,23 @@ export default function CortellisComparePage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {[
             {
-              title: 'Deal Economics, Not Pipeline Data',
+              title: 'From Comps to Conclusions',
               description:
-                'Cortellis maps pipelines, regulatory milestones, and patent landscapes. Solidus analyzes the deal terms themselves — what comparable transactions paid in upfronts, how milestone structures break down by type, what royalty rates look like by therapeutic area and phase, and how competitive dynamics affect deal leverage.',
+                'DealForma gives you the data points. Solidus gives you the analysis. Run rNPV models, Monte Carlo simulations, and scenario comparisons directly on top of deal benchmarks — no spreadsheet gymnastics required.',
             },
             {
               title: '21 Integrated Analytical Engines',
               description:
-                'Run rNPV, Monte Carlo simulation, real options, tornado sensitivity, deal waterfall, competitive dynamics, partner matching, and AI deal memo generation on demand. Cortellis provides deal summaries and search — Solidus provides the analytical workbench.',
+                'Deal waterfall, tornado sensitivity, competitive dynamics, real options valuation, partner matching, Pharma Intent Scoring, AI deal memos — all connected to the same deal dataset. DealForma provides the database; Solidus provides the analytical layer.',
             },
             {
-              title: 'Faster Time to Decision',
+              title: 'Built by Deal Practitioners',
               description:
-                'Cortellis is designed for comprehensive research workflows across large organizations. Solidus is designed for the BD professional who needs to benchmark a deal, model scenarios, and build a recommendation deck in hours, not weeks. Self-serve access, no IT provisioning.',
+                'Solidus was built by an M&A advisory team that structures real transactions. The engines reflect how BD professionals actually work — not how a data vendor thinks they should. Every feature maps to a real workflow in deal evaluation.',
             },
             {
-              title: 'A Fraction of the Cost',
-              description: `Solidus Pro starts at ${PRICING.PRO_ANNUAL_MONTHLY} (annual) with no contract. Cortellis enterprise licenses typically run $100K-$150K+ per year with per-module pricing, multi-year commitments, and per-seat costs. For smaller biotech teams and emerging pharma, Solidus delivers institutional-grade analysis without the enterprise price tag.`,
+              title: 'Accessible Pricing, No Procurement',
+              description: `Start free, upgrade to Pro at ${PRICING.PRO_ANNUAL_MONTHLY} (annual) with no contract. DealForma requires annual subscriptions typically starting at $15K-$30K+. Solidus makes institutional-grade deal intelligence accessible to emerging biotech teams, not just large pharma.`,
             },
           ].map(({ title, description }) => (
             <div
@@ -253,52 +250,48 @@ export default function CortellisComparePage() {
             <ul className="space-y-3 text-sm text-slate-300">
               <li className="flex items-start gap-2">
                 <span className="text-teal-400 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Model deal valuations with rNPV, Monte Carlo, and scenario analysis
+                Model deal economics with rNPV, Monte Carlo, and scenario analysis
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-teal-400 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Generate AI deal memos and negotiation playbooks for board presentations
+                Generate AI-powered deal memos and negotiation playbooks
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-teal-400 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Match assets to potential acquirers and partners with intent scoring
+                Match assets to potential partners with intent scoring
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-teal-400 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Move from benchmarking to recommendation in one platform
+                Track competitive dynamics across therapeutic areas in real time
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-teal-400 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Get institutional-grade deal analytics without enterprise procurement
+                Get started quickly without a procurement cycle or six-figure budget
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-teal-400 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Serve a smaller team that needs depth over breadth
+                Work across the full deal lifecycle, not just the comp search
               </li>
             </ul>
           </div>
           <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-            <h3 className="text-lg font-semibold text-slate-300 mb-4">Choose Cortellis if you need to:</h3>
+            <h3 className="text-lg font-semibold text-slate-300 mb-4">Choose DealForma if you need to:</h3>
             <ul className="space-y-3 text-sm text-slate-400">
               <li className="flex items-start gap-2">
                 <span className="text-slate-500 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Access a massive 15,500+ deal record database with contract documents
+                Search a well-established licensing deal comps database
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-slate-500 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Connect deal data to Clarivate&apos;s pipeline, regulatory, and patent intelligence
+                Reference historical deal terms for term sheet benchmarking
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-slate-500 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Serve a large enterprise with research, regulatory, and commercial users
+                Access deal summaries and press release aggregation
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-slate-500 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Maintain a single vendor relationship across the full Clarivate suite
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-slate-500 mt-0.5 flex-shrink-0">&#x2022;</span>
-                Prioritize database coverage over integrated analytical modeling
+                Work within a team already trained on DealForma&apos;s interface
               </li>
             </ul>
           </div>
@@ -310,8 +303,7 @@ export default function CortellisComparePage() {
         <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-8">
           <h2 className="text-2xl font-bold text-white mb-2">Pricing Comparison</h2>
           <p className="text-slate-400 mb-6">
-            Cortellis is built for large pharma with enterprise budgets and organization-wide
-            data needs. Solidus delivers deal-specific analytical depth at a fraction of the cost.
+            Both platforms serve biopharma BD teams. The difference is access model and analytical depth.
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
             <div className="p-5 rounded-xl bg-teal-500/5 border border-teal-500/20">
@@ -335,17 +327,17 @@ export default function CortellisComparePage() {
             </div>
             <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                Clarivate Cortellis
+                DealForma
               </p>
               <p className="text-3xl font-bold text-white">
-                ~$120K+<span className="text-sm font-normal text-slate-500">/year</span>
+                ~$15K-$30K+<span className="text-sm font-normal text-slate-500">/year</span>
               </p>
-              <p className="text-sm text-slate-400 mt-1">Per-module enterprise pricing</p>
+              <p className="text-sm text-slate-400 mt-1">Annual subscriptions, module-dependent</p>
               <ul className="mt-4 space-y-2 text-sm text-slate-500">
-                <li>Module-based pricing adds up</li>
-                <li>Multi-year commitments expected</li>
-                <li>Per-seat costs on top</li>
-                <li>Sales-led procurement only</li>
+                <li>Deal comps database access</li>
+                <li>Annual commitment typically required</li>
+                <li>No integrated valuation engines</li>
+                <li>No free tier</li>
               </ul>
             </div>
           </div>
@@ -397,11 +389,11 @@ export default function CortellisComparePage() {
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="text-center rounded-xl bg-gradient-to-b from-teal-500/5 to-transparent border border-teal-500/10 p-10">
           <h2 className="text-2xl font-bold text-white mb-3">
-            The Deal Modeling Layer Cortellis Doesn&apos;t Cover
+            More Than a Deal Database
           </h2>
           <p className="text-slate-400 mb-6 max-w-xl mx-auto">
-            Run your asset through Solidus&apos;s 21 analytical engines and get the deal-level
-            modeling that pipeline databases can&apos;t provide.
+            Run your asset through Solidus&apos;s 21 engines and see the deal intelligence
+            that a reference database alone can&apos;t provide.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

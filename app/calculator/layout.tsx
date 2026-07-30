@@ -10,7 +10,7 @@ const breadcrumbSchema = generateBreadcrumbSchema([
 ]);
 
 export const metadata: Metadata = {
-  title: 'Solidus — Biotech & Pharma Licensing Benchmarks',
+  title: 'Biotech Deal Calculator — Pharma Licensing Benchmarks & rNPV | Solidus',
   description: `Calculate upfront payments, milestone structures, and royalty rates for biopharma licensing deals. rNPV analysis, Monte Carlo simulation, sensitivity analysis, and AI deal memos across oncology, neurology, immunology, metabolic, cardiovascular, and more. Powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
   keywords: [
     'biotech deal calculator', 'pharma licensing calculator', 'drug deal valuation tool',

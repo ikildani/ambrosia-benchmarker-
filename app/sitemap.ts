@@ -8,154 +8,134 @@ import { SEO_INSIGHT_SLUGS } from '@/lib/insights/seo-pages';
 import { getAllProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
 import { getAllPseoSlugs } from '@/lib/pseoPages';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://solidus.ambrosiaventures.co';
+const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
-  // Static pages
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/calculator`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/insights`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/glossary`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/pulse`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/press`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/playbook`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/trade-space`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/simulator`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/intelligence`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/methodology`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/therapeutic-areas`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    // 12 TA-specific pages
-    ...['oncology', 'neurology', 'immunology', 'cardiovascular', 'metabolic', 'rareDisease',
-        'infectiousDisease', 'ophthalmology', 'dermatology', 'womensHealth', 'gastroenterology', 'hematology']
-      .map(ta => ({
-        url: `${baseUrl}/therapeutic-areas/${ta}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      })),
-    {
-      url: `${baseUrl}/benchmark`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/compare`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/compare/evaluate-pharma`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/compare/capital-iq`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/compare/cortellis`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+// ---------------------------------------------------------------------------
+// Sub-sitemap IDs — each produces a separate /sitemap/{id}.xml
+// Next.js generates a sitemap index at /sitemap.xml pointing to each.
+// ---------------------------------------------------------------------------
+const SITEMAP = {
+  CORE: 0,       // Static pages, therapeutic areas, compare pages
+  CONTENT: 1,    // Blog, landing pages, guides, reports, backlinks
+  BENCHMARKS: 2, // Benchmark deal pages + pSEO (modality x phase)
+  INSIGHTS: 3,   // Insight pages, SEO insights, lead magnets
+  COMPANIES: 4,  // Company profiles (DB-driven)
+  REFERENCE: 5,  // Glossary terms + programmatic data pages
+} as const;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a deterministic Date for a given slug within a date range.
+ * Uses a simple string hash so each slug always maps to the same date
+ * (stable across builds) and dates spread naturally across the range.
+ */
+function staggeredDate(slug: string, rangeStart: string, rangeDays: number): Date {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = ((hash << 5) - hash) + slug.charCodeAt(i);
+    hash |= 0;
+  }
+  const offset = Math.abs(hash) % rangeDays;
+  const d = new Date(rangeStart);
+  d.setDate(d.getDate() + offset);
+  return d;
+}
+
+// ---------------------------------------------------------------------------
+// generateSitemaps — tells Next.js to produce a sitemap index
+// ---------------------------------------------------------------------------
+export async function generateSitemaps() {
+  return Object.values(SITEMAP).map((id) => ({ id }));
+}
+
+// ---------------------------------------------------------------------------
+// Main sitemap handler — dispatches by sub-sitemap id
+// ---------------------------------------------------------------------------
+export default async function sitemap(
+  { id }: { id: number },
+): Promise<MetadataRoute.Sitemap> {
+  switch (id) {
+    case SITEMAP.CORE:
+      return getCorePages();
+    case SITEMAP.CONTENT:
+      return getContentPages();
+    case SITEMAP.BENCHMARKS:
+      return getBenchmarkPages();
+    case SITEMAP.INSIGHTS:
+      return getInsightPages();
+    case SITEMAP.COMPANIES:
+      return getCompanyPages();
+    case SITEMAP.REFERENCE:
+      return getReferencePages();
+    default:
+      return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 0 — Core static pages
+// ---------------------------------------------------------------------------
+function getCorePages(): MetadataRoute.Sitemap {
+  const taPages = [
+    'oncology', 'neurology', 'immunology', 'cardiovascular', 'metabolic',
+    'rareDisease', 'infectiousDisease', 'ophthalmology', 'dermatology',
+    'womensHealth', 'gastroenterology', 'hematology',
   ];
 
-  // Dynamic pages
+  return [
+    { url: BASE_URL, lastModified: '2026-07-28', changeFrequency: 'weekly', priority: 1 },
+    { url: `${BASE_URL}/calculator`, lastModified: '2026-07-14', changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/insights`, lastModified: '2026-07-20', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/glossary`, lastModified: '2026-06-10', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/pulse`, lastModified: '2026-07-25', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/privacy`, lastModified: '2026-01-15', changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/terms`, lastModified: '2026-01-15', changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/press`, lastModified: '2026-06-20', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/playbook`, lastModified: '2026-07-08', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/tracker`, lastModified: '2026-07-28', changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/trade-space`, lastModified: '2026-07-18', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/simulator`, lastModified: '2026-07-12', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/intelligence`, lastModified: '2026-07-27', changeFrequency: 'daily', priority: 0.7 },
+    { url: `${BASE_URL}/methodology`, lastModified: '2026-05-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/therapeutic-areas`, lastModified: '2026-07-22', changeFrequency: 'weekly', priority: 0.8 },
+    // 12 TA-specific pages — staggered across Jun-Jul 2026
+    ...taPages.map((ta) => ({
+      url: `${BASE_URL}/therapeutic-areas/${ta}`,
+      lastModified: staggeredDate(ta, '2026-06-01', 50),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    })),
+    { url: `${BASE_URL}/benchmark`, lastModified: '2026-07-20', changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/contact`, lastModified: '2026-03-10', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/compare`, lastModified: '2026-06-05', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/compare/evaluate-pharma`, lastModified: '2026-06-01', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/compare/capital-iq`, lastModified: '2026-06-08', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/compare/cortellis`, lastModified: '2026-06-15', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/compare/dealforma`, lastModified: '2026-07-01', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/about`, lastModified: '2026-04-20', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/pro`, lastModified: '2026-06-25', changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${BASE_URL}/portfolio`, lastModified: '2026-06-25', changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${BASE_URL}/companies`, lastModified: '2026-07-22', changeFrequency: 'weekly', priority: 0.8 },
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// 1 — Content pages (blog, landing, guides, reports, backlinks)
+// ---------------------------------------------------------------------------
+async function getContentPages(): Promise<MetadataRoute.Sitemap> {
   let blogPages: MetadataRoute.Sitemap = [];
   let landingPages: MetadataRoute.Sitemap = [];
-  let companyPages: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = createServiceClient();
 
-    // Fetch published blog posts (exclude archived and noindex pages)
+    // Blog posts — prefer updated_at over published_at for accurate freshness
     const { data: posts, error: postsError } = await supabase
       .from('blog_posts')
-      .select('slug, published_at')
+      .select('slug, updated_at, published_at')
       .eq('status', 'published')
       .neq('noindex', true);
 
@@ -163,272 +143,207 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       console.error('Sitemap: Error fetching blog posts:', postsError.message);
     }
 
-    if (posts) {
+    if (posts?.length) {
       blogPages = posts.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(post.published_at || new Date()),
+        url: `${BASE_URL}/blog/${post.slug}`,
+        lastModified: new Date(post.updated_at || post.published_at || '2026-06-01'),
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       }));
     }
 
-    // Fetch published landing pages
+    // Landing pages — prefer updated_at over published_at
     const { data: pages, error: pagesError } = await supabase
       .from('landing_pages')
-      .select('slug, published_at')
+      .select('slug, updated_at, published_at')
       .eq('status', 'published');
 
     if (pagesError) {
       console.error('Sitemap: Error fetching landing pages:', pagesError.message);
     }
 
-    if (pages) {
+    if (pages?.length) {
       landingPages = pages.map((page) => ({
-        url: `${baseUrl}/${page.slug}`,
-        lastModified: new Date(page.published_at || new Date()),
+        url: `${BASE_URL}/${page.slug}`,
+        lastModified: new Date(page.updated_at || page.published_at || '2026-06-01'),
         changeFrequency: 'monthly' as const,
         priority: 0.8,
       }));
     }
-
-    // Fetch companies for sitemap
-    const { data: companies, error: companiesError } = await supabase
-      .from('companies')
-      .select('id')
-      .order('deals_last_12mo', { ascending: false, nullsFirst: false })
-      .limit(200);
-
-    if (companiesError) {
-      console.error('Sitemap: Error fetching companies:', companiesError.message);
-    }
-
-    if (companies) {
-      companyPages = companies.map((company) => ({
-        url: `${baseUrl}/companies/${company.id}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-      }));
-    }
-  } catch (error) {
-    // Tables might not exist yet, continue with static pages only
-    console.log('Sitemap: Dynamic content tables not available yet');
+  } catch {
+    console.log('Sitemap [content]: Dynamic content tables not available yet');
   }
 
   // Fallback to hardcoded blog posts if DB returned none
   if (blogPages.length === 0 && hardcodedBlogPosts.length > 0) {
     blogPages = hardcodedBlogPosts.map((post) => ({
-      url: `${baseUrl}/blog/${post.slug}`,
+      url: `${BASE_URL}/blog/${post.slug}`,
       lastModified: new Date(post.publishedAt),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     }));
   }
 
-  // Add blog index if there are posts
+  // Blog index — lastmod = date of newest post
+  const blogIndex: MetadataRoute.Sitemap = [];
   if (blogPages.length > 0) {
-    staticPages.push({
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
+    const newestBlog = blogPages.reduce((newest, p) => {
+      const d = p.lastModified instanceof Date
+        ? p.lastModified
+        : new Date(String(p.lastModified));
+      return d > newest ? d : newest;
+    }, new Date(0));
+
+    blogIndex.push({
+      url: `${BASE_URL}/blog`,
+      lastModified: newestBlog,
       changeFrequency: 'daily',
       priority: 0.8,
     });
   }
 
-  // About page
-  staticPages.push({
-    url: `${baseUrl}/about`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  });
-
-  // Benchmark pages (statically generated)
-  const benchmarkSlugs = await getAllBenchmarkSlugsWithDb();
-  const benchmarkPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/benchmarks`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    ...benchmarkSlugs.map((slug) => ({
-      url: `${baseUrl}/benchmarks/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    })),
-  ];
-
-  // Insight pages (statically generated, social-friendly)
-  const insightSlugs = getAllInsightSlugs();
-  const insightPages: MetadataRoute.Sitemap = insightSlugs.map((slug) => ({
-    url: `${baseUrl}/insights/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
-
-  // Pro plan page
-  staticPages.push({
-    url: `${baseUrl}/pro`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.9,
-  });
-
-  // Portfolio License page (multi-seat enterprise tier for VC firms)
-  staticPages.push({
-    url: `${baseUrl}/portfolio`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.9,
-  });
-
-  // Companies index page
-  staticPages.push({
-    url: `${baseUrl}/companies`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  });
-
-  // Individual glossary term pages
-  const termSlugs = getAllTermSlugs();
-  const glossaryTermPages: MetadataRoute.Sitemap = termSlugs.map((slug) => ({
-    url: `${baseUrl}/glossary/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
-
-  // Guide pages
+  // Guide pages — staggered realistic dates
   const guidePages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/guides`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/guides/how-to-value-biotech-deal`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/guides/negotiate-pharma-royalty-rates`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/guides/biotech-licensing-deal-structure`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/guides/rnpv-biotech-valuation`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/guides/pharma-ma-vs-licensing`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/guides/biopharma-licensing-benchmarks`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/guides/life-sciences-deal-calculator-guide`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
+    { url: `${BASE_URL}/guides`, lastModified: '2026-06-01', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/guides/how-to-value-biotech-deal`, lastModified: '2026-03-12', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/guides/negotiate-pharma-royalty-rates`, lastModified: '2026-03-25', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/guides/biotech-licensing-deal-structure`, lastModified: '2026-04-08', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/guides/rnpv-biotech-valuation`, lastModified: '2026-04-18', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/guides/pharma-ma-vs-licensing`, lastModified: '2026-05-02', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/guides/biopharma-licensing-benchmarks`, lastModified: '2026-05-20', changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${BASE_URL}/guides/life-sciences-deal-calculator-guide`, lastModified: '2026-06-01', changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${BASE_URL}/guides/monte-carlo-biotech-valuation`, lastModified: '2026-07-15', changeFrequency: 'monthly', priority: 0.8 },
   ];
 
   // Report pages
   const reportPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/reports`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/reports/deal-trends-2026`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-  ];
-
-  // Lead magnet / data insight pages
-  const leadMagnetPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/insights/biopharma-deal-benchmarks-2026`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-  ];
-
-  // SEO long-form insight pages
-  const seoInsightPages: MetadataRoute.Sitemap = SEO_INSIGHT_SLUGS.map(slug => ({
-    url: `${baseUrl}/insights/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.9,
-  }));
-
-  // Programmatic data pages (TA × Phase × Territory)
-  const programmaticSlugs = getAllProgrammaticSlugs();
-  const programmaticPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/data`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    ...programmaticSlugs.map(slug => ({
-      url: `${baseUrl}/data/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    })),
+    { url: `${BASE_URL}/reports`, lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/reports/deal-trends-2026`, lastModified: '2026-04-10', changeFrequency: 'monthly', priority: 0.8 },
   ];
 
   // Backlink engine pages
   const backlinkPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/press/data-kit`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
+    { url: `${BASE_URL}/press/data-kit`, lastModified: '2026-05-10', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/reports/q1-2026-biopharma-deal-benchmarks`, lastModified: '2026-04-01', changeFrequency: 'monthly', priority: 0.9 },
+  ];
+
+  return [...blogIndex, ...blogPages, ...landingPages, ...guidePages, ...reportPages, ...backlinkPages];
+}
+
+// ---------------------------------------------------------------------------
+// 2 — Benchmark pages + pSEO benchmark data
+// ---------------------------------------------------------------------------
+async function getBenchmarkPages(): Promise<MetadataRoute.Sitemap> {
+  const benchmarkSlugs = await getAllBenchmarkSlugsWithDb();
+  const pseoSlugs = getAllPseoSlugs();
+
+  return [
+    { url: `${BASE_URL}/benchmarks`, lastModified: '2026-07-20', changeFrequency: 'weekly', priority: 0.8 },
+    ...benchmarkSlugs.map((slug) => ({
+      url: `${BASE_URL}/benchmarks/${slug}`,
+      lastModified: staggeredDate(slug, '2026-04-01', 100),
+      changeFrequency: 'monthly' as const,
       priority: 0.8,
-    },
+    })),
+    ...pseoSlugs.map((slug) => ({
+      url: `${BASE_URL}/benchmarks/data/${slug}`,
+      lastModified: staggeredDate(slug, '2026-05-01', 75),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// 3 — Insight pages (all types)
+// ---------------------------------------------------------------------------
+function getInsightPages(): MetadataRoute.Sitemap {
+  const insightSlugs = getAllInsightSlugs();
+
+  // Regular insight pages
+  const insightPages: MetadataRoute.Sitemap = insightSlugs.map((slug) => ({
+    url: `${BASE_URL}/insights/${slug}`,
+    lastModified: staggeredDate(slug, '2026-03-01', 120),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // SEO long-form insight pages
+  const seoInsightPages: MetadataRoute.Sitemap = SEO_INSIGHT_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/insights/${slug}`,
+    lastModified: staggeredDate(slug, '2026-04-01', 90),
+    changeFrequency: 'monthly' as const,
+    priority: 0.9,
+  }));
+
+  // Lead magnet pages
+  const leadMagnetPages: MetadataRoute.Sitemap = [
     {
-      url: `${baseUrl}/reports/q1-2026-biopharma-deal-benchmarks`,
-      lastModified: new Date(),
+      url: `${BASE_URL}/insights/biopharma-deal-benchmarks-2026`,
+      lastModified: '2026-06-15',
       changeFrequency: 'monthly',
       priority: 0.9,
     },
   ];
 
-  // pSEO benchmark data pages (modality x phase)
-  const pseoSlugs = getAllPseoSlugs();
-  const pseoPages: MetadataRoute.Sitemap = pseoSlugs.map(slug => ({
-    url: `${baseUrl}/benchmarks/data/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
+  return [...insightPages, ...seoInsightPages, ...leadMagnetPages];
+}
 
-  return [...staticPages, ...blogPages, ...landingPages, ...benchmarkPages, ...insightPages, ...companyPages, ...glossaryTermPages, ...guidePages, ...reportPages, ...leadMagnetPages, ...seoInsightPages, ...programmaticPages, ...backlinkPages, ...pseoPages];
+// ---------------------------------------------------------------------------
+// 4 — Company pages (DB-driven with real updated_at)
+// ---------------------------------------------------------------------------
+async function getCompanyPages(): Promise<MetadataRoute.Sitemap> {
+  try {
+    const supabase = createServiceClient();
+
+    const { data: companies, error } = await supabase
+      .from('companies')
+      .select('id, updated_at')
+      .order('deals_last_12mo', { ascending: false, nullsFirst: false })
+      .limit(200);
+
+    if (error) {
+      console.error('Sitemap: Error fetching companies:', error.message);
+      return [];
+    }
+
+    if (!companies?.length) return [];
+
+    return companies.map((company) => ({
+      url: `${BASE_URL}/companies/${company.id}`,
+      lastModified: new Date(company.updated_at || '2026-06-01'),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }));
+  } catch {
+    console.log('Sitemap [companies]: Companies table not available yet');
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 5 — Reference pages (glossary terms + programmatic data)
+// ---------------------------------------------------------------------------
+function getReferencePages(): MetadataRoute.Sitemap {
+  const termSlugs = getAllTermSlugs();
+  const programmaticSlugs = getAllProgrammaticSlugs();
+
+  return [
+    // Programmatic data index
+    { url: `${BASE_URL}/data`, lastModified: '2026-07-15', changeFrequency: 'weekly', priority: 0.7 },
+    // Individual glossary terms
+    ...termSlugs.map((slug) => ({
+      url: `${BASE_URL}/glossary/${slug}`,
+      lastModified: staggeredDate(slug, '2026-02-01', 120),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+    // Programmatic data pages (TA x Phase x Territory)
+    ...programmaticSlugs.map((slug) => ({
+      url: `${BASE_URL}/data/${slug}`,
+      lastModified: staggeredDate(slug, '2026-04-01', 90),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  ];
 }

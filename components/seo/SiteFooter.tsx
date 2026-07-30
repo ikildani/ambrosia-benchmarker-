@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import { DEAL_STATS } from '@/lib/config/constants';
 
-const footerLinks = {
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
+const footerLinks: Record<string, FooterLink[]> = {
   Product: [
     { label: 'Solidus', href: '/calculator' },
     { label: 'Pro Plan', href: '/pro' },
@@ -40,6 +46,8 @@ const footerLinks = {
     { label: 'Press & Media', href: '/press' },
   ],
   Company: [
+    { label: 'Ambrosia Ventures', href: 'https://ambrosiaventures.co', external: true },
+    { label: 'Advisory Services', href: 'https://ambrosiaventures.co/advisory', external: true },
     { label: 'About', href: '/about' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
@@ -59,12 +67,23 @@ export function SiteFooter() {
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-slate-500 hover:text-white transition-colors"
-                    >
-                      {link.label}
-                    </Link>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-slate-500 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-slate-500 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -3,28 +3,33 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Pharma M&A vs. Licensing: When to Acquire vs. License | Ambrosia Ventures',
-  description: 'Comprehensive comparison of pharma M&A vs licensing strategies. Learn when acquisition makes sense, when licensing wins, hybrid deal structures, and real case studies from recent biopharma transactions.',
+  title: 'Pharma M&A vs. Licensing in 2026: Decision Framework With Cost Comparisons | Ambrosia Ventures',
+  description: 'Licensing requires 10-30% of M&A capital for comparable asset access. See when to acquire vs. license, with M&A premium data (median 60-70%) and hybrid structures reshaping biopharma BD.',
   keywords: [
     'pharma M&A vs licensing',
+    'should biotech license or sell',
     'biotech acquisition vs license',
     'pharma deal strategy',
     'biopharma M&A',
     'licensing vs acquisition biotech',
     'pharma business development strategy',
     'drug asset acquisition',
+    'pharma M&A vs licensing 2026',
+    'biotech sell or license decision',
+    'biopharma M&A premium',
+    'pharma hybrid deal structures',
   ],
   openGraph: {
-    title: 'Pharma M&A vs. Licensing: When to Acquire vs. License',
-    description: 'Strategic framework for choosing between M&A and licensing in biopharma, with case studies and decision criteria.',
+    title: 'Pharma M&A vs. Licensing in 2026: Decision Framework With Cost Comparisons',
+    description: 'Licensing requires 10-30% of M&A capital for comparable asset access. When to acquire vs. license, with M&A premium data and hybrid structures.',
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/pharma-ma-vs-licensing',
     images: [{ url: '/api/og?title=Pharma%20M%26A%20vs.%20Licensing&subtitle=When%20to%20Acquire%20vs.%20License&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pharma M&A vs. Licensing: When to Acquire vs. License',
-    description: 'Strategic framework for choosing between M&A and licensing in biopharma.',
+    title: 'Pharma M&A vs. Licensing in 2026: Decision Framework With Cost Comparisons',
+    description: 'Licensing requires 10-30% of M&A capital for comparable asset access. Decision framework with cost comparisons.',
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/pharma-ma-vs-licensing',
