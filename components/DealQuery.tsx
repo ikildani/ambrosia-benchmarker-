@@ -434,7 +434,7 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
                     {result.follow_ups.map((fu, i) => (
                       <button
                         key={i}
-                        onClick={() => { setQuestion(fu); handleQuery(fu); }}
+                        onClick={() => { setQuestion(fu); handleSubmit(fu); }}
                         className="text-[11px] px-3 py-1.5 border border-slate-700 text-slate-400 hover:border-teal-500/50 hover:text-teal-400 transition-colors"
                       >
                         {fu}
