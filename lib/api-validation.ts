@@ -31,7 +31,7 @@ export const calculationRequestSchema = z.object({
     total_deal_value_low: z.number().optional().nullable(),
     total_deal_value_high: z.number().optional().nullable(),
   }).optional().nullable(),
-  custom_assumptions: z.record(z.unknown()).optional().nullable(),
+  custom_assumptions: z.record(z.string(), z.unknown()).optional().nullable(),
 }).strip(); // Silently strip extra fields for safety
 
 // Report email request
