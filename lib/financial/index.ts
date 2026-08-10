@@ -6,7 +6,7 @@
  */
 
 // Core engines
-export { calculateRNPV } from './rnpv-engine';
+export { calculateRNPV, getCogsRate, getGenericErosionRate, getDefaultDiscountRate } from './rnpv-engine';
 export { runMonteCarlo } from './monte-carlo';
 export { estimateMarketSize, getEpidemiologyData, formatPatientFunnel } from './market-size';
 export { calculateFXSensitivity, getPricingPressureNarrative } from './fx-sensitivity';
@@ -66,3 +66,8 @@ export type {
 } from './types';
 
 export type { ScenarioBridge, ScenarioBridgeAdjustment } from './scenario-bridge';
+
+// Custom assumptions
+export { getResolvedDefaults } from './default-assumptions';
+export type { ResolvedDefaults } from './default-assumptions';
+export type { CustomAssumptions } from './types';

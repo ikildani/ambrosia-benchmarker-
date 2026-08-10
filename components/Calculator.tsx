@@ -84,6 +84,8 @@ import type { WizardStep } from './calculator/index';
 import { useCalculatorState } from './calculator/useCalculatorState';
 import type { CalculatorFormState } from './calculator/useCalculatorState';
 import { useCalculation, buildCalculationInput } from './calculator/useCalculation';
+import { CustomAssumptionsPanel } from './calculator/CustomAssumptionsPanel';
+import { getResolvedDefaults } from '@/lib/financial/default-assumptions';
 
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 
@@ -126,6 +128,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setShowPaywall(true);
     },
   });
+
+  // ── Resolved defaults for Custom Assumptions panel ─────────────────────────
+  const resolvedDefaults = useMemo(() => getResolvedDefaults({
+    therapeuticArea: state.therapeuticArea,
+    phase: state.phase || 'phase2',
+    modality: state.modality || 'smallMolecule',
+    indication: state.indication || undefined,
+    territory: state.territory,
+  }), [state.therapeuticArea, state.phase, state.modality, state.indication, state.territory]);
 
   // ── Local UI state (not form-related) ──────────────────────────────────────
   const [showPaywall, setShowPaywall] = useState(false);
@@ -716,13 +727,31 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     stepContent = <AdvancedOptionsSection column="competitive" {...advancedProps} />;
                     break;
                   case 'deal':
-                    stepContent = <AdvancedOptionsSection column="deal-scope" {...advancedProps} />;
+                    stepContent = (
+                      <div className="space-y-6">
+                        <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
+                        <CustomAssumptionsPanel
+                          assumptions={state.customAssumptions}
+                          defaults={resolvedDefaults}
+                          onChange={actions.setCustomAssumptions}
+                          tier={tier}
+                          onUpgradeClick={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+                        />
+                      </div>
+                    );
                     break;
                   case 'competitive-deal':
                     stepContent = (
                       <div className="space-y-8">
                         <AdvancedOptionsSection column="competitive" {...advancedProps} />
                         <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
+                        <CustomAssumptionsPanel
+                          assumptions={state.customAssumptions}
+                          defaults={resolvedDefaults}
+                          onChange={actions.setCustomAssumptions}
+                          tier={tier}
+                          onUpgradeClick={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+                        />
                       </div>
                     );
                     break;

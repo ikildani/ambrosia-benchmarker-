@@ -25,6 +25,8 @@ export interface CalculationHistoryItem {
     dataQuality?: string;
     dealType?: string;
     regulatoryDesignations?: RegulatoryDesignationsInput;
+    // Custom model assumptions (Pro feature)
+    customAssumptions?: Record<string, unknown>;
   };
   results: {
     upfrontLow: number;

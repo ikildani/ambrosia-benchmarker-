@@ -35,6 +35,8 @@ import {
 import { DEFAULT_DISCOUNT_RATES, COMPANY_TYPE_ADJUSTMENT, TERRITORY_RISK_PREMIUM, DEAL_TYPE_RISK_ADJUSTMENT } from './discount-rates';
 import { checkRNPVInvariants, assertInvariants } from './invariants';
 import { getCompetitiveDensity } from './indication-competitive-density';
+import { decomposeRisk } from './risk-decomposition';
+import { TIER4_FLAGS } from '@/lib/feature-flags';
 
 /**
  * Effective corporate tax rate for pharma/biotech.
@@ -363,13 +365,15 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // --- Input guards ---
   const VALID_PHASES = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
   const guardedPhase = VALID_PHASES.includes(input.phase) ? input.phase : 'phase2';
-  const guardedDiscountRate = input.discountRate != null
-    ? Math.max(0.01, Math.min(0.30, input.discountRate))
+  const ca = input.customAssumptions;
+  const guardedDiscountRate = (ca?.discountRate ?? input.discountRate) != null
+    ? Math.max(0.01, Math.min(0.30, (ca?.discountRate ?? input.discountRate)!))
     : input.discountRate;
+  const rawPeakSales = ca?.peakSalesOverride ?? input.peakSalesEstimate;
   const guardedPeakSales = {
-    low: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.low)),
-    median: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.median)),
-    high: Math.max(0, Math.min(1_000_000, input.peakSalesEstimate.high)),
+    low: Math.max(0, Math.min(1_000_000, rawPeakSales.low)),
+    median: Math.max(0, Math.min(1_000_000, rawPeakSales.median)),
+    high: Math.max(0, Math.min(1_000_000, rawPeakSales.high)),
   };
 
   const {
@@ -408,9 +412,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   })();
 
   // 1. Get discount rate (use guarded value, or compute from TA + territory + company type + deal type)
-  // Add manufacturing complexity WACC premium for technically challenging modalities
+  // Add manufacturing complexity WACC premium for technically challenging modalities.
+  // The risk decomposer (tier 4 item 11) sets __internalFlags.skipMfgPremium
+  // to neutralize this risk source for the manufacturing-bucket counterfactual.
   const baseDiscountRate = guardedDiscountRate ?? getDefaultDiscountRate(therapeuticArea, phase, territory, input.companyType, dealType);
-  const mfgPremium = MANUFACTURING_WACC_PREMIUM[modality] || 0;
+  const mfgPremium = input.__internalFlags?.skipMfgPremium ? 0 : (MANUFACTURING_WACC_PREMIUM[modality] || 0);
   // Cap the combined rate at 35% (not 30%) so that the manufacturing WACC
   // premium isn't silently dropped for high-risk combos where the base rate
   // already sits at the 30% TA/phase ceiling from getDefaultDiscountRate.
@@ -427,6 +433,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     input.biomarkerStatus || 'unselected',
     regulatoryDesignations,
     input.indication,
+    ca?.phaseTransitionRates,
   );
 
   // 2b. Apply indication-specific PoS modifiers
@@ -465,7 +472,10 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // steps. A drug follows ONE of: standard (P1→P2→P3), combined-early (P1/2→P3),
   // or combined-late (P2/3). Iterating PHASE_ORDER linearly double-counts them.
   const durations = PHASE_DURATION[therapeuticArea] || PHASE_DURATION.oncology;
-  const costs = PHASE_COSTS[therapeuticArea] || PHASE_COSTS.oncology;
+  const baseCosts = PHASE_COSTS[therapeuticArea] || PHASE_COSTS.oncology;
+  const costs = ca?.phaseCosts
+    ? { ...baseCosts, ...ca.phaseCosts }
+    : baseCosts;
   const currentIdx = phaseIndex(phase);
 
   // Build the actual sequential pathway based on the starting phase
@@ -540,8 +550,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     yearsToMarket = Math.max(0, yearsToMarket + adjustment);
   }
 
-  // Apply market access delay (post-approval reimbursement lag)
-  const accessDelay = MARKET_ACCESS_DELAY_MONTHS[therapeuticArea]?.default || 0;
+  // Apply market access delay (post-approval reimbursement lag).
+  // Risk decomposer (tier 4 item 11) sets __internalFlags.skipMarketAccessDelay
+  // to neutralize this for the regulatory-bucket counterfactual.
+  const accessDelay = input.__internalFlags?.skipMarketAccessDelay
+    ? 0
+    : (MARKET_ACCESS_DELAY_MONTHS[therapeuticArea]?.default || 0);
   if (accessDelay > 0) {
     yearsToMarket += accessDelay / 12; // Convert months to years
   }
@@ -558,10 +572,12 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Source: Internal calibration — data quality reflects confidence in projections
   const dataQualityAdj = getDataQualityAdjustment(dataQuality);
 
-  // 4b. Generic market entrenchment penalty (Nirav Jhaveri feedback)
-  // If entering a market where generics dominate, peak sales are penalized at launch
+  // 4b. Generic market entrenchment penalty (Nirav Jhaveri feedback).
+  // If entering a market where generics dominate, peak sales are penalized at launch.
+  // Risk decomposer (tier 4 item 11) sets __internalFlags.skipGenericEntrenchment
+  // to neutralize this for the commercial-bucket counterfactual.
   const genericEntrenchment = getGenericEntrenchmentMultiplier(therapeuticArea, input.indication);
-  const genericMultiplier = genericEntrenchment.multiplier;
+  const genericMultiplier = input.__internalFlags?.skipGenericEntrenchment ? 1.0 : genericEntrenchment.multiplier;
 
   const adjustedPeakSales = {
     low: peakSalesEstimate.low * dataQualityAdj * genericMultiplier,
@@ -572,11 +588,13 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // 4c. Peak sales sanity check against index drug (Nirav Jhaveri feedback)
   const peakSalesCheck = checkPeakSalesRealism(adjustedPeakSales.median, therapeuticArea, input.indication, modality);
 
-  // 4d. Indication-specific competitive density adjustment
+  // 4d. Indication-specific competitive density adjustment.
   // Crowded indications (HER2 breast, MS, RA) penalize peak sales penetration;
   // under-served indications (SCI, Huntington's) get a boost.
+  // Risk decomposer (tier 4 item 11) sets __internalFlags.skipCompetitiveDensity
+  // to neutralize this for the commercial-bucket counterfactual.
   const competitiveDensity = getCompetitiveDensity(input.indication);
-  if (competitiveDensity) {
+  if (competitiveDensity && !input.__internalFlags?.skipCompetitiveDensity) {
     adjustedPeakSales.low = adjustedPeakSales.low / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.median = adjustedPeakSales.median / competitiveDensity.penetrationMultiplier;
     adjustedPeakSales.high = adjustedPeakSales.high / competitiveDensity.penetrationMultiplier;
@@ -593,8 +611,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     durations,
     modality,
     therapeuticArea,
-    pathway, // Pass pathway so R&D cost schedule uses sequential phases, not PHASE_ORDER linear sum
-    input.indication, // Indication-specific revenue curve lookup (takes precedence over TA override)
+    pathway,
+    input.indication,
+    ca,
   );
 
   // 6. Calculate NPV from cash flows
@@ -614,9 +633,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   const TERMINAL_DECLINE_RATE = -0.10; // 10% annual decline post-LOE
   const lastRevenueCF = [...cashFlows].reverse().find(cf => cf.revenue > 0);
   let terminalValue = 0;
-  const genericErosion = getGenericErosionRate(modality);
+  const genericErosionTV = ca?.revenueCurve?.genericErosion ?? getGenericErosionRate(modality);
   if (lastRevenueCF && lastRevenueCF.revenue > 0) {
-    const terminalRevenue = lastRevenueCF.revenue * (1 - genericErosion); // Retained revenue post-LOE (modality-dependent)
+    const terminalRevenue = lastRevenueCF.revenue * (1 - genericErosionTV);
     // Gordon growth model with negative growth: TV = CF / (r - g), discounted to present
     // Source: Damodaran, "Valuing pharma companies" — terminal value for mature drugs
     const denominator = discountRate - TERMINAL_DECLINE_RATE; // r - g where g is negative, so r + |g|
@@ -729,6 +748,13 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     terminalValue: Math.round(terminalValue),
     modelAssumptions,
     peakSalesCeilingCheck: ceilingCheck.ok ? { ok: true } : ceilingCheck,
+    ...(ca && Object.values(ca).some(v => v != null) ? {
+      customAssumptionsApplied: {
+        overriddenFields: Object.entries(ca)
+          .filter(([, v]) => v != null)
+          .map(([k]) => k),
+      },
+    } : {}),
   };
 
   // Layer 1: Mathematical invariants — log to Sentry but never throw.
@@ -750,6 +776,17 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     // Never allow invariant checks to break production calculations.
   }
 
+  // Tier 4 item 11: Risk decomposition. Runs counterfactual NPVs internally
+  // (5 extra calculateRNPV invocations), so we gate on the feature flag and
+  // also skip when called recursively from inside the decomposer itself.
+  if (TIER4_FLAGS.riskDecomposition && !input.__internalFlags?.skipDecomposition) {
+    try {
+      rnpvResult.riskDecomposition = decomposeRisk(input, rnpvResult, calculateRNPV);
+    } catch {
+      // Decomposition is informational. Never let it break the headline NPV.
+    }
+  }
+
   return rnpvResult;
 }
 
@@ -768,6 +805,7 @@ function projectCashFlows(
   therapeuticArea: string,
   pathway?: string[],
   indication?: string,
+  customAssumptions?: import('./types').CustomAssumptions,
 ): CashFlowYear[] {
   const cashFlows: CashFlowYear[] = [];
   // Resolve revenue curve parameters with the following precedence:
@@ -776,12 +814,12 @@ function projectCashFlows(
   //   3. REVENUE_CURVE — default
   const indicationCurve = indication ? INDICATION_REVENUE_CURVES[indication] : undefined;
   const taOverrides = REVENUE_CURVE_OVERRIDES[therapeuticArea] || {};
-  const rampUpYears = indicationCurve?.rampUpYears ?? taOverrides.rampUpYears ?? REVENUE_CURVE.rampUpYears;
-  const peakDurationYears = indicationCurve?.peakDurationYears ?? taOverrides.peakDurationYears ?? REVENUE_CURVE.peakDurationYears;
-  const declineRate = indicationCurve?.declineRate ?? taOverrides.declineRate ?? REVENUE_CURVE.declineRate;
-  const loeYearsAfterApproval = indicationCurve?.loeYearsAfterApproval ?? taOverrides.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval;
-  // Use modality-dependent generic erosion instead of the flat 80% constant
-  const genericErosion = getGenericErosionRate(modality);
+  const rc = customAssumptions?.revenueCurve;
+  const rampUpYears = rc?.rampUpYears ?? indicationCurve?.rampUpYears ?? taOverrides.rampUpYears ?? REVENUE_CURVE.rampUpYears;
+  const peakDurationYears = rc?.peakDurationYears ?? indicationCurve?.peakDurationYears ?? taOverrides.peakDurationYears ?? REVENUE_CURVE.peakDurationYears;
+  const declineRate = rc?.declineRate ?? indicationCurve?.declineRate ?? taOverrides.declineRate ?? REVENUE_CURVE.declineRate;
+  const loeYearsAfterApproval = rc?.loeYearsAfterApproval ?? indicationCurve?.loeYearsAfterApproval ?? taOverrides.loeYearsAfterApproval ?? REVENUE_CURVE.loeYearsAfterApproval;
+  const genericErosion = rc?.genericErosion ?? getGenericErosionRate(modality);
   const totalYears = Math.ceil(yearsToMarket) + loeYearsAfterApproval + 5; // +5 for post-LOE tail
 
   // R&D cost phase mapping (years spent in each remaining phase)
@@ -850,9 +888,7 @@ function projectCashFlows(
       }
     }
 
-    // COGS by modality category
-    // Source: Industry benchmarks — biologics 15-20%, small molecules 8-12%, cell/gene 25-35%
-    const cogsRate = getCogsRate(modality);
+    const cogsRate = customAssumptions?.cogsPercent ?? getCogsRate(modality);
     const cogs = revenue * cogsRate;
     const grossProfit = revenue - cogs;
 
@@ -924,7 +960,7 @@ function projectCashFlows(
 
 /** Map modality to COGS category
  * Source: Industry benchmarks — Deloitte biopharma manufacturing cost analysis */
-function getCogsRate(modality: string): number {
+export function getCogsRate(modality: string): number {
   // Map specific modalities to categories
   // Comprehensive modality-to-COGS mapping — all biologic-class modalities must be listed
   // to avoid incorrectly defaulting to smallMolecule (10% COGS instead of 18%)
@@ -952,7 +988,7 @@ function getCogsRate(modality: string): number {
 /** Map modality to generic erosion rate at LOE.
  * Source: IQVIA Channel Dynamics — biologics retain more revenue post-LOE
  * than small molecules due to slower biosimilar adoption. */
-function getGenericErosionRate(modality: string): number {
+export function getGenericErosionRate(modality: string): number {
   const biologicModalities = ['mab', 'antibody', 'bispecific', 'tCellEngager', 'adc', 'fcrnAntagonist', 'complementInhibitor', 'peptide', 'dualAntagonist', 'tl1aInhibitor', 'antiVegf', 'jakInhibitor', 's1pModulator', 'oralIntegrin', 'pcsk9Targeting', 'antiActivin', 'intravitreal', 'gnrhAntagonist', 'anticoagulantNovel', 'amylinAnalog', 'glp1Agonist', 'dualIncretin', 'tripleIncretin', 'sglt2Inhibitor'];
   const cellTherapyModalities = ['carT_heme', 'carT_solid', 'cellTherapy', 'carT_autoimmune', 'inVivoCarT', 'carTreg', 'stemCell'];
   const geneTherapyModalities = ['geneTherapy', 'geneTherapyOcular', 'aso', 'rnai', 'oligonucleotide', 'mrna'];
@@ -998,7 +1034,7 @@ function getPartialPoS(year: number, launchYear: number, fullPoS: number): numbe
 /** Get default discount rate for therapeutic area, phase, territory, company type, and deal type.
  * Additive adjustments from territory risk premium, company type, and deal type are applied
  * to the base TA/phase rate. Source: Damodaran, EY biopharma valuation benchmarks. */
-function getDefaultDiscountRate(
+export function getDefaultDiscountRate(
   therapeuticArea: string,
   phase: string,
   territory?: string,

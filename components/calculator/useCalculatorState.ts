@@ -1,4 +1,5 @@
 import { useReducer, useCallback, useMemo } from 'react';
+import type { CustomAssumptions } from '@/lib/financial/types';
 import type {
   TherapeuticArea,
   Phase,
@@ -117,6 +118,8 @@ export interface CalculatorFormState {
   giSegment: GISegment;
   biologicExperience: BiologicExperience;
   endoscopicEndpoint: EndoscopicEndpoint;
+  // Custom model assumptions (Pro feature)
+  customAssumptions: CustomAssumptions | null;
   // UI state
   wizardStep: number;
   quickMode: boolean;
@@ -174,6 +177,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   giSegment: 'colonic',
   biologicExperience: 'biologic_naive',
   endoscopicEndpoint: 'endoscopic_improvement',
+  customAssumptions: null,
   wizardStep: 0,
   quickMode: true,
   showTemplates: true,
@@ -190,6 +194,8 @@ type CalculatorAction =
   | { type: 'TOGGLE_REGULATORY'; designation: keyof RegulatoryDesignations }
   | { type: 'CLEAR_HIGHLIGHTS' }
   | { type: 'BULK_SET'; fields: Partial<CalculatorFormState> }
+  | { type: 'SET_CUSTOM_ASSUMPTIONS'; assumptions: CustomAssumptions }
+  | { type: 'RESET_CUSTOM_ASSUMPTIONS' }
   | { type: 'RESET' };
 
 function reducer(state: CalculatorFormState, action: CalculatorAction): CalculatorFormState {
@@ -370,6 +376,12 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
       return next;
     }
 
+    case 'SET_CUSTOM_ASSUMPTIONS':
+      return { ...state, customAssumptions: action.assumptions };
+
+    case 'RESET_CUSTOM_ASSUMPTIONS':
+      return { ...state, customAssumptions: null };
+
     case 'RESET':
       return { ...INITIAL_STATE };
 
@@ -437,6 +449,8 @@ export interface CalculatorActions {
   applyTemplate: (template: DealTemplate) => void;
   clearHighlights: () => void;
   bulkSet: (fields: Partial<CalculatorFormState>) => void;
+  setCustomAssumptions: (v: CustomAssumptions) => void;
+  resetCustomAssumptions: () => void;
   switchTherapeuticArea: (area: TherapeuticArea) => void;
   reset: () => void;
   dispatch: React.Dispatch<CalculatorAction>;
@@ -504,6 +518,8 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions] {
     applyTemplate: (t) => dispatch({ type: 'APPLY_TEMPLATE', template: t }),
     clearHighlights: () => dispatch({ type: 'CLEAR_HIGHLIGHTS' }),
     bulkSet: (fields) => dispatch({ type: 'BULK_SET', fields }),
+    setCustomAssumptions: (v) => dispatch({ type: 'SET_CUSTOM_ASSUMPTIONS', assumptions: v }),
+    resetCustomAssumptions: () => dispatch({ type: 'RESET_CUSTOM_ASSUMPTIONS' }),
     switchTherapeuticArea: (area) => dispatch({ type: 'SET_THERAPEUTIC_AREA', area }),
     reset: () => dispatch({ type: 'RESET' }),
     dispatch,

@@ -1730,6 +1730,7 @@ export function getCumulativePoS(
     prime: boolean;
   },
   indication?: string,
+  phaseTransitionOverrides?: Partial<Record<string, number>>,
 ): {
   cumulativePoS: number;
   transitions: { phase: string; probability: number; cumulativeProb: number }[];
@@ -1767,6 +1768,25 @@ export function getCumulativePoS(
       'phase3ToApproval',
     ),
   };
+
+  // Apply user-provided phase transition rate overrides (Custom Assumptions).
+  // These replace specific transitions entirely — the user's number IS the rate,
+  // bypassing indication-specific and TA-level defaults for that transition.
+  if (phaseTransitionOverrides) {
+    const keyMap: Record<string, keyof PhaseTransitionRates> = {
+      preclinical_to_p1: 'preclinicalToPhase1',
+      p1_to_p2: 'phase1ToPhase2',
+      p2_to_p3: 'phase2ToPhase3',
+      p3_to_approval: 'phase3ToApproval',
+      approval_to_launch: 'approvalToLaunch',
+    };
+    for (const [overrideKey, rate] of Object.entries(phaseTransitionOverrides)) {
+      const mappedKey = keyMap[overrideKey] ?? overrideKey;
+      if (mappedKey in baseRates && rate != null) {
+        (baseRates as Record<string, number>)[mappedKey] = Math.max(0.01, Math.min(0.98, rate));
+      }
+    }
+  }
 
   // Resolve modality adjustment -- default to 1.0 (no adjustment)
   const modalityAdj = POS_MODALITY_ADJUSTMENT[modality] ?? 1.0;

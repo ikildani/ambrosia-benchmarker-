@@ -171,6 +171,9 @@ function buildRNPVInput(
     giSegment: inputs.giSegment,
     biologicExperience: inputs.biologicExperience,
     endoscopicEndpoint: inputs.endoscopicEndpoint,
+
+    // Custom model assumptions (Pro feature)
+    customAssumptions: inputs.customAssumptions,
   };
 }
 

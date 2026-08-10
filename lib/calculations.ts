@@ -368,6 +368,8 @@ export interface CalculationInput {
   giSegment?: GISegment;
   biologicExperience?: BiologicExperience;
   endoscopicEndpoint?: EndoscopicEndpoint;
+  // Custom model assumptions (Pro feature)
+  customAssumptions?: import('@/lib/financial/types').CustomAssumptions;
 }
 
 // Drill-down data for expanded metric views

@@ -251,6 +251,86 @@ export interface RNPVInput {
   biologicExperience?: string;
   /** Endoscopic endpoint */
   endoscopicEndpoint?: string;
+
+  // =========================================================================
+  // Custom assumptions — Pro users can override hardcoded engine defaults.
+  // When set, these take precedence over the lookup-table values from
+  // pos-tables.ts, discount-rates.ts, etc. When omitted, the engine uses
+  // its standard defaults (identical to pre-feature behavior).
+  // =========================================================================
+  customAssumptions?: CustomAssumptions;
+
+  // =========================================================================
+  // Internal flags — DO NOT set from public API code.
+  // Used by lib/financial/risk-decomposition.ts (tier 4 item 11) to run
+  // counterfactual NPVs with specific risk sources neutralized. The leading
+  // double-underscore is a convention to mark this field as engine-private.
+  // =========================================================================
+  /** Internal: counterfactual flags for risk decomposition. */
+  __internalFlags?: RNPVInternalFlags;
+}
+
+/**
+ * User-overridable valuation assumptions for the rNPV engine.
+ *
+ * Each field, when set, takes precedence over the corresponding hardcoded
+ * default from pos-tables.ts, discount-rates.ts, or rnpv-engine.ts.
+ * When omitted (undefined), the engine falls back to its standard defaults —
+ * so existing calculations are unaffected.
+ */
+export interface CustomAssumptions {
+  /** WACC override (decimal, e.g. 0.12 for 12%). Supersedes the computed discount rate. */
+  discountRate?: number;
+
+  /**
+   * Per-phase transition probability overrides (decimal, 0–1).
+   * Keys are phase transition labels: 'p1_to_p2', 'p2_to_p3', 'p3_to_approval', etc.
+   * Only the phases provided are overridden; others fall back to base rates.
+   */
+  phaseTransitionRates?: Partial<Record<string, number>>;
+
+  /**
+   * Per-phase development cost overrides in $M.
+   * Keys match phase names: 'discovery', 'preclinical', 'phase1', 'phase2', 'phase3', 'nda'.
+   */
+  phaseCosts?: Partial<Record<string, number>>;
+
+  /** Revenue lifecycle curve overrides. Only provided fields are overridden. */
+  revenueCurve?: Partial<{
+    rampUpYears: number;
+    peakDurationYears: number;
+    declineRate: number;
+    genericErosion: number;
+    loeYearsAfterApproval: number;
+  }>;
+
+  /** COGS as a fraction of revenue (0–1, e.g. 0.10 for 10%). */
+  cogsPercent?: number;
+
+  /** Explicit peak annual sales override in $M. */
+  peakSalesOverride?: { low: number; median: number; high: number };
+}
+
+/**
+ * Internal counterfactual flags used by the risk decomposer (item 11, tier 4).
+ *
+ * Each flag, when true, neutralizes one risk source inside calculateRNPV()
+ * so the decomposer can measure the marginal value impact of that source by
+ * comparing the counterfactual NPV against the baseline NPV. NEVER set these
+ * from public API code — they exist solely for internal recursive calls and
+ * always travel with `skipDecomposition: true` to prevent infinite recursion.
+ */
+export interface RNPVInternalFlags {
+  /** Strip MANUFACTURING_WACC_PREMIUM from the discount rate calculation. */
+  skipMfgPremium?: boolean;
+  /** Skip the indication-specific competitive density penetration multiplier. */
+  skipCompetitiveDensity?: boolean;
+  /** Skip the MARKET_ACCESS_DELAY_MONTHS lag added to time-to-market. */
+  skipMarketAccessDelay?: boolean;
+  /** Skip the indication generic-entrenchment peak sales penalty. */
+  skipGenericEntrenchment?: boolean;
+  /** Suppress the recursive decomposeRisk() call inside calculateRNPV. */
+  skipDecomposition?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -393,6 +473,90 @@ export interface RNPVResult {
     tam?: number;
     message?: string;
   };
+
+  /**
+   * Risk decomposition: attribution of how the headline rNPV is reduced
+   * (vs an unrisked baseline) across four institutional risk buckets plus
+   * an "other" residual that captures interactions and unmodeled risk.
+   *
+   * Populated only when TIER4_FLAGS.riskDecomposition is on. Item 11 of
+   * the engine grade A+ tier 4 roadmap.
+   *
+   * Mechanically: each bucket's `impact_M` is the marginal value LOST to
+   * that risk source, computed by re-running calculateRNPV with that one
+   * risk source neutralized and taking the delta (counterfactual NPV minus
+   * baseline NPV, sign-flipped). All buckets are non-positive (≤ 0).
+   *
+   * The four buckets are:
+   *   - clinical: phase-transition failure risk (PoS)
+   *   - commercial: competitive density + generic entrenchment peak penalty
+   *   - manufacturing: MANUFACTURING_WACC_PREMIUM by modality
+   *   - regulatory: market access delay + absent regulatory designations
+   *   - other: residual = trueTotal − sum(buckets), captures interactions
+   */
+  riskDecomposition?: RiskDecomposition;
+
+  /** Tracks which custom assumptions were applied, if any. */
+  customAssumptionsApplied?: {
+    overriddenFields: string[];
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Risk Decomposition (tier 4 item 11)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single risk bucket within the rNPV decomposition.
+ *
+ * `impact_M` is the marginal $M of value LOST to this bucket given the
+ * other buckets are still active (i.e. measured "in context", not in
+ * isolation). It is non-positive: 0 means this risk source had no
+ * material effect; -50 means this bucket is eating $50M of value.
+ *
+ * `percentOfTotal` is `impact_M / total_M`, normalized so all buckets
+ * (including `other`) sum to 1.0 ± 0.001.
+ */
+export interface RiskBucket {
+  /** Marginal NPV impact in $M, ≤ 0 (negative = value lost). */
+  impact_M: number;
+  /** Share of total decomposed risk (0..1). All buckets sum to 1.0. */
+  percentOfTotal: number;
+  /** Human-readable drivers (e.g. ['Phase 2→3 transition (24% PoS)']). */
+  drivers: string[];
+}
+
+/**
+ * Four-bucket attribution of where the rNPV's risk wedge comes from.
+ *
+ * `total_M` is the sum of all five buckets and should match the "true
+ * total wedge" — the difference between an unrisked counterfactual NPV
+ * and the headline `riskAdjustedNPV` — within `reconciliationGap` < 0.10.
+ *
+ * If reconciliationGap > 0.10 the decomposer logs a Sentry breadcrumb
+ * (production-safe, never throws) and biases the residual into `other`
+ * so the totals always reconcile to 1.0 for UI display.
+ */
+export interface RiskDecomposition {
+  /** Phase-transition failure risk (clinical PoS). */
+  clinical: RiskBucket;
+  /** Competitive density + generic entrenchment peak sales penalty. */
+  commercial: RiskBucket;
+  /** Manufacturing complexity WACC premium (modality-driven). */
+  manufacturing: RiskBucket;
+  /** Market access delay + missing regulatory designations. */
+  regulatory: RiskBucket;
+  /** Residual: interactions + unmodeled risk. */
+  other: RiskBucket;
+  /** Sum of all five buckets in $M (≤ 0). */
+  total_M: number;
+  /**
+   * |trueTotal − sum(buckets)| / |trueTotal|, where trueTotal is the
+   * difference between the fully-unrisked counterfactual NPV and the
+   * baseline rNPV. Should be < 0.10; values above that trigger a
+   * Sentry breadcrumb but the bucket totals are always reconciled.
+   */
+  reconciliationGap: number;
 }
 
 // ---------------------------------------------------------------------------
