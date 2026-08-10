@@ -383,6 +383,14 @@ export interface RNPVInput {
   differentiationFactors?: string[];
 
   // =========================================================================
+  // Custom assumptions — Pro users can override hardcoded engine defaults.
+  // When set, these take precedence over the lookup-table values from
+  // pos-tables.ts, discount-rates.ts, etc. When omitted, the engine uses
+  // its standard defaults (identical to pre-feature behavior).
+  // =========================================================================
+  customAssumptions?: CustomAssumptions;
+
+  // =========================================================================
   // Internal flags — DO NOT set from public API code.
   // Used by lib/financial/risk-decomposition.ts (Tier 4 item 11) to run
   // counterfactual NPVs with specific risk sources neutralized. Always
@@ -390,6 +398,47 @@ export interface RNPVInput {
   // =========================================================================
   /** Internal: counterfactual flags for risk decomposition. */
   __internalFlags?: RNPVInternalFlags;
+}
+
+/**
+ * User-overridable valuation assumptions for the rNPV engine.
+ *
+ * Each field, when set, takes precedence over the corresponding hardcoded
+ * default from pos-tables.ts, discount-rates.ts, or rnpv-engine.ts.
+ * When omitted (undefined), the engine falls back to its standard defaults —
+ * so existing calculations are unaffected.
+ */
+export interface CustomAssumptions {
+  /** WACC override (decimal, e.g. 0.12 for 12%). Supersedes the computed discount rate. */
+  discountRate?: number;
+
+  /**
+   * Per-phase transition probability overrides (decimal, 0–1).
+   * Keys are phase transition labels: 'p1_to_p2', 'p2_to_p3', 'p3_to_approval', etc.
+   * Only the phases provided are overridden; others fall back to base rates.
+   */
+  phaseTransitionRates?: Partial<Record<string, number>>;
+
+  /**
+   * Per-phase development cost overrides in $M.
+   * Keys match phase names: 'discovery', 'preclinical', 'phase1', 'phase2', 'phase3', 'nda'.
+   */
+  phaseCosts?: Partial<Record<string, number>>;
+
+  /** Revenue lifecycle curve overrides. Only provided fields are overridden. */
+  revenueCurve?: Partial<{
+    rampUpYears: number;
+    peakDurationYears: number;
+    declineRate: number;
+    genericErosion: number;
+    loeYearsAfterApproval: number;
+  }>;
+
+  /** COGS as a fraction of revenue (0–1, e.g. 0.10 for 10%). */
+  cogsPercent?: number;
+
+  /** Explicit peak annual sales override in $M. */
+  peakSalesOverride?: { low: number; median: number; high: number };
 }
 
 /**
@@ -713,6 +762,11 @@ export interface RNPVResult {
     loeYear?: number;
     biosimilarYear?: number;
   };
+
+  /** Tracks which custom assumptions were applied, if any. */
+  customAssumptionsApplied?: {
+    overriddenFields: string[];
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -724,16 +778,16 @@ export interface RNPVResult {
  * All impacts are reported as positive $M (magnitude of value destroyed).
  */
 export interface RiskBucket {
-  /** Magnitude of NPV impact attributed to this bucket ($M, ≥ 0). */
+  /** Magnitude of NPV impact attributed to this bucket ($M, >= 0). */
   impact_M: number;
   /** Share of total risk wedge attributable to this bucket (0..1). */
   percentOfTotal: number;
-  /** Human-readable drivers (e.g., "phase 2→3 attrition", "Keytruda crowding"). */
+  /** Human-readable drivers (e.g., "phase 2->3 attrition", "Keytruda crowding"). */
   drivers: string[];
 }
 
 /**
- * 4-bucket attribution of `unadjustedNPV - riskAdjustedNPV` — the "risk wedge."
+ * 4-bucket attribution of `unadjustedNPV - riskAdjustedNPV` -- the "risk wedge."
  * Each bucket represents how much NPV is destroyed by a specific risk source,
  * computed via counterfactual re-runs of calculateRNPV with that source
  * neutralized.
@@ -747,12 +801,12 @@ export interface RiskDecomposition {
   manufacturing: RiskBucket;
   /** Regulatory: designation risk, territory risk premium, FDA pathway risk. */
   regulatory: RiskBucket;
-  /** Residual — bookkeeping bucket so the four main ones always reconcile. */
+  /** Residual -- bookkeeping bucket so the four main ones always reconcile. */
   other: RiskBucket;
-  /** Sum of bucket impacts ($M). Should ≈ unadjustedNPV − riskAdjustedNPV. */
+  /** Sum of bucket impacts ($M). Should approximate unadjustedNPV - riskAdjustedNPV. */
   total_M: number;
   /**
-   * Absolute reconciliation gap vs. `unadjustedNPV − riskAdjustedNPV`,
+   * Absolute reconciliation gap vs. `unadjustedNPV - riskAdjustedNPV`,
    * normalized by total_M (0..1). Violations > 0.10 surface as Sentry
    * breadcrumbs but never throw (decomposition is informational).
    */

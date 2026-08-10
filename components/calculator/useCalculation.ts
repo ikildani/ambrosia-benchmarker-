@@ -61,6 +61,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     ...(s.therapeuticArea === 'hematology' ? { hemeLineage: s.hemeLineage, transplantEligibility: s.transplantEligibility, mrdStatus: s.mrdStatus } : {}),
     ...(s.therapeuticArea === 'dermatology' ? { skinSeverity: s.skinSeverity, chronicityProfile: s.chronicityProfile, topicalVsSystemic: s.topicalVsSystemic } : {}),
     ...(s.therapeuticArea === 'gastroenterology' ? { giSegment: s.giSegment, biologicExperience: s.biologicExperience, endoscopicEndpoint: s.endoscopicEndpoint } : {}),
+    ...(s.customAssumptions ? { customAssumptions: s.customAssumptions } : {}),
   };
 }
 
@@ -218,6 +219,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
             total_deal_value_low: calculatedResult.terms.totalDealValue.low,
             total_deal_value_high: calculatedResult.terms.totalDealValue.high,
           },
+          ...(state.customAssumptions ? { custom_assumptions: state.customAssumptions } : {}),
         }),
       })
         .then(async (response) => {
@@ -259,6 +261,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
           dataQuality: state.dataQuality,
           dealType: state.dealType || 'licensing',
           regulatoryDesignations: state.regulatoryDesignations,
+          ...(state.customAssumptions ? { customAssumptions: state.customAssumptions as Record<string, unknown> } : {}),
         },
         results: {
           upfrontLow: calculatedResult.terms.upfront.low,

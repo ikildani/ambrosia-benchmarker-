@@ -8,3 +8,8 @@ export { default as LiveDealPreview } from './LiveDealPreview';
 export { default as WizardStepper } from './WizardStepper';
 export type { WizardStep } from './WizardStepper';
 export { default as ValidationWarnings } from './ValidationWarnings';
+export { default as PerPhaseTransitionTable } from './PerPhaseTransitionTable';
+export { default as NumberInputWithDefault } from './NumberInputWithDefault';
+export { default as CustomAssumptionsBadge } from './CustomAssumptionsBadge';
+export { default as CustomAssumptionsPanel } from './CustomAssumptionsPanel';
+export type { DealTemplate } from './types';

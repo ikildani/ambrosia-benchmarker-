@@ -91,6 +91,8 @@ import type { CalculatorFormState } from './calculator/useCalculatorState';
 import { useCalculation, buildCalculationInput } from './calculator/useCalculation';
 import { UsageCounter } from './calculator/UsageCounter';
 import type { UserTier } from '@/types/tier';
+import CustomAssumptionsPanel from './calculator/CustomAssumptionsPanel';
+import { getResolvedDefaults } from '@/lib/financial/default-assumptions';
 
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 const DealQuery = dynamic(() => import('./DealQuery'), { ssr: false });
@@ -134,6 +136,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setShowPaywall(true);
     },
   });
+
+  // ── Resolved defaults for Custom Assumptions panel ─────────────────────────
+  const resolvedDefaults = useMemo(() => getResolvedDefaults({
+    therapeuticArea: state.therapeuticArea,
+    phase: state.phase || 'phase2',
+    modality: state.modality || 'smallMolecule',
+    indication: state.indication || undefined,
+    territory: state.territory,
+  }), [state.therapeuticArea, state.phase, state.modality, state.indication, state.territory]);
 
   // ── Local UI state (not form-related) ──────────────────────────────────────
   const [showPaywall, setShowPaywall] = useState(false);
@@ -836,7 +847,18 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                     );
                     break;
                   case 'deal':
-                    stepContent = <AdvancedOptionsSection column="deal-scope" {...advancedProps} />;
+                    stepContent = (
+                      <div className="space-y-6">
+                        <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
+                        <CustomAssumptionsPanel
+                          assumptions={state.customAssumptions}
+                          defaults={resolvedDefaults}
+                          onChange={(v) => v ? actions.setCustomAssumptions(v) : actions.resetCustomAssumptions()}
+                          tier={tier as 'free' | 'pro' | 'report'}
+                          onUpgradeClick={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+                        />
+                      </div>
+                    );
                     break;
                   case 'competitive-deal':
                     stepContent = (
@@ -855,6 +877,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           phase={state.phase}
                         />
                         <AdvancedOptionsSection column="deal-scope" {...advancedProps} />
+                        <CustomAssumptionsPanel
+                          assumptions={state.customAssumptions}
+                          defaults={resolvedDefaults}
+                          onChange={(v) => v ? actions.setCustomAssumptions(v) : actions.resetCustomAssumptions()}
+                          tier={tier as 'free' | 'pro' | 'report'}
+                          onUpgradeClick={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+                        />
                       </div>
                     );
                     break;

@@ -1,4 +1,5 @@
 import { useReducer, useCallback, useMemo, useEffect, useRef, useState } from 'react';
+import type { CustomAssumptions } from '@/lib/financial/types';
 import type {
   TherapeuticArea,
   Phase,
@@ -139,6 +140,8 @@ export interface CalculatorFormState {
   // didn't provide a specific asset.
   assetName: string;
 
+  // Custom model assumptions (Pro feature)
+  customAssumptions: CustomAssumptions | null;
   // UI state
   wizardStep: number;
   quickMode: boolean;
@@ -202,6 +205,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   differentiationFactors: [],  // No differentiation factors selected by default
   peakSalesOverrideM: null,  // R23: null = use engine default
   assetName: '',  // R63: empty = no branded lookup
+  customAssumptions: null,
   wizardStep: 0,
   quickMode: true,
   showTemplates: false,
@@ -218,6 +222,8 @@ type CalculatorAction =
   | { type: 'TOGGLE_DIFFERENTIATION'; key: string }
   | { type: 'CLEAR_HIGHLIGHTS' }
   | { type: 'BULK_SET'; fields: Partial<CalculatorFormState> }
+  | { type: 'SET_CUSTOM_ASSUMPTIONS'; assumptions: CustomAssumptions }
+  | { type: 'RESET_CUSTOM_ASSUMPTIONS' }
   | { type: 'RESET' };
 
 function reducer(state: CalculatorFormState, action: CalculatorAction): CalculatorFormState {
@@ -386,6 +392,12 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
       return next;
     }
 
+    case 'SET_CUSTOM_ASSUMPTIONS':
+      return { ...state, customAssumptions: action.assumptions };
+
+    case 'RESET_CUSTOM_ASSUMPTIONS':
+      return { ...state, customAssumptions: null };
+
     case 'RESET':
       return { ...INITIAL_STATE };
 
@@ -464,6 +476,8 @@ export interface CalculatorActions {
   toggleRegulatory: (designation: keyof RegulatoryDesignations) => void;
   clearHighlights: () => void;
   bulkSet: (fields: Partial<CalculatorFormState>) => void;
+  setCustomAssumptions: (v: CustomAssumptions) => void;
+  resetCustomAssumptions: () => void;
   switchTherapeuticArea: (area: TherapeuticArea) => void;
   reset: () => void;
   dispatch: React.Dispatch<CalculatorAction>;
@@ -619,6 +633,8 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions, b
     toggleRegulatory: (d) => dispatch({ type: 'TOGGLE_REGULATORY', designation: d }),
     clearHighlights: () => dispatch({ type: 'CLEAR_HIGHLIGHTS' }),
     bulkSet: (fields) => dispatch({ type: 'BULK_SET', fields }),
+    setCustomAssumptions: (v) => dispatch({ type: 'SET_CUSTOM_ASSUMPTIONS', assumptions: v }),
+    resetCustomAssumptions: () => dispatch({ type: 'RESET_CUSTOM_ASSUMPTIONS' }),
     switchTherapeuticArea: (area) => dispatch({ type: 'SET_THERAPEUTIC_AREA', area }),
     reset: () => { clearSavedFormState(); dispatch({ type: 'RESET' }); },
     dispatch,

@@ -397,6 +397,8 @@ export interface CalculationInput {
   };
   // Collaboration: equity investment by the licensee in $M.
   equityInvestment?: number;
+  // Custom model assumptions (Pro feature)
+  customAssumptions?: import('@/lib/financial/types').CustomAssumptions;
 }
 
 // Drill-down data for expanded metric views

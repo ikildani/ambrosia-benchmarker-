@@ -1340,6 +1340,23 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
         )}
 
+        {/* Custom Assumptions Applied indicator */}
+        {financialModel?.rnpv?.customAssumptionsApplied && (
+          <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-teal-50/50 dark:bg-teal-900/10 rounded-xl border border-teal-200/60 dark:border-teal-700/30 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">Custom Assumptions Applied</p>
+              <p className="text-xs text-teal-600 dark:text-teal-400 mt-0.5">
+                {financialModel.rnpv.customAssumptionsApplied.overriddenFields.length} model {financialModel.rnpv.customAssumptionsApplied.overriddenFields.length === 1 ? 'parameter' : 'parameters'} customized: {financialModel.rnpv.customAssumptionsApplied.overriddenFields.join(', ')}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Deal Summary Strip -- compact single-row overview (Pro/Report only) */}
         {<div className="mb-3 sm:mb-4 rounded-lg border border-neutral-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
           <div className="flex flex-wrap items-center divide-x divide-neutral-200 dark:divide-slate-600">

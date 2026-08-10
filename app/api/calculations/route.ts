@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
       output_total_deal_value_low: safeNum(body.outputs?.total_deal_value_low),
       output_total_deal_value_high: safeNum(body.outputs?.total_deal_value_high),
       calculation_version: '1.0.0',
+      custom_assumptions: body.custom_assumptions || null,
     };
 
     let { data: calculation, error: calcError } = await supabase
