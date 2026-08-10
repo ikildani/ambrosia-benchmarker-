@@ -500,20 +500,38 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
 
   // Apply scenario PoS multiplier (e.g., 0.85 for reduced approval confidence)
   // Clamp to [0, 1] to keep probability valid
-  const cumulativePoS = input.posMultiplier != null
+  let cumulativePoS = input.posMultiplier != null
     ? Math.max(0, Math.min(1, modifiedPoS * input.posMultiplier))
     : modifiedPoS;
+
+  // Reformulation: higher PoS due to established safety profile
+  if (dealType === 'reformulation') {
+    cumulativePoS = Math.min(0.95, cumulativePoS * 1.40);
+  }
 
   // 3. Calculate years to market from current phase
   // Determine which clinical pathway to follow based on current phase.
   // Combined phases (phase1_2, phase2_3) are ALTERNATIVE pathways, not sequential
   // steps. A drug follows ONE of: standard (P1→P2→P3), combined-early (P1/2→P3),
   // or combined-late (P2/3). Iterating PHASE_ORDER linearly double-counts them.
-  const durations = PHASE_DURATION[therapeuticArea] || PHASE_DURATION.oncology;
+  const baseDurations = PHASE_DURATION[therapeuticArea] || PHASE_DURATION.oncology;
   const baseCosts = PHASE_COSTS[therapeuticArea] || PHASE_COSTS.oncology;
+  // Spread into mutable copies so deal-type adjustments (e.g., reformulation)
+  // do not mutate the shared lookup tables.
+  const durations: Record<string, number> = { ...baseDurations };
   const costs: Record<string, number> = ca?.phaseCosts
     ? { ...baseCosts, ...Object.fromEntries(Object.entries(ca.phaseCosts).filter(([, v]) => v != null)) as Record<string, number> }
-    : baseCosts;
+    : { ...baseCosts };
+
+  // Reformulation: reduced costs and timelines (PK bridging, not full trials)
+  if (dealType === 'reformulation') {
+    for (const key of Object.keys(costs)) {
+      costs[key] = (costs[key] || 0) * 0.4;
+    }
+    for (const key of Object.keys(durations)) {
+      durations[key] = (durations[key] || 0) * 0.5;
+    }
+  }
   const currentIdx = phaseIndex(phase);
 
   // Build the actual sequential pathway based on the starting phase
@@ -1745,6 +1763,7 @@ function getUpfrontPercent(phase: string): { low: number; median: number; high: 
  * Source: DealForma/BioCentury 2020-2025 deal analysis by deal structure.
  */
 function getDealTypeUpfrontPercent(dealType: string): { low: number; median: number; high: number } | null {
+  if (dealType === 'reformulation') return { low: 0.15, median: 0.225, high: 0.30 };
   const overrides: Record<string, { low: number; median: number; high: number }> = {
     acquisition: { low: 0.70, median: 0.825, high: 0.95 },    // Mostly upfront cash
     codevelopment: { low: 0.15, median: 0.225, high: 0.30 },   // Shared risk = lower upfront

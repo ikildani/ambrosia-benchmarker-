@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { CalculationInput } from '@/lib/calculations';
 import { PRICING } from '@/lib/config/constants';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
 import type { UserTier } from '@/types/tier';
+import { BUYER_TIER_LABELS, BUYER_TIER_COLORS } from '@/lib/buyer-tier';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,7 @@ interface EnrichedDeal {
   therapeuticArea: string | null;
   dealType: string | null;
   territory: string | null;
+  buyerTier: string | null;
   matchScore: number;
   matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; indication: boolean; recency: number };
   relevanceReasons: string[];
@@ -235,6 +237,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
   const [phaseFilter, setPhaseFilter] = useState('all');
   const [modalityFilter, setModalityFilter] = useState('all');
   const [dealTypeFilter, setDealTypeFilter] = useState('all');
+  const [buyerTierFilter, setBuyerTierFilter] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('matchScore');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
@@ -266,6 +269,15 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
   }, [inputs.therapeuticArea, inputs.modality, inputs.indication, inputs.phase, inputs.dealType]);
 
   // Derived filter options
+  const buyerTierOptions = [
+    { value: 'all', label: 'All buyer types' },
+    { value: 'large_pharma', label: 'Large Pharma' },
+    { value: 'mid_pharma', label: 'Mid-Cap Pharma' },
+    { value: 'specialty', label: 'Specialty' },
+    { value: 'generic', label: 'Generic' },
+    { value: 'biotech', label: 'Biotech' },
+  ];
+
   const filterOptions = useMemo(() => {
     const phases = new Set(deals.map(d => d.phase).filter(Boolean));
     const modalities = new Set(deals.map(d => d.modality).filter(Boolean));
@@ -286,6 +298,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
       if (phaseFilter !== 'all' && deal.phase !== phaseFilter) return false;
       if (modalityFilter !== 'all' && deal.modality !== modalityFilter) return false;
       if (dealTypeFilter !== 'all' && deal.dealType !== dealTypeFilter) return false;
+      if (buyerTierFilter !== 'all' && deal.buyerTier !== buyerTierFilter) return false;
       return true;
     });
     filtered.sort((a, b) => {
@@ -296,7 +309,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
       return sortDir === 'desc' ? bv - av : av - bv;
     });
     return filtered;
-  }, [deals, recencyFilter, phaseFilter, modalityFilter, dealTypeFilter, sortKey, sortDir, currentYear]);
+  }, [deals, recencyFilter, phaseFilter, modalityFilter, dealTypeFilter, buyerTierFilter, sortKey, sortDir, currentYear]);
 
   const visibleDeals = hasFullAccess ? processedDeals : processedDeals.slice(0, FREE_DEAL_LIMIT);
   const hiddenCount = hasFullAccess ? 0 : Math.max(0, totalAvailable - FREE_DEAL_LIMIT);
@@ -429,6 +442,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
             <FilterSelect label="Phase" value={phaseFilter} options={filterOptions.phases} onChange={setPhaseFilter} />
             <FilterSelect label="Modality" value={modalityFilter} options={filterOptions.modalities} onChange={setModalityFilter} />
             <FilterSelect label="Deal type" value={dealTypeFilter} options={filterOptions.dealTypes} onChange={setDealTypeFilter} />
+            <FilterSelect label="Buyer type" value={buyerTierFilter} options={buyerTierOptions} onChange={setBuyerTierFilter} />
           </div>
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
             {([['12mo', '12mo'], ['24mo', '24mo'], ['all', 'All']] as const).map(([value, label]) => (
@@ -511,6 +525,11 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
                   {deal.matchBreakdown.modality && <span className="text-[9px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Mod</span>}
                   {deal.matchBreakdown.phase && <span className="text-[9px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Phase</span>}
                   {deal.matchBreakdown.indication && <span className="text-[9px] px-1 py-px rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300">Ind</span>}
+                  {deal.buyerTier && BUYER_TIER_LABELS[deal.buyerTier as keyof typeof BUYER_TIER_LABELS] && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${BUYER_TIER_COLORS[deal.buyerTier as keyof typeof BUYER_TIER_COLORS] || ''}`}>
+                      {BUYER_TIER_LABELS[deal.buyerTier as keyof typeof BUYER_TIER_LABELS]}
+                    </span>
+                  )}
                   {deal.phase && <span className="text-[10px] text-slate-400 dark:text-slate-500">{deal.phase}</span>}
                   {deal.modality && <span className="text-[10px] text-slate-400 dark:text-slate-500">· {deal.modality}</span>}
                 </div>
@@ -573,8 +592,7 @@ function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInpu
   const [narration, setNarration] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const startedRef = useCallback(() => {}, []);
-  const [hasStarted, setHasStarted] = useState(false);
+  const triggeredRef = useRef(false);
 
   const generateNarration = useCallback(async () => {
     if (loading || narration) return;
@@ -610,14 +628,14 @@ function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInpu
     }
   }, [inputs, deals, loading, narration]);
 
-  // Auto-trigger once on mount
+  // Auto-trigger once on mount — ref-guarded so re-renders don't cancel the timer
   useEffect(() => {
-    if (!hasStarted && deals.length > 0) {
-      setHasStarted(true);
+    if (!triggeredRef.current && deals.length > 0) {
+      triggeredRef.current = true;
       const timer = setTimeout(generateNarration, 1500);
       return () => clearTimeout(timer);
     }
-  }, [hasStarted, deals.length, generateNarration]);
+  }, [deals.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">

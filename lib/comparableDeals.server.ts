@@ -10,6 +10,7 @@ import {
   COMPARABLE_DEALS,
 } from '@/lib/comparableDeals';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
+import { classifyBuyerTier } from './buyer-tier';
 
 // Format dollar amount from raw USD number to display string
 function formatDealValue(usd: number | null): string | null {
@@ -206,6 +207,7 @@ export interface EnrichedComparableDeal {
   therapeuticArea: string | null;
   dealType: string | null;
   territory: string | null;
+  buyerTier: string | null;
   matchScore: number;
   matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; indication: boolean; recency: number };
   relevanceReasons: string[];
@@ -273,6 +275,7 @@ export async function findEnrichedComparableDeals(
         therapeuticArea: ta || null,
         dealType: d.deal_type || null,
         territory: d.territory || null,
+        buyerTier: classifyBuyerTier(d.licensee_name || ''),
         matchScore: Math.min(score / MAX_SCORE, 1),
         matchBreakdown: breakdown,
         relevanceReasons: reasons,

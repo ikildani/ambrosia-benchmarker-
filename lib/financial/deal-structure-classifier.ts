@@ -315,7 +315,17 @@ export function classifyDealStructure(input: DealStructureInput): DealStructureC
     };
   }
 
-  // ── 6. Classic license (default) ──
+  // ── 6. Reformulation / 505(b)(2) ──
+  if (dealType === 'reformulation') {
+    signals.push('dealType=reformulation (505(b)(2) / line extension)');
+    return {
+      structure: 'classic_license' as DealStructure,
+      confidence: 0.90,
+      signals,
+    };
+  }
+
+  // ── 7. Classic license (default) ──
   signals.push(
     `dealType=${dealType || 'license'} + phase=${phase} + territory=${territory || 'global'}`,
   );

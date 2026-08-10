@@ -60,6 +60,7 @@ export type DealType =
   | 'codevelopment'
   | 'collaboration'
   | 'option'
+  | 'reformulation'          // Line extension / 505(b)(2) pathway referencing prior approval
   // Round 21 additions (2026-04-13)
   | 'platform'              // Platform access deals (Moderna-style $500M-$2B broad-access
                              // agreements granting exclusive modality rights, not asset-specific)
@@ -176,6 +177,15 @@ export const DEAL_TYPE_PROFILES: Record<DealType, DealTypeProfile> = {
     postApprovalFloorM: null,
     notes: 'Pure option premium, exercise economics deferred. Engine pairs upfront ratio with `getOptionExerciseProbability` in rnpv-engine.ts.',
     source: 'BIO 2024-2026 option-deal analysis; Pfizer/Takeda preclinical option deals 2020-2024.',
+  },
+
+  reformulation: {
+    dealType: 'reformulation',
+    upfrontPercent: { low: 0.15, median: 0.225, high: 0.30 },
+    postApprovalUpfrontMultiplier: null,
+    postApprovalFloorM: null,
+    notes: 'Line extension / 505(b)(2). Lower risk, shorter timeline. Deal values typically $10-200M.',
+    source: 'DealForma 2020-2025 reformulation analysis.',
   },
 
   // ==========================================================================

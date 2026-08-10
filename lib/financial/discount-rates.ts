@@ -180,6 +180,7 @@ export const DEAL_TYPE_RISK_ADJUSTMENT: Record<string, number> = {
   codevelopment: -0.005,    // -0.5pp — shared risk reduces cost of capital
   option: 0.01,             // +1.0pp — execution uncertainty (option exercise)
   collaboration: 0.02,      // +2.0pp — early-stage, high structural uncertainty
+  reformulation: -0.02,     // -2.0pp — established safety profile, 505(b)(2) lower risk
 };
 
 /**

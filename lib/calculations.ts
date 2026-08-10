@@ -12,7 +12,7 @@ export type TherapeuticArea = 'oncology' | 'neurology' | 'immunology' | 'metabol
 export type Phase = 'discovery' | 'preclinical' | 'phase1' | 'phase1_2' | 'phase2' | 'phase2_3' | 'phase3' | 'nda_filed' | 'approved';
 
 // Deal structure types
-export type DealType = 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+export type DealType = 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation';
 
 // Modality types (17 oncology + 6 neurology = 23 options)
 export type Modality =
@@ -1579,12 +1579,28 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     approved: 0.90,     // Approved: effectively commercial partnership
   };
 
+  // Reformulation / 505(b)(2): lower multipliers than licensing because
+  // deal values are typically $10-200M (line extensions, not novel assets).
+  // Established safety profile reduces risk but total value is smaller.
+  const phaseReformulationMultipliers: Partial<Record<Phase, number>> = {
+    discovery: 0.25,    // Discovery: rarely reformulated at this stage
+    preclinical: 0.35,  // Preclinical: formulation development
+    phase1: 0.45,       // Phase 1: PK bridging studies
+    phase1_2: 0.50,     // Phase 1/2: early reformulation data
+    phase2: 0.55,       // Phase 2: PK/efficacy bridging
+    phase2_3: 0.60,     // Phase 2/3: pivotal reformulation trial
+    phase3: 0.65,       // Phase 3: registrational 505(b)(2) trial
+    nda_filed: 0.70,    // NDA filed: 505(b)(2) submission
+    approved: 0.75,     // Approved: reformulated product on market
+  };
+
   const dealTypeMultipliers: Record<DealType, number> = {
     licensing: 1.0,
     acquisition: phaseAcquisitionMultipliers[input.phase] ?? 0.90,
     codevelopment: phaseCodevMultipliers[input.phase] ?? 0.85,
     option: phaseOptionMultipliers[input.phase] ?? 0.75,
     collaboration: phaseCollabMultipliers[input.phase] ?? 0.50,
+    reformulation: phaseReformulationMultipliers[input.phase] ?? 0.55,
   };
   const dealTypeMultiplier = dealTypeMultipliers[dealType];
   if (dealType !== 'licensing') {
@@ -1592,6 +1608,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       licensing: 'Licensing', acquisition: 'Acquisition / M&A',
       codevelopment: 'Co-Development', option: 'Option Agreement',
       collaboration: 'Research Collaboration',
+      reformulation: 'Reformulation / 505(b)(2)',
     };
     modifiers.push({
       name: dealTypeLabels[dealType],
@@ -1599,6 +1616,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
       context: dealType === 'acquisition' ? 'Premium for certainty of control' :
                dealType === 'codevelopment' ? 'Shared economics reduce total value' :
                dealType === 'option' ? 'Optionality discount, lower commitment' :
+               dealType === 'reformulation' ? 'Lower value — established safety, abbreviated pathway' :
                'Early-stage research partnership',
     });
   }
@@ -1723,6 +1741,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     codevelopment: { low: 0.15, high: 0.30 }, // shared risk = lower upfront
     option: { low: 0.05, high: 0.15 }, // option premium, exercise later
     collaboration: { low: 0.10, high: 0.25 }, // research funding, early partnership
+    reformulation: { low: 0.15, high: 0.30 }, // 505(b)(2) lower upfront than licensing
   };
 
   // Calculate upfront based on phase ratios with risk adjustment
@@ -1760,6 +1779,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     codevelopment: { dev: 0.40, reg: 0.35, comm: 0.25 }, // dev-heavy shared economics
     option: { dev: 0.40, reg: 0.30, comm: 0.30 }, // pre-exercise + post-exercise
     collaboration: { dev: 0.50, reg: 0.30, comm: 0.20 }, // research-heavy
+    reformulation: { dev: 0.20, reg: 0.35, comm: 0.45 }, // regulatory-heavy (505(b)(2) pathway)
   };
 
   const dmPhaseAdjust = benchmarks.neurologyDiseaseModifyingPhaseAdjustment;
@@ -1817,6 +1837,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     codevelopment: 0.65,
     option: 1.0,
     collaboration: 0.50,
+    reformulation: 0.70,
   };
   const royaltyScalar = dealTypeRoyaltyScalars[dealType];
 
@@ -2246,6 +2267,21 @@ function getDealTypeLabels(dealType: DealType, upfrontPercent: number): DealType
         recommendationPrefix: `~${upfrontPercent}% Research Funding / ~${100 - upfrontPercent}% Deferred`,
         dealTypeDisplay: 'Research Collaboration',
       };
+    case 'reformulation':
+      return {
+        upfrontLabel: 'Upfront Payment',
+        upfrontBadge: '505(b)(2) Payment',
+        upfrontTooltip: 'The upfront payment for reformulation / 505(b)(2) rights. Typically 15-30% of total deal value, reflecting lower risk from established safety profile.',
+        totalValueLabel: 'Total Deal Value',
+        devMilestoneLabel: 'Formulation Development',
+        regMilestoneLabel: 'Regulatory Milestones',
+        commMilestoneLabel: 'Commercial Milestones',
+        milestoneBadge: 'If Achieved',
+        royaltyLabel: 'Royalties',
+        royaltyNote: 'Ongoing percentage of net sales for reformulated product',
+        recommendationPrefix: `~${upfrontPercent}% Upfront / ~${100 - upfrontPercent}% Milestones`,
+        dealTypeDisplay: 'Reformulation / 505(b)(2)',
+      };
     case 'licensing':
     default:
       return {
@@ -2299,6 +2335,12 @@ function getDrillDownExplanation(category: 'dev' | 'reg' | 'comm' | 'royalty', d
       comm: 'Post-license value represents potential downstream milestones and royalties if the collaboration converts to a full license. These payments are highly contingent on early research success.',
       royalty: 'Royalties apply only if the collaboration converts to a license agreement. Research collaborations often include reduced royalty rates (50% of standard) reflecting the partner\'s early-stage investment.',
     },
+    reformulation: {
+      dev: 'Formulation development milestones cover PK bridging studies, bioequivalence work, and reformulation optimization. These are typically lower-cost than de novo clinical trials.',
+      reg: 'Regulatory milestones are tied to 505(b)(2) submission acceptance, FDA review completion, and product approval. The 505(b)(2) pathway allows reference to prior approval data, reducing regulatory risk.',
+      comm: 'Commercial milestones are tied to net sales thresholds for the reformulated product. Launch economics benefit from existing market awareness of the reference product.',
+      royalty: 'Royalties on the reformulated product are typically lower than novel-asset licensing (70% of standard) reflecting the lower risk profile and established safety data.',
+    },
   };
   return explanations[dt]?.[category] ?? explanations.licensing[category];
 }
@@ -2315,6 +2357,7 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
     codevelopment: 'As a co-development partnership, economics are shared — lower upfront commitment offset by shared development costs and profit-sharing. ',
     option: 'Structured as an option agreement, the initial premium is modest with the majority of value deferred to exercise and post-exercise milestones. ',
     collaboration: 'As a research collaboration, upfront research funding is modest with value contingent on achieving research objectives and potential license conversion. ',
+    reformulation: 'As a reformulation / 505(b)(2) deal, economics reflect lower development risk due to established safety data, with regulatory milestones weighted toward the abbreviated approval pathway. ',
   };
   const prefix = dealTypeFraming[dealType] || '';
 
@@ -2467,6 +2510,7 @@ export const dealTypeOptions = [
   { value: 'codevelopment', label: 'Co-Development' },
   { value: 'option', label: 'Option Agreement' },
   { value: 'collaboration', label: 'Research Collaboration' },
+  { value: 'reformulation', label: 'Reformulation / 505(b)(2)' },
 ];
 
 export const dealTypeDescriptions: Record<string, string> = {
@@ -2475,6 +2519,7 @@ export const dealTypeDescriptions: Record<string, string> = {
   codevelopment: 'Shared development costs and commercial rights',
   option: 'Right to license at a future date, lower upfront',
   collaboration: 'Early research partnership, milestone-driven',
+  reformulation: 'Line extension, new formulation, or 505(b)(2) pathway referencing prior approval',
 };
 
 export const modalityOptions = [

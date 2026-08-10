@@ -28,6 +28,8 @@ export function normalizeDealTypeForDB(dealType: DealType): string {
       return 'license';
     case 'codevelopment':
       return 'co_development';
+    case 'reformulation':
+      return 'reformulation';
     case 'acquisition':
     case 'option':
     case 'collaboration':
@@ -61,6 +63,8 @@ export function normalizeDealTypeFromDB(dbDealType: string | null | undefined): 
       return 'option';
     case 'collaboration':
       return 'collaboration';
+    case 'reformulation':
+      return 'reformulation';
     // Unmapped: 'co_promotion', 'other', 'unknown', etc.
     default:
       return null;

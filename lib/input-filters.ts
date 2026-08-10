@@ -15,14 +15,15 @@ const HIDDEN_PHASES_BY_DEAL_TYPE: Record<DealType, Phase[]> = {
   collaboration: ['approved', 'nda_filed', 'phase3'],
   licensing: [],
   codevelopment: ['discovery'],
+  reformulation: ['discovery', 'preclinical', 'phase1', 'phase1_2'],
 };
 
 /** Deal types hidden for each phase */
 const HIDDEN_DEAL_TYPES_BY_PHASE: Record<Phase, DealType[]> = {
-  discovery: ['acquisition', 'codevelopment'],
-  preclinical: [],
-  phase1: [],
-  phase1_2: [],
+  discovery: ['acquisition', 'codevelopment', 'reformulation'],
+  preclinical: ['reformulation'],
+  phase1: ['reformulation'],
+  phase1_2: ['reformulation'],
   phase2: [],
   phase2_3: [],
   phase3: ['collaboration'],
@@ -37,6 +38,7 @@ const HIDDEN_TERRITORIES_BY_DEAL_TYPE: Record<DealType, Territory[]> = {
   licensing: [],
   option: [],
   codevelopment: [],
+  reformulation: [],
 };
 
 // ── Phase range descriptions for deal type tooltips ──────────────────────────
@@ -47,6 +49,7 @@ export const dealTypePhaseHints: Record<DealType, string> = {
   codevelopment: 'Preclinical through Approved',
   option: 'Discovery through Phase 3',
   collaboration: 'Discovery through Phase 2/3',
+  reformulation: 'Phase 2 through Approved',
 };
 
 // ── Public API ───────────────────────────────────────────────────────────────

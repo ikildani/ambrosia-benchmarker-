@@ -8,6 +8,7 @@
 // Revenue proxies and market cap references live in data/revenue-benchmarks.ts
 
 import { EXTENDED_COMPARABLE_DEALS, type ExtendedComparableDeal } from '@/data/comparable-deals-extended';
+import { type BuyerTier, classifyBuyerTier } from './buyer-tier';
 
 export interface ComparableDeal {
   licensor: string;
@@ -19,7 +20,7 @@ export interface ComparableDeal {
   royaltyRange?: string; // e.g., "mid-single to low-double digit"
   year: number;
   relevance: string;
-  dealType?: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+  dealType?: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation';
   modalities?: string[];
   indications?: string[];
   therapeuticArea: 'oncology' | 'neurology' | 'immunology' | 'metabolic' | 'cardiovascular' | 'infectiousDisease' | 'ophthalmology' | 'womensHealth' | 'rareDisease' | 'hematology' | 'dermatology' | 'gastroenterology' | 'both';
@@ -27,6 +28,7 @@ export interface ComparableDeal {
   territory?: string;
   phase?: string;
   source?: string;
+  buyerTier?: BuyerTier;
 }
 
 export const COMPARABLE_DEALS: ComparableDeal[] = [
@@ -44,7 +46,7 @@ export const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'Summit Therapeutics', licensee: 'Akeso', value: '$5B', totalValueM: 5000, upfrontM: 500, milestonesM: 4500, year: 2025, relevance: 'PD-1/VEGF bispecific ivonescimab US rights (NSCLC)', dealType: 'licensing', modalities: ['bispecific'], indications: ['lung_nsclc'], therapeuticArea: 'oncology' },
 
   // ═══════════════════════════════════════════════════════════════════════
-  // NEUROLOGY (8 deals)
+  // NEUROLOGY (8 deals + 7 CGRP migraine + 4 insomnia/orexin)
   // ═══════════════════════════════════════════════════════════════════════
   { licensor: 'Karuna Therapeutics', licensee: 'BMS', value: '$14B', totalValueM: 14000, year: 2024, relevance: 'Schizophrenia (KarXT/Cobenfy)', dealType: 'acquisition', modalities: ['smallMolecule'], indications: ['schizophrenia'], therapeuticArea: 'neurology' },
   { licensor: 'Cerevel Therapeutics', licensee: 'AbbVie', value: '$8.7B', totalValueM: 8700, year: 2024, relevance: 'CNS pipeline acquisition', dealType: 'acquisition', indications: ['schizophrenia', 'parkinsons'], therapeuticArea: 'neurology' },
@@ -54,6 +56,26 @@ export const COMPARABLE_DEALS: ComparableDeal[] = [
   { licensor: 'PTC Therapeutics', licensee: 'Novartis', value: '$1B', totalValueM: 1000, upfrontM: 1000, year: 2024, relevance: "Huntington's gene therapy", dealType: 'licensing', modalities: ['geneTherapy'], indications: ['huntingtons'], therapeuticArea: 'neurology' },
   { licensor: 'Sarepta Therapeutics', licensee: 'Roche', value: '$1.5B', totalValueM: 1500, upfrontM: 1500, year: 2024, relevance: 'Gene therapy for DMD (delandistrogene)', dealType: 'codevelopment', modalities: ['geneTherapy'], indications: ['dmd'], therapeuticArea: 'neurology', secondaryTAs: ['rareDisease'] },
   { licensor: 'Intra-Cellular', licensee: 'Johnson & Johnson', value: '$14.6B', totalValueM: 14600, year: 2025, relevance: 'J&J acquisition for CAPLYTA (bipolar/schizophrenia)', dealType: 'acquisition', modalities: ['smallMolecule'], indications: ['bipolar', 'schizophrenia'], therapeuticArea: 'neurology' },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CGRP MIGRAINE (7 deals)
+  // ═══════════════════════════════════════════════════════════════════════
+  { licensor: 'Biohaven Pharmaceutical', licensee: 'Pfizer', value: '$1.2B', totalValueM: 1240, upfrontM: 500, milestonesM: 740, royaltyRange: 'tiered double-digit', year: 2021, relevance: 'Pfizer licenses rimegepant + zavegepant (CGRP small molecule gepants) ex-US rights', dealType: 'licensing', modalities: ['smallMolecule'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'ex_us', phase: 'approved' },
+  { licensor: 'Merck', licensee: 'Allergan', value: '$250M', totalValueM: 250, upfrontM: 250, royaltyRange: 'tiered double-digit', year: 2015, relevance: 'Allergan licenses ubrogepant (Ubrelvy) + atogepant (Qulipta) CGRP antagonists from Merck at Phase 2', dealType: 'licensing', modalities: ['smallMolecule'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'global', phase: 'phase2' },
+  { licensor: 'Alder BioPharmaceuticals', licensee: 'Lundbeck', value: '$1.95B', totalValueM: 1950, upfrontM: 1950, year: 2019, relevance: 'Lundbeck acquires Alder for eptinezumab (Vyepti) IV CGRP mAb for migraine prevention', dealType: 'acquisition', modalities: ['mab'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'global', phase: 'phase3' },
+  { licensor: 'Amgen', licensee: 'Novartis', value: '$400M', totalValueM: 400, milestonesM: 400, year: 2017, relevance: 'Amgen/Novartis co-develop erenumab (Aimovig), first approved CGRP mAb for migraine prevention', dealType: 'codevelopment', modalities: ['mab'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'global', phase: 'phase3' },
+  { licensor: 'CoLucid Pharmaceuticals', licensee: 'Eli Lilly', value: '$960M', totalValueM: 960, upfrontM: 960, year: 2017, relevance: 'Lilly acquires CoLucid for lasmiditan (Rayvow) 5-HT1F agonist for acute migraine at Phase 3', dealType: 'acquisition', modalities: ['smallMolecule'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'global', phase: 'phase3' },
+  { licensor: 'Eli Lilly', licensee: 'Organon', value: '$220M', totalValueM: 220, upfrontM: 50, milestonesM: 170, year: 2023, relevance: 'Organon licenses Emgality (galcanezumab) + Rayvow European rights from Lilly', dealType: 'licensing', modalities: ['mab'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'ex_us', phase: 'approved' },
+  { licensor: 'Teva', licensee: 'Otsuka', value: '$65M', totalValueM: 65, upfrontM: 50, milestonesM: 15, year: 2017, relevance: 'Otsuka licenses fremanezumab (Ajovy) CGRP mAb from Teva for Japan migraine market', dealType: 'licensing', modalities: ['mab'], indications: ['migraine'], therapeuticArea: 'neurology', territory: 'japan_only', phase: 'phase3' },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // INSOMNIA / OREXIN (4 deals)
+  // ═══════════════════════════════════════════════════════════════════════
+  { licensor: 'Idorsia', licensee: 'Viatris', value: '$350M', totalValueM: 350, milestonesM: 350, royaltyRange: 'tiered double-digit', year: 2024, relevance: 'Viatris licenses Quviviq (daridorexant) DORA for insomnia, ex-US commercialization', dealType: 'licensing', modalities: ['smallMolecule'], indications: ['insomnia'], therapeuticArea: 'neurology', territory: 'ex_us', phase: 'approved' },
+  { licensor: 'Idorsia', licensee: 'Mochida Pharmaceutical', value: '$80M', totalValueM: 80, upfrontM: 15, milestonesM: 65, royaltyRange: 'double-digit', year: 2023, relevance: 'Mochida licenses Quviviq (daridorexant) DORA for insomnia in Japan', dealType: 'licensing', modalities: ['smallMolecule'], indications: ['insomnia'], therapeuticArea: 'neurology', territory: 'japan_only', phase: 'approved' },
+  { licensor: 'Eisai', licensee: 'Purdue Pharma', value: '$200M', totalValueM: 200, upfrontM: 50, milestonesM: 150, year: 2018, relevance: 'Purdue licenses lemborexant (Dayvigo) DORA for insomnia US commercialization from Eisai', dealType: 'licensing', modalities: ['smallMolecule'], indications: ['insomnia'], therapeuticArea: 'neurology', territory: 'us_only', phase: 'phase3' },
+  { licensor: 'Minerva Neurosciences', licensee: 'Johnson & Johnson', value: '$110M', totalValueM: 110, upfrontM: 30, milestonesM: 80, royaltyRange: 'high single-digit', year: 2017, relevance: 'Janssen co-develops seltorexant (JNJ-42847922) selective OX2R antagonist for insomnia and MDD; $30M upfront + $80M milestones', dealType: 'codevelopment', modalities: ['smallMolecule'], indications: ['insomnia', 'depression'], therapeuticArea: 'neurology', territory: 'global', phase: 'phase1' },
+  { licensor: 'Idorsia', licensee: 'Sosei Heptares', value: '$466M', totalValueM: 466, upfrontM: 466, year: 2023, relevance: 'Sosei acquires Idorsia Asia-Pacific business including daridorexant (Quviviq) DORA for insomnia in Japan/Korea', dealType: 'acquisition', modalities: ['smallMolecule'], indications: ['insomnia'], therapeuticArea: 'neurology', territory: 'apac', phase: 'approved' },
 
   // ═══════════════════════════════════════════════════════════════════════
   // IMMUNOLOGY / AUTOIMMUNE (20 deals — deduplicated, no standalones)
@@ -122,6 +144,21 @@ export const COMPARABLE_DEALS: ComparableDeal[] = [
   // ═══════════════════════════════════════════════════════════════════════
   { licensor: 'Iterative Health', licensee: 'Pfizer', value: '$1.6B', totalValueM: 1600, year: 2024, relevance: 'AI-powered GI diagnostics platform for IBD and endoscopy', dealType: 'licensing', modalities: ['smallMolecule'], indications: ['ulcerativeColitis', 'crohns'], therapeuticArea: 'gastroenterology' },
   { licensor: 'Protagonist Therapeutics', licensee: 'J&J', value: '$1B', totalValueM: 1000, upfrontM: 1000, year: 2024, relevance: 'Icotrokinra (JNJ-2113) oral IL-23 peptide for UC/Crohn\'s', dealType: 'licensing', modalities: ['peptide'], indications: ['ulcerativeColitis', 'crohns', 'psoriasis'], therapeuticArea: 'gastroenterology' },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // REFORMULATION / 505(b)(2) (11 deals)
+  // ═══════════════════════════════════════════════════════════════════════
+  { licensor: 'Eagle Pharmaceuticals', licensee: 'Teva', value: '$250M', totalValueM: 250, upfrontM: 50, milestonesM: 150, royaltyRange: 'mid-single to low-double digit', year: 2022, relevance: 'Bendamustine RTD reformulation licensing', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'oncology', phase: 'approved', territory: 'global', source: 'SEC 8-K filing' },
+  { licensor: 'Xeris Pharmaceuticals', licensee: 'Amphastar Pharmaceuticals', value: '$170M', totalValueM: 170, upfrontM: 35, milestonesM: 100, royaltyRange: 'high single-digit', year: 2023, relevance: 'Gvoke (glucagon injection) ready-to-use reformulation licensing', dealType: 'reformulation', modalities: ['peptide'], therapeuticArea: 'metabolic', phase: 'approved', territory: 'global', source: 'SEC 8-K filing' },
+  { licensor: 'Assertio Therapeutics', licensee: 'Collegium Pharmaceutical', value: '$375M', totalValueM: 375, upfrontM: 75, milestonesM: 200, royaltyRange: 'low-double digit', year: 2023, relevance: 'Nucynta ER (tapentadol) abuse-deterrent reformulation rights', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'neurology', phase: 'approved', territory: 'us_only', source: 'SEC 8-K filing' },
+  { licensor: 'Paratek Pharmaceuticals', licensee: 'Almirall', value: '$85M', totalValueM: 85, upfrontM: 15, milestonesM: 50, royaltyRange: 'tiered double-digit', year: 2021, relevance: 'Seysara (sarecycline) oral reformulation for acne, European rights', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'dermatology', phase: 'approved', territory: 'europe', source: 'Company press release' },
+  { licensor: "Dr. Reddy's Laboratories", licensee: 'Nestlé Health Science', value: '$65M', totalValueM: 65, upfrontM: 20, milestonesM: 30, royaltyRange: 'mid-single digit', year: 2022, relevance: 'Reformulated omeprazole (Zegerid) OTC rights licensing', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'gastroenterology', phase: 'approved', territory: 'us_only', source: 'Company press release' },
+  { licensor: 'Sun Pharma', licensee: 'Taro Pharmaceutical', value: '$120M', totalValueM: 120, upfrontM: 25, milestonesM: 70, royaltyRange: 'high single-digit', year: 2021, relevance: 'Doxycycline extended-release reformulation for rosacea (Oracea-type)', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'dermatology', phase: 'approved', territory: 'us_only', source: 'Company press release' },
+  { licensor: 'Kashiv BioSciences', licensee: 'Hikma Pharmaceuticals', value: '$125M', totalValueM: 125, upfrontM: 30, milestonesM: 70, royaltyRange: 'mid-single digit', year: 2022, relevance: 'Epinephrine auto-injector (EpiPen) 505(b)(2) biosimilar/reformulation', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'immunology', phase: 'nda_filed', territory: 'us_only', source: 'SEC 8-K filing' },
+  { licensor: 'Acrotech Biopharma', licensee: 'Eagle Pharmaceuticals', value: '$200M', totalValueM: 200, upfrontM: 40, milestonesM: 120, royaltyRange: 'low-double digit', year: 2020, relevance: 'Bendeka (bendamustine) rapid infusion reformulation rights', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'oncology', phase: 'approved', territory: 'us_only', source: 'SEC 8-K filing' },
+  { licensor: 'Teva', licensee: 'Alvotech', value: '$90M', totalValueM: 90, upfrontM: 20, milestonesM: 50, royaltyRange: 'high single-digit', year: 2023, relevance: 'Copaxone (glatiramer acetate) reformulation/line extension licensing', dealType: 'reformulation', modalities: ['peptide'], therapeuticArea: 'neurology', phase: 'approved', territory: 'europe', source: 'Company press release' },
+  { licensor: 'Lupin', licensee: 'Bayer', value: '$100M', totalValueM: 100, upfrontM: 20, milestonesM: 55, royaltyRange: 'mid-single digit', year: 2022, relevance: 'Oral contraceptive novel-combination 505(b)(2) reformulation', dealType: 'reformulation', modalities: ['smallMolecule'], therapeuticArea: 'womensHealth', phase: 'phase3', territory: 'us_only', source: 'Company press release' },
+  { licensor: 'Antares Pharma', licensee: 'Teva', value: '$130M', totalValueM: 130, upfrontM: 25, milestonesM: 75, royaltyRange: 'tiered single-to-double digit', year: 2020, relevance: 'XYOSTED (testosterone enanthate) auto-injector 505(b)(2) reformulation', dealType: 'reformulation', modalities: ['peptide'], therapeuticArea: 'metabolic', phase: 'approved', territory: 'us_only', source: 'SEC 8-K filing' },
 ];
 
 // Convert extended deal to base ComparableDeal format — preserves all structured fields
@@ -150,12 +187,14 @@ function toComparableDeal(d: ExtendedComparableDeal): ComparableDeal {
 }
 
 // Merge curated deals with extended deals (deduplicate by licensor+licensee+year)
+// Enrich every deal with buyer tier classification based on licensee name
 const ALL_DEALS: ComparableDeal[] = (() => {
   const seen = new Set(COMPARABLE_DEALS.map(d => `${d.licensor}|${d.licensee}|${d.year}`));
   const extended = EXTENDED_COMPARABLE_DEALS
     .filter(d => !seen.has(`${d.licensor}|${d.licensee}|${d.year}`))
     .map(toComparableDeal);
-  return [...COMPARABLE_DEALS, ...extended];
+  const merged = [...COMPARABLE_DEALS, ...extended];
+  return merged.map(d => ({ ...d, buyerTier: d.buyerTier ?? classifyBuyerTier(d.licensee) }));
 })();
 
 // Extended interface for web UI component
@@ -361,6 +400,7 @@ export interface HedonicScoringInput {
   phase?: string;
   dealType?: string;
   territory?: string;
+  buyerTier?: string;
 }
 
 /**
@@ -493,11 +533,18 @@ export function scoreComparableDealsHedonic(
       reasons.push('Same deal structure');
     }
 
+    // --- Buyer tier match ---
+    let buyerTierScore = 0;
+    if (inputs.buyerTier && deal.buyerTier === inputs.buyerTier) {
+      buyerTierScore = 2;
+      reasons.push('Same buyer type');
+    }
+
     // --- Recency weight (multiplicative) ---
     const recencyWeight = getRecencyWeight(deal.year);
 
     // Raw score = sum of dimension scores
-    const rawScore = phaseScore + modalityScore + taScore + indicationScore + territoryScore + dealTypeScore;
+    const rawScore = phaseScore + modalityScore + taScore + indicationScore + territoryScore + dealTypeScore + buyerTierScore;
     const weightedScore = rawScore * recencyWeight;
 
     if (rawScore < 4) return null; // Filter irrelevant deals (need at least one strong dimension match)

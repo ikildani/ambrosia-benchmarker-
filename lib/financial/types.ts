@@ -1550,7 +1550,7 @@ export interface LicensorPreferenceProfile {
  * counterfactual: "what would this asset look like as a $dealType deal?"
  */
 export interface DealStructureOption {
-  dealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+  dealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation';
   /** Headline deal value to licensor ($M) — uses rNPV implied total deal median */
   dealValue: number;
   /** Implied upfront payment ($M) for this structure */
@@ -1572,7 +1572,7 @@ export interface DealStructureOption {
  * the top alternative is materially better than the user's current selection.
  */
 export interface DealOptimizerResult {
-  userSelectedDealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+  userSelectedDealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation';
   userSelectedDealValue: number;
   /** All 5 deal types ranked best → worst */
   rankings: DealStructureOption[];

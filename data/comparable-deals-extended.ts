@@ -25,7 +25,7 @@ export interface ExtendedComparableDeal {
   royaltyRange?: string;
 
   // Classification
-  dealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration';
+  dealType: 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation';
   combinationTherapy?: boolean;
   geographicSpecific?: boolean;
 
@@ -33,6 +33,9 @@ export interface ExtendedComparableDeal {
   headline: string;
   keyTerms?: string;
   source: string;
+
+  // Buyer tier classification (optional — auto-classified from licensee name if not set)
+  buyerTier?: string;
 
   // Supabase-sourced fields (optional — only set for SUPABASE_COMPARABLE_DEALS).
   // Used by the backtest harness to distinguish hand-audited real deals from
@@ -3473,6 +3476,166 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     source: 'Company press release, December 2022',
   },
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // CGRP MIGRAINE DEALS
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'cgrp-001', year: 2021, licensor: 'Biohaven Pharmaceutical', licensee: 'Pfizer',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'ex_us', therapeuticArea: 'neurology',
+    upfront: 500, totalDealValue: 1240, milestones: 740, royaltyRange: 'tiered double-digit',
+    dealType: 'licensing',
+    headline: 'Pfizer licenses rimegepant and zavegepant ex-US rights from Biohaven; $150M cash + $350M equity upfront',
+    keyTerms: 'Pfizer pays $150M cash + $350M equity (25% premium) upfront, plus $740M in milestones. Tiered double-digit royalties on ex-US sales.',
+    source: 'Company press release / SEC 8-K, November 2021',
+  },
+  {
+    id: 'cgrp-002', year: 2015, licensor: 'Merck', licensee: 'Allergan',
+    modality: 'smallMolecule', phase: 'phase2', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 250, totalDealValue: 250, royaltyRange: 'tiered double-digit',
+    dealType: 'licensing',
+    headline: 'Allergan licenses MK-1602 (ubrogepant) and MK-8031 (atogepant) CGRP antagonists from Merck at Phase 2',
+    keyTerms: '$125M upfront + $125M near-term payment. Worldwide exclusive rights. Tiered double-digit royalties.',
+    source: 'SEC 10-K / Company press release, 2015',
+  },
+  {
+    id: 'cgrp-003', year: 2019, licensor: 'Alder BioPharmaceuticals', licensee: 'Lundbeck',
+    modality: 'mab', phase: 'phase3', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 1950, totalDealValue: 1950, dealType: 'acquisition',
+    headline: 'Lundbeck acquires Alder BioPharmaceuticals for eptinezumab (Vyepti) IV CGRP antibody for migraine prevention',
+    keyTerms: '$18/share + $2 CVR contingent on EMA approval. Only IV CGRP therapy.',
+    source: 'SEC 8-K, September 2019',
+  },
+  {
+    id: 'cgrp-004', year: 2017, licensor: 'Amgen', licensee: 'Novartis',
+    modality: 'mab', phase: 'phase3', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 0, totalDealValue: 400, milestones: 400,
+    dealType: 'codevelopment',
+    headline: 'Amgen and Novartis co-develop erenumab (Aimovig), first CGRP mAb approved for migraine prevention',
+    keyTerms: '>$400M milestones from Novartis. US co-commercialization, Japan to Amgen, RoW to Novartis. Bilateral royalties.',
+    source: 'Company press release / SEC 10-K, 2017',
+  },
+  {
+    id: 'cgrp-005', year: 2017, licensor: 'CoLucid Pharmaceuticals', licensee: 'Eli Lilly',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 960, totalDealValue: 960, dealType: 'acquisition',
+    headline: 'Eli Lilly acquires CoLucid for lasmiditan (Rayvow) 5-HT1F agonist for acute migraine at Phase 3',
+    keyTerms: '$46.50/share cash acquisition.',
+    source: 'SEC 8-K, March 2017',
+  },
+  {
+    id: 'cgrp-006', year: 2017, licensor: 'Teva', licensee: 'Otsuka',
+    modality: 'mab', phase: 'phase3', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'japan_only', therapeuticArea: 'neurology',
+    upfront: 50, totalDealValue: 65, milestones: 15,
+    dealType: 'licensing',
+    headline: 'Otsuka licenses fremanezumab (Ajovy) from Teva for Japan territory; CGRP mAb for migraine prevention',
+    keyTerms: '$50M upfront + $15M filing milestone (paid 2020). Undisclosed approval/revenue milestones + royalties on Japan sales.',
+    source: 'Company press release, 2017',
+  },
+  {
+    id: 'cgrp-007', year: 2023, licensor: 'Eli Lilly', licensee: 'Organon',
+    modality: 'mab', phase: 'approved', indication_category: 'neurology', indication_specific: 'migraine',
+    territory: 'ex_us', therapeuticArea: 'neurology',
+    upfront: 50, totalDealValue: 220, milestones: 170,
+    dealType: 'licensing',
+    headline: 'Organon licenses Emgality (galcanezumab) and Rayvow (lasmiditan) European commercialization rights from Eli Lilly',
+    keyTerms: '$50M upfront + $170M sales milestones for European distribution of two migraine therapies.',
+    source: 'Company press release, 2023',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // INSOMNIA / OREXIN RECEPTOR ANTAGONIST DEALS
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'orexin-001', year: 2017, licensor: 'Minerva Neurosciences', licensee: 'Johnson & Johnson',
+    modality: 'smallMolecule', phase: 'phase1', indication_category: 'neurology', indication_specific: 'insomnia',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 30, totalDealValue: 110, milestones: 80, royaltyRange: 'high single-digit',
+    dealType: 'codevelopment',
+    headline: 'Janssen co-develops seltorexant (JNJ-42847922) selective OX2R antagonist for insomnia and MDD; $30M upfront + $80M milestones',
+    keyTerms: '2017 amendment: $30M upfront + $20M Phase 3 start + $20M 50% enrollment + up to $40M additional. High single-digit royalties. Minerva opted out 2020, retained mid-single digit royalty sold to Royalty Pharma for $60M + $95M milestones.',
+    source: 'Minerva 10-K FY2018 (SEC 0001564590-19-007246), 8-K Jul 2020, 8-K Jan 2021',
+  },
+  {
+    id: 'orexin-002', year: 2019, licensor: 'Actelion (Idorsia spin-off)', licensee: 'Idorsia',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'neurology', indication_specific: 'insomnia',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 0, totalDealValue: 500,
+    dealType: 'licensing',
+    headline: 'Idorsia develops daridorexant (Quviviq) dual orexin receptor antagonist (DORA) for insomnia; spun out from J&J/Actelion',
+    keyTerms: 'Idorsia spun off from Actelion (acquired by J&J for $30B) retaining insomnia and other pipeline assets. Daridorexant approved FDA 2022.',
+    source: 'Company press release, 2017-2019',
+  },
+  {
+    id: 'orexin-003', year: 2023, licensor: 'Idorsia', licensee: 'Mochida Pharmaceutical',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'insomnia',
+    territory: 'japan_only', therapeuticArea: 'neurology',
+    upfront: 15, totalDealValue: 80, milestones: 65, royaltyRange: 'double-digit',
+    dealType: 'licensing',
+    headline: 'Mochida licenses Quviviq (daridorexant) from Idorsia for Japan; DORA insomnia treatment',
+    keyTerms: 'CHF 15M upfront + CHF 65M milestones + double-digit royalties. Japan-only territory.',
+    source: 'Idorsia press release, 2023',
+  },
+  {
+    id: 'orexin-004', year: 2024, licensor: 'Idorsia', licensee: 'Viatris',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'insomnia',
+    territory: 'ex_us', therapeuticArea: 'neurology',
+    upfront: 0, totalDealValue: 350, milestones: 350, royaltyRange: 'tiered double-digit',
+    dealType: 'licensing',
+    headline: 'Viatris licenses Quviviq (daridorexant) from Idorsia for ex-US commercialization in insomnia',
+    keyTerms: 'Milestone-heavy structure with tiered double-digit royalties. Idorsia restructuring drove the deal.',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'orexin-005', year: 2014, licensor: 'Merck', licensee: 'Merck (internal)',
+    modality: 'smallMolecule', phase: 'approved', indication_category: 'neurology', indication_specific: 'insomnia',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 0, totalDealValue: 0,
+    dealType: 'licensing',
+    headline: 'Merck launches suvorexant (Belsomra), first-in-class dual orexin receptor antagonist for insomnia (FDA approved 2014)',
+    keyTerms: 'Internal development — no external deal terms. Established the DORA class commercially. Peak sales ~$500M/yr.',
+    source: 'FDA approval, August 2014',
+  },
+  {
+    id: 'orexin-006', year: 2018, licensor: 'Eisai', licensee: 'Purdue Pharma',
+    modality: 'smallMolecule', phase: 'phase3', indication_category: 'neurology', indication_specific: 'insomnia',
+    territory: 'us_only', therapeuticArea: 'neurology',
+    upfront: 50, totalDealValue: 200, milestones: 150,
+    dealType: 'licensing',
+    headline: 'Purdue licenses lemborexant (Dayvigo) US commercialization rights from Eisai; DORA for insomnia at Phase 3',
+    keyTerms: '$50M upfront + up to $150M in milestones. Agreement later terminated when Purdue entered bankruptcy.',
+    source: 'Company press release, 2018',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CNS SMALL MOLECULE DEALS — CHINA BIOTECH OUT-LICENSING (comps for Chinese biotech assets)
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    id: 'cns-china-001', year: 2024, licensor: 'Neumirna Therapeutics', licensee: 'AbbVie',
+    modality: 'rnai', phase: 'preclinical', indication_category: 'neurology', indication_specific: 'neurodegeneration',
+    territory: 'global', therapeuticArea: 'neurology',
+    upfront: 60, totalDealValue: 1400, milestones: 1340,
+    dealType: 'licensing',
+    headline: 'AbbVie licenses RNAi neurology assets from China-based Neumirna for neurodegeneration targets',
+    keyTerms: '$60M upfront + up to $1.34B in milestones. Multiple CNS targets.',
+    source: 'Company press release, 2024',
+  },
+  {
+    id: 'cns-china-002', year: 2024, licensor: 'Simcere Pharmaceutical', licensee: 'Ono Pharmaceutical',
+    modality: 'smallMolecule', phase: 'phase2', indication_category: 'neurology', indication_specific: 'alzheimers',
+    territory: 'japan_only', therapeuticArea: 'neurology',
+    upfront: 30, totalDealValue: 270, milestones: 240,
+    dealType: 'licensing',
+    headline: 'Ono licenses SIM0408 (oral BACE1 inhibitor) from Chinese Simcere for Japan in Alzheimer\'s disease',
+    keyTerms: '$30M upfront + $240M milestones. Phase 2 asset.',
+    source: 'Company press release, 2024',
+  },
+
   // Immunology 2020-2022
   {
     id: 'imm-new-001', year: 2020, licensor: 'Principia Biopharma', licensee: 'Sanofi',
@@ -4785,7 +4948,7 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     indication_category: 'rare_disease',
     indication_specific: 'hypoparathyroidism',
     territory: 'global',
-    therapeuticArea: 'rare_disease',
+    therapeuticArea: 'rareDisease',
     upfront: 800,
     totalDealValue: 1050,
     milestones: 250,
@@ -5445,7 +5608,7 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     indication_category: 'rare_disease',
     indication_specific: 'a1at_deficiency',
     territory: 'global',
-    therapeuticArea: 'rare_disease',
+    therapeuticArea: 'rareDisease',
     upfront: 2200,
     totalDealValue: 2200,
     dealType: 'acquisition',
@@ -5463,7 +5626,7 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     indication_category: 'rare_disease',
     indication_specific: 'muscular_dystrophy',
     territory: 'global',
-    therapeuticArea: 'rare_disease',
+    therapeuticArea: 'rareDisease',
     upfront: 80,
     totalDealValue: 1055,
     milestones: 975,
@@ -5501,7 +5664,7 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     indication_category: 'rare_disease',
     indication_specific: 'cold_agglutinin_disease',
     territory: 'global',
-    therapeuticArea: 'rare_disease',
+    therapeuticArea: 'rareDisease',
     upfront: 825,
     totalDealValue: 825,
     dealType: 'acquisition',
@@ -5672,7 +5835,7 @@ export const EXTENDED_COMPARABLE_DEALS: ExtendedComparableDeal[] = [
     indication_category: 'rare_disease',
     indication_specific: 'pku',
     territory: 'global',
-    therapeuticArea: 'rare_disease',
+    therapeuticArea: 'rareDisease',
     upfront: 800,
     totalDealValue: 1125,
     milestones: 325,

@@ -51,6 +51,7 @@ const ALL_DEAL_TYPES: DealType[] = [
   'codevelopment',
   'option',
   'collaboration',
+  'reformulation',
 ];
 
 // ---------------------------------------------------------------------------
@@ -158,6 +159,7 @@ function preferenceScore(
     codevelopment: 0.05,
     option: 0.15,
     collaboration: 0.10,
+    reformulation: -0.05, // Lower risk — established safety profile, 505(b)(2) pathway
   };
   const riskPenalty = profile.riskAversionWeight * RISK_PENALTY[dealType];
 
@@ -176,6 +178,7 @@ const DEAL_TYPE_LABELS: Record<DealType, string> = {
   codevelopment: 'Co-development',
   option: 'Option / License',
   collaboration: 'Research Collaboration',
+  reformulation: 'Reformulation / 505(b)(2)',
 };
 
 function buildRationale(

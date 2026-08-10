@@ -88,7 +88,8 @@ export type DealType =
   | 'acquisition'
   | 'codevelopment'
   | 'option'
-  | 'collaboration';
+  | 'collaboration'
+  | 'reformulation';
 
 // ---------------------------------------------------------------------------
 // Jurisdiction tax profiles
@@ -254,6 +255,12 @@ const DEAL_INCOME_PROFILES: Record<DealType, DealIncomeProfile> = {
     serviceIncomeFraction: 0.45,
     incomeStreamYears: 10,
     tpComplexity: 1.3,
+  },
+  reformulation: {
+    ipIncomeFraction: 0.80,
+    serviceIncomeFraction: 0.20,
+    incomeStreamYears: 10,
+    tpComplexity: 0.8, // simpler IP structure — referencing existing approval
   },
 };
 
