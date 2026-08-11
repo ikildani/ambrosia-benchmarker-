@@ -260,6 +260,32 @@ function buildDataBackedRiskFactors(
   return risks;
 }
 
+/** Deal-type-specific guidance for the AI — ensures memo reflects structural differences by deal type */
+function getDealTypeGuidance(dealType: string): string {
+  if (dealType === 'reformulation') {
+    return `This is a 505(b)(2) / reformulation deal. Key considerations:
+- The asset references a previously approved product's safety and efficacy data
+- Development is abbreviated: PK bridging and/or bioequivalence studies, not full clinical program
+- Regulatory risk is lower than NME but reference product withdrawal or label changes pose unique risks
+- Deal values are typically $10-200M (lower than NME licensing) with regulatory-heavy milestone structures
+- Upfront percentages tend to be higher relative to total deal value due to lower overall risk
+- Key risk factors: reference product market dynamics, AB-rating/therapeutic equivalence, formulation IP strength`;
+  }
+  if (dealType === 'acquisition') {
+    return 'This is an acquisition/M&A deal. Focus on control premium, synergy value, and integration risk.';
+  }
+  if (dealType === 'option') {
+    return 'This is an option agreement. Focus on option exercise triggers, time value, and downside protection.';
+  }
+  if (dealType === 'codevelopment') {
+    return 'This is a co-development deal. Focus on cost-sharing economics, profit-split structures, and opt-in/opt-out triggers at phase gates.';
+  }
+  if (dealType === 'collaboration') {
+    return 'This is a collaboration deal. Focus on FTE-based research funding, multi-target milestone structures, and governance provisions.';
+  }
+  return '';
+}
+
 // Build the memo prompt
 function buildMemoPrompt(input: DealMemoInput, comparableDeals: ComparableDeal[]): string {
   const { inputs, results, labels } = input;
@@ -281,6 +307,10 @@ function buildMemoPrompt(input: DealMemoInput, comparableDeals: ComparableDeal[]
   // TA-specific risk factor guidance — ensures AI generates risks unique to the therapeutic area
   const taRiskGuidance = getTherapeuticAreaRiskGuidance(inputs);
 
+  // Deal-type-specific guidance — ensures memo reflects structural differences
+  const dealType = inputs.dealType || 'licensing';
+  const dealTypeGuidance = getDealTypeGuidance(dealType);
+
   // TA-specific asset profile fields
   const taSpecificFields = getTherapeuticAreaFields(inputs);
 
@@ -294,6 +324,7 @@ function buildMemoPrompt(input: DealMemoInput, comparableDeals: ComparableDeal[]
   return `You are a senior biotech business development advisor with 20+ years of experience in licensing, M&A, and strategic partnerships. Write a confidential deal analysis memo for a client considering out-licensing the following asset.
 
 ASSET PROFILE:
+  Deal Type: ${dealType}
   Phase: ${labels.phase}
   Modality: ${labels.modality}
   Indication: ${labels.indication}
@@ -322,6 +353,7 @@ ${modifiersList ? `VALUE MODIFIERS:\n  ${modifiersList}` : ''}
 COMPARABLE TRANSACTIONS:
   ${comparablesList || 'No direct comparables identified'}
 ${dataBackedRisksSection}
+${dealTypeGuidance ? `\nDEAL TYPE GUIDANCE:\n${dealTypeGuidance}` : ''}
 
 Write a deal analysis memo. Be SPECIFIC — reference actual dollar amounts from the benchmarks above, name actual companies from the comparable transactions, and provide actionable guidance. Do NOT be generic. Every sentence should contain a specific number, company name, or concrete recommendation.
 

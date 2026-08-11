@@ -288,6 +288,7 @@ const DEAL_TYPE_MILESTONE_MULTIPLIER: Record<string, { dev: number; commercial: 
   codevelopment:  { dev: 0.85, commercial: 1.10, regulatory: 0.90 },
   option:         { dev: 1.20, commercial: 1.15, regulatory: 1.10 },
   collaboration:  { dev: 0.90, commercial: 1.05, regulatory: 1.00 },
+  reformulation:  { dev: 0.60, commercial: 0.90, regulatory: 1.30 },
 };
 
 // ---------------------------------------------------------------------------

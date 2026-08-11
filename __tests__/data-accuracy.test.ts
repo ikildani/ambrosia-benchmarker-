@@ -238,7 +238,7 @@ describe('Territory Multiplier Accuracy', () => {
 // =============================================================================
 
 describe('Deal Type Impact', () => {
-  const allDealTypes: DealType[] = ['licensing', 'acquisition', 'codevelopment', 'option', 'collaboration'];
+  const allDealTypes: DealType[] = ['licensing', 'acquisition', 'codevelopment', 'option', 'collaboration', 'reformulation'];
 
   let results: Record<string, ReturnType<typeof calculateDealTerms>>;
 

@@ -75,6 +75,7 @@ const DEAL_TYPE_CAPTURE: Record<string, number> = {
   codevelopment: 0.55,
   option: 0.40,
   collaboration: 0.50,
+  reformulation: 0.65,
 };
 
 /**

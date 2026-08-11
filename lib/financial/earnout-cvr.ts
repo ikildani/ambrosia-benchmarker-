@@ -331,6 +331,15 @@ export const EARNOUT_BENCHMARKS: Record<string, {
     historicalRecoveryRate: 0.48,
     notes: 'Upfront 20-30% of total. 50/50 cost-share is modal. Profit split replaces royalties. Opt-in/opt-out triggers at each phase gate.',
   },
+  reformulation: {
+    description: '505(b)(2) / reformulation deal with regulatory-heavy milestone structure. Abbreviated clinical program means fewer development milestones but higher regulatory milestone weight.',
+    contingentFraction: { low: 0.45, median: 0.58, high: 0.70 },
+    clinicalRegulatoryShare: 0.65,
+    salesShare: 0.20,
+    typicalTrancheCount: { low: 3, high: 6 },
+    historicalRecoveryRate: 0.52,
+    notes: 'Upfront 30-45% of total due to lower overall risk. Regulatory milestones dominate (FDA acceptance, approval, AB-rating). Development milestones limited to PK bridging/bioequivalence. Commercial milestones tied to market share capture vs reference product.',
+  },
 };
 
 // ---------------------------------------------------------------------------

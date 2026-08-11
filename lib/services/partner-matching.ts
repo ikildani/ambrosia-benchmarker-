@@ -2273,6 +2273,7 @@ function generateDealRelevance(deal: Pick<CompanyDeal, 'modality' | 'phase_at_si
       acquisition: 'Acquisition',
       collaboration: 'Collaboration',
       option: 'Option',
+      reformulation: 'Reformulation / 505(b)(2)',
     };
     parts.push(typeLabels[deal.deal_type] || deal.deal_type);
   }
