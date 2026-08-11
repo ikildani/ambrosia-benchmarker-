@@ -62,6 +62,11 @@ const STRUCTURE_STYLES: Record<
     description: 'Bidding-war premium 2-5× intrinsic NPV. Most value paid upfront (70-95%).',
     tone: 'amber',
   },
+  reformulation_license: {
+    label: 'Reformulation / 505(b)(2)',
+    description: 'Abbreviated development pathway. Higher upfront % (20-45%) reflecting lower risk and established safety profile.',
+    tone: 'teal',
+  },
 };
 
 const TONE_CLASSES: Record<StructureStyle['tone'], string> = {
