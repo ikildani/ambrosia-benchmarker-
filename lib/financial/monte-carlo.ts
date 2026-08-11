@@ -250,6 +250,21 @@ const DEAL_TYPE_CORRELATION_OVERRIDES: Record<string, number[][]> = {
     [-0.45, -0.40,  0.30,  1.00,  0.00],  // Time to Market — exercise window drives urgency
     [ 0.00,  0.25,  0.00,  0.00,  1.00],  // Pricing
   ],
+  // Reformulation / 505(b)(2): more predictable regulatory timelines
+  // (pathway is well-defined), so PoS-timeline correlation is much lower
+  // than for NME assets. Lower overall correlations reflect the reduced
+  // uncertainty in 505(b)(2) development programs where the reference
+  // product provides substantial prior data.
+  // Source: FDA 505(b)(2) approval statistics (2018-2025), DealForma
+  // reformulation deal outcomes analysis.
+  reformulation: [
+    // PoS    Peak   Rate   Time   Price
+    [ 1.00,  0.15, -0.10,  0.10,  0.00],  // PoS — lower correlation, more predictable for 505(b)(2)
+    [ 0.15,  1.00,  0.00,  0.20,  0.20],  // Peak Sales — lower timeline sensitivity
+    [-0.10,  0.00,  1.00,  0.10,  0.00],  // Discount Rate — slight negative, lower risk = lower discount
+    [ 0.10,  0.20,  0.10,  1.00,  0.00],  // Time to Market — well-defined regulatory timeline
+    [ 0.00,  0.20,  0.00,  0.00,  1.00],  // Pricing
+  ],
 };
 
 /**

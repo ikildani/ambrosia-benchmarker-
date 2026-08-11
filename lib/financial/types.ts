@@ -671,7 +671,8 @@ export interface RNPVResult {
       | 'platform_collab'
       | 'regional_license'
       | 'biosimilar_license'
-      | 'strategic_acquisition';
+      | 'strategic_acquisition'
+      | 'reformulation_license';
     confidence: number;
     signals: string[];
   };

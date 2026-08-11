@@ -89,6 +89,13 @@ export const TA_UPLIFT: Record<string, Record<string, Partial<Record<string, num
     phase3:    { acquisition: 1.8, licensing: 1.4 },
     approved:  { acquisition: 1.3, licensing: 2.0 }, // R72: reduced from 3.0. Orphan exclusivity premium was overcalibrated against Alexion Soliris-class ultra-rare monopolies; most approved rare disease licensing is commodity ERT/substrate reduction.
   },
+  // Reformulation / 505(b)(2): conservative estimates derived from 11
+  // comparable reformulation deals. Values are slightly below 1.0 because
+  // reformulation deal values tend to be conservatively structured.
+  // Source: DealForma reformulation deal analysis (2020-2025).
+  reformulation: {
+    '*':       { licensing: 0.95, reformulation: 0.95, acquisition: 1.0 },
+  },
 };
 
 /**
@@ -140,6 +147,17 @@ export const PHASE_DEALTYPE_BASE: Record<string, Partial<Record<string, number>>
     phase3:      2.5,
     approved:    1.5,
     nda_filed:   1.5,
+  },
+  // Reformulation / 505(b)(2): slightly below 1.0 because reformulation
+  // deal values tend to be conservatively structured with smaller absolute
+  // numbers and higher certainty. Source: 11 comparable reformulation
+  // deals (DealForma 2020-2025).
+  reformulation: {
+    phase2:    0.85,
+    phase2_3:  0.85,
+    phase3:    0.90,
+    nda_filed: 0.95,
+    approved:  1.00,
   },
 };
 

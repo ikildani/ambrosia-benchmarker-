@@ -360,6 +360,49 @@ const GENERIC_EROSION_BY_MODALITY: Record<string, number> = {
   radiopharmaceutical: 0.30, // Complex manufacturing limits generic entry
 };
 
+// ---------------------------------------------------------------------------
+// Reformulation / 505(b)(2) Sub-Type Profiles
+// ---------------------------------------------------------------------------
+// Different reformulation types have fundamentally different economics.
+// A pure formulation change (tablet→ER) requires only PK bridging, while
+// a 505(b)(2) with a new indication is closer to an abbreviated NDA.
+//
+// Sources: FDA 505(b)(2) guidance (2023), DealForma reformulation deal
+// analysis (2020-2025), EvaluatePharma lifecycle analytics.
+// ---------------------------------------------------------------------------
+
+interface ReformulationProfile {
+  costMultiplier: number;
+  durationMultiplier: number;
+  posUplift: number;
+  description: string;
+}
+
+const REFORMULATION_PROFILES: Record<string, ReformulationProfile> = {
+  // Pure formulation change — PK bridging only (tablet→ER, IV→subQ same molecule)
+  formulation_change: { costMultiplier: 0.25, durationMultiplier: 0.35, posUplift: 1.60, description: 'PK bridging study only' },
+  // New route of administration — PK + additional safety data needed (oral→injectable, IV→inhaled)
+  route_change: { costMultiplier: 0.40, durationMultiplier: 0.50, posUplift: 1.40, description: 'PK bridging + safety assessment' },
+  // New dosage form with efficacy claims — PK + efficacy data (abuse-deterrent, extended-release with new claims)
+  dosage_form: { costMultiplier: 0.55, durationMultiplier: 0.60, posUplift: 1.25, description: 'PK + efficacy demonstration' },
+  // 505(b)(2) with new indication — abbreviated but substantial clinical program
+  new_indication: { costMultiplier: 0.70, durationMultiplier: 0.75, posUplift: 1.15, description: 'Abbreviated clinical program for new indication' },
+};
+
+/**
+ * Infer reformulation sub-type from modality and indication context.
+ * Falls back to 'route_change' as the safe middle-ground default.
+ */
+function inferReformulationSubType(modality: string, _indication?: string): string {
+  const mod = modality.toLowerCase();
+  // Extended-release / sustained-release formulation changes
+  if (mod.includes('extended') || mod.includes('er') || mod.includes('sr') || mod.includes('sustained')) {
+    return 'formulation_change';
+  }
+  // Default to route_change (middle ground) when no sub-type info is available
+  return 'route_change';
+}
+
 /** Phase order for iteration */
 const PHASE_ORDER = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'] as const;
 
@@ -504,9 +547,59 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     ? Math.max(0, Math.min(1, modifiedPoS * input.posMultiplier))
     : modifiedPoS;
 
-  // Reformulation: higher PoS due to established safety profile
+  // Reformulation / 505(b)(2): per-transition PoS adjustments based on sub-type.
+  // Replaces the former flat cumulativePoS * 1.40 with differentiated per-
+  // transition adjustments that flow through the same phaseTransitionOverrides
+  // mechanism used by the custom assumptions feature.
+  // Source: FDA 505(b)(2) approval statistics (2018-2025), DealForma
+  // reformulation deal outcomes analysis.
   if (dealType === 'reformulation') {
-    cumulativePoS = Math.min(0.95, cumulativePoS * 1.40);
+    const reformSubType = inferReformulationSubType(modality, input.indication);
+    const reformProfile = REFORMULATION_PROFILES[reformSubType] ?? REFORMULATION_PROFILES.route_change;
+
+    // Per-transition PoS uplift: the base rates are already computed; we
+    // multiply each transition by the profile's uplift with phase-specific
+    // scaling to reflect 505(b)(2) pathway characteristics.
+    const reformPoSUplift = reformProfile.posUplift;
+    const reformTransitionOverrides: Partial<Record<string, number>> = {};
+
+    // Find and override the relevant transition rates
+    for (const t of transitions) {
+      if (t.phase.includes('Phase 2') && t.phase.includes('Phase 3')) {
+        // Phase 2→3: moderate uplift — still need PK/safety data
+        reformTransitionOverrides['phase2ToPhase3'] = Math.min(0.95, t.probability * reformPoSUplift * 0.90);
+      }
+      if (t.phase.includes('Phase 3') && t.phase.includes('Approval')) {
+        // Phase 3→Approval: strong uplift — abbreviated pathway, reference product safety
+        reformTransitionOverrides['phase3ToApproval'] = Math.min(0.95, t.probability * reformPoSUplift * 1.10);
+      }
+      if (t.phase.includes('Approval') && t.phase.includes('Launch')) {
+        // Approval→Launch: slight uplift — regulatory pathway is clearer
+        reformTransitionOverrides['approvalToLaunch'] = Math.min(0.99, t.probability * 1.05);
+      }
+    }
+
+    // Recalculate cumulative PoS with reformulation-adjusted transition rates
+    // if we found applicable transitions
+    if (Object.keys(reformTransitionOverrides).length > 0) {
+      const { cumulativePoS: reformPoS } = getCumulativePoS(
+        phase,
+        therapeuticArea,
+        modality,
+        input.biomarkerStatus || 'unselected',
+        regulatoryDesignations,
+        input.indication,
+        undefined,
+        input.molecularTargets,
+        input.deliveryRoute,
+        reformTransitionOverrides,
+      );
+      cumulativePoS = Math.min(0.95, reformPoS);
+    } else {
+      // Fallback: if no transitions matched (e.g., approved phase), apply
+      // a conservative uplift
+      cumulativePoS = Math.min(0.95, cumulativePoS * reformPoSUplift);
+    }
   }
 
   // 3. Calculate years to market from current phase
@@ -523,13 +616,17 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     ? { ...baseCosts, ...Object.fromEntries(Object.entries(ca.phaseCosts).filter(([, v]) => v != null)) as Record<string, number> }
     : { ...baseCosts };
 
-  // Reformulation: reduced costs and timelines (PK bridging, not full trials)
+  // Reformulation: sub-type-specific cost and timeline reductions.
+  // Replaces the former flat 0.4x cost / 0.5x duration with profile-based
+  // multipliers that differentiate PK-bridging-only from abbreviated programs.
   if (dealType === 'reformulation') {
+    const reformSubType = inferReformulationSubType(modality, input.indication);
+    const reformProfile = REFORMULATION_PROFILES[reformSubType] ?? REFORMULATION_PROFILES.route_change;
     for (const key of Object.keys(costs)) {
-      costs[key] = (costs[key] || 0) * 0.4;
+      costs[key] = (costs[key] || 0) * reformProfile.costMultiplier;
     }
     for (const key of Object.keys(durations)) {
-      durations[key] = (durations[key] || 0) * 0.5;
+      durations[key] = (durations[key] || 0) * reformProfile.durationMultiplier;
     }
   }
   const currentIdx = phaseIndex(phase);

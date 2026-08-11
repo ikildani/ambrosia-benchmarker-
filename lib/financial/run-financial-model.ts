@@ -426,7 +426,7 @@ export function runFinancialModel(
       rnpvInput.territory as 'us' | 'eu' | 'japan' | 'china' | 'row' | 'global',
       rnpv.impliedDealValue.totalDeal.median,
       royaltyRate,
-      (rnpvInput.dealType ?? 'licensing') as 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration',
+      (rnpvInput.dealType ?? 'licensing') as 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation',
       rnpvInput.peakSalesEstimate.median,
     );
   } catch { /* non-critical — keep going */ }
