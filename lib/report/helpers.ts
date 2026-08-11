@@ -146,6 +146,7 @@ export const competitivePositionLabels: Record<string, string> = {
   firstInClass: 'First-in-Class',
   firstToPivotal: 'First to Pivotal',
   bestInClass: 'Best-in-Class',
+  fastFollower: 'Fast Follower',
   racing: 'Racing',
   behind: 'Behind',
   crowded: 'Crowded',
