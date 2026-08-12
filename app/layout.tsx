@@ -87,9 +87,19 @@ export default function RootLayout({
       <head>
         <link rel="alternate" type="application/rss+xml" title="Ambrosia Ventures" href="/feed.xml" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
         <link rel="dns-prefetch" href="https://checkout.stripe.com" />
         <link rel="dns-prefetch" href="https://js.stripe.com" />
+
+        {/* GA4 — cross-domain with ambrosiaventures.co */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-33TBPKF000" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-33TBPKF000',{send_page_view:true,linker:{domains:['ambrosiaventures.co','solidus.ambrosiaventures.co']}});`,
+          }}
+        />
+
         {/* LinkedIn Insight Tag — retargeting pixel for calculator visitors */}
         {process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID && (
           <script

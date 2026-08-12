@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { useSession } from './useSession';
+import { ga4Calculation, ga4PaywallHit, ga4ProUpgrade } from '@/lib/ga4';
 
 interface TrackEventOptions {
   immediate?: boolean; // Skip batching, send immediately
@@ -117,6 +118,7 @@ export function useEventTracker() {
       },
       iterationNumber: number = 1
     ) => {
+      ga4Calculation(params.indication_category || params.modality, 'calculator');
       track(
         'calculation_completed',
         {
@@ -162,6 +164,7 @@ export function useEventTracker() {
         indication?: string;
       }
     ) => {
+      ga4PaywallHit(trigger);
       track(
         'paywall_displayed',
         {
@@ -202,6 +205,7 @@ export function useEventTracker() {
 
   const trackUpgradeCtaClick = useCallback(
     (source: string) => {
+      ga4ProUpgrade(source);
       track('upgrade_cta_clicked', { source }, { immediate: true });
     },
     [track]
