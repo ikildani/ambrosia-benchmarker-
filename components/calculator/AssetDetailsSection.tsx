@@ -3,6 +3,7 @@ import type {
   TherapeuticArea,
   Phase,
   DealType,
+  ReformulationSubType,
   Modality,
   Indication,
   BiomarkerStatus,
@@ -11,6 +12,8 @@ import {
   phaseOptions,
   dealTypeOptions,
   dealTypeDescriptions,
+  reformulationSubTypeOptions,
+  reformulationSubTypeDescriptions,
   modalityOptions,
   neurologyModalityOptions,
   immunologyModalityOptions,
@@ -50,6 +53,7 @@ interface AssetDetailsSectionProps {
   therapeuticArea: TherapeuticArea;
   phase: Phase;
   dealType: DealType;
+  reformulationSubType: ReformulationSubType;
   modality: Modality;
   indication: Indication;
   biomarker: BiomarkerStatus;
@@ -58,6 +62,7 @@ interface AssetDetailsSectionProps {
   onboardingStep: OnboardingStep | null;
   onPhaseChange: (value: Phase) => void;
   onDealTypeChange: (value: DealType) => void;
+  onReformulationSubTypeChange: (value: ReformulationSubType) => void;
   onModalityChange: (value: Modality) => void;
   onIndicationChange: (value: Indication) => void;
   onBiomarkerChange: (value: BiomarkerStatus) => void;
@@ -70,6 +75,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   therapeuticArea,
   phase,
   dealType,
+  reformulationSubType,
   modality,
   indication,
   biomarker,
@@ -78,6 +84,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   onboardingStep,
   onPhaseChange,
   onDealTypeChange,
+  onReformulationSubTypeChange,
   onModalityChange,
   onIndicationChange,
   onBiomarkerChange,
@@ -256,6 +263,19 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           highlighted={highlightedFields.has('dealType')}
           columns={5}
         />
+
+        {dealType === 'reformulation' && (
+          <OptionCardGroup
+            id="reformulation-subtype-select"
+            label="Reformulation Pathway"
+            helpText="The reformulation sub-type drives dramatically different cost, timeline, and probability-of-success profiles. Formulation changes (PK bridging) are cheapest; new indications via 505(b)(2) require the most clinical work."
+            options={reformulationSubTypeOptions}
+            descriptions={reformulationSubTypeDescriptions}
+            value={reformulationSubType}
+            onChange={onReformulationSubTypeChange}
+            columns={4}
+          />
+        )}
 
         <SearchableCombobox
           id="modality-select"

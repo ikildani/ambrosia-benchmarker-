@@ -125,6 +125,15 @@ export interface RNPVInput {
    */
   dealType?: string;
 
+  /**
+   * Reformulation sub-type — selects the 505(b)(2) profile that drives
+   * PoS uplift, cost multiplier, and timeline compression.
+   * Only used when dealType === 'reformulation'.
+   * One of: 'formulation_change', 'route_change', 'dosage_form', 'new_indication'.
+   * Defaults to 'route_change' if not provided.
+   */
+  reformulationSubType?: string;
+
   // =========================================================================
   // Deal-type-specific structural components
   // =========================================================================
@@ -621,6 +630,23 @@ export interface RNPVResult {
      * dealType === 'collaboration' when equityInvestment is provided.
      */
     equityInvestment?: number;
+
+    /**
+     * Reformulation IP licensing component. Populated only for
+     * dealType === 'reformulation'. Represents the value of the
+     * abbreviated regulatory pathway — cost savings from referencing
+     * the existing safety database and 505(b)(2) route.
+     */
+    reformulationIPValue?: {
+      /** Total R&D cost if run as full NDA ($M) */
+      fullNDACost_M: number;
+      /** Cost multiplier from reformulation profile (0-1) */
+      costMultiplier: number;
+      /** R&D cost savings from abbreviated pathway ($M) */
+      pathwaySavings_M: number;
+      /** Reformulation sub-type used */
+      subType: string;
+    };
   };
 
   /**

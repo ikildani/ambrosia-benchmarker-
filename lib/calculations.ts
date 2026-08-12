@@ -14,6 +14,9 @@ export type Phase = 'discovery' | 'preclinical' | 'phase1' | 'phase1_2' | 'phase
 // Deal structure types
 export type DealType = 'licensing' | 'acquisition' | 'codevelopment' | 'option' | 'collaboration' | 'reformulation';
 
+// Reformulation sub-type — differentiates 505(b)(2) pathways with dramatically different economics
+export type ReformulationSubType = 'formulation_change' | 'route_change' | 'dosage_form' | 'new_indication';
+
 // Modality types (17 oncology + 6 neurology = 23 options)
 export type Modality =
   | 'smallMolecule' | 'mab' | 'adc' | 'bispecific' | 'trispecificAntibody' | 'tCellEngager'
@@ -385,6 +388,9 @@ export interface CalculationInput {
   peakSalesOverrideM?: number | null;
 
   // Deal-type-specific structural inputs (mirror RNPVInput).
+  // Reformulation: sub-type selection drives PoS uplift, cost, and duration profiles.
+  // Only used when dealType === 'reformulation'. Defaults to 'route_change' if omitted.
+  reformulationSubType?: ReformulationSubType;
   // Co-development: licensee's share of the remaining R&D budget (0–1). Default 0.5.
   costSharingRatio?: number;
   // Option: exercise fee in $M, paid only if the licensee converts the option.
@@ -744,6 +750,12 @@ export function calculateRiskScore(input: CalculationInput): number {
   };
   score += dataRisk[input.dataQuality];
 
+  // Deal-type-specific risk adjustment: reformulation deals benefit from
+  // established safety profiles and abbreviated regulatory pathways
+  if (input.dealType === 'reformulation') {
+    score -= 8; // Established safety data and reference product de-risk the program
+  }
+
   // Therapeutic-area-specific risk adjustments (up to ±15 points)
   score += getTherapeuticAreaRiskAdjustment(input);
 
@@ -864,6 +876,16 @@ function getNegotiationInsight(input: CalculationInput): string {
   const isHematology = input.therapeuticArea === 'hematology';
   const isDermatology = input.therapeuticArea === 'dermatology';
   const isGastroenterology = input.therapeuticArea === 'gastroenterology';
+
+  // Reformulation / 505(b)(2) — deal-type-specific insights take priority
+  if (input.dealType === 'reformulation') {
+    const reformInsights = (insights as Record<string, Record<string, string>>).reformulationDealType;
+    const subType = input.reformulationSubType;
+    if (subType && reformInsights?.[subType]) {
+      return reformInsights[subType];
+    }
+    return '505(b)(2) upfronts typically represent 20-30% of total deal value, with milestones weighted toward regulatory submissions and FDA acceptance rather than clinical endpoints. Reference product safety data de-risks the program, supporting higher upfront percentages and shorter milestone timelines. Key comparables: Eagle/Cephalon-Teva BENDEKA ($120M, 25-32% royalties, SEC 8-K 2015), BioDelivery/Endo BELBUCA ($180M, $50M approval milestone, SEC 8-K 2012), Opiant/Adapt NARCAN ($55M+, double-digit royalties, SEC 10-K 2014).';
+  }
 
   // For rare disease, check TA-specific insights first
   if (isRareDisease) {
@@ -2474,22 +2496,7 @@ function generateTARationale(ta: string, phaseLabel: string, riskScore: number):
   }
 }
 
-export function formatCurrency(value: number | null | undefined): string {
-  if (value == null || isNaN(value)) return '$0M';
-  const abs = Math.abs(value);
-  const sign = value < 0 ? '-' : '';
-  if (abs >= 1000) {
-    return `${sign}$${(abs / 1000).toFixed(1)}B`;
-  }
-  if (abs < 1 && abs > 0) {
-    return `${sign}$${(abs * 1000).toFixed(0)}K`;
-  }
-  return `${sign}$${Math.round(abs)}M`;
-}
-
-export function formatRange(range: { low: number; median: number; high: number }): string {
-  return `${formatCurrency(range.low)} - ${formatCurrency(range.high)}`;
-}
+export { formatCurrency, formatRange, formatPercent, formatRawUsd, formatNumber } from '@/lib/format';
 
 // Option arrays for dropdowns
 export const phaseOptions = [
@@ -2520,6 +2527,20 @@ export const dealTypeDescriptions: Record<string, string> = {
   option: 'Right to license at a future date, lower upfront',
   collaboration: 'Early research partnership, milestone-driven',
   reformulation: 'Line extension, new formulation, or 505(b)(2) pathway referencing prior approval',
+};
+
+export const reformulationSubTypeOptions = [
+  { value: 'formulation_change', label: 'Formulation Change (PK Bridging)' },
+  { value: 'route_change', label: 'Route Change (e.g., oral → injectable)' },
+  { value: 'dosage_form', label: 'Dosage Form (e.g., abuse-deterrent, ER)' },
+  { value: 'new_indication', label: 'New Indication (505(b)(2))' },
+];
+
+export const reformulationSubTypeDescriptions: Record<string, string> = {
+  formulation_change: 'Same molecule, different formulation — PK bridging study only. Lowest cost, highest PoS.',
+  route_change: 'New route of administration (e.g., IV→subQ, oral→inhaled) — PK + safety data required.',
+  dosage_form: 'New dosage form with efficacy claims (e.g., extended-release, abuse-deterrent) — PK + efficacy.',
+  new_indication: '505(b)(2) referencing existing safety data for a new indication — abbreviated clinical program.',
 };
 
 export const modalityOptions = [

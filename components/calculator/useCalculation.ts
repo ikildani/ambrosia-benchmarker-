@@ -6,6 +6,7 @@ import {
   calculateDealTerms,
   type Phase,
   type DealType,
+  type ReformulationSubType,
   type Modality,
   type Indication,
 } from '@/lib/calculations';
@@ -50,6 +51,7 @@ export function buildCalculationInput(s: CalculatorFormState): CalculationInput 
     deliveryRoute: s.deliveryRoute || undefined,
     differentiationFactors: s.differentiationFactors.length > 0 ? s.differentiationFactors : undefined,
     peakSalesOverrideM: s.peakSalesOverrideM,  // R23
+    ...(s.dealType === 'reformulation' ? { reformulationSubType: s.reformulationSubType } : {}),
     ...(s.therapeuticArea === 'neurology' ? { bbbPenetration: s.bbbPenetration, diseaseProgression: s.diseaseProgression, biomarkerValidation: s.biomarkerValidation } : {}),
     ...(s.therapeuticArea === 'immunology' ? { immuneResetPotential: s.immuneResetPotential, targetSpecificity: s.targetSpecificity, diseaseSeverity: s.diseaseSeverity, treatmentGoal: s.treatmentGoal } : {}),
     ...(s.therapeuticArea === 'metabolic' ? { mechanismDifferentiation: s.mechanismDifferentiation, weightLossEfficacy: s.weightLossEfficacy, routeOfAdministration: s.routeOfAdministration, comorbidityBreadth: s.comorbidityBreadth, metabolicTreatmentApproach: s.metabolicTreatmentApproach } : {}),

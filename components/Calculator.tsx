@@ -789,6 +789,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           therapeuticArea={state.therapeuticArea}
                           phase={(state.phase || '') as Phase}
                           dealType={(state.dealType || '') as DealType}
+                          reformulationSubType={state.reformulationSubType}
                           modality={(state.modality || '') as Modality}
                           indication={(state.indication || '') as Indication}
                           biomarker={state.biomarker}
@@ -797,6 +798,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           onboardingStep={onboardingStep}
                           onPhaseChange={(newValue) => { trackParameterChange('phase', state.phase, newValue); actions.setPhase(newValue); }}
                           onDealTypeChange={(newValue: DealType) => { trackParameterChange('dealType', state.dealType, newValue); actions.setDealType(newValue); }}
+                          onReformulationSubTypeChange={(newValue) => { actions.setReformulationSubType(newValue); }}
                           onModalityChange={(newValue) => { trackParameterChange('modality', state.modality, newValue); actions.setModality(newValue); }}
                           onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
                           onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}

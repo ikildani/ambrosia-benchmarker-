@@ -4,6 +4,7 @@ import type {
   TherapeuticArea,
   Phase,
   DealType,
+  ReformulationSubType,
   Modality,
   Indication,
   Territory,
@@ -61,6 +62,7 @@ export interface CalculatorFormState {
   therapeuticArea: TherapeuticArea;
   phase: Phase | '';
   dealType: DealType | '';
+  reformulationSubType: ReformulationSubType;
   modality: Modality | '';
   indication: Indication | '';
   territory: Territory;
@@ -154,6 +156,7 @@ export const INITIAL_STATE: CalculatorFormState = {
   therapeuticArea: 'oncology', // TA must be set for form rendering; user picks from selector
   phase: '',          // Not yet selected — user must choose
   dealType: '',       // Not yet selected — user must choose
+  reformulationSubType: 'route_change', // Default sub-type; only used when dealType === 'reformulation'
   modality: '',       // Not yet selected — user must choose
   indication: '',     // Not yet selected — user must choose
   territory: 'global',
@@ -239,6 +242,10 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
         );
         if (resets) {
           next = { ...next, ...resets };
+        }
+        // Reset reformulation sub-type when switching away from reformulation
+        if (action.field === 'dealType' && action.value !== 'reformulation') {
+          next = { ...next, reformulationSubType: 'route_change' };
         }
       }
       return next;
@@ -412,6 +419,7 @@ export interface CalculatorActions {
   setTherapeuticArea: (v: TherapeuticArea) => void;
   setPhase: (v: Phase) => void;
   setDealType: (v: DealType) => void;
+  setReformulationSubType: (v: ReformulationSubType) => void;
   setModality: (v: Modality) => void;
   setIndication: (v: Indication) => void;
   setTerritory: (v: Territory) => void;
@@ -489,7 +497,7 @@ const STORAGE_KEY = 'calculator-form-state';
 
 /** Fields to persist — excludes UI-only state. */
 const FORM_FIELDS: (keyof CalculatorFormState)[] = [
-  'therapeuticArea', 'phase', 'dealType', 'modality', 'indication', 'territory',
+  'therapeuticArea', 'phase', 'dealType', 'reformulationSubType', 'modality', 'indication', 'territory',
   'biomarker', 'lineOfTherapy', 'treatmentApproach', 'combinationPotential',
   'competitivePosition', 'dataQuality', 'regulatoryDesignations',
   'bbbPenetration', 'diseaseProgression', 'biomarkerValidation',
@@ -569,6 +577,7 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions, b
     setTherapeuticArea: (v) => dispatch({ type: 'SET_FIELD', field: 'therapeuticArea', value: v }),
     setPhase: (v) => dispatch({ type: 'SET_FIELD', field: 'phase', value: v }),
     setDealType: (v) => dispatch({ type: 'SET_FIELD', field: 'dealType', value: v }),
+    setReformulationSubType: (v) => dispatch({ type: 'SET_FIELD', field: 'reformulationSubType', value: v }),
     setModality: (v) => dispatch({ type: 'SET_FIELD', field: 'modality', value: v }),
     setIndication: (v) => dispatch({ type: 'SET_FIELD', field: 'indication', value: v }),
     setTerritory: (v) => dispatch({ type: 'SET_FIELD', field: 'territory', value: v }),

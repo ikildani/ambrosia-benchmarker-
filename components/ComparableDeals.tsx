@@ -123,7 +123,7 @@ function DealDistributionChart({
             className="absolute top-0 bottom-0 w-0.5 bg-teal-500 dark:bg-teal-400 z-10"
             style={{ left: `${pct(median)}%` }}
           >
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-teal-600 dark:text-teal-300 whitespace-nowrap">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-teal-600 dark:text-teal-300 whitespace-nowrap">
               {fmtM(median)}
             </div>
           </div>
@@ -146,11 +146,11 @@ function DealDistributionChart({
           );
         })}
         {/* Axis labels */}
-        <div className="absolute bottom-0.5 left-1 text-[8px] text-slate-400 dark:text-slate-500">{fmtM(minVal || 1)}</div>
-        <div className="absolute bottom-0.5 right-1 text-[8px] text-slate-400 dark:text-slate-500">{fmtM(maxVal)}</div>
+        <div className="absolute bottom-0.5 left-1 text-[10px] text-slate-400 dark:text-slate-500">{fmtM(minVal || 1)}</div>
+        <div className="absolute bottom-0.5 right-1 text-[10px] text-slate-400 dark:text-slate-500">{fmtM(maxVal)}</div>
       </div>
       {benchmark && (
-        <div className="flex justify-between mt-1 text-[9px] text-slate-400 dark:text-slate-500">
+        <div className="flex justify-between mt-1 text-[10px] text-slate-400 dark:text-slate-500">
           <span style={{ marginLeft: `${pct(p25)}%` }}>p25: {fmtM(p25)}</span>
           <span style={{ marginRight: `${100 - pct(p75)}%` }}>p75: {fmtM(p75)}</span>
         </div>
@@ -211,7 +211,7 @@ function FilterSelect({
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500"
+      className="text-xs font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500"
       aria-label={label}
     >
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -518,13 +518,13 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{deal.licensor} <span className="text-slate-400 dark:text-slate-500 font-normal">→</span> {deal.licensee}</p>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold whitespace-nowrap flex-shrink-0 ${matchBadge.className}`}>{matchBadge.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold whitespace-nowrap flex-shrink-0 ${matchBadge.className}`}>{matchBadge.label}</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                  {deal.matchBreakdown.ta && <span className="text-[9px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">TA</span>}
-                  {deal.matchBreakdown.modality && <span className="text-[9px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Mod</span>}
-                  {deal.matchBreakdown.phase && <span className="text-[9px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Phase</span>}
-                  {deal.matchBreakdown.indication && <span className="text-[9px] px-1 py-px rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300">Ind</span>}
+                  {deal.matchBreakdown.ta && <span className="text-[10px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">TA</span>}
+                  {deal.matchBreakdown.modality && <span className="text-[10px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Mod</span>}
+                  {deal.matchBreakdown.phase && <span className="text-[10px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Phase</span>}
+                  {deal.matchBreakdown.indication && <span className="text-[10px] px-1 py-px rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300">Ind</span>}
                   {deal.buyerTier && BUYER_TIER_LABELS[deal.buyerTier as keyof typeof BUYER_TIER_LABELS] && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${BUYER_TIER_COLORS[deal.buyerTier as keyof typeof BUYER_TIER_COLORS] || ''}`}>
                       {BUYER_TIER_LABELS[deal.buyerTier as keyof typeof BUYER_TIER_LABELS]}
@@ -648,7 +648,7 @@ function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInpu
           </div>
           <div>
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">AI Comparable Analysis</span>
-            <span className="ml-2 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded">Ambrosia AI</span>
+            <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded">Ambrosia AI</span>
           </div>
         </div>
         {narration?.confidenceLevel && (
@@ -693,7 +693,7 @@ function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInpu
               {d.adjustments?.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {d.adjustments.map((a: any, j: number) => (
-                    <span key={j} className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${a.direction === 'premium' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : a.direction === 'discount' ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'}`}>
+                    <span key={j} className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${a.direction === 'premium' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' : a.direction === 'discount' ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'}`}>
                       {a.factor}: {a.direction === 'discount' ? '-' : '+'}{a.magnitude_pct}%
                     </span>
                   ))}

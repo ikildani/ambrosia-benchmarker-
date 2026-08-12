@@ -86,6 +86,8 @@ const COMPANY_TIER: Record<string, BuyerTier> = {
   'organon': 'mid_pharma',
   'alkem': 'mid_pharma',
   'alkem laboratories': 'mid_pharma',
+  'taro': 'mid_pharma',
+  'taro pharmaceutical': 'mid_pharma',
   'torrent': 'mid_pharma',
   'torrent pharmaceuticals': 'mid_pharma',
   'zydus': 'mid_pharma',
@@ -124,6 +126,17 @@ const COMPANY_TIER: Record<string, BuyerTier> = {
   'neurocrine biosciences': 'specialty',
   'mochida pharmaceutical': 'specialty',
   'purdue pharma': 'specialty',
+  'amphastar': 'specialty',
+  'amphastar pharmaceuticals': 'specialty',
+  'antares pharma': 'specialty',
+  'antares': 'specialty',
+  'acrotech': 'specialty',
+  'acrotech biopharma': 'specialty',
+  'kashiv': 'specialty',
+  'kashiv biosciences': 'specialty',
+  'nestle health science': 'specialty',
+  'zealand pharma': 'specialty',
+  'zealand': 'specialty',
 
   // ── Generic ───────────────────────────────────────────────────────
   'sandoz': 'generic',
@@ -144,6 +157,7 @@ const COMPANY_TIER: Record<string, BuyerTier> = {
   'hetero labs': 'generic',
   'piramal': 'generic',
   'piramal pharma': 'generic',
+  'alvotech': 'generic',
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -162,6 +176,7 @@ const COMPANY_ALIASES: Record<string, string> = {
   'allergan': 'abbvie', // acquired by AbbVie
   'alexion': 'astrazeneca', // acquired by AZ
   'global blood therapeutics': 'pfizer', // acquired by Pfizer
+  'nestlé health science': 'nestle health science',
 };
 
 // ═══════════════════════════════════════════════════════════════════════

@@ -367,8 +367,17 @@ const GENERIC_EROSION_BY_MODALITY: Record<string, number> = {
 // A pure formulation change (tablet→ER) requires only PK bridging, while
 // a 505(b)(2) with a new indication is closer to an abbreviated NDA.
 //
-// Sources: FDA 505(b)(2) guidance (2023), DealForma reformulation deal
-// analysis (2020-2025), EvaluatePharma lifecycle analytics.
+// Sources & calibration (verified Aug 2026):
+// - Cost ranges: SyneticX "The Real Cost of a 505(b)(2)" ($8-20M for
+//   formulation changes, $20-300M for complex programs); DrugPatentWatch
+//   "Cut Drug R&D Costs by 90%" ($200-300M for new indication Phase III)
+// - Timelines: SyneticX (2-3yr formulation, 3-5yr mid-complexity, 4-7yr
+//   Phase III); Premier Research "2020 505(b)(2) Year in Review"
+// - PoS: 505(b)(2) accounts for ~60% of NDA approvals (Premier Research);
+//   64.5% first-cycle approval rate 2009-2015 (Premier Consulting); rank
+//   ordering by sub-type is model assumption (no published sub-type PoS)
+// - Discount: -2pp captures commercial de-risking (known molecule,
+//   prescriber familiarity); development de-risking is in PoS uplift
 // ---------------------------------------------------------------------------
 
 interface ReformulationProfile {
@@ -391,9 +400,14 @@ const REFORMULATION_PROFILES: Record<string, ReformulationProfile> = {
 
 /**
  * Infer reformulation sub-type from modality and indication context.
+ * When an explicit sub-type is provided (user-selected), returns it directly.
  * Falls back to 'route_change' as the safe middle-ground default.
  */
-function inferReformulationSubType(modality: string, _indication?: string): string {
+function inferReformulationSubType(modality: string, _indication?: string, explicitSubType?: string): string {
+  // If the user explicitly selected a sub-type, use it directly
+  if (explicitSubType) {
+    return explicitSubType;
+  }
   const mod = modality.toLowerCase();
   // Extended-release / sustained-release formulation changes
   if (mod.includes('extended') || mod.includes('er') || mod.includes('sr') || mod.includes('sustained')) {
@@ -554,7 +568,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Source: FDA 505(b)(2) approval statistics (2018-2025), DealForma
   // reformulation deal outcomes analysis.
   if (dealType === 'reformulation') {
-    const reformSubType = inferReformulationSubType(modality, input.indication);
+    const reformSubType = inferReformulationSubType(modality, input.indication, input.reformulationSubType);
     const reformProfile = REFORMULATION_PROFILES[reformSubType] ?? REFORMULATION_PROFILES.route_change;
 
     // Per-transition PoS uplift: the base rates are already computed; we
@@ -620,7 +634,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // Replaces the former flat 0.4x cost / 0.5x duration with profile-based
   // multipliers that differentiate PK-bridging-only from abbreviated programs.
   if (dealType === 'reformulation') {
-    const reformSubType = inferReformulationSubType(modality, input.indication);
+    const reformSubType = inferReformulationSubType(modality, input.indication, input.reformulationSubType);
     const reformProfile = REFORMULATION_PROFILES[reformSubType] ?? REFORMULATION_PROFILES.route_change;
     for (const key of Object.keys(costs)) {
       costs[key] = (costs[key] || 0) * reformProfile.costMultiplier;
@@ -1245,6 +1259,65 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     if (equityValue > 0) {
       impliedDealValue.equityInvestment = Math.round(equityValue);
     }
+  } else if (dealType === 'reformulation') {
+    // Reformulation overlay: the abbreviated 505(b)(2) pathway creates
+    // structural value through R&D cost savings vs. a full NDA program.
+    // Real reformulation deals have distinct structural features: technology
+    // access fees, formulation IP licensing, reference product data licensing,
+    // and manufacturing know-how transfer payments.
+    const reformSubType = inferReformulationSubType(modality, input.indication, input.reformulationSubType);
+    const reformProfile = REFORMULATION_PROFILES[reformSubType] ?? REFORMULATION_PROFILES.route_change;
+
+    // Calculate full-NDA cost for comparison using baseCosts (unmodified by
+    // reformulation cost reductions) so the savings reflect the true delta.
+    const fullNDACost = pathway.reduce((sum, p) => sum + (baseCosts[p] ?? 0), 0);
+    const reformCost = fullNDACost * reformProfile.costMultiplier;
+    const pathwaySavings = fullNDACost - reformCost;
+
+    // Formulation IP premium: 8-12% of deal value, reflecting the value
+    // of the reference product data package and formulation know-how
+    const ipPremium = Math.abs(calibratedRNPV) * 0.10;
+
+    // Phase-specific reformulation multipliers (mirroring calculations.ts).
+    // Lower than licensing because reformulation deals are typically $10-200M
+    // (line extensions, not novel assets). Established safety profile reduces
+    // risk but total value is smaller.
+    const PHASE_REFORM_MULTIPLIERS: Record<string, number> = {
+      discovery: 0.25,
+      preclinical: 0.35,
+      phase1: 0.45,
+      phase1_2: 0.50,
+      phase2: 0.55,
+      phase2_3: 0.60,
+      phase3: 0.65,
+      nda_filed: 0.70,
+      approved: 0.75,
+    };
+
+    // Rebuild total deal with reformulation economics
+    const reformBase = Math.abs(calibratedRNPV) * (PHASE_REFORM_MULTIPLIERS[phase] ?? 0.55);
+    const reformTotalMedian = reformBase + ipPremium;
+    const reformTotalLow = reformTotalMedian * 0.80;
+    const reformTotalHigh = reformTotalMedian * 1.20;
+
+    impliedDealValue.totalDeal = {
+      low: reformTotalLow,
+      median: reformTotalMedian,
+      high: reformTotalHigh,
+    };
+
+    impliedDealValue.upfront = {
+      low: impliedDealValue.totalDeal.low * upfrontPercent.low,
+      median: impliedDealValue.totalDeal.median * upfrontPercent.median,
+      high: impliedDealValue.totalDeal.high * upfrontPercent.high,
+    };
+
+    impliedDealValue.reformulationIPValue = {
+      fullNDACost_M: Math.round(fullNDACost),
+      costMultiplier: reformProfile.costMultiplier,
+      pathwaySavings_M: Math.round(pathwaySavings),
+      subType: reformSubType,
+    };
   }
 
   // Post-branch invariant: upfront.high ≤ totalDeal.high (and median/low).
@@ -1786,6 +1859,13 @@ export function getDefaultDiscountRate(
   // behavior change until the 100-deal backtest validates the blend.
   if (TIER4_FLAGS.macroFactors) {
     rate += getDynamicWaccComponent(rate);
+  }
+
+  // Floor: reformulation discount rate should not go below 7.5% (below pharma WACC floor).
+  // At late stages (approved = base 8%), the flat -2pp deal-type adjustment pushes to 6%,
+  // which is below investment-grade WACC and unrealistic for any pharma asset.
+  if (dealType === 'reformulation') {
+    rate = Math.max(0.075, rate);
   }
 
   // Clamp to reasonable range

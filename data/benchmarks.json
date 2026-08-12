@@ -7384,6 +7384,12 @@
         "celiacDisease": "Celiac disease has zero approved therapies — patients rely entirely on dietary gluten avoidance. Massive underserved population (~1% prevalence). Multiple Phase 2 programs active. First-in-class commands exceptional terms.",
         "eosinophilicEsophagitis": "EoE was transformed by dupilumab approval. High unmet need with limited approved options. Anti-IL-13, TSLP, and small molecule approaches in pipeline. Premium for oral delivery.",
         "ibs": "IBS affects 10-15% of the global population but has limited effective therapies. Serotonin modulators and GLP-1 approaches are emerging. Large market potential but regulatory bar for functional disorders is high."
+      },
+      "reformulationDealType": {
+        "formulation_change": "Pure formulation changes (e.g., tablet-to-ER, lyophilized-to-liquid) rely on PK bridging data, with 505(b)(2) submission typically requiring only bioequivalence studies. Upfronts of 25-35% of total deal value are standard given low development risk. Development costs typically $8-20M and timelines of 2-3 years (Source: SyneticX 505(b)(2) cost analysis).",
+        "route_change": "Route-of-administration changes (e.g., IV-to-subQ, oral-to-inhaled) require PK bridging plus additional safety data. Higher development costs than pure formulation changes but still benefit from established efficacy. Upfronts of 20-30% are typical. Key comparable: Eagle/Cephalon-Teva BENDEKA rapid infusion ($120M total, 505(b)(2), SEC 8-K 2015).",
+        "dosage_form": "Dosage form modifications with new efficacy claims (abuse-deterrent, extended-release with new labeling) require both PK bridging and efficacy demonstration. Development costs are moderate ($20-50M); expect upfronts of 15-25% (Source: DrugPatentWatch 505(b)(2) analysis).",
+        "new_indication": "505(b)(2) filings for new indications reference existing safety data but require an abbreviated clinical program. Development costs approach 70% of a full NDA ($200-300M for large Phase III). Expect milestone-weighted structures with upfronts of 15-20% (Source: DrugPatentWatch, Premier Research)."
       }
     }
   },

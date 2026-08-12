@@ -778,6 +778,7 @@ const LICENSING_DEAL_TYPES = new Set([
   'co_development',
   'co-development',
   'option',
+  'reformulation',
 ]);
 
 /**
@@ -875,29 +876,35 @@ function scoreDealTypeAlignment(
 
   const signals: string[] = [];
 
+  // Reformulation is structurally a licensing deal — treat it as licensing
+  // for deal-type alignment so companies with licensing history score well
+  const effectiveDealType = userDealType === 'reformulation' ? 'licensing' : userDealType;
+
   // Exact match: full points
   if (
-    preferred === userDealType ||
-    (preferred === 'mixed' && ['licensing', 'codevelopment'].includes(userDealType))
+    preferred === effectiveDealType ||
+    (preferred === 'mixed' && ['licensing', 'codevelopment'].includes(effectiveDealType))
   ) {
-    signals.push(`Active in ${userDealType} deals`);
+    signals.push(userDealType === 'reformulation'
+      ? 'Active in licensing deals (reformulation is a licensing sub-type)'
+      : `Active in ${effectiveDealType} deals`);
     return { score: weight, signals };
   }
 
   // Strong mismatch: licensing requested but company only does acquisitions
-  if (userDealType === 'licensing' && preferred === 'acquisition') {
+  if (effectiveDealType === 'licensing' && preferred === 'acquisition') {
     signals.push('Prefers acquisitions over licensing');
     return { score: weight * 0.2, signals };
   }
 
   // Strong mismatch: acquisition requested but company only does licensing
-  if (userDealType === 'acquisition' && preferred === 'licensing') {
+  if (effectiveDealType === 'acquisition' && preferred === 'licensing') {
     signals.push('Prefers licensing over acquisitions');
     return { score: weight * 0.2, signals };
   }
 
   // Co-development requested
-  if (userDealType === 'codevelopment') {
+  if (effectiveDealType === 'codevelopment') {
     if (preferred === 'mixed') {
       return { score: weight * 0.8, signals: ['Mixed deal history supports co-dev'] };
     }
