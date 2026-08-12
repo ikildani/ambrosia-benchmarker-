@@ -19,11 +19,12 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess: (email: string, name: string) => void;
   initialMode?: 'signin' | 'signup';
+  prefillEmail?: string;
 }
 
 type AuthMode = 'signin' | 'signup' | 'forgot-password' | 'verify-email';
 
-export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signup' }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'signup', prefillEmail }: AuthModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, isOpen, onClose);
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -43,6 +44,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
   });
 
   const showSocial = (mode === 'signin' || mode === 'signup') && isSupabaseConfigured();
+
+  useEffect(() => {
+    if (prefillEmail) form.setEmail(prefillEmail);
+  }, [prefillEmail]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (isOpen) {
@@ -226,7 +231,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
           </div>
 
           {mode === 'signup' && (
-            <p className="mt-5 text-[11px] text-slate-400 dark:text-slate-500 text-center leading-relaxed">
+            <p className="mt-5 text-xs text-slate-400 dark:text-slate-500 text-center leading-relaxed">
               By creating an account, you agree to our{' '}
               <a href="/terms" className="underline hover:text-slate-600 dark:hover:text-slate-300">Terms</a> and{' '}
               <a href="/privacy" className="underline hover:text-slate-600 dark:hover:text-slate-300">Privacy Policy</a>.
