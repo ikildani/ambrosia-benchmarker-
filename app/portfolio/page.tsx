@@ -969,11 +969,11 @@ export default function PortfolioPage() {
                 <ArrowRight className="w-5 h-5" />
               </a>
               <a
-                href="mailto:issa@ambrosiaventures.co"
+                href="mailto:info@ambrosiaventures.co"
                 className="inline-flex items-center gap-2 px-8 py-4 text-slate-300 font-medium rounded-xl hover:text-white hover:bg-white/5 transition-all border border-white/10"
               >
                 <Mail className="w-4 h-4" />
-                issa@ambrosiaventures.co
+                info@ambrosiaventures.co
               </a>
             </div>
 
