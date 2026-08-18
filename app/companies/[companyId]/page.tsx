@@ -6,6 +6,17 @@ import CompanyPageClient from './CompanyPageClient';
 
 // ISR: regenerate company pages every hour
 export const revalidate = 3600;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from('companies')
+    .select('id')
+    .order('deals_last_12mo', { ascending: false, nullsFirst: false })
+    .limit(200);
+  return (data || []).map((c) => ({ companyId: c.id }));
+}
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

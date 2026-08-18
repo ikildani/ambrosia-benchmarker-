@@ -5,6 +5,9 @@ import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 export const metadata: Metadata = {
   title: 'Security | Ambrosia Ventures',
   description: 'How Ambrosia Ventures protects your data. Infrastructure security, application security, data handling, compliance, and privacy practices for the Biopharma Deal Intelligence Platform.',
+  alternates: {
+    canonical: '/security',
+  },
   openGraph: {
     title: 'Security — Ambrosia Ventures',
     description: 'Enterprise-grade security for biopharma deal intelligence. Encryption, access controls, data isolation, and compliance.',
