@@ -62,18 +62,18 @@ export async function findOptimizationCandidates(
   // 1. Read latest GSC performance rows
   const { data: metrics, error: metricsError } = await supabase
     .from('seo_metrics')
-    .select('payload')
+    .select('data')
     .eq('metric_type', 'gsc_performance')
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
 
-  if (metricsError || !metrics?.payload) {
+  if (metricsError || !metrics?.data) {
     console.warn('[ctr-optimizer] No GSC performance data found');
     return [];
   }
 
-  const rows = metrics.payload as {
+  const rows = (metrics.data as Record<string, unknown>)?.topQueries as {
     page: string;
     query: string;
     impressions: number;

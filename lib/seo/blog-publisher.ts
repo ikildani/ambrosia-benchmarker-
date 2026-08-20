@@ -52,9 +52,18 @@ export async function publishBlogPost(
   content: GeneratedBlogContent,
   topic: TopicMeta,
 ): Promise<PublishResult> {
-  const slug = slugify(content.title);
+  let slug = slugify(content.title);
 
   try {
+    const { data: existing } = await supabase
+      .from('blog_posts')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (existing) {
+      slug = `${slug}-${Date.now().toString(36).slice(-5)}`;
+    }
     // 1. Insert into blog_posts
     // Build tags — filter out 'general' placeholder values
     const tags = [topic.therapeuticArea, topic.modality, topic.phase]

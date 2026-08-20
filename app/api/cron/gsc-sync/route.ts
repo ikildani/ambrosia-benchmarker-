@@ -60,6 +60,35 @@ export async function GET(request: NextRequest) {
     // 2. Pull performance data (28 days)
     const performanceData = await gsc.getPerformanceData(28);
 
+    // Alert if GSC is returning zero data for 3+ consecutive days
+    if (performanceData.length === 0) {
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
+
+      const { count: zeroDays } = await supabase
+        .from('seo_metrics')
+        .select('*', { count: 'exact', head: true })
+        .eq('metric_type', 'gsc_performance')
+        .gte('metric_date', threeDaysAgoStr);
+
+      if (zeroDays && zeroDays >= 3) {
+        const alertWebhook = process.env.SLACK_WEBHOOK_URL;
+        if (alertWebhook) {
+          await fetch(alertWebhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: `GSC Alert: Search Console returning ZERO performance data for ${zeroDays}+ consecutive days. ` +
+                `Auth method: ${gsc.getAuthMethod()}. Check: (1) GSC property URL matches code, ` +
+                `(2) OAuth refresh token is valid, (3) Google Cloud app is in "production" mode. ` +
+                `All SEO monitoring, CTR optimization, and auto-indexing are disabled.`,
+            }),
+          }).catch(() => {});
+        }
+      }
+    }
+
     await supabase.from('seo_metrics').upsert(
       {
         metric_date: today,

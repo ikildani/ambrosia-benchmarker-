@@ -537,6 +537,22 @@ export async function GET(request: NextRequest) {
       categoryDistribution[cat] = (categoryDistribution[cat] || 0) + 1;
     }
 
+    // Alert if all articles failed (likely systemic issue like slug exhaustion)
+    if (published.length === 0 && errors.length > 0) {
+      const alertWebhook = process.env.SLACK_SEO_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
+      if (alertWebhook) {
+        const topErrors = errors.slice(0, 3).join('; ');
+        await fetch(alertWebhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: `SEO Content Alert: All ${errors.length} article attempts failed today. ` +
+              `Errors: ${topErrors}. Content pipeline is stalled.`,
+          }),
+        }).catch(() => {});
+      }
+    }
+
     await logCronRun(supabase, 'seo-content', {
       processed: published.length,
       inserted: published.length,

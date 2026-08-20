@@ -113,6 +113,27 @@ export async function GET(request: NextRequest) {
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
 
   try {
+    // Guard: skip pruning if GSC data has never returned real performance metrics.
+    // Without real data, gsc_clicks/gsc_impressions are always 0 and every post gets archived.
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const { data: recentGsc } = await supabase
+      .from('seo_metrics')
+      .select('data')
+      .eq('metric_type', 'gsc_performance')
+      .gte('metric_date', sevenDaysAgo)
+      .order('metric_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const totalImpressions = (recentGsc?.data as Record<string, number> | null)?.totalImpressions ?? 0;
+    if (totalImpressions === 0) {
+      await logCronRun(supabase, 'content-pruning', {
+        processed: 0,
+        parameters: { status: 'skipped_no_gsc_data', reason: 'No non-zero GSC data in last 7 days' },
+      });
+      return NextResponse.json({ skipped: true, reason: 'No GSC data available — cannot judge content performance' });
+    }
+
     // 1. Find underperforming pages: older than 60 days, zero clicks, < 10 impressions
     const { data: candidates, error: queryError } = await supabase
       .from('blog_posts')
