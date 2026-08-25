@@ -266,38 +266,46 @@ function aggregateBy(
 export function computeTuningDeltas(
   biasByTA: BiasAggregate[],
   biasByModality: BiasAggregate[],
+  activeOverrides?: Record<string, number>,
 ): TuningDelta[] {
   const deltas: TuningDelta[] = [];
+  const overrides = activeOverrides ?? {};
 
   for (const slice of biasByTA) {
     if (Math.abs(slice.recommendedAdjustment - 1) < 0.001) continue;
+    const paramKey = `PEAK_SALES_CAP.${slice.group}.median`;
+    const currentMultiplier = overrides[paramKey] ?? 1.0;
     const direction = slice.recommendedAdjustment > 1 ? 'up' : 'down';
     const pctChange = Math.abs(slice.recommendedAdjustment - 1) * 100;
     deltas.push({
-      parameter: `PEAK_SALES_CAP.${slice.group}.median`,
-      currentValue: 1.0, // placeholder — the actual current value is the cap multiplier
+      parameter: paramKey,
+      currentValue: currentMultiplier,
       proposedValue: slice.recommendedAdjustment,
       expectedErrorReduction: Math.abs(slice.meanError) * slice.rmseM,
       rationale:
         `${slice.group}: model ${slice.meanError > 0 ? 'overshoots' : 'undershoots'} by ` +
         `${(slice.meanError * 100).toFixed(0)}% on average across ${slice.sampleSize} drugs ` +
         `(median ${(slice.medianError * 100).toFixed(0)}%, RMSE $${Math.round(slice.rmseM)}M). ` +
+        `Current multiplier: ${currentMultiplier.toFixed(3)}. ` +
         `Proposing ${pctChange.toFixed(1)}% ${direction}-adjustment, capped at ±${DELTA_CAP * 100}%.`,
     });
   }
 
   for (const slice of biasByModality) {
     if (Math.abs(slice.recommendedAdjustment - 1) < 0.001) continue;
+    const paramKey = `PEAK_SALES_CAP.modality.${slice.group}`;
+    const currentMultiplier = overrides[paramKey] ?? 1.0;
     const direction = slice.recommendedAdjustment > 1 ? 'up' : 'down';
     const pctChange = Math.abs(slice.recommendedAdjustment - 1) * 100;
     deltas.push({
-      parameter: `PEAK_SALES_CAP.modality.${slice.group}`,
-      currentValue: 1.0,
+      parameter: paramKey,
+      currentValue: currentMultiplier,
       proposedValue: slice.recommendedAdjustment,
       expectedErrorReduction: Math.abs(slice.meanError) * slice.rmseM,
       rationale:
         `Modality "${slice.group}": ${slice.meanError > 0 ? 'overshoots' : 'undershoots'} by ` +
         `${(slice.meanError * 100).toFixed(0)}% on ${slice.sampleSize} drugs. ` +
+        `Current multiplier: ${currentMultiplier.toFixed(3)}. ` +
         `Proposing ${pctChange.toFixed(1)}% ${direction}-adjustment.`,
     });
   }
@@ -365,6 +373,7 @@ export function runRWEBacktest(
   drugs: IndexDrug[],
   rnpvCalculator: (input: RNPVInput) => RNPVResult,
   previousRmse?: number,
+  activeOverrides?: Record<string, number>,
 ): RWETuningResult {
   const asOfDate = new Date().toISOString().slice(0, 10);
   const backtests: DrugBacktest[] = [];
@@ -400,7 +409,7 @@ export function runRWEBacktest(
   }
 
   // Tuning deltas
-  const proposedTuningDeltas = computeTuningDeltas(biasByTA, biasByModality);
+  const proposedTuningDeltas = computeTuningDeltas(biasByTA, biasByModality, activeOverrides);
 
   // Held-out validation
   const holdoutValidation = computeHoldoutValidation(backtests);

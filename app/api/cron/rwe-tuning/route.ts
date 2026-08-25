@@ -78,8 +78,19 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
     const previousRmse = prevRow?.overall_rmse ?? undefined;
 
+    // Fetch active overrides so currentValue in deltas reflects reality
+    const { data: overrideRows } = await supabase
+      .from('rwe_active_overrides')
+      .select('parameter, override_value');
+    const activeOverrides: Record<string, number> = {};
+    if (overrideRows) {
+      for (const row of overrideRows) {
+        activeOverrides[row.parameter] = row.override_value;
+      }
+    }
+
     // Run the backtest
-    const result = runRWEBacktest(INDEX_DRUG_DATABASE, calculateRNPV, previousRmse);
+    const result = runRWEBacktest(INDEX_DRUG_DATABASE, calculateRNPV, previousRmse, activeOverrides);
 
     // Persist the full result
     const { data: insertedResult, error: insertErr } = await supabase
