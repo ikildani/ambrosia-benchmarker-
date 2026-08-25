@@ -131,6 +131,12 @@ export async function GET(request: NextRequest) {
         processed: 0,
         parameters: { status: 'skipped_no_gsc_data', reason: 'No non-zero GSC data in last 7 days' },
       });
+      const { notifyCronSkipped } = await import('@/lib/slack/notify');
+      await notifyCronSkipped({
+        cronName: 'content-pruning',
+        reason: 'No GSC data available — cannot judge content performance',
+        fix: 'Ensure GSC is connected and syncing via /api/auth/gsc-authorize',
+      });
       return NextResponse.json({ skipped: true, reason: 'No GSC data available — cannot judge content performance' });
     }
 

@@ -114,6 +114,12 @@ export async function GET(request: NextRequest) {
         processed: 0,
         parameters: { status: 'gsc_not_configured' },
       });
+      const { notifyCronSkipped } = await import('@/lib/slack/notify');
+      await notifyCronSkipped({
+        cronName: 'comparison-optimizer',
+        reason: 'GSC not configured',
+        fix: 'Visit /api/auth/gsc-authorize to reconnect Google Search Console',
+      });
       return NextResponse.json({ message: 'GSC not configured', skipped: true });
     }
 

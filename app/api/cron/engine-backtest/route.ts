@@ -91,9 +91,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Intelligence tracking
+    // Persist backtest results for historical tracking and API access
     try {
       const supabase = createServiceClient();
+      await supabase.from('cron_runs').insert({
+        cron_name: 'engine-backtest',
+        status: failingThresholds.length > 0 ? 'degraded' : 'passed',
+        metadata: {
+          assetCount: report.assetCount,
+          edgeCaseCount: report.edgeCaseCount,
+          confidence: report.overallConfidence,
+          defensibleMAPE: report.defensiblePeakErosionMetrics.mape,
+          defensiblePearsonR: report.defensiblePeakErosionMetrics.pearsonR,
+          defensibleRSquared: report.defensiblePeakErosionMetrics.rSquared,
+          allAssetMAPE: report.peakErosionMetrics.mape,
+          allAssetPearsonR: report.peakErosionMetrics.pearsonR,
+          calibrationAccuracy: report.calibrationAccuracyPeakErosion,
+          timingAccuracy: report.timingAccuracyCompetitorYear,
+          failingThresholds,
+        },
+        created_at: new Date().toISOString(),
+      });
       await runCronIntelligence(supabase, 'engine-backtest', {
         processed: 1,
         inserted: 0,

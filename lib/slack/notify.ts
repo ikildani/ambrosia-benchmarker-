@@ -419,6 +419,31 @@ export async function notifyIngestionRun(run: {
   );
 }
 
+export async function notifyCronSkipped(details: {
+  cronName: string;
+  reason: string;
+  fix?: string;
+}): Promise<void> {
+  await postToSlack(
+    [{
+      color: '#f59e0b',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: `⚠️ Cron Skipped: ${details.cronName}`, emoji: true } },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: `*Cron:*\n${details.cronName}` },
+            { type: 'mrkdwn', text: `*Reason:*\n${details.reason}` },
+            ...(details.fix ? [{ type: 'mrkdwn' as const, text: `*Fix:*\n${details.fix}` }] : []),
+            { type: 'mrkdwn', text: `*Time:*\n${formatTimestamp()}` },
+          ],
+        },
+      ],
+    }],
+    `⚠️ ${details.cronName} skipped: ${details.reason}`,
+  );
+}
+
 export async function notifyShareView(details: {
   token: string;
   modality: string;

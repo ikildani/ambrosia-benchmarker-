@@ -1308,6 +1308,9 @@ export interface CompetitiveAsset {
 /**
  * Competitive landscape analysis for a specific indication.
  *
+ * Computed by `lib/services/pipeline-intelligence.ts#analyzeCompetitiveLandscape()`,
+ * which queries Supabase pipeline data. Called from `/api/financial` and the QA health check.
+ *
  * Synthesizes pipeline data into a density score and market share
  * erosion estimate that feeds into the rNPV model.
  */
@@ -1354,6 +1357,8 @@ export interface CompetitiveLandscape {
 
 /**
  * Deal flow forecast for a therapeutic area.
+ *
+ * Computed by `lib/services/deal-flow-forecast.ts#generateDealFlowForecast()`.
  *
  * Combines historical quarterly deal volume/value with a forward-looking
  * prediction of deal activity, market sentiment, and seasonal patterns.
@@ -1417,6 +1422,8 @@ export interface DealFlowForecast {
 
 /**
  * Acquisition likelihood assessment for partner/acquirer matching.
+ *
+ * Computed by `lib/services/acquisition-likelihood.ts#scoreAcquisitionLikelihood()`.
  *
  * Scores how likely a given asset or company is to be acquired,
  * based on strategic fit, pipeline gaps, financial capacity, and
