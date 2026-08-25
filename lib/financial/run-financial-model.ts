@@ -487,8 +487,21 @@ export function runFinancialModel(
   // Step 19: Pricing & Reimbursement Constraints
   let pricingConstraints: PricingConstraintResult | undefined;
   try {
-    // Estimate annual cost of therapy from peak sales and addressable patients
-    const estimatedPatientsAtPeak = 10_000; // conservative default
+    const taPatientDefaults: Record<string, number> = {
+      oncology: 125_000,
+      neurology: 300_000,
+      cardiovascular: 1_250_000,
+      metabolic: 1_500_000,
+      rareDisease: 27_500,
+      dermatology: 600_000,
+      infectiousDisease: 300_000,
+      womensHealth: 600_000,
+      ophthalmology: 125_000,
+      gastroenterology: 300_000,
+      immunology: 300_000,
+      hematology: 60_000,
+    };
+    const estimatedPatientsAtPeak = taPatientDefaults[rnpvInput.therapeuticArea] ?? 10_000;
     const annualCostOfTherapy = marketSize?.annualRevenuePerPatient
       ?? (rnpvInput.peakSalesEstimate.median * 1_000_000) / estimatedPatientsAtPeak;
     pricingConstraints = computePricingConstraints(
