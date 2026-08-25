@@ -244,6 +244,43 @@ function buildRNPVInput(
   };
 }
 
+const BIOMARKER_DRIVEN_INDICATIONS = new Set([
+  'her2BreastCancer', 'her2GastricCancer', 'krasg12cNsclc', 'krasg12dNsclc',
+  'egfrNsclc', 'alkNsclc', 'brafMelanoma', 'brcaOvarian', 'brcaBreastCancer',
+  'msiHighColorectal', 'ntrk', 'pdl1Nsclc', 'pdl1Bladder', 'flt3Aml',
+  'bcrabl', 'retFusion', 'ros1', 'fgfrBladder', 'idh1Glioma', 'idh2Aml',
+  'pik3caBreastCancer',
+]);
+
+const BIOMARKER_DRIVEN_MODALITIES = new Set([
+  'adc', 'carT_heme', 'carT_solid', 'bispecific', 'tCellEngager', 'bispecificHeme',
+]);
+
+function inferCompanionDxRequired(indication: string, modality: string): boolean {
+  if (BIOMARKER_DRIVEN_INDICATIONS.has(indication)) return true;
+  if (BIOMARKER_DRIVEN_MODALITIES.has(modality)) return true;
+  if (/her2|kras|egfr|alk\+|braf|brca|ntrk|pdl1|flt3|bcr.abl|ret|ros1|fgfr|idh|pik3/i.test(indication)) return true;
+  return false;
+}
+
+function estimateBidderCount(competitiveDynamics: CompetitiveDynamicsResult): number {
+  const competitors = competitiveDynamics.competitorTimeline?.length ?? 0;
+  if (competitors <= 2) return 4;
+  if (competitors <= 5) return 3;
+  if (competitors <= 10) return 2;
+  return 1;
+}
+
+function estimateAssetAttractiveness(input: RNPVInput, rnpv: RNPVResult): number {
+  let score = 5;
+  if (rnpv.riskAdjustedNPV > 500) score += 2;
+  else if (rnpv.riskAdjustedNPV > 200) score += 1;
+  if (input.phase === 'phase3' || input.phase === 'approved') score += 1;
+  if (rnpv.cumulativePoS > 0.3) score += 1;
+  if (input.peakSalesEstimate.median > 1000) score += 1;
+  return Math.min(10, score);
+}
+
 /**
  * Run the full financial modeling pipeline synchronously.
  *
@@ -554,9 +591,9 @@ export function runFinancialModel(
       ),
       mechanism: rnpvInput.modality,
       phase: rnpvInput.phase,
-      requiresCompanionDx: false,
-      numberOfBidders: 2,
-      attractiveness: 6,
+      requiresCompanionDx: inferCompanionDxRequired(rnpvInput.indication, rnpvInput.modality),
+      numberOfBidders: estimateBidderCount(competitiveDynamics),
+      attractiveness: estimateAssetAttractiveness(rnpvInput, rnpv),
     };
 
     const results: BuyerSynergyResult[] = [];
