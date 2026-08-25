@@ -1,3 +1,13 @@
+> ## ⛔ DO NOT SEND — benchmark failed live-data verification (Aug 25, 2026)
+>
+> The Deal Terms Benchmark was built from a **static April 17, 2026 export**
+> (`data/comparable-deals-*.ts`), not a live Solidus query. Verification against the
+> live `deals` table (Supabase `mnzoulengniofgkwtfbo`) found the comp set unsafe for
+> client use. See "Live verification findings" at the bottom of this file.
+>
+> The revised **fee proposal** is unaffected on structure, but its platform figures
+> must change: the live corpus holds **1,620 deals, not 2,500+**.
+
 # ThalassaX / Chipscreen — August 2026 follow-up package
 
 Deliverables for the stalled Chipscreen (ThalassaX Therapeutics US) engagement.
@@ -52,3 +62,64 @@ Comparable set: China-origin licensor, oncology, Phase 1–3, out-licensing, 202
 Closest structural analogue: **Ascentage → Takeda (2024)** — China-origin, oncology, small molecule, Phase 2, ex-China rights, $100M upfront / $1,300M total.
 
 Note on the ratio: an earlier read guessed ThalassaX's back-loading was a clear outlier. The data is more precise — 1:15.1 sits at the 75th percentile, elevated but inside the range. The **upfront level**, not the ratio, is the real gap.
+
+
+---
+
+# Live verification findings (Aug 25, 2026)
+
+Queried the live Solidus `deals` table directly. The benchmark's comparable set does not
+survive it.
+
+## 1. The platform figures in client documents are overstated
+
+| Claim | Where it appears | Live value |
+|---|---|---|
+| 2,500+ curated deals | July proposal, case studies PDF | **1,620** |
+| 1,600+ curated deals | Aug fee proposal | **accurate** |
+| 14 engines / 30+ engines | July / case studies | not verified — still needs checking |
+
+The August fee proposal was the correct one. My earlier recommendation to standardise on
+"2,500+" was wrong and has been reversed in the fee proposal.
+
+## 2. Provenance is thin
+
+- 1,620 deals total; 609 with `verification_status = 'verified'`
+- **Only 57 verified rows carry a source URL** (3.5% of the corpus)
+- Most comps used in the benchmark have `source_type = 'manual'` and `source_url = null`
+
+## 3. The `verified` flag is not reliable
+
+- 287 rows have slug-style placeholder asset names (`lung_nsclc`, `solid_tumors`,
+  `breast_her2`, `hematologic_malignancies`)
+- **221 of those are marked `verified = true`**
+
+This is the pattern `supabase/migrations/051_flag_fabricated_deals.sql` exists to catch.
+Ten of the benchmark's twelve comps come from this population.
+
+## 4. Two named claims in the benchmark are factually wrong
+
+- **"Hengrui → GSK, $500M upfront, Phase 1 small molecule, oncology"** — the live record
+  is **HRS-9821, a PDE3/4 inhibitor for COPD**, not oncology. The "28x spread between GSK
+  and Glenmark" observation is built on a mis-tagged respiratory deal.
+- **"Ascentage → Takeda — closest structural analogue to Chiauranib"** — the live record is
+  **olverembatinib in CML**, Phase 3 heme, not a Phase 2 solid-tumour small molecule.
+
+## 5. Heavy duplication inflates any aggregate
+
+The same transaction appears repeatedly with conflicting terms: 3SBio/Pfizer across 5 rows
+($1.2B-$1.3B upfront, `option` and `license`, phase `unknown` and `phase_3`);
+Hengrui/BMS across 8+; Ascentage/Takeda across 4. Any median computed without
+transaction-level de-duplication is unreliable.
+
+## Path to a sendable version
+
+1. De-duplicate at transaction level (licensor + licensee + asset + announcement).
+2. Restrict to rows with a real asset name **and** a resolvable source URL.
+3. Hand-verify each surviving comp against its primary source.
+4. If fewer than ~8 survive, present it as a **curated, individually sourced comp set** with
+   citations per row — not as a database median. Smaller and sourced beats larger and unverifiable.
+
+Separately, the corpus issues above are worth addressing independent of this client: 3.5%
+source coverage and a `verified` flag that passes 221 placeholder rows will not survive
+diligence from any buyer who looks closely.
