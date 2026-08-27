@@ -35,8 +35,19 @@ const nextConfig = {
         destination: '/playbook',
         permanent: true,
       },
+      {
+        source: '/pricing',
+        destination: '/pro',
+        permanent: true,
+      },
+      {
+        source: '/insights/deal-benchmarks',
+        destination: '/insights/biopharma-deal-benchmarks-2026',
+        permanent: true,
+      },
     ];
   },
+  trailingSlash: false,
   // Security headers configuration
   async headers() {
     return [

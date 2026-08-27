@@ -1974,7 +1974,7 @@ function buildParkinsonsPage(): BenchmarkPageData {
       },
     ],
     relatedPages: [
-      { slug: 'alzheimers-deal-benchmarks', title: "Alzheimer's Deal Benchmarks" },
+      { slug: 'alzheimers-licensing-deals', title: "Alzheimer's Licensing Deals" },
       { slug: 'neurology-cns-deal-benchmarks', title: 'Neurology & CNS Deal Overview' },
       { slug: 'gene-therapy-deal-benchmarks', title: 'Gene Therapy Deals' },
       { slug: 'small-molecule-deal-benchmarks', title: 'Small Molecule Deals' },

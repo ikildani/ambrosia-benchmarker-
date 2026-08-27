@@ -72,7 +72,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: page.faqs.map((faq) => ({
+    mainEntity: page.faqs.slice(0, 2).map((faq) => ({
       '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
@@ -184,16 +184,16 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Market Analysis
             </h2>
             <div className="space-y-6">
-              {/* First paragraph is free */}
-              {page.contextParagraphs.length > 0 && (
-                <p className="text-slate-600 leading-relaxed text-lg">
-                  {page.contextParagraphs[0]}
+              {/* First two paragraphs are free */}
+              {page.contextParagraphs.slice(0, 2).map((para, i) => (
+                <p key={i} className="text-slate-600 leading-relaxed text-lg">
+                  {para}
                 </p>
-              )}
+              ))}
               {/* Remaining paragraphs are gated */}
-              {page.contextParagraphs.length > 1 && (
+              {page.contextParagraphs.length > 2 && (
                 <ProGate title="Full Benchmark Analysis" description="Complete deal term ranges, comparable transactions, and negotiation insights." pageSlug={slug}>
-                  {page.contextParagraphs.slice(1).map((para, i) => (
+                  {page.contextParagraphs.slice(2).map((para, i) => (
                     <p key={i} className="text-slate-600 leading-relaxed text-lg">
                       {para}
                     </p>
@@ -239,14 +239,15 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Frequently Asked Questions
             </h2>
             <div className="space-y-4">
-              {/* First FAQ is free */}
-              {page.faqs.length > 0 && (
+              {/* First two FAQs are free */}
+              {page.faqs.slice(0, 2).map((faq, i) => (
                 <details
+                  key={i}
                   className="group bg-white rounded-xl border border-slate-200 overflow-hidden"
                 >
                   <summary className="flex items-center justify-between p-6 cursor-pointer select-none">
                     <span className="font-medium text-slate-900 pr-4">
-                      {page.faqs[0].question}
+                      {faq.question}
                     </span>
                     <svg
                       className="w-5 h-5 text-slate-500 flex-shrink-0 transition-transform group-open:rotate-180"
@@ -263,14 +264,14 @@ export default async function BenchmarkPage({ params }: PageProps) {
                     </svg>
                   </summary>
                   <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                    {page.faqs[0].answer}
+                    {faq.answer}
                   </div>
                 </details>
-              )}
+              ))}
               {/* Remaining FAQs are gated */}
-              {page.faqs.length > 1 && (
+              {page.faqs.length > 2 && (
                 <ProGate title="Full Benchmark Analysis" description="Complete deal term ranges, comparable transactions, and negotiation insights." pageSlug={slug}>
-                  {page.faqs.slice(1).map((faq, i) => (
+                  {page.faqs.slice(2).map((faq, i) => (
                     <details
                       key={i}
                       className="group bg-white rounded-xl border border-slate-200 overflow-hidden"

@@ -39,7 +39,7 @@ export function ProGate({
   return (
     <div className="relative">
       {/* Blurred content preview */}
-      <div className="max-h-[200px] overflow-hidden" aria-hidden="true">
+      <div className="max-h-[400px] overflow-hidden relative">
         <div className="blur-[6px] select-none pointer-events-none opacity-60">
           {children}
         </div>

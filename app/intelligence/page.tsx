@@ -65,10 +65,16 @@ export default async function IntelligencePage({ searchParams }: Props) {
 
   // Fetch readouts for ALL six TAs in parallel (cached at edge for 1h).
   const allReadouts = await Promise.all(
-    supportedTAs.map(async (ta) => ({
-      ta,
-      readouts: await fetchUpcomingReadouts({ ta, phase: 'PHASE3', limit: 6, daysAhead: 90 }),
-    })),
+    supportedTAs.map(async (ta) => {
+      try {
+        return {
+          ta,
+          readouts: await fetchUpcomingReadouts({ ta, phase: 'PHASE3', limit: 6, daysAhead: 90 }),
+        };
+      } catch {
+        return { ta, readouts: [] };
+      }
+    }),
   );
 
   // ── User calculations for personalized readout matching ──────────────
