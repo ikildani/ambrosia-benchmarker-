@@ -1377,8 +1377,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 </p>
                 <p className={`font-mono text-sm sm:text-base font-bold leading-tight mt-0.5 ${showValue ? 'text-neutral-900 dark:text-white' : 'text-neutral-900 dark:text-white blur-[6px] select-none'}`}>{item.value}</p>
               </div>
-              );}
-            ))}
+              );
+            })}
           </div>
         </div>}
 

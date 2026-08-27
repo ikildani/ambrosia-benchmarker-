@@ -13,9 +13,9 @@
  *   5. Confidence score must be >= 75
  *   6. Dedup against existing licensor+licensee pairs
  *
- * Schedule: every 6 hours (30 */6 * * *)
+ * Schedule: every 6 hours
  * Expected yield: 5-15 verified deals per run
- * Cost: ~$0.10/run (3-4 Perplexity queries + 3-4 Claude extractions)
+ * Cost: ~$0.10 per run (3-4 Perplexity queries + 3-4 Claude extractions)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
