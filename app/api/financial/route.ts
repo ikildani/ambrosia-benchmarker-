@@ -86,10 +86,10 @@ export async function GET(request: NextRequest) {
         }),
     ]);
 
-    return NextResponse.json({
-      competitiveLandscape,
-      dealFlowForecast,
-    });
+    return NextResponse.json(
+      { competitiveLandscape, dealFlowForecast },
+      { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' } },
+    );
   } catch (error) {
     captureApiError(error, '/api/financial');
     return apiError('Internal server error', 500);
