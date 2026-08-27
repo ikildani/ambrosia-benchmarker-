@@ -49,9 +49,7 @@ export default function EstimateDistributionChart({ p10, p25, p50, p75, p90, lab
           <XAxis dataKey="value" tick={{ fill: CHART_COLORS.axisLabel, fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => fmt(v)} interval="preserveStartEnd" />
           <YAxis hide />
           <Tooltip
-            formatter={(v: number) => [null, null]}
-            labelFormatter={v => fmt(Number(v))}
-            contentStyle={{ display: 'none' }}
+            content={() => null}
           />
           <Area type="monotone" dataKey="density" stroke={CHART_COLORS.teal500} strokeWidth={2} fill="url(#distFill)" />
           <ReferenceLine x={p25} stroke={CHART_COLORS.slate400} strokeDasharray="4 4" label={{ value: 'P25', position: 'top', fill: CHART_COLORS.axisLabel, fontSize: 10 }} />
