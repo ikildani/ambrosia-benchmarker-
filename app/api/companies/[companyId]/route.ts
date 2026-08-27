@@ -300,6 +300,8 @@ export async function GET(
       active_trials_count: company.active_trials_count,
       patent_cliffs: isPro ? company.patent_cliffs : null,
       strategic_priorities: isPro ? company.strategic_priorities : null,
+      last_deal_date: company.last_deal_date,
+      actively_acquiring: company.actively_acquiring,
     };
 
     const gatedDeals = isPro
