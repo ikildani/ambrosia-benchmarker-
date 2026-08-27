@@ -129,8 +129,8 @@ export default function ConfidenceBandEnhanced({
             />
             <YAxis hide />
             <Tooltip
-              formatter={(val: number) => [`${(val * 100).toFixed(0)}%`, 'Density']}
-              labelFormatter={(v: number) => formatM(v)}
+              formatter={(val: number | undefined) => [`${((val ?? 0) * 100).toFixed(0)}%`, 'Density']}
+              labelFormatter={(v: unknown) => formatM(Number(v))}
               contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', fontSize: '11px' }}
               itemStyle={{ color: '#94A3B8' }}
               labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
