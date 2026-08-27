@@ -99,7 +99,7 @@ export default function TrendsTab({ onUpgrade }: TrendsTabProps) {
   }));
 
   const upfrontData = data.map(q => {
-    const row: Record<string, string | number | null> = { label: `Q${q.quarter} ${q.year}` };
+    const row: Record<string, string | number | null> & { label: string } = { label: `Q${q.quarter} ${q.year}` };
     if (selectedTA === 'all') {
       row.medianUpfront = q.medianUpfront;
       for (const [ta, count] of Object.entries(q.byTA)) {
