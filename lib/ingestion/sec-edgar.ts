@@ -421,7 +421,10 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
         size: '100',
       });
 
-      const response = await fetchWithTimeout(`${SEC_FULL_TEXT_SEARCH}?${params}`, {
+      const searchUrl = `${SEC_FULL_TEXT_SEARCH}?${params}`;
+      console.log(`[sec-edgar] Searching: ${searchUrl.substring(0, 200)}`);
+
+      const response = await fetchWithTimeout(searchUrl, {
         headers: {
           'User-Agent': 'Solidus research@ambrosiaventures.co',
           'Accept': 'application/json',
@@ -431,11 +434,15 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
       });
 
       if (!response.ok) {
-        console.error(`SEC search failed for "${term}": ${response.status}`);
+        const body = await response.text().catch(() => '');
+        console.error(`[sec-edgar] Search failed for "${term}": HTTP ${response.status} — ${body.substring(0, 300)}`);
         continue;
       }
 
       const data = await response.json();
+      const hitCount = data.hits?.hits?.length ?? 0;
+      const totalHits = data.hits?.total?.value ?? data.hits?.total ?? 'unknown';
+      console.log(`[sec-edgar] "${term}": ${hitCount} hits returned (total: ${totalHits}), response keys: ${Object.keys(data).join(',')}`);
 
       if (data.hits?.hits) {
         for (const hit of data.hits.hits) {
