@@ -1367,13 +1367,17 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               { label: dtl?.totalValueLabel || 'Total', value: formatCurrency(terms.totalDealValue.median), jargon: 'TDV' },
               ...(financialModel ? [{ label: 'rNPV', value: formatCurrency(financialModel.rnpv.riskAdjustedNPV), jargon: 'rNPV' }] : []),
               ...(financialModel ? [{ label: 'PoS', value: `${(financialModel.rnpv.cumulativePoS * 100).toFixed(0)}%`, jargon: 'PoS' }] : []),
-            ].map((item: { label: string; value: string; jargon?: string }, idx) => (
+            ].map((item: { label: string; value: string; jargon?: string }, idx) => {
+              const isHeadlineMetric = idx <= 1;
+              const showValue = hasFullAccess || isHeadlineMetric;
+              return (
               <div key={idx} className="flex-1 min-w-[80px] px-2 sm:px-3 py-2 text-center">
                 <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-slate-400 uppercase tracking-wider leading-tight">
                   {item.jargon ? <JargonTooltip term={item.jargon}>{item.label}</JargonTooltip> : item.label}
                 </p>
-                <p className={`font-mono text-sm sm:text-base font-bold leading-tight mt-0.5 ${hasFullAccess ? 'text-neutral-900 dark:text-white' : 'text-neutral-900 dark:text-white blur-[6px] select-none'}`}>{item.value}</p>
+                <p className={`font-mono text-sm sm:text-base font-bold leading-tight mt-0.5 ${showValue ? 'text-neutral-900 dark:text-white' : 'text-neutral-900 dark:text-white blur-[6px] select-none'}`}>{item.value}</p>
               </div>
+              );}
             ))}
           </div>
         </div>}
@@ -1626,7 +1630,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                       {dtl?.royaltyLabel || 'Tiered Royalties'}
                       <InfoTooltip content={metricTooltips.royalties} />
                     </p>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full border whitespace-nowrap bg-amber-500/20 text-amber-400 border-amber-500/30">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full border whitespace-nowrap bg-amber-500/20 text-amber-400 border-amber-500/30">
                       Moderate confidence
                     </span>
                   </div>
