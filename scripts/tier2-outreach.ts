@@ -224,7 +224,7 @@ Body uses \\n for line breaks. End with just "Issa".`;
 function fallback(c: Contact, p: ProfileResult, url: string) {
   return {
     subject: `${p.therapeuticArea} deal benchmarks for ${c['Company Name']}`,
-    body: `${c['First Name']},\n\nWe built a deal analysis specific to ${p.therapeuticArea} — upfront ranges, comparable transactions, and partner intelligence from 2,500+ verified deals.\n\nPut this together for your space: ${url}\n\nIssa`,
+    body: `${c['First Name']},\n\nWe built a deal analysis specific to ${p.therapeuticArea} — upfront ranges, comparable transactions, and partner intelligence from 1,600+ verified deals.\n\nPut this together for your space: ${url}\n\nIssa`,
   };
 }
 

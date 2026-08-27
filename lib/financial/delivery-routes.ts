@@ -12,7 +12,7 @@
  *   - BIO/Informa 2024 (route-stratified clinical success rates)
  *   - EvaluatePharma 2025 (deal premium analysis by formulation)
  *   - FDA approval data (route-specific approval rates and timelines)
- *   - Ambrosia deal database (route-derived deal premiums from 2,500+ deals)
+ *   - Ambrosia deal database (route-derived deal premiums from 1,600+ deals)
  */
 
 // ---------------------------------------------------------------------------

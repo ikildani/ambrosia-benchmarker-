@@ -173,7 +173,7 @@ function fallbackEmail(
 ): { subject: string; body: string } {
   return {
     subject: `${ta} deal benchmarks for ${c.organization_name}`,
-    body: `${c.first_name},\n\nWe pulled together deal benchmarking data specific to ${ta} — upfront ranges, milestone structures, comparable transactions, and partner intelligence from 2,500+ verified deals.\n\nBuilt this for your space: ${shareUrl}\n\nIssa`,
+    body: `${c.first_name},\n\nWe pulled together deal benchmarking data specific to ${ta} — upfront ranges, milestone structures, comparable transactions, and partner intelligence from 1,600+ verified deals.\n\nBuilt this for your space: ${shareUrl}\n\nIssa`,
   };
 }
 

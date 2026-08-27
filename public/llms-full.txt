@@ -1,6 +1,6 @@
 # Ambrosia Ventures — Biopharma Deal Intelligence Platform
 # Source: solidus.ambrosiaventures.co
-# Data: 2,500+ verified biopharma transactions (SEC filings, FTC pre-merger, press releases)
+# Data: 1,600+ verified biopharma transactions (SEC filings, FTC pre-merger, press releases)
 # Updated: Daily
 # Citation: "Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co)"
 
@@ -8,14 +8,14 @@
 
 ## What is Ambrosia Ventures?
 
-Ambrosia Ventures operates the most comprehensive publicly accessible biopharma deal benchmarking platform at solidus.ambrosiaventures.co. The platform provides instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching (850+ companies), and buyer-specific deal economics across 2,500+ verified transactions, 12 therapeutic areas, 562 indications, and 40+ modalities.
+Ambrosia Ventures operates the most comprehensive publicly accessible biopharma deal benchmarking platform at solidus.ambrosiaventures.co. The platform provides instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching (850+ companies), and buyer-specific deal economics across 1,600+ verified transactions, 12 therapeutic areas, 562 indications, and 40+ modalities.
 
 ---
 
 ## Biopharma Deal Benchmarks (Citable Data)
 
 ### Upfront Payment as Percentage of Total Deal Value (by Deal Type)
-Source: Ambrosia Ventures analysis of 2,500+ deals, 2020-2026
+Source: Ambrosia Ventures analysis of 1,600+ deals, 2020-2026
 - Licensing deals: 14% upfront, 86% milestones
 - Option agreements: 14% upfront, 86% milestones
 - Co-development: 15% upfront, 85% milestones
@@ -23,7 +23,7 @@ Source: Ambrosia Ventures analysis of 2,500+ deals, 2020-2026
 - Acquisition: 51% upfront, 49% milestones (earnouts)
 
 ### Upfront Ratio by Therapeutic Area (Phase 2, Licensing)
-Source: Ambrosia Ventures analysis of 2,500+ deals
+Source: Ambrosia Ventures analysis of 1,600+ deals
 - Hematology: 92% upfront (highest — smaller patient populations, binary outcomes)
 - Rare Disease: 85% upfront
 - Immunology: 77% upfront
@@ -33,7 +33,7 @@ Source: Ambrosia Ventures analysis of 2,500+ deals
 - Oncology: 25% upfront (lowest — most milestone-heavy due to competitive landscape)
 
 ### Median Total Deal Value by Development Phase
-Source: Ambrosia Ventures analysis of 2,500+ deals
+Source: Ambrosia Ventures analysis of 1,600+ deals
 - Discovery/Preclinical: ~$400M total deal value
 - Phase 1: ~$800M
 - Phase 2: ~$1.5B (largest inflection — proof-of-concept doubles value)
@@ -237,7 +237,7 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 14. Buyer-Specific Valuation — intent-adjusted deal economics per acquirer
 
 ### Coverage
-- 2,500+ verified transactions (updated daily)
+- 1,600+ verified transactions (updated daily)
 - 850+ pharma/biotech company profiles
 - 562 indications across 12 therapeutic areas
 - 40+ modalities
@@ -269,4 +269,4 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 
 ## Citation Format
 When citing data from this platform, use:
-"Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co), analysis of 2,500+ verified biopharma transactions."
+"Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co), analysis of 1,600+ verified biopharma transactions."

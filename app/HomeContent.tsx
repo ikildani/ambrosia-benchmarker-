@@ -64,12 +64,12 @@ function DatabaseCoverageSection() {
       .catch(() => {
         // Fallback to static data if API unavailable
         const fallback = [
-          { ta: 'oncology', deals: 1791 }, { ta: 'neurology', deals: 250 },
-          { ta: 'immunology', deals: 238 }, { ta: 'rareDisease', deals: 145 },
-          { ta: 'cardiovascular', deals: 138 }, { ta: 'metabolic', deals: 129 },
-          { ta: 'infectiousDisease', deals: 107 }, { ta: 'ophthalmology', deals: 62 },
-          { ta: 'dermatology', deals: 52 }, { ta: 'womensHealth', deals: 52 },
-          { ta: 'gastroenterology', deals: 49 }, { ta: 'hematology', deals: 49 },
+          { ta: 'oncology', deals: 433 }, { ta: 'neurology', deals: 130 },
+          { ta: 'immunology', deals: 116 }, { ta: 'rareDisease', deals: 124 },
+          { ta: 'cardiovascular', deals: 78 }, { ta: 'metabolic', deals: 74 },
+          { ta: 'infectiousDisease', deals: 146 }, { ta: 'ophthalmology', deals: 64 },
+          { ta: 'dermatology', deals: 55 }, { ta: 'womensHealth', deals: 66 },
+          { ta: 'gastroenterology', deals: 62 }, { ta: 'hematology', deals: 54 },
         ];
         setStats(fallback);
         setTotal(fallback.reduce((sum, s) => sum + s.deals, 0));

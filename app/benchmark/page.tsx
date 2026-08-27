@@ -76,7 +76,7 @@ const briefFaqSchema = {
     {
       '@type': 'Question',
       name: 'What is a Deal Intelligence Brief?',
-      acceptedAnswer: { '@type': 'Answer', text: 'A comprehensive deal landscape report covering 52 deal calculations (13 modalities x 4 deal structures) for any biopharma indication. It includes AI-written strategic narrative and negotiation playbook, comparable transactions from 2,500+ deals, partner matching with intent scoring, full financial model suite (rNPV, Monte Carlo, scenarios), M&A structures with CVR valuation, and white-label branding.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'A comprehensive deal landscape report covering 52 deal calculations (13 modalities x 4 deal structures) for any biopharma indication. It includes AI-written strategic narrative and negotiation playbook, comparable transactions from 1,600+ deals, partner matching with intent scoring, full financial model suite (rNPV, Monte Carlo, scenarios), M&A structures with CVR valuation, and white-label branding.' },
     },
     {
       '@type': 'Question',

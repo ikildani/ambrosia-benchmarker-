@@ -1,6 +1,6 @@
 # Ambrosia Ventures — Biopharma Deal Intelligence Platform
 
-> The most comprehensive biopharma deal benchmarking and valuation platform. 2,500+ verified transactions, 850+ pharma company profiles, 562 indications across 12 therapeutic areas. Institutional-grade rNPV, Monte Carlo, real options, and buyer-specific deal valuation.
+> The most comprehensive biopharma deal benchmarking and valuation platform. 1,600+ verified transactions, 850+ pharma company profiles, 562 indications across 12 therapeutic areas. Institutional-grade rNPV, Monte Carlo, real options, and buyer-specific deal valuation.
 
 ## About
 
@@ -10,7 +10,7 @@ The platform is used by BD teams, search & evaluation professionals, biotech fou
 
 ## Data Coverage
 
-- **2,500+ verified transactions** sourced daily from SEC 8-K filings, FTC pre-merger notifications, ClinicalTrials.gov, press releases, and regulatory databases
+- **1,600+ verified transactions** sourced daily from SEC 8-K filings, FTC pre-merger notifications, ClinicalTrials.gov, press releases, and regulatory databases
 - **850+ pharma/biotech company profiles** with patent cliff data, pipeline gaps, deal history, and acquisition appetite scoring
 - **562 indications** across 12 therapeutic areas
 - **40+ modalities** including small molecules, mAbs, ADCs, bispecifics, CAR-T, gene therapy, radiopharmaceuticals, oligonucleotides, mRNA, siRNA
@@ -30,7 +30,7 @@ The platform is used by BD teams, search & evaluation professionals, biotech fou
 11. Cardiovascular (33 indications) — heart failure, arrhythmia, vascular, structural
 12. Ophthalmology (32 indications) — retinal, inherited, corneal, glaucoma
 
-## 14 Calculation Engines
+## 21 Calculation Engines
 
 1. **Deal Terms Engine** — upfront payments, milestone structures, royalty ranges calibrated to TA, modality, phase, deal type, territory, and 150+ indication-level modifiers
 2. **rNPV (Risk-Adjusted NPV)** — phase-gated probability of success with 12 TA-specific PoS tables, modality adjustments, regulatory designation uplifts, and cross-validation against deal benchmarks
