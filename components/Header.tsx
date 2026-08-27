@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { type JSX, useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import type { UserTier } from '@/types/tier';
+
+const NotificationBellComponent = dynamic(() => import('@/components/NotificationBell'), { ssr: false });
 
 // Avatar gradient options - premium color combinations (synced with Dashboard.tsx)
 const AVATAR_GRADIENTS = [
@@ -323,6 +326,10 @@ export default function Header({
           {/* Right Side Actions */}
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
+              <>
+              {(tier === 'pro' || tier === 'portfolio' || tier === 'report') && (
+                <NotificationBellComponent />
+              )}
               <div className="relative" ref={menuRef} onKeyDown={handleDropdownKeyDown}>
                 {/* User Avatar Button */}
                 <button
@@ -472,6 +479,7 @@ export default function Header({
                   </div>
                 )}
               </div>
+              </>
             ) : (
               <>
                 <button

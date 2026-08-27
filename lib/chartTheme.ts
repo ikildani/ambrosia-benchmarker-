@@ -42,3 +42,31 @@ export const CHART_COLORS_DARK = {
   axisLabelBold: '#E2E8F0',
   axisLine: '#334155',
 } as const;
+
+// Per-TA colors for stacked/multi-series trend charts
+export const TA_CHART_COLORS: Record<string, string> = {
+  oncology: '#f43f5e',
+  neurology: '#8b5cf6',
+  immunology: '#3b82f6',
+  metabolic: '#f59e0b',
+  cardiovascular: '#ef4444',
+  infectiousDisease: '#10b981',
+  ophthalmology: '#06b6d4',
+  womensHealth: '#ec4899',
+  rareDisease: '#a855f7',
+  hematology: '#f97316',
+  dermatology: '#d946ef',
+  gastroenterology: '#84cc16',
+} as const;
+
+// Sequential palette for multi-series line/area charts (up to 8 series)
+export const SERIES_COLORS = [
+  '#0EA5A5',
+  '#06B6D4',
+  '#3b82f6',
+  '#8b5cf6',
+  '#E6A800',
+  '#f43f5e',
+  '#10b981',
+  '#f97316',
+] as const;

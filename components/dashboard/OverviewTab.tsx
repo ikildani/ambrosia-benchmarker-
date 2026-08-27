@@ -3,9 +3,12 @@ import dynamic from 'next/dynamic';
 import { formatDate, type CalculationHistoryItem } from '@/lib/history';
 import ActivityHeatmap from './ActivityHeatmap';
 import InsightsSummary from './InsightsSummary';
+import MomentumIndicators from './MomentumIndicators';
 import type { UserTier } from '@/types/tier';
 
 const DealQuery = dynamic(() => import('../DealQuery'), { ssr: false });
+const DealsToWatchTeaser = dynamic(() => import('./DealsToWatchTeaser'), { ssr: false });
+const AlertFeed = dynamic(() => import('./AlertFeed'), { ssr: false });
 
 interface OverviewTabProps {
   history: CalculationHistoryItem[];
@@ -49,6 +52,9 @@ const OverviewTab = React.memo(function OverviewTab({
   }, [history]);
   return (
     <div className="space-y-6">
+      {/* Market Momentum */}
+      <MomentumIndicators />
+
       {/* Deal Insights - Full Width */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
@@ -156,6 +162,10 @@ const OverviewTab = React.memo(function OverviewTab({
           </div>
         )}
       </div>
+
+      {/* Companies to Watch + Alert Feed */}
+      <DealsToWatchTeaser tier={tier} onUpgrade={onUpgrade} />
+      <AlertFeed tier={tier} onUpgrade={onUpgrade} />
 
       {/* Activity Heatmap */}
       <ActivityHeatmap history={history} />

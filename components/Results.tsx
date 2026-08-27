@@ -32,6 +32,7 @@ const PipelineIntelligence = dynamic(() => import('./results/PipelineIntelligenc
 const RnpvAnalysis = dynamic(() => import('./results/RnpvAnalysis'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const BuyerSpecificPanel = dynamic(() => import('./results/BuyerSpecificPanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const MonteCarloResults = dynamic(() => import('./results/MonteCarloResults'), { ssr: false, loading: () => <ChartSkeleton /> });
+const ConfidenceBandEnhanced = dynamic(() => import('./results/ConfidenceBandEnhanced'), { ssr: false, loading: () => <ChartSkeleton /> });
 const MarketSizePanel = dynamic(() => import('./results/MarketSizePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const ScenarioPlanner = dynamic(() => import('./results/ScenarioPlanner'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
 const CompetitiveLandscapePanel = dynamic(() => import('./results/CompetitiveLandscapePanel'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
@@ -2059,6 +2060,21 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                   onBuyReport={onBuyReport}
                 />
               </FinancialErrorBoundary>
+            )}
+
+            {hasFullAccess && financialModel.monteCarlo?.percentiles && (
+              <ConfidenceBandEnhanced
+                percentiles={{
+                  p5: financialModel.monteCarlo.percentiles.p5 || 0,
+                  p25: financialModel.monteCarlo.percentiles.p25 || 0,
+                  p50: financialModel.monteCarlo.percentiles.p50 || 0,
+                  p75: financialModel.monteCarlo.percentiles.p75 || 0,
+                  p95: financialModel.monteCarlo.percentiles.p95 || 0,
+                }}
+                userValue={terms.upfront.median}
+                label="Upfront Payment Distribution"
+                sampleSize={financialModel.monteCarlo.iterations}
+              />
             )}
 
             <div id={TOUR_STEP_IDS.MONTE_CARLO}>

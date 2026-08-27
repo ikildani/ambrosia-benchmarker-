@@ -12,6 +12,7 @@ import OverviewTab from './dashboard/OverviewTab';
 import HistoryTab from './dashboard/HistoryTab';
 import SettingsTab from './dashboard/SettingsTab';
 import ApiTab from './dashboard/ApiTab';
+import TrendsTab from './dashboard/TrendsTab';
 import type { UserTier } from '@/types/tier';
 
 // Avatar gradient options - premium color combinations
@@ -46,12 +47,11 @@ export default function Dashboard({
   onSignOut,
 }: DashboardProps) {
   const { history, loading: historyLoading, deleteItem: deleteHistoryItem } = useCalculationHistory();
-  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'watchlist' | 'settings' | 'api'>(() => {
-    // Support deep links: /dashboard?tab=settings from email unsubscribe
+  const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'history' | 'watchlist' | 'settings' | 'api'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab === 'settings' || tab === 'watchlist' || tab === 'history' || tab === 'api') return tab;
+      if (tab === 'settings' || tab === 'watchlist' || tab === 'history' || tab === 'api' || tab === 'trends') return tab;
     }
     return 'overview';
   });
@@ -530,6 +530,15 @@ export default function Dashboard({
               onHistoryClick={handleHistoryClick}
               formatCurrency={formatCurrency}
             />
+          </div>
+
+          <div
+            style={{ display: activeTab === 'trends' ? 'block' : 'none' }}
+            role="tabpanel"
+            id="tabpanel-trends"
+            aria-labelledby="tab-trends"
+          >
+            <TrendsTab onUpgrade={onUpgrade} />
           </div>
 
           <div

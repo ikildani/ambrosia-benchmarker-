@@ -11,6 +11,8 @@ import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { ReadoutImpactEstimate } from '@/components/intelligence/ReadoutImpactEstimate';
 import { CompetitiveCluster } from '@/components/intelligence/CompetitiveCluster';
 import { DealImpactSection } from '@/components/intelligence/DealImpactSection';
+import { DealsToWatch } from '@/components/intelligence/DealsToWatch';
+import { MomentumSection } from '@/components/intelligence/MomentumSection';
 import { createServerClient } from '@/lib/supabase/server';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
@@ -186,10 +188,26 @@ export default async function IntelligencePage({ searchParams }: Props) {
         </section>
       )}
 
+      {/* ── Market Momentum ── */}
+      <MomentumSection />
+
       {/* ── Competitive cluster alerts ── */}
       <section>
         <div className="mx-auto max-w-6xl px-6 pt-6 pb-4">
           <CompetitiveCluster readoutsByTA={readoutsByTA} />
+        </div>
+      </section>
+
+      {/* Deals to Watch — forward-looking signal board */}
+      <section className="border-t border-slate-800/60">
+        <div className="mx-auto max-w-6xl px-6 pt-10 pb-4">
+          <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-slate-500">
+            Companies to Watch
+          </h2>
+          <p className="mb-4 text-xs text-slate-600">
+            Ranked by Pharma Intent Score — patent cliff urgency, pipeline gaps, and deal velocity.
+          </p>
+          <DealsToWatch selectedTA={selectedTA} hasProAccess={true} />
         </div>
       </section>
 

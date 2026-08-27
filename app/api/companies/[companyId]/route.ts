@@ -308,6 +308,29 @@ export async function GET(
 
     const gatedTrials = isPro ? trials : trials.slice(0, 5);
 
+    // Compute licensing window from company data
+    let licensingWindow = null;
+    try {
+      const { computeLicensingWindow } = await import('@/lib/services/licensing-window');
+      const dealsLast12 = profile.deals_last_12mo || 0;
+      const appetite = profile.acquisition_appetite || 'inactive';
+      const simpleIntentScore =
+        (dealsLast12 >= 3 ? 70 : dealsLast12 >= 1 ? 50 : 20) +
+        (appetite === 'aggressive' ? 20 : appetite === 'moderate' ? 10 : 0);
+
+      licensingWindow = computeLicensingWindow(
+        {
+          intentScore: Math.min(simpleIntentScore, 100),
+          lastDealDate: profile.last_deal_date,
+          activelyAcquiring: profile.actively_acquiring,
+          acquisitionAppetite: appetite,
+          indicationsActive: profile.indications_active || [],
+        },
+        undefined,
+        undefined,
+      );
+    } catch {}
+
     return NextResponse.json({
       company: profile,
       summary,
@@ -322,6 +345,7 @@ export async function GET(
       competitive_peers: competitivePeers.map(p => isPro ? p : { ...p, shared_modalities: [] }),
       market_position: marketPosition,
       benchmark_comparison: benchmarkComparison,
+      licensingWindow,
       is_pro: isPro,
     });
   } catch (error) {

@@ -11,6 +11,7 @@ import CompanyPipelineChart from '@/components/competitive/CompanyPipelineChart'
 import PipelineByIndication from '@/components/competitive/PipelineByIndication';
 import CompanyBenchmarkComparison from '@/components/competitive/CompanyBenchmarkComparison';
 import PatentCliffTimeline from '@/components/competitive/PatentCliffTimeline';
+import LicensingWindow from '@/components/competitive/LicensingWindow';
 import CompetitivePeers from '@/components/competitive/CompetitivePeers';
 import DealTimeline from '@/components/competitive/DealTimeline';
 import PeerComparison from '@/components/competitive/PeerComparison';
@@ -165,6 +166,19 @@ export default function CompanyPageClient({ companyId }: { companyId: string }) 
             {/* Patent cliffs — only show if data exists */}
             {data.company.patent_cliffs && data.company.patent_cliffs.length > 0 && (
               <PatentCliffTimeline cliffs={data.company.patent_cliffs} />
+            )}
+
+            {/* Licensing Window analysis */}
+            {data.licensingWindow && data.licensingWindow.status !== 'no_window' && (
+              <LicensingWindow
+                status={data.licensingWindow.status}
+                urgency={data.licensingWindow.urgency}
+                estimatedMonthsRemaining={data.licensingWindow.estimatedMonthsRemaining}
+                patentCliffYear={data.licensingWindow.patentCliffYear}
+                biosimilarYear={data.licensingWindow.biosimilarYear}
+                signals={data.licensingWindow.signals}
+                hasProAccess={isPro}
+              />
             )}
 
             {/* Competitive peers */}
