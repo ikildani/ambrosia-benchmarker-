@@ -395,7 +395,7 @@ export default function Dashboard({
     onSignOut();
   };
 
-  const handleTabChange = (tab: 'overview' | 'history' | 'watchlist' | 'settings' | 'api') => {
+  const handleTabChange = (tab: 'overview' | 'trends' | 'history' | 'watchlist' | 'settings' | 'api') => {
     startTransition(() => {
       setActiveTab(tab);
     });
