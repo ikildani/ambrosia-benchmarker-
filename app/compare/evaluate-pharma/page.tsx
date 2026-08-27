@@ -34,7 +34,7 @@ const FAQ_ITEMS = [
   {
     question: 'What makes Ambrosia different from EvaluatePharma?',
     answer:
-      'Ambrosia provides 14 purpose-built calculation engines for biopharma deal analysis: rNPV, Monte Carlo simulation, partner matching (850+ companies), competitive dynamics, real options valuation, deal waterfall, and more. EvaluatePharma focuses on consensus forecasts and pipeline data without deal-specific benchmarking tools.',
+      'Ambrosia provides 14 purpose-built calculation engines for biopharma deal analysis: rNPV, Monte Carlo simulation, partner matching (700+ companies), competitive dynamics, real options valuation, deal waterfall, and more. EvaluatePharma focuses on consensus forecasts and pipeline data without deal-specific benchmarking tools.',
   },
   {
     question: 'Is Ambrosia cheaper than EvaluatePharma?',
@@ -52,7 +52,7 @@ const FEATURES = [
   { feature: 'Deal Benchmarking', ambrosia: true, competitor: false },
   { feature: 'rNPV Analysis', ambrosia: true, competitor: false },
   { feature: 'Monte Carlo Simulation', ambrosia: true, competitor: false },
-  { feature: 'Partner Matching (850+ companies)', ambrosia: true, competitor: false },
+  { feature: 'Partner Matching (700+ companies)', ambrosia: true, competitor: false },
   { feature: 'Real-time Deal Intelligence', ambrosia: true, competitor: false },
   { feature: 'PDF/Excel Export', ambrosia: true, competitor: true },
   { feature: 'Competitive Dynamics Engine', ambrosia: true, competitor: false },
@@ -169,9 +169,9 @@ export default function EvaluatePharmaComparePage() {
               description: `Pro starts at ${PRICING.PRO_ANNUAL_MONTHLY} (annual). No enterprise sales process, no six-figure minimums, no multi-year lock-in. EvaluatePharma starts around $50K/year.`,
             },
             {
-              title: '850+ Partner Company Database',
+              title: '700+ Partner Company Database',
               description:
-                'Algorithmic partner matching across 850+ pharma and biotech companies with therapeutic area affinity, deal history, and strategic fit scoring.',
+                'Algorithmic partner matching across 700+ pharma and biotech companies with therapeutic area affinity, deal history, and strategic fit scoring.',
             },
           ].map(({ title, description }) => (
             <div

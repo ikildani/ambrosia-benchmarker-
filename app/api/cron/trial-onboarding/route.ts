@@ -40,7 +40,7 @@ function buildDay1Email(name: string): { subject: string; html: string } {
           <tr>
             <td style="padding: 8px 0; color: #e2e8f0; font-size: 14px; border-top: 1px solid #1e293b;">
               <strong>2. Check your Partner Matches</strong>
-              <p style="color: #64748b; font-size: 12px; margin: 4px 0 0;">See which of 850+ pharma companies are most likely to bid on your asset — scored by patent cliffs, pipeline gaps, and deal urgency.</p>
+              <p style="color: #64748b; font-size: 12px; margin: 4px 0 0;">See which of 700+ pharma companies are most likely to bid on your asset — scored by patent cliffs, pipeline gaps, and deal urgency.</p>
             </td>
           </tr>
           <tr>

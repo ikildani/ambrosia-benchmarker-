@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: "What's included in the Pro plan?",
-    answer: "Pro ($299/month, or $199/month billed annually) unlocks the complete platform: rNPV analysis with 10,000-iteration Monte Carlo simulation, deal valuation modeling, Market Pulse intelligence dashboard, unlimited AI deal memos and negotiation playbooks, scenario comparison tools, watchlist with market alerts, 850+ company profiles with pipeline tracking, patent cliff timelines, and Pharma Intent Score, AI-powered partner matching with outreach email generation, branded PDF and Excel exports, and priority support. Free users get unlimited calculations with headline metrics and 3 comparable deals."
+    answer: "Pro ($299/month, or $199/month billed annually) unlocks the complete platform: rNPV analysis with 10,000-iteration Monte Carlo simulation, deal valuation modeling, Market Pulse intelligence dashboard, unlimited AI deal memos and negotiation playbooks, scenario comparison tools, watchlist with market alerts, 700+ company profiles with pipeline tracking, patent cliff timelines, and Pharma Intent Score, AI-powered partner matching with outreach email generation, branded PDF and Excel exports, and priority support. Free users get unlimited calculations with headline metrics and 3 comparable deals."
   },
   {
     question: "Is my data kept confidential?",

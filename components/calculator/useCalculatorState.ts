@@ -227,6 +227,7 @@ type CalculatorAction =
   | { type: 'BULK_SET'; fields: Partial<CalculatorFormState> }
   | { type: 'SET_CUSTOM_ASSUMPTIONS'; assumptions: CustomAssumptions }
   | { type: 'RESET_CUSTOM_ASSUMPTIONS' }
+  | { type: 'TOGGLE_MOLECULAR_TARGET'; slug: string }
   | { type: 'RESET' };
 
 function reducer(state: CalculatorFormState, action: CalculatorAction): CalculatorFormState {
@@ -404,6 +405,14 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
 
     case 'RESET_CUSTOM_ASSUMPTIONS':
       return { ...state, customAssumptions: null };
+
+    case 'TOGGLE_MOLECULAR_TARGET': {
+      const current = state.molecularTargets;
+      const next = current.includes(action.slug)
+        ? current.filter(t => t !== action.slug)
+        : current.length < 4 ? [...current, action.slug] : current;
+      return { ...state, molecularTargets: next };
+    }
 
     case 'RESET':
       return { ...INITIAL_STATE };
@@ -590,11 +599,7 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions, b
     setMolecularTargets: (v: string[]) => dispatch({ type: 'SET_FIELD', field: 'molecularTargets', value: v }),
     setDeliveryRoute: (v: string) => dispatch({ type: 'SET_FIELD', field: 'deliveryRoute', value: v }),
     toggleMolecularTarget: (slug: string) => {
-      const current = state.molecularTargets;
-      const next = current.includes(slug)
-        ? current.filter(t => t !== slug)
-        : current.length < 4 ? [...current, slug] : current;
-      dispatch({ type: 'SET_FIELD', field: 'molecularTargets', value: next });
+      dispatch({ type: 'TOGGLE_MOLECULAR_TARGET', slug });
     },
     toggleDifferentiationFactor: (key) => dispatch({ type: 'TOGGLE_DIFFERENTIATION', key }),
     setPeakSalesOverrideM: (v) => dispatch({ type: 'SET_FIELD', field: 'peakSalesOverrideM', value: v }),

@@ -275,7 +275,7 @@ export function buildProGateEmail4(
         <td style="padding: 8px 0; font-size: 14px; color: #16a34a; text-align: right; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Included</td>
       </tr>
       <tr>
-        <td style="padding: 8px 0; font-size: 14px; color: #334155;">850+ partner company database</td>
+        <td style="padding: 8px 0; font-size: 14px; color: #334155;">700+ partner company database</td>
         <td style="padding: 8px 0; font-size: 14px; color: #16a34a; text-align: right; font-weight: 600;">Included</td>
       </tr>
     </table>

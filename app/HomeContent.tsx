@@ -542,7 +542,7 @@ export default function HomeContent() {
               {
                 icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
                 title: 'Company Intelligence',
-                description: 'Deep profiles on 850+ pharma and biotech companies with deal history, pipeline tracking, patent cliff timelines, and intelligent partner matching.',
+                description: 'Deep profiles on 700+ pharma and biotech companies with deal history, pipeline tracking, patent cliff timelines, and intelligent partner matching.',
                 gradient: 'from-slate-700 to-slate-900',
               },
               {
@@ -599,7 +599,7 @@ export default function HomeContent() {
               Find Your Ideal Licensing Partner
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-              Our AI matches your asset profile against 850+ pharma and biotech companies to find the best strategic fit
+              Our AI matches your asset profile against 700+ pharma and biotech companies to find the best strategic fit
             </p>
           </div>
 
@@ -708,7 +708,7 @@ export default function HomeContent() {
                 <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">Company Profiles & Pipeline</h3>
               </div>
               <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
-                Deep profiles on 850+ pharma and biotech companies with historical deal flow, active pipeline tracking from ClinicalTrials.gov, patent cliff timelines, and strategic fit scoring.
+                Deep profiles on 700+ pharma and biotech companies with historical deal flow, active pipeline tracking from ClinicalTrials.gov, patent cliff timelines, and strategic fit scoring.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Deal history', 'Pipeline tracker', 'Patent cliffs', 'Strategic fit scores'].map((tag) => (

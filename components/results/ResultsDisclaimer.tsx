@@ -36,8 +36,8 @@ function MethodologySection() {
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               All benchmarks are derived from <strong className="text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified biopharma transactions</strong> sourced
               from SEC EDGAR 8-K filings, FTC premerger filings, public press releases, ClinicalTrials.gov, and FDA regulatory databases.
-              Data is refreshed daily through automated ingestion pipelines that monitor 10+ sources. Each deal is verified against
-              multiple sources before inclusion.
+              Data is refreshed through automated ingestion pipelines. Each deal is verified against
+              original source documents before inclusion.
             </p>
           </div>
 

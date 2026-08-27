@@ -105,7 +105,7 @@ const DEAL_TYPE_GROUPS: GroupedOption[] = [
 ];
 
 const LOCKED_SECTIONS = [
-  { icon: Users, label: 'Partner Intelligence + Pharma Intent Score', desc: '850+ companies ranked by fit' },
+  { icon: Users, label: 'Partner Intelligence + Pharma Intent Score', desc: '700+ companies ranked by fit' },
   { icon: Calculator, label: 'rNPV & Deal Valuation', desc: 'Phase-specific LoA-calibrated asset value' },
   { icon: Building2, label: 'Buyer-Specific Valuation', desc: 'What your asset is worth to each acquirer' },
   { icon: LineChart, label: 'Monte Carlo Sensitivity Analysis', desc: 'rNPV modeling with probability-weighted outcomes' },

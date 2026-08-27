@@ -540,7 +540,7 @@ export default function PortfolioPage() {
                 { icon: LineChart, label: 'rNPV Modeling',         sub: 'TA-specific PoS curves' },
                 { icon: Layers,    label: 'Monte Carlo',           sub: '10,000-iter simulations' },
                 { icon: Brain,     label: 'AI Deal Memos',         sub: 'Institutional-quality' },
-                { icon: Search,    label: 'Partner Matching',      sub: '850+ companies, 10-factor' },
+                { icon: Search,    label: 'Partner Matching',      sub: '700+ companies, 10-factor' },
                 { icon: Users,     label: 'Buyer-Specific',        sub: 'Up to 3 buyers compared' },
                 { icon: GitBranch, label: 'Scenario Analysis',     sub: 'Bear / Base / Bull' },
                 { icon: FileDown,  label: 'Branded PDFs',          sub: 'White-labeled exports' },
@@ -652,7 +652,7 @@ export default function PortfolioPage() {
                     <span className="text-xs font-semibold text-teal-300 uppercase tracking-wider">Trusted Infrastructure</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-tight">
-                    Built on the platform used by <span className="text-teal-400">850+ biopharma BD professionals.</span>
+                    Built on the platform used by <span className="text-teal-400">700+ biopharma BD professionals.</span>
                   </h2>
                   <p className="text-slate-400 leading-relaxed">
                     Portfolio License is the multi-seat extension of Solidus —
@@ -663,7 +663,7 @@ export default function PortfolioPage() {
                 <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
                   {[
                     { stat: DEAL_STATS.TOTAL_DEALS, label: 'Verified transactions' },
-                    { stat: '850+', label: 'BD pros on platform' },
+                    { stat: '700+', label: 'BD pros on platform' },
                     { stat: '12 TAs', label: 'Therapeutic areas covered' },
                     { stat: '14', label: 'Calculation engines' },
                   ].map(s => (

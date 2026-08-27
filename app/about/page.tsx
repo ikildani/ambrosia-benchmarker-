@@ -179,7 +179,7 @@ export default function AboutPage() {
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Market Intelligence</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">
                     Real-time deal flow tracking, company profiles, and competitive landscape analysis
-                    across 12 therapeutic areas and 850+ companies.
+                    across 12 therapeutic areas and 700+ companies.
                   </p>
                 </div>
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">

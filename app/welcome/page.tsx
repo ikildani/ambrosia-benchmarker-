@@ -26,7 +26,7 @@ const ENGINES: { name: string; description: string; icon: string }[] = [
   { name: 'rNPV', description: 'Risk-adjusted NPV with phase-specific LoA and discount rates', icon: 'chart-line' },
   { name: 'Monte Carlo', description: '10,000-iteration probabilistic simulation with confidence intervals', icon: 'dice' },
   { name: 'Sensitivity Analysis', description: 'Tornado charts isolating key value drivers', icon: 'sliders' },
-  { name: 'Partner Matching', description: '850+ biopharma companies scored by strategic fit', icon: 'network' },
+  { name: 'Partner Matching', description: '700+ biopharma companies scored by strategic fit', icon: 'network' },
   { name: 'Competitive Landscape', description: 'Pipeline density, mechanism clustering, and white-space analysis', icon: 'radar' },
   { name: 'Market Sizing', description: 'TAM/SAM/SOM with epidemiology-driven bottom-up models', icon: 'globe' },
   { name: 'Scenario Planner', description: 'Side-by-side comparison of deal structures and outcomes', icon: 'layers' },

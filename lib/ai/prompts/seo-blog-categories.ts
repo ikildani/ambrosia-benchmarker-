@@ -267,7 +267,7 @@ ${recentDealsRows}
 
 6. **H2: What This Means If You're Pitching to ${data.companyName}** — Specific, tactical advice for biotechs approaching this buyer. What asset profile fits their pattern? What deal structure should you propose? What terms will they push back on?
 
-7. **CTA paragraph**: "See which companies match your asset" — link to <a href="/calculator">the Ambrosia calculator's partner matching engine</a>, which scores 850+ companies against your asset profile.
+7. **CTA paragraph**: "See which companies match your asset" — link to <a href="/calculator">the Ambrosia calculator's partner matching engine</a>, which scores 700+ companies against your asset profile.
 
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Partner Matching</a> — find your best buyer fit
@@ -388,7 +388,7 @@ ${data.comparisonAngle}
 
 ## AMBROSIA DATA ADVANTAGE (verified facts — use these exact numbers)
 - **Deal count in database**: ${DEAL_STATS.TOTAL_DEALS}
-- **Real-time benchmarking engines**: 14 (Deal Terms, rNPV, Monte Carlo, Tornado Sensitivity, Partner Matching with 850+ companies, Competitive Landscape, Market Sizing, Pharma Intent Score, Deal Waterfall, Scenario Comparison, Real Options via CRR lattice, Competitive Dynamics, Lifecycle Extensions, Buyer-Specific Valuation)
+- **Real-time benchmarking engines**: 14 (Deal Terms, rNPV, Monte Carlo, Tornado Sensitivity, Partner Matching with 700+ companies, Competitive Landscape, Market Sizing, Pharma Intent Score, Deal Waterfall, Scenario Comparison, Real Options via CRR lattice, Competitive Dynamics, Lifecycle Extensions, Buyer-Specific Valuation)
 - **Therapeutic areas covered**: 12 with 562 indications
 - **Pro pricing**: $299/month ($199/month annual)
 - **One-time report**: $499

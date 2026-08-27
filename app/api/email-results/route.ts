@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         <div style="background: #0d1420; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; margin-bottom: 28px;">
           <p style="font-size: 13px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px;">Want the full report?</p>
           <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px; line-height: 1.5;">
-            Get comparable transactions, partner matches (850+ companies scored), sensitivity analysis, competitive landscape, and a negotiation playbook.
+            Get comparable transactions, partner matches (700+ companies scored), sensitivity analysis, competitive landscape, and a negotiation playbook.
           </p>
           <a href="https://solidus.ambrosiaventures.co/calculator" style="display: inline-block; padding: 10px 24px; background: #00c9a7; color: #0a0f1a; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 6px;">
             Get Full Report — $499

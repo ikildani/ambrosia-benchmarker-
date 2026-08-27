@@ -760,7 +760,7 @@ export default function ReportPage() {
                 title: 'Pharma Search & Evaluation',
                 items: [
                   'Validate internal comps with independent benchmarks',
-                  'Screen 850+ companies for therapeutic pipeline fit',
+                  'Screen 700+ companies for therapeutic pipeline fit',
                   'Support investment committee presentations',
                 ],
               },

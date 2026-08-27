@@ -169,7 +169,7 @@ function buildDay7Email(name: string): { subject: string; html: string } {
         <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
           <div style="color: #14b8a6; font-size: 14px; margin-right: 10px; min-width: 20px;">&#10003;</div>
           <div>
-            <strong style="color: #e2e8f0; font-size: 14px;">Partner Matching (850+ Companies)</strong>
+            <strong style="color: #e2e8f0; font-size: 14px;">Partner Matching (700+ Companies)</strong>
             <p style="color: #94a3b8; font-size: 13px; margin: 2px 0 0;">Buyer-specific valuation and strategic fit scoring</p>
           </div>
         </div>

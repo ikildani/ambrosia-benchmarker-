@@ -83,7 +83,7 @@ export const LIVE_DEAL_COUNT = 1619;
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
   TOTAL_DEALS_RAW: LIVE_DEAL_COUNT,
-  TOTAL_COMPANIES: '1,000+',
+  TOTAL_COMPANIES: '700+',
   TOTAL_DEALS_DESCRIPTION: 'verified biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, FTC premerger filings, press releases, and regulatory databases',
   NEUROLOGY_DEALS: '150+',
   NEUROLOGY_DEALS_DESCRIPTION: 'neurology R&D partnerships',
@@ -112,7 +112,7 @@ export const BENCHMARK_PRICING = {
   INCLUDES: [
     '52 deal calculations (13 modalities × 4 structures)',
     'AI-written strategic narrative & negotiation playbook',
-    'Comparable transactions from 2,500+ deal database',
+    `Comparable transactions from ${formatDealCount(LIVE_DEAL_COUNT)} deal database`,
     'Partner matching with intent scoring (6-10 counterparties)',
     'Full financial model suite (rNPV, Monte Carlo, scenarios)',
     'M&A structures with earnout & CVR valuation',

@@ -186,7 +186,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
             <p className="text-xs font-bold text-teal-400 tracking-wider uppercase mb-2">Recommended</p>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Try Pro Free for 7 Days</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-              14 engines · Unlimited calculations · PDF exports · 850+ company profiles
+              14 engines · Unlimited calculations · PDF exports · 700+ company profiles
             </p>
             <button
               onClick={handleTrialStart}

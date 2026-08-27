@@ -214,7 +214,7 @@ export function renderEarnoutPage(data: PDFReportData, meta: ReportMeta): string
 
       <!-- Methodology note -->
       <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.6;">
-        <strong>Methodology:</strong> Earnout probabilities derived from BIO/QLS phase transition tables and FDA approval rates (2020-2026). Commercial trigger probabilities calibrated to DealForma revenue-milestone achievement data (n=850+ transactions). Discounted values use a risk-adjusted rate reflecting the contingent nature of each tranche. CVR fair-value estimates follow ASC 805 acquisition accounting guidance.
+        <strong>Methodology:</strong> Earnout probabilities derived from BIO/QLS phase transition tables and FDA approval rates (2020-2026). Commercial trigger probabilities calibrated to DealForma revenue-milestone achievement data (n=700+ transactions). Discounted values use a risk-adjusted rate reflecting the contingent nature of each tranche. CVR fair-value estimates follow ASC 805 acquisition accounting guidance.
       </div>
 
       ${pageFooter(meta.reportId)}

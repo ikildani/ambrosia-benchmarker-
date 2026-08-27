@@ -70,7 +70,7 @@ function buildDay1Email(name: string, calcCount: number): { subject: string; htm
         <div style="padding:16px;">
           <table style="width:100%; border-collapse:collapse;">
             <tr><td style="padding:8px 0; color:#e2e8f0; font-size:14px;">rNPV modeling & Monte Carlo simulation</td></tr>
-            <tr><td style="padding:8px 0; color:#e2e8f0; font-size:14px; border-top:1px solid #1e293b;">Partner matching across 850+ companies</td></tr>
+            <tr><td style="padding:8px 0; color:#e2e8f0; font-size:14px; border-top:1px solid #1e293b;">Partner matching across 700+ companies</td></tr>
             <tr><td style="padding:8px 0; color:#e2e8f0; font-size:14px; border-top:1px solid #1e293b;">AI deal memos & negotiation playbooks</td></tr>
             <tr><td style="padding:8px 0; color:#e2e8f0; font-size:14px; border-top:1px solid #1e293b;">PDF report exports for board decks</td></tr>
             <tr><td style="padding:8px 0; color:#e2e8f0; font-size:14px; border-top:1px solid #1e293b;">Scenario comparison & sensitivity analysis</td></tr>

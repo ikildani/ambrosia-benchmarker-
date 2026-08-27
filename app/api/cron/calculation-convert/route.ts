@@ -101,7 +101,7 @@ function buildConversionEmail(
         <div style="padding: 16px;">
           <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
             <span style="color: #14b8a6; font-size: 13px; font-weight: 600;">Partner Matching</span>
-            <span style="color: #64748b; font-size: 12px;"> — 850+ companies scored for your ${modalityLabel}</span>
+            <span style="color: #64748b; font-size: 12px;"> — 700+ companies scored for your ${modalityLabel}</span>
           </div>
           <div style="padding: 8px 0; border-bottom: 1px solid #1e293b;">
             <span style="color: #14b8a6; font-size: 13px; font-weight: 600;">rNPV + Monte Carlo</span>

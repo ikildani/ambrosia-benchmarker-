@@ -128,7 +128,7 @@ const TOUR_STEPS: TourStepDef[] = [
   {
     targetId: TOUR_STEP_IDS.PARTNER_MATCHES,
     title: 'Partner Matching',
-    body: 'Scored against 850+ pharma and biotech companies. Ranks potential partners by therapeutic fit, modality expertise, deal history, and strategic alignment.',
+    body: 'Scored against 700+ pharma and biotech companies. Ranks potential partners by therapeutic fit, modality expertise, deal history, and strategic alignment.',
     icon: <Handshake className={ICON_CLASS} />,
   },
   {

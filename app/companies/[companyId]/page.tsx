@@ -986,7 +986,7 @@ export default async function CompanyPage({ params }: Props) {
                 All Company Profiles
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Browse 850+ biotech and pharma company profiles with deal history and pipeline data
+                Browse 700+ biotech and pharma company profiles with deal history and pipeline data
               </p>
             </Link>
 
@@ -1030,7 +1030,7 @@ export default async function CompanyPage({ params }: Props) {
             )}
             <p>
               Ambrosia Ventures tracks deal terms, pipeline data, patent expirations, and competitive
-              positioning for {company.name} and 850+ other biopharma companies. Use our{' '}
+              positioning for {company.name} and 700+ other biopharma companies. Use our{' '}
               <Link href="/calculator" className="text-teal-600 dark:text-teal-400 hover:underline">Solidus</Link>{' '}
               to benchmark your asset against {company.name}&apos;s historical deal terms, or explore{' '}
               <Link href="/companies" className="text-teal-600 dark:text-teal-400 hover:underline">all company profiles</Link>{' '}

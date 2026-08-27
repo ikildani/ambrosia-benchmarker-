@@ -38,7 +38,7 @@ function buildDunningEmail(stage: DunningStage): { subject: string; html: string
           <li>Monte Carlo simulation and rNPV analysis</li>
           <li>Partner matching with intent scoring</li>
           <li>PDF and Excel exports</li>
-          <li>850+ company deal profiles</li>
+          <li>700+ company deal profiles</li>
         </ul>
       </div>`,
     3: `<p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">

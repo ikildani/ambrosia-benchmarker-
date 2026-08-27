@@ -1830,7 +1830,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-4">
                 {[
-                  { label: 'Partner Matching', desc: '850+ companies scored for fit', icon: '🎯' },
+                  { label: 'Partner Matching', desc: '700+ companies scored for fit', icon: '🎯' },
                   { label: 'Scenario Comparison', desc: 'Bull / base / bear with your inputs', icon: '📊' },
                   { label: 'Deal Waterfall', desc: 'Visual value breakdown by component', icon: '💧' },
                   { label: 'rNPV & Monte Carlo', desc: 'Risk-adjusted valuation model', icon: '🧮' },

@@ -42,7 +42,7 @@ function buildUpsellEmail(email: string): { subject: string; html: string } {
         <ul style="color: #94a3b8; font-size: 14px; line-height: 2; margin: 0; padding-left: 20px;">
           <li><strong style="color: #14b8a6;">Unlimited deal reports</strong> — run as many analyses as you need</li>
           <li><strong style="color: #14b8a6;">rNPV + Monte Carlo</strong> — full risk-adjusted valuations</li>
-          <li><strong style="color: #14b8a6;">Partner matching</strong> — 850+ pharma companies with intent scoring</li>
+          <li><strong style="color: #14b8a6;">Partner matching</strong> — 700+ pharma companies with intent scoring</li>
           <li><strong style="color: #14b8a6;">Real options + scenario comparison</strong> — model every outcome</li>
           <li><strong style="color: #14b8a6;">PDF + Excel export</strong> — board-ready deliverables</li>
         </ul>

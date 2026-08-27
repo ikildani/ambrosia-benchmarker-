@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Solidus — Life Sciences Deal Intelligence & Benchmarks',
-    description: `Instant biopharma deal benchmarks, rNPV, Monte Carlo & AI deal intelligence. ${DEAL_STATS.TOTAL_DEALS} verified deals, 850+ company profiles, 12 therapeutic areas. Free to start.`,
+    description: `Instant biopharma deal benchmarks, rNPV, Monte Carlo & AI deal intelligence. ${DEAL_STATS.TOTAL_DEALS} verified deals, 700+ company profiles, 12 therapeutic areas. Free to start.`,
     images: ['/api/og'],
   },
 };

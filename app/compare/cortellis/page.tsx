@@ -56,7 +56,7 @@ const FEATURES = [
   { feature: 'rNPV Valuation Engine', solidus: true, competitor: false },
   { feature: 'Monte Carlo Simulation (10K iterations)', solidus: true, competitor: false },
   { feature: 'AI Deal Memos & Narratives', solidus: true, competitor: false },
-  { feature: 'Partner Matching (850+ companies)', solidus: true, competitor: false },
+  { feature: 'Partner Matching (700+ companies)', solidus: true, competitor: false },
   { feature: 'Competitive Dynamics Engine', solidus: true, competitor: false },
   { feature: 'Real Options Valuation', solidus: true, competitor: false },
   { feature: 'Pharma Intent Scoring', solidus: true, competitor: false },

@@ -345,7 +345,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
   const server = new McpServer({
     name: 'Solidus',
     version: '2.0.0',
-    description: `Institutional-grade biopharma deal intelligence — 21 engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 850+ companies`,
+    description: `Institutional-grade biopharma deal intelligence — 21 engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 700+ companies`,
   });
 
   // ─────────────────────────────────────────────────────────────────────
@@ -613,7 +613,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
   // ─────────────────────────────────────────────────────────────────────
   server.tool(
     'match_partners',
-    'Find the best-fit licensing/acquisition partners for a pharmaceutical asset. Scores 850+ companies across 9 dimensions (modality fit, indication relevance, phase preference, activity signals, strategic need, territory, quality, deal type, watch-outs). Returns ranked matches with Pharma Intent scores, strategic context, and recent deal history.',
+    'Find the best-fit licensing/acquisition partners for a pharmaceutical asset. Scores 700+ companies across 9 dimensions (modality fit, indication relevance, phase preference, activity signals, strategic need, territory, quality, deal type, watch-outs). Returns ranked matches with Pharma Intent scores, strategic context, and recent deal history.',
     {
       therapeuticArea: therapeuticAreaEnum,
       phase: phaseEnum,
@@ -2193,7 +2193,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
           { name: 'calculate_deal_terms', category: 'Core Valuation', description: `Calculate deal terms (upfront, milestones, royalties) calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions.` },
           { name: 'run_rnpv_model', category: 'Core Valuation', description: 'Risk-adjusted NPV with 10,000-iteration Monte Carlo simulation. P10/P50/P90, cash flows, driver sensitivity.' },
           { name: 'optimize_deal_structure', category: 'Core Valuation', description: 'Rank all 5 deal structures by total value to licensor with component breakdown.' },
-          { name: 'match_partners', category: 'Intelligence', description: 'Find best-fit partners from 850+ companies scored across 9 dimensions with Pharma Intent signals.' },
+          { name: 'match_partners', category: 'Intelligence', description: 'Find best-fit partners from 700+ companies scored across 9 dimensions with Pharma Intent signals.' },
           { name: 'compute_negotiation_zopa', category: 'Negotiation', description: 'Zone of Possible Agreement for 1-3 buyers with counterparty premiums and BATNA-anchored positions.' },
           { name: 'get_regulatory_risk', category: 'Regulatory', description: 'Global regulatory risk across 7 agencies with rejection probability, review timelines, and designation impacts.' },
           { name: 'get_comparable_deals', category: 'Intelligence', description: 'Find comparable transactions from 280+ curated deals using hedonic regression scoring.' },
@@ -2599,7 +2599,7 @@ export async function GET() {
       {
         name: 'match_partners',
         category: 'Intelligence',
-        description: 'Find best-fit partners from 850+ companies scored across 9 dimensions with Pharma Intent signals.',
+        description: 'Find best-fit partners from 700+ companies scored across 9 dimensions with Pharma Intent signals.',
       },
       {
         name: 'get_comparable_deals',

@@ -52,7 +52,7 @@ const FEATURES = [
   { feature: 'Deal Benchmarking', ambrosia: true, competitor: false },
   { feature: 'rNPV Analysis', ambrosia: true, competitor: false },
   { feature: 'Monte Carlo Simulation', ambrosia: true, competitor: false },
-  { feature: 'Partner Matching (850+ companies)', ambrosia: true, competitor: false },
+  { feature: 'Partner Matching (700+ companies)', ambrosia: true, competitor: false },
   { feature: 'Real-time Deal Intelligence', ambrosia: true, competitor: false },
   { feature: 'PDF/Excel Export', ambrosia: true, competitor: true },
   { feature: 'Competitive Dynamics Engine', ambrosia: true, competitor: false },
@@ -172,7 +172,7 @@ export default function CapitalIQComparePage() {
             {
               title: 'Partner Matching Algorithm',
               description:
-                'Match your asset to the best potential partners from 850+ pharma and biotech companies — scored by therapeutic area focus, deal history, and strategic fit. Capital IQ has no equivalent.',
+                'Match your asset to the best potential partners from 700+ pharma and biotech companies — scored by therapeutic area focus, deal history, and strategic fit. Capital IQ has no equivalent.',
             },
           ].map(({ title, description }) => (
             <div

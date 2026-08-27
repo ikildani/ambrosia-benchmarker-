@@ -42,7 +42,7 @@ const ALL_FEATURES: FeatureDef[] = [
   {
     id: 'partner_matching',
     label: 'Partner Matching',
-    desc: '850+ companies scored for your asset',
+    desc: '700+ companies scored for your asset',
     valueHook: () => null,
   },
   {

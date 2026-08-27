@@ -50,7 +50,7 @@ export async function sendTrialWelcome(to: string, name: string, ta?: string) {
       <ol style="font-size: 14px; color: #334155; padding-left: 20px;">
         <li style="margin-bottom: 8px;"><strong>Run a deal benchmark</strong> — enter your asset's phase, modality, and indication to get instant deal terms</li>
         <li style="margin-bottom: 8px;"><strong>Generate a deal memo</strong> — AI-written institutional-quality memo for your board or IC</li>
-        <li style="margin-bottom: 8px;"><strong>Match with partners</strong> — see which of 850+ companies are the best fit for your asset</li>
+        <li style="margin-bottom: 8px;"><strong>Match with partners</strong> — see which of 700+ companies are the best fit for your asset</li>
       </ol>
       ${cta('Run Your First Calculation', `${APP_URL}/calculator`)}
       <p style="font-size: 14px; color: #64748b;">Questions? Reply to this email — we respond within 24 hours.</p>
@@ -98,7 +98,7 @@ export async function sendTrialDay5(to: string, name: string, calcCount: number)
         <p style="font-size: 14px; color: #991b1b; margin: 0; font-weight: 600;">When your trial expires, you lose access to:</p>
         <ul style="font-size: 13px; color: #991b1b; padding-left: 18px; margin-bottom: 0;">
           <li>rNPV modeling & Monte Carlo simulation</li>
-          <li>Partner matching (850+ companies)</li>
+          <li>Partner matching (700+ companies)</li>
           <li>AI deal memos & negotiation playbooks</li>
           <li>PDF report exports</li>
           <li>Scenario comparison & sensitivity analysis</li>

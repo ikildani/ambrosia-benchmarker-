@@ -23,7 +23,7 @@ export function GlobalJsonLd() {
 
   const companiesPageSchema = generateWebPageSchema({
     name: 'Biopharma Company Profiles & Deal Activity',
-    description: 'Explore 850+ biopharma company profiles with deal history, pipeline activity, and licensing track records across 12 therapeutic areas.',
+    description: 'Explore 700+ biopharma company profiles with deal history, pipeline activity, and licensing track records across 12 therapeutic areas.',
     url: 'https://solidus.ambrosiaventures.co/companies',
   });
 

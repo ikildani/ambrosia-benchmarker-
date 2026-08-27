@@ -144,7 +144,7 @@ export default function MethodologyPage() {
               {[
                 { label: 'Confidence Threshold', desc: 'Every transaction is scored for extraction confidence. Deals below 75/100 are excluded from benchmarks — we prioritize accuracy over volume.' },
                 { label: 'Source Verification', desc: 'Deals are cross-referenced against original source documents. Financial terms are only marked as disclosed when explicitly stated in filings or press releases.' },
-                { label: 'Continuous Updates', desc: 'Our pipeline ingests from 10+ data sources on automated schedules — some hourly, some daily, some weekly — depending on source update frequency.' },
+                { label: 'Continuous Updates', desc: 'Our pipeline ingests from SEC filings, FTC premerger databases, press releases, and regulatory databases on automated schedules — some daily, some weekly — depending on source update frequency.' },
                 { label: 'Deduplication', desc: 'Multi-key conflict resolution prevents the same deal from appearing twice, even when announced via different sources or amended in subsequent filings.' },
               ].map(item => (
                 <div key={item.label} className="flex gap-3 p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-800/30">

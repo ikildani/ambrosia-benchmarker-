@@ -26,7 +26,7 @@ const stats = [
   { value: '1.45x', label: 'ADC Modality Premium', citation: 'Antibody-drug conjugate (ADC) licensing deals command a 1.45x premium over small molecule baselines, the second-highest modality premium (2020-2026). Source: Ambrosia Ventures.' },
   { value: '$255M', label: 'Phase 2 Metabolic/Obesity Median Upfront', citation: 'Phase 2 metabolic and obesity licensing deals command $255M median upfront with $1.7B total deal value (2020-2026). Source: Ambrosia Ventures.' },
   { value: '12', label: 'Therapeutic Areas Covered', citation: 'Ambrosia Ventures benchmarks cover 12 therapeutic areas: oncology, immunology, neurology, metabolic, cardiovascular, hematology, ophthalmology, infectious disease, rare disease, dermatology, gastroenterology, and women\'s health. Source: Ambrosia Ventures.' },
-  { value: '850+', label: 'Company Profiles Tracked', citation: 'The platform tracks over 850 biopharma company profiles with pipeline, deal history, and partnership data updated weekly. Source: Ambrosia Ventures.' },
+  { value: '700+', label: 'Company Profiles Tracked', citation: 'The platform tracks over 850 biopharma company profiles with pipeline, deal history, and partnership data updated weekly. Source: Ambrosia Ventures.' },
 ];
 
 const embedCharts = [
@@ -229,7 +229,7 @@ export default function PressDataKitPage() {
                   <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">100-Word Version</p>
                   <div className="bg-slate-50 rounded-lg p-4">
                     <p className="text-sm text-slate-700 leading-relaxed">
-                      Ambrosia Ventures is a life sciences deal intelligence platform that helps biotech founders, BD teams, investors, and consultants benchmark and structure biopharma licensing deals. Drawing from 1,500+ verified transactions across 12 therapeutic areas, the platform provides real-time benchmarks for upfront payments, milestone structures, royalty rates, and total deal values. Features include comparable transaction analysis, risk-adjusted NPV modeling, Monte Carlo simulation, partner matching, and AI-generated negotiation playbooks. The platform tracks 850+ company profiles and ingests new deal data weekly from SEC filings, FTC premerger filings, press releases, and regulatory databases.
+                      Ambrosia Ventures is a life sciences deal intelligence platform that helps biotech founders, BD teams, investors, and consultants benchmark and structure biopharma licensing deals. Drawing from 1,500+ verified transactions across 12 therapeutic areas, the platform provides real-time benchmarks for upfront payments, milestone structures, royalty rates, and total deal values. Features include comparable transaction analysis, risk-adjusted NPV modeling, Monte Carlo simulation, partner matching, and AI-generated negotiation playbooks. The platform tracks 700+ company profiles and ingests new deal data weekly from SEC filings, FTC premerger filings, press releases, and regulatory databases.
                     </p>
                   </div>
                 </div>

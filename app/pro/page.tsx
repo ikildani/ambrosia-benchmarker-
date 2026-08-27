@@ -57,7 +57,7 @@ const comparison = [
   { feature: 'Peak sales validation', free: false, pro: 'Sanity check vs 164 index drugs' },
   { feature: 'PDF & Excel export', free: false, pro: '20-page reports + workbooks' },
   { feature: 'Share links', free: false, pro: 'Branded dark-theme pages' },
-  { feature: 'Company profiles (850+)', free: 'Names & types only', pro: 'Full deal history, pipeline, patent cliffs' },
+  { feature: 'Company profiles (700+)', free: 'Names & types only', pro: 'Full deal history, pipeline, patent cliffs' },
   { feature: 'Market Pulse (weekly)', free: false, pro: 'Deal activity, benchmarks, trend analysis' },
 ];
 
@@ -66,7 +66,7 @@ const faqs = [
   { q: 'Can I cancel anytime?', a: 'Yes. Cancel from your account settings at any time. You keep full access through the end of your billing period with no penalties or hidden fees.' },
   { q: 'What\'s included in the annual plan?', a: `Everything in monthly Pro, billed annually at ${PRICING.PRO_ANNUAL_PRICE}/year (${PRICING.PRO_ANNUAL_MONTHLY}). You save ${PRICING.PRO_ANNUAL_SAVINGS} compared to monthly billing.` },
   { q: 'Do I get access to all therapeutic areas?', a: 'Yes. Pro unlocks all 12 therapeutic areas and 562 indications with full deal benchmarks, partner matching, and competitive landscape data.' },
-  { q: 'What data sources do you use?', a: 'SEC 8-K filings, FTC premerger filings, press releases, ClinicalTrials.gov, FDA/EMA regulatory databases, patent filings, and company financial reports. New deals are ingested daily from 10+ sources.' },
+  { q: 'What data sources do you use?', a: 'SEC 8-K filings, FTC premerger filings, press releases, ClinicalTrials.gov, FDA/EMA regulatory databases, patent filings, and company financial reports. New deals are ingested from SEC filings, FTC premerger databases, press releases, and regulatory databases.' },
   { q: 'How often are benchmarks updated?', a: 'Daily. New deals are automatically ingested and benchmarks recalibrate in real time. Your analyses always reflect the latest market data.' },
   { q: 'Can I use this for board presentations?', a: 'Absolutely. PDF reports are designed for deal committees and investment committees. Export 20-page branded reports with scenario comparison, deal waterfall, real options, competitive dynamics, and buyer-specific valuation.' },
   { q: 'How does this compare to Evaluate Pharma or Cortellis?', a: `Those platforms focus on pipeline and market data. Ambrosia focuses specifically on deal intelligence — benchmarking your deal terms against ${DEAL_STATS.TOTAL_DEALS} real transactions with institutional-grade financial modeling. Most users find it complementary, not duplicative.` },
@@ -381,7 +381,7 @@ export default function ProPage() {
                   <Brain className="w-3 h-3 text-amber-400" />
                   <span className="text-xs text-amber-300 font-medium">Partner Matching + Pharma Intent</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">850+ companies ranked by fit and acquisition intent</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">700+ companies ranked by fit and acquisition intent</h3>
                 <p className="text-slate-400 leading-relaxed mb-4">
                   Our partner matching engine scores companies across modality alignment, pipeline gaps, patent cliff pressure, and deal velocity. The 10-factor Pharma Intent Score predicts who is most likely to transact in the next 12-18 months.
                 </p>
@@ -549,7 +549,7 @@ export default function ProPage() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400">Board Meetings</span>
               </h2>
               <p className="mt-5 text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                Two intelligence platforms that monitor 850+ companies and every deal that moves — so you walk into every meeting knowing what changed.
+                Two intelligence platforms that monitor 700+ companies and every deal that moves — so you walk into every meeting knowing what changed.
               </p>
             </div>
 
@@ -563,7 +563,7 @@ export default function ProPage() {
                   {/* Floating badges */}
                   <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 items-end">
                     <div className="btc-stagger-1 px-2.5 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-sm" style={{ animation: 'btc-fade-up 0.6s ease both, btc-border-shimmer 3s ease-in-out infinite' }}>
-                      <span className="text-[10px] font-semibold text-teal-400">850+ companies tracked</span>
+                      <span className="text-[10px] font-semibold text-teal-400">700+ companies tracked</span>
                     </div>
                     <div className="btc-stagger-2 px-2.5 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-sm">
                       <span className="text-[10px] font-semibold text-teal-400">Updated weekly</span>
@@ -673,7 +673,7 @@ export default function ProPage() {
                     Know every buyer before<br className="hidden sm:block" /> they know themselves
                   </h3>
                   <p className="text-sm text-slate-400 leading-relaxed mb-6">
-                    Deep profiles on 850+ biopharma companies updated weekly. Patent cliff pressure, pipeline gaps, acquisition appetite, and deal velocity -- the signals that predict who transacts next.
+                    Deep profiles on 700+ biopharma companies updated weekly. Patent cliff pressure, pipeline gaps, acquisition appetite, and deal velocity -- the signals that predict who transacts next.
                   </p>
 
                   <div className="space-y-3 mb-8">

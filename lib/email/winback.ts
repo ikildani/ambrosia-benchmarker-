@@ -34,7 +34,7 @@ export function buildSubscriptionWinbackEmail(name: string): { subject: string; 
         <p style="color: #14b8a6; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px;">Welcome back offer</p>
         <p style="color: #e2e8f0; font-size: 24px; font-weight: 800; margin: 0 0 8px;">50% off for 3 months</p>
         <p style="color: #94a3b8; font-size: 14px; margin: 0 0 16px;">
-          That's Pro at $149.50/month — full access to all 14 engines, unlimited calculations, and 850+ company profiles.
+          That's Pro at $149.50/month — full access to all 14 engines, unlimited calculations, and 700+ company profiles.
         </p>
         <a href="${BASE_URL}/calculator?upgrade=true&promo=COMEBACK50" style="display: inline-block; background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color: #ffffff; padding: 14px 36px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px;">
           Reactivate at 50% Off

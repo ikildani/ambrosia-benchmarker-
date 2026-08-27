@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import {
-  targetOptionsByTA,
   getTargetEntry,
   getCompositeTargetPosModifier,
   MODALITY_TARGET_OVERLAP,
@@ -11,6 +10,7 @@ import {
   getTargetCombination,
   getDefaultCombinationEffect,
 } from '@/lib/financial/target-combinations';
+import { getTargetsForIndication } from '@/lib/financial/target-indication-map';
 
 interface MolecularTargetSelectorProps {
   therapeuticArea: string;
@@ -28,11 +28,24 @@ export function MolecularTargetSelector({
   onToggle,
 }: MolecularTargetSelectorProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showOtherTargets, setShowOtherTargets] = useState(false);
 
-  const options = useMemo(
-    () => targetOptionsByTA[therapeuticArea] ?? [],
-    [therapeuticArea],
+  const allOptions = useMemo(
+    () => getTargetsForIndication(indication, therapeuticArea),
+    [indication, therapeuticArea],
   );
+
+  const relevantOptions = useMemo(
+    () => allOptions.filter(o => o.indicationRelevant),
+    [allOptions],
+  );
+
+  const otherOptions = useMemo(
+    () => allOptions.filter(o => !o.indicationRelevant),
+    [allOptions],
+  );
+
+  const hasIndicationMapping = relevantOptions.length > 0;
 
   const overlapTarget = MODALITY_TARGET_OVERLAP[modality];
   const effectiveTargets = selectedTargets.filter(t => t !== overlapTarget);
@@ -62,6 +75,35 @@ export function MolecularTargetSelector({
     : defaultCombo
       ? `+${(defaultCombo.dealPremium * 100).toFixed(0)}% premium`
       : '';
+
+  const renderTargetButton = (opt: { value: string; label: string }) => {
+    const entry = getTargetEntry(opt.value);
+    const isSelected = selectedTargets.includes(opt.value);
+    const isOverlap = opt.value === overlapTarget;
+
+    return (
+      <button
+        key={opt.value}
+        type="button"
+        onClick={() => onToggle(opt.value)}
+        disabled={isOverlap}
+        title={isOverlap ? `Already captured by ${modality} modality` : entry?.source}
+        className={`
+          rounded-lg border px-3 py-1.5 text-xs font-medium transition-all
+          ${isOverlap
+            ? 'cursor-not-allowed border-slate-700/20 bg-slate-800/20 text-slate-600 line-through'
+            : isSelected
+              ? entry?.validatedTarget
+                ? 'border-teal-500/50 bg-teal-500/15 text-teal-300 shadow-sm shadow-teal-500/10'
+                : 'border-amber-500/50 bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10'
+              : 'border-slate-700/40 bg-slate-800/30 text-slate-400 hover:border-slate-600/50 hover:text-slate-300'
+          }
+        `}
+      >
+        {opt.label}
+      </button>
+    );
+  };
 
   return (
     <div className="rounded-xl border border-slate-700/40 bg-slate-900/40">
@@ -110,36 +152,40 @@ export function MolecularTargetSelector({
             Select the molecular target(s) your asset engages. Multi-target assets (bispecifics, conjugates) can select up to 4. Each target adjusts PoS and deal premiums based on validation history.
           </p>
 
-          <div className="flex flex-wrap gap-2">
-            {options.map(opt => {
-              const entry = getTargetEntry(opt.value);
-              const isSelected = selectedTargets.includes(opt.value);
-              const isOverlap = opt.value === overlapTarget;
+          {hasIndicationMapping ? (
+            <>
+              <div className="flex flex-wrap gap-2">
+                {relevantOptions.map(renderTargetButton)}
+              </div>
 
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => onToggle(opt.value)}
-                  disabled={isOverlap}
-                  title={isOverlap ? `Already captured by ${modality} modality` : entry?.source}
-                  className={`
-                    rounded-lg border px-3 py-1.5 text-xs font-medium transition-all
-                    ${isOverlap
-                      ? 'cursor-not-allowed border-slate-700/20 bg-slate-800/20 text-slate-600 line-through'
-                      : isSelected
-                        ? entry?.validatedTarget
-                          ? 'border-teal-500/50 bg-teal-500/15 text-teal-300 shadow-sm shadow-teal-500/10'
-                          : 'border-amber-500/50 bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10'
-                        : 'border-slate-700/40 bg-slate-800/30 text-slate-400 hover:border-slate-600/50 hover:text-slate-300'
-                    }
-                  `}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
+              {otherOptions.length > 0 && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowOtherTargets(v => !v)}
+                    className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-slate-400 transition-colors"
+                  >
+                    <svg
+                      className={`h-3 w-3 transition-transform duration-150 ${showOtherTargets ? 'rotate-90' : ''}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    Other {therapeuticArea} targets ({otherOptions.length})
+                  </button>
+                  {showOtherTargets && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {otherOptions.map(renderTargetButton)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {allOptions.map(renderTargetButton)}
+            </div>
+          )}
 
           {/* Validated combination callout */}
           {combo && (

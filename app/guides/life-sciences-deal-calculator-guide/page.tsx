@@ -96,7 +96,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
         name: 'How is the deal calculator different from a DCF model or spreadsheet?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `Unlike a static DCF spreadsheet, the deal calculator combines 14 specialized engines: deal term benchmarking, rNPV, Monte Carlo simulation, tornado sensitivity analysis, partner matching (850+ companies), competitive landscape, market sizing, Pharma Intent Score, deal waterfall, scenario comparison, real options (CRR lattice), competitive dynamics, lifecycle extensions, and buyer-specific valuation. It benchmarks against ${DEAL_STATS.TOTAL_DEALS} real transactions rather than relying on assumptions, and generates institutional-quality PDF reports.`,
+          text: `Unlike a static DCF spreadsheet, the deal calculator combines 14 specialized engines: deal term benchmarking, rNPV, Monte Carlo simulation, tornado sensitivity analysis, partner matching (700+ companies), competitive landscape, market sizing, Pharma Intent Score, deal waterfall, scenario comparison, real options (CRR lattice), competitive dynamics, lifecycle extensions, and buyer-specific valuation. It benchmarks against ${DEAL_STATS.TOTAL_DEALS} real transactions rather than relying on assumptions, and generates institutional-quality PDF reports.`,
         },
       },
     ],
@@ -183,7 +183,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
               <li><strong>rNPV Engine:</strong> Calculates <Link href="/guides/rnpv-biotech-valuation" className="text-teal-600 font-medium hover:text-teal-700">risk-adjusted net present value</Link> using calibrated probability-of-success rates across all clinical phases and therapeutic areas.</li>
               <li><strong>Monte Carlo Engine:</strong> Runs 10,000 randomized scenarios to generate probability distributions and confidence intervals, replacing false precision with actionable ranges.</li>
               <li><strong>Tornado Sensitivity Engine:</strong> Identifies which variables drive the most variation in deal value, focusing diligence and negotiation strategy on what matters most.</li>
-              <li><strong>Partner Matching Engine:</strong> Scores 850+ pharma and biotech companies on strategic fit, pipeline gaps, financial capacity, and historical deal preferences.</li>
+              <li><strong>Partner Matching Engine:</strong> Scores 700+ pharma and biotech companies on strategic fit, pipeline gaps, financial capacity, and historical deal preferences.</li>
               <li><strong>Competitive Landscape Engine:</strong> Maps competing programs by phase, mechanism, and timeline to contextualize competitive risk and differentiation.</li>
               <li><strong>Market Sizing Engine:</strong> Projects addressable market size by indication, patient population, pricing assumptions, and market share scenarios.</li>
               <li><strong>Pharma Intent Score:</strong> A proprietary 10-factor predictive model scoring buyer interest based on pipeline gaps, M&amp;A activity, therapeutic focus, financial signals, and press/research signals.</li>
@@ -238,7 +238,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
               <li><strong>rNPV valuation:</strong> Risk-adjusted net present value with phase-specific probability-of-success rates, showing the expected value of the asset under current development assumptions.</li>
               <li><strong>Monte Carlo distribution:</strong> 10,000-scenario simulation showing P10, P25, P50, P75, and P90 outcomes with a visual probability distribution chart.</li>
               <li><strong>Sensitivity tornado:</strong> Ranked chart showing which input variables drive the most variation in output value, guiding where to focus diligence and negotiation.</li>
-              <li><strong>Partner match scores:</strong> Top-ranked potential partners from a database of 850+ companies, scored on strategic fit, pipeline complementarity, deal history, and financial capacity.</li>
+              <li><strong>Partner match scores:</strong> Top-ranked potential partners from a database of 700+ companies, scored on strategic fit, pipeline complementarity, deal history, and financial capacity.</li>
               <li><strong>Buyer-specific valuations:</strong> Customized valuation for specific potential acquirers reflecting their WACC, commercial capabilities, and strategic premium.</li>
               <li><strong>PDF report:</strong> A ~20-page institutional-quality report covering all engines, suitable for board presentations, deal committee memos, and investor updates. Available for $499 one-time or included with Pro.</li>
             </ul>
@@ -305,7 +305,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
                   <tr className="bg-slate-50/50"><td className="px-4 py-3 text-slate-700 font-medium">Time to benchmark</td><td className="px-4 py-3 text-slate-600">2-4 weeks</td><td className="px-4 py-3 text-slate-600">Under 2 minutes</td></tr>
                   <tr><td className="px-4 py-3 text-slate-700 font-medium">Valuation engines</td><td className="px-4 py-3 text-slate-600">1-2 (DCF, comps)</td><td className="px-4 py-3 text-slate-600">14 specialized engines</td></tr>
                   <tr className="bg-slate-50/50"><td className="px-4 py-3 text-slate-700 font-medium">Monte Carlo</td><td className="px-4 py-3 text-slate-600">Rare, requires add-ins</td><td className="px-4 py-3 text-slate-600">Built-in, 10,000 scenarios</td></tr>
-                  <tr><td className="px-4 py-3 text-slate-700 font-medium">Partner matching</td><td className="px-4 py-3 text-slate-600">Manual research</td><td className="px-4 py-3 text-slate-600">850+ companies scored</td></tr>
+                  <tr><td className="px-4 py-3 text-slate-700 font-medium">Partner matching</td><td className="px-4 py-3 text-slate-600">Manual research</td><td className="px-4 py-3 text-slate-600">700+ companies scored</td></tr>
                   <tr className="bg-slate-50/50"><td className="px-4 py-3 text-slate-700 font-medium">Therapeutic areas</td><td className="px-4 py-3 text-slate-600">TA-agnostic assumptions</td><td className="px-4 py-3 text-slate-600">12 TAs, 562 indications</td></tr>
                   <tr><td className="px-4 py-3 text-slate-700 font-medium">Output format</td><td className="px-4 py-3 text-slate-600">Raw spreadsheet</td><td className="px-4 py-3 text-slate-600">Interactive + PDF report</td></tr>
                   <tr className="bg-slate-50/50"><td className="px-4 py-3 text-slate-700 font-medium">Data freshness</td><td className="px-4 py-3 text-slate-600">Point-in-time snapshot</td><td className="px-4 py-3 text-slate-600">Continuously updated</td></tr>
@@ -399,7 +399,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  Unlike a static DCF spreadsheet, the calculator combines 14 specialized engines with a continuously updated dataset of {DEAL_STATS.TOTAL_DEALS} real transactions. It benchmarks against actual market data rather than assumptions, runs Monte Carlo simulations with 10,000 scenarios, matches against 850+ potential partners, and generates institutional-quality <Link href="/calculator" className="text-teal-600 hover:text-teal-700">PDF reports</Link> in seconds rather than weeks.
+                  Unlike a static DCF spreadsheet, the calculator combines 14 specialized engines with a continuously updated dataset of {DEAL_STATS.TOTAL_DEALS} real transactions. It benchmarks against actual market data rather than assumptions, runs Monte Carlo simulations with 10,000 scenarios, matches against 700+ potential partners, and generates institutional-quality <Link href="/calculator" className="text-teal-600 hover:text-teal-700">PDF reports</Link> in seconds rather than weeks.
                 </div>
               </details>
             </div>
