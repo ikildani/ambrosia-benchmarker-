@@ -162,7 +162,6 @@ export const INDICATION_TARGET_RELEVANCE: Record<string, string[]> = {
   alopecia:             ['jak1', 'il17'],
   mixedConnectiveTissue: ['tnf_alpha', 'cd20', 'jak1'],
   aancaVasculitis:      ['c5', 'cd20'],
-  stiffPerson:          ['cd19', 'cd20', 'fcrn'],
   type1DiabetesAutoimmune: ['cd20', 'cd19', 'ctla4'],
   pbc:                  ['fxr', 'il23', 'jak1'],
   psc:                  ['il23', 'jak1', 'fxr'],
@@ -229,20 +228,16 @@ export const INDICATION_TARGET_RELEVANCE: Record<string, string[]> = {
   influenza:            ['neuraminidase'],
 
   // ═══════════════════════════════════════════════════════════════════════
-  // RARE DISEASE
+  // RARE DISEASE (unique entries not covered above)
   // ═══════════════════════════════════════════════════════════════════════
 
-  sma:                  ['smn2'],
-  dmd:                  ['dystrophin'],
   cftr:                 ['cftr'],
   fabry:                ['gla'],
   pompe:                ['gaa'],
   gaucher:              ['gba1'],
-  huntingtons:          ['htt'],
-  friedreichs:          ['tfr'],
 
   // ═══════════════════════════════════════════════════════════════════════
-  // HEMATOLOGY (non-malignant)
+  // HEMATOLOGY — non-malignant (unique entries)
   // ═══════════════════════════════════════════════════════════════════════
 
   aplasticAnemia:       ['flt3', 'cd38'],
@@ -250,31 +245,6 @@ export const INDICATION_TARGET_RELEVANCE: Record<string, string[]> = {
   bpdcn:                ['cd19', 'cd38'],
   lgll:                 ['jak1'],
   castlemanDisease:     ['il17', 'jak1'],
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // DERMATOLOGY
-  // ═══════════════════════════════════════════════════════════════════════
-
-  atopicderm:           ['il13', 'il4r_alpha', 'jak1', 'il31', 'tslp'],
-  psoriasis:            ['il17', 'il23', 'tnf_alpha', 'il13', 'tslp', 'tl1a'],
-  vitiligo:             ['jak1', 'il17', 'il23'],
-  alopecia:             ['jak1', 'il17'],
-  hidradenitis:         ['il17', 'tnf_alpha', 'il23'],
-  chronicUrticaria:     ['il4r_alpha', 'il13', 'fcrn'],
-  pemphigus:            ['cd20', 'cd19', 'fcrn'],
-  epidermolysis:        ['jak1'],
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // GASTROENTEROLOGY
-  // ═══════════════════════════════════════════════════════════════════════
-
-  ulcerativeColitis:    ['tnf_alpha', 'il23', 'integrin_a4b7', 'jak1', 'tl1a', 'il12_23', 'madcam1', 'tnf_gi', 's1p1'],
-  crohns:               ['tnf_alpha', 'il23', 'integrin_a4b7', 'jak1', 'tl1a', 'il12_23'],
-  eosinophilicEsophagitis: ['il13', 'il4r_alpha', 'tslp', 'il23'],
-  eosinophilicGI:       ['il13', 'il4r_alpha', 'tslp'],
-  celiac:               ['il17', 'il23', 'tnf_alpha'],
-  pbc:                  ['fxr', 'il23', 'jak1'],
-  psc:                  ['il23', 'jak1', 'fxr'],
 };
 
 /**
