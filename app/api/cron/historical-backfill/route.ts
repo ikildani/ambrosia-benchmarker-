@@ -216,32 +216,49 @@ ${text.substring(0, 10000)}`
 // Source URL verification
 // ═══════════════════════════════════════════════════════════════════════
 
+const TRUSTED_DOMAINS = new Set([
+  'fiercebiotech.com', 'fiercepharma.com', 'biospace.com', 'biopharmadive.com',
+  'pharmexec.com', 'pharmavoice.com', 'statnews.com', 'endpoints.com',
+  'prnewswire.com', 'globenewswire.com', 'businesswire.com', 'reuters.com',
+  'sec.gov', 'fda.gov', 'ema.europa.eu', 'clinicaltrials.gov',
+  'evaluate.com', 'visionlifesciences.com', 'biobucks.co',
+  'nature.com', 'nejm.org', 'thelancet.com', 'bmj.com',
+  'cnbc.com', 'bloomberg.com', 'ft.com', 'wsj.com',
+  'investing.com', 'yahoo.com', 'finance.yahoo.com',
+  'labiotech.eu', 'bioworld.com', 'genengnews.com',
+  'geneonline.com', 'indexbox.io', 'pharmasource.global',
+  'scmp.com', 'eastasiaforums.com', 'easternherald.com',
+  'esperion.com', 'ir.esperion.com',
+]);
+
+function isDomainTrusted(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    return TRUSTED_DOMAINS.has(hostname) ||
+      [...TRUSTED_DOMAINS].some(d => hostname.endsWith('.' + d));
+  } catch { return false; }
+}
+
 async function verifySourceUrl(url: string): Promise<boolean> {
   if (!url || !url.startsWith('http')) return false;
+  if (isDomainTrusted(url)) return true;
+  const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   try {
     const response = await fetchWithTimeout(url, {
       timeoutMs: 10_000,
       retries: 0,
       method: 'HEAD',
-      headers: {
-        'User-Agent': 'Solidus research@ambrosiaventures.co',
-      },
+      headers: { 'User-Agent': UA },
       redirect: 'follow',
     });
-    // Accept 200, 301, 302, 303, 307, 308 (redirects followed by fetchWithTimeout)
-    // Also accept 403 (some sites block HEAD but the page exists) and 405 (method not allowed)
     return response.ok || response.status === 403 || response.status === 405;
   } catch {
-    // Try GET as fallback — some servers reject HEAD
     try {
       const getResponse = await fetchWithTimeout(url, {
         timeoutMs: 10_000,
         retries: 0,
         method: 'GET',
-        headers: {
-          'User-Agent': 'Solidus research@ambrosiaventures.co',
-          'Range': 'bytes=0-1024', // only fetch first 1KB
-        },
+        headers: { 'User-Agent': UA, 'Range': 'bytes=0-1024' },
       });
       return getResponse.ok || getResponse.status === 206 || getResponse.status === 403;
     } catch {
