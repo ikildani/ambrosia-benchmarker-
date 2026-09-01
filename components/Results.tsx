@@ -57,6 +57,7 @@ import MetricCard from './results/MetricCard';
 import DrillDownPanel from './results/DrillDownPanel';
 import DealMemoSection from './results/DealMemoSection';
 import ResultsDisclaimer from './results/ResultsDisclaimer';
+import { AdvisoryCTA } from '@/src/components/shared/AdvisoryCTA';
 import JargonTooltip from './ui/JargonTooltip';
 const ResultsTour = dynamic(() => import('./ResultsTour'), { ssr: false });
 import { TOUR_STEP_IDS } from './ResultsTour';
@@ -2534,6 +2535,9 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             {' '}&middot;{' '}350+ curated deals across 12 therapeutic areas{' '}&middot;{' '}Refreshed daily via SEC EDGAR
           </p>
         </div>
+
+        {/* Advisory CTA */}
+        <AdvisoryCTA therapeuticArea={therapeuticArea} indication={indication} />
 
         {/* World-Class Disclaimer */}
         <ResultsDisclaimer />
