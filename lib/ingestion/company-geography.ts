@@ -92,7 +92,7 @@ const COMPANY_COUNTRY_MAP: Record<string, string> = {
   'cerevel therapeutics': 'US', 'sage therapeutics': 'US',
   'acadia pharmaceuticals': 'US', 'intra-cellular therapies': 'US',
   'agilix': 'US', 'recursion': 'US', 'recursion pharmaceuticals': 'US',
-  'tempest therapeutics': 'US', 'repare therapeutics': 'US',
+  'tempest therapeutics': 'US',
   'syndax pharmaceuticals': 'US', 'kinnate biopharma': 'US',
   'springworks therapeutics': 'US', 'day one biopharmaceuticals': 'US',
   'cogent biosciences': 'US', 'pyxis oncology': 'US',
