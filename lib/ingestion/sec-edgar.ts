@@ -841,22 +841,12 @@ export async function runDailyIngestion(
             }
           }
 
-          // Classify geography
-          const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
-          const geo = classifyAndEnrichDeal(deal.licensor || '', deal.licensee || '');
-
           // Insert deal
           const { error: insertError } = await supabase.from('deals').insert({
             licensor_name: deal.licensor,
             licensor_id: licensorId,
             licensee_name: deal.licensee,
             licensee_id: licenseeId,
-            licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
-            licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
-            licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
-            licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
-            cross_border: geo.cross_border,
-            deal_corridor: geo.deal_corridor,
             asset_name: deal.asset_name,
             asset_description: deal.asset_description,
             modality: deal.modality,
