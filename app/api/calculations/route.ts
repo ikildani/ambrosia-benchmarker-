@@ -158,6 +158,22 @@ export async function POST(request: NextRequest) {
       ).catch(() => {});
     }
 
+    // Lead scoring & advisory conversion (non-blocking)
+    if (verifiedUserId) {
+      import('@/lib/lead-scoring').then(({ checkLeadScoreAndAlert }) => {
+        checkLeadScoreAndAlert(verifiedUserId, {
+          therapeuticArea: body.therapeutic_area || 'oncology',
+          indication: body.indication_specific || body.indication_category || undefined,
+          modality: body.modality,
+          phase: body.development_phase,
+          dealType: body.deal_type || undefined,
+          upfrontRange: [safeNum(body.outputs?.upfront_low), safeNum(body.outputs?.upfront_high)],
+          totalDealValueRange: [safeNum(body.outputs?.total_deal_value_low), safeNum(body.outputs?.total_deal_value_high)],
+          timestamp: new Date().toISOString(),
+        }).catch(err => console.error('[LeadScoring] Error:', err));
+      }).catch(() => {});
+    }
+
     // Notify admin via Slack (non-blocking)
     notifyCalculation({
       email: userEmail,
