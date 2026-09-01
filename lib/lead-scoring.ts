@@ -177,13 +177,15 @@ export async function checkLeadScoreAndAlert(
 
     // Store calculation context for personalized emails
     const supabase = createServiceClient();
-    await supabase.from('lead_events').insert({
-      user_id: userId,
-      event_type: 'calculation',
-      context: calculationContext,
-      lead_score: lead.score,
-      deal_stage: lead.dealStage,
-    }).catch(() => {});
+    try {
+      await supabase.from('lead_events').insert({
+        user_id: userId,
+        event_type: 'calculation',
+        context: calculationContext,
+        lead_score: lead.score,
+        deal_stage: lead.dealStage,
+      });
+    } catch {}
 
     // Hot lead alert (score > 50)
     if (lead.score > 50) {
