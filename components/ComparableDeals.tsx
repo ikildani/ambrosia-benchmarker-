@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { CalculationInput } from '@/lib/calculations';
 import { PRICING } from '@/lib/config/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
 import type { UserTier } from '@/types/tier';
 import { BUYER_TIER_LABELS, BUYER_TIER_COLORS } from '@/lib/buyer-tier';
@@ -589,6 +590,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
 // ── AI Narration Sub-Component ──
 
 function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInput; deals: EnrichedDeal[] }) {
+  const { user } = useAuth();
   const [narration, setNarration] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -612,7 +614,7 @@ function ComparableNarrationSection({ inputs, deals }: { inputs: CalculationInpu
       const res = await fetch('/api/comparable-narration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs, results: { terms: {} }, comparables }),
+        body: JSON.stringify({ inputs, results: { terms: {} }, comparables, email: user?.email }),
         signal: AbortSignal.timeout(35000),
       });
       if (res.ok) {
