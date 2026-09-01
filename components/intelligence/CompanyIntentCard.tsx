@@ -70,7 +70,7 @@ export function CompanyIntentCard({
   const TrendIcon = trend === 'rising' ? TrendingUp : trend === 'declining' ? TrendingDown : Minus;
   const trendColor = trend === 'rising' ? 'text-emerald-500' : trend === 'declining' ? 'text-red-400' : 'text-slate-400';
 
-  const nearestCliff = patentCliffs.sort((a, b) => a.loeYear - b.loeYear)[0];
+  const nearestCliff = (patentCliffs || []).sort((a, b) => a.loeYear - b.loeYear)[0];
   const currentYear = new Date().getFullYear();
   const cliffMonths = nearestCliff ? (nearestCliff.loeYear - currentYear) * 12 : null;
 
