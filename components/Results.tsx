@@ -1385,8 +1385,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               ...(financialModel ? [{ label: 'rNPV', value: formatCurrency(financialModel.rnpv.riskAdjustedNPV), jargon: 'rNPV' }] : []),
               ...(financialModel ? [{ label: 'PoS', value: `${(financialModel.rnpv.cumulativePoS * 100).toFixed(0)}%`, jargon: 'PoS' }] : []),
             ].map((item: { label: string; value: string; jargon?: string }, idx) => {
-              const isHeadlineMetric = idx === 0;
-              const showValue = hasFullAccess || isHeadlineMetric;
+              const showValue = hasFullAccess;
               return (
               <div key={idx} className="flex-1 min-w-[80px] px-2 sm:px-3 py-2 text-center">
                 <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-slate-400 uppercase tracking-wider leading-tight">
@@ -1475,13 +1474,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </svg>
             }
             value={formatRange(terms.upfront)}
-            expected={formatCurrency(terms.upfront.median)}
-            expectedColor="text-teal-600"
+            expected={hasFullAccess ? formatCurrency(terms.upfront.median) : 'Unlock with Pro'}
+            expectedColor={hasFullAccess ? 'text-teal-600' : 'text-slate-500'}
             badge={metricBadges.upfront.label}
             badgeColor={metricBadges.upfront.color}
             progressWidth={getBarWidth(terms.upfront.median, maxTotalValue)}
             progressColor="bg-gradient-to-r from-teal-500 to-cyan-500"
-            drillDown={drillDown?.upfront}
+            drillDown={hasFullAccess ? drillDown?.upfront : undefined}
             isExpanded={expandedCard === 'upfront'}
             onToggle={() => toggleCard('upfront')}
             canExpand={canExpandCard('upfront')}
@@ -1489,11 +1488,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             onProClick={() => handleProFeatureClick('comparable_deals')}
             animationIndex={0}
             tooltipContent={metricTooltips.upfront}
-            contextLine={contextLines.upfront}
-            previousValue={previousTerms?.upfront}
-            currentValue={terms.upfront.median}
-            warningText={fieldWarnings['upfront']}
-            percentileContext={getPercentileContext(terms.upfront.median)}
+            contextLine={hasFullAccess ? contextLines.upfront : undefined}
+            previousValue={hasFullAccess ? previousTerms?.upfront : undefined}
+            currentValue={hasFullAccess ? terms.upfront.median : undefined}
+            warningText={hasFullAccess ? fieldWarnings['upfront'] : undefined}
+            percentileContext={hasFullAccess ? getPercentileContext(terms.upfront.median) : undefined}
             confidenceLevel="high"
           />
 
@@ -1705,6 +1704,35 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           </div>
           )}
         </div>
+
+        {/* Deal Intelligence Brief CTA — primary conversion for non-Pro users */}
+        {!hasFullAccess && (
+          <div className="mt-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-900/20 to-orange-900/10 dark:from-amber-900/20 dark:to-orange-900/10 p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-bold text-amber-200 mb-1">Get the Complete Picture — Deal Intelligence Brief</h4>
+                <p className="text-xs text-amber-300/70">52 deal calculations across 13 modalities, comparable transactions, partner matching with intent scoring, and a negotiation playbook. White-labeled. Delivered within 24 hours.</p>
+              </div>
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <a
+                  href="/benchmark"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all whitespace-nowrap"
+                >
+                  Get Brief — $2,500
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+                <button
+                  onClick={onUpgrade}
+                  className="text-xs text-teal-400 hover:text-teal-300 transition-colors text-center"
+                >
+                  Or start Pro trial — {PRICING.PRO_MONTHLY}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Applied Adjustments — moved below metric cards for above-fold density */}
         {modifiers.length > 0 && (
