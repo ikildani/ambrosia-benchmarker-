@@ -243,8 +243,22 @@ export function optimizeDealStructure(
   const userSelectedDealType = (rnpvInput.dealType ?? 'licensing') as DealType;
   const profile = resolveProfile(rnpvInput, preferences);
 
-  // ── 1. Project all 5 deal types ──
-  const projections = ALL_DEAL_TYPES.map(dt => projectForDealType(rnpvInput, dt));
+  // ── 1. Project phase-appropriate deal types ──
+  const PHASE_ORDER: Record<string, number> = {
+    discovery: 0, preclinical: 1, phase_1: 2, phase_1_2: 2, phase_2: 3, phase_2_3: 3, phase_3: 4, nda_filed: 5, approved: 5,
+  };
+  const phaseRank = PHASE_ORDER[rnpvInput.phase] ?? 1;
+  const applicableTypes = ALL_DEAL_TYPES.filter(dt => {
+    if (dt === 'acquisition') return phaseRank >= 3;
+    if (dt === 'codevelopment') return phaseRank >= 2;
+    if (dt === 'reformulation') return phaseRank >= 4;
+    return true;
+  });
+  // Always include the user's selected deal type
+  if (!applicableTypes.includes(userSelectedDealType)) {
+    applicableTypes.push(userSelectedDealType);
+  }
+  const projections = applicableTypes.map(dt => projectForDealType(rnpvInput, dt));
 
   // ── 2. Compute base upfront ratio (average across all 5) ──
   const upfrontRatios = projections
