@@ -357,6 +357,7 @@ export async function POST(request: NextRequest) {
 
   const result = {
     queries_run: 0,
+    debug: [] as string[],
     deals_discovered: 0,
     deals_deduplicated: 0,
     deals_validated: 0,
@@ -378,6 +379,8 @@ export async function POST(request: NextRequest) {
       const searchText = await queryPerplexity(query.query, perplexityApiKey);
       result.queries_run++;
 
+      result.debug.push(`${query.id}: perplexity=${searchText.length} chars`);
+
       if (!searchText || searchText.length < 100) {
         result.errors.push(`${query.id}: empty Perplexity response`);
         continue;
@@ -385,6 +388,7 @@ export async function POST(request: NextRequest) {
 
       // Step 2: Claude extraction
       const deals = await extractDeals(searchText, query.id, anthropicApiKey);
+      result.debug.push(`${query.id}: claude extracted ${deals.length} deals`);
       qResult.discovered = deals.length;
       result.deals_discovered += deals.length;
       console.log(`[bulk-ingest] ${query.id}: ${deals.length} deals extracted`);
