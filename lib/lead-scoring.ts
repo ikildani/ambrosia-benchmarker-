@@ -283,34 +283,240 @@ async function notifyHotLead(lead: LeadScore, latestCalc: CalculationContext): P
   }
 }
 
-// ── Email Drip Triggers ───────────────────────────────────
+// ── Email Drip Triggers (Full Revenue Funnel) ────────────
 
 async function checkEmailTriggers(lead: LeadScore, latestCalc: CalculationContext): Promise<void> {
   const supabase = createServiceClient();
 
-  // Check what emails have already been sent
+  const allEmailTypes = [
+    'pro_nudge_sent', 'email_1_sent', 'brief_upsell_sent',
+    'email_2_sent', 'email_3_sent',
+  ];
+
   const { data: sentEmails } = await supabase
     .from('lead_events')
     .select('event_type')
     .eq('user_id', lead.userId)
-    .in('event_type', ['email_1_sent', 'email_2_sent', 'email_3_sent']);
+    .in('event_type', allEmailTypes);
 
   const sent = new Set(sentEmails?.map(e => e.event_type) || []);
 
-  // Email 1: "What we're seeing" — after 2nd calc in same TA
+  // ── 1. Pro Nudge — free user, 3rd calculation ──
+  if (!sent.has('pro_nudge_sent') && lead.tier === 'free' && lead.totalCalculations >= 3) {
+    await queueFunnelEmail(lead, 'pro_nudge', latestCalc);
+  }
+
+  // ── 2. Evaluating Nurture — 2nd calc in same TA ──
   if (!sent.has('email_1_sent') && lead.focusedTA && lead.calculationsLast7Days >= 2) {
     await queueAdvisoryEmail(lead, 'email_1', latestCalc);
   }
 
-  // Email 2: "Your analysis, deeper" — after PDF export
+  // ── 3. Intelligence Brief Upsell — Pro user, 5+ calcs in same TA ──
+  if (
+    !sent.has('brief_upsell_sent') &&
+    (lead.tier === 'pro' || lead.tier === 'report') &&
+    lead.focusedTA &&
+    lead.score > 40 &&
+    lead.calculationsLast7Days >= 5
+  ) {
+    await queueFunnelEmail(lead, 'brief_upsell', latestCalc);
+  }
+
+  // ── 4. Export Follow-up — after PDF export ──
   if (!sent.has('email_2_sent') && lead.hasExportedPdf) {
     await queueAdvisoryEmail(lead, 'email_2', latestCalc);
   }
 
-  // Email 3: "Quick question about your deal" — score > 70 (direct outreach)
+  // ── 5. Advisory Outreach — score > 70, direct from Issa ──
   if (!sent.has('email_3_sent') && lead.score > 70) {
     await queueAdvisoryEmail(lead, 'email_3', latestCalc);
   }
+
+  // ── 6. Portfolio License Detection — multi-user from same domain ──
+  await checkPortfolioLicenseSignal(lead);
+}
+
+// ── Portfolio License Detection ──────────────────────────
+
+async function checkPortfolioLicenseSignal(lead: LeadScore): Promise<void> {
+  const domain = lead.email?.split('@')[1];
+  if (!domain) return;
+
+  const genericDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com', 'protonmail.com', 'me.com'];
+  if (genericDomains.includes(domain)) return;
+
+  const supabase = createServiceClient();
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // Count distinct active users from the same domain
+  const { data: domainUsers } = await supabase
+    .from('user_profiles')
+    .select('id, email, full_name')
+    .like('email', `%@${domain}`)
+    .limit(20);
+
+  if (!domainUsers || domainUsers.length < 3) return;
+
+  // Check if each domain user has been active recently
+  const activeUsers: { email: string; name?: string; calcCount: number }[] = [];
+  for (const user of domainUsers) {
+    const { count } = await supabase
+      .from('calculations')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', thirtyDaysAgo.toISOString());
+    if (count && count > 0) {
+      activeUsers.push({ email: user.email, name: user.full_name || undefined, calcCount: count });
+    }
+  }
+
+  if (activeUsers.length < 3) return;
+
+  // Check if we already alerted for this domain recently
+  const { data: recentAlert } = await supabase
+    .from('lead_events')
+    .select('id')
+    .eq('event_type', 'portfolio_signal')
+    .eq('context->>domain', domain)
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .limit(1);
+
+  if (recentAlert && recentAlert.length > 0) return;
+
+  // Record and alert
+  await supabase.from('lead_events').insert({
+    user_id: lead.userId,
+    event_type: 'portfolio_signal',
+    context: { domain, activeUsers, userCount: activeUsers.length },
+    lead_score: lead.score,
+    deal_stage: 'enterprise',
+  }).catch(() => {});
+
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  const userLines = activeUsers
+    .sort((a, b) => b.calcCount - a.calcCount)
+    .map(u => `  • ${u.email}${u.name ? ` (${u.name})` : ''} — ${u.calcCount} calculations`)
+    .join('\n');
+
+  await fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: `:office: Portfolio License Signal — ${activeUsers.length} users from @${domain}`,
+      attachments: [{
+        color: '#8B5CF6',
+        blocks: [
+          {
+            type: 'header',
+            text: { type: 'plain_text', text: `🏢 Portfolio License Opportunity — @${domain}`, emoji: true },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*${activeUsers.length} active users from @${domain} in the last 30 days:*\n${userLines}\n\n*This is a $30–120K/yr Portfolio License opportunity.*\nDo NOT email about Portfolio License — reach out personally.`,
+            },
+          },
+          {
+            type: 'context',
+            elements: [{ type: 'mrkdwn', text: ':point_right: *ACTION:* Identify the operating partner or Head of BD and send a personalized note.' }],
+          },
+        ],
+      }],
+    }),
+  }).catch(() => {});
+}
+
+// ── Funnel Emails (Pro Nudge + Brief Upsell) ─────────────
+
+async function queueFunnelEmail(
+  lead: LeadScore,
+  emailType: 'pro_nudge' | 'brief_upsell',
+  latestCalc: CalculationContext,
+): Promise<void> {
+  const supabase = createServiceClient();
+
+  await supabase.from('lead_events').insert({
+    user_id: lead.userId,
+    event_type: `${emailType}_sent`,
+    context: { lead_score: lead.score, deal_stage: lead.dealStage, ...latestCalc },
+  }).catch(() => {});
+
+  const { sendEmail } = await import('@/lib/email/client');
+
+  const name = lead.fullName?.split(' ')[0] || 'there';
+  const indicationRef = latestCalc.indication || latestCalc.therapeuticArea;
+  const taRef = latestCalc.therapeuticArea?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'your therapeutic area';
+
+  const templates: Record<string, { subject: string; body: string }> = {
+    pro_nudge: {
+      subject: `You've run ${lead.totalCalculations} analyses — unlock the full engine`,
+      body: `
+        <p>Hi ${name},</p>
+        <p>You've been benchmarking deals in ${taRef} — and you've hit the point where the free tier can't show you the full picture.</p>
+        <p>With Pro, every calculation includes:</p>
+        <ul style="color: #334155; line-height: 2;">
+          <li><strong>Monte Carlo simulation</strong> — 10,000-iteration probability distribution, not just point estimates</li>
+          <li><strong>Buyer-specific valuation</strong> — how Pfizer, AbbVie, or Novartis would value your asset differently</li>
+          <li><strong>Comparable transactions</strong> — the actual deals your negotiation will be benchmarked against</li>
+          <li><strong>Partner matching</strong> — scored against 850+ companies on 11 strategic dimensions</li>
+          <li><strong>AI deal memo</strong> — board-ready narrative with negotiation playbook</li>
+        </ul>
+        <p><strong>$299/month. Cancel anytime.</strong> Or start with a <a href="https://solidus.ambrosiaventures.co/trial" style="color: #14B8A6; font-weight: 600;">7-day free trial</a> and see everything on your next calculation.</p>
+        <p>Best,<br>The Solidus Team</p>
+      `,
+    },
+    brief_upsell: {
+      subject: `Get the complete ${indicationRef} deal landscape`,
+      body: `
+        <p>Hi ${name},</p>
+        <p>You've been deep in ${indicationRef} deal benchmarking — ${lead.calculationsLast7Days} calculations this week across ${lead.recentModalities.slice(0, 3).join(', ') || 'multiple modalities'}.</p>
+        <p>Our <strong>Deal Intelligence Brief</strong> covers the complete landscape in one deliverable:</p>
+        <ul style="color: #334155; line-height: 2;">
+          <li>52 deal calculations (13 modalities × 4 structures) for ${indicationRef}</li>
+          <li>AI-written strategic narrative and negotiation playbook</li>
+          <li>Partner matching with intent scoring (6-10 counterparties)</li>
+          <li>Full financial model suite — rNPV, Monte Carlo, scenario comparison</li>
+          <li>White-labeled with your company branding</li>
+        </ul>
+        <p><strong>$2,500. Delivered in 24 hours.</strong></p>
+        <p><a href="https://solidus.ambrosiaventures.co/benchmark" style="display: inline-block; background: #14B8A6; color: white; padding: 10px 24px; text-decoration: none; border-radius: 4px; font-weight: 600;">Order Your Brief →</a></p>
+        <p>Or reply to this email and I'll share a sample brief first.</p>
+        <p>Best,<br>Issa Kildani<br>Managing Partner, Ambrosia Ventures</p>
+      `,
+    },
+  };
+
+  const template = templates[emailType];
+  if (!template) return;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: #1e293b; max-width: 560px; margin: 0 auto; padding: 20px; font-size: 15px;">
+        ${template.body}
+        <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8;">
+          <p>Ambrosia Ventures | <a href="https://ambrosiaventures.co" style="color: #14b8a6;">ambrosiaventures.co</a> | <a href="https://solidus.ambrosiaventures.co" style="color: #14b8a6;">solidus.ambrosiaventures.co</a></p>
+          <p><a href="https://solidus.ambrosiaventures.co/unsubscribe" style="color: #94a3b8;">Unsubscribe</a></p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await sendEmail({
+    to: lead.email,
+    subject: template.subject,
+    html,
+    from: emailType === 'pro_nudge'
+      ? 'Solidus by Ambrosia Ventures <info@ambrosiaventures.co>'
+      : 'Issa Kildani <issa@ambrosiaventures.co>',
+    replyTo: 'ikildani@ambrosiaventures.co',
+  });
 }
 
 async function queueAdvisoryEmail(
