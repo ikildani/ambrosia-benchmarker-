@@ -35,6 +35,8 @@ interface Props {
     confidence_score: number | null;
     therapeutic_area: string | null;
     raw_text_excerpt: string | null;
+    extraction_notes: string | null;
+    extraction_model: string | null;
   };
 }
 
@@ -105,7 +107,13 @@ export function DealAuditRow({ row }: Props) {
           <div className="mt-1 text-xs font-mono text-slate-500">
             Upfront {fmtM(row.upfront_usd)} · Total {fmtM(row.total_deal_value_usd)}
             {row.source_type && ` · src=${row.source_type}`}
+            {row.extraction_model && ` · model=${row.extraction_model}`}
           </div>
+          {row.extraction_notes && (
+            <div className="mt-1 text-[11px] text-slate-600 italic">
+              {row.extraction_notes}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">

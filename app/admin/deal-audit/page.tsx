@@ -42,21 +42,27 @@ type PendingDeal = {
   confidence_score: number | null;
   therapeutic_area: string | null;
   raw_text_excerpt: string | null;
+  extraction_notes: string | null;
+  extraction_model: string | null;
 };
 
-async function fetchQueue(limit: number) {
+async function fetchQueue(limit: number, sourceFilter?: string) {
   const supabase = createServiceClient();
+  let query = supabase
+    .from('deals')
+    .select(
+      'id, announced_date, licensor_name, licensee_name, modality, asset_name, indication_specific, indication_category, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, source_type, source_url, source_filing_id, confidence_score, therapeutic_area, raw_text_excerpt, extraction_notes, extraction_model',
+    )
+    .eq('is_synthetic', false)
+    .eq('verified', false)
+    .or('verification_status.is.null,verification_status.eq.pending')
+    .order('announced_date', { ascending: false, nullsFirst: false })
+    .limit(limit);
+  if (sourceFilter) {
+    query = query.eq('source_type', sourceFilter);
+  }
   const [queueRes, countsRes] = await Promise.all([
-    supabase
-      .from('deals')
-      .select(
-        'id, announced_date, licensor_name, licensee_name, modality, asset_name, indication_specific, indication_category, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, source_type, source_url, source_filing_id, confidence_score, therapeutic_area, raw_text_excerpt',
-      )
-      .eq('is_synthetic', false)
-      .eq('verified', false)
-      .or('verification_status.is.null,verification_status.eq.pending')
-      .order('announced_date', { ascending: false, nullsFirst: false })
-      .limit(limit),
+    query,
     supabase
       .from('deals')
       .select('verified, verification_status', { count: 'exact', head: false })
@@ -79,8 +85,15 @@ async function fetchQueue(limit: number) {
   return { rows, counts };
 }
 
-export default async function DealAuditPage() {
-  const { rows, counts } = await fetchQueue(20);
+export default async function DealAuditPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string; limit?: string }>;
+}) {
+  const params = await searchParams;
+  const limit = Math.min(parseInt(params.limit || '50', 10), 100);
+  const sourceFilter = params.source || undefined;
+  const { rows, counts } = await fetchQueue(limit, sourceFilter);
   const pctClassified =
     counts.total > 0
       ? ((counts.verified + counts.rejected) / counts.total) * 100
@@ -99,6 +112,28 @@ export default async function DealAuditPage() {
           per-row actions to verify real deals, reject hallucinated ones,
           or open the source URL to check against the original announcement.
         </p>
+
+        <div className="mt-4 flex flex-wrap gap-2 text-xs">
+          {[
+            { label: 'All', value: undefined },
+            { label: 'Bulk Backfill', value: 'manual' },
+            { label: 'SEC 8-K', value: 'sec_8k' },
+            { label: 'Press Release', value: 'press_release' },
+            { label: 'Historical', value: 'historical_backfill' },
+          ].map(f => (
+            <a
+              key={f.label}
+              href={f.value ? `/admin/deal-audit?source=${f.value}` : '/admin/deal-audit'}
+              className={`px-3 py-1.5 rounded-md border transition-colors ${
+                sourceFilter === f.value || (!sourceFilter && !f.value)
+                  ? 'border-teal-500/40 bg-teal-500/20 text-teal-300'
+                  : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {f.label}
+            </a>
+          ))}
+        </div>
 
         <div className="mt-6 grid grid-cols-4 gap-3 text-sm">
           <StatTile label="Verified" value={counts.verified} tone="teal" />
