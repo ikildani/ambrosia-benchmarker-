@@ -436,11 +436,19 @@ export async function POST(request: NextRequest) {
         const licensorId = await findOrCreateCompany(supabase, deal.licensor, false).catch(() => null);
         const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true).catch(() => null);
 
-        // Geography
-        let geo = { licensor_country: 'unknown', licensee_country: 'unknown', licensor_region: 'unknown', licensee_region: 'unknown', cross_border: false, deal_corridor: null as string | null };
+        // Geography — columns added by migration 079, may not exist yet
+        let geo: Record<string, unknown> = {};
         try {
           const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
-          geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
+          const g = classifyAndEnrichDeal(deal.licensor, deal.licensee);
+          geo = {
+            licensor_country: g.licensor_country !== 'unknown' ? g.licensor_country : null,
+            licensee_country: g.licensee_country !== 'unknown' ? g.licensee_country : null,
+            licensor_region: g.licensor_region !== 'unknown' ? g.licensor_region : null,
+            licensee_region: g.licensee_region !== 'unknown' ? g.licensee_region : null,
+            cross_border: g.cross_border,
+            deal_corridor: g.deal_corridor,
+          };
         } catch {}
 
         // Insert
@@ -475,12 +483,7 @@ export async function POST(request: NextRequest) {
           extraction_model: 'perplexity+claude-opus-4-6',
           extraction_timestamp: new Date().toISOString(),
           therapeutic_area: ta === 'other' ? (query.ta !== 'multi' ? query.ta : 'other') : ta,
-          licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
-          licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
-          licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
-          licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
-          cross_border: geo.cross_border,
-          deal_corridor: geo.deal_corridor,
+          ...geo,
         });
 
         if (insertError?.code === '23505') {
