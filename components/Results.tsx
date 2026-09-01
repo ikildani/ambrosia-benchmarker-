@@ -1215,6 +1215,22 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       )}
 
       {/* Tab bar */}
+      {/* Usage limit banner for free users (non-power-calc) */}
+      {!hasFullAccess && tier === 'free' && (
+        <div className="px-4 sm:px-6 lg:px-8 py-2 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-xs text-amber-300 font-medium">Free tier — limited results shown</span>
+          </div>
+          <button
+            onClick={onUpgrade}
+            className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors"
+          >
+            Start Free Trial →
+          </button>
+        </div>
+      )}
+
       <div className="sticky top-0 z-20 px-4 sm:px-6 lg:px-8 py-2.5 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50">
         <div className="flex gap-1.5">
           {([
@@ -1369,7 +1385,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               ...(financialModel ? [{ label: 'rNPV', value: formatCurrency(financialModel.rnpv.riskAdjustedNPV), jargon: 'rNPV' }] : []),
               ...(financialModel ? [{ label: 'PoS', value: `${(financialModel.rnpv.cumulativePoS * 100).toFixed(0)}%`, jargon: 'PoS' }] : []),
             ].map((item: { label: string; value: string; jargon?: string }, idx) => {
-              const isHeadlineMetric = idx <= 1;
+              const isHeadlineMetric = idx === 0;
               const showValue = hasFullAccess || isHeadlineMetric;
               return (
               <div key={idx} className="flex-1 min-w-[80px] px-2 sm:px-3 py-2 text-center">
@@ -1513,10 +1529,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             confidenceLevel="high"
           />
           ) : (
-          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '100ms' }} onClick={onBuyReport}>
+          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '100ms' }} onClick={onUpgrade}>
             <div className="absolute inset-0 z-10 bg-white/70 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer rounded-xl">
               <svg className="w-6 h-6 text-slate-400 dark:text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Unlock with Report or Pro</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Start Free Trial to Unlock</span>
             </div>
             <div className="opacity-20 pointer-events-none select-none">
               <div className="flex items-center gap-2 mb-4"><div className="w-10 h-10 rounded-xl bg-success-50 dark:bg-success-500/20" /><p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{dtl?.totalValueLabel || 'Total Deal Value'}</p></div>
@@ -1540,10 +1556,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             confidenceLevel="medium"
           />
           ) : (
-          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '200ms' }} onClick={onBuyReport}>
+          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '200ms' }} onClick={onUpgrade}>
             <div className="absolute inset-0 z-10 bg-white/70 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer rounded-xl">
               <svg className="w-6 h-6 text-slate-400 dark:text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Unlock with Report or Pro</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Start Free Trial to Unlock</span>
             </div>
             <div className="opacity-20 pointer-events-none select-none"><div className="flex items-center gap-2 mb-4"><div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-500/20" /><p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{dtl?.devMilestoneLabel || 'Development Milestones'}</p></div><div className="h-6 bg-neutral-100 dark:bg-slate-700 rounded w-3/4 mb-2" /><div className="h-4 bg-neutral-100 dark:bg-slate-700 rounded w-1/2" /></div>
           </div>
@@ -1563,10 +1579,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             confidenceLevel="medium"
           />
           ) : (
-          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '300ms' }} onClick={onBuyReport}>
+          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '300ms' }} onClick={onUpgrade}>
             <div className="absolute inset-0 z-10 bg-white/70 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer rounded-xl">
               <svg className="w-6 h-6 text-slate-400 dark:text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Unlock with Report or Pro</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Start Free Trial to Unlock</span>
             </div>
             <div className="opacity-20 pointer-events-none select-none"><div className="flex items-center gap-2 mb-4"><div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/20" /><p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{dtl?.regMilestoneLabel || 'Regulatory Milestones'}</p></div><div className="h-6 bg-neutral-100 dark:bg-slate-700 rounded w-3/4 mb-2" /><div className="h-4 bg-neutral-100 dark:bg-slate-700 rounded w-1/2" /></div>
           </div>
@@ -1586,10 +1602,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             confidenceLevel="low"
           />
           ) : (
-          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '400ms' }} onClick={onBuyReport}>
+          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '400ms' }} onClick={onUpgrade}>
             <div className="absolute inset-0 z-10 bg-white/70 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer rounded-xl">
               <svg className="w-6 h-6 text-slate-400 dark:text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Unlock with Report or Pro</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Start Free Trial to Unlock</span>
             </div>
             <div className="opacity-20 pointer-events-none select-none"><div className="flex items-center gap-2 mb-4"><div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-500/20" /><p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{dtl?.commMilestoneLabel || 'Commercial Milestones'}</p></div><div className="h-6 bg-neutral-100 dark:bg-slate-700 rounded w-3/4 mb-2" /><div className="h-4 bg-neutral-100 dark:bg-slate-700 rounded w-1/2" /></div>
           </div>
@@ -1597,10 +1613,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
           {/* Tiered Royalties — locked for free */}
           {!hasFullAccess ? (
-          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '500ms' }} onClick={onBuyReport}>
+          <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '500ms' }} onClick={onUpgrade}>
             <div className="absolute inset-0 z-10 bg-white/70 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer rounded-xl">
               <svg className="w-6 h-6 text-slate-400 dark:text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Unlock with Report or Pro</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Start Free Trial to Unlock</span>
             </div>
             <div className="opacity-20 pointer-events-none select-none"><div className="flex items-center gap-2 mb-4"><div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/20" /><p className="text-sm font-semibold text-neutral-700 dark:text-slate-200">{dtl?.royaltyLabel || 'Tiered Royalties'}</p></div><div className="space-y-2"><div className="h-5 bg-neutral-100 dark:bg-slate-700 rounded w-full" /><div className="h-5 bg-neutral-100 dark:bg-slate-700 rounded w-full" /><div className="h-5 bg-neutral-100 dark:bg-slate-700 rounded w-full" /></div></div>
           </div>
