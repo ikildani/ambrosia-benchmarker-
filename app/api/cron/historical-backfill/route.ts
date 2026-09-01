@@ -416,15 +416,19 @@ export async function GET(request: NextRequest) {
           }
           result.deals_validation_passed++;
 
-          // 3e. Dedup — check for same licensor + licensee + asset combination
+          // 3e. Dedup — normalized company names + asset or year
+          const normLicensor = deal.licensor.replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?|Company|Pharmaceuticals?|Therapeutics?|Biosciences?|Biotech|Sciences?|AG|SA|GmbH)$/i, '').trim().toLowerCase();
+          const normLicensee = deal.licensee.replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?|Company|Pharmaceuticals?|Therapeutics?|Biosciences?|Biotech|Sciences?|AG|SA|GmbH)$/i, '').trim().toLowerCase();
+          const searchLicensor = normLicensor.substring(0, 12);
+          const searchLicensee = normLicensee.substring(0, 12);
           const assetSearch = deal.asset_name?.trim()
-            ? deal.asset_name.substring(0, 20)
+            ? deal.asset_name.substring(0, 15)
             : null;
           let dedupQuery = supabase
             .from('deals')
             .select('id')
-            .ilike('licensee_name', `%${deal.licensee.substring(0, 15)}%`)
-            .ilike('licensor_name', `%${deal.licensor.substring(0, 15)}%`);
+            .ilike('licensor_name', `%${searchLicensor}%`)
+            .ilike('licensee_name', `%${searchLicensee}%`);
           if (assetSearch) {
             dedupQuery = dedupQuery.ilike('asset_name', `%${assetSearch}%`);
           } else if (deal.announced_date && deal.announced_date.length >= 4) {

@@ -197,6 +197,8 @@ RULES:
 5. Convert all financial values to USD (full dollars, not millions). Example: $2.5 billion = 2500000000.
 6. Royalties as decimals: 10% = 0.10.
 7. If upfront vs milestones breakdown isn't clear but total is known, put total in total_deal_value_usd and leave upfront/milestones as null.
+8. DATES ARE CRITICAL: announced_date must be the actual announcement date from the source, NOT a guess. If the source says "January 2025" use "2025-01-15". If you cannot determine the month, use June 15 of that year. NEVER use today's date or a recent date if the deal was announced earlier.
+9. Company names: use the short common name (e.g., "Eli Lilly" not "Eli Lilly and Company", "AbbVie" not "AbbVie Inc."). Strip Inc., Ltd., Corp., etc.
 
 INDICATION CATEGORIES: solid_tumor, hematological, autoimmune, cns, cardiovascular, infectious, metabolic, rare_disease, respiratory, dermatology, ophthalmology, reproductive, other
 MODALITIES: smallMolecule, antibody, adc, bispecific, car_t, cell_therapy, gene_therapy, mrna, radiopharm, peptide, oligonucleotide, vaccine, other
@@ -265,6 +267,15 @@ Return [] if no verifiable deals found. Text:\n${text.substring(0, 15000)}`
 // Smart dedup — checks source URL, then asset+companies, then year+companies
 // ═══════════════════════════════════════════════════════════════════════
 
+function normalizeName(name: string): string {
+  return name
+    .replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?|Company|Pharmaceuticals?|Therapeutics?|Biosciences?|Biotech|Sciences?|AG|SA|S\.A\.?|N\.V\.?|SE|GmbH|A\/S)$/i, '')
+    .replace(/\s*\(.*?\)\s*/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
 async function isDuplicate(
   supabase: ReturnType<typeof createServiceClient>,
   deal: ExtractedDeal
@@ -280,32 +291,40 @@ async function isDuplicate(
     if (byUrl) return true;
   }
 
-  // Layer 2: licensor + licensee + asset name
+  // Normalize names for fuzzy matching
+  const normLicensor = normalizeName(deal.licensor);
+  const normLicensee = normalizeName(deal.licensee);
+  const searchLicensor = normLicensor.substring(0, Math.min(normLicensor.length, 12));
+  const searchLicensee = normLicensee.substring(0, Math.min(normLicensee.length, 12));
+
+  // Layer 2: normalized companies + asset name
   if (deal.asset_name?.trim()) {
-    const assetToken = deal.asset_name.substring(0, 20);
+    const assetToken = deal.asset_name.substring(0, 15);
     const { data: byAsset } = await supabase
       .from('deals')
       .select('id')
-      .ilike('licensor_name', `%${deal.licensor.substring(0, 15)}%`)
-      .ilike('licensee_name', `%${deal.licensee.substring(0, 15)}%`)
+      .ilike('licensor_name', `%${searchLicensor}%`)
+      .ilike('licensee_name', `%${searchLicensee}%`)
       .ilike('asset_name', `%${assetToken}%`)
       .limit(1)
       .maybeSingle();
     if (byAsset) return true;
   }
 
-  // Layer 3: same companies + same year (only if no asset name to match on)
-  if (!deal.asset_name?.trim() && deal.announced_date?.length >= 4) {
+  // Layer 3: normalized companies + same year + same deal type
+  if (deal.announced_date?.length >= 4) {
     const year = deal.announced_date.substring(0, 4);
-    const { data: byYear } = await supabase
+    let yearQuery = supabase
       .from('deals')
       .select('id')
-      .ilike('licensor_name', `%${deal.licensor.substring(0, 15)}%`)
-      .ilike('licensee_name', `%${deal.licensee.substring(0, 15)}%`)
+      .ilike('licensor_name', `%${searchLicensor}%`)
+      .ilike('licensee_name', `%${searchLicensee}%`)
       .gte('announced_date', `${year}-01-01`)
-      .lte('announced_date', `${year}-12-31`)
-      .limit(1)
-      .maybeSingle();
+      .lte('announced_date', `${year}-12-31`);
+    if (deal.deal_type) {
+      yearQuery = yearQuery.eq('deal_type', deal.deal_type);
+    }
+    const { data: byYear } = await yearQuery.limit(1).maybeSingle();
     if (byYear) return true;
   }
 
