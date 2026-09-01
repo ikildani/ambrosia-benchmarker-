@@ -337,6 +337,10 @@
     {
       "path": "/api/cron/historical-backfill",
       "schedule": "30 */6 * * *"
+    },
+    {
+      "path": "/api/cron/deal-qa",
+      "schedule": "0 3 * * *"
     }
   ]
 }

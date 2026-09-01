@@ -275,3 +275,96 @@ export function extractAuditExcerpt(filingText: string, licensee: string, maxLen
   const start = idx > 100 ? idx - 100 : 0;
   return filingText.slice(start, start + maxLen).replace(/\s+/g, ' ').trim();
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// Source URL date extraction + date validation
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Extract a publication date from common press release URL patterns.
+ * Returns YYYY-MM-DD or YYYY-MM or YYYY, or null if no date found.
+ */
+export function extractDateFromUrl(url: string): string | null {
+  if (!url) return null;
+
+  // Pattern: /2025/06/08/ or /2025-06-08/
+  const fullDate = url.match(/\/(\d{4})[-/](\d{2})[-/](\d{2})/);
+  if (fullDate) {
+    const [, y, m, d] = fullDate;
+    if (+y >= 2010 && +y <= 2030 && +m >= 1 && +m <= 12 && +d >= 1 && +d <= 31) {
+      return `${y}-${m}-${d}`;
+    }
+  }
+
+  // Pattern: date query param (?date=2025-06-08)
+  try {
+    const parsed = new URL(url);
+    const dateParam = parsed.searchParams.get('date');
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) return dateParam;
+  } catch {}
+
+  // Pattern: /news-releases/...20250608... (8-digit date in slug)
+  const slugDate = url.match(/(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])/);
+  if (slugDate) {
+    const [, y, m, d] = slugDate;
+    if (+y >= 2017 && +y <= 2030) return `${y}-${m}-${d}`;
+  }
+
+  // Pattern: year + month in path (/2025/06/ without day)
+  const yearMonth = url.match(/\/(\d{4})\/(0[1-9]|1[0-2])\//);
+  if (yearMonth) {
+    const [, y, m] = yearMonth;
+    if (+y >= 2010 && +y <= 2030) return `${y}-${m}`;
+  }
+
+  return null;
+}
+
+export interface DateValidationResult {
+  valid: boolean;
+  warning?: string;
+  urlDate?: string | null;
+}
+
+/**
+ * Validate announced_date against source URL and current date.
+ * - Hard reject: future dates
+ * - Warning: date mismatch > 60 days with URL-extracted date
+ */
+export function validateDealDate(
+  announcedDate: string | null | undefined,
+  sourceUrl: string | null | undefined,
+): DateValidationResult {
+  if (!announcedDate) return { valid: true };
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Hard reject: future dates
+  if (announcedDate > today) {
+    return {
+      valid: false,
+      warning: `announced_date ${announcedDate} is in the future (today: ${today})`,
+    };
+  }
+
+  // Warning: date mismatch with source URL
+  if (sourceUrl) {
+    const urlDate = extractDateFromUrl(sourceUrl);
+    if (urlDate && urlDate.length >= 7) {
+      const urlFullDate = urlDate.length === 7 ? `${urlDate}-15` : urlDate;
+      const announcedMs = new Date(announcedDate).getTime();
+      const urlMs = new Date(urlFullDate).getTime();
+      const diffDays = Math.abs(announcedMs - urlMs) / 86400000;
+
+      if (diffDays > 60) {
+        return {
+          valid: true,
+          warning: `Date mismatch: announced ${announcedDate} but source URL suggests ${urlDate} (${Math.round(diffDays)} days apart)`,
+          urlDate,
+        };
+      }
+    }
+  }
+
+  return { valid: true };
+}
