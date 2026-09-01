@@ -187,7 +187,6 @@ async function extractDeals(text: string, queryId: string, anthropicApiKey: stri
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 16000,
-    thinking: { type: 'adaptive' },
     system: `You are an expert biopharma deal data extractor. Extract ONLY deals explicitly mentioned in the provided text with verifiable details.
 
 RULES:
