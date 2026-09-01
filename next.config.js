@@ -41,6 +41,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/report',
+        destination: '/pro',
+        permanent: true,
+      },
+      {
         source: '/insights/deal-benchmarks',
         destination: '/insights/biopharma-deal-benchmarks-2026',
         permanent: true,

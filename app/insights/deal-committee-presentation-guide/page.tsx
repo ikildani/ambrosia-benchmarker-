@@ -589,7 +589,7 @@ export default function DealCommitteePresentationGuidePage() {
 
             <h3>How many comparable transactions should I include?</h3>
             <p>
-              Five to eight in the main presentation, 15-20 in the appendix. Match on TA, phase, modality, and recency. Include outliers on both ends and explain them. The <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> automatically matches comparable transactions from {DEAL_STATS.TOTAL_DEALS} verified deals.
+              Five to eight in the main presentation, 15-20 in the appendix. Match on TA, phase, modality, and recency. Include outliers on both ends and explain them. The <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> automatically matches comparable transactions from {DEAL_STATS.TOTAL_DEALS} verified deals.
             </p>
 
             <h3>How do I present rNPV to a deal committee?</h3>
