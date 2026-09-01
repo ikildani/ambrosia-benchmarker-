@@ -436,13 +436,22 @@ export async function POST(request: NextRequest) {
         const licensorId = await findOrCreateCompany(supabase, deal.licensor, false).catch(() => null);
         const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true).catch(() => null);
 
+        // Sanitize asset name — clear fabrication patterns that hit the DB constraint
+        let safeAssetName = deal.asset_name?.trim() || null;
+        if (safeAssetName) {
+          const isFab = /^[A-Za-z0-9/]+-[0-9]{3}$/.test(safeAssetName)
+            || (/^[A-Za-z0-9/-]+-mab$/.test(safeAssetName) && !/^anti-/i.test(safeAssetName))
+            || /^Anti-[A-Za-z0-9]+(-mab)?$/.test(safeAssetName);
+          if (isFab) safeAssetName = null;
+        }
+
         // Insert
         const { error: insertError } = await supabase.from('deals').insert({
           licensor_name: deal.licensor,
           licensee_name: deal.licensee,
           licensor_id: licensorId,
           licensee_id: licenseeId,
-          asset_name: deal.asset_name,
+          asset_name: safeAssetName,
           asset_description: deal.indication_specific || null,
           modality: deal.modality || 'other',
           indication_category: deal.indication_category,
@@ -459,7 +468,7 @@ export async function POST(request: NextRequest) {
           royalty_high_pct: deal.royalty_high_pct,
           total_deal_value_usd: deal.total_deal_value_usd,
           announced_date: announcedDate,
-          source_type: 'bulk_backfill',
+          source_type: 'manual',
           source_url: deal.source_url,
           terms_disclosed: (deal.upfront_usd !== null) || (deal.total_deal_value_usd !== null) || (deal.milestones_total_usd !== null),
           confidence_score: deal.confidence,
