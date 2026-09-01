@@ -56,7 +56,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     log.info('Narration complete', { durationMs: elapsed(), dealCount: comparables.length });
     return apiSuccess({ narration: result });
   } catch (error) {
-    log.error('Narration failed', { error: error instanceof Error ? error.message : String(error), durationMs: elapsed() });
-    return apiError('Narration failed', 500);
+    const msg = error instanceof Error ? error.message : String(error);
+    log.error('Narration failed', { error: msg, durationMs: elapsed() });
+    return apiError(`Narration failed: ${msg.substring(0, 200)}`, 500);
   }
 }
