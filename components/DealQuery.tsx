@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // ── Types ───────────────────────────────────────────────────────────────
 interface Highlight {
@@ -255,7 +256,7 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
             </div>
             <div className="min-w-0">
               <h3 className="text-sm sm:text-base font-semibold text-white">Deal Intelligence Query</h3>
-              <p className="text-xs text-slate-400">Ask anything about 1,500+ biopharma deals</p>
+              <p className="text-xs text-slate-400">Ask anything about {DEAL_STATS.TOTAL_DEALS} biopharma deals</p>
             </div>
             {isPro && (
               <span className="ml-auto hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">

@@ -2502,12 +2502,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               AI deal memo, full comparable deals, sensitivity analysis, negotiation playbook, and board-ready PDF
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                onClick={() => onBuyReport?.()}
+              <a
+                href="/benchmark"
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-white text-navy-900 text-sm font-semibold rounded-xl hover:bg-neutral-100 transition-all shadow-soft w-full sm:w-auto"
               >
-                <span>Get Full Report — {PRICING.REPORT_PRICE}</span>
-              </button>
+                <span>Get Deal Intelligence Brief — $2,500</span>
+              </a>
               <span className="text-neutral-500 text-xs">or</span>
               <button
                 onClick={handleUpgradeClick}

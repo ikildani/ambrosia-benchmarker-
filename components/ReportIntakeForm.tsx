@@ -436,7 +436,7 @@ export default function ReportIntakeForm() {
               </button>
 
               <p className="text-center text-[10px] text-slate-600 mt-3">
-                Free preview included &middot; Full report {PRICING.REPORT_PRICE} via Stripe
+                Free preview included &middot; Pro unlocks all engines
               </p>
             </>
           )}
@@ -555,7 +555,7 @@ export default function ReportIntakeForm() {
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    Unlock Full Report — {PRICING.REPORT_PRICE}
+                    Unlock Full Report — Start Pro Trial
                     <ArrowUpRight className="w-4 h-4 opacity-60" />
                   </>
                 )}

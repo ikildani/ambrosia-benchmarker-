@@ -158,40 +158,30 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
           </p>
         </div>
 
-        {/* HERO: Deal Report Card */}
-        <div className="relative bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-8 sm:p-10 lg:p-12 border-2 border-purple-300 dark:border-purple-500 shadow-soft-xl transition-all duration-300 mb-6">
-          {currentTier === 'report' && (
-            <div className="absolute -top-3 left-8">
-              <span className="bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-soft">
-                Current Plan
-              </span>
-            </div>
-          )}
-
+        {/* HERO: Deal Intelligence Brief */}
+        <div className="relative bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-8 sm:p-10 lg:p-12 border-2 border-teal-300 dark:border-teal-500 shadow-soft-xl transition-all duration-300 mb-6">
           <div className="text-center mb-6">
-            <h3 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-2">Deal Intelligence Report</h3>
-            <p className="text-neutral-500 dark:text-slate-400 text-sm sm:text-base">Everything you need for your next deal conversation</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-2">Deal Intelligence Brief</h3>
+            <p className="text-neutral-500 dark:text-slate-400 text-sm sm:text-base">The complete deal landscape — done for you in 24 hours</p>
           </div>
 
           <div className="text-center mb-8">
-            <span className="text-5xl sm:text-6xl font-bold text-neutral-900 dark:text-white">{PRICING.REPORT_PRICE}</span>
+            <span className="text-5xl sm:text-6xl font-bold text-neutral-900 dark:text-white">$2,500</span>
             <span className="text-neutral-500 dark:text-slate-400 ml-2 text-base sm:text-lg">one-time</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mb-8 max-w-lg mx-auto">
             {[
-              'Institutional deal memo',
-              'All card drill-downs',
-              'Full comparable deals (15+)',
-              'Complete sensitivity analysis',
-              'Negotiation playbook',
-              'Branded PDF report',
-              'Excel data export',
-              'Shareable link',
+              '52 deal calculations (13 modalities × 4 structures)',
+              'AI strategic narrative + negotiation playbook',
+              'Comparable transactions with full terms',
+              'Partner matching with intent scoring',
+              'White-label branding for board/IC',
+              'Complimentary walkthrough call',
             ].map((item, idx) => (
               <li key={idx} className="flex items-start gap-2.5 list-none">
-                <div className="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg className="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-3 h-3 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
@@ -202,12 +192,12 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
           <div className="text-center">
             <a
-              href="/report"
-              className="inline-flex items-center justify-center px-10 py-3.5 rounded-xl font-bold text-base transition-all duration-200 bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5"
+              href="/benchmark"
+              className="inline-flex items-center justify-center px-10 py-3.5 rounded-xl font-bold text-base transition-all duration-200 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5"
             >
-              Get Your Report
+              Configure Your Brief
             </a>
-            <p className="text-xs text-neutral-400 dark:text-slate-500 mt-3">Personalized deal intelligence in 60 seconds</p>
+            <p className="text-xs text-neutral-400 dark:text-slate-500 mt-3">Delivered within 24 hours with walkthrough</p>
           </div>
         </div>
 
