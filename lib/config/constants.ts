@@ -78,7 +78,7 @@ export function formatDealCount(count: number): string {
 // Updated daily by /api/cron/daily-stats via GitHub API
 // 2026-06-29: Full cleanup — deleted rejected/synthetic/pre-2017/dupes, added landmark deals
 // Deal count reflects only verified + pending real deals with disclosed terms.
-export const LIVE_DEAL_COUNT = 1548;
+export const LIVE_DEAL_COUNT = 1809;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),

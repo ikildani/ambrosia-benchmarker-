@@ -62,7 +62,7 @@ interface TrendsTabProps {
 }
 
 export default function TrendsTab({ onUpgrade }: TrendsTabProps) {
-  const { tier } = useAuth();
+  const { tier, user } = useAuth();
   const isPro = tier === 'pro' || tier === 'portfolio';
 
   const [selectedTA, setSelectedTA] = useState('all');
@@ -78,6 +78,7 @@ export default function TrendsTab({ onUpgrade }: TrendsTabProps) {
       if (selectedTA !== 'all') params.set('ta', selectedTA);
       params.set('from', String(fromYear));
       params.set('to', String(toYear));
+      if (user?.email) params.set('email', user.email);
       const res = await fetch(`/api/trends?${params}`);
       if (res.ok) {
         const json = await res.json();

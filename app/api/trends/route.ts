@@ -56,7 +56,22 @@ export async function GET(request: NextRequest) {
       // Session check failed — serve free tier
     }
 
-    const hasPro = userTier === 'pro' || userTier === 'portfolio';
+    // Email fallback — if cookie auth failed, check email param
+    if (userTier === 'free') {
+      const emailParam = new URL(request.url).searchParams.get('email');
+      if (emailParam) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('email', emailParam.toLowerCase().trim())
+          .maybeSingle();
+        if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') {
+          userTier = profile.tier;
+        }
+      }
+    }
+
+    const hasPro = userTier === 'pro' || userTier === 'portfolio' || userTier === 'report';
 
     const sanitizedQuarters = quarters.map(q => ({
       quarter: q.quarter,
