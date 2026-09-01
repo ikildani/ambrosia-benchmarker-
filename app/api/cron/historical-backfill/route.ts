@@ -96,6 +96,27 @@ const GAP_QUERIES: GapQuery[] = [
   // ── Cross-border (China deals, heavily underrepresented historically) ─
   { ta: 'oncology', yearRange: '2019-2022', query: 'Chinese biotech companies licensing drugs to Western pharma companies 2019-2022. Include all China-to-West out-licensing deals for oncology, immunology, and other therapeutic areas with upfront payments, milestones, and total deal values. Provide licensor, licensee, drug name, deal economics, and source URL.' },
   { ta: 'oncology', yearRange: '2022-2024', query: 'China biotech out-licensing deals to US and European pharma 2022-2024 across all therapeutic areas. Include ADC deals, bispecific deals, small molecule out-licensing from Chinese biotechs. Provide company names, drug names, financial terms, and press release or news article URLs.' },
+
+  // ── 2025-2026 Major Deals (THE BIG GAP) ─────────────────────────────
+  { ta: 'oncology', yearRange: '2025-2026', query: 'List ALL major biopharma oncology licensing deals and acquisitions announced in 2025 and 2026 with disclosed financial terms. Include ADC deals, bispecific antibody deals, CAR-T deals, radiopharmaceutical deals, and IO combination deals. Include Pfizer/3SBio, Genmab/Merus, BMS/BioNTech, Akeso/Summit, Lilly/Scorpion, Lilly/Kelonia, Lilly/CrossBridge, Lilly/Ajax, AbbVie/RemeGen, Novartis/PeptiDream, Sanofi/RadioMedix. Provide company names, drug names, upfront payments, milestones, total deal values, development phase, announced date, and press release or news article URLs.' },
+  { ta: 'immunology', yearRange: '2025-2026', query: 'List ALL major autoimmune and immunology drug licensing deals and acquisitions 2025 and 2026. Include AbbVie/Capstan (in vivo CAR-T), AbbVie/Apogee ($10.9B), AbbVie/Nimble, Lilly/Merida (Graves disease), BMS/Orbital (circular RNA), and all JAK, IL-17, IL-23, TL1A, and TNF deals. Provide company names, drug names, financial terms, announced date, and source URLs.' },
+  { ta: 'neurology', yearRange: '2025-2026', query: 'List ALL major neurology and CNS drug acquisitions and licensing deals 2025 and 2026. Include J&J/Intra-Cellular Therapies ($14.6B, Caplyta), Lilly/Centessa ($7.8B, narcolepsy OX2R), AbbVie/Gilgamesh ($906M, psychedelic depression), and all Alzheimer, Parkinson, migraine, pain, and psychiatric deals. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'metabolic', yearRange: '2025-2026', query: 'List ALL major metabolic disease, obesity, and GLP-1 deals 2025 and 2026. Include Pfizer/Metsera (~$10B obesity), Roche/Zealand ($5.3B GLP-1), Roche/89bio ($3.5B MASH), AstraZeneca/CSPC ($18.5B obesity), Regeneron/Hansoh ($2B GLP-1), and all obesity, diabetes, NASH/MASH deals. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'rareDisease', yearRange: '2025-2026', query: 'List ALL major rare disease drug deals 2025 and 2026. Include Sanofi/Blueprint Medicines ($9.5B), gene therapy licensing deals, enzyme replacement deals, and RNA therapeutic deals for rare diseases. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'hematology', yearRange: '2025-2026', query: 'List ALL major hematology drug deals 2025 and 2026. Include Gilead/Arcellx (~$4B CAR-T), Lilly/Ajax ($2.3B myelofibrosis), bispecific antibody deals for blood cancers, and CAR-T licensing deals. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'infectiousDisease', yearRange: '2025-2026', query: 'List ALL major infectious disease, vaccine, and antimicrobial deals 2025 and 2026 with disclosed financial terms. Include RSV vaccine deals, mRNA platform collaborations, antiviral licensing, antibiotic partnerships, and pandemic preparedness deals. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'respiratory', yearRange: '2025-2026', query: 'List ALL major respiratory drug deals 2025 and 2026. Include Merck/Verona (~$10B, ensifentrine for COPD), asthma biologic deals, TSLP deals, IPF deals, and cystic fibrosis modulator licensing. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'ophthalmology', yearRange: '2025-2026', query: 'List ALL ophthalmology drug licensing deals and acquisitions 2025 and 2026. Include AMD, glaucoma, geographic atrophy, gene therapy for retinal diseases, and diabetic eye disease deals with disclosed financial terms. Provide company names, drug names, deal values, and source URLs.' },
+  { ta: 'dermatology', yearRange: '2025-2026', query: 'List ALL dermatology drug licensing deals and acquisitions 2025 and 2026. Include atopic dermatitis, psoriasis, vitiligo, alopecia areata, and hidradenitis deals with disclosed financial terms. Provide company names, drug names, deal values, and source URLs.' },
+  { ta: 'cardiovascular', yearRange: '2025-2026', query: 'List ALL cardiovascular drug deals 2025 and 2026 with disclosed financial terms. Include heart failure, PAH, thrombosis, cardiomyopathy, and lipid-lowering deals. Provide company names, drug names, deal values, and source URLs.' },
+  { ta: 'womensHealth', yearRange: '2025-2026', query: 'List ALL women\'s health drug licensing deals and acquisitions 2025 and 2026. Include endometriosis, uterine fibroids, fertility, menopause, and gynecologic oncology deals with disclosed financial terms. Provide company names, drug names, deal values, and source URLs.' },
+  { ta: 'gastroenterology', yearRange: '2025-2026', query: 'List ALL gastroenterology drug licensing deals 2025 and 2026. Include IBD, Crohn\'s, ulcerative colitis, celiac, EoE, and liver disease deals with disclosed financial terms. Include TL1A, integrin, and IL-23 deals. Provide company names, drug names, deal values, and source URLs.' },
+
+  // ── 2024 deals (likely gap year before pipeline stalled) ────────────
+  { ta: 'oncology', yearRange: '2024', query: 'List ALL major oncology licensing deals and acquisitions announced in 2024 with disclosed financial terms over $100M. Include ADC deals, bispecific deals, radiopharmaceutical deals, cell therapy licensing, and IO combination deals. Provide company names, drug names, upfront payments, milestones, total deal values, and source URLs.' },
+  { ta: 'immunology', yearRange: '2024', query: 'List ALL major immunology and autoimmune drug licensing deals and acquisitions in 2024 with disclosed financial terms. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'neurology', yearRange: '2024', query: 'List ALL major neurology and CNS drug licensing deals and acquisitions in 2024 with disclosed financial terms. Provide company names, drug names, financial terms, and source URLs.' },
+  { ta: 'metabolic', yearRange: '2024', query: 'List ALL major metabolic, obesity, GLP-1, and NASH drug deals in 2024 with disclosed financial terms. Provide company names, drug names, financial terms, and source URLs.' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -395,14 +416,22 @@ export async function GET(request: NextRequest) {
           }
           result.deals_validation_passed++;
 
-          // 3e. Dedup — check if licensor+licensee pair already exists
-          const { data: existing } = await supabase
+          // 3e. Dedup — check for same licensor + licensee + asset combination
+          const assetSearch = deal.asset_name?.trim()
+            ? deal.asset_name.substring(0, 20)
+            : null;
+          let dedupQuery = supabase
             .from('deals')
             .select('id')
             .ilike('licensee_name', `%${deal.licensee.substring(0, 15)}%`)
-            .ilike('licensor_name', `%${deal.licensor.substring(0, 15)}%`)
-            .limit(1)
-            .maybeSingle();
+            .ilike('licensor_name', `%${deal.licensor.substring(0, 15)}%`);
+          if (assetSearch) {
+            dedupQuery = dedupQuery.ilike('asset_name', `%${assetSearch}%`);
+          } else if (deal.announced_date && deal.announced_date.length >= 4) {
+            const year = deal.announced_date.substring(0, 4);
+            dedupQuery = dedupQuery.gte('announced_date', `${year}-01-01`).lte('announced_date', `${year}-12-31`);
+          }
+          const { data: existing } = await dedupQuery.limit(1).maybeSingle();
 
           if (existing) {
             result.deals_duplicate++;
@@ -421,6 +450,9 @@ export async function GET(request: NextRequest) {
             const derivedTA = deriveTherapeuticArea(deal.indication) || gap.ta;
             const licensorId = await findOrCreateCompany(supabase, deal.licensor).catch(() => null);
             const licenseeId = await findOrCreateCompany(supabase, deal.licensee).catch(() => null);
+
+            const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
+            const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
 
             const { error: insertError } = await supabase.from('deals').insert({
               licensor_name: deal.licensor,
@@ -449,6 +481,12 @@ export async function GET(request: NextRequest) {
               extraction_notes: `Historical backfill: ${gap.ta} ${gap.yearRange}. Source verified: ${deal.source_url}`,
               extraction_model: 'perplexity+claude-opus-4-6',
               extraction_timestamp: new Date().toISOString(),
+              licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+              licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+              licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+              licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+              cross_border: geo.cross_border,
+              deal_corridor: geo.deal_corridor,
             });
 
             if (insertError?.code === '23505') {
