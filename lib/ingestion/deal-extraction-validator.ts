@@ -248,6 +248,48 @@ export function validateExtractedDeal(deal: ValidatableDeal): ValidationResult {
     }
   }
 
+  // ── 6. Financial sanity checks ──
+  const upfront = deal.upfront_usd;
+  const total = deal.total_deal_value_usd;
+
+  // Upfront can't exceed total deal value
+  if (upfront != null && total != null && upfront > total * 1.05) {
+    return {
+      valid: false,
+      rejectCode: 'upfront_exceeds_total',
+      rejectReason: `Upfront ($${(upfront / 1e6).toFixed(0)}M) exceeds total deal value ($${(total / 1e6).toFixed(0)}M)`,
+    };
+  }
+
+  // No biopharma deal has ever been worth more than $100B (BMS/Celgene was ~$74B)
+  if (total != null && total > 100_000_000_000) {
+    return {
+      valid: false,
+      rejectCode: 'unrealistic_deal_value',
+      rejectReason: `Total deal value $${(total / 1e9).toFixed(1)}B exceeds maximum plausible ($100B)`,
+    };
+  }
+
+  // Preclinical/discovery deals rarely exceed $5B total
+  const phase = (deal as Record<string, unknown>).phase_at_signing as string | undefined;
+  if (phase && ['discovery', 'preclinical'].includes(phase) && total != null && total > 5_000_000_000) {
+    return {
+      valid: false,
+      rejectCode: 'phase_value_mismatch',
+      rejectReason: `${phase} deal at $${(total / 1e9).toFixed(1)}B exceeds typical maximum for stage ($5B)`,
+    };
+  }
+
+  // Royalties above 30% are extremely rare — likely a parsing error
+  const royaltyHigh = (deal as Record<string, unknown>).royalty_high_pct as number | undefined;
+  if (royaltyHigh != null && royaltyHigh > 0.30) {
+    return {
+      valid: false,
+      rejectCode: 'unrealistic_royalty',
+      rejectReason: `Royalty high ${(royaltyHigh * 100).toFixed(1)}% exceeds maximum plausible (30%)`,
+    };
+  }
+
   return { valid: true };
 }
 
