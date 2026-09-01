@@ -236,14 +236,27 @@ Return [] if no verifiable deals found. Text:\n${text.substring(0, 15000)}`
   });
 
   const textBlock = response.content.find(b => b.type === 'text');
-  if (!textBlock || textBlock.type !== 'text') return [];
+  if (!textBlock || textBlock.type !== 'text') {
+    console.log(`[bulk-ingest] ${queryId}: No text block in Claude response`);
+    return [];
+  }
 
-  const jsonMatch = textBlock.text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) return [];
+  let raw = textBlock.text;
+  // Strip markdown code fences
+  raw = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+  const jsonMatch = raw.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) {
+    console.log(`[bulk-ingest] ${queryId}: No JSON array found in Claude response (${raw.length} chars). First 200: ${raw.substring(0, 200)}`);
+    return [];
+  }
 
   try {
-    return JSON.parse(jsonMatch[0]) as ExtractedDeal[];
-  } catch {
+    const deals = JSON.parse(jsonMatch[0]) as ExtractedDeal[];
+    console.log(`[bulk-ingest] ${queryId}: Parsed ${deals.length} deals from Claude`);
+    return deals;
+  } catch (err) {
+    console.log(`[bulk-ingest] ${queryId}: JSON parse failed: ${String(err).substring(0, 100)}`);
     return [];
   }
 }
