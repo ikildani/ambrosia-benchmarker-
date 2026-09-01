@@ -40,7 +40,15 @@ export default function DealsToWatchTeaser({ tier, onUpgrade }: DealsToWatchTeas
       .then(r => r.json())
       .then(data => {
         if (data.success && data.dealsToWatch) {
-          setDeals(data.dealsToWatch.slice(0, 3));
+          setDeals(data.dealsToWatch.slice(0, 3).map((d: any) => ({
+            ...d,
+            companyName: d.companyName || d.name || 'Unknown',
+            patentCliffs: d.patentCliffs || d.licensingWindow?.patentCliffDrug ? [{
+              drug: d.licensingWindow?.patentCliffDrug || '',
+              loeYear: d.licensingWindow?.patentCliffYear || 0,
+              revenueAtRisk: d.licensingWindow?.revenueAtRiskM,
+            }] : [],
+          })));
         }
       })
       .catch(() => {})

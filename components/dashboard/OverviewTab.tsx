@@ -203,7 +203,7 @@ const OverviewTab = React.memo(function OverviewTab({
               </svg>
             </div>
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : tier === 'report' ? 'Report Access' : 'Free Plan'}</p>
+              <p className="font-semibold text-slate-900 dark:text-white">{tier === 'pro' ? 'Pro Plan' : tier === 'report' ? 'Report Access' : tier === 'portfolio' ? 'Portfolio License' : 'Free Plan'}</p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {(tier === 'pro' || tier === 'report' || tier === 'portfolio')
                   ? 'Full access to all features'
