@@ -207,14 +207,6 @@ export function generatePricingSchema() {
         availability: 'https://schema.org/InStock',
       },
       {
-        '@type': 'Offer',
-        name: 'Deal Report',
-        price: '499',
-        priceCurrency: 'USD',
-        description: 'Comprehensive PDF report with rNPV valuation, sensitivity analysis, comparable deals, partner matches, and negotiation playbook',
-        availability: 'https://schema.org/InStock',
-      },
-      {
         '@type': 'AggregateOffer',
         name: 'Pro Monthly',
         price: '299',

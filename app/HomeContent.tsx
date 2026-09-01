@@ -789,32 +789,7 @@ export default function HomeContent() {
             <h2 className="text-3xl font-bold text-white mb-3">Choose Your Plan</h2>
             <p className="text-slate-400 max-w-xl mx-auto">Price a single asset, map an entire landscape, or run your full pipeline.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {/* Report */}
-            <Link
-              href="/report"
-              className="group relative bg-[#0d1420] border border-white/[0.06] rounded-2xl p-7 hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="flex items-center justify-between mb-5">
-                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-400 bg-violet-500/10 rounded-full border border-violet-500/20">One-Time</span>
-                <span className="text-2xl font-bold text-white font-mono">{PRICING.REPORT_PRICE}</span>
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1">Deal Report</h3>
-              <p className="text-xs text-slate-500 mb-1 font-medium text-violet-400/70">Price your asset</p>
-              <p className="text-xs text-slate-500 mb-5 leading-relaxed">Single-asset PDF + Excel. Comparable transactions, partner matching, negotiation playbook.</p>
-              <ul className="space-y-2 mb-5">
-                {['rNPV with index drug validation', 'Monte Carlo + VaR/CVaR', 'Multi-buyer valuation', 'Negotiation playbook'].map(item => (
-                  <li key={item} className="flex items-center gap-2 text-[11px] text-slate-400">
-                    <Check className="w-3 h-3 text-violet-500 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
-                Get report <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </Link>
-
+          <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             {/* Deal Intelligence Brief */}
             <Link
               href="/benchmark"

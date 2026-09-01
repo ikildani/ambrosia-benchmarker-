@@ -393,13 +393,13 @@ export default function SmartTrialPrompt({
           </button>
           <p className="text-center text-xs text-slate-500 mt-2">Cancel anytime. No commitment.</p>
 
-          {/* Secondary CTA */}
-          <button
-            onClick={() => { onBuyReport?.(); handleDismiss(); }}
-            className="w-full mt-3 py-2.5 bg-transparent border border-slate-700 hover:border-slate-600 text-slate-400 hover:text-slate-300 text-xs font-medium rounded-xl transition-all"
+          {/* Secondary CTA — Brief */}
+          <a
+            href="/benchmark"
+            className="w-full mt-3 py-2.5 bg-transparent border border-slate-700 hover:border-slate-600 text-slate-400 hover:text-slate-300 text-xs font-medium rounded-xl transition-all block text-center"
           >
-            Or get a single report — {PRICING.REPORT_PRICE}
-          </button>
+            Or get a Deal Intelligence Brief — $2,500
+          </a>
 
           <button onClick={handleDismissPermanent} className="w-full mt-3 text-[11px] text-slate-600 hover:text-slate-400 transition-colors">
             Don&apos;t show this again

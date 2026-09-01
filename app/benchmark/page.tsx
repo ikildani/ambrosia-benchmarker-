@@ -95,8 +95,8 @@ const briefFaqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'How is the Brief different from the $499 report?',
-      acceptedAnswer: { '@type': 'Answer', text: 'The $499 Deal Intelligence Report covers one modality and one deal structure. The $2,500 Brief covers ALL 52 combinations (13 modalities x 4 structures) for a single indication, with human concierge service, custom AI narrative tailored to your specific deal context, white-label branding for IC/board presentations, and a complimentary walkthrough call.' },
+      name: 'How is the Brief different from Pro?',
+      acceptedAnswer: { '@type': 'Answer', text: 'Pro ($299/mo) gives you unlimited access to run calculations yourself across all 14 engines. The $2,500 Brief is a done-for-you deliverable — 52 deal calculations across 13 modalities and 4 deal structures for your specific indication, with a custom AI narrative, comparable transactions, partner matching with intent scoring, white-label branding for IC/board presentations, and a complimentary walkthrough call. Most BD teams start with a Brief and then subscribe to Pro for ongoing access.' },
     },
   ],
 };
