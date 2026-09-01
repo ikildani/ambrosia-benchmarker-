@@ -2537,7 +2537,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         </div>
 
         {/* Advisory CTA */}
-        <AdvisoryCTA therapeuticArea={therapeuticArea} indication={indication} />
+        <AdvisoryCTA therapeuticArea={fullInputs?.therapeuticArea} indication={fullInputs?.indication} />
 
         {/* World-Class Disclaimer */}
         <ResultsDisclaimer />
