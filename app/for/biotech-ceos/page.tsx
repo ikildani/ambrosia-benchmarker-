@@ -83,7 +83,7 @@ export default function BiotechCEOsPage() {
             A Phase 2 oncology licensing deal has a median total deal value of $400M+. The difference between a well-benchmarked negotiation and an under-informed one is typically 10-20% of deal value. On a $400M deal, that&apos;s $40-80M left on the table.
           </p>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Solidus Pro costs $299/month. A single deal intelligence brief costs $499. The math speaks for itself.
+            Solidus Pro costs $299/month. A Deal Intelligence Brief is $2,500 for the full landscape. The math speaks for itself.
           </p>
         </div>
 
@@ -91,8 +91,8 @@ export default function BiotechCEOsPage() {
           <Link href="/calculator" className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors">
             Benchmark Your Asset — Free
           </Link>
-          <Link href="/report" className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            Get a Deal Intelligence Brief — $499
+          <Link href="/pro" className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            Start Free Pro Trial
           </Link>
         </div>
       </div>

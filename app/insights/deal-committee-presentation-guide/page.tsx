@@ -244,7 +244,7 @@ export default function DealCommitteePresentationGuidePage() {
             'Deal committees evaluate five things: comparable transactions, risk-adjusted valuation, competitive landscape, strategic rationale, and negotiation parameters. Missing any one can delay or kill a deal.',
             'The most common reason deals fail at committee is cherry-picked comparables. Present the full range with 5-8 primary comps and explain where the proposed deal should fall and why.',
             'Bear/base/bull rNPV scenarios with a tornado sensitivity chart demonstrate rigor. Committees distrust single-point valuations.',
-            `A board-ready deal report with all five elements can be generated in 60 seconds from Solidus for ${PRICING.REPORT_PRICE}.`,
+            `A board-ready deal report with all five elements can be generated in 60 seconds with Solidus Pro.`,
           ]} />
 
           {/* ── SECTION 1: WHAT DEAL COMMITTEES EVALUATE ── */}
@@ -351,9 +351,9 @@ export default function DealCommitteePresentationGuidePage() {
 
           <InsightCTA
             variant="mid"
-            heading="Generate a Board-Ready Deal Report"
-            description={`Comparable transactions, rNPV valuation, sensitivity analysis, partner matching, and negotiation playbook — in 60 seconds. ${PRICING.REPORT_PRICE} one-time.`}
-            calculatorHref="/report"
+            heading="Generate Board-Ready Deal Intelligence"
+            description={`Comparable transactions, rNPV valuation, sensitivity analysis, partner matching, and negotiation playbook — start your free Pro trial.`}
+            calculatorHref="/pro"
           />
 
           {/* ── SECTION 2: COMPARABLE DEALS ── */}
@@ -535,7 +535,7 @@ export default function DealCommitteePresentationGuidePage() {
           <div className="bg-rose-50 border border-rose-100 rounded-xl p-5 my-8">
             <p className="text-sm font-semibold text-rose-900 mb-1">Time-sensitive: Deal committee deadlines</p>
             <p className="text-sm text-rose-800 leading-relaxed">
-              If you are preparing a deal committee presentation with a deadline, the <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> ({PRICING.REPORT_PRICE}) generates comparable transactions, rNPV valuation, sensitivity analysis, market sizing, partner intelligence, and negotiation playbook in 60 seconds. It is the fastest path from &ldquo;I need deal committee data&rdquo; to &ldquo;I have a board-ready presentation.&rdquo;
+              If you are preparing a deal committee presentation with a deadline, <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Solidus Pro</Link> generates comparable transactions, rNPV valuation, sensitivity analysis, market sizing, partner intelligence, and negotiation playbook in 60 seconds. Start a free trial — it is the fastest path from &ldquo;I need deal committee data&rdquo; to &ldquo;I have a board-ready presentation.&rdquo;
             </p>
           </div>
 
@@ -599,12 +599,12 @@ export default function DealCommitteePresentationGuidePage() {
 
             <h3>What are common mistakes in deal committee presentations?</h3>
             <p>
-              Five killers: cherry-picked comparables, single-scenario valuation, ignoring competitive risk, no defined walk-away point, and unvalidated market sizing. Each is avoidable with proper data preparation. The <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Ambrosia Deal Report</Link> addresses all five automatically.
+              Five killers: cherry-picked comparables, single-scenario valuation, ignoring competitive risk, no defined walk-away point, and unvalidated market sizing. Each is avoidable with proper data preparation. <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Solidus Pro</Link> addresses all five automatically.
             </p>
 
             <h3>How long does it take to prepare a deal committee presentation?</h3>
             <p>
-              Traditional preparation takes 2-4 weeks of analyst time for comparable deal research, valuation modeling, and competitive analysis. With the <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> ({PRICING.REPORT_PRICE}), the data foundation is generated in 60 seconds — leaving your team to focus on strategic narrative and internal stakeholder management rather than data compilation.
+              Traditional preparation takes 2-4 weeks of analyst time for comparable deal research, valuation modeling, and competitive analysis. With <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Solidus Pro</Link>, the data foundation is generated in 60 seconds — leaving your team to focus on strategic narrative and internal stakeholder management rather than data compilation.
             </p>
           </div>
 
@@ -649,9 +649,9 @@ export default function DealCommitteePresentationGuidePage() {
 
         <InsightCTA
           variant="bottom"
-          heading="Generate a Board-Ready Deal Report"
-          description={`Comparable transactions, rNPV scenarios, sensitivity analysis, partner intelligence, and negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions. ${PRICING.REPORT_PRICE} one-time.`}
-          calculatorHref="/report"
+          heading="Generate Board-Ready Deal Intelligence"
+          description={`Comparable transactions, rNPV scenarios, sensitivity analysis, partner intelligence, and negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions. Start your free Pro trial.`}
+          calculatorHref="/pro"
         />
       </main>
     </>

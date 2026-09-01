@@ -609,7 +609,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
         <InsightCTA
           variant="bottom"
           heading="Find Your Highest-Probability Partners"
-          description={`Screen ${DEAL_STATS.TOTAL_COMPANIES} companies for pipeline gaps, deal velocity, and intent signals. Pro access at ${PRICING.PRO_MONTHLY} or get a full partner report for ${PRICING.REPORT_PRICE}.`}
+          description={`Screen ${DEAL_STATS.TOTAL_COMPANIES} companies for pipeline gaps, deal velocity, and intent signals. Pro access at ${PRICING.PRO_MONTHLY}.`}
         />
       </main>
     </>

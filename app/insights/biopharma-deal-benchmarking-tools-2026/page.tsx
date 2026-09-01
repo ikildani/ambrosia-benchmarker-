@@ -177,7 +177,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'Can I benchmark deals without an enterprise platform?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. A single deal report ($499) delivers comparable transactions, rNPV valuation, partner matching, and negotiation playbook. Pro subscriptions ($299/month) provide ongoing access to all 8 calculation engines for teams running multiple evaluations.',
+          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. Pro subscriptions ($299/month) provide ongoing access to all 14 calculation engines for teams running multiple evaluations. For a comprehensive one-time landscape, the Deal Intelligence Brief ($2,500) covers 52 deal calculations across 13 modalities.',
         },
       },
       {
@@ -305,7 +305,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           <GatedBenchmarkTable
             headers={['Dimension', 'Manual Research', 'Consulting', 'Platform (Ambrosia)']}
             rows={[
-              ['Cost', 'Internal time only', '$50K-$150K per deal', `${PRICING.PRO_MONTHLY} or ${PRICING.REPORT_PRICE}/report`],
+              ['Cost', 'Internal time only', '$50K-$150K per deal', `${PRICING.PRO_MONTHLY}`],
               ['Turnaround', '2-4 weeks', '4-8 weeks', 'Minutes'],
               ['Deal Database', '10-30 comps', '50-100 comps', `${DEAL_STATS.TOTAL_DEALS} verified`],
               ['Data Freshness', 'Point-in-time', 'Point-in-time', 'Weekly updates'],
@@ -554,7 +554,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             <ul>
               <li><strong>Enterprise platforms</strong> (GlobalData Pharma Intelligence, Evaluate Pharma, Citeline): $50,000-$200,000/year. Comprehensive datasets but limited analytical tools — you export data and build your own models.</li>
               <li><strong>Boutique consulting</strong> (per engagement): $50,000-$150,000 per deal analysis. Deep strategic context but slow turnaround (4-8 weeks) and non-repeatable.</li>
-              <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all 8 engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses. Or {PRICING.REPORT_PRICE} for a single deal report.</li>
+              <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all 14 engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses.</li>
             </ul>
           </div>
 
@@ -594,7 +594,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>How much do pharma deal intelligence platforms cost?</h3>
             <p>
-              Enterprise platforms range from $50,000-$200,000/year. Consulting engagements cost $50,000-$150,000 per deal. Specialized benchmarking platforms like Solidus costs {PRICING.PRO_MONTHLY} for full access or {PRICING.REPORT_PRICE} for a single deal report. The cost-performance ratio strongly favors platforms that combine data with analytical engines.
+              Enterprise platforms range from $50,000-$200,000/year. Consulting engagements cost $50,000-$150,000 per deal. Specialized benchmarking platforms like Solidus cost {PRICING.PRO_MONTHLY} for full access, with a 7-day free trial. The cost-performance ratio strongly favors platforms that combine data with analytical engines.
             </p>
 
             <h3>What should I look for in a deal benchmarking tool?</h3>
@@ -604,7 +604,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>Can I benchmark deals without an enterprise subscription?</h3>
             <p>
-              Yes. A single <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> ({PRICING.REPORT_PRICE}) delivers comparable transactions, rNPV valuation, partner matching, sensitivity analysis, and a negotiation playbook. For teams running multiple analyses, Pro access ({PRICING.PRO_MONTHLY}) provides unlimited benchmarking across all 8 engines.
+              Yes. Start a 7-day free <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Pro trial</Link> for full access to comparable transactions, rNPV valuation, partner matching, sensitivity analysis, and negotiation playbooks. For a comprehensive done-for-you landscape, the <Link href="/benchmark" className="text-teal-600 font-medium hover:text-teal-700">Deal Intelligence Brief</Link> ($2,500) covers 52 calculations across 13 modalities with white-label branding.
             </p>
 
             <h3>How often should deal benchmarking data be updated?</h3>

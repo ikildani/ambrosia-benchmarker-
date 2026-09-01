@@ -493,7 +493,7 @@ export default function HowMuchIsBiotechAssetWorthPage() {
 
             <h3>How much is a Phase 2 biotech asset worth?</h3>
             <p>
-              A Phase 2 biotech asset is worth $500M-$3.5B in total deal value depending on therapeutic area, modality, and data quality. Oncology Phase 2 assets command the highest values ($800M-$2.5B), followed by immunology ($600M-$2.0B) and neurology ($500M-$1.8B). Upfront payments typically represent 12-16% of total deal value at Phase 2. Use the <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> ({PRICING.REPORT_PRICE}) for asset-specific benchmarks.
+              A Phase 2 biotech asset is worth $500M-$3.5B in total deal value depending on therapeutic area, modality, and data quality. Oncology Phase 2 assets command the highest values ($800M-$2.5B), followed by immunology ($600M-$2.0B) and neurology ($500M-$1.8B). Upfront payments typically represent 12-16% of total deal value at Phase 2. Use <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Solidus Pro</Link> for asset-specific benchmarks.
             </p>
 
             <h3>What is my preclinical biotech asset worth?</h3>
@@ -559,8 +559,8 @@ export default function HowMuchIsBiotechAssetWorthPage() {
         <InsightCTA
           variant="bottom"
           heading="Get Your Asset's Exact Valuation"
-          description={`Generate a board-ready deal report with comparable transactions, rNPV valuation, partner matching, and negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions. ${PRICING.REPORT_PRICE} one-time.`}
-          calculatorHref="/report"
+          description={`Start a free Pro trial for comparable transactions, rNPV valuation, and partner matching — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
+          calculatorHref="/pro"
         />
       </main>
     </>

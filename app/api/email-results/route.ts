@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
           <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px; line-height: 1.5;">
             Get comparable transactions, partner matches (700+ companies scored), sensitivity analysis, competitive landscape, and a negotiation playbook.
           </p>
-          <a href="https://solidus.ambrosiaventures.co/calculator" style="display: inline-block; padding: 10px 24px; background: #00c9a7; color: #0a0f1a; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 6px;">
-            Get Full Report — $499
+          <a href="https://solidus.ambrosiaventures.co/pro" style="display: inline-block; padding: 10px 24px; background: #00c9a7; color: #0a0f1a; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 6px;">
+            Unlock Full Results — Start Pro Trial
           </a>
         </div>
 

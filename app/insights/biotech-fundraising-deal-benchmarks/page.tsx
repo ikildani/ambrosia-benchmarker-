@@ -415,8 +415,8 @@ export default function BiotechFundraisingDealBenchmarksPage() {
           <InsightCTA
             variant="mid"
             heading="See What Your Asset Is Worth to Partners"
-            description={`Model licensing economics — upfronts, milestones, royalties, and total deal value — for your specific asset. Calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions. ${PRICING.REPORT_PRICE} one-time.`}
-            calculatorHref="/report"
+            description={`Start a free Pro trial for asset-specific deal benchmarks — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions.`}
+            calculatorHref="/pro"
           />
 
           {/* ── MINI CALCULATOR ── */}
@@ -531,7 +531,7 @@ export default function BiotechFundraisingDealBenchmarksPage() {
 
             <h3>What is a Phase 2 biotech worth in a licensing deal?</h3>
             <p>
-              Phase 2 assets are worth $500M-$3.5B in total deal value, with $80-450M upfronts. Oncology Phase 2 assets command the highest values. Compare this to Series C fundraising at $600M-$1.2B pre-money with 15-25% dilution. Use the <Link href="/report" className="text-teal-600 font-medium hover:text-teal-700">Deal Report</Link> ({PRICING.REPORT_PRICE}) for asset-specific benchmarks.
+              Phase 2 assets are worth $500M-$3.5B in total deal value, with $80-450M upfronts. Oncology Phase 2 assets command the highest values. Compare this to Series C fundraising at $600M-$1.2B pre-money with 15-25% dilution. Use <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Solidus Pro</Link> for asset-specific benchmarks.
             </p>
 
             <h3>How do licensing benchmarks help fundraising?</h3>
@@ -583,8 +583,8 @@ export default function BiotechFundraisingDealBenchmarksPage() {
         <InsightCTA
           variant="bottom"
           heading="See What Your Asset Is Worth to Partners"
-          description={`Generate a full deal valuation with comparable transactions, rNPV scenarios, and partner matching — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions. ${PRICING.REPORT_PRICE} one-time.`}
-          calculatorHref="/report"
+          description={`Full deal valuation with comparable transactions, rNPV scenarios, and partner matching — powered by ${DEAL_STATS.TOTAL_DEALS} real transactions. Start your free Pro trial.`}
+          calculatorHref="/pro"
         />
       </main>
     </>

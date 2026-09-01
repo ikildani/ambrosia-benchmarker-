@@ -240,7 +240,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
               <li><strong>Sensitivity tornado:</strong> Ranked chart showing which input variables drive the most variation in output value, guiding where to focus diligence and negotiation.</li>
               <li><strong>Partner match scores:</strong> Top-ranked potential partners from a database of 700+ companies, scored on strategic fit, pipeline complementarity, deal history, and financial capacity.</li>
               <li><strong>Buyer-specific valuations:</strong> Customized valuation for specific potential acquirers reflecting their WACC, commercial capabilities, and strategic premium.</li>
-              <li><strong>PDF report:</strong> A ~20-page institutional-quality report covering all engines, suitable for board presentations, deal committee memos, and investor updates. Available for $499 one-time or included with Pro.</li>
+              <li><strong>PDF report:</strong> A ~20-page institutional-quality report covering all engines, suitable for board presentations, deal committee memos, and investor updates. Included with Pro ($299/mo).</li>
             </ul>
 
             {/* Section 4: Data Sources */}

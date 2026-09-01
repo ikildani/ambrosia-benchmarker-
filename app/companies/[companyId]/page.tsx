@@ -915,7 +915,7 @@ export default async function CompanyPage({ params }: Props) {
                   href="/#pricing"
                   className="inline-flex items-center justify-center px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all border border-white/20"
                 >
-                  Get Full Report — $499
+                  Start Free Pro Trial
                 </Link>
               </div>
             </div>
