@@ -15,9 +15,9 @@ interface MomentumSignal {
 }
 
 function formatValue(value: number, metric: string) {
-  if (metric === 'deal_count') return `${value} deals`;
-  if (metric === 'median_upfront') return value >= 1000 ? `$${(value / 1000).toFixed(1)}B` : `$${Math.round(value)}M`;
-  return String(Math.round(value));
+  if (metric === 'deal_count') return String(value);
+  if (value >= 1000) return `$${(value / 1000).toFixed(1)}B`;
+  return `$${Math.round(value)}M`;
 }
 
 export default function MomentumIndicators() {
