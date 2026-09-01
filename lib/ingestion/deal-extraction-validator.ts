@@ -191,12 +191,12 @@ export function validateExtractedDeal(deal: ValidatableDeal): ValidationResult {
     };
   }
 
-  // ── 2. Confidence threshold (stricter than prior 75) ──
-  if (deal.confidence_score != null && deal.confidence_score < 85) {
+  // ── 2. Confidence threshold ──
+  if (deal.confidence_score != null && deal.confidence_score < 75) {
     return {
       valid: false,
       rejectCode: 'confidence_below_threshold',
-      rejectReason: `Confidence ${deal.confidence_score} below minimum 85`,
+      rejectReason: `Confidence ${deal.confidence_score} below minimum 75`,
     };
   }
 

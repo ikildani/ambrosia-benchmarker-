@@ -29,6 +29,16 @@ export const dynamic = 'force-dynamic';
 const MAX_RUNTIME_MS = 250_000;
 const SEC_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 
+function getDateRange(): { dateStart: string; dateEnd: string } {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 30);
+  return {
+    dateStart: start.toISOString().split('T')[0],
+    dateEnd: end.toISOString().split('T')[0],
+  };
+}
+
 // Cycle through these deal searches — each cron run processes one
 const DEAL_SEARCHES = [
   { type: 'license', query: '"license agreement" "upfront" "milestone"' },
@@ -86,11 +96,14 @@ export async function GET(request: NextRequest) {
   }
 
   const search = DEAL_SEARCHES[searchIndex];
-  // Search SEC EDGAR
+  const { dateStart, dateEnd } = getDateRange();
+  // Search SEC EDGAR — rolling 30-day window to continuously find new filings
   const params = new URLSearchParams({
     q: search.query,
     forms: '8-K,8-K/A,6-K',
-    items: '1.01',
+    dateRange: 'custom',
+    startdt: dateStart,
+    enddt: dateEnd,
     from: String(page * 20),
     size: '20',
   });
@@ -181,6 +194,9 @@ export async function GET(request: NextRequest) {
         const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
         const ta = deriveTherapeuticArea(deal.indication_category);
 
+        const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
+        const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
+
         const { error: insertError } = await supabase.from('deals').insert({
           licensor_name: deal.licensor,
           licensor_id: licensorId,
@@ -225,6 +241,12 @@ export async function GET(request: NextRequest) {
           rights_retained: deal.rights_retained,
           indications_licensed: deal.indications_licensed,
           includes_diagnostics: deal.includes_diagnostics,
+          licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+          licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+          licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+          licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+          cross_border: geo.cross_border,
+          deal_corridor: geo.deal_corridor,
         });
 
         if (insertError && insertError.code !== '23505') {
@@ -265,7 +287,7 @@ export async function GET(request: NextRequest) {
     oncology: ['solid_tumor', 'solid_tumors', 'hematological', 'hematologic', 'heme_onc', 'lung_cancer', 'breast_cancer', 'prostate_cancer', 'colorectal_cancer', 'pancreatic_cancer', 'liver_cancer', 'melanoma', 'glioblastoma', 'bladder_cancer', 'renal_cell_carcinoma', 'head_and_neck_cancer'],
     cardiovascular: ['cardiovascular', 'cardiac', 'heart_failure', 'hypertension', 'thrombosis', 'cardiomyopathy', 'atrial_fibrillation', 'atherosclerosis', 'pulmonary_hypertension', 'coronary', 'arrhythmia', 'attr_cardiomyopathy', 'pah'],
     neurology: ['cns', 'alzheimers', 'parkinsons', 'epilepsy', 'migraine', 'schizophrenia', 'depression', 'neurodegeneration', 'multiple_sclerosis', 'als', 'huntingtons', 'neuropathic_pain', 'bipolar', 'adhd', 'insomnia', 'stroke', 'spasticity', 'parkinsons_disease', 'alzheimers_disease'],
-    immunology: ['autoimmune', 'rheumatoid_arthritis', 'lupus', 'inflammatory_bowel', 'psoriasis', 'atopic_dermatitis', 'psoriatic_arthritis', 'ankylosing_spondylitis', 'vasculitis', 'myasthenia_gravis', 'ibd', 'crohns', 'ulcerative_colitis', 'iga_nephropathy', 'gvhd', 'multiple_sclerosis'],
+    immunology: ['autoimmune', 'rheumatoid_arthritis', 'lupus', 'inflammatory_bowel', 'psoriasis', 'atopic_dermatitis', 'psoriatic_arthritis', 'ankylosing_spondylitis', 'vasculitis', 'myasthenia_gravis', 'ibd', 'crohns', 'ulcerative_colitis', 'iga_nephropathy', 'gvhd', 'multiple_sclerosis', 'respiratory', 'pulmonary', 'asthma', 'copd'],
     metabolic: ['metabolic', 'diabetes', 'obesity', 'nash', 'mash', 'dyslipidemia', 'type_2_diabetes', 'type_1_diabetes', 'gout', 'fatty_liver', 'hypercholesterolemia', 'hypertriglyceridemia', 'pcsk9', 'sglt2', 'glp1'],
     infectiousDisease: ['infectious', 'hiv', 'hepatitis', 'hbv', 'hcv', 'rsv', 'influenza', 'covid_19', 'covid', 'antiviral', 'antibiotic', 'antimicrobial', 'vaccine', 'fungal', 'tuberculosis', 'malaria', 'bacterial'],
     rareDisease: ['rare_disease', 'orphan', 'gene_therapy', 'sma', 'duchenne', 'dmd', 'hemophilia', 'cystic_fibrosis', 'fabry', 'gaucher', 'pompe', 'hunter', 'sickle_cell', 'thalassemia', 'attr_amyloidosis', 'pnh', 'hae', 'angelman', 'dravet', 'friedreich', 'achondroplasia', 'wilson_disease'],

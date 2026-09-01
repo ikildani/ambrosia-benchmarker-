@@ -817,12 +817,46 @@ export async function runDailyIngestion(
           // Derive therapeutic_area from indication_category
           const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
 
+          // Classify geography
+          const { classifyAndEnrichDeal, classifyCompanyCountry } = await import('./company-geography');
+          const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
+
+          // Update company HQ if not already set
+          if (licensorId) {
+            const licGeo = classifyCompanyCountry(deal.licensor);
+            if (licGeo.confidence !== 'low') {
+              await supabase.from('companies').update({
+                headquarters_country: licGeo.country,
+                headquarters_region: licGeo.region,
+              }).eq('id', licensorId).is('headquarters_country', null);
+            }
+          }
+          if (licenseeId) {
+            const licnGeo = classifyCompanyCountry(deal.licensee);
+            if (licnGeo.confidence !== 'low') {
+              await supabase.from('companies').update({
+                headquarters_country: licnGeo.country,
+                headquarters_region: licnGeo.region,
+              }).eq('id', licenseeId).is('headquarters_country', null);
+            }
+          }
+
+          // Classify geography
+          const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
+          const geo = classifyAndEnrichDeal(deal.licensor || '', deal.licensee || '');
+
           // Insert deal
           const { error: insertError } = await supabase.from('deals').insert({
             licensor_name: deal.licensor,
             licensor_id: licensorId,
             licensee_name: deal.licensee,
             licensee_id: licenseeId,
+            licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+            licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+            licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+            licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+            cross_border: geo.cross_border,
+            deal_corridor: geo.deal_corridor,
             asset_name: deal.asset_name,
             asset_description: deal.asset_description,
             modality: deal.modality,
@@ -871,22 +905,24 @@ export async function runDailyIngestion(
             extraction_model: 'claude-opus-4-6',
             extraction_timestamp: new Date().toISOString(),
             therapeutic_area: therapeuticArea,
-            // Phase 4 (2026-04-14): explicit pending status + audit excerpt.
-            // verification_status was implicitly NULL before, which made it
-            // impossible to distinguish "never audited" from "audited and
-            // passed." Pending is now the default first-insert state.
+            licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+            licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+            licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+            licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+            cross_border: geo.cross_border,
+            deal_corridor: geo.deal_corridor,
             verification_status: 'pending',
             raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
           });
 
           if (insertError) {
-            // Skip duplicates silently (unique index catches them)
             if (insertError.code !== '23505') {
               errors.push(`Insert error for ${filing.accessionNumber}: ${insertError.message}`);
             }
           } else {
             dealsExtracted++;
-            console.log(`Extracted deal: ${deal.licensor} -> ${deal.licensee} (${deal.modality})`);
+            const corridorTag = geo.deal_corridor ? ` [${geo.deal_corridor}]` : '';
+            console.log(`Extracted deal: ${deal.licensor} -> ${deal.licensee} (${deal.modality})${corridorTag}`);
           }
         }
 
@@ -961,6 +997,7 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
     case 'cardiovascular':
       return 'cardiovascular';
     case 'infectious_disease':
+    case 'infectious':
     case 'antiviral':
     case 'antibiotic':
       return 'infectiousDisease';
@@ -986,6 +1023,9 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
     case 'gi':
     case 'ibd':
       return 'gastroenterology';
+    case 'respiratory':
+    case 'pulmonary':
+      return 'immunology';
     default:
       return 'other';
   }
