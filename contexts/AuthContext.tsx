@@ -192,6 +192,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isSupabaseConfigured()) {
       const supabase = createClient();
       if (supabase) {
+        let isMounted = true;
+
         // Check current session with a timeout to prevent infinite loading
         let sessionTimedOut = false;
         const sessionTimeout = setTimeout(() => {
@@ -208,6 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             const { data: { session } } = await supabase.auth.getSession();
             clearTimeout(sessionTimeout);
+            if (!isMounted) return;
 
             if (session?.user) {
               const supabaseUser = session.user;
@@ -271,7 +274,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           } catch (error) {
             clearTimeout(sessionTimeout);
-            captureClientError(error, 'AuthContext', { context: 'Supabase getSession failed' });
+            if (error instanceof DOMException && error.name === 'AbortError') {
+              // Benign — component unmounted before auth fetch completed (React StrictMode)
+            } else {
+              captureClientError(error, 'AuthContext', { context: 'Supabase getSession failed' });
+            }
           } finally {
             setIsLoading(false);
           }
@@ -397,6 +404,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
+          isMounted = false;
           subscription.unsubscribe();
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
