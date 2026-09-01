@@ -64,7 +64,7 @@ export default async function PlaybookDetail({ params }: Props) {
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/playbook" />
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
-        <div className="mx-auto max-w-5xl px-6 pt-20 sm:pt-24 lg:pt-28 pb-12">
+        <div className="mx-auto max-w-5xl px-6 pt-20 pb-12">
           <nav className="mb-4 flex items-center gap-2 text-sm">
             <Link href="/playbook" className="text-slate-500 hover:text-slate-300">Playbooks</Link>
             <span className="text-slate-700">/</span>

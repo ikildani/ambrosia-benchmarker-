@@ -38,7 +38,7 @@ interface Props {
 export function InstitutionalNav({ activePath }: Props) {
   return (
     <nav
-      className="fixed top-16 sm:top-20 lg:top-24 left-0 right-0 z-40 border-b border-slate-800/60 bg-slate-950/95 backdrop-blur-md"
+      className="fixed top-0 left-0 right-0 z-40 border-b border-slate-800/60 bg-slate-950/95 backdrop-blur-md"
       aria-label="Institutional intelligence navigation"
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
