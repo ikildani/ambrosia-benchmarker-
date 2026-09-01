@@ -10,13 +10,17 @@ interface Props {
   onBuyReport?: () => void;
 }
 
-const STRUCTURES = [
-  { key: 'licensing', label: 'Licensing', color: 'teal', description: 'Standard out-license' },
-  { key: 'codevelopment', label: 'Co-Development', color: 'blue', description: 'Shared R&D costs' },
-  { key: 'option', label: 'Option', color: 'purple', description: 'Option to license' },
-  { key: 'acquisition', label: 'Acquisition', color: 'amber', description: 'Full buyout' },
-  { key: 'collaboration', label: 'Collaboration', color: 'rose', description: 'Research partnership' },
+const ALL_STRUCTURES = [
+  { key: 'licensing', label: 'Licensing', color: 'teal', description: 'Standard out-license', minPhase: 'discovery' },
+  { key: 'codevelopment', label: 'Co-Development', color: 'blue', description: 'Shared R&D costs', minPhase: 'phase_1' },
+  { key: 'option', label: 'Option', color: 'purple', description: 'Option to license', minPhase: 'discovery' },
+  { key: 'acquisition', label: 'Acquisition', color: 'amber', description: 'Full buyout', minPhase: 'phase_2' },
+  { key: 'collaboration', label: 'Collaboration', color: 'rose', description: 'Research partnership', minPhase: 'discovery' },
 ] as const;
+
+const PHASE_ORDER: Record<string, number> = {
+  discovery: 0, preclinical: 1, phase_1: 2, phase_2: 3, phase_3: 4, approved: 5,
+};
 
 function fmtM(v: number): string {
   if (Math.abs(v) >= 1000) return `$${(v / 1000).toFixed(1)}B`;
@@ -36,7 +40,12 @@ export default function DealStructureComparison({ inputs, currentResult, tier, o
   const currentDealType = inputs.dealType || 'licensing';
 
   const comparisons = useMemo(() => {
-    return STRUCTURES.map(s => {
+    const currentPhaseRank = PHASE_ORDER[inputs.phase] ?? 1;
+    const applicable = ALL_STRUCTURES.filter(s => {
+      const minRank = PHASE_ORDER[s.minPhase] ?? 0;
+      return currentPhaseRank >= minRank || s.key === currentDealType;
+    });
+    return applicable.map(s => {
       const modified = { ...inputs, dealType: s.key as DealType };
       try {
         const result = calculateDealTerms(modified);
