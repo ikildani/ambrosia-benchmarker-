@@ -394,7 +394,7 @@ async function checkPortfolioLicenseSignal(lead: LeadScore): Promise<void> {
     context: { domain, activeUsers, userCount: activeUsers.length },
     lead_score: lead.score,
     deal_stage: 'enterprise',
-  }).catch(() => {});
+  });
 
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) return;
@@ -430,7 +430,7 @@ async function checkPortfolioLicenseSignal(lead: LeadScore): Promise<void> {
         ],
       }],
     }),
-  }).catch(() => {});
+  });
 }
 
 // ── Funnel Emails (Pro Nudge + Brief Upsell) ─────────────
@@ -446,7 +446,7 @@ async function queueFunnelEmail(
     user_id: lead.userId,
     event_type: `${emailType}_sent`,
     context: { lead_score: lead.score, deal_stage: lead.dealStage, ...latestCalc },
-  }).catch(() => {});
+  });
 
   const { sendEmail } = await import('@/lib/email/client');
 
@@ -533,7 +533,7 @@ async function queueAdvisoryEmail(
     user_id: lead.userId,
     event_type: `${emailType}_sent`,
     context: { lead_score: lead.score, deal_stage: lead.dealStage, ...latestCalc },
-  }).catch(() => {});
+  });
 
   // Send via SendGrid
   const { sendEmail } = await import('@/lib/email/client');
