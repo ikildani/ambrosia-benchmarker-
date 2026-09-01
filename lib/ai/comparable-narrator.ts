@@ -213,8 +213,12 @@ function buildNarratorPrompt(
   adjustmentsByDeal: Map<string, ComparableAdjustment[]>,
 ): string {
   const assetDesc = `${PHASE_LABELS[userAsset.phase] || userAsset.phase} ${userAsset.modality} in ${userAsset.indication} (${userAsset.therapeuticArea}), ${userAsset.territory || 'global'} rights, ${userAsset.competitivePosition || 'racing'} competitive position`;
-  const tdv = `$${userTerms.terms.totalDealValue.low}M-$${userTerms.terms.totalDealValue.high}M (median $${userTerms.terms.totalDealValue.median}M)`;
-  const upfront = `$${userTerms.terms.upfront.median}M`;
+  const tdv = userTerms.terms?.totalDealValue
+    ? `$${userTerms.terms.totalDealValue.low}M-$${userTerms.terms.totalDealValue.high}M (median $${userTerms.terms.totalDealValue.median}M)`
+    : 'not yet calculated';
+  const upfront = userTerms.terms?.upfront
+    ? `$${userTerms.terms.upfront.median}M`
+    : 'not yet calculated';
 
   const compDetails = comparables.map((c, i) => {
     const adjs = adjustmentsByDeal.get(c.id) || [];
