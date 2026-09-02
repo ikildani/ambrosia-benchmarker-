@@ -362,13 +362,14 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const targetId = body.queryId as string | undefined;
   const maxQueries = Math.min(body.maxQueries || 6, 15);
+  const offset = Math.max(0, body.offset || 0);
 
   const supabase = createServiceClient();
   const startTime = Date.now();
 
   const queries = targetId
     ? BULK_QUERIES.filter(q => q.id === targetId)
-    : BULK_QUERIES.slice(0, maxQueries);
+    : BULK_QUERIES.slice(offset, offset + maxQueries);
 
   if (queries.length === 0) {
     return NextResponse.json({ error: `No query found for id: ${targetId}` }, { status: 400 });
