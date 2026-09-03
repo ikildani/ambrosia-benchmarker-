@@ -345,6 +345,10 @@
     {
       "path": "/api/cron/deal-qa",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/asset-universe",
+      "schedule": "30 6 * * *"
     }
   ]
 }
