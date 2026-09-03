@@ -25,6 +25,7 @@ const ScenarioComparison = dynamic(() => import('./ScenarioComparison'), { ssr: 
 const NegotiationPlaybookModal = dynamic(() => import('./NegotiationPlaybookModal'), { ssr: false });
 const PartnerMatchesContainer = dynamic(() => import('./PartnerMatchesContainer'), { ssr: false, loading: () => <PartnerMatchesSkeleton /> });
 const ComparableDeals = dynamic(() => import('./ComparableDeals'), { ssr: false, loading: () => <TableSkeleton /> });
+const DealTransparency = dynamic(() => import('./results/DealTransparency'), { ssr: false, loading: () => <TableSkeleton /> });
 const HistoryPicker = dynamic(() => import('./results/HistoryPicker'), { ssr: false });
 const ScenarioComparisonPanel = dynamic(() => import('./results/ScenarioComparison'), { ssr: false });
 const MarketUrgency = dynamic(() => import('./results/MarketUrgency'), { ssr: false, loading: () => <AnalysisPanelSkeleton /> });
@@ -2001,7 +2002,14 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* ═══ TAB 3: COMPARABLES ═══ */}
         {activeTab === 'comparables' && (
         <>
-        {/* Comparable Deals */}
+        {/* Deal Transparency — raw data behind the estimate */}
+        {fullInputs && (
+          <FinancialErrorBoundary fallbackTitle="Deal data unavailable">
+            <DealTransparency inputs={fullInputs} tier={tier} onUpgrade={onUpgrade} />
+          </FinancialErrorBoundary>
+        )}
+
+        {/* Comparable Deals — AI-narrated analysis */}
         <div id="section-comparable-deals">
         {fullInputs && (
           <FinancialErrorBoundary fallbackTitle="Comparable Deals unavailable">
