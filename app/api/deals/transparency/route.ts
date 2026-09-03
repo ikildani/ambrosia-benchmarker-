@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
   // Fetch all deals for this TA (indexed query)
   const { data: allDeals, error } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, announced_date, phase_at_signing, modality, deal_type, territory, therapeutic_area, upfront_usd, milestones_total_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, source_type, confidence_score')
+    .select('id, licensor_name, licensee_name, asset_name, announced_date, phase_at_signing, modality, deal_type, territory, therapeutic_area, upfront_usd, milestones_total_usd, milestones_development_usd, milestones_regulatory_usd, milestones_commercial_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, source_type, confidence_score, indication_specific, indication_category, raw_text_excerpt')
     .eq('is_synthetic', false)
     .eq('therapeutic_area', ta)
     .not('therapeutic_area', 'eq', 'other')
@@ -179,6 +179,52 @@ export async function GET(request: NextRequest) {
   const strongCount = scored.filter(d => d.match_quality === 'strong').length;
   const withTermsCount = scored.filter(d => d.upfront_usd != null || d.total_deal_value_usd != null).length;
 
+  // Feature 2: Methodology confidence aggregates
+  const confidenceScores = scored.filter(d => d.confidence_score != null).map(d => d.confidence_score!);
+  const medianConfidence = confidenceScores.length > 0
+    ? confidenceScores.sort((a, b) => a - b)[Math.floor(confidenceScores.length / 2)]
+    : null;
+  const verifiedCount = scored.filter(d => d.confidence_score != null && d.confidence_score >= 85).length;
+  const bySource: Record<string, number> = {};
+  scored.forEach(d => {
+    const src = d.source_type || 'unknown';
+    bySource[src] = (bySource[src] || 0) + 1;
+  });
+  const dates = scored.filter(d => d.announced_date).map(d => d.announced_date!).sort();
+  const newestDeal = dates.length > 0 ? dates[dates.length - 1] : null;
+  const oldestDeal = dates.length > 0 ? dates[0] : null;
+  const coverageLevel = exactCount >= 20 ? 'strong' : exactCount >= 10 ? 'moderate' : 'limited';
+
+  // Feature 5: Quarterly trend for matching segment
+  const quarterlyMap = new Map<string, { upfronts: number[]; count: number }>();
+  const threeYearsAgo = new Date().getFullYear() - 3;
+  scored.forEach(d => {
+    if (!d.announced_date) return;
+    const year = parseInt(d.announced_date.substring(0, 4));
+    if (year < threeYearsAgo) return;
+    const month = parseInt(d.announced_date.substring(5, 7));
+    const q = `Q${Math.ceil(month / 3)}`;
+    const key = `${q} ${year}`;
+    if (!quarterlyMap.has(key)) quarterlyMap.set(key, { upfronts: [], count: 0 });
+    const entry = quarterlyMap.get(key)!;
+    entry.count++;
+    if (d.upfront_usd != null && d.upfront_usd > 0) entry.upfronts.push(d.upfront_usd / 1_000_000);
+  });
+  const quarterlyTrend = Array.from(quarterlyMap.entries())
+    .map(([label, data]) => {
+      const sorted = data.upfronts.sort((a, b) => a - b);
+      return {
+        label,
+        quarter: label.split(' ')[0],
+        year: parseInt(label.split(' ')[1]),
+        medianUpfront: sorted.length > 0 ? sorted[Math.floor(sorted.length / 2)] : null,
+        dealCount: data.count,
+      };
+    })
+    .sort((a, b) => a.year - b.year || a.quarter.localeCompare(b.quarter));
+
+  const confidence = { medianConfidence, verifiedCount, bySource, newestDeal, oldestDeal, coverageLevel };
+
   // Free users: stats only, no deals
   if (!hasPro) {
     return NextResponse.json({
@@ -189,13 +235,15 @@ export async function GET(request: NextRequest) {
       strongCount,
       withTermsCount,
       stats,
+      confidence,
+      quarterlyTrend,
       deals: [],
       methodology: 'Estimates are derived from weighted median benchmarks across all matching deals in the database. Start a Pro trial to see individual transactions.',
     });
   }
 
-  // Pro users: full deal list (top 50)
-  const deals: TransparencyDeal[] = dealPool.slice(0, 50).map(({ score, ...d }) => d);
+  // Pro users: full deal list (top 50) with extra fields for detail modal
+  const deals = dealPool.slice(0, 50).map(({ score, ...d }) => d);
 
   return NextResponse.json({
     success: true,
@@ -205,6 +253,8 @@ export async function GET(request: NextRequest) {
     strongCount,
     withTermsCount,
     stats,
+    confidence,
+    quarterlyTrend,
     deals,
     methodology: 'Estimates are derived from weighted median benchmarks calibrated against all matching deals. The comparable transactions below are the individual data points. Deals are scored by therapeutic area, development phase, modality, and recency.',
   });
