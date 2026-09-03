@@ -612,12 +612,6 @@ export async function runPressReleaseIngestion(
               extraction_model: 'claude-opus-4-6',
               extraction_timestamp: new Date().toISOString(),
               therapeutic_area: therapeuticArea,
-              licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
-              licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
-              licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
-              licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
-              cross_border: geo.cross_border,
-              deal_corridor: geo.deal_corridor,
               verification_status: 'pending',
               raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
             });
