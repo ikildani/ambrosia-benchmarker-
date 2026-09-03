@@ -51,7 +51,13 @@ export interface ValidationResult {
     | 'placeholder_asset_pattern'
     | 'licensor_modality_mismatch'
     | 'missing_critical_field'
-    | 'confidence_below_threshold';
+    | 'confidence_below_threshold'
+    | 'upfront_exceeds_total'
+    | 'unrealistic_deal_value'
+    | 'phase_value_mismatch'
+    | 'unrealistic_royalty'
+    | 'future_date'
+    | 'date_mismatch';
   /** Human-readable explanation for audit trail */
   rejectReason?: string;
 }
