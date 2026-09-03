@@ -38,28 +38,34 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
     onClose();
   };
 
+  const [trialError, setTrialError] = useState<string | null>(null);
+  const [trialSuccess, setTrialSuccess] = useState(false);
+
   const handleTrialStart = async () => {
     trackUpgradeCtaClick('paywall_trial');
     setIsTrialLoading(true);
+    setTrialError(null);
     try {
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/trial/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          purchaseType: 'subscription',
-          userId: user?.id,
-          email: user?.email,
-          trial: true,
-        }),
       });
       const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (data.success) {
+        setTrialSuccess(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else if (data.expired) {
+        setTrialError('Your free trial has ended. Subscribe to continue with Pro.');
+      } else if (data.alreadyActive) {
+        window.location.reload();
       } else {
-        captureClientError(data.error || 'Trial checkout failed', 'PaywallModal', { context: 'Trial checkout' });
+        setTrialError(data.error || 'Unable to start trial. Please try again.');
       }
     } catch {
-      captureClientError(new Error('Trial checkout failed'), 'PaywallModal', { context: 'Trial checkout network error' });
+      captureClientError(new Error('Trial start failed'), 'PaywallModal', { context: 'Trial start network error' });
+      setTrialError('Connection error. Please try again.');
     } finally {
       setIsTrialLoading(false);
     }

@@ -19,7 +19,7 @@ interface PricingProps {
 export default function Pricing({ currentTier, onSelectTier, userEmail, userId, initialPromoCode }: PricingProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isManageLoading, setIsManageLoading] = useState(false);
-  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('annual');
   const [error, setError] = useState<string | null>(null);
   const {
     promoCode, setPromoCode, promoStatus, promoDiscount, promoId, promoError,
@@ -69,32 +69,35 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
     }
   };
 
+  const [trialSuccess, setTrialSuccess] = useState(false);
+
   const handleStartTrial = async () => {
     setIsTrialLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/trial/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: userEmail,
-          userId: userId,
-          billingInterval,
-          trial: true,
-        }),
       });
       const data = await response.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (data.success) {
+        setTrialSuccess(true);
+        setTimeout(() => { window.location.reload(); }, 1500);
         return;
       }
 
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError('Unable to start trial. Please try again.');
+      if (data.expired) {
+        setError('Your free trial has ended. Subscribe to continue with Pro.');
+        return;
       }
+
+      if (data.alreadyActive) {
+        window.location.reload();
+        return;
+      }
+
+      setError(data.error || 'Unable to start trial. Please try again.');
     } catch (err) {
       captureClientError(err, 'Pricing', { context: 'Trial checkout request failed' });
       setError('Connection error. Please try again.');

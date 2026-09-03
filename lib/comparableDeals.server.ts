@@ -208,6 +208,10 @@ export interface EnrichedComparableDeal {
   dealType: string | null;
   territory: string | null;
   buyerTier: string | null;
+  licensorCountry: string | null;
+  licenseeCountry: string | null;
+  crossBorder: boolean;
+  dealCorridor: string | null;
   matchScore: number;
   matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; indication: boolean; recency: number };
   relevanceReasons: string[];
@@ -227,7 +231,7 @@ export async function findEnrichedComparableDeals(
 
   const { data: dbDeals } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name')
+    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name, licensor_country, licensee_country, cross_border, deal_corridor')
     .eq('terms_disclosed', true)
     .eq('is_synthetic', false)
     .not('total_deal_value_usd', 'is', null)
@@ -276,6 +280,10 @@ export async function findEnrichedComparableDeals(
         dealType: d.deal_type || null,
         territory: d.territory || null,
         buyerTier: classifyBuyerTier(d.licensee_name || ''),
+        licensorCountry: d.licensor_country || null,
+        licenseeCountry: d.licensee_country || null,
+        crossBorder: d.cross_border || false,
+        dealCorridor: d.deal_corridor || null,
         matchScore: Math.min(score / MAX_SCORE, 1),
         matchBreakdown: breakdown,
         relevanceReasons: reasons,

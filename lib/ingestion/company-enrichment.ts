@@ -164,13 +164,32 @@ export async function runCompanyEnrichment(
           errors.push(`RPC calculate_company_data_quality failed for ${company.name} (${company.id}): ${qualityError.message}`);
         }
 
-        // Step 2g: Update the company with derived fields
+        // Step 2g: Classify geography if not already set
+        const { data: companyGeoCheck } = await supabase
+          .from('companies')
+          .select('headquarters_country')
+          .eq('id', company.id)
+          .single();
+
+        let geoUpdate: Record<string, string> = {};
+        if (!companyGeoCheck?.headquarters_country) {
+          const { classifyCompanyCountry } = await import('./company-geography');
+          const geo = classifyCompanyCountry(company.name);
+          if (geo.confidence !== 'low') {
+            geoUpdate = {
+              headquarters_country: geo.country,
+              headquarters_region: geo.region,
+            };
+          }
+        }
+
+        // Step 2h: Update the company with derived fields
         const updatePayload: Record<string, unknown> = {
           acquisition_appetite: acquisitionAppetite,
           actively_acquiring: activelyAcquiring,
+          ...geoUpdate,
         };
 
-        // Only update modalities_primary if we have data
         if (modalitiesPrimary.length > 0) {
           updatePayload.modalities_primary = modalitiesPrimary;
         }

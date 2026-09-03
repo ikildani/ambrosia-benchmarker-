@@ -521,9 +521,29 @@ export async function runPressReleaseIngestion(
 
             // Find or create companies
             const { findOrCreateCompany, deriveTherapeuticArea } = await import('./sec-edgar');
+            const { classifyAndEnrichDeal, classifyCompanyCountry } = await import('./company-geography');
             const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
             const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
             const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
+            const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
+
+            // Update company HQ if not already set
+            if (licensorId) {
+              const licGeo = classifyCompanyCountry(deal.licensor);
+              if (licGeo.confidence !== 'low') {
+                await supabase.from('companies').update({
+                  headquarters_country: licGeo.country, headquarters_region: licGeo.region,
+                }).eq('id', licensorId).is('headquarters_country', null);
+              }
+            }
+            if (licenseeId) {
+              const licnGeo = classifyCompanyCountry(deal.licensee);
+              if (licnGeo.confidence !== 'low') {
+                await supabase.from('companies').update({
+                  headquarters_country: licnGeo.country, headquarters_region: licnGeo.region,
+                }).eq('id', licenseeId).is('headquarters_country', null);
+              }
+            }
 
             // Parse pub date (fallback to today if RSS item has no date)
             let announcedDate: string = new Date().toISOString().split('T')[0];
@@ -532,11 +552,20 @@ export async function runPressReleaseIngestion(
               if (!isNaN(d.getTime())) announcedDate = d.toISOString().split('T')[0];
             } catch { /* ignore */ }
 
+            const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
+            const geo = classifyAndEnrichDeal(deal.licensor || '', deal.licensee || '');
+
             const { error: insertError } = await supabase.from('deals').insert({
               licensor_name: deal.licensor,
               licensor_id: licensorId,
               licensee_name: deal.licensee,
               licensee_id: licenseeId,
+              licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+              licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+              licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+              licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+              cross_border: geo.cross_border,
+              deal_corridor: geo.deal_corridor,
               asset_name: deal.asset_name,
               asset_description: deal.asset_description,
               modality: deal.modality,
@@ -586,7 +615,12 @@ export async function runPressReleaseIngestion(
               extraction_model: 'claude-opus-4-6',
               extraction_timestamp: new Date().toISOString(),
               therapeutic_area: therapeuticArea,
-              // Phase 4 (2026-04-14): explicit pending status + audit excerpt
+              licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+              licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+              licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+              licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+              cross_border: geo.cross_border,
+              deal_corridor: geo.deal_corridor,
               verification_status: 'pending',
               raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
             });

@@ -34,6 +34,8 @@ export default function ProCheckoutButton({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  const [trialSuccess, setTrialSuccess] = useState(false);
+
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       pendingCheckoutRef.current = true;
@@ -45,6 +47,22 @@ export default function ProCheckoutButton({
     setError(null);
 
     try {
+      if (trial) {
+        const res = await fetch('/api/trial/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setTrialSuccess(true);
+          setTimeout(() => { window.location.reload(); }, 1500);
+          return;
+        }
+        if (data.alreadyActive) { window.location.reload(); return; }
+        setError(data.error || 'Unable to start trial.');
+        return;
+      }
+
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -53,7 +71,6 @@ export default function ProCheckoutButton({
           userId: user?.id,
           billingInterval,
           promoCode: promoCode.trim() || undefined,
-          ...(trial && { trial: true }),
         }),
       });
 
