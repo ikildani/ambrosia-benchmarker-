@@ -471,7 +471,7 @@ export async function indexAssetUniverse(
       partnerships_resolved: partnershipsResolved,
       timed_out: timedOut,
     },
-  }).then(() => {}).catch(() => {});
+  });
 
   console.log(`[asset-universe] Done: ${companiesProcessed} companies, ${assetsIndexed} assets indexed, ${assetsUpdated} updated, ${partnershipsResolved} partnerships resolved, ${errors.length} errors, ${duration}s${timedOut ? ' (timed out)' : ''}`);
 
