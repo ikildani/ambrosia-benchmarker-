@@ -357,7 +357,7 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
               <Tooltip
                 contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', fontSize: '11px' }}
                 labelStyle={{ color: '#e2e8f0' }}
-                formatter={(v: number) => [`$${Math.round(v)}M`, 'Median Upfront']}
+                formatter={(v: number | undefined) => [`$${Math.round(v ?? 0)}M`, 'Median Upfront']}
               />
               <Area type="monotone" dataKey="medianUpfront" stroke="#0EA5A5" strokeWidth={2} fill="url(#trendFill)" dot={{ r: 2, fill: '#0EA5A5' }} />
             </AreaChart>
