@@ -552,9 +552,6 @@ export async function runPressReleaseIngestion(
               if (!isNaN(d.getTime())) announcedDate = d.toISOString().split('T')[0];
             } catch { /* ignore */ }
 
-            const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
-            const geo = classifyAndEnrichDeal(deal.licensor || '', deal.licensee || '');
-
             const { error: insertError } = await supabase.from('deals').insert({
               licensor_name: deal.licensor,
               licensor_id: licensorId,
