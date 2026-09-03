@@ -2005,7 +2005,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* Deal Transparency — raw data behind the estimate */}
         {fullInputs && (
           <FinancialErrorBoundary fallbackTitle="Deal data unavailable">
-            <DealTransparency inputs={fullInputs} tier={tier} onUpgrade={onUpgrade} />
+            <DealTransparency inputs={fullInputs} tier={tier} onUpgrade={onUpgrade} calculationMedian={terms.upfront.median} />
           </FinancialErrorBoundary>
         )}
 
