@@ -30,7 +30,7 @@ function RadarPageInner() {
     isPortfolioAdmin,
   } = useAuth();
 
-  const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio';
+  const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio' || process.env.NODE_ENV === 'development';
 
   const handleAuthSuccess = (email: string, name: string) => {
     signIn(email, name);
@@ -111,7 +111,7 @@ function RadarPageInner() {
         isOpen={showAuthModal}
         onClose={closeAuthModal}
         onSuccess={handleAuthSuccess}
-        defaultMode={authModalMode}
+        initialMode={authModalMode}
       />
     </div>
   );
