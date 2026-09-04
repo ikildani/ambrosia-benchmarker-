@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getAllPseoSlugs, getPseoBySlug, getRelatedPseoPages, formatDollar } from '@/lib/pseoPages';
 import { createServiceClient } from '@/lib/supabase/server';
 import ReportCTA from '@/components/ReportCTA';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -301,7 +302,7 @@ export default async function PseoPage({ params }: PageProps) {
           <div className="max-w-3xl mx-auto">
             <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Methodology</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              This analysis draws from the Ambrosia Ventures proprietary deal database (1,600+ verified biopharma transactions, {yearRange}). All deal terms are primary-source-verified from SEC EDGAR (10-K, 10-Q, 8-K filings), FTC pre-merger notifications, FDA Orange Book, and company press releases. No secondary-source or scraped data is included. Medians are calculated from deals with disclosed financial terms only.
+              This analysis draws from the Ambrosia Ventures proprietary deal database ({DEAL_STATS.TOTAL_DEALS} verified biopharma transactions, {yearRange}). All deal terms are primary-source-verified from SEC EDGAR (10-K, 10-Q, 8-K filings), FTC pre-merger notifications, FDA Orange Book, and company press releases. No secondary-source or scraped data is included. Medians are calculated from deals with disclosed financial terms only.
             </p>
           </div>
         </section>

@@ -787,7 +787,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>One of the most significant consequences of the termination wave is a measurable shift in large pharma deal preference from partnerships to acquisitions. The logic is straightforward: acquisitions, while more expensive upfront, eliminate the risk of partnership termination entirely. When you own the asset outright, there is no partner to walk away.</p>
 
-<p>Based on our analysis of deal flow across 847 oncology transactions and 1,600+ deals in other TAs, the data supports this shift. Biopharma M&A surged 133% in 2025, reaching $133 billion in disclosed transaction value — the highest annual total since 2019. This surge occurred simultaneously with the partnership termination wave, and the correlation is not coincidental. Several of the largest 2025 acquisitions were explicitly framed by the acquirers as alternatives to licensing structures:</p>
+<p>Based on our analysis of deal flow across 847 oncology transactions and ${DEAL_STATS.TOTAL_DEALS} deals in other TAs, the data supports this shift. Biopharma M&A surged 133% in 2025, reaching $133 billion in disclosed transaction value — the highest annual total since 2019. This surge occurred simultaneously with the partnership termination wave, and the correlation is not coincidental. Several of the largest 2025 acquisitions were explicitly framed by the acquirers as alternatives to licensing structures:</p>
 
 <table>
 <thead>

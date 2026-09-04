@@ -5,7 +5,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide | Ambrosia Ventures',
-  description: 'Learn how Monte Carlo simulation quantifies uncertainty in biotech deal valuation. Compare with rNPV, see real probability distributions from 1,600+ deals, and run your own scenarios on Solidus. Free simulator included.',
+  description: `Learn how Monte Carlo simulation quantifies uncertainty in biotech deal valuation. Compare with rNPV, see real probability distributions from ${DEAL_STATS.TOTAL_DEALS} deals, and run your own scenarios on Solidus. Free simulator included.`,
   keywords: [
     'Monte Carlo simulation biotech',
     'Monte Carlo valuation pharma',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide',
-    description: 'How Monte Carlo simulation quantifies uncertainty in biotech deal valuation, with real distributions from 1,600+ deals.',
+    description: `How Monte Carlo simulation quantifies uncertainty in biotech deal valuation, with real distributions from ${DEAL_STATS.TOTAL_DEALS} deals.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/monte-carlo-biotech-valuation',
     images: [{ url: '/api/og?title=Monte%20Carlo%20Simulation&subtitle=Biotech%20Valuation%20Guide&type=landing', width: 1200, height: 630 }],
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide',
-    description: 'How Monte Carlo simulation quantifies uncertainty in biotech deal valuation, with real distributions from 1,600+ deals.',
+    description: `How Monte Carlo simulation quantifies uncertainty in biotech deal valuation, with real distributions from ${DEAL_STATS.TOTAL_DEALS} deals.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/monte-carlo-biotech-valuation',
@@ -43,7 +43,7 @@ export default function MonteCarloBiotechValuationPage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide',
-    description: 'How Monte Carlo simulation quantifies uncertainty in biotech deal valuation, with real probability distributions from 1,600+ deals.',
+    description: `How Monte Carlo simulation quantifies uncertainty in biotech deal valuation, with real probability distributions from ${DEAL_STATS.TOTAL_DEALS} deals.`,
     author: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',

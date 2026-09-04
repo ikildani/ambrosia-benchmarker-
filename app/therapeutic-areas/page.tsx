@@ -1,13 +1,14 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Benchmarks by Therapeutic Area 2026 | Solidus',
-  description: 'Deal benchmarks across 12 TAs: oncology, neurology, immunology, rare disease & more. Licensing, M&A, royalty data from 1,600+ verified deals.',
+  description: `Deal benchmarks across 12 TAs: oncology, neurology, immunology, rare disease & more. Licensing, M&A, royalty data from ${DEAL_STATS.TOTAL_DEALS} verified deals.`,
   keywords: ['therapeutic area deal benchmarks', 'biopharma licensing deals 2026', 'pharma M&A benchmarks', 'drug deal royalty rates', 'therapeutic area comparison'],
   openGraph: {
     title: 'Biopharma Deal Benchmarks by Therapeutic Area 2026 | Solidus',
-    description: 'Deal benchmarks across 12 TAs: oncology, neurology, immunology, rare disease & more. Licensing, M&A, royalty data from 1,600+ verified deals.',
+    description: `Deal benchmarks across 12 TAs: oncology, neurology, immunology, rare disease & more. Licensing, M&A, royalty data from ${DEAL_STATS.TOTAL_DEALS} verified deals.`,
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/therapeutic-areas',
     siteName: 'Solidus by Ambrosia Ventures',
@@ -44,7 +45,7 @@ export default function TherapeuticAreasIndex() {
           Biopharma Deal Benchmarks by Therapeutic Area
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 mb-10">
-          Explore licensing, acquisition, and collaboration deal terms across 12 therapeutic areas, powered by 1,600+ verified transactions with disclosed financial terms.
+          Explore licensing, acquisition, and collaboration deal terms across 12 therapeutic areas, powered by {DEAL_STATS.TOTAL_DEALS} verified transactions with disclosed financial terms.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {TAS.map(ta => (
@@ -69,7 +70,7 @@ export default function TherapeuticAreasIndex() {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "Biopharma Deal Benchmarks by Therapeutic Area 2026",
-        "description": "Deal benchmarks across 12 therapeutic areas including oncology, neurology, immunology, rare disease, and more. Licensing, M&A, and royalty data from 1,600+ verified biopharma transactions.",
+        "description": `Deal benchmarks across 12 therapeutic areas including oncology, neurology, immunology, rare disease, and more. Licensing, M&A, and royalty data from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions.`,
         "url": "https://solidus.ambrosiaventures.co/therapeutic-areas",
         "isPartOf": { "@type": "WebSite", "name": "Solidus", "url": "https://solidus.ambrosiaventures.co" },
         "breadcrumb": {

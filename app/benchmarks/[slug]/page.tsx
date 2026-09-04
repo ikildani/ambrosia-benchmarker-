@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { ProGate } from '@/components/seo/ProGate';
+import { DEAL_STATS } from '@/lib/config/constants';
 import {
   getAllBenchmarkSlugs,
   getBenchmarkBySlug,
@@ -350,7 +351,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
               Ready to Calculate Your Deal Terms?
             </h2>
             <p className="text-slate-300 mb-8">
-              Get instant, customized benchmarks based on real market data from 1,600+ biopharma licensing deals.
+              Get instant, customized benchmarks based on real market data from {DEAL_STATS.TOTAL_DEALS} biopharma licensing deals.
             </p>
             <Link
               href={calculatorUrl}

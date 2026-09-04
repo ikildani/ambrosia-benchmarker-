@@ -17,7 +17,7 @@
  *  to fill their NSCLC patent cliff gap."
  *
  * No other platform can do this because no one else has:
- *   - The 1,600+ deal comp database
+ *   - The verified deal comp database
  *   - The clinical asset universe
  *   - The licensing signal scores
  *   - The competitive intelligence

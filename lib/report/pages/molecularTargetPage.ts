@@ -1,5 +1,6 @@
 import { pageHeader, pageFooter, COLORS } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export function renderMolecularTargetPage(data: PDFReportData, meta: ReportMeta): string {
   const tra = (data as any).financialModel?.targetRouteAnalysis;
@@ -112,7 +113,7 @@ export function renderMolecularTargetPage(data: PDFReportData, meta: ReportMeta)
 
       <!-- Methodology -->
       <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.6;">
-        <strong>Target Validation Methodology:</strong> PoS modifiers grounded in target-class approval history from FDA/EMA databases (2014&ndash;2026). Validated targets (at least one approved drug) receive a positive PoS uplift (1.05&ndash;1.30x) reflecting reduced biological risk. Novel targets receive a penalty (0.45&ndash;0.80x) reflecting higher attrition rates for first-in-target programs. Deal premiums derived from matched-pair analysis of target-enriched vs. undifferentiated deals in the Ambrosia transaction database (1,600+ deals). Combination effects calibrated against approved multi-target drugs and disclosed bispecific/ADC deal economics.
+        <strong>Target Validation Methodology:</strong> PoS modifiers grounded in target-class approval history from FDA/EMA databases (2014&ndash;2026). Validated targets (at least one approved drug) receive a positive PoS uplift (1.05&ndash;1.30x) reflecting reduced biological risk. Novel targets receive a penalty (0.45&ndash;0.80x) reflecting higher attrition rates for first-in-target programs. Deal premiums derived from matched-pair analysis of target-enriched vs. undifferentiated deals in the Ambrosia transaction database (${DEAL_STATS.TOTAL_DEALS} deals). Combination effects calibrated against approved multi-target drugs and disclosed bispecific/ADC deal economics.
       </div>
 
       ${pageFooter(meta.reportId)}

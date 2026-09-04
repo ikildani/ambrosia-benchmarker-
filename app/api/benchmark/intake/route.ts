@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -144,7 +145,7 @@ export async function POST(request: NextRequest) {
             <ul style="line-height: 1.8; color: #64748b;">
               <li>${body.modalities.length * body.dealTypes.length} deal term calculations</li>
               <li>AI-written strategic narrative and negotiation playbook</li>
-              <li>Comparable transactions from our database of 1,600+ deals</li>
+              <li>Comparable transactions from our database of ${DEAL_STATS.TOTAL_DEALS} deals</li>
               <li>Partner matching with intent scoring</li>
               <li>Full financial model suite (rNPV, Monte Carlo, scenarios)</li>
               ${body.whiteLabel ? `<li>White-label branding under ${body.brandName || 'your firm name'}</li>` : ''}
