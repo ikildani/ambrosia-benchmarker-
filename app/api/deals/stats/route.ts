@@ -24,7 +24,7 @@ export async function GET() {
           .select('id', { count: 'exact', head: true })
           .eq('therapeutic_area', ta)
           .eq('is_synthetic', false)
-          .not('verification_status', 'in', '("rejected","flagged")');
+          .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")');
         return { ta, count: count || 0 };
       })
     );
