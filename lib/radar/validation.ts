@@ -81,8 +81,7 @@ export function validateAssetData(asset: Record<string, unknown>): ValidationRes
 const VALID_SIGNAL_TYPES = new Set([
   'cash_runway', 'bd_executive_hire', 'conference_activity',
   'regulatory_milestone', 'competitor_failure', 'management_commentary',
-  'patent_filing', 'publication_velocity', 'funding_round',
-  'workforce_reduction', 'strategic_review',
+  'patent_filing', 'publication_velocity', 'strategic_review',
 ]);
 
 export function validateSignalData(signal: Record<string, unknown>): ValidationResult {
