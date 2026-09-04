@@ -62,7 +62,7 @@ function RadarPageInner() {
           isOpen={showAuthModal}
           onClose={closeAuthModal}
           onSuccess={handleAuthSuccess}
-          defaultMode={authModalMode}
+          initialMode={authModalMode}
         />
       </>
     );
