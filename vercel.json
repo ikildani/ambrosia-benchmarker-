@@ -349,6 +349,18 @@
     {
       "path": "/api/cron/asset-universe",
       "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/licensing-signals",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/deal-thesis",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/mandate-matcher",
+      "schedule": "0 10 * * *"
     }
   ]
 }

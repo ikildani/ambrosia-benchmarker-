@@ -74,6 +74,7 @@ export default function Header({
   const isDashboardPage = pathname === '/dashboard';
   const isPulsePage = pathname === '/pulse';
   const isCompaniesPage = pathname?.startsWith('/companies');
+  const isRadarPage = pathname?.startsWith('/radar') || false;
   const isIntelligencePage = pathname?.startsWith('/playbook') || pathname?.startsWith('/trade-space') || pathname?.startsWith('/simulator') || pathname?.startsWith('/intelligence') || pathname?.startsWith('/methodology/engine') || false;
   const [intelDropdownOpen, setIntelDropdownOpen] = useState(false);
 
@@ -198,6 +199,11 @@ export default function Header({
       label: 'Companies',
       href: '/companies',
       isActive: isCompaniesPage,
+    },
+    {
+      label: 'Asset Radar',
+      href: '/radar',
+      isActive: isRadarPage,
     },
     {
       label: 'Intelligence',
