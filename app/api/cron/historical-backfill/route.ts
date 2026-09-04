@@ -316,7 +316,8 @@ function isDomainTrusted(url: string): boolean {
 
 async function verifySourceUrl(url: string): Promise<boolean> {
   if (!url || !url.startsWith('http')) return false;
-  if (isDomainTrusted(url)) return true;
+  // Always HTTP-check URLs — trusted domains get higher confidence scoring
+  // but must still pass verification to prevent hallucinated URLs
   const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
   try {
     const response = await fetchWithTimeout(url, {
