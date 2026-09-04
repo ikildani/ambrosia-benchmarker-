@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
     .insert({
       asset_id,
       user_id: auth.userId,
-      user_name: auth.userName || null,
-      user_email: auth.userEmail || null,
+      user_name: null,
+      user_email: auth.email || null,
       note_text,
       note_type: note_type || 'general',
     })
