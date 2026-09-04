@@ -47,7 +47,6 @@ const TA_DISPLAY_NAMES: Record<string, string> = {
 
 function DatabaseCoverageSection() {
   const [stats, setStats] = useState<{ ta: string; deals: number }[]>([]);
-  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     fetch('/api/deals/stats')
@@ -59,11 +58,9 @@ function DatabaseCoverageSection() {
             .sort(([, a], [, b]) => (b as number) - (a as number))
             .map(([ta, deals]) => ({ ta, deals: deals as number }));
           setStats(sorted);
-          setTotal(sorted.reduce((sum, s) => sum + s.deals, 0));
         }
       })
       .catch(() => {
-        // Fallback to static data if API unavailable
         const fallback = [
           { ta: 'oncology', deals: 433 }, { ta: 'neurology', deals: 130 },
           { ta: 'immunology', deals: 116 }, { ta: 'rareDisease', deals: 124 },
@@ -73,7 +70,6 @@ function DatabaseCoverageSection() {
           { ta: 'gastroenterology', deals: 62 }, { ta: 'hematology', deals: 54 },
         ];
         setStats(fallback);
-        setTotal(fallback.reduce((sum, s) => sum + s.deals, 0));
       });
   }, []);
 
@@ -86,7 +82,7 @@ function DatabaseCoverageSection() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{total.toLocaleString()} verified transactions across {stats.length} therapeutic areas</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{DEAL_STATS.TOTAL_DEALS} verified transactions across {stats.length} therapeutic areas</p>
           </div>
           <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
             Updated daily from SEC filings, press releases, FTC pre-merger filings & regulatory databases
