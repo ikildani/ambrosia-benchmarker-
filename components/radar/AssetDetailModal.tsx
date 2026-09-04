@@ -465,9 +465,9 @@ function CompetitionTab({ data }: { data: IntelData | null }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{String(s.evidence_text)}</p>
-                      {s.competitor_name && (
+                      {s.competitor_name ? (
                         <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{String(s.competitor_name)} · Intensity {intensity}/100</p>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 );
@@ -529,14 +529,14 @@ function AcquirersTab({ data }: { data: OpportunityData | null }) {
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Timing {timing}</span>
               </div>
-              {o.predicted_upfront_mid && (
+              {o.predicted_upfront_mid ? (
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                   <span className="text-[10px] text-slate-500 dark:text-slate-400">
                     {formatCurrency(o.predicted_upfront_low)}–{formatCurrency(o.predicted_upfront_high)} upfront
                   </span>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* Rationale */}
@@ -544,30 +544,30 @@ function AcquirersTab({ data }: { data: OpportunityData | null }) {
 
             {/* Drivers + risks */}
             <div className="grid grid-cols-2 gap-3 mt-3">
-              {(o.strategic_drivers as string[])?.length > 0 && (
+              {(o.strategic_drivers as string[])?.length > 0 ? (
                 <div>
                   <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider mb-1">Drivers</p>
                   {(o.strategic_drivers as string[]).slice(0, 3).map((d, j) => (
                     <p key={j} className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">+ {d}</p>
                   ))}
                 </div>
-              )}
-              {(o.risk_factors as string[])?.length > 0 && (
+              ) : null}
+              {(o.risk_factors as string[])?.length > 0 ? (
                 <div>
                   <p className="text-[10px] text-red-500 dark:text-red-400 font-semibold uppercase tracking-wider mb-1">Risks</p>
                   {(o.risk_factors as string[]).slice(0, 3).map((r, j) => (
                     <p key={j} className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">– {r}</p>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* Comp basis */}
-            {Number(o.comp_count || 0) > 0 && (
+            {Number(o.comp_count || 0) > 0 ? (
               <p className="text-[10px] text-slate-400 mt-3 pt-2 border-t border-slate-100 dark:border-slate-700/30">
-                Based on {o.comp_count as number} comparable transactions · Confidence {o.confidence as number}/100
+                Based on {Number(o.comp_count)} comparable transactions · Confidence {Number(o.confidence)}/100
               </p>
-            )}
+            ) : null}
           </div>
         );
       })}
