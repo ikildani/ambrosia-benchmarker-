@@ -36,6 +36,15 @@ function RadarPageInner() {
 
   const [view, setView] = useState<RadarView>('feed');
 
+  // Asset Radar is dev-only until launch
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
+        <p className="text-sm">Coming soon.</p>
+      </div>
+    );
+  }
+
   const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
   const handleAuthSuccess = (email: string, name: string) => {

@@ -200,11 +200,11 @@ export default function Header({
       href: '/companies',
       isActive: isCompaniesPage,
     },
-    {
+    ...(process.env.NODE_ENV === 'development' ? [{
       label: 'Asset Radar',
       href: '/radar',
       isActive: isRadarPage,
-    },
+    }] : []),
     {
       label: 'Intelligence',
       href: '/playbook',
