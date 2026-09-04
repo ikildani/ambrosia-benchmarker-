@@ -25,6 +25,7 @@ interface DealData {
   indication_specific?: string | null;
   indication_category?: string | null;
   raw_text_excerpt?: string | null;
+  url_status?: 'alive' | 'dead' | 'unknown' | null;
 }
 
 interface Props {
@@ -158,7 +159,7 @@ export default function DealDetailModal({ deal, userPhase, onClose }: Props) {
                 Confidence: <span className={`font-mono font-semibold ${deal.confidence_score >= 85 ? 'text-emerald-400' : deal.confidence_score >= 70 ? 'text-amber-400' : 'text-red-400'}`}>{deal.confidence_score}/100</span>
               </span>
             )}
-            {deal.source_url && (
+            {deal.source_url && deal.url_status !== 'dead' && (
               <a
                 href={deal.source_url}
                 target="_blank"
@@ -168,13 +169,20 @@ export default function DealDetailModal({ deal, userPhase, onClose }: Props) {
                 View source filing
               </a>
             )}
+            {deal.source_url && deal.url_status === 'dead' && (
+              <span className="ml-auto text-[11px] text-slate-500 line-through" title={deal.source_url}>
+                Source no longer available
+              </span>
+            )}
           </div>
 
-          {/* Raw Text Excerpt */}
+          {/* Raw Text Excerpt — promoted when source URL is dead */}
           {deal.raw_text_excerpt && (
             <div className="mb-6">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Source Excerpt</p>
-              <blockquote className="text-xs text-slate-400 leading-relaxed p-3 bg-slate-950/50 border-l-2 border-teal-500/30 rounded-r-lg italic">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">
+                {deal.url_status === 'dead' ? 'Source Evidence' : 'Source Excerpt'}
+              </p>
+              <blockquote className={`text-xs text-slate-400 leading-relaxed p-3 bg-slate-950/50 border-l-2 rounded-r-lg italic ${deal.url_status === 'dead' ? 'border-amber-500/50' : 'border-teal-500/30'}`}>
                 &ldquo;{deal.raw_text_excerpt}&rdquo;
               </blockquote>
             </div>

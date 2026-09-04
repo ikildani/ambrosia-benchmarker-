@@ -34,6 +34,7 @@ interface TransparencyDeal {
   indication_specific?: string | null;
   indication_category?: string | null;
   raw_text_excerpt?: string | null;
+  url_status?: 'alive' | 'dead' | 'unknown' | null;
 }
 
 interface Stats { min: number; p25: number; median: number; p75: number; max: number }
@@ -461,11 +462,15 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
                         <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full border ${badge.cls}`}>{badge.label}</span>
                       </td>
                       <td className="px-3 py-3 text-center">
-                        {deal.source_url ? (
+                        {deal.source_url && deal.url_status !== 'dead' ? (
                           <a href={deal.source_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
                             className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
                             {deal.source_type === 'sec_8k' ? 'SEC' : deal.source_type === 'sec_10k' ? '10-K' : deal.source_type === 'press_release' ? 'PR' : 'Link'}
                           </a>
+                        ) : deal.source_url && deal.url_status === 'dead' ? (
+                          <span className="text-slate-600 line-through text-[10px]" title="Source no longer available">
+                            {deal.source_type === 'sec_8k' ? 'SEC' : deal.source_type === 'sec_10k' ? '10-K' : deal.source_type === 'press_release' ? 'PR' : 'Link'}
+                          </span>
                         ) : <span className="text-slate-600 text-[10px]">Internal</span>}
                       </td>
                     </tr>

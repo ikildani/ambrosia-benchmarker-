@@ -83,6 +83,7 @@ interface TransparencyDeal {
   source_type: string | null;
   confidence_score: number | null;
   match_quality: 'exact' | 'strong' | 'partial';
+  url_status?: string | null;
 }
 
 function computeStats(values: number[]): { min: number; p25: number; median: number; p75: number; max: number } | null {
@@ -120,7 +121,7 @@ export async function GET(request: NextRequest) {
   // Fetch all deals for this TA (indexed query)
   const { data: allDeals, error } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, announced_date, phase_at_signing, modality, deal_type, territory, therapeutic_area, upfront_usd, milestones_total_usd, milestones_development_usd, milestones_regulatory_usd, milestones_commercial_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, source_type, confidence_score, indication_specific, indication_category, raw_text_excerpt')
+    .select('id, licensor_name, licensee_name, asset_name, announced_date, phase_at_signing, modality, deal_type, territory, therapeutic_area, upfront_usd, milestones_total_usd, milestones_development_usd, milestones_regulatory_usd, milestones_commercial_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, source_type, confidence_score, indication_specific, indication_category, raw_text_excerpt, url_status')
     .eq('is_synthetic', false)
     .eq('therapeutic_area', ta)
     .not('therapeutic_area', 'eq', 'other')
