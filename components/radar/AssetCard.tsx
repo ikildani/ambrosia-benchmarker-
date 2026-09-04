@@ -31,141 +31,189 @@ interface Props {
   onClick: (id: string) => void;
 }
 
-const PHASE_COLORS: Record<string, string> = {
-  'Early Phase 1': 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-  'Phase 1': 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  'Phase 1/Phase 2': 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  'Phase 2': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-  'Phase 2/Phase 3': 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
-  'Phase 3': 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-  'Phase 4': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-  'Approved': 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+const PHASE_COLORS: Record<string, { bg: string; text: string; glow: string }> = {
+  'Early Phase 1': { bg: 'bg-slate-500/10', text: 'text-slate-600 dark:text-slate-300', glow: '' },
+  'Phase 1':       { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-300', glow: '' },
+  'Phase 1/Phase 2': { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-300', glow: '' },
+  'Phase 2':       { bg: 'bg-indigo-500/10', text: 'text-indigo-600 dark:text-indigo-300', glow: '' },
+  'Phase 2/Phase 3': { bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-300', glow: '' },
+  'Phase 3':       { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-300', glow: 'ring-1 ring-amber-500/20' },
+  'Phase 4':       { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-300', glow: '' },
+  'Approved':      { bg: 'bg-green-500/10', text: 'text-green-600 dark:text-green-300', glow: 'ring-1 ring-green-500/20' },
 };
 
-const PARTNERSHIP_LABELS: Record<string, { label: string; className: string }> = {
-  unpartnered: { label: 'Unpartnered', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
-  partially_partnered: { label: 'Partial Rights', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  partnered: { label: 'Partnered', className: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400' },
-  unknown: { label: 'Unknown', className: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400' },
+const PARTNERSHIP_CONFIG: Record<string, { label: string; dot: string; text: string }> = {
+  unpartnered:         { label: 'Unpartnered', dot: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
+  partially_partnered: { label: 'Partial Rights', dot: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400' },
+  partnered:           { label: 'Partnered', dot: 'bg-slate-400', text: 'text-slate-500 dark:text-slate-400' },
+  unknown:             { label: 'Unknown', dot: 'bg-slate-300', text: 'text-slate-400 dark:text-slate-500' },
 };
 
 function formatTA(ta: string): string {
-  return ta.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  return ta.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function formatModality(m: string): string {
   const map: Record<string, string> = {
-    small_molecule: 'Small Molecule',
-    monoclonal_antibody: 'mAb',
-    adc: 'ADC',
-    bispecific: 'Bispecific',
-    car_t: 'CAR-T',
-    cell_therapy: 'Cell Therapy',
-    gene_therapy: 'Gene Therapy',
-    mrna: 'mRNA',
-    peptide: 'Peptide',
-    oligonucleotide: 'Oligo',
-    vaccine: 'Vaccine',
-    radiopharmaceutical: 'Radiopharma',
+    small_molecule: 'Small Molecule', monoclonal_antibody: 'mAb', adc: 'ADC',
+    bispecific: 'Bispecific', car_t: 'CAR-T', cell_therapy: 'Cell Therapy',
+    gene_therapy: 'Gene Therapy', mrna: 'mRNA', peptide: 'Peptide',
+    oligonucleotide: 'Oligo', vaccine: 'Vaccine', radiopharmaceutical: 'Radiopharma',
   };
-  return map[m] || m.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  return map[m] || m.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function ScoreBar({ value, label, color }: { value: number; label: string; color: string }) {
+function ScoreGauge({ value, label, color, glowColor }: { value: number; label: string; color: string; glowColor: string }) {
+  const pct = Math.min(100, Math.max(0, value));
+  const circumference = 2 * Math.PI * 18;
+  const offset = circumference - (pct / 100) * circumference;
+
   return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="text-slate-500 dark:text-slate-400 w-20 shrink-0">{label}</span>
-      <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${color}`}
-          style={{ width: `${Math.min(100, value)}%` }}
-        />
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative w-11 h-11">
+        <svg className="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r="18" fill="none" strokeWidth="3"
+            className="stroke-slate-100 dark:stroke-slate-700" />
+          <circle cx="22" cy="22" r="18" fill="none" strokeWidth="3"
+            strokeLinecap="round"
+            className={color}
+            style={{ strokeDasharray: circumference, strokeDashoffset: offset, transition: 'stroke-dashoffset 0.8s ease' }}
+          />
+        </svg>
+        <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold tabular-nums ${glowColor}`}>
+          {Math.round(pct)}
+        </span>
       </div>
-      <span className="text-slate-600 dark:text-slate-300 w-8 text-right font-medium tabular-nums">
-        {Math.round(value)}
-      </span>
+      <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">{label}</span>
     </div>
   );
 }
 
 export function AssetCard({ asset, onClick }: Props) {
-  const partnerInfo = PARTNERSHIP_LABELS[asset.partnership_status] || PARTNERSHIP_LABELS.unknown;
-  const phaseColor = PHASE_COLORS[asset.phase || ''] || 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
+  const partner = PARTNERSHIP_CONFIG[asset.partnership_status] || PARTNERSHIP_CONFIG.unknown;
+  const phaseStyle = PHASE_COLORS[asset.phase || ''] || { bg: 'bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', glow: '' };
+  const isHighIntent = asset.licensing_intent_score >= 60;
 
   return (
     <button
       onClick={() => onClick(asset.id)}
-      className="w-full text-left rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 p-5 hover:border-amber-300 dark:hover:border-amber-600/50 hover:shadow-md transition-all duration-200 group"
+      className={`w-full text-left rounded-xl border bg-white dark:bg-slate-800/60 p-5 transition-all duration-200 group relative overflow-hidden ${
+        isHighIntent
+          ? 'border-amber-200/60 dark:border-amber-700/30 hover:border-amber-300 dark:hover:border-amber-600/50 hover:shadow-lg hover:shadow-amber-500/5'
+          : 'border-slate-200 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md'
+      }`}
     >
-      {/* Header */}
+      {/* High-intent shimmer accent */}
+      {isHighIntent && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+      )}
+
+      {/* Row 1: Name + Phase + Partnership */}
       <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="min-w-0">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors leading-tight">
             {asset.asset_name}
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-            {asset.company_name}
-            {asset.originator_country && (
-              <span className="text-slate-400 dark:text-slate-500"> · {asset.originator_country}</span>
-            )}
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {asset.phase && (
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${phaseColor}`}>
-              {asset.phase}
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+              {asset.company_name}
             </span>
-          )}
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${partnerInfo.className}`}>
-            {partnerInfo.label}
+            {asset.originator_country && (
+              <>
+                <span className="text-slate-300 dark:text-slate-600 text-xs">·</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">{asset.originator_country}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Partnership indicator */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className={`w-1.5 h-1.5 rounded-full ${partner.dot}`} />
+          <span className={`text-[10px] font-semibold uppercase tracking-wider ${partner.text}`}>
+            {partner.label}
           </span>
         </div>
       </div>
 
-      {/* Tags */}
+      {/* Row 2: Tags */}
       <div className="flex flex-wrap gap-1.5 mb-4">
+        {asset.phase && (
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${phaseStyle.bg} ${phaseStyle.text} ${phaseStyle.glow}`}>
+            {asset.phase}
+          </span>
+        )}
         {asset.therapeutic_area && (
-          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700/60 text-xs text-slate-600 dark:text-slate-300">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300">
             {formatTA(asset.therapeutic_area)}
           </span>
         )}
         {asset.modality && (
-          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700/60 text-xs text-slate-600 dark:text-slate-300">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300">
             {formatModality(asset.modality)}
           </span>
         )}
-        {asset.indication_specific && (
-          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700/60 text-xs text-slate-600 dark:text-slate-300 truncate max-w-[200px]">
-            {asset.indication_specific.replace(/_/g, ' ')}
-          </span>
-        )}
         {asset.partner_company_name && (
-          <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20 text-xs text-amber-700 dark:text-amber-300">
-            Partner: {asset.partner_company_name}
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 dark:bg-amber-900/15 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200/40 dark:ring-amber-700/30">
+            {asset.partner_company_name}
           </span>
         )}
       </div>
 
-      {/* Scores */}
-      <div className="space-y-1.5">
-        <ScoreBar value={asset.licensing_intent_score} label="Intent" color="bg-amber-500" />
-        <ScoreBar value={asset.deal_readiness_score} label="Readiness" color="bg-teal-500" />
-        <ScoreBar value={asset.competitive_heat} label="Heat" color="bg-rose-500" />
+      {/* Row 3: Score gauges */}
+      <div className="flex items-center justify-between px-2">
+        <ScoreGauge
+          value={asset.licensing_intent_score}
+          label="Intent"
+          color="stroke-amber-500"
+          glowColor="text-amber-600 dark:text-amber-400"
+        />
+        <ScoreGauge
+          value={asset.deal_readiness_score}
+          label="Ready"
+          color="stroke-teal-500"
+          glowColor="text-teal-600 dark:text-teal-400"
+        />
+        <ScoreGauge
+          value={asset.competitive_heat}
+          label="Heat"
+          color="stroke-rose-500"
+          glowColor="text-rose-600 dark:text-rose-400"
+        />
+        <ScoreGauge
+          value={asset.confidence_score}
+          label="Data"
+          color="stroke-blue-500"
+          glowColor="text-blue-600 dark:text-blue-400"
+        />
       </div>
 
-      {/* Footer stats */}
-      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/40 text-xs text-slate-400 dark:text-slate-500">
-        <span>{asset.trial_count} trial{asset.trial_count !== 1 ? 's' : ''}</span>
+      {/* Row 4: Footer meta */}
+      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/30 text-[11px] text-slate-400 dark:text-slate-500">
+        <span className="flex items-center gap-1">
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          {asset.trial_count} trial{asset.trial_count !== 1 ? 's' : ''}
+        </span>
         {asset.enrollment_total > 0 && (
-          <span>{asset.enrollment_total.toLocaleString()} enrolled</span>
+          <span className="flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {asset.enrollment_total.toLocaleString()}
+          </span>
         )}
         {asset.territory_rights_available?.length > 0 && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-            {asset.territory_rights_available.join(', ')} available
+          <span className="flex items-center gap-1 text-emerald-500 dark:text-emerald-400 font-semibold">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+            </svg>
+            {asset.territory_rights_available.map(t => t === 'global' ? 'Global' : t.replace(/_/g, ' ').toUpperCase()).join(', ')}
           </span>
         )}
         {asset.last_update_date && (
-          <span className="ml-auto">Updated {asset.last_update_date}</span>
+          <span className="ml-auto tabular-nums">{asset.last_update_date}</span>
         )}
       </div>
     </button>

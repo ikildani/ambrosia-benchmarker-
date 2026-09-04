@@ -115,16 +115,25 @@ export function RadarFeed() {
       <RadarStats stats={stats as StatsResponse | null} loading={statsLoading} />
       <RadarFilters filters={filters} onChange={handleFilterChange} />
 
-      {/* Results count */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {loading ? 'Loading...' : (
-            feed ? `${feed.total.toLocaleString()} asset${feed.total !== 1 ? 's' : ''} found` : 'No results'
+      {/* Results bar */}
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          {loading ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-amber-500 animate-spin" />
+              Scanning universe...
+            </span>
+          ) : (
+            feed ? (
+              <span>
+                <span className="text-slate-700 dark:text-slate-200 tabular-nums">{feed.total.toLocaleString()}</span> asset{feed.total !== 1 ? 's' : ''}
+              </span>
+            ) : 'No results'
           )}
         </p>
         {feed && feed.totalPages > 1 && (
-          <p className="text-sm text-slate-400 dark:text-slate-500">
-            Page {feed.page} of {feed.totalPages}
+          <p className="text-xs text-slate-400 dark:text-slate-500 tabular-nums">
+            {feed.page} / {feed.totalPages}
           </p>
         )}
       </div>
@@ -134,12 +143,29 @@ export function RadarFeed() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 p-5 animate-pulse">
-              <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 rounded mb-2" />
-              <div className="h-4 w-28 bg-slate-200 dark:bg-slate-700 rounded mb-4" />
-              <div className="space-y-2">
-                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="flex items-start justify-between mb-3">
+                <div className="space-y-2">
+                  <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+                </div>
+                <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+              <div className="flex gap-1.5 mb-4">
+                <div className="h-5 w-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+              <div className="flex justify-between px-2">
+                {[1, 2, 3, 4].map(j => (
+                  <div key={j} className="flex flex-col items-center gap-1">
+                    <div className="w-11 h-11 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                    <div className="h-2 w-8 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/30 flex gap-3">
+                <div className="h-2.5 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-2.5 w-12 bg-slate-200 dark:bg-slate-700 rounded" />
               </div>
             </div>
           ))}
@@ -166,25 +192,27 @@ export function RadarFeed() {
 
       {/* Pagination */}
       {feed && feed.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
+        <div className="flex items-center justify-center gap-1.5 pt-6">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 rounded-full text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
-            Previous
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
           {generatePageNumbers(page, feed.totalPages).map((p, i) => (
             p === '...' ? (
-              <span key={`dots-${i}`} className="px-2 text-slate-400">...</span>
+              <span key={`dots-${i}`} className="px-1 text-slate-300 dark:text-slate-600 text-xs">···</span>
             ) : (
               <button
                 key={p}
                 onClick={() => setPage(p as number)}
-                className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                className={`w-8 h-8 rounded-full text-xs font-semibold transition-all ${
                   p === page
-                    ? 'bg-amber-500 text-white'
-                    : 'border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    ? 'bg-amber-500 text-white shadow-sm shadow-amber-500/20'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 {p}
@@ -194,9 +222,11 @@ export function RadarFeed() {
           <button
             onClick={() => setPage(p => Math.min(feed!.totalPages, p + 1))}
             disabled={page >= feed.totalPages}
-            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 rounded-full text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
-            Next
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       )}
