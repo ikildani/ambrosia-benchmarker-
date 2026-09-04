@@ -5,6 +5,9 @@ import { AssetCard } from './AssetCard';
 import { RadarFilters } from './RadarFilters';
 import { RadarStats } from './RadarStats';
 import { AssetDetailModal } from './AssetDetailModal';
+import { OpportunityCard } from './OpportunityCard';
+
+type ViewMode = 'assets' | 'opportunities';
 
 interface Filters {
   ta: string;
@@ -42,10 +45,13 @@ interface StatsResponse {
 }
 
 export function RadarFeed() {
+  const [viewMode, setViewMode] = useState<ViewMode>('assets');
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const [feed, setFeed] = useState<FeedResponse | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
+  const [opportunities, setOpportunities] = useState<Record<string, unknown>[] | null>(null);
+  const [oppsLoading, setOppsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
@@ -97,8 +103,24 @@ export function RadarFeed() {
     }
   }, []);
 
+  const fetchOpportunities = useCallback(async () => {
+    setOppsLoading(true);
+    try {
+      const res = await fetch('/api/radar/opportunities?top=50');
+      if (res.ok) {
+        const data = await res.json();
+        setOpportunities(data.opportunities || []);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setOppsLoading(false);
+    }
+  }, []);
+
   useEffect(() => { fetchFeed(); }, [fetchFeed]);
   useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => { if (viewMode === 'opportunities' && !opportunities) fetchOpportunities(); }, [viewMode, opportunities, fetchOpportunities]);
 
   // Reset page on filter change
   useEffect(() => { setPage(1); }, [filters.ta, filters.modality, filters.phase, filters.partnership, filters.country, debouncedQ]);
@@ -113,31 +135,116 @@ export function RadarFeed() {
   return (
     <div className="space-y-6">
       <RadarStats stats={stats as StatsResponse | null} loading={statsLoading} />
-      <RadarFilters filters={filters} onChange={handleFilterChange} />
 
-      {/* Results bar */}
-      <div className="flex items-center justify-between px-1">
-        <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-          {loading ? (
-            <span className="inline-flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-amber-500 animate-spin" />
-              Scanning universe...
+      {/* View toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+          <button
+            onClick={() => setViewMode('assets')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              viewMode === 'assets'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+              </svg>
+              Asset Universe
             </span>
-          ) : (
-            feed ? (
-              <span>
-                <span className="text-slate-700 dark:text-slate-200 tabular-nums">{feed.total.toLocaleString()}</span> asset{feed.total !== 1 ? 's' : ''}
-              </span>
-            ) : 'No results'
-          )}
-        </p>
-        {feed && feed.totalPages > 1 && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 tabular-nums">
-            {feed.page} / {feed.totalPages}
-          </p>
-        )}
+          </button>
+          <button
+            onClick={() => setViewMode('opportunities')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              viewMode === 'opportunities'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+              Deal Opportunities
+              {opportunities && opportunities.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                  {opportunities.length}
+                </span>
+              )}
+            </span>
+          </button>
+        </div>
       </div>
 
+      {viewMode === 'assets' && <RadarFilters filters={filters} onChange={handleFilterChange} />}
+
+      {/* Results bar */}
+      {viewMode === 'assets' && (
+        <div className="flex items-center justify-between px-1">
+          <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-amber-500 animate-spin" />
+                Scanning universe...
+              </span>
+            ) : (
+              feed ? (
+                <span>
+                  <span className="text-slate-700 dark:text-slate-200 tabular-nums">{feed.total.toLocaleString()}</span> asset{feed.total !== 1 ? 's' : ''}
+                </span>
+              ) : 'No results'
+            )}
+          </p>
+          {feed && feed.totalPages > 1 && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 tabular-nums">
+              {feed.page} / {feed.totalPages}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ── DEAL OPPORTUNITIES VIEW ────────────────────── */}
+      {viewMode === 'opportunities' && (
+        <>
+          {oppsLoading ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 p-5 animate-pulse">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="space-y-2"><div className="h-4 w-40 bg-slate-200 dark:bg-slate-700 rounded" /><div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" /></div>
+                    <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+                  </div>
+                  <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded mt-4" />
+                  <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-700 rounded mt-2" />
+                </div>
+              ))}
+            </div>
+          ) : opportunities && opportunities.length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-1">
+                <span className="text-slate-700 dark:text-slate-200 tabular-nums">{opportunities.length}</span> AI-proposed transactions ranked by opportunity score
+              </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {opportunities.map((opp: any) => (
+                  <OpportunityCard key={opp.id} opportunity={opp} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-16 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+              <span className="text-3xl block mb-3">🎯</span>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">No deal opportunities yet</p>
+              <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">The Deal Creation Engine runs daily at 11:30 AM UTC</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── ASSET FEED VIEW ────────────────────────────── */}
+      {viewMode === 'assets' && (
+        <>
       {/* Asset grid */}
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -229,6 +336,9 @@ export function RadarFeed() {
             </svg>
           </button>
         </div>
+      )}
+
+        </>
       )}
 
       {/* Detail modal */}
