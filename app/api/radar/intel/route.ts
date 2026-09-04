@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     if (intelResult.data) {
       for (const sig of intelResult.data) {
         if (!byType[sig.intel_type]) byType[sig.intel_type] = [];
-        byType[sig.intel_type].push(sig);
+        byType[sig.intel_type]!.push(sig);
       }
     }
 

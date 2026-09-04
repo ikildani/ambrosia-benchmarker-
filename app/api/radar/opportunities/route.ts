@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       for (const opp of opportunities) {
         const key = opp.gap_type || 'other';
         if (!byGap[key]) byGap[key] = [];
-        byGap[key].push(opp);
+        byGap[key]!.push(opp);
       }
     }
 
