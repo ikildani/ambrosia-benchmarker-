@@ -160,9 +160,9 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
             <div className="p-6 pb-0 sm:p-8 sm:pb-0">
               <div className="flex items-start justify-between gap-4 mb-2">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{asset.asset_name as string}</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{String(asset.asset_name)}</h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    {asset.company_name as string}{asset.originator_country ? ` · ${asset.originator_country}` : ''}
+                    {String(asset.company_name)}{asset.originator_country ? ` · ${asset.originator_country}` : ''}
                   </p>
                 </div>
                 {/* Trend badge */}
@@ -183,9 +183,9 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mb-4">
-                {asset.phase && <Pill color="indigo">{asset.phase as string}</Pill>}
-                {asset.therapeutic_area && <Pill color="slate">{(asset.therapeutic_area as string).replace(/_/g, ' ')}</Pill>}
-                {asset.modality && <Pill color="slate">{asset.modality as string}</Pill>}
+                {asset.phase && <Pill color="indigo">{String(asset.phase)}</Pill>}
+                {asset.therapeutic_area && <Pill color="slate">{String(asset.therapeutic_area).replace(/_/g, ' ')}</Pill>}
+                {asset.modality && <Pill color="slate">{String(asset.modality)}</Pill>}
                 <Pill color={asset.partnership_status === 'unpartnered' ? 'emerald' : asset.partnership_status === 'partially_partnered' ? 'amber' : 'slate'}>
                   {asset.partnership_status === 'unpartnered' ? 'Unpartnered' : asset.partnership_status === 'partially_partnered' ? 'Partial Rights' : 'Partnered'}
                 </Pill>
@@ -285,9 +285,9 @@ function OverviewTab({ data }: { data: AssetDetail }) {
             {data.trials.slice(0, 8).map((trial, i) => (
               <div key={i} className="rounded-lg border border-slate-100 dark:border-slate-700/40 p-3 flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-1">{trial.trial_title as string}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-1">{String(trial.trial_title)}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {trial.nct_id as string} · {trial.phase as string || '—'} · {trial.status as string || '—'}
+                    {String(trial.nct_id)} · {String(trial.phase || '—')} · {String(trial.status || '—')}
                     {trial.enrollment_count ? ` · ${(trial.enrollment_count as number).toLocaleString()} enrolled` : ''}
                   </p>
                 </div>
@@ -464,9 +464,9 @@ function CompetitionTab({ data }: { data: IntelData | null }) {
                       }`} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{s.evidence_text as string}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{String(s.evidence_text)}</p>
                       {s.competitor_name && (
-                        <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{s.competitor_name as string} · Intensity {intensity}/100</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{String(s.competitor_name)} · Intensity {intensity}/100</p>
                       )}
                     </div>
                   </div>
@@ -508,7 +508,7 @@ function AcquirersTab({ data }: { data: OpportunityData | null }) {
             {/* Header */}
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{o.acquirer_name as string}</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{String(o.acquirer_name)}</p>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">
                   {(o.gap_type as string || '').replace(/_/g, ' ')}
                 </p>
@@ -540,7 +540,7 @@ function AcquirersTab({ data }: { data: OpportunityData | null }) {
             </div>
 
             {/* Rationale */}
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{o.rationale as string}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{String(o.rationale)}</p>
 
             {/* Drivers + risks */}
             <div className="grid grid-cols-2 gap-3 mt-3">
