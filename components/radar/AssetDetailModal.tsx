@@ -253,7 +253,7 @@ function OverviewTab({ data }: { data: AssetDetail }) {
           <div className="flex items-center gap-2 mb-4">
             <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Predicted Deal Terms</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-medium">
-              {(data.thesis as Record<string, unknown>).comp_count as number} comps
+              {String((data.thesis as Record<string, unknown>).comp_count)} comps
             </span>
           </div>
           <div className="grid grid-cols-3 gap-6">

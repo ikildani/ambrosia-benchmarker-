@@ -134,7 +134,8 @@ export function RadarFeed() {
 
   return (
     <div className="space-y-6">
-      <RadarStats stats={stats as StatsResponse | null} loading={statsLoading} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <RadarStats stats={stats as any} loading={statsLoading} />
 
       {/* View toggle */}
       <div className="flex items-center justify-between">
