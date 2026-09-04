@@ -18,7 +18,7 @@ import { Check, ArrowRight } from 'lucide-react';
 // Below-fold components loaded dynamically
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
 const FAQSection = dynamic(() => import('@/components/FAQSection'), { ssr: true });
-const InstantEstimator = dynamic(() => import('@/components/estimator/InstantEstimator'), { ssr: false });
+
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserTier } from '@/types/tier';
 import {
@@ -768,17 +768,6 @@ export default function HomeContent() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Instant Estimator */}
-      <section className="py-20 px-4 bg-[#080d16] border-t border-white/5">
-        <div className="max-w-4xl mx-auto text-center mb-10">
-          <h2 className="text-3xl font-bold text-white mb-3">What&rsquo;s Your Asset Worth?</h2>
-          <p className="text-slate-400 max-w-xl mx-auto">Get an instant estimate based on comparable biopharma transactions. No signup required.</p>
-        </div>
-        <div className="max-w-4xl mx-auto">
-          <InstantEstimator compact />
         </div>
       </section>
 
