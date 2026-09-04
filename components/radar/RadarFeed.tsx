@@ -8,7 +8,7 @@ import { AssetDetailModal } from './AssetDetailModal';
 import { OpportunityCard } from './OpportunityCard';
 import { CustomWeightsPanel, type WeightConfig, DEFAULT_WEIGHTS } from './CustomWeights';
 
-type ViewMode = 'assets' | 'opportunities';
+type ViewMode = 'assets' | 'opportunities' | 'acquirer';
 
 interface Filters {
   ta: string;
@@ -58,6 +58,10 @@ export function RadarFeed() {
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [showWeights, setShowWeights] = useState(false);
   const [, setCustomWeights] = useState<WeightConfig>(DEFAULT_WEIGHTS);
+  const [acquirerData, setAcquirerData] = useState<Record<string, unknown>[] | null>(null);
+  const [acquirerLoading, setAcquirerLoading] = useState(false);
+  const [nlSearchResults, setNlSearchResults] = useState<{ assets: Record<string, unknown>[]; filters: Record<string, unknown>; query: string } | null>(null);
+  const [nlSearching, setNlSearching] = useState(false);
 
   // Debounced search
   const [debouncedQ, setDebouncedQ] = useState('');
@@ -121,9 +125,39 @@ export function RadarFeed() {
     }
   }, []);
 
+  const fetchAcquirerView = useCallback(async () => {
+    setAcquirerLoading(true);
+    try {
+      const res = await fetch('/api/radar/acquirer-view?top=20');
+      if (res.ok) {
+        const data = await res.json();
+        setAcquirerData(data.acquirers || []);
+      }
+    } catch { /* silent */ }
+    finally { setAcquirerLoading(false); }
+  }, []);
+
+  const handleNLSearch = useCallback(async (query: string) => {
+    if (query.length < 5) { setNlSearchResults(null); return; }
+    setNlSearching(true);
+    try {
+      const res = await fetch('/api/radar/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNlSearchResults({ assets: data.assets, filters: data.parsed_filters, query: data.query });
+      }
+    } catch { /* silent */ }
+    finally { setNlSearching(false); }
+  }, []);
+
   useEffect(() => { fetchFeed(); }, [fetchFeed]);
   useEffect(() => { fetchStats(); }, [fetchStats]);
   useEffect(() => { if (viewMode === 'opportunities' && !opportunities) fetchOpportunities(); }, [viewMode, opportunities, fetchOpportunities]);
+  useEffect(() => { if (viewMode === 'acquirer' && !acquirerData) fetchAcquirerView(); }, [viewMode, acquirerData, fetchAcquirerView]);
 
   // Reset page on filter change
   useEffect(() => { setPage(1); }, [filters.ta, filters.modality, filters.phase, filters.partnership, filters.country, debouncedQ]);
@@ -178,6 +212,22 @@ export function RadarFeed() {
               )}
             </span>
           </button>
+          <button
+            onClick={() => setViewMode('acquirer')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+              viewMode === 'acquirer'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Acquirer View
+            </span>
+          </button>
         </div>
         <button
           onClick={() => setShowWeights(true)}
@@ -191,7 +241,7 @@ export function RadarFeed() {
         </button>
       </div>
 
-      {viewMode === 'assets' && <RadarFilters filters={filters} onChange={handleFilterChange} />}
+      {viewMode === 'assets' && <RadarFilters filters={filters} onChange={handleFilterChange} onNLSearch={handleNLSearch} nlSearching={nlSearching} />}
 
       {/* Results bar */}
       {viewMode === 'assets' && (
@@ -256,8 +306,92 @@ export function RadarFeed() {
         </>
       )}
 
+      {/* ── ACQUIRER VIEW ──────────────────────────────── */}
+      {viewMode === 'acquirer' && (
+        <>
+          {acquirerLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 p-5 animate-pulse">
+                  <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 rounded mb-2" />
+                  <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : acquirerData && acquirerData.length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-1">
+                Top acquirers by proposed deal opportunities — click to explore their recommended assets
+              </p>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {acquirerData.map((acq: any, i: number) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setViewMode('opportunities');
+                    }}
+                    className="text-left rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 p-5 hover:border-amber-300 dark:hover:border-amber-700/50 hover:shadow-md transition-all group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          {acq.name}
+                        </h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          {acq.count} proposed deal{acq.count !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-lg font-bold text-amber-600 dark:text-amber-400 tabular-nums">
+                        {acq.count}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-16 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+              <span className="text-3xl block mb-3">👁️</span>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">No acquirer data yet</p>
+              <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">The Deal Creation Engine runs daily at 11:30 AM UTC</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── NL SEARCH RESULTS OVERLAY ────────────────────── */}
+      {nlSearchResults && viewMode === 'assets' && (
+        <div className="rounded-xl border border-amber-200/60 dark:border-amber-700/30 bg-amber-50/30 dark:bg-amber-900/5 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">AI Search Results</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                &ldquo;{nlSearchResults.query}&rdquo; — {nlSearchResults.assets.length} matches
+              </p>
+            </div>
+            <button
+              onClick={() => setNlSearchResults(null)}
+              className="text-[10px] px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-700 transition-colors font-semibold"
+            >
+              Clear
+            </button>
+          </div>
+          {nlSearchResults.assets.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {nlSearchResults.assets.map((asset: any) => (
+                <AssetCard key={asset.id} asset={asset} onClick={setSelectedAssetId} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500 text-center py-6">No assets match your query</p>
+          )}
+        </div>
+      )}
+
       {/* ── ASSET FEED VIEW ────────────────────────────── */}
-      {viewMode === 'assets' && (
+      {viewMode === 'assets' && !nlSearchResults && (
         <>
       {/* Asset grid */}
       {loading ? (

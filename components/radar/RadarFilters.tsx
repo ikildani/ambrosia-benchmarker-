@@ -15,6 +15,8 @@ interface Filters {
 interface Props {
   filters: Filters;
   onChange: (filters: Filters) => void;
+  onNLSearch?: (query: string) => void;
+  nlSearching?: boolean;
 }
 
 const TA_OPTIONS = [
@@ -77,7 +79,7 @@ const SORT_OPTIONS = [
 
 type FilterSection = 'ta' | 'modality' | 'phase' | 'partnership' | null;
 
-export function RadarFilters({ filters, onChange }: Props) {
+export function RadarFilters({ filters, onChange, onNLSearch, nlSearching }: Props) {
   const [expandedSection, setExpandedSection] = useState<FilterSection>(null);
 
   const set = useCallback((key: keyof Filters, value: string) => {
@@ -100,11 +102,22 @@ export function RadarFilters({ filters, onChange }: Props) {
           </svg>
           <input
             type="text"
-            placeholder="Search asset name or company..."
+            placeholder="Search assets or try: &quot;Unpartnered Phase 2+ ADCs in oncology&quot;"
             value={filters.q}
             onChange={(e) => set('q', e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && filters.q.length >= 5 && onNLSearch) {
+                e.preventDefault();
+                onNLSearch(filters.q);
+              }
+            }}
             className="w-full pl-10 pr-4 py-2.5 rounded-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all"
           />
+          {nlSearching && (
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+              <span className="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-amber-500 animate-spin inline-block" />
+            </div>
+          )}
         </div>
 
         {/* Sort pills */}
