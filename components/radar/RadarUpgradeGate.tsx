@@ -100,7 +100,7 @@ export function RadarUpgradeGate({ isAuthenticated }: Props) {
                     Start a free Pro trial to explore Asset Radar.
                   </p>
                   <p className="text-xs text-slate-500 mt-1">
-                    No credit card required. Full access for 14 days.
+                    No credit card required. Full access for 7 days.
                   </p>
                 </div>
                 <Link
