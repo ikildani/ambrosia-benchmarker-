@@ -87,9 +87,9 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('is_synthetic', false)
       .not('therapeutic_area', 'eq', 'other')
-      .not('therapeutic_area', 'like', '_%');
+      .not('therapeutic_area', 'like', '\\__%');
 
-    if (verifiedDeals) {
+    if (verifiedDeals != null) {
       await updateDealCountIfChanged(verifiedDeals);
     }
 
