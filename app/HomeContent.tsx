@@ -106,7 +106,7 @@ function DatabaseCoverageSection() {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
           {[
-            { label: 'Verified Deals', value: total.toLocaleString() },
+            { label: 'Verified Deals', value: DEAL_STATS.TOTAL_DEALS },
             { label: 'Deal Types', value: '5' },
             { label: 'Sources', value: '10+' },
             { label: 'Updated', value: 'Daily' },
