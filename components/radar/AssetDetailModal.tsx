@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { DueDiligencePanel } from './DueDiligencePanel';
 
 interface AssetDetail {
   asset: Record<string, unknown>;
@@ -31,7 +32,7 @@ interface OpportunityData {
   proposed_acquirers: Record<string, unknown>[];
 }
 
-type Tab = 'overview' | 'signals' | 'competition' | 'acquirers';
+type Tab = 'overview' | 'signals' | 'competition' | 'acquirers' | 'diligence';
 
 interface Props {
   assetId: string | null;
@@ -103,13 +104,28 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
   const [signalData, setSignalData] = useState<SignalData | null>(null);
   const [intelData, setIntelData] = useState<IntelData | null>(null);
   const [oppData, setOppData] = useState<OpportunityData | null>(null);
+  const [narrative, setNarrative] = useState<string | null>(null);
+  const [narrativeLoading, setNarrativeLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('overview');
 
+  const fetchNarrative = useCallback(async (id: string) => {
+    setNarrativeLoading(true);
+    try {
+      const res = await fetch(`/api/radar/narrative?asset_id=${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setNarrative(data.narrative || null);
+      }
+    } catch { /* silent */ }
+    finally { setNarrativeLoading(false); }
+  }, []);
+
   const fetchAll = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
+    setNarrative(null);
     setTab('overview');
 
     try {
@@ -135,8 +151,11 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
   }, []);
 
   useEffect(() => {
-    if (assetId) fetchAll(assetId);
-  }, [assetId, fetchAll]);
+    if (assetId) {
+      fetchAll(assetId);
+      fetchNarrative(assetId);
+    }
+  }, [assetId, fetchAll, fetchNarrative]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -153,6 +172,7 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
     { key: 'signals', label: 'Signals', count: signalData ? Object.keys(signalData.signals_by_type).length : 0 },
     { key: 'competition', label: 'Competition', count: intelData?.competitors?.length || 0 },
     { key: 'acquirers', label: 'Acquirers', count: oppData?.proposed_acquirers?.length || 0 },
+    { key: 'diligence', label: 'Due Diligence' },
   ];
 
   return (
@@ -237,12 +257,40 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
               </div>
             </div>
 
+            {/* ── AI Analyst Brief ──────────────────────────── */}
+            {(narrative || narrativeLoading) && (
+              <div className="mx-6 sm:mx-8 mt-5 mb-0 rounded-xl border border-slate-200/60 dark:border-slate-700/40 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">AI Analyst Brief</span>
+                  {narrativeLoading && <span className="w-3 h-3 rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-amber-500 animate-spin" />}
+                </div>
+                {narrative ? (
+                  <p className="text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed italic">{narrative}</p>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    <div className="h-3 w-5/6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    <div className="h-3 w-4/6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* ── Tab Content ─────────────────────────────── */}
             <div className="p-6 sm:p-8 pt-5">
               {tab === 'overview' && <OverviewTab data={data!} />}
               {tab === 'signals' && <SignalsTab data={signalData} />}
               {tab === 'competition' && <CompetitionTab data={intelData} />}
               {tab === 'acquirers' && <AcquirersTab data={oppData} />}
+              {tab === 'diligence' && asset && (
+                <DueDiligencePanel
+                  asset={asset}
+                  signals={(signalData?.signals_by_type ? Object.values(signalData.signals_by_type).flat() : []) as Record<string, unknown>[]}
+                  competitors={intelData?.competitors || []}
+                  thesis={data?.thesis as Record<string, unknown> | null}
+                  trials={data?.trials || []}
+                />
+              )}
             </div>
 
             {/* Meta footer */}
