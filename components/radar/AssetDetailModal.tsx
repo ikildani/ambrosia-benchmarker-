@@ -183,9 +183,9 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mb-4">
-                {asset.phase && <Pill color="indigo">{String(asset.phase)}</Pill>}
-                {asset.therapeutic_area && <Pill color="slate">{String(asset.therapeutic_area).replace(/_/g, ' ')}</Pill>}
-                {asset.modality && <Pill color="slate">{String(asset.modality)}</Pill>}
+                {asset.phase ? <Pill color="indigo">{String(asset.phase)}</Pill> : null}
+                {asset.therapeutic_area ? <Pill color="slate">{String(asset.therapeutic_area).replace(/_/g, ' ')}</Pill> : null}
+                {asset.modality ? <Pill color="slate">{String(asset.modality)}</Pill> : null}
                 <Pill color={asset.partnership_status === 'unpartnered' ? 'emerald' : asset.partnership_status === 'partially_partnered' ? 'amber' : 'slate'}>
                   {asset.partnership_status === 'unpartnered' ? 'Unpartnered' : asset.partnership_status === 'partially_partnered' ? 'Partial Rights' : 'Partnered'}
                 </Pill>
@@ -230,8 +230,8 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
             {/* Meta footer */}
             <div className="px-6 sm:px-8 pb-6 flex items-center gap-4 text-[10px] text-slate-400 dark:text-slate-500">
               <span>{(asset.nct_ids as string[])?.length || 0} NCT IDs</span>
-              {asset.last_update_date && <span>Updated {formatDate(asset.last_update_date)}</span>}
-              {asset.last_enriched_at && <span>Enriched {formatDate(asset.last_enriched_at)}</span>}
+              {asset.last_update_date ? <span>Updated {formatDate(asset.last_update_date)}</span> : null}
+              {asset.last_enriched_at ? <span>Enriched {formatDate(asset.last_enriched_at)}</span> : null}
             </div>
           </div>
         )}
