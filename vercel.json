@@ -365,6 +365,14 @@
     {
       "path": "/api/cron/mandate-matcher",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/competitive-intel-radar",
+      "schedule": "30 10 * * *"
+    },
+    {
+      "path": "/api/cron/deal-creator",
+      "schedule": "30 11 * * *"
     }
   ]
 }
