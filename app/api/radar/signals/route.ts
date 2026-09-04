@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     if (signalsResult.data) {
       for (const sig of signalsResult.data) {
         if (!signalsByType[sig.signal_type]) signalsByType[sig.signal_type] = [];
-        signalsByType[sig.signal_type].push(sig);
+        signalsByType[sig.signal_type]!.push(sig);
       }
     }
 
