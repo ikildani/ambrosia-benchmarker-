@@ -306,7 +306,7 @@ export async function indexAssetUniverse(
   // Fetch companies to process (prioritize least recently enriched)
   let companyQuery = supabase
     .from('companies')
-    .select('id, name, headquarters_country, headquarters_region')
+    .select('id, name, hq_country, hq_region')
     .order('updated_at', { ascending: true });
 
   if (options?.companyIds?.length) {
@@ -365,8 +365,8 @@ export async function indexAssetUniverse(
 
         // Get company geography
         const company = batch.find(c => c.id === group.companyId);
-        const geo = company?.headquarters_country
-          ? { country: company.headquarters_country, region: company.headquarters_region }
+        const geo = company?.hq_country
+          ? { country: company.hq_country, region: company.hq_region }
           : classifyCompanyCountry(group.companyName);
 
         // Compute primary modality (most common)

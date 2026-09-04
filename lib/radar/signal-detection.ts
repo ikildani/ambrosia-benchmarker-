@@ -395,7 +395,7 @@ async function detectRegulatoryMilestones(
     .eq('id', asset.id)
     .single();
 
-  if (assetRow?.regulatory_designations?.length > 0) {
+  if (assetRow && (assetRow.regulatory_designations as unknown[])?.length > 0) {
     const desigs = assetRow.regulatory_designations as string[];
     const highValue = desigs.filter(d =>
       ['breakthrough', 'fast_track', 'priority_review', 'orphan_drug', 'rmat'].some(
@@ -417,7 +417,8 @@ async function detectRegulatoryMilestones(
     )
   ) {
     score += 20;
-    evidenceParts.push(`Active ${asset.phase} trials — progressing through late-stage development`);
+    const phaseDisplay = (asset.phase || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    evidenceParts.push(`Active ${phaseDisplay} trials — progressing through late-stage development`);
   }
 
   // Search press releases for regulatory milestones
@@ -944,7 +945,8 @@ async function detectStrategicReview(
     )
   ) {
     score += 20;
-    evidenceParts.push(`Small/mid biotech with unpartnered ${asset.phase} asset — strategic pressure to partner`);
+    const phaseFmt = (asset.phase || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    evidenceParts.push(`Small/mid biotech with unpartnered ${phaseFmt} asset — strategic pressure to partner`);
   }
 
   return {

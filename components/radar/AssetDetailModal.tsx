@@ -51,6 +51,24 @@ function formatDate(d: unknown): string {
   return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function formatLabel(raw: string): string {
+  const LABELS: Record<string, string> = {
+    phase_1: 'Phase 1', phase_2: 'Phase 2', phase_3: 'Phase 3', phase_4: 'Phase 4',
+    phase1: 'Phase 1', phase2: 'Phase 2', phase3: 'Phase 3', phase4: 'Phase 4',
+    early_phase1: 'Early Phase 1', phase_1_2: 'Phase 1/2', phase_2_3: 'Phase 2/3',
+    phase1_phase2: 'Phase 1/2', phase2_phase3: 'Phase 2/3',
+    small_molecule: 'Small Molecule', car_t: 'CAR-T', gene_therapy: 'Gene Therapy',
+    cell_therapy: 'Cell Therapy', adc: 'ADC', mrna: 'mRNA',
+    oligonucleotide: 'Oligonucleotide', radiopharm: 'Radiopharmaceutical',
+    oncology: 'Oncology', neurology: 'Neurology', immunology: 'Immunology',
+    cardiovascular: 'Cardiovascular', metabolic: 'Metabolic', hematology: 'Hematology',
+    rare_disease: 'Rare Disease', infectious_disease: 'Infectious Disease',
+    ophthalmology: 'Ophthalmology', dermatology: 'Dermatology', respiratory: 'Respiratory',
+    womens_health: "Women's Health", cns: 'CNS',
+  };
+  return LABELS[raw] || raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 const SIGNAL_TYPE_META: Record<string, { label: string; icon: string; color: string }> = {
   cash_runway:           { label: 'Cash Runway',     icon: '💰', color: 'text-red-500' },
   regulatory_milestone:  { label: 'Regulatory',      icon: '📋', color: 'text-blue-500' },
@@ -183,9 +201,9 @@ export function AssetDetailModal({ assetId, onClose }: Props) {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mb-4">
-                {asset.phase ? <Pill color="indigo">{String(asset.phase)}</Pill> : null}
-                {asset.therapeutic_area ? <Pill color="slate">{String(asset.therapeutic_area).replace(/_/g, ' ')}</Pill> : null}
-                {asset.modality ? <Pill color="slate">{String(asset.modality)}</Pill> : null}
+                {asset.phase ? <Pill color="indigo">{formatLabel(String(asset.phase))}</Pill> : null}
+                {asset.therapeutic_area ? <Pill color="slate">{formatLabel(String(asset.therapeutic_area))}</Pill> : null}
+                {asset.modality ? <Pill color="slate">{formatLabel(String(asset.modality))}</Pill> : null}
                 <Pill color={asset.partnership_status === 'unpartnered' ? 'emerald' : asset.partnership_status === 'partially_partnered' ? 'amber' : 'slate'}>
                   {asset.partnership_status === 'unpartnered' ? 'Unpartnered' : asset.partnership_status === 'partially_partnered' ? 'Partial Rights' : 'Partnered'}
                 </Pill>

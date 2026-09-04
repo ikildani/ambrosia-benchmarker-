@@ -89,9 +89,21 @@ function ScoreGauge({ value, label, color, glowColor }: { value: number; label: 
   );
 }
 
+function formatPhase(raw: string): string {
+  const map: Record<string, string> = {
+    phase_1: 'Phase 1', phase_2: 'Phase 2', phase_3: 'Phase 3', phase_4: 'Phase 4',
+    phase1: 'Phase 1', phase2: 'Phase 2', phase3: 'Phase 3', phase4: 'Phase 4',
+    early_phase1: 'Early Phase 1', phase_1_2: 'Phase 1/Phase 2', phase_2_3: 'Phase 2/Phase 3',
+    phase1_phase2: 'Phase 1/Phase 2', phase2_phase3: 'Phase 2/Phase 3',
+    approved: 'Approved', preclinical: 'Preclinical', discovery: 'Discovery',
+  };
+  return map[raw.toLowerCase()] || raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export function AssetCard({ asset, onClick }: Props) {
   const partner = PARTNERSHIP_CONFIG[asset.partnership_status] || PARTNERSHIP_CONFIG.unknown;
-  const phaseStyle = PHASE_COLORS[asset.phase || ''] || { bg: 'bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', glow: '' };
+  const phaseLabel = asset.phase ? formatPhase(asset.phase) : '';
+  const phaseStyle = PHASE_COLORS[phaseLabel] || { bg: 'bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', glow: '' };
   const isHighIntent = asset.licensing_intent_score >= 60;
 
   return (
@@ -138,9 +150,9 @@ export function AssetCard({ asset, onClick }: Props) {
 
       {/* Row 2: Tags */}
       <div className="flex flex-wrap gap-1.5 mb-4">
-        {asset.phase && (
+        {phaseLabel && (
           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${phaseStyle.bg} ${phaseStyle.text} ${phaseStyle.glow}`}>
-            {asset.phase}
+            {phaseLabel}
           </span>
         )}
         {asset.therapeutic_area && (

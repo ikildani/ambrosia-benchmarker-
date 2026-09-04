@@ -204,11 +204,12 @@ async function identifyPortfolioGaps(
 
   // GAP 1: Patent cliff replacement
   const totalRevAtRisk = (acquirer.revenue_at_risk_2026 || 0) + (acquirer.revenue_at_risk_2027 || 0);
-  if (totalRevAtRisk > 500) {
+  const revAtRiskB = totalRevAtRisk / 1_000_000_000;
+  if (totalRevAtRisk > 500_000_000) {
     gaps.push({
       type: 'patent_cliff_replacement',
-      detail: `$${(totalRevAtRisk / 1000).toFixed(1)}B revenue at risk from patent cliffs in ${Array.from(cliffTAs).join(', ') || 'key products'}`,
-      urgency: Math.min(totalRevAtRisk / 100, 100),
+      detail: `$${revAtRiskB.toFixed(1)}B revenue at risk from patent cliffs in ${Array.from(cliffTAs).join(', ') || 'key products'}`,
+      urgency: Math.min(revAtRiskB * 10, 100),
       targetModalities: acquirer.modalities_active,
       targetIndications: Array.from(cliffTAs).length > 0 ? Array.from(cliffTAs) : acquirer.indications_active,
     });
@@ -486,7 +487,8 @@ function scoreOpportunity(
   }
 
   if (asset.phase) {
-    rationaleLines.push(`The asset is at ${asset.phase} with a licensing intent score of ${asset.licensing_intent_score}/100.`);
+    const phaseLabel = asset.phase.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    rationaleLines.push(`The asset is at ${phaseLabel} with a licensing intent score of ${asset.licensing_intent_score}/100.`);
   }
 
   if (thesis && thesis.predicted_upfront_mid) {
