@@ -15,7 +15,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
-import { validateExtractedDeal } from './deal-extraction-validator';
+import { validateExtractedDeal, extractAuditExcerpt } from './deal-extraction-validator';
+import { extractCitationUrls, selectSourceUrl, isPressReleaseUrl } from './deal-verifier';
 
 // Perplexity uses the OpenAI-compatible Chat Completions format.
 // Previously used /v1/responses which returned 400 after API update.
@@ -126,13 +127,21 @@ const TA_DISCOVERY_QUERIES: Record<string, string[]> = {
   ],
 };
 
+interface PerplexityAnswer {
+  text: string;
+  /** Citation URLs in the order Perplexity numbered them ([1], [2], ...). */
+  citations: string[];
+}
+
 /**
  * Query Perplexity's agent API to discover deals for a specific TA.
+ * Returns the answer text together with its citation URLs — previously the
+ * citations were discarded, which left every discovered deal without a link.
  */
 async function queryPerplexityForDeals(
   query: string,
   apiKey: string
-): Promise<string> {
+): Promise<PerplexityAnswer> {
   const response = await fetchWithTimeout(PERPLEXITY_API, {
     timeoutMs: 30_000,
     retries: 1,
@@ -153,10 +162,11 @@ async function queryPerplexityForDeals(
   }
 
   const data = await response.json();
+  const citations = extractCitationUrls(data);
 
   // Chat Completions format: data.choices[0].message.content
   if (data.choices?.[0]?.message?.content) {
-    return data.choices[0].message.content;
+    return { text: data.choices[0].message.content, citations };
   }
 
   // Fallback: try the Responses API format (legacy)
@@ -171,7 +181,30 @@ async function queryPerplexityForDeals(
     }
   }
 
-  return text;
+  return { text, citations };
+}
+
+/** Numbered citation list appended to the extraction prompt so Claude can
+ * map the [n] markers in Perplexity's answer back to a real URL. */
+function formatCitationList(citations: string[]): string {
+  if (citations.length === 0) return '';
+  return '\n\nSources cited in the text (numbered as [n]):\n' +
+    citations.slice(0, 40).map((url, i) => `[${i + 1}] ${url}`).join('\n');
+}
+
+/**
+ * Resolve the URL to persist for a discovered deal: Claude's pick from the
+ * citation list first, otherwise a citation on a preferred newswire / SEC
+ * host or the party's own domain. Multi-deal answers never fall back to an
+ * arbitrary first URL, so an unrelated link is not attributed to the deal.
+ */
+function resolveDiscoveredSourceUrl(
+  deal: Pick<PerplexityDeal, 'licensor' | 'licensee' | 'source_url'>,
+  citations: string[]
+): string | null {
+  const claudePick = deal.source_url?.trim();
+  if (claudePick && /^https:\/\//.test(claudePick)) return claudePick;
+  return selectSourceUrl(citations, { licensor: deal.licensor, licensee: deal.licensee }, { allowFirstHttps: false })?.url ?? null;
 }
 
 /**
@@ -180,7 +213,8 @@ async function queryPerplexityForDeals(
 async function extractDealsFromText(
   text: string,
   ta: string,
-  anthropicApiKey: string
+  anthropicApiKey: string,
+  citations: string[] = []
 ): Promise<PerplexityDeal[]> {
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
 
@@ -210,12 +244,13 @@ async function extractDealsFromText(
   // When uncertain between discovery and preclinical, use "preclinical" if any IND-enabling activity is mentioned
   "territory": "global|us|ex_us|etc",
   "announced_date": "YYYY-MM-DD or YYYY-MM or YYYY",
+  "source_url": "exact URL copied from the numbered sources list that reports this deal, or null if none of the listed sources covers it",
   "therapeutic_area": "${ta}",
   "confidence": 85-95
 }
 
 Return JSON array only. Text:
-${text.substring(0, 8000)}`
+${text.substring(0, 8000)}${formatCitationList(citations)}`
     }],
   });
 
@@ -270,11 +305,11 @@ export async function runPerplexityDealDiscovery(
 
   try {
     console.log('[perplexity] Running mega-deal sweep for last 7 days...');
-    const sweepText = await queryPerplexityForDeals(megaDealQuery, perplexityApiKey);
+    const { text: sweepText, citations: sweepCitations } = await queryPerplexityForDeals(megaDealQuery, perplexityApiKey);
     result.queries_run++;
 
     if (sweepText && sweepText.length >= 50) {
-      const sweepDeals = await extractDealsFromText(sweepText, 'multi_ta', anthropicApiKey);
+      const sweepDeals = await extractDealsFromText(sweepText, 'multi_ta', anthropicApiKey, sweepCitations);
       result.deals_discovered += sweepDeals.length;
       console.log(`[perplexity] Mega-deal sweep: Discovered ${sweepDeals.length} deals`);
 
@@ -320,6 +355,7 @@ export async function runPerplexityDealDiscovery(
           if (!existing) {
             const licensorCompanyId = await findOrCreateCompany(supabase, deal.licensor).catch(() => null);
             const licenseeCompanyId = await findOrCreateCompany(supabase, deal.licensee).catch(() => null);
+            const sourceUrl = resolveDiscoveredSourceUrl(deal, sweepCitations);
 
             const { error: sweepInsertErr } = await supabase.from('deals').insert({
               licensor_name: deal.licensor,
@@ -338,7 +374,9 @@ export async function runPerplexityDealDiscovery(
               territory: deal.territory || 'global',
               announced_date: deal.announced_date || new Date().toISOString().split('T')[0],
               source_type: 'perplexity_sweep',
-              source_url: deal.source_url,
+              source_url: sourceUrl,
+              press_release_url: sourceUrl && isPressReleaseUrl(sourceUrl) ? sourceUrl : null,
+              raw_text_excerpt: extractAuditExcerpt(sweepText, deal.licensee, 600) || null,
               confidence_score: deal.confidence,
               extraction_notes: `Mega-deal sweep discovery. Confidence: ${deal.confidence}%`,
               verification_status: 'pending', // Phase 4: explicit pending status
@@ -371,7 +409,7 @@ export async function runPerplexityDealDiscovery(
         console.log(`[perplexity] Querying ${ta}: "${query.substring(0, 60)}..."`);
 
         // Step 1: Perplexity discovers deals from the web
-        const perplexityText = await queryPerplexityForDeals(query, perplexityApiKey);
+        const { text: perplexityText, citations } = await queryPerplexityForDeals(query, perplexityApiKey);
         result.queries_run++;
 
         if (!perplexityText || perplexityText.length < 50) {
@@ -379,8 +417,9 @@ export async function runPerplexityDealDiscovery(
           continue;
         }
 
-        // Step 2: Claude extracts structured data
-        const deals = await extractDealsFromText(perplexityText, ta, anthropicApiKey);
+        // Step 2: Claude extracts structured data (with the citation list so
+        // each deal can carry the URL Perplexity actually cited)
+        const deals = await extractDealsFromText(perplexityText, ta, anthropicApiKey, citations);
         result.deals_discovered += deals.length;
         console.log(`[perplexity] ${ta}: Discovered ${deals.length} deals`);
 
@@ -403,6 +442,10 @@ export async function runPerplexityDealDiscovery(
             // Clamp future dates to today
             if (announcedDate && announcedDate > today) announcedDate = today;
 
+            const sourceUrl = resolveDiscoveredSourceUrl(deal, citations);
+
+            // Note: no onConflict target, so an existing row raises 23505 and
+            // is skipped below — an existing source_url is never overwritten.
             const { error: insertError } = await supabase.from('deals').upsert({
               licensor_name: deal.licensor,
               licensor_id: licensorId,
@@ -421,6 +464,9 @@ export async function runPerplexityDealDiscovery(
               total_deal_value_usd: deal.total_deal_value_usd,
               announced_date: announcedDate,
               source_type: 'perplexity_discovery',
+              source_url: sourceUrl,
+              press_release_url: sourceUrl && isPressReleaseUrl(sourceUrl) ? sourceUrl : null,
+              raw_text_excerpt: extractAuditExcerpt(perplexityText, deal.licensee, 600) || null,
               terms_disclosed: (deal.upfront_usd !== null) || (deal.total_deal_value_usd !== null),
               confidence_score: deal.confidence || 85,
               verified: false,

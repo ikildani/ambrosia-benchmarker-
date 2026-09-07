@@ -23,8 +23,9 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
-import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
+import { validateExtractedDeal, extractAuditExcerpt } from '@/lib/ingestion/deal-extraction-validator';
 import { findOrCreateCompany, deriveTherapeuticArea } from '@/lib/ingestion/sec-edgar';
+import { extractCitationUrls, selectSourceUrl, isPressReleaseUrl } from '@/lib/ingestion/deal-verifier';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -220,7 +221,13 @@ const GAP_QUERIES: GapQuery[] = [
 
 const PERPLEXITY_API = 'https://api.perplexity.ai/chat/completions';
 
-async function queryPerplexity(query: string, apiKey: string): Promise<string> {
+interface PerplexityAnswer {
+  text: string;
+  /** Citation URLs in the order Perplexity numbered them ([1], [2], ...). */
+  citations: string[];
+}
+
+async function queryPerplexity(query: string, apiKey: string): Promise<PerplexityAnswer> {
   const response = await fetchWithTimeout(PERPLEXITY_API, {
     timeoutMs: 45_000,
     retries: 1,
@@ -241,7 +248,18 @@ async function queryPerplexity(query: string, apiKey: string): Promise<string> {
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
+  return {
+    text: data.choices?.[0]?.message?.content || '',
+    citations: extractCitationUrls(data),
+  };
+}
+
+/** Numbered citation list appended to the extraction prompt so Claude maps
+ * the [n] markers in Perplexity's answer to the URL it actually cited. */
+function formatCitationList(citations: string[]): string {
+  if (citations.length === 0) return '';
+  return '\n\nSources cited in the text (numbered as [n]):\n' +
+    citations.slice(0, 40).map((url, i) => `[${i + 1}] ${url}`).join('\n');
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -271,7 +289,8 @@ async function extractDealsWithSources(
   text: string,
   ta: string,
   yearRange: string,
-  anthropicApiKey: string
+  anthropicApiKey: string,
+  citations: string[] = []
 ): Promise<BackfillDeal[]> {
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 90_000 });
 
@@ -303,7 +322,7 @@ async function extractDealsWithSources(
   "phase": "discovery|preclinical|phase_1|phase_2|phase_3|approved",
   "territory": "global|us|ex_us|ex_china|greater_china|japan|europe|etc",
   "announced_date": "YYYY-MM-DD",
-  "source_url": "URL to press release or news article (REQUIRED — omit deal if no URL available)",
+  "source_url": "URL to press release or news article, copied exactly from the numbered sources list when the deal is cited there (REQUIRED — omit deal if no URL available)",
   "confidence": 75-95 (based on how much verifiable data is in the source),
   "terms_disclosed": true if any financial terms (upfront, milestones, total value) are explicitly stated, false otherwise
 }
@@ -311,7 +330,7 @@ async function extractDealsWithSources(
 CRITICAL: If you cannot provide a source_url for a deal, do NOT include it. Only return deals with verifiable sources.
 
 Return a JSON array. Text:
-${text.substring(0, 10000)}`
+${text.substring(0, 10000)}${formatCitationList(citations)}`
     }],
   });
 
@@ -450,7 +469,7 @@ export async function GET(request: NextRequest) {
 
       try {
         // Step 1: Perplexity discovers deals
-        const searchText = await queryPerplexity(gap.query, perplexityApiKey);
+        const { text: searchText, citations } = await queryPerplexity(gap.query, perplexityApiKey);
         result.queries_run++;
 
         if (!searchText || searchText.length < 100) {
@@ -459,7 +478,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Step 2: Claude extracts structured deals with source URLs
-        const deals = await extractDealsWithSources(searchText, gap.ta, gap.yearRange, anthropicApiKey);
+        const deals = await extractDealsWithSources(searchText, gap.ta, gap.yearRange, anthropicApiKey, citations);
         result.deals_discovered += deals.length;
         console.log(`[backfill] ${gap.ta} ${gap.yearRange}: ${deals.length} deals extracted`);
 
@@ -473,8 +492,15 @@ export async function GET(request: NextRequest) {
             continue;
           }
           if (!deal.source_url?.trim()) {
-            result.deals_rejected.push(`No source URL: ${deal.licensor} → ${deal.licensee}`);
-            continue;
+            // Claude gave no URL — fall back to a citation on a preferred
+            // (SEC/newswire) host or a party's own domain. Never an arbitrary
+            // first URL: the answer covers many deals.
+            const fallback = selectSourceUrl(citations, { licensor: deal.licensor, licensee: deal.licensee }, { allowFirstHttps: false });
+            if (!fallback) {
+              result.deals_rejected.push(`No source URL: ${deal.licensor} → ${deal.licensee}`);
+              continue;
+            }
+            deal.source_url = fallback.url;
           }
 
           // 3b. Source URL verification — THE critical anti-hallucination guard
@@ -573,6 +599,8 @@ export async function GET(request: NextRequest) {
               announced_date: announcedDate,
               source_type: 'historical_backfill',
               source_url: deal.source_url,
+              press_release_url: isPressReleaseUrl(deal.source_url) ? deal.source_url : null,
+              raw_text_excerpt: extractAuditExcerpt(searchText, deal.licensee, 600) || null,
               terms_disclosed: deal.terms_disclosed ?? ((deal.upfront_usd !== null) || (deal.total_deal_value_usd !== null)),
               confidence_score: deal.confidence,
               verified: false,

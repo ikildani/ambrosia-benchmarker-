@@ -91,6 +91,8 @@ export async function GET(request: NextRequest) {
     maxDeals: 50,
     timeBudgetMs: 250_000,
     priorityTAs,
+    // Fill source_url on already-verified deals with leftover budget (URL-only, verdict untouched)
+    sourceBackfillSlots: 15,
   });
 
   // Auto-remediation: accept high-confidence verified deals, reject low-confidence flagged deals
@@ -131,7 +133,7 @@ export async function GET(request: NextRequest) {
             elements: [
               {
                 type: 'mrkdwn',
-                text: `Verified: ${result.verified} (${acceptResult.fixed} auto-accepted) | Flagged: ${result.flagged} | Rejected: ${rejectResult.fixed} auto-rejected | Unchanged: ${result.unchanged} | Errors: ${result.errors.length}`,
+                text: `Verified: ${result.verified} (${acceptResult.fixed} auto-accepted) | Flagged: ${result.flagged} | Rejected: ${rejectResult.fixed} auto-rejected | Unchanged: ${result.unchanged} | Source URLs added: ${result.sourceUrlsAdded} | Errors: ${result.errors.length}`,
               },
             ],
           },
@@ -147,7 +149,7 @@ export async function GET(request: NextRequest) {
     processed: result.verified + result.flagged,
     inserted: result.verified,
     errors: result.errors,
-    parameters: { maxDeals: 20, timeBudgetMs: 250_000 },
+    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded },
   });
 
   // Intelligence tracking
@@ -163,6 +165,7 @@ export async function GET(request: NextRequest) {
     verified: result.verified,
     flagged: result.flagged,
     unchanged: result.unchanged,
+    sourceUrlsAdded: result.sourceUrlsAdded,
     errors: result.errors.length,
   });
 }

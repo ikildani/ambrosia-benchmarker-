@@ -13,8 +13,160 @@ import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import { isTimeBudgetExceeded } from '../cron-utils';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { extractAuditExcerpt } from './deal-extraction-validator';
 
 const PERPLEXITY_API = 'https://api.perplexity.ai/v1/responses';
+
+// ═══════════════════════════════════════════════════════════════════════
+// Source URL helpers — shared by deal-verifier, perplexity-deals and
+// historical-backfill so every writer keeps the citation it already gets.
+// ═══════════════════════════════════════════════════════════════════════
+
+/** Hosts whose citations are preferred as a deal's source_url. */
+export const PREFERRED_SOURCE_HOSTS = [
+  'sec.gov',
+  'businesswire.com',
+  'prnewswire.com',
+  'globenewswire.com',
+] as const;
+
+const NEWSWIRE_HOSTS = ['businesswire.com', 'prnewswire.com', 'globenewswire.com', 'newswire.ca', 'accesswire.com'];
+
+const COMPANY_SUFFIX_RE = /\b(inc|corp|corporation|ltd|limited|plc|llc|lp|co|company|pharmaceuticals?|pharma|therapeutics?|biosciences?|biotech|biotechnology|sciences?|ag|sa|gmbh|nv|ab|holdings?|group)\b/gi;
+
+function hostOf(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:') return null;
+    return u.hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function hostMatches(host: string, domain: string): boolean {
+  return host === domain || host.endsWith('.' + domain);
+}
+
+/**
+ * Best-effort domain stem for a company name ("Esperion Therapeutics, Inc."
+ * → "esperion"). Returns null when no distinctive token (≥ 4 chars) remains.
+ */
+export function companyDomainStem(name: string | null | undefined): string | null {
+  if (!name) return null;
+  const cleaned = name.replace(/[.,()]/g, ' ').replace(COMPANY_SUFFIX_RE, ' ');
+  const token = cleaned.split(/\s+/).map(t => t.toLowerCase().replace(/[^a-z0-9]/g, '')).find(t => t.length >= 4);
+  return token || null;
+}
+
+/** URLs appearing verbatim in free text (last-resort citation source). */
+export function extractUrlsFromText(text: string): string[] {
+  if (!text) return [];
+  const matches = text.match(/https?:\/\/[^\s)\]>"']+/g) || [];
+  return Array.from(new Set(matches.map(m => m.replace(/[.,;:]+$/, ''))));
+}
+
+/**
+ * Collect citation URLs from a Perplexity response body, whichever API shape
+ * it used: Chat Completions (`citations: string[]`, `search_results[].url`)
+ * or Responses (`output[].content[].annotations[]` with `url_citation`).
+ * Order is preserved; duplicates removed.
+ */
+export function extractCitationUrls(data: unknown): string[] {
+  const urls: string[] = [];
+  const push = (v: unknown) => {
+    if (typeof v === 'string' && /^https?:\/\//.test(v)) urls.push(v);
+    else if (v && typeof v === 'object' && typeof (v as { url?: unknown }).url === 'string') urls.push((v as { url: string }).url);
+  };
+  if (!data || typeof data !== 'object') return [];
+  const d = data as Record<string, unknown>;
+  if (Array.isArray(d.citations)) d.citations.forEach(push);
+  if (Array.isArray(d.search_results)) d.search_results.forEach(push);
+  if (Array.isArray(d.output)) {
+    for (const item of d.output as Array<Record<string, unknown>>) {
+      for (const content of (Array.isArray(item?.content) ? item.content : []) as Array<Record<string, unknown>>) {
+        for (const ann of (Array.isArray(content?.annotations) ? content.annotations : []) as Array<Record<string, unknown>>) {
+          if (ann?.type === 'url_citation') push(ann);
+        }
+      }
+    }
+  }
+  return Array.from(new Set(urls));
+}
+
+export type SourceUrlPath = 'preferred_host' | 'company_domain' | 'first_https';
+
+export interface SelectedSourceUrl {
+  url: string;
+  host: string;
+  path: SourceUrlPath;
+}
+
+/**
+ * Pick the citation to persist as source_url.
+ *
+ * Rule: first https URL whose host is sec.gov / businesswire / prnewswire /
+ * globenewswire, else first https URL on a host matching the licensor or
+ * licensee company-name stem, else (when `allowFirstHttps`, default true)
+ * the first https URL. Multi-deal discovery answers pass `false` so an
+ * unrelated citation is never attributed to a deal.
+ */
+export function selectSourceUrl(
+  urls: string[],
+  parties: { licensor?: string | null; licensee?: string | null },
+  options?: { allowFirstHttps?: boolean }
+): SelectedSourceUrl | null {
+  const allowFirstHttps = options?.allowFirstHttps ?? true;
+  const candidates = urls
+    .map(url => ({ url, host: hostOf(url) }))
+    .filter((c): c is { url: string; host: string } => !!c.host);
+  if (candidates.length === 0) return null;
+
+  const preferred = candidates.find(c => PREFERRED_SOURCE_HOSTS.some(h => hostMatches(c.host, h)));
+  if (preferred) return { ...preferred, path: 'preferred_host' };
+
+  const stems = [companyDomainStem(parties.licensor), companyDomainStem(parties.licensee)].filter((s): s is string => !!s);
+  if (stems.length > 0) {
+    const byCompany = candidates.find(c => stems.some(stem => c.host.split('.').some(label => label === stem || label.startsWith(stem))));
+    if (byCompany) return { ...byCompany, path: 'company_domain' };
+  }
+
+  return allowFirstHttps ? { ...candidates[0], path: 'first_https' } : null;
+}
+
+/** True when the URL points at a newswire or a company press-release page. */
+export function isPressReleaseUrl(url: string): boolean {
+  const host = hostOf(url);
+  if (!host) return false;
+  if (NEWSWIRE_HOSTS.some(h => hostMatches(host, h))) return true;
+  try {
+    return /press[-_]?release|news[-_]?release|\/newsroom\/|\/press\//i.test(new URL(url).pathname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Column patch that fills source_url (and press_release_url / raw_text_excerpt)
+ * only where the row currently has null. Never overwrites a non-null URL:
+ * returns {} when source_url is already set.
+ */
+export function buildSourceUrlUpdate(
+  existing: { source_url?: string | null; press_release_url?: string | null; raw_text_excerpt?: string | null },
+  candidate: { url: string; excerpt?: string | null }
+): Record<string, string> {
+  if (existing.source_url) return {};
+  const patch: Record<string, string> = { source_url: candidate.url };
+  if (!existing.press_release_url && isPressReleaseUrl(candidate.url)) patch.press_release_url = candidate.url;
+  if (!existing.raw_text_excerpt && candidate.excerpt) patch.raw_text_excerpt = candidate.excerpt.slice(0, 600);
+  return patch;
+}
+
+/** Append a note to verification_notes without discarding what is there. */
+export function appendVerificationNote(existing: string | null | undefined, note: string): string {
+  const base = (existing || '').trim();
+  return base ? `${base} | ${note}` : note;
+}
 
 interface VerificationResult {
   status: 'verified' | 'flagged' | 'rejected';
@@ -28,19 +180,33 @@ export async function verifyPendingDeals(
   supabase: SupabaseClient,
   perplexityApiKey: string,
   anthropicApiKey: string,
-  options?: { maxDeals?: number; timeBudgetMs?: number; priorityTAs?: string[] }
+  options?: {
+    maxDeals?: number;
+    timeBudgetMs?: number;
+    priorityTAs?: string[];
+    /**
+     * After the pending queue, also process up to N already-verified,
+     * non-synthetic deals that still lack a source_url. For these the
+     * verdict is NOT rewritten — only the corroborating URL (and excerpt)
+     * is filled in. Default 0 (off).
+     */
+    sourceBackfillSlots?: number;
+  }
 ): Promise<{
   verified: number;
   flagged: number;
   unchanged: number;
+  sourceUrlsAdded: number;
   errors: string[];
 }> {
   const maxDeals = options?.maxDeals ?? 20;
   const timeBudgetMs = options?.timeBudgetMs ?? 250_000;
   const startTime = Date.now();
   const priorityTAs = options?.priorityTAs || [];
+  const sourceBackfillSlots = options?.sourceBackfillSlots ?? 0;
 
-  const result = { verified: 0, flagged: 0, unchanged: 0, errors: [] as string[] };
+  const result = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, errors: [] as string[] };
+  const DEAL_COLUMNS = 'id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, press_release_url, raw_text_excerpt, verification_notes, confidence_score';
 
   // 1. Query pending deals — prioritize discovery-stage deals (only 9%
   // verified vs 29% for preclinical) then highest value. The two-pass
@@ -48,7 +214,7 @@ export async function verifyPendingDeals(
   // high-value deals from the queue.
   const { data: discoveryDeals } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, confidence_score')
+    .select(DEAL_COLUMNS)
     .eq('verification_status', 'pending')
     .in('phase_at_signing', ['discovery', 'preclinical'])
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
@@ -58,7 +224,7 @@ export async function verifyPendingDeals(
 
   const { data: remainingDeals, error: queryError } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, confidence_score')
+    .select(DEAL_COLUMNS)
     .eq('verification_status', 'pending')
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(maxDeals);
@@ -67,6 +233,26 @@ export async function verifyPendingDeals(
     ...(discoveryDeals || []),
     ...(remainingDeals || []).filter(d => !discoveryIds.has(d.id)),
   ].slice(0, maxDeals);
+
+  // Source-URL backfill pass: already-verified deals with no link. They are
+  // appended after the pending queue so they only consume leftover budget,
+  // and their verdict is left untouched (URL-only update).
+  const sourceBackfillIds = new Set<string>();
+  if (sourceBackfillSlots > 0) {
+    const { data: noSourceDeals } = await supabase
+      .from('deals')
+      .select(DEAL_COLUMNS)
+      .eq('verification_status', 'verified')
+      .is('source_url', null)
+      .or('is_synthetic.is.null,is_synthetic.eq.false')
+      .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
+      .limit(sourceBackfillSlots);
+    for (const d of noSourceDeals || []) {
+      if (deals.some(existing => existing.id === d.id)) continue;
+      sourceBackfillIds.add(d.id);
+      deals.push(d);
+    }
+  }
 
   // Sort deals so priority TAs (user-demanded) come first
   if (priorityTAs.length > 0) {
@@ -125,6 +311,7 @@ export async function verifyPendingDeals(
       }
 
       const data = await response.json();
+      const citationUrls = extractCitationUrls(data);
       let perplexityText = '';
       for (const item of data.output || []) {
         if (item.type === 'message') {
@@ -141,6 +328,7 @@ export async function verifyPendingDeals(
         result.unchanged++;
         continue;
       }
+      if (citationUrls.length === 0) citationUrls.push(...extractUrlsFromText(perplexityText));
 
       // 2c. Send to Claude for comparison
       const dealRecord = {
@@ -209,11 +397,52 @@ Rules:
         continue;
       }
 
-      // 2e-g. Update deal based on status
+      // 2e. Keep the corroborating citation when the row has no link yet.
+      // Rejected verdicts never supply a URL (nothing corroborated).
+      let sourcePatch: Record<string, string> = {};
+      let sourceNote: string | null = null;
+      if (verification.status !== 'rejected' && !deal.source_url) {
+        const selected = selectSourceUrl(citationUrls, {
+          licensor: deal.licensor_name,
+          licensee: deal.licensee_name,
+        });
+        if (selected) {
+          sourcePatch = buildSourceUrlUpdate(deal, {
+            url: selected.url,
+            excerpt: extractAuditExcerpt(perplexityText, deal.licensee_name ?? '', 600),
+          });
+          if (sourcePatch.source_url) {
+            sourceNote = `source_url set by deal-verifier from Perplexity citation (${selected.path}: ${selected.host})`;
+          }
+        }
+      }
+
+      const isSourceBackfill = sourceBackfillIds.has(deal.id);
+      if (isSourceBackfill) {
+        // URL-only pass: never rewrite an existing verdict here.
+        if (!sourcePatch.source_url || !sourceNote) {
+          result.unchanged++;
+          continue;
+        }
+        await supabase
+          .from('deals')
+          .update({ ...sourcePatch, verification_notes: appendVerificationNote(deal.verification_notes, sourceNote) })
+          .eq('id', deal.id)
+          .is('source_url', null); // race guard: never overwrite a URL written meanwhile
+        result.sourceUrlsAdded++;
+        await new Promise(r => setTimeout(r, 2000));
+        continue;
+      }
+
+      // 2f-g. Update deal based on status
       const updates: Record<string, unknown> = {
         verification_status: verification.status,
-        verification_notes: verification.reason,
+        verification_notes: sourceNote
+          ? appendVerificationNote(verification.reason, sourceNote)
+          : verification.reason,
+        ...sourcePatch,
       };
+      if (sourcePatch.source_url) result.sourceUrlsAdded++;
 
       if (verification.status === 'verified') {
         updates.verified = true;
