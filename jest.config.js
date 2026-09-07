@@ -45,7 +45,7 @@ module.exports = async () => {
         ...nextJestConfig,
         displayName: 'lib',
         testEnvironment: 'node',
-        testMatch: ['<rootDir>/__tests__/lib/**/*.test.ts'],
+        testMatch: ['<rootDir>/__tests__/lib/**/*.test.ts', '<rootDir>/__tests__/ingestion/**/*.test.ts'],
       },
     ],
   };
