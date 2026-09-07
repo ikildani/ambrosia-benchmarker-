@@ -25,14 +25,18 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, therapeutic_area, indication_category, modality, phase, total_deal_value_usd, upfront_payment_usd, announced_date, deal_type, territory', { count: 'exact' })
-    .eq('is_fabricated', false)
+    // Column names must match the deals schema (phase_at_signing, upfront_usd,
+    // is_synthetic). The previous names did not exist and every call 500'd.
+    .select('id, licensor_name, licensee_name, therapeutic_area, indication_category, indication_specific, modality, phase_at_signing, total_deal_value_usd, upfront_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, deal_type, territory, source_url, confidence_score, verification_status', { count: 'exact' })
+    .eq('is_synthetic', false)
+    .or('is_canonical.is.null,is_canonical.eq.true')
     .order('announced_date', { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (therapeuticArea) query = query.eq('therapeutic_area', therapeuticArea);
   if (modality) query = query.eq('modality', modality);
-  if (phase) query = query.eq('phase', phase);
+  // Accept both calculator-style ("phase2") and schema-style ("phase_2") phase keys.
+  if (phase) query = query.eq('phase_at_signing', phase.replace(/^phase(\d)/, 'phase_$1'));
   if (minValue) query = query.gte('total_deal_value_usd', parseInt(minValue) * 1_000_000);
 
   const { data: deals, count, error } = await query;

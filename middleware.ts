@@ -17,6 +17,7 @@ const ROUTE_RATE_LIMITS: Record<string, RateLimitConfig> = {
   '/api/share': { limit: 10, windowSeconds: 60 },
   '/api/billing': { limit: 10, windowSeconds: 60 },
   '/api/email': { limit: 5, windowSeconds: 60 },
+  '/api/email-results': { limit: 3, windowSeconds: 60 },
   '/api/events': RATE_LIMIT_CONFIGS.events,
   '/api/user': { limit: 10, windowSeconds: 60 },
   '/api/companies': RATE_LIMIT_CONFIGS.deals,

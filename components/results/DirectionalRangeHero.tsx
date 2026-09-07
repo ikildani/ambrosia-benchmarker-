@@ -153,7 +153,7 @@ export function DirectionalRangeHero({
             80% band: <span className="font-mono text-slate-400">{fmtM(p10)}</span>–
             <span className="font-mono text-slate-400">{fmtM(p90)}</span>
           </span>
-          <span>~95% of real deals land in this wider range</span>
+          <span>p10–p90 of the comparable sample (80% of those deals by construction)</span>
         </div>
       )}
 
