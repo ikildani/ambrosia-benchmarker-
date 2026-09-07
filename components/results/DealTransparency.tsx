@@ -6,6 +6,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import type { CalculationInput } from '@/lib/calculations';
 import type { UserTier } from '@/types/tier';
+import type { PeerBenchmarkSummary } from '@/lib/peer-benchmark';
 import DealDetailModal from './DealDetailModal';
 import { relaxationLabel, type CompRelaxation } from '@/lib/comparable-scoring';
 
@@ -90,6 +91,12 @@ interface Props {
   tier: UserTier;
   onUpgrade?: () => void;
   calculationMedian?: number;
+  /**
+   * The single comparable population used by the summary hero and the
+   * "at market" percentile (live pool, recency-weighted). Shown here so the
+   * Comparables tab and the summary quote the same median.
+   */
+  peerBenchmark?: PeerBenchmarkSummary | null;
 }
 
 const PHASE_RANK: Record<string, number> = {
@@ -181,7 +188,7 @@ function phaseAdjust(dealUpfront: number | null, dealPhase: string | null, userP
   return { adjusted: dealUpfront * (1 + pct / 100), pct };
 }
 
-export default function DealTransparency({ inputs, tier, onUpgrade, calculationMedian }: Props) {
+export default function DealTransparency({ inputs, tier, onUpgrade, calculationMedian, peerBenchmark }: Props) {
   const { user } = useAuth();
   const hasPro = tier === 'pro' || tier === 'portfolio' || tier === 'report';
   const [data, setData] = useState<TransparencyResponse | null>(null);
@@ -287,8 +294,17 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
   const relaxNote = relaxationLabel(data.relaxation);
   const isPreApprovalQuery = inputs.phase !== 'approved';
   const calcM = calculationMedian != null ? calculationMedian : null;
-  const deltaAbs = rawMedian != null && calcM != null ? calcM - rawMedian : null;
-  const deltaPct = rawMedian != null && calcM != null && rawMedian > 0 ? ((calcM - rawMedian) / rawMedian) * 100 : null;
+  // Prefer the same comparable median the summary hero uses, so the two tabs
+  // never quote different "market" numbers. The TA-wide pool median is still
+  // shown, labelled as what it is.
+  const compMedian = peerBenchmark && peerBenchmark.nDisclosedUpfront >= 3
+    ? peerBenchmark.upfrontPercentiles.p50
+    : null;
+  const compMedianN = peerBenchmark?.nDisclosedUpfront ?? null;
+  const compIsOffline = peerBenchmark != null && peerBenchmark.source !== 'live';
+  const reference = compMedian ?? rawMedian;
+  const deltaAbs = reference != null && calcM != null ? calcM - reference : null;
+  const deltaPct = reference != null && calcM != null && reference > 0 ? ((calcM - reference) / reference) * 100 : null;
 
   const trendData = (data.quarterlyTrend || []).filter(t => t.medianUpfront != null);
   const trendChange = trendData.length >= 2
@@ -355,16 +371,32 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
               <span className="text-white font-mono font-semibold">{fmtM(calcM)}</span>
             </div>
             <div className="text-slate-600">vs</div>
-            <div>
-              <span className="text-slate-500">Raw data median: </span>
-              <span className="text-white font-mono font-semibold">{fmtM(rawMedian)}</span>
-              {rawMedianN != null && <span className="text-slate-500 ml-1">(n = {rawMedianN} with disclosed upfront)</span>}
-            </div>
+            {compMedian != null ? (
+              <div>
+                <span className="text-slate-500">Comparable median: </span>
+                <span className="text-white font-mono font-semibold">{fmtM(compMedian)}</span>
+                <span className="text-slate-500 ml-1">
+                  (n = {compMedianN} with disclosed upfront · recency-weighted · same as summary{compIsOffline ? ' · offline sample' : ''})
+                </span>
+              </div>
+            ) : (
+              <div>
+                <span className="text-slate-500">Raw data median: </span>
+                <span className="text-white font-mono font-semibold">{fmtM(rawMedian)}</span>
+                {rawMedianN != null && <span className="text-slate-500 ml-1">(n = {rawMedianN} with disclosed upfront)</span>}
+              </div>
+            )}
+            {compMedian != null && rawMedian != null && (
+              <div className="text-slate-500">
+                · TA pool median <span className="font-mono text-slate-300">{fmtM(rawMedian)}</span>
+                {rawMedianN != null && <span> (n = {rawMedianN}, unweighted)</span>}
+              </div>
+            )}
             {deltaPct != null && (
               <div className={`ml-auto font-mono font-semibold ${Math.abs(deltaPct) <= 15 ? 'text-emerald-400' : 'text-amber-400'}`}>
                 {deltaPct >= 0 ? '+' : ''}{deltaPct.toFixed(0)}%
                 {Math.abs(deltaPct) > 15 && (
-                  <span className="text-[10px] text-slate-500 font-normal ml-2">Adjusted for modality/competitive position</span>
+                  <span className="text-[10px] text-slate-500 font-normal ml-2">Estimate includes asset-specific modifiers — see “Why This Range?”</span>
                 )}
               </div>
             )}
