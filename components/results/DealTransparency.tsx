@@ -143,7 +143,8 @@ function StatBar({ label, stats }: { label: string; stats: Stats | null }) {
 
 function phaseAdjust(dealUpfront: number | null, dealPhase: string | null, userPhase: string): { adjusted: number | null; pct: number } {
   if (dealUpfront == null || !dealPhase) return { adjusted: null, pct: 0 };
-  const userRank = PHASE_RANK[userPhase] ?? 3;
+  // Calculator phases are "phase2"; deals table uses "phase_2". Accept both.
+  const userRank = PHASE_RANK[userPhase] ?? PHASE_RANK[userPhase.replace(/^phase(\d)/, 'phase_$1')] ?? 3;
   const compRank = PHASE_RANK[dealPhase] ?? 3;
   const delta = userRank - compRank;
   // Comp later than user → discount it; comp earlier → mark it up. 15% per phase step.
