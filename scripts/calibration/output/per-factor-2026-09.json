@@ -1,0 +1,3334 @@
+{
+  "study": "per-factor-2026-09",
+  "generatedAt": "2026-09-07T23:37:50.686Z",
+  "method": {
+    "corpus": "getAllBacktestCases() — EXTENDED_COMPARABLE_DEALS + SUPABASE_COMPARABLE_DEALS, deduped, upfront >= $20M, data-quality filter",
+    "residual": "ln(actual / engine baseline median for TA x phase [x rare-disease modality sub-baseline])",
+    "model": "ridge OLS on one-hot dummies; intercept unpenalised",
+    "lambda": 1,
+    "bootstrap": 200,
+    "seed": 20260907,
+    "minNForVerdict": 15,
+    "minNOwnLevel": 5,
+    "referenceLevels": {
+      "modality": "smallMolecule",
+      "territory": "global",
+      "dealType": "licensing",
+      "indication": "unmatched (engine 1.0)",
+      "year": "2024",
+      "ta": "oncology",
+      "phase": "phase2"
+    },
+    "liveTableProbe": "scripts/calibration/live-enrichment-coverage.ts — read-only; enrichment columns too sparse to use (see unidentifiable)"
+  },
+  "corpus": {
+    "casesIn": 462,
+    "rowsUsed": 462,
+    "dropped": []
+  },
+  "primary": {
+    "label": "full corpus",
+    "n": 462,
+    "p": 75,
+    "interceptTotal": 0.7015172718872476,
+    "interceptUpfront": 1.0064978888300893,
+    "r2Total": 0.543463929016857,
+    "r2Upfront": 0.6483375509180639,
+    "rmseLogTotal": 0.8662395158733548,
+    "rmseLogUpfront": 0.9744290122809104,
+    "levels": [
+      {
+        "family": "modality",
+        "level": "adc",
+        "n": 12,
+        "impliedTotal": 2.4296013073617333,
+        "ci95Total": [
+          1.4731451751473534,
+          3.9247120291960442
+        ],
+        "impliedUpfront": 2.2389368575458843,
+        "ci95Upfront": [
+          1.273356173879709,
+          4.068979301641158
+        ],
+        "engineMultiplier": 1.45,
+        "exponent": 1,
+        "engineApplied": 1.45,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "territory:ex_china",
+        "maxAbsCorr": 0.2996038107883732
+      },
+      {
+        "family": "modality",
+        "level": "bispecific",
+        "n": 35,
+        "impliedTotal": 1.0560273991282543,
+        "ci95Total": [
+          0.7677777233367705,
+          1.4157548388847854
+        ],
+        "impliedUpfront": 1.466620713044986,
+        "ci95Upfront": [
+          0.9798775458867782,
+          2.242640611199435
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 1,
+        "engineApplied": 1.35,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "indication:atopicDermatitis",
+        "maxAbsCorr": 0.2834217155626225
+      },
+      {
+        "family": "modality",
+        "level": "carT_heme",
+        "n": 9,
+        "impliedTotal": 1.0845230013351115,
+        "ci95Total": [
+          0.5184340424570004,
+          2.3458384201500215
+        ],
+        "impliedUpfront": 1.3786717970266946,
+        "ci95Upfront": [
+          0.8853708537119381,
+          2.36658843296786
+        ],
+        "engineMultiplier": 1.2,
+        "exponent": 1,
+        "engineApplied": 1.2,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:sle_lupus",
+        "maxAbsCorr": 0.3988189838159426
+      },
+      {
+        "family": "modality",
+        "level": "cellTherapy",
+        "n": 9,
+        "impliedTotal": 0.7128156967935759,
+        "ci95Total": [
+          0.40348783441770036,
+          1.4011507393496352
+        ],
+        "impliedUpfront": 0.8247859997425949,
+        "ci95Upfront": [
+          0.5294653500143472,
+          1.294871589023963
+        ],
+        "engineMultiplier": 1.15,
+        "exponent": 1,
+        "engineApplied": 1.15,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "dealType:acquisition@preclinical",
+        "maxAbsCorr": 0.13349250355198036
+      },
+      {
+        "family": "modality",
+        "level": "geneTherapy",
+        "n": 51,
+        "impliedTotal": 1.1081361503591858,
+        "ci95Total": [
+          0.7868856039078524,
+          1.587303430561478
+        ],
+        "impliedUpfront": 1.0906239071378656,
+        "ci95Upfront": [
+          0.7523630794448425,
+          1.4875943294803085
+        ],
+        "engineMultiplier": 0.98,
+        "exponent": 1,
+        "engineApplied": 0.98,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "ta:rareDisease",
+        "maxAbsCorr": 0.36508780163736837
+      },
+      {
+        "family": "modality",
+        "level": "mab",
+        "n": 75,
+        "impliedTotal": 1.1063720555889713,
+        "ci95Total": [
+          0.8446998918064115,
+          1.509084225500379
+        ],
+        "impliedUpfront": 1.3062916686483925,
+        "ci95Upfront": [
+          0.9595752640940263,
+          1.8134178245727703
+        ],
+        "engineMultiplier": 1.03,
+        "exponent": 1,
+        "engineApplied": 1.03,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "indication:ibd_broad",
+        "maxAbsCorr": 0.18565104062437734
+      },
+      {
+        "family": "modality",
+        "level": "modality:pooledThin",
+        "n": 35,
+        "impliedTotal": 1.3395251693682249,
+        "ci95Total": [
+          0.8525347986715457,
+          1.9240076485162745
+        ],
+        "impliedUpfront": 1.4761366969326746,
+        "ci95Upfront": [
+          0.9314859738982538,
+          2.1462132130656464
+        ],
+        "engineMultiplier": 1.2111934554776687,
+        "exponent": 1,
+        "engineApplied": 1.2111934554776687,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "ta:infectiousDisease",
+        "maxAbsCorr": 0.18477339142178786,
+        "note": "not an engine modality key"
+      },
+      {
+        "family": "modality",
+        "level": "mrna",
+        "n": 9,
+        "impliedTotal": 1.4373284299300852,
+        "ci95Total": [
+          0.6425511625952157,
+          2.9341064437073436
+        ],
+        "impliedUpfront": 2.2877280052251283,
+        "ci95Upfront": [
+          1.1857798455515547,
+          4.12843085391407
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 1,
+        "engineApplied": 1.3,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:infectiousDisease",
+        "maxAbsCorr": 0.33777884067747144
+      },
+      {
+        "family": "modality",
+        "level": "oligonucleotide",
+        "n": 9,
+        "impliedTotal": 1.155443327868996,
+        "ci95Total": [
+          0.6687171279997869,
+          1.8615273775628938
+        ],
+        "impliedUpfront": 0.9223529146948358,
+        "ci95Upfront": [
+          0.6073905634036418,
+          1.4626462798696296
+        ],
+        "engineMultiplier": 1.18,
+        "exponent": 1,
+        "engineApplied": 1.18,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:nashMash",
+        "maxAbsCorr": 0.19427927651051036
+      },
+      {
+        "family": "modality",
+        "level": "peptide",
+        "n": 18,
+        "impliedTotal": 0.8264608649382317,
+        "ci95Total": [
+          0.5673493151829451,
+          1.2777124702637122
+        ],
+        "impliedUpfront": 0.6698637560140488,
+        "ci95Upfront": [
+          0.424184144591421,
+          1.0948479956377675
+        ],
+        "engineMultiplier": 1.05,
+        "exponent": 1,
+        "engineApplied": 1.05,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "indication:nashMash",
+        "maxAbsCorr": 0.2775230701269428
+      },
+      {
+        "family": "modality",
+        "level": "protac",
+        "n": 6,
+        "impliedTotal": 1.125965162738274,
+        "ci95Total": [
+          0.6985808536875008,
+          1.5254972968814742
+        ],
+        "impliedUpfront": 1.1618221902307635,
+        "ci95Upfront": [
+          0.5642367070646244,
+          2.276583505886057
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 1,
+        "engineApplied": 1.35,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:covid",
+        "maxAbsCorr": 0.17277567489734325
+      },
+      {
+        "family": "modality",
+        "level": "radiopharmaceutical",
+        "n": 5,
+        "impliedTotal": 1.0780216162955663,
+        "ci95Total": [
+          0.5876388112728407,
+          1.8434406759899884
+        ],
+        "impliedUpfront": 1.5047622634982432,
+        "ci95Upfront": [
+          0.962170355510766,
+          2.25798679125388
+        ],
+        "engineMultiplier": 1.6,
+        "exponent": 1,
+        "engineApplied": 1.6,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "territory:japan",
+        "maxAbsCorr": 0.15828146251811206
+      },
+      {
+        "family": "modality",
+        "level": "rnai",
+        "n": 15,
+        "impliedTotal": 1.566501979863688,
+        "ci95Total": [
+          1.0071039609718566,
+          2.1257386149680557
+        ],
+        "impliedUpfront": 2.1284188176751995,
+        "ci95Upfront": [
+          1.313816862326627,
+          3.837871225175776
+        ],
+        "engineMultiplier": 1.15,
+        "exponent": 1,
+        "engineApplied": 1.15,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "ta:cardiovascular",
+        "maxAbsCorr": 0.2653774422675978
+      },
+      {
+        "family": "territory",
+        "level": "china",
+        "n": 11,
+        "impliedTotal": 0.7173957560312245,
+        "ci95Total": [
+          0.36954365325133165,
+          1.5978758562322355
+        ],
+        "impliedUpfront": 0.3125939372630904,
+        "ci95Upfront": [
+          0.1253895489171832,
+          0.7309186076682664
+        ],
+        "engineMultiplier": 0.11999999999999995,
+        "exponent": 1,
+        "engineApplied": 0.11999999999999995,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:dlbcl",
+        "maxAbsCorr": 0.25810241058996514
+      },
+      {
+        "family": "territory",
+        "level": "europe",
+        "n": 8,
+        "impliedTotal": 0.776142283641212,
+        "ci95Total": [
+          0.44687094925368004,
+          1.3802076049776308
+        ],
+        "impliedUpfront": 0.6847907898153069,
+        "ci95Upfront": [
+          0.39642908953945755,
+          1.1908330169285273
+        ],
+        "engineMultiplier": 0.25,
+        "exponent": 1,
+        "engineApplied": 0.25,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "dealType:option",
+        "maxAbsCorr": 0.23846938237626594
+      },
+      {
+        "family": "territory",
+        "level": "ex_china",
+        "n": 20,
+        "impliedTotal": 1.3382864936145031,
+        "ci95Total": [
+          0.9667643927175256,
+          1.802525254387229
+        ],
+        "impliedUpfront": 0.8631836217390148,
+        "ci95Upfront": [
+          0.5309338218334269,
+          1.5026148155485404
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "modality:adc",
+        "maxAbsCorr": 0.2996038107883732,
+        "note": "not an engine territory key (engine applies 1.0)"
+      },
+      {
+        "family": "territory",
+        "level": "ex_us",
+        "n": 18,
+        "impliedTotal": 0.7406471304979669,
+        "ci95Total": [
+          0.39708136893153234,
+          1.210698696690047
+        ],
+        "impliedUpfront": 0.8856290727278342,
+        "ci95Upfront": [
+          0.4536653548145365,
+          1.5220601099662816
+        ],
+        "engineMultiplier": 0.44999999999999996,
+        "exponent": 1,
+        "engineApplied": 0.44999999999999996,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "indication:migraine",
+        "maxAbsCorr": 0.15816866003518523
+      },
+      {
+        "family": "territory",
+        "level": "japan",
+        "n": 7,
+        "impliedTotal": 0.3938673421917409,
+        "ci95Total": [
+          0.23237087525347688,
+          0.8634243662093883
+        ],
+        "impliedUpfront": 0.33849597868629827,
+        "ci95Upfront": [
+          0.24282351242982525,
+          0.6364705769756277
+        ],
+        "engineMultiplier": 0.09000000000000002,
+        "exponent": 1,
+        "engineApplied": 0.09000000000000002,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:other",
+        "maxAbsCorr": 0.21057989315867043
+      },
+      {
+        "family": "territory",
+        "level": "territory:pooledThin",
+        "n": 7,
+        "impliedTotal": 0.728752961825943,
+        "ci95Total": [
+          0.4300714890919187,
+          1.3172365452828756
+        ],
+        "impliedUpfront": 0.3915967068715721,
+        "ci95Upfront": [
+          0.19479764842531594,
+          0.9458038761533878
+        ],
+        "engineMultiplier": 0.06,
+        "exponent": 1,
+        "engineApplied": 0.06,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:adc",
+        "maxAbsCorr": 0.20254787341673264,
+        "note": "not an engine territory key (engine applies 1.0)"
+      },
+      {
+        "family": "territory",
+        "level": "us_only",
+        "n": 9,
+        "impliedTotal": 1.0172615780002048,
+        "ci95Total": [
+          0.5952188667534889,
+          1.82135071100495
+        ],
+        "impliedUpfront": 0.7847480729015243,
+        "ci95Upfront": [
+          0.4288576400769229,
+          1.6217317442756236
+        ],
+        "engineMultiplier": 0.5499999999999999,
+        "exponent": 1,
+        "engineApplied": 0.5499999999999999,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:menopause",
+        "maxAbsCorr": 0.13662261607992726
+      },
+      {
+        "family": "dealType",
+        "level": "acquisition@approved",
+        "n": 58,
+        "impliedTotal": 2.473610877942309,
+        "ci95Total": [
+          1.54887988086008,
+          3.963605173532084
+        ],
+        "impliedUpfront": 7.254597310343668,
+        "ci95Upfront": [
+          4.177467469514788,
+          11.426352270770197
+        ],
+        "engineMultiplier": 1.65,
+        "exponent": 1,
+        "engineApplied": 1.65,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:approved",
+        "maxAbsCorr": 0.7547359256524422
+      },
+      {
+        "family": "dealType",
+        "level": "acquisition@phase1",
+        "n": 29,
+        "impliedTotal": 1.0534697194983924,
+        "ci95Total": [
+          0.7656438934516532,
+          1.4902698971677077
+        ],
+        "impliedUpfront": 5.872954264629548,
+        "ci95Upfront": [
+          3.9192164611951386,
+          8.318177451540711
+        ],
+        "engineMultiplier": 0.6000000000000001,
+        "exponent": 1,
+        "engineApplied": 0.6000000000000001,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:phase1",
+        "maxAbsCorr": 0.5298030612419818
+      },
+      {
+        "family": "dealType",
+        "level": "acquisition@phase2",
+        "n": 50,
+        "impliedTotal": 1.6464406614967113,
+        "ci95Total": [
+          1.2388294523169203,
+          2.2437494499281576
+        ],
+        "impliedUpfront": 7.65674807948499,
+        "ci95Upfront": [
+          5.363989984395734,
+          11.015138464568448
+        ],
+        "engineMultiplier": 0.9000000000000001,
+        "exponent": 1,
+        "engineApplied": 0.9000000000000001,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "indication:ulcerativeColitis",
+        "maxAbsCorr": 0.187575342138659
+      },
+      {
+        "family": "dealType",
+        "level": "acquisition@phase3",
+        "n": 36,
+        "impliedTotal": 2.339738178082363,
+        "ci95Total": [
+          1.6127499793504447,
+          3.5783387145731873
+        ],
+        "impliedUpfront": 9.104947273259047,
+        "ci95Upfront": [
+          5.556421967030637,
+          13.86757285779802
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 1,
+        "engineApplied": 1.35,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:phase3",
+        "maxAbsCorr": 0.6656507930606248
+      },
+      {
+        "family": "dealType",
+        "level": "acquisition@preclinical",
+        "n": 18,
+        "impliedTotal": 1.2719539180888964,
+        "ci95Total": [
+          0.7537934308113707,
+          2.076847621010782
+        ],
+        "impliedUpfront": 10.18017589732974,
+        "ci95Upfront": [
+          5.64649434851633,
+          18.795924120217453
+        ],
+        "engineMultiplier": 0.6000000000000001,
+        "exponent": 1,
+        "engineApplied": 0.6000000000000001,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:preclinical",
+        "maxAbsCorr": 0.3880452944942765
+      },
+      {
+        "family": "dealType",
+        "level": "codevelopment",
+        "n": 16,
+        "impliedTotal": 1.2090218421481225,
+        "ci95Total": [
+          0.686426665311057,
+          1.9821423460940695
+        ],
+        "impliedUpfront": 1.3282965455183051,
+        "ci95Upfront": [
+          0.7142903067045318,
+          2.282460228477986
+        ],
+        "engineMultiplier": 0.8046509950159642,
+        "exponent": 1,
+        "engineApplied": 0.8046509950159642,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "territory:territory:pooledThin",
+        "maxAbsCorr": 0.17032323226578958
+      },
+      {
+        "family": "dealType",
+        "level": "collaboration",
+        "n": 80,
+        "impliedTotal": 1.0823201786570442,
+        "ci95Total": [
+          0.8191511275108025,
+          1.3450373044863542
+        ],
+        "impliedUpfront": 1.1394551331400142,
+        "ci95Upfront": [
+          0.8559974858569481,
+          1.4293047439097601
+        ],
+        "engineMultiplier": 0.5269165912769003,
+        "exponent": 1,
+        "engineApplied": 0.5269165912769003,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:preclinical",
+        "maxAbsCorr": 0.2662853505613746
+      },
+      {
+        "family": "dealType",
+        "level": "dealType:pooledThin",
+        "n": 1,
+        "impliedTotal": 0.31879698062592476,
+        "ci95Total": [
+          0.14966008532253597,
+          1
+        ],
+        "impliedUpfront": 0.5878665078887715,
+        "ci95Upfront": [
+          0.3426084397030653,
+          1
+        ],
+        "engineMultiplier": 0.55,
+        "exponent": 1,
+        "engineApplied": 0.55,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "year:2021",
+        "maxAbsCorr": 0.15127799753420904
+      },
+      {
+        "family": "dealType",
+        "level": "option",
+        "n": 17,
+        "impliedTotal": 0.925435419669681,
+        "ci95Total": [
+          0.6251629759736116,
+          1.4437260057937595
+        ],
+        "impliedUpfront": 1.0929618893643955,
+        "ci95Upfront": [
+          0.7461379369805456,
+          1.5280567891753045
+        ],
+        "engineMultiplier": 0.6646922025783164,
+        "exponent": 1,
+        "engineApplied": 0.6646922025783164,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "territory:europe",
+        "maxAbsCorr": 0.23846938237626594
+      },
+      {
+        "family": "indication",
+        "level": "alzheimers",
+        "n": 9,
+        "impliedTotal": 1.2686481318282237,
+        "ci95Total": [
+          0.8074503075811028,
+          1.8643706088466694
+        ],
+        "impliedUpfront": 0.8683265405036816,
+        "ci95Upfront": [
+          0.4301501836226027,
+          1.6786819834577227
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 0.9000000000000001,
+        "engineApplied": 1.2663361857313113,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:neurology",
+        "maxAbsCorr": 0.3795256711993798
+      },
+      {
+        "family": "indication",
+        "level": "atopicDermatitis",
+        "n": 14,
+        "impliedTotal": 1.0530287378155603,
+        "ci95Total": [
+          0.6901465677221084,
+          1.5387143312379756
+        ],
+        "impliedUpfront": 0.8861163569375359,
+        "ci95Upfront": [
+          0.49563655294605136,
+          1.5501045523151185
+        ],
+        "engineMultiplier": 1.3000000000000003,
+        "exponent": 0.8178571428571428,
+        "engineApplied": 1.2393369114103978,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:dermatology",
+        "maxAbsCorr": 0.48203591294911213
+      },
+      {
+        "family": "indication",
+        "level": "cardiomyopathy",
+        "n": 12,
+        "impliedTotal": 1.383384874301758,
+        "ci95Total": [
+          0.7715713430525235,
+          2.3561433179027813
+        ],
+        "impliedUpfront": 1.6719602786704284,
+        "ci95Upfront": [
+          0.8849258713751006,
+          3.045406880851708
+        ],
+        "engineMultiplier": 1.22,
+        "exponent": 0.8499999999999998,
+        "engineApplied": 1.1841476462754186,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:cardiovascular",
+        "maxAbsCorr": 0.4910798512358845
+      },
+      {
+        "family": "indication",
+        "level": "covid",
+        "n": 5,
+        "impliedTotal": 1.1544672642885299,
+        "ci95Total": [
+          0.6486200918787495,
+          1.9734492196116413
+        ],
+        "impliedUpfront": 1.1603653462121704,
+        "ci95Upfront": [
+          0.6151414000969488,
+          1.9271703967014462
+        ],
+        "engineMultiplier": 0.9,
+        "exponent": 0.85,
+        "engineApplied": 0.9143366600529774,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:infectiousDisease",
+        "maxAbsCorr": 0.3900180353576941
+      },
+      {
+        "family": "indication",
+        "level": "dlbcl",
+        "n": 5,
+        "impliedTotal": 2.10493640468086,
+        "ci95Total": [
+          0.9982245253203683,
+          3.9538943361556966
+        ],
+        "impliedUpfront": 1.4694452382859036,
+        "ci95Upfront": [
+          0.7306546554242273,
+          2.8022376928850727
+        ],
+        "engineMultiplier": 1.1504778186170193,
+        "exponent": 0.8,
+        "engineApplied": 1.1186715669830956,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:carT_heme",
+        "maxAbsCorr": 0.28798867993826377
+      },
+      {
+        "family": "indication",
+        "level": "dryAmdGA",
+        "n": 5,
+        "impliedTotal": 1.7536667458188953,
+        "ci95Total": [
+          0.9094564399425239,
+          3.1714401740075373
+        ],
+        "impliedUpfront": 2.2280677405890588,
+        "ci95Upfront": [
+          0.7682701091114479,
+          4.302438559114575
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 0.9,
+        "engineApplied": 1.2663361857313113,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:ophthalmology",
+        "maxAbsCorr": 0.4198456409991409
+      },
+      {
+        "family": "indication",
+        "level": "endometriosis",
+        "n": 5,
+        "impliedTotal": 0.8809792331494619,
+        "ci95Total": [
+          0.476852725918812,
+          1.5473615989736
+        ],
+        "impliedUpfront": 0.6698687155372067,
+        "ci95Upfront": [
+          0.3084477875721276,
+          1.5761923373585183
+        ],
+        "engineMultiplier": 1.22,
+        "exponent": 0.85,
+        "engineApplied": 1.1841476462754186,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:womensHealth",
+        "maxAbsCorr": 0.4677802697249858
+      },
+      {
+        "family": "indication",
+        "level": "hemophiliaB",
+        "n": 7,
+        "impliedTotal": 0.3931084556546366,
+        "ci95Total": [
+          0.20013623504326375,
+          0.7787888790094748
+        ],
+        "impliedUpfront": 0.507443454897794,
+        "ci95Upfront": [
+          0.2714886881557777,
+          0.9369846065930739
+        ],
+        "engineMultiplier": 1.2218631371112538,
+        "exponent": 0.7999999999999999,
+        "engineApplied": 1.1738647194432033,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:geneTherapy",
+        "maxAbsCorr": 0.29556732274782044
+      },
+      {
+        "family": "indication",
+        "level": "ibd_broad",
+        "n": 7,
+        "impliedTotal": 0.8322376668284834,
+        "ci95Total": [
+          0.48349071144142935,
+          1.4243105848895683
+        ],
+        "impliedUpfront": 0.9426230574791132,
+        "ci95Upfront": [
+          0.5367778482030583,
+          1.5072302766500683
+        ],
+        "engineMultiplier": 1.18,
+        "exponent": 0.8285714285714285,
+        "engineApplied": 1.1469893290398905,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:gastroenterology",
+        "maxAbsCorr": 0.21049893061308164
+      },
+      {
+        "family": "indication",
+        "level": "indication:pooledThin",
+        "n": 142,
+        "impliedTotal": 0.9688142638564968,
+        "ci95Total": [
+          0.7730194796497115,
+          1.164567374884166
+        ],
+        "impliedUpfront": 1.0478404902215201,
+        "ci95Upfront": [
+          0.7811298478600811,
+          1.3113305647400433
+        ],
+        "engineMultiplier": 1.1861817742512075,
+        "exponent": 0.8411971830985907,
+        "engineApplied": 1.1537983731708197,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "ta:ophthalmology",
+        "maxAbsCorr": 0.13401557686387167
+      },
+      {
+        "family": "indication",
+        "level": "menopause",
+        "n": 5,
+        "impliedTotal": 0.27546279438496774,
+        "ci95Total": [
+          0.15532618915021862,
+          0.6341255280628975
+        ],
+        "impliedUpfront": 0.38847569962229017,
+        "ci95Upfront": [
+          0.2198623011199815,
+          0.886299297397576
+        ],
+        "engineMultiplier": 1.15,
+        "exponent": 0.85,
+        "engineApplied": 1.1261420215411433,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:womensHealth",
+        "maxAbsCorr": 0.4677802697249903
+      },
+      {
+        "family": "indication",
+        "level": "migraine",
+        "n": 7,
+        "impliedTotal": 0.8713650024049013,
+        "ci95Total": [
+          0.2636760432787166,
+          2.00933430075084
+        ],
+        "impliedUpfront": 1.0871070886643943,
+        "ci95Upfront": [
+          0.3779872089035786,
+          3.116030412622141
+        ],
+        "engineMultiplier": 1.05,
+        "exponent": 0.9000000000000001,
+        "engineApplied": 1.0448895099824027,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "year:pre2020",
+        "maxAbsCorr": 0.4253505341751491
+      },
+      {
+        "family": "indication",
+        "level": "myelofibrosis",
+        "n": 5,
+        "impliedTotal": 0.8250193989991519,
+        "ci95Total": [
+          0.5022119467158516,
+          1.4776051511430506
+        ],
+        "impliedUpfront": 0.8574766396238943,
+        "ci95Upfront": [
+          0.5120041361720798,
+          1.3989224984425577
+        ],
+        "engineMultiplier": 1.28,
+        "exponent": 0.8,
+        "engineApplied": 1.2183385207781623,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:hematology",
+        "maxAbsCorr": 0.3969247209933696
+      },
+      {
+        "family": "indication",
+        "level": "myeloma",
+        "n": 6,
+        "impliedTotal": 2.135938798015873,
+        "ci95Total": [
+          0.9496468880186415,
+          5.7174167763930726
+        ],
+        "impliedUpfront": 2.004180939332333,
+        "ci95Upfront": [
+          0.8844988218880494,
+          4.317369720917912
+        ],
+        "engineMultiplier": 1.2833549781724463,
+        "exponent": 0.7999999999999999,
+        "engineApplied": 1.2208925388410503,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "combinationTherapy:flagged",
+        "maxAbsCorr": 0.22874834123069654
+      },
+      {
+        "family": "indication",
+        "level": "nashMash",
+        "n": 10,
+        "impliedTotal": 1.1574967460662062,
+        "ci95Total": [
+          0.5721041204392208,
+          1.9045537716882222
+        ],
+        "impliedUpfront": 1.2189393054887352,
+        "ci95Upfront": [
+          0.6445831388859833,
+          1.9573335402930827
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 0.8399999999999999,
+        "engineApplied": 1.2465577867998567,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:metabolic",
+        "maxAbsCorr": 0.5255001831378118
+      },
+      {
+        "family": "indication",
+        "level": "obesity",
+        "n": 6,
+        "impliedTotal": 1.0598719916623907,
+        "ci95Total": [
+          0.6450847427796391,
+          1.4769216046651024
+        ],
+        "impliedUpfront": 0.8728876733689944,
+        "ci95Upfront": [
+          0.4625734573940357,
+          1.5839987386889347
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 0.85,
+        "engineApplied": 1.290576352634392,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:metabolic",
+        "maxAbsCorr": 0.5129891760425821
+      },
+      {
+        "family": "indication",
+        "level": "parkinsons",
+        "n": 6,
+        "impliedTotal": 1.0752876684183041,
+        "ci95Total": [
+          0.6993284336413514,
+          1.6116220873181641
+        ],
+        "impliedUpfront": 0.8788094456574593,
+        "ci95Upfront": [
+          0.38263090722124093,
+          2.2467030093760245
+        ],
+        "engineMultiplier": 1.2,
+        "exponent": 0.9,
+        "engineApplied": 1.1783196534742952,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:neurology",
+        "maxAbsCorr": 0.30886038406067057
+      },
+      {
+        "family": "indication",
+        "level": "psoriasis",
+        "n": 9,
+        "impliedTotal": 1.1567577941616192,
+        "ci95Total": [
+          0.4780580247796899,
+          2.0641229648766313
+        ],
+        "impliedUpfront": 1.4003266026167458,
+        "ci95Upfront": [
+          0.47700993482251797,
+          3.785831246689794
+        ],
+        "engineMultiplier": 1.1656953366502913,
+        "exponent": 0.8166666666666665,
+        "engineApplied": 1.1322906610887051,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:dermatology",
+        "maxAbsCorr": 0.39977979006466363
+      },
+      {
+        "family": "indication",
+        "level": "sickleCell",
+        "n": 10,
+        "impliedTotal": 0.6017757687145022,
+        "ci95Total": [
+          0.3016559936972688,
+          1.200621652891624
+        ],
+        "impliedUpfront": 0.4885329737232069,
+        "ci95Upfront": [
+          0.19885676860138546,
+          1.3248415608023725
+        ],
+        "engineMultiplier": 1.3586890683283541,
+        "exponent": 0.8099999999999999,
+        "engineApplied": 1.281450409689028,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:hematology",
+        "maxAbsCorr": 0.2626179090904202
+      },
+      {
+        "family": "indication",
+        "level": "sle_lupus",
+        "n": 6,
+        "impliedTotal": 0.8534908252910085,
+        "ci95Total": [
+          0.542261773696683,
+          1.5575089242808104
+        ],
+        "impliedUpfront": 1.00523458164183,
+        "ci95Upfront": [
+          0.610887423522582,
+          1.5293524889652899
+        ],
+        "engineMultiplier": 1.25,
+        "exponent": 0.85,
+        "engineApplied": 1.2088530513353746,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:carT_heme",
+        "maxAbsCorr": 0.3988189838159426
+      },
+      {
+        "family": "indication",
+        "level": "ulcerativeColitis",
+        "n": 10,
+        "impliedTotal": 1.626491415868658,
+        "ci95Total": [
+          0.7118604656220595,
+          2.942581730060275
+        ],
+        "impliedUpfront": 1.9604428567242262,
+        "ci95Upfront": [
+          0.780244358087079,
+          4.285803221224672
+        ],
+        "engineMultiplier": 1.25,
+        "exponent": 0.7999999999999999,
+        "engineApplied": 1.1954406247375462,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:gastroenterology",
+        "maxAbsCorr": 0.6354219558269206
+      },
+      {
+        "family": "combinationTherapy",
+        "level": "flagged",
+        "n": 3,
+        "impliedTotal": 1.4612104465918168,
+        "ci95Total": [
+          0.9674335108657873,
+          2.289020447500996
+        ],
+        "impliedUpfront": 0.8464627603350259,
+        "ci95Upfront": [
+          0.5463643990928149,
+          1.2776666146324502
+        ],
+        "engineMultiplier": 1.1,
+        "exponent": 0.7833333333333333,
+        "engineApplied": 1.0775173455740172,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:myeloma",
+        "maxAbsCorr": 0.22874834123069654,
+        "note": "corpus flag ~ engine \"some combo potential\" (1.10)"
+      },
+      {
+        "family": "verified",
+        "level": "verified",
+        "n": 141,
+        "impliedTotal": 1.1375445882831778,
+        "ci95Total": [
+          0.9330266735676894,
+          1.3590066823623252
+        ],
+        "impliedUpfront": 1.1727298229987746,
+        "ci95Upfront": [
+          0.9252702868295796,
+          1.518743709635181
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "year:2026",
+        "maxAbsCorr": 0.2907174592082936,
+        "note": "data-quality control, not an engine factor"
+      },
+      {
+        "family": "year",
+        "level": "2020",
+        "n": 42,
+        "impliedTotal": 1.5051344392821766,
+        "ci95Total": [
+          1.0720360875368022,
+          2.079439592893209
+        ],
+        "impliedUpfront": 1.7552708894839737,
+        "ci95Upfront": [
+          1.2020244300539709,
+          2.5707326285881402
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:menopause",
+        "maxAbsCorr": 0.18523153646357463,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2021",
+        "n": 40,
+        "impliedTotal": 1.1006130093588804,
+        "ci95Total": [
+          0.8094827008975775,
+          1.634054056841243
+        ],
+        "impliedUpfront": 1.215646913398691,
+        "ci95Upfront": [
+          0.8797186703152571,
+          1.8988396921168103
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:dealType:pooledThin",
+        "maxAbsCorr": 0.15127799753420904,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2022",
+        "n": 53,
+        "impliedTotal": 1.1293793724936838,
+        "ci95Total": [
+          0.8340466872955424,
+          1.5186194811283675
+        ],
+        "impliedUpfront": 1.052803421380619,
+        "ci95Upfront": [
+          0.7680490892602494,
+          1.488716792799528
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "ta:womensHealth",
+        "maxAbsCorr": 0.17465589707264073,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2023",
+        "n": 84,
+        "impliedTotal": 1.1501576632744162,
+        "ci95Total": [
+          0.8677155120760534,
+          1.5027729426439973
+        ],
+        "impliedUpfront": 1.0969101762411808,
+        "ci95Upfront": [
+          0.8391772744407298,
+          1.529746149907489
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:hemophiliaB",
+        "maxAbsCorr": 0.17123513710280025,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2025",
+        "n": 37,
+        "impliedTotal": 1.4869215116940422,
+        "ci95Total": [
+          1.0508376809808844,
+          2.3156262353304657
+        ],
+        "impliedUpfront": 1.3160978146388473,
+        "ci95Upfront": [
+          0.8968647433251181,
+          2.105810733791772
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:nashMash",
+        "maxAbsCorr": 0.23011089705786844,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2026",
+        "n": 33,
+        "impliedTotal": 1.2828856169134593,
+        "ci95Total": [
+          0.8498861148778084,
+          1.9020654981760137
+        ],
+        "impliedUpfront": 1.1358792709879988,
+        "ci95Upfront": [
+          0.7261372359096133,
+          1.7223760339643412
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "ta:other",
+        "maxAbsCorr": 0.2914915440650688,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "pre2020",
+        "n": 12,
+        "impliedTotal": 1.0131551250813158,
+        "ci95Total": [
+          0.37298494413940897,
+          2.543862885052473
+        ],
+        "impliedUpfront": 1.5582970079762313,
+        "ci95Upfront": [
+          0.653563054722744,
+          3.445732464286147
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:migraine",
+        "maxAbsCorr": 0.4253505341751491,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "ta",
+        "level": "cardiovascular",
+        "n": 46,
+        "impliedTotal": 0.7869916511711235,
+        "ci95Total": [
+          0.5689579647733484,
+          1.0525522202074185
+        ],
+        "impliedUpfront": 0.5116558446415943,
+        "ci95Upfront": [
+          0.3848520623699987,
+          0.7186055214563782
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:cardiomyopathy",
+        "maxAbsCorr": 0.4910798512358845,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "dermatology",
+        "n": 23,
+        "impliedTotal": 0.3966979369269361,
+        "ci95Total": [
+          0.2579389129055467,
+          0.6499298504170536
+        ],
+        "impliedUpfront": 0.5410523769167732,
+        "ci95Upfront": [
+          0.2921450842162542,
+          1.0270669325858814
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:atopicDermatitis",
+        "maxAbsCorr": 0.48203591294911213,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "gastroenterology",
+        "n": 24,
+        "impliedTotal": 0.5389038856636866,
+        "ci95Total": [
+          0.34585277740603904,
+          0.9141777101192473
+        ],
+        "impliedUpfront": 0.5775533638106225,
+        "ci95Upfront": [
+          0.3775106852991339,
+          1.1061912554290587
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:ulcerativeColitis",
+        "maxAbsCorr": 0.6354219558269206,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "hematology",
+        "n": 30,
+        "impliedTotal": 0.5654971198962727,
+        "ci95Total": [
+          0.32989799952775867,
+          0.8970768694398673
+        ],
+        "impliedUpfront": 0.8977339618934574,
+        "ci95Upfront": [
+          0.5800169294546365,
+          1.4825081917878349
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:myelofibrosis",
+        "maxAbsCorr": 0.3969247209933696,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "immunology",
+        "n": 52,
+        "impliedTotal": 1.091211157171191,
+        "ci95Total": [
+          0.8504153336497218,
+          1.5098030618897016
+        ],
+        "impliedUpfront": 0.7184350204625588,
+        "ci95Upfront": [
+          0.5163021879802046,
+          1.1296701302738437
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:sle_lupus",
+        "maxAbsCorr": 0.3220946122977799,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "infectiousDisease",
+        "n": 31,
+        "impliedTotal": 0.43652599803449005,
+        "ci95Total": [
+          0.26263834011078924,
+          0.6779519371836811
+        ],
+        "impliedUpfront": 0.3560814349207814,
+        "ci95Upfront": [
+          0.20789153543787375,
+          0.5541493939516616
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:covid",
+        "maxAbsCorr": 0.3900180353576941,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "metabolic",
+        "n": 22,
+        "impliedTotal": 0.8735917799669022,
+        "ci95Total": [
+          0.5661546073919776,
+          1.4701408256227277
+        ],
+        "impliedUpfront": 0.6845180411381553,
+        "ci95Upfront": [
+          0.4277661628707752,
+          1.3252015296053603
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:nashMash",
+        "maxAbsCorr": 0.5255001831378118,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "neurology",
+        "n": 56,
+        "impliedTotal": 0.806608248266127,
+        "ci95Total": [
+          0.5458066392778284,
+          1.2406353912186048
+        ],
+        "impliedUpfront": 0.8555361596950406,
+        "ci95Upfront": [
+          0.5243662053389366,
+          1.4271379932999304
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:alzheimers",
+        "maxAbsCorr": 0.3795256711993798,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "ophthalmology",
+        "n": 27,
+        "impliedTotal": 0.4032438491725436,
+        "ci95Total": [
+          0.27827994439983184,
+          0.5994240539869056
+        ],
+        "impliedUpfront": 0.25217597097183186,
+        "ci95Upfront": [
+          0.1639016254660164,
+          0.3865701179728011
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:dryAmdGA",
+        "maxAbsCorr": 0.4198456409991409,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "other",
+        "n": 3,
+        "impliedTotal": 0.5352929618545622,
+        "ci95Total": [
+          0.27888265848678534,
+          1.109949333854345
+        ],
+        "impliedUpfront": 0.48998057369820164,
+        "ci95Upfront": [
+          0.2989157885916056,
+          1
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "year:2026",
+        "maxAbsCorr": 0.2914915440650688,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "rareDisease",
+        "n": 39,
+        "impliedTotal": 0.8245856333449795,
+        "ci95Total": [
+          0.5564758054633705,
+          1.105700422684916
+        ],
+        "impliedUpfront": 1.2007485008653298,
+        "ci95Upfront": [
+          0.7996367135295157,
+          1.7828217317603574
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "modality:geneTherapy",
+        "maxAbsCorr": 0.36508780163736837,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "womensHealth",
+        "n": 22,
+        "impliedTotal": 0.624829638890232,
+        "ci95Total": [
+          0.4123902568783164,
+          0.9710183419476595
+        ],
+        "impliedUpfront": 0.3894941054124435,
+        "ci95Upfront": [
+          0.22765488732228528,
+          0.7108130796332233
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:menopause",
+        "maxAbsCorr": 0.4677802697249903,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "approved",
+        "n": 93,
+        "impliedTotal": 0.3186003986612474,
+        "ci95Total": [
+          0.22591588105103091,
+          0.465759711446962
+        ],
+        "impliedUpfront": 0.38338744817392867,
+        "ci95Upfront": [
+          0.262010139561513,
+          0.611231178590626
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:acquisition@approved",
+        "maxAbsCorr": 0.7547359256524422,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "phase1",
+        "n": 89,
+        "impliedTotal": 1.8085304923154477,
+        "ci95Total": [
+          1.3544632161559729,
+          2.58019654127465
+        ],
+        "impliedUpfront": 1.6268765915016303,
+        "ci95Upfront": [
+          1.1631040752869897,
+          2.2706497809105746
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:acquisition@phase1",
+        "maxAbsCorr": 0.5298030612419818,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "phase3",
+        "n": 74,
+        "impliedTotal": 0.5394904714856972,
+        "ci95Total": [
+          0.3900199850555792,
+          0.8084287703471466
+        ],
+        "impliedUpfront": 0.518202380026671,
+        "ci95Upfront": [
+          0.36382925562494917,
+          0.7954433339628599
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:acquisition@phase3",
+        "maxAbsCorr": 0.6656507930606248,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "preclinical",
+        "n": 98,
+        "impliedTotal": 2.8455892812722636,
+        "ci95Total": [
+          2.194453635835944,
+          3.8333373333954333
+        ],
+        "impliedUpfront": 2.65830074687965,
+        "ci95Upfront": [
+          1.913203835592873,
+          3.5605736068304945
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:acquisition@preclinical",
+        "maxAbsCorr": 0.3880452944942765,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      }
+    ]
+  },
+  "robustness": {
+    "label": "non-M&A subset",
+    "n": 271,
+    "p": 70,
+    "interceptTotal": 0.6366237540673951,
+    "interceptUpfront": 0.9928926939059968,
+    "r2Total": 0.6639185955983431,
+    "r2Upfront": 0.6512546987060833,
+    "rmseLogTotal": 0.7509265228509187,
+    "rmseLogUpfront": 0.7744295999901339,
+    "levels": [
+      {
+        "family": "modality",
+        "level": "adc",
+        "n": 7,
+        "impliedTotal": 2.099325850478964,
+        "ci95Total": [
+          1.0733015813340918,
+          3.9297826907176354
+        ],
+        "impliedUpfront": 1.552620016170866,
+        "ci95Upfront": [
+          0.8412726123741346,
+          2.712965735922243
+        ],
+        "engineMultiplier": 1.45,
+        "exponent": 1,
+        "engineApplied": 1.45,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "territory:ex_china",
+        "maxAbsCorr": 0.4236472447973907
+      },
+      {
+        "family": "modality",
+        "level": "bispecific",
+        "n": 20,
+        "impliedTotal": 1.2446098913553194,
+        "ci95Total": [
+          0.8896430527073081,
+          1.7541961134182267
+        ],
+        "impliedUpfront": 1.7293983687199768,
+        "ci95Upfront": [
+          1.107889384265746,
+          2.873125282285031
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 1,
+        "engineApplied": 1.35,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "indication:myeloma",
+        "maxAbsCorr": 0.31656761895921015
+      },
+      {
+        "family": "modality",
+        "level": "carT_heme",
+        "n": 6,
+        "impliedTotal": 0.8591609300904262,
+        "ci95Total": [
+          0.462626723411328,
+          1.8537476328729388
+        ],
+        "impliedUpfront": 1.0676532054790842,
+        "ci95Upfront": [
+          0.7157190115562075,
+          1.8115935779645669
+        ],
+        "engineMultiplier": 1.2,
+        "exponent": 1,
+        "engineApplied": 1.2,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:sle_lupus",
+        "maxAbsCorr": 0.3975077234125903
+      },
+      {
+        "family": "modality",
+        "level": "cellTherapy",
+        "n": 6,
+        "impliedTotal": 1.0011108583686017,
+        "ci95Total": [
+          0.6321729034475556,
+          1.9639074100771725
+        ],
+        "impliedUpfront": 1.0272541705005902,
+        "ci95Upfront": [
+          0.7238615466645142,
+          1.338828680489628
+        ],
+        "engineMultiplier": 1.15,
+        "exponent": 1,
+        "engineApplied": 1.15,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "territory:us_only",
+        "maxAbsCorr": 0.14779874213836428
+      },
+      {
+        "family": "modality",
+        "level": "geneTherapy",
+        "n": 37,
+        "impliedTotal": 1.4484247181203727,
+        "ci95Total": [
+          1.0168531559868588,
+          1.9270349815512657
+        ],
+        "impliedUpfront": 1.447837755006029,
+        "ci95Upfront": [
+          0.9556560087203063,
+          2.014319909346492
+        ],
+        "engineMultiplier": 0.98,
+        "exponent": 1,
+        "engineApplied": 0.98,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "ta:rareDisease",
+        "maxAbsCorr": 0.43270952917069716
+      },
+      {
+        "family": "modality",
+        "level": "mab",
+        "n": 41,
+        "impliedTotal": 1.1615005466708437,
+        "ci95Total": [
+          0.856652148341355,
+          1.5376933040746785
+        ],
+        "impliedUpfront": 1.3400554314198785,
+        "ci95Upfront": [
+          0.9227404826790878,
+          1.8644428802281512
+        ],
+        "engineMultiplier": 1.03,
+        "exponent": 1,
+        "engineApplied": 1.03,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "ta:immunology",
+        "maxAbsCorr": 0.22126183048000286
+      },
+      {
+        "family": "modality",
+        "level": "modality:pooledThin",
+        "n": 18,
+        "impliedTotal": 1.3069328968626763,
+        "ci95Total": [
+          0.8901245988946807,
+          1.7684807886943814
+        ],
+        "impliedUpfront": 1.0943598368272276,
+        "ci95Upfront": [
+          0.6813177637758461,
+          1.7628333514428394
+        ],
+        "engineMultiplier": 1.2111934554776687,
+        "exponent": 1,
+        "engineApplied": 1.2111934554776687,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "ta:infectiousDisease",
+        "maxAbsCorr": 0.18463046006178274,
+        "note": "not an engine modality key"
+      },
+      {
+        "family": "modality",
+        "level": "mrna",
+        "n": 7,
+        "impliedTotal": 1.4978249979126375,
+        "ci95Total": [
+          0.7660285618436606,
+          3.0795464175518448
+        ],
+        "impliedUpfront": 2.6293944529715665,
+        "ci95Upfront": [
+          1.3843917956638998,
+          3.8056377285117504
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 1,
+        "engineApplied": 1.3,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:infectiousDisease",
+        "maxAbsCorr": 0.36775923295965823
+      },
+      {
+        "family": "modality",
+        "level": "oligonucleotide",
+        "n": 8,
+        "impliedTotal": 1.04267629657383,
+        "ci95Total": [
+          0.5471919708457892,
+          1.9231853172496824
+        ],
+        "impliedUpfront": 0.9213520101554185,
+        "ci95Upfront": [
+          0.5523725392810747,
+          1.5078768874389763
+        ],
+        "engineMultiplier": 1.18,
+        "exponent": 1,
+        "engineApplied": 1.18,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:nashMash",
+        "maxAbsCorr": 0.27008814309593915
+      },
+      {
+        "family": "modality",
+        "level": "peptide",
+        "n": 8,
+        "impliedTotal": 1.0345009646587129,
+        "ci95Total": [
+          0.5041482002706097,
+          1.8497079655850648
+        ],
+        "impliedUpfront": 1.0896467399636558,
+        "ci95Upfront": [
+          0.6686260356216092,
+          1.6269912421803252
+        ],
+        "engineMultiplier": 1.05,
+        "exponent": 1,
+        "engineApplied": 1.05,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:obesity",
+        "maxAbsCorr": 0.27008814309593904
+      },
+      {
+        "family": "modality",
+        "level": "protac",
+        "n": 5,
+        "impliedTotal": 1.2363493955224847,
+        "ci95Total": [
+          0.7760970190787788,
+          2.057585693687162
+        ],
+        "impliedUpfront": 1.485197567865759,
+        "ci95Upfront": [
+          0.8682614707150149,
+          2.629101948819827
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 1,
+        "engineApplied": 1.35,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "phase:phase1",
+        "maxAbsCorr": 0.19106159077862023
+      },
+      {
+        "family": "modality",
+        "level": "radiopharmaceutical",
+        "n": 3,
+        "impliedTotal": 1.1087966638832756,
+        "ci95Total": [
+          0.5678322944646159,
+          1.8689500642067103
+        ],
+        "impliedUpfront": 1.599897494323655,
+        "ci95Upfront": [
+          1,
+          2.150803507115459
+        ],
+        "engineMultiplier": 1.6,
+        "exponent": 1,
+        "engineApplied": 1.6,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "territory:japan",
+        "maxAbsCorr": 0.22376591553613423
+      },
+      {
+        "family": "modality",
+        "level": "rnai",
+        "n": 12,
+        "impliedTotal": 1.752272153846813,
+        "ci95Total": [
+          1.1073212257093465,
+          2.7566022505262966
+        ],
+        "impliedUpfront": 2.1779354434942526,
+        "ci95Upfront": [
+          1.175499519549303,
+          3.869435270562092
+        ],
+        "engineMultiplier": 1.15,
+        "exponent": 1,
+        "engineApplied": 1.15,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:cardiovascular",
+        "maxAbsCorr": 0.26706935156613254
+      },
+      {
+        "family": "territory",
+        "level": "china",
+        "n": 7,
+        "impliedTotal": 0.7493211587165043,
+        "ci95Total": [
+          0.3118629314605637,
+          2.3834848341536934
+        ],
+        "impliedUpfront": 0.47761259502359155,
+        "ci95Upfront": [
+          0.21223906380666377,
+          1.17891882695149
+        ],
+        "engineMultiplier": 0.11999999999999995,
+        "exponent": 1,
+        "engineApplied": 0.11999999999999995,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:dlbcl",
+        "maxAbsCorr": 0.25774544683455036
+      },
+      {
+        "family": "territory",
+        "level": "europe",
+        "n": 8,
+        "impliedTotal": 0.8482189002961266,
+        "ci95Total": [
+          0.4122358798465018,
+          1.5492495331751526
+        ],
+        "impliedUpfront": 0.721415966194906,
+        "ci95Upfront": [
+          0.418695874027669,
+          1.341519148285771
+        ],
+        "engineMultiplier": 0.25,
+        "exponent": 1,
+        "engineApplied": 0.25,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "phase:phase3",
+        "maxAbsCorr": 0.24350623703082674
+      },
+      {
+        "family": "territory",
+        "level": "ex_china",
+        "n": 18,
+        "impliedTotal": 1.550826926847524,
+        "ci95Total": [
+          1.018685893571272,
+          2.2679052750996984
+        ],
+        "impliedUpfront": 1.2510667486860352,
+        "ci95Upfront": [
+          0.8192047654407537,
+          1.9212779535013345
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "modality:adc",
+        "maxAbsCorr": 0.4236472447973907,
+        "note": "not an engine territory key (engine applies 1.0)"
+      },
+      {
+        "family": "territory",
+        "level": "ex_us",
+        "n": 17,
+        "impliedTotal": 1.0880442236707855,
+        "ci95Total": [
+          0.6329604943591566,
+          1.7870640716422572
+        ],
+        "impliedUpfront": 1.3698663765574632,
+        "ci95Upfront": [
+          0.7710916740895892,
+          2.6839501375298083
+        ],
+        "engineMultiplier": 0.44999999999999996,
+        "exponent": 1,
+        "engineApplied": 0.44999999999999996,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:approved",
+        "maxAbsCorr": 0.2633888462829945
+      },
+      {
+        "family": "territory",
+        "level": "japan",
+        "n": 6,
+        "impliedTotal": 0.5823732633034016,
+        "ci95Total": [
+          0.36323695296676917,
+          1.0080940917929004
+        ],
+        "impliedUpfront": 0.4821913351708948,
+        "ci95Upfront": [
+          0.3291283708556769,
+          0.839718381038405
+        ],
+        "engineMultiplier": 0.09000000000000002,
+        "exponent": 1,
+        "engineApplied": 0.09000000000000002,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:radiopharmaceutical",
+        "maxAbsCorr": 0.22376591553613423
+      },
+      {
+        "family": "territory",
+        "level": "territory:pooledThin",
+        "n": 6,
+        "impliedTotal": 0.8161230828961045,
+        "ci95Total": [
+          0.44560097455457653,
+          1.2847796165886685
+        ],
+        "impliedUpfront": 0.6014761386205683,
+        "ci95Upfront": [
+          0.29606649737178337,
+          1.2691835359995942
+        ],
+        "engineMultiplier": 0.06,
+        "exponent": 1,
+        "engineApplied": 0.06,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "dealType:codevelopment",
+        "maxAbsCorr": 0.17510809162872462,
+        "note": "not an engine territory key (engine applies 1.0)"
+      },
+      {
+        "family": "territory",
+        "level": "us_only",
+        "n": 6,
+        "impliedTotal": 1.236287624234901,
+        "ci95Total": [
+          0.5987629401824333,
+          2.239853182915709
+        ],
+        "impliedUpfront": 1.0102904288175198,
+        "ci95Upfront": [
+          0.5499195618022067,
+          1.942576334372817
+        ],
+        "engineMultiplier": 0.5499999999999999,
+        "exponent": 1,
+        "engineApplied": 0.5499999999999999,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:dermatology",
+        "maxAbsCorr": 0.16572676765387176
+      },
+      {
+        "family": "dealType",
+        "level": "codevelopment",
+        "n": 16,
+        "impliedTotal": 1.3979680291071472,
+        "ci95Total": [
+          0.7996673237301688,
+          2.3139774285214862
+        ],
+        "impliedUpfront": 1.4699815587204579,
+        "ci95Upfront": [
+          0.867302915094183,
+          2.297444958260016
+        ],
+        "engineMultiplier": 0.8046509950159642,
+        "exponent": 1,
+        "engineApplied": 0.8046509950159642,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "territory:territory:pooledThin",
+        "maxAbsCorr": 0.17510809162872462
+      },
+      {
+        "family": "dealType",
+        "level": "collaboration",
+        "n": 80,
+        "impliedTotal": 1.3562681591574905,
+        "ci95Total": [
+          0.9559107872171477,
+          1.6961796474174426
+        ],
+        "impliedUpfront": 1.3996938237487448,
+        "ci95Upfront": [
+          1.0452264514667526,
+          1.854879681597825
+        ],
+        "engineMultiplier": 0.5269165912769003,
+        "exponent": 1,
+        "engineApplied": 0.5269165912769003,
+        "verdictTotal": "engine low",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "phase:preclinical",
+        "maxAbsCorr": 0.21963350785340244
+      },
+      {
+        "family": "dealType",
+        "level": "dealType:pooledThin",
+        "n": 1,
+        "impliedTotal": 0.3748171413312768,
+        "ci95Total": [
+          0.16740400399849115,
+          1
+        ],
+        "impliedUpfront": 0.761500222275658,
+        "ci95Upfront": [
+          0.5093295987005881,
+          1.1590859648376202
+        ],
+        "engineMultiplier": 0.55,
+        "exponent": 1,
+        "engineApplied": 0.55,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "year:2021",
+        "maxAbsCorr": 0.20474176886798476
+      },
+      {
+        "family": "dealType",
+        "level": "option",
+        "n": 17,
+        "impliedTotal": 1.0077298204563805,
+        "ci95Total": [
+          0.6272979115154131,
+          1.4467594784910056
+        ],
+        "impliedUpfront": 1.1900706949969075,
+        "ci95Upfront": [
+          0.8653175129366446,
+          1.66987230487769
+        ],
+        "engineMultiplier": 0.6646922025783164,
+        "exponent": 1,
+        "engineApplied": 0.6646922025783164,
+        "verdictTotal": "consistent",
+        "verdictUpfront": "engine low",
+        "maxAbsCorrWith": "territory:europe",
+        "maxAbsCorr": 0.22460761791521586
+      },
+      {
+        "family": "indication",
+        "level": "alzheimers",
+        "n": 8,
+        "impliedTotal": 1.1767686067136103,
+        "ci95Total": [
+          0.737876336969302,
+          1.790344788797999
+        ],
+        "impliedUpfront": 0.8667267898135598,
+        "ci95Upfront": [
+          0.45063203431613164,
+          1.5836359887507512
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 0.9000000000000001,
+        "engineApplied": 1.2663361857313113,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:neurology",
+        "maxAbsCorr": 0.4386056137238713
+      },
+      {
+        "family": "indication",
+        "level": "atopicDermatitis",
+        "n": 2,
+        "impliedTotal": 0.9198744373039909,
+        "ci95Total": [
+          0.6374752118210211,
+          1.3034596186684342
+        ],
+        "impliedUpfront": 1.0533101609099718,
+        "ci95Upfront": [
+          0.696431454860411,
+          1.546631208919824
+        ],
+        "engineMultiplier": 1.3000000000000003,
+        "exponent": 0.8178571428571428,
+        "engineApplied": 1.2393369114103978,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:immunology",
+        "maxAbsCorr": 0.27048077806216736
+      },
+      {
+        "family": "indication",
+        "level": "cardiomyopathy",
+        "n": 9,
+        "impliedTotal": 0.8714688451213061,
+        "ci95Total": [
+          0.5233570420733911,
+          1.4254694445738527
+        ],
+        "impliedUpfront": 1.0375849720516692,
+        "ci95Upfront": [
+          0.5825026200262508,
+          1.8129563133134374
+        ],
+        "engineMultiplier": 1.22,
+        "exponent": 0.8499999999999998,
+        "engineApplied": 1.1841476462754186,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:cardiovascular",
+        "maxAbsCorr": 0.5253134287958805
+      },
+      {
+        "family": "indication",
+        "level": "covid",
+        "n": 5,
+        "impliedTotal": 1.0985300185584501,
+        "ci95Total": [
+          0.6303559023106583,
+          1.9294051597389534
+        ],
+        "impliedUpfront": 1.1669902223234465,
+        "ci95Upfront": [
+          0.6505852041133584,
+          1.9988663178246702
+        ],
+        "engineMultiplier": 0.9,
+        "exponent": 0.85,
+        "engineApplied": 0.9143366600529774,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:infectiousDisease",
+        "maxAbsCorr": 0.4502006381380659
+      },
+      {
+        "family": "indication",
+        "level": "dlbcl",
+        "n": 2,
+        "impliedTotal": 1.581897962598918,
+        "ci95Total": [
+          0.8584197393242583,
+          2.6778798610640955
+        ],
+        "impliedUpfront": 1.1222540033722672,
+        "ci95Upfront": [
+          0.73683503143338,
+          1.9675348881108845
+        ],
+        "engineMultiplier": 1.1504778186170193,
+        "exponent": 0.8,
+        "engineApplied": 1.1186715669830956,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "territory:china",
+        "maxAbsCorr": 0.25774544683455036
+      },
+      {
+        "family": "indication",
+        "level": "dryAmdGA",
+        "n": 1,
+        "impliedTotal": 0.912674211385957,
+        "ci95Total": [
+          0.7117239173882801,
+          1.1229839873423357
+        ],
+        "impliedUpfront": 0.6890584257787966,
+        "ci95Upfront": [
+          0.45683019363717436,
+          1
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 0.9,
+        "engineApplied": 1.2663361857313113,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:ophthalmology",
+        "maxAbsCorr": 0.25141574442188297
+      },
+      {
+        "family": "indication",
+        "level": "endometriosis",
+        "n": 4,
+        "impliedTotal": 0.8177425289530948,
+        "ci95Total": [
+          0.47169544107782435,
+          1.5975979830801983
+        ],
+        "impliedUpfront": 0.9492703503909404,
+        "ci95Upfront": [
+          0.49885364698015855,
+          1.9287324728694448
+        ],
+        "engineMultiplier": 1.22,
+        "exponent": 0.85,
+        "engineApplied": 1.1841476462754186,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:womensHealth",
+        "maxAbsCorr": 0.5950653964170206
+      },
+      {
+        "family": "indication",
+        "level": "hemophiliaB",
+        "n": 5,
+        "impliedTotal": 0.6489642746671481,
+        "ci95Total": [
+          0.3958567087412717,
+          1.2170552449517726
+        ],
+        "impliedUpfront": 0.8993561184847327,
+        "ci95Upfront": [
+          0.5707861668725065,
+          1.3708222303697841
+        ],
+        "engineMultiplier": 1.2218631371112538,
+        "exponent": 0.7999999999999999,
+        "engineApplied": 1.1738647194432033,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:geneTherapy",
+        "maxAbsCorr": 0.2649263039068334
+      },
+      {
+        "family": "indication",
+        "level": "ibd_broad",
+        "n": 5,
+        "impliedTotal": 0.9769838275735163,
+        "ci95Total": [
+          0.6161462620783024,
+          1.4347254689361861
+        ],
+        "impliedUpfront": 1.0516666227892408,
+        "ci95Upfront": [
+          0.642226475334891,
+          1.728937698348757
+        ],
+        "engineMultiplier": 1.18,
+        "exponent": 0.8285714285714285,
+        "engineApplied": 1.1469893290398905,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:immunology",
+        "maxAbsCorr": 0.24056091105705746
+      },
+      {
+        "family": "indication",
+        "level": "indication:pooledThin",
+        "n": 81,
+        "impliedTotal": 0.8639007962253722,
+        "ci95Total": [
+          0.6695159105561913,
+          1.1259937948783125
+        ],
+        "impliedUpfront": 0.9388957773558277,
+        "ci95Upfront": [
+          0.7156221118674421,
+          1.2973473012776304
+        ],
+        "engineMultiplier": 1.1861817742512075,
+        "exponent": 0.8411971830985907,
+        "engineApplied": 1.1537983731708197,
+        "verdictTotal": "engine high",
+        "verdictUpfront": "consistent",
+        "maxAbsCorrWith": "dealType:option",
+        "maxAbsCorr": 0.16351948870510066
+      },
+      {
+        "family": "indication",
+        "level": "menopause",
+        "n": 1,
+        "impliedTotal": 0.7454815556384189,
+        "ci95Total": [
+          0.5157863909364764,
+          1.0447939197397007
+        ],
+        "impliedUpfront": 0.5759329017517493,
+        "ci95Upfront": [
+          0.3609772364698688,
+          1
+        ],
+        "engineMultiplier": 1.15,
+        "exponent": 0.85,
+        "engineApplied": 1.1261420215411433,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:womensHealth",
+        "maxAbsCorr": 0.2958751215328669
+      },
+      {
+        "family": "indication",
+        "level": "migraine",
+        "n": 4,
+        "impliedTotal": 0.6230534223739836,
+        "ci95Total": [
+          0.2645054952414933,
+          1.572394447527577
+        ],
+        "impliedUpfront": 0.9596140576942837,
+        "ci95Upfront": [
+          0.3888420095785333,
+          2.778770284799033
+        ],
+        "engineMultiplier": 1.05,
+        "exponent": 0.9000000000000001,
+        "engineApplied": 1.0448895099824027,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "year:pre2020",
+        "maxAbsCorr": 0.3658697546942141
+      },
+      {
+        "family": "indication",
+        "level": "myelofibrosis",
+        "n": 1,
+        "impliedTotal": 1.4832925344735477,
+        "ci95Total": [
+          1,
+          2.2674663809687337
+        ],
+        "impliedUpfront": 1.2762315635851886,
+        "ci95Upfront": [
+          0.9802664196784062,
+          1.6420297456253308
+        ],
+        "engineMultiplier": 1.28,
+        "exponent": 0.8,
+        "engineApplied": 1.2183385207781623,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:hematology",
+        "maxAbsCorr": 0.25141574442188314
+      },
+      {
+        "family": "indication",
+        "level": "myeloma",
+        "n": 4,
+        "impliedTotal": 1.8011536127578105,
+        "ci95Total": [
+          1,
+          2.888643568293417
+        ],
+        "impliedUpfront": 1.756284981156155,
+        "ci95Upfront": [
+          0.9189805347576172,
+          2.9445018106946734
+        ],
+        "engineMultiplier": 1.2833549781724463,
+        "exponent": 0.7999999999999999,
+        "engineApplied": 1.2208925388410503,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:bispecific",
+        "maxAbsCorr": 0.31656761895921015
+      },
+      {
+        "family": "indication",
+        "level": "nashMash",
+        "n": 6,
+        "impliedTotal": 1.3705779822513307,
+        "ci95Total": [
+          0.8113306739887677,
+          2.173926772823899
+        ],
+        "impliedUpfront": 1.3266491477608837,
+        "ci95Upfront": [
+          0.7481054845321251,
+          2.0696123378204074
+        ],
+        "engineMultiplier": 1.3,
+        "exponent": 0.8399999999999999,
+        "engineApplied": 1.2465577867998567,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:metabolic",
+        "maxAbsCorr": 0.41809103801358877
+      },
+      {
+        "family": "indication",
+        "level": "obesity",
+        "n": 6,
+        "impliedTotal": 0.9890010402666145,
+        "ci95Total": [
+          0.6491772538030778,
+          1.5047738074963266
+        ],
+        "impliedUpfront": 0.8616374290262064,
+        "ci95Upfront": [
+          0.49384787496124904,
+          1.412940355307863
+        ],
+        "engineMultiplier": 1.35,
+        "exponent": 0.85,
+        "engineApplied": 1.290576352634392,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:metabolic",
+        "maxAbsCorr": 0.6446963806169517
+      },
+      {
+        "family": "indication",
+        "level": "parkinsons",
+        "n": 5,
+        "impliedTotal": 1.1784117959960239,
+        "ci95Total": [
+          0.6835848129895761,
+          1.908293495152792
+        ],
+        "impliedUpfront": 1.4052193461412188,
+        "ci95Upfront": [
+          0.5806816322922069,
+          3.0699897088537904
+        ],
+        "engineMultiplier": 1.2,
+        "exponent": 0.9,
+        "engineApplied": 1.1783196534742952,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:neurology",
+        "maxAbsCorr": 0.3447872920700717
+      },
+      {
+        "family": "indication",
+        "level": "psoriasis",
+        "n": 2,
+        "impliedTotal": 0.7377902492044759,
+        "ci95Total": [
+          0.46901700380287836,
+          1.249761935755659
+        ],
+        "impliedUpfront": 0.5206271358150679,
+        "ci95Upfront": [
+          0.30885199006260133,
+          1
+        ],
+        "engineMultiplier": 1.1656953366502913,
+        "exponent": 0.8166666666666665,
+        "engineApplied": 1.1322906610887051,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:dermatology",
+        "maxAbsCorr": 0.628918940291392
+      },
+      {
+        "family": "indication",
+        "level": "sickleCell",
+        "n": 7,
+        "impliedTotal": 0.7921276698228308,
+        "ci95Total": [
+          0.4889285195476989,
+          1.4382348660771458
+        ],
+        "impliedUpfront": 0.8035592689404689,
+        "ci95Upfront": [
+          0.4219295242551965,
+          1.7418161346293521
+        ],
+        "engineMultiplier": 1.3586890683283541,
+        "exponent": 0.8099999999999999,
+        "engineApplied": 1.281450409689028,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:hematology",
+        "maxAbsCorr": 0.26577655149518975
+      },
+      {
+        "family": "indication",
+        "level": "sle_lupus",
+        "n": 4,
+        "impliedTotal": 1.2341140326749214,
+        "ci95Total": [
+          0.6604611096960836,
+          2.180667713707778
+        ],
+        "impliedUpfront": 1.3943045995266647,
+        "ci95Upfront": [
+          0.8471139399500305,
+          1.936688941900475
+        ],
+        "engineMultiplier": 1.25,
+        "exponent": 0.85,
+        "engineApplied": 1.2088530513353746,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "modality:carT_heme",
+        "maxAbsCorr": 0.3975077234125903
+      },
+      {
+        "family": "indication",
+        "level": "ulcerativeColitis",
+        "n": 4,
+        "impliedTotal": 1.3627809324265334,
+        "ci95Total": [
+          0.8217807510255355,
+          2.0125375423728444
+        ],
+        "impliedUpfront": 1.3323438991948806,
+        "ci95Upfront": [
+          0.649785308731561,
+          2.8287160060066685
+        ],
+        "engineMultiplier": 1.25,
+        "exponent": 0.7999999999999999,
+        "engineApplied": 1.1954406247375462,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "ta:gastroenterology",
+        "maxAbsCorr": 0.5686350479242729
+      },
+      {
+        "family": "combinationTherapy",
+        "level": "flagged",
+        "n": 3,
+        "impliedTotal": 1.4251421421929817,
+        "ci95Total": [
+          0.9075105031832036,
+          2.100571022671572
+        ],
+        "impliedUpfront": 0.785459003689866,
+        "ci95Upfront": [
+          0.5675521017483861,
+          1.1785894148741671
+        ],
+        "engineMultiplier": 1.1,
+        "exponent": 0.7833333333333333,
+        "engineApplied": 1.0775173455740172,
+        "verdictTotal": "insufficient n",
+        "verdictUpfront": "insufficient n",
+        "maxAbsCorrWith": "indication:myeloma",
+        "maxAbsCorr": 0.2795027681081843,
+        "note": "corpus flag ~ engine \"some combo potential\" (1.10)"
+      },
+      {
+        "family": "verified",
+        "level": "verified",
+        "n": 86,
+        "impliedTotal": 1.215953952686623,
+        "ci95Total": [
+          0.9470797688840386,
+          1.5170283836246283
+        ],
+        "impliedUpfront": 1.1678089287344893,
+        "ci95Upfront": [
+          0.8917443219293119,
+          1.493635700837841
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "year:2026",
+        "maxAbsCorr": 0.29271891806189027,
+        "note": "data-quality control, not an engine factor"
+      },
+      {
+        "family": "year",
+        "level": "2020",
+        "n": 20,
+        "impliedTotal": 0.8509568682293851,
+        "ci95Total": [
+          0.5847593080490934,
+          1.4135919585609051
+        ],
+        "impliedUpfront": 1.164230221950281,
+        "ci95Upfront": [
+          0.6734802338747773,
+          1.961359808277614
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:collaboration",
+        "maxAbsCorr": 0.2195663329012667,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2021",
+        "n": 22,
+        "impliedTotal": 0.7515457697430041,
+        "ci95Total": [
+          0.4522447270067923,
+          1.323618105119928
+        ],
+        "impliedUpfront": 0.886761903107117,
+        "ci95Upfront": [
+          0.5087877695228078,
+          1.588448774894515
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "dealType:dealType:pooledThin",
+        "maxAbsCorr": 0.20474176886798476,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2022",
+        "n": 28,
+        "impliedTotal": 0.8848594413653884,
+        "ci95Total": [
+          0.6524465509217412,
+          1.3348793102454999
+        ],
+        "impliedUpfront": 0.6279390911949045,
+        "ci95Upfront": [
+          0.42424316752979674,
+          0.9018402663724139
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "ta:womensHealth",
+        "maxAbsCorr": 0.17591243986922014,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2023",
+        "n": 49,
+        "impliedTotal": 0.954879540682669,
+        "ci95Total": [
+          0.7118706098159295,
+          1.2592192902722648
+        ],
+        "impliedUpfront": 0.899980929100051,
+        "ci95Upfront": [
+          0.6673814292590512,
+          1.1944137519055114
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "ta:ophthalmology",
+        "maxAbsCorr": 0.2217206029631197,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2025",
+        "n": 20,
+        "impliedTotal": 1.9714255252252302,
+        "ci95Total": [
+          1.2371498737797282,
+          2.984334998540182
+        ],
+        "impliedUpfront": 1.703778986186033,
+        "ci95Upfront": [
+          1.1118384520434506,
+          2.6075718324033974
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:nashMash",
+        "maxAbsCorr": 0.24529167783766911,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "2026",
+        "n": 20,
+        "impliedTotal": 1.2469888703611742,
+        "ci95Total": [
+          0.8423798644622379,
+          1.7620835038729874
+        ],
+        "impliedUpfront": 0.8917857184418234,
+        "ci95Upfront": [
+          0.5622832965151596,
+          1.330708522266208
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "ta:other",
+        "maxAbsCorr": 0.3054644826913178,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "year",
+        "level": "pre2020",
+        "n": 7,
+        "impliedTotal": 0.6154573851895568,
+        "ci95Total": [
+          0.2358150139733781,
+          1.732930894197922
+        ],
+        "impliedUpfront": 1.2590025989609017,
+        "ci95Upfront": [
+          0.5421283435738632,
+          2.65292794440376
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:migraine",
+        "maxAbsCorr": 0.3658697546942141,
+        "note": "year fixed effect (control)"
+      },
+      {
+        "family": "ta",
+        "level": "cardiovascular",
+        "n": 30,
+        "impliedTotal": 0.8783085592810271,
+        "ci95Total": [
+          0.5876540744350287,
+          1.3739702056157714
+        ],
+        "impliedUpfront": 0.5492884310758839,
+        "ci95Upfront": [
+          0.39934099081593555,
+          0.7827742674868665
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:cardiomyopathy",
+        "maxAbsCorr": 0.5253134287958805,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "dermatology",
+        "n": 5,
+        "impliedTotal": 0.5767733758325367,
+        "ci95Total": [
+          0.3219611541378922,
+          1.0336579835450461
+        ],
+        "impliedUpfront": 0.9554948288282683,
+        "ci95Upfront": [
+          0.5657284682737261,
+          1.5666463462145734
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:psoriasis",
+        "maxAbsCorr": 0.628918940291392,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "gastroenterology",
+        "n": 12,
+        "impliedTotal": 0.6590123081083473,
+        "ci95Total": [
+          0.4545969448486109,
+          1.1055115594949325
+        ],
+        "impliedUpfront": 0.5200695467452179,
+        "ci95Upfront": [
+          0.340465012328627,
+          0.8989279722737673
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:ulcerativeColitis",
+        "maxAbsCorr": 0.5686350479242729,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "hematology",
+        "n": 15,
+        "impliedTotal": 0.46729912530989215,
+        "ci95Total": [
+          0.2747711424798993,
+          0.8722542203466389
+        ],
+        "impliedUpfront": 0.6870770078067008,
+        "ci95Upfront": [
+          0.45611635836862313,
+          1.0338915905032526
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:sickleCell",
+        "maxAbsCorr": 0.26577655149518975,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "immunology",
+        "n": 25,
+        "impliedTotal": 0.901599960608167,
+        "ci95Total": [
+          0.6330991176341187,
+          1.310664204543592
+        ],
+        "impliedUpfront": 0.5685956589191826,
+        "ci95Upfront": [
+          0.4096942880827146,
+          0.83905062431413
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:sle_lupus",
+        "maxAbsCorr": 0.38394756196267305,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "infectiousDisease",
+        "n": 23,
+        "impliedTotal": 0.5723334459811633,
+        "ci95Total": [
+          0.32039397435477796,
+          0.924836588797
+        ],
+        "impliedUpfront": 0.44940300193776705,
+        "ci95Upfront": [
+          0.29091936867265106,
+          0.7656509379060796
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:covid",
+        "maxAbsCorr": 0.4502006381380659,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "metabolic",
+        "n": 14,
+        "impliedTotal": 0.7730528714623498,
+        "ci95Total": [
+          0.533097056660114,
+          1.2393034514351904
+        ],
+        "impliedUpfront": 0.4845817835502375,
+        "ci95Upfront": [
+          0.32044286143003925,
+          0.8194431666478982
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:obesity",
+        "maxAbsCorr": 0.6446963806169517,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "neurology",
+        "n": 37,
+        "impliedTotal": 0.880923520377745,
+        "ci95Total": [
+          0.5787757304105936,
+          1.5225252800452573
+        ],
+        "impliedUpfront": 0.7115294723139541,
+        "ci95Upfront": [
+          0.4388416046436034,
+          1.2929571589759974
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:alzheimers",
+        "maxAbsCorr": 0.4386056137238713,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "ophthalmology",
+        "n": 15,
+        "impliedTotal": 0.5075395694642657,
+        "ci95Total": [
+          0.3321173949996995,
+          0.7910846404269375
+        ],
+        "impliedUpfront": 0.2752194138301157,
+        "ci95Upfront": [
+          0.18627303660544337,
+          0.4550845420015008
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:dryAmdGA",
+        "maxAbsCorr": 0.25141574442188297,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "other",
+        "n": 2,
+        "impliedTotal": 0.7726954800617839,
+        "ci95Total": [
+          0.4967161905110709,
+          1.1479574955093108
+        ],
+        "impliedUpfront": 0.5898791713359615,
+        "ci95Upfront": [
+          0.3704372561525777,
+          1.0553453912516113
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "year:2026",
+        "maxAbsCorr": 0.3054644826913178,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "rareDisease",
+        "n": 22,
+        "impliedTotal": 0.8685901953907433,
+        "ci95Total": [
+          0.5572682620882501,
+          1.3882148867238906
+        ],
+        "impliedUpfront": 1.3410254139041577,
+        "ci95Upfront": [
+          0.8360554073078441,
+          2.3924621917739315
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "modality:geneTherapy",
+        "maxAbsCorr": 0.43270952917069716,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "ta",
+        "level": "womensHealth",
+        "n": 11,
+        "impliedTotal": 0.7812523640203393,
+        "ci95Total": [
+          0.4405867938081427,
+          1.3672433187772495
+        ],
+        "impliedUpfront": 0.4912873705849233,
+        "ci95Upfront": [
+          0.25186979453472697,
+          1.0734418330042703
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:endometriosis",
+        "maxAbsCorr": 0.5950653964170206,
+        "note": "TA fixed effect — implied scale error of the TA baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "approved",
+        "n": 35,
+        "impliedTotal": 0.3036801652481498,
+        "ci95Total": [
+          0.20833569570832122,
+          0.46956376304134406
+        ],
+        "impliedUpfront": 0.35390620580770654,
+        "ci95Upfront": [
+          0.23075127529415404,
+          0.5391214586928517
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "territory:ex_us",
+        "maxAbsCorr": 0.2633888462829945,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "phase1",
+        "n": 60,
+        "impliedTotal": 1.873798399329147,
+        "ci95Total": [
+          1.3677492486399965,
+          2.4431941907724526
+        ],
+        "impliedUpfront": 1.5666013107607213,
+        "ci95Upfront": [
+          1.0910864834951741,
+          2.2137261121681266
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "phase:preclinical",
+        "maxAbsCorr": -0.3451141033396959,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "phase3",
+        "n": 38,
+        "impliedTotal": 0.5570107364236115,
+        "ci95Total": [
+          0.36520035421545116,
+          0.8060762747716987
+        ],
+        "impliedUpfront": 0.5278836963485605,
+        "ci95Upfront": [
+          0.3748083298236722,
+          0.7967941009321251
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "indication:cardiomyopathy",
+        "maxAbsCorr": 0.34032098861362775,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      },
+      {
+        "family": "phase",
+        "level": "preclinical",
+        "n": 80,
+        "impliedTotal": 2.5603624234219815,
+        "ci95Total": [
+          1.9319692145762273,
+          3.3963361637020695
+        ],
+        "impliedUpfront": 2.4609304601087354,
+        "ci95Upfront": [
+          1.7275343064078275,
+          3.1662334048374356
+        ],
+        "verdictTotal": "no engine value",
+        "verdictUpfront": "no engine value",
+        "maxAbsCorrWith": "phase:phase1",
+        "maxAbsCorr": -0.3451141033396959,
+        "note": "phase fixed effect — implied scale error of the phase baseline itself"
+      }
+    ]
+  },
+  "supplementary": {
+    "n": 46,
+    "source": "lib/financial/calibration.ts CALIBRATION_DEALS (hand-labelled; reference/no-deal rows excluded)",
+    "r2Total": 0.4583651792112152,
+    "levels": [
+      {
+        "family": "competitivePosition",
+        "level": "bestInClass",
+        "engineMultiplier": 1.1,
+        "exponent": 0.7,
+        "engineApplied": 1.068993044916333,
+        "n": 5,
+        "impliedTotal": 1.3505004488730226,
+        "ci95Total": [
+          0.573298505486523,
+          2.600917391226793
+        ],
+        "impliedUpfront": 1.0689573302273812,
+        "verdict": "insufficient n"
+      },
+      {
+        "family": "biomarker",
+        "level": "selected",
+        "engineMultiplier": 1.15,
+        "exponent": 0.9,
+        "engineApplied": 1.1340391722481378,
+        "n": 7,
+        "impliedTotal": 2.154825725473651,
+        "ci95Total": [
+          0.9955193104023579,
+          4.0349015139577595
+        ],
+        "impliedUpfront": 2.4594819535205845,
+        "verdict": "insufficient n"
+      },
+      {
+        "family": "breakthrough",
+        "level": "yes",
+        "engineMultiplier": 1.12,
+        "exponent": 1,
+        "engineApplied": 1.12,
+        "n": 6,
+        "impliedTotal": 0.9051252196915307,
+        "ci95Total": [
+          0.45690461501671015,
+          1.9149009435075066
+        ],
+        "impliedUpfront": 1.0650816107693846,
+        "verdict": "insufficient n"
+      },
+      {
+        "family": "phaseBucket",
+        "level": "phase3",
+        "note": "control",
+        "n": 4,
+        "impliedTotal": 2.575239112376571,
+        "ci95Total": [
+          1.39849160191611,
+          3.4603466225232644
+        ],
+        "impliedUpfront": 3.0078201445659563,
+        "verdict": "no engine value"
+      },
+      {
+        "family": "phaseBucket",
+        "level": "early",
+        "note": "control",
+        "n": 15,
+        "impliedTotal": 2.0938851025476524,
+        "ci95Total": [
+          1.319172766003015,
+          3.3631821979995413
+        ],
+        "impliedUpfront": 2.4936821135200957,
+        "verdict": "no engine value"
+      },
+      {
+        "family": "competitivePosition",
+        "level": "firstInClass",
+        "engineMultiplier": 1.25,
+        "exponent": 0.7,
+        "engineApplied": 1.1690605597782766,
+        "n": 18,
+        "impliedTotal": 1.7214703274034837,
+        "ci95Total": [
+          1.2102944033544465,
+          2.406245393371222
+        ],
+        "impliedUpfront": 1.557945386624394,
+        "verdict": "engine low"
+      },
+      {
+        "family": "isAcquisition",
+        "level": "yes",
+        "note": "control",
+        "n": 17,
+        "impliedTotal": 1.3798533919102522,
+        "ci95Total": [
+          0.9801782140688851,
+          2.173597992019831
+        ],
+        "impliedUpfront": 7.0804750344944525,
+        "verdict": "no engine value"
+      },
+      {
+        "family": "phaseBucket",
+        "level": "approved",
+        "note": "control",
+        "n": 8,
+        "impliedTotal": 0.561064539330038,
+        "ci95Total": [
+          0.278955425401192,
+          1.4920838610983458
+        ],
+        "impliedUpfront": 0.6936493769439229,
+        "verdict": "no engine value"
+      },
+      {
+        "family": "fastTrack",
+        "level": "yes",
+        "engineMultiplier": 1.06,
+        "exponent": 1,
+        "engineApplied": 1.06,
+        "n": 7,
+        "impliedTotal": 0.6193013774761376,
+        "ci95Total": [
+          0.4669934072490393,
+          0.9910531519479995
+        ],
+        "impliedUpfront": 0.5630049957597283,
+        "verdict": "insufficient n"
+      },
+      {
+        "family": "orphan",
+        "level": "yes",
+        "engineMultiplier": 1.08,
+        "exponent": 1,
+        "engineApplied": 1.08,
+        "n": 4,
+        "impliedTotal": 1.0362855519867888,
+        "ci95Total": [
+          0.5308316187434868,
+          1.8523575633430565
+        ],
+        "impliedUpfront": 0.8569199891892081,
+        "verdict": "insufficient n"
+      }
+    ]
+  },
+  "unidentifiable": [
+    {
+      "factor": "competitivePosition (first-in-class 1.25 / first-to-pivotal 1.15 / best-in-class 1.10 / behind 0.80 / crowded 0.70)",
+      "reason": "No competitive-position field in the backtest corpus or the live deals table (0 of 1,875 rows). Only 4 of 221 matched live rows mention \"first-in-class\" in free text."
+    },
+    {
+      "factor": "dataQuality (pivotal-ready 1.15 / strong Ph2 1.08 / mixed 0.85 / limited 0.75)",
+      "reason": "Not recorded per deal. Phase at signing is the only proxy and is already in the baseline."
+    },
+    {
+      "factor": "biomarker (selected 1.15)",
+      "reason": "No biomarker field in corpus or live table. 57 hand-labelled CALIBRATION_DEALS carry it (see supplementary probe, n too thin)."
+    },
+    {
+      "factor": "lineOfTherapy (1L 1.25 / 3L+ 0.85)",
+      "reason": "Not recorded per deal."
+    },
+    {
+      "factor": "combinationPotential (strong 1.20 / some 1.10)",
+      "reason": "Only 3 corpus rows flagged combinationTherapy; live table has no combination field."
+    },
+    {
+      "factor": "regulatoryDesignations (breakthrough +12% / orphan +8% / fast track +6%)",
+      "reason": "regulatory_designations populated on 15 of 1,875 live rows (0.8%); 4 within the corpus."
+    },
+    {
+      "factor": "TA-specific enrichment (bbbPenetration, diseaseSeverity, mechanismDifferentiation, weightLossEfficacy, cvOutcomeBenefit, resistanceProfile, ocularDelivery, whUnmetNeed, orphanDesignation, hemeLineage, skinSeverity, ...)",
+      "reason": "None of these are recorded per deal in any available source."
+    },
+    {
+      "factor": "sub-territory keys (canada, australia, south_korea, latam, mena, us_eu, us_japan)",
+      "reason": "Zero corpus deals carry these territory codes."
+    }
+  ]
+}

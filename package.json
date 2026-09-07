@@ -18,7 +18,9 @@
     "test:load": "k6 run -e SCENARIO=smoke load-tests/k6-smoke.js",
     "type-check": "tsc --noEmit",
     "validate:empirical": "tsx scripts/validate-empirical-calibration.ts",
-    "validate:empirical:verbose": "tsx scripts/validate-empirical-calibration.ts --verbose"
+    "validate:empirical:verbose": "tsx scripts/validate-empirical-calibration.ts --verbose",
+    "calibration:per-factor": "tsx scripts/calibration/per-factor-regression.ts",
+    "calibration:live-coverage": "tsx scripts/calibration/live-enrichment-coverage.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",

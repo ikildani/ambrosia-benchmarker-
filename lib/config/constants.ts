@@ -147,3 +147,18 @@ export const DEAL_MEMO_CONFIDENCE = {
   /** tight-match count >= MEDIUM_MIN -> 'medium', else 'low' */
   MEDIUM_MIN: 5,
 } as const;
+
+/**
+ * Per-factor calibration study (2026-09). Answers "is there a quantitative
+ * lookback behind each engine multiplier?" — a ridge log-linear regression of
+ * observed deal value on one-hot factor dummies over the backtest corpus.
+ * Evidence only: production multipliers were NOT changed by this study.
+ * Reproduce: `npm run calibration:per-factor`.
+ */
+export const PER_FACTOR_CALIBRATION_STUDY = {
+  TAG: '2026-09',
+  CORPUS_N: 462,
+  DOC_PATH: 'docs/calibration-per-factor-2026-09.md',
+  OUTPUT_PATH: 'scripts/calibration/output/per-factor-2026-09.json',
+  COMMAND: 'npm run calibration:per-factor',
+} as const;
