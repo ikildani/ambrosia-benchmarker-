@@ -6,7 +6,12 @@ import { RotateCcw, Minus, Plus } from 'lucide-react';
 
 interface NumberInputWithDefaultProps {
   label: string;
-  defaultValue: number;
+  /** Baseline shown as placeholder + "Ambrosia Default" label. null = no numeric
+   *  baseline is known at this wizard step; the label falls back to
+   *  `defaultLabel` (never "0"), focus does not pre-fill, and stepping starts at 0. */
+  defaultValue: number | null;
+  /** Text shown when defaultValue is null. */
+  defaultLabel?: string;
   value: number | undefined; // undefined = using default
   onChange: (value: number | undefined) => void; // undefined = reset to default
   min?: number;
@@ -32,6 +37,7 @@ function roundToStep(val: number, step: number): number {
 function NumberInputWithDefaultInner({
   label,
   defaultValue,
+  defaultLabel = 'Model default: computed at calculation time',
   value,
   onChange,
   min,
@@ -46,30 +52,33 @@ function NumberInputWithDefaultInner({
   const [isFocused, setIsFocused] = useState(false);
 
   const isOverridden = value !== undefined;
+  const hasDefault = defaultValue !== null;
   const displayValue = isOverridden ? value : '';
-  const formattedDefault = formatDefault
-    ? formatDefault(defaultValue)
-    : `${defaultValue}${suffix ? ` ${suffix}` : ''}`;
+  const formattedDefault = !hasDefault
+    ? defaultLabel
+    : formatDefault
+      ? formatDefault(defaultValue)
+      : `${defaultValue}${suffix ? ` ${suffix}` : ''}`;
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
     // Pre-fill with default value so the user can edit from there
-    if (!isOverridden) {
+    if (!isOverridden && hasDefault) {
       onChange(defaultValue);
       // Select all text after React re-renders with the new value
       requestAnimationFrame(() => {
         inputRef.current?.select();
       });
     }
-  }, [isOverridden, defaultValue, onChange]);
+  }, [isOverridden, hasDefault, defaultValue, onChange]);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
     // If the value equals the default, reset to undefined
-    if (value !== undefined && value === defaultValue) {
+    if (value !== undefined && hasDefault && value === defaultValue) {
       onChange(undefined);
     }
-  }, [value, defaultValue, onChange]);
+  }, [value, hasDefault, defaultValue, onChange]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +97,7 @@ function NumberInputWithDefaultInner({
 
   const handleStep = useCallback(
     (direction: 1 | -1) => {
-      const current = value ?? defaultValue;
+      const current = value ?? defaultValue ?? 0;
       const next = roundToStep(current + direction * step, step);
       onChange(clamp(next, min, max));
     },
@@ -162,7 +171,7 @@ function NumberInputWithDefaultInner({
             ref={inputRef}
             type="number"
             value={displayValue}
-            placeholder={String(defaultValue)}
+            placeholder={hasDefault ? String(defaultValue) : '—'}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
@@ -225,7 +234,7 @@ function NumberInputWithDefaultInner({
 
       {/* Default value label */}
       <div className="mt-1 pl-3 text-xs text-neutral-400 dark:text-slate-500 select-none">
-        Ambrosia Default: {formattedDefault}
+        {hasDefault ? `Ambrosia Default: ${formattedDefault}` : formattedDefault}
       </div>
     </div>
   );

@@ -7,12 +7,82 @@ import { captureApiError } from '@/lib/sentry-api';
 import { calculationRequestSchema, clampInt } from '@/lib/api-validation';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { notifyCalculation } from '@/lib/slack/notify';
+import { z } from 'zod';
 
 /** Sanitize numeric output — reject NaN/Infinity, return null for invalid */
 function safeNum(v: unknown): number | null {
   if (v === null || v === undefined) return null;
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+// ── Full-input persistence (migration 097) ───────────────────────────────────
+// The base schema is `.strip()`, so the reproducibility payload is declared
+// here rather than silently dropped. `inputs` is the complete CalculationInput,
+// `modifiers` is CalculationResult.modifiers, `calculation_fingerprint` comes
+// from lib/financial/calculation-version.ts.
+const calculationRequestWithInputsSchema = calculationRequestSchema.extend({
+  inputs: z.record(z.string(), z.unknown()).optional().nullable(),
+  modifiers: z
+    .array(z.object({
+      name: z.string().max(200),
+      multiplier: z.number(),
+      context: z.string().max(2000).optional().nullable(),
+    }).strip())
+    .max(200)
+    .optional()
+    .nullable(),
+  calculation_fingerprint: z.string().max(64).optional().nullable(),
+});
+
+/** Hard cap on each persisted JSON blob (inputs / modifiers). */
+const MAX_PERSISTED_JSON_BYTES = 32 * 1024; // not exported: Next.js route files may only export handlers
+const MAX_JSON_DEPTH = 5;
+
+/**
+ * Whitelist-copy a JSON value: keep finite numbers, strings, booleans, null,
+ * arrays and plain objects (to a bounded depth). Drops functions, symbols,
+ * undefined, NaN/Infinity and prototype-polluting keys. Nothing here is
+ * sensitive — CalculationInput is enum strings, numbers and small nested
+ * objects — but the DB should never receive anything we did not expect.
+ */
+function sanitizeJson(value: unknown, depth = 0): unknown {
+  if (value === null) return null;
+  if (typeof value === 'string' || typeof value === 'boolean') return value;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (depth >= MAX_JSON_DEPTH) return undefined;
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => sanitizeJson(v, depth + 1))
+      .filter((v) => v !== undefined);
+  }
+  if (typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      const cleaned = sanitizeJson(v, depth + 1);
+      if (cleaned !== undefined) out[k] = cleaned;
+    }
+    return out;
+  }
+  return undefined; // function, symbol, bigint, undefined
+}
+
+/**
+ * Sanitize + size-cap a JSON blob for persistence. Returns null (and logs a
+ * warning) when the serialized payload exceeds MAX_PERSISTED_JSON_BYTES so an
+ * oversized request can never fail the whole insert.
+ */
+function persistableJson(value: unknown, label: string): unknown | null {
+  if (value == null) return null;
+  const cleaned = sanitizeJson(value);
+  if (cleaned == null) return null;
+  const bytes = Buffer.byteLength(JSON.stringify(cleaned), 'utf8');
+  if (bytes > MAX_PERSISTED_JSON_BYTES) {
+    console.warn(`[Calculations] ${label} payload is ${bytes} bytes (> ${MAX_PERSISTED_JSON_BYTES}); dropping`);
+    return null;
+  }
+  return cleaned;
 }
 
 export async function POST(request: NextRequest) {
@@ -36,7 +106,7 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.json();
 
     // Validate input with Zod schema
-    const parseResult = calculationRequestSchema.safeParse(rawBody);
+    const parseResult = calculationRequestWithInputsSchema.safeParse(rawBody);
     if (!parseResult.success) {
       const firstError = parseResult.error.issues[0]?.message || 'Invalid input';
       return apiError(firstError, 400);
@@ -92,6 +162,10 @@ export async function POST(request: NextRequest) {
       output_total_deal_value_high: safeNum(body.outputs?.total_deal_value_high),
       calculation_version: '1.0.0',
       custom_assumptions: body.custom_assumptions || null,
+      // Migration 097: full reproducibility payload (nullable; capped at 32 KB each)
+      inputs: persistableJson(body.inputs, 'inputs'),
+      modifiers: persistableJson(body.modifiers, 'modifiers'),
+      calculation_fingerprint: body.calculation_fingerprint?.trim() || null,
     };
 
     let { data: calculation, error: calcError } = await supabase

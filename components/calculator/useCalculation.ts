@@ -11,6 +11,8 @@ import {
   type Indication,
 } from '@/lib/calculations';
 import { incrementUsage, getUsage, incrementServerUsage, checkServerUsage, type ServerUsageResult } from '@/lib/usage';
+import { ensureBenchmarksLoaded } from '@/lib/benchmarks';
+import { computeCalculationFingerprint } from '@/lib/financial/calculation-version';
 import { addToHistory } from '@/lib/history';
 import type { CalculatorFormState } from './useCalculatorState';
 import { clearSavedFormState } from './useCalculatorState';
@@ -89,12 +91,12 @@ export interface UseCalculationReturn {
   calculationError: string | null;
   setSaveError: (v: string | null) => void;
   setResult: (v: CalculationResult | null) => void;
-  handleCalculate: (state: CalculatorFormState) => void;
+  handleCalculate: (state: CalculatorFormState) => Promise<void>;
   handleSensitivityApply: (
     state: CalculatorFormState,
     newInputs: Partial<CalculationInput>,
     bulkSet: (fields: Partial<CalculatorFormState>) => void,
-  ) => void;
+  ) => Promise<void>;
   calculationCountRef: React.MutableRefObject<number>;
   limitHit: boolean;
   remainingCalcs: number | null;
@@ -128,7 +130,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     }
   }, [isAuthenticated, tier, userId]);
 
-  const handleCalculate = useCallback((state: CalculatorFormState) => {
+  const handleCalculate = useCallback(async (state: CalculatorFormState) => {
     // Require all primary fields to be selected
     if (!isReadyToCalculate(state)) {
       toast.error('Please select phase and modality before calculating.');
@@ -164,8 +166,13 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
 
     try {
       const input = buildCalculationInput(state);
+      // Await the Supabase calibration overlay so the first run in a fresh tab
+      // uses the same calibrated baselines as every later run. Resolves
+      // immediately once warm (Calculator.tsx pre-warms on mount); never throws.
+      await ensureBenchmarksLoaded();
       const calculatedResult = calculateDealTerms(input);
       setResult(calculatedResult);
+      const fingerprint = computeCalculationFingerprint(input as unknown as Record<string, unknown>);
 
       calculationCountRef.current += 1;
 
@@ -222,6 +229,14 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
             total_deal_value_high: calculatedResult.terms.totalDealValue.high,
           },
           ...(state.customAssumptions ? { custom_assumptions: state.customAssumptions } : {}),
+          // Migration 097: full reproducibility payload — every wizard field
+          // (competitive position, data quality, biomarker, LoT, treatment
+          // approach, combination potential, regulatory designations, targets,
+          // delivery route, differentiation, peak-sales override, TA-specific
+          // inputs) plus the applied modifiers and engine fingerprint.
+          inputs: input,
+          modifiers: calculatedResult.modifiers,
+          calculation_fingerprint: fingerprint,
         }),
       })
         .then(async (response) => {
@@ -318,7 +333,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
     }
   }, [isAuthenticated, isCalculating, tier, sessionId, anonymousId, userId, trackCalculation, openAuthModal]);
 
-  const handleSensitivityApply = useCallback((
+  const handleSensitivityApply = useCallback(async (
     state: CalculatorFormState,
     newInputs: Partial<CalculationInput>,
     bulkSet: (fields: Partial<CalculatorFormState>) => void,
@@ -368,6 +383,7 @@ export function useCalculation(opts: UseCalculationOptions): UseCalculationRetur
       bulkSet(newInputs as Partial<CalculatorFormState>);
 
       // Calculate directly with merged inputs (don't rely on state which is async)
+      await ensureBenchmarksLoaded(); // same calibrated baselines as handleCalculate
       const calculatedResult = calculateDealTerms(mergedInputs);
       setResult(calculatedResult);
 

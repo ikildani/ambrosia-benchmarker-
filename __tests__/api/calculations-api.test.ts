@@ -177,6 +177,106 @@ describe('/api/calculations', () => {
       expect(data.calculation_id).toBe('calc-123');
     });
 
+    it('should persist full inputs, modifiers and fingerprint (migration 097)', async () => {
+      const insertChain = createChain();
+      (insertChain.single as jest.Mock).mockResolvedValueOnce({ data: { id: 'calc-full' }, error: null });
+      const eventChain = createChain();
+      fromChains = [insertChain, eventChain];
+
+      const inputs = {
+        therapeuticArea: 'oncology',
+        phase: 'phase2',
+        modality: 'mab',
+        indication: 'lung_nsclc',
+        competitivePosition: 'firstInClass',
+        dataQuality: 'strong',
+        biomarker: 'yes',
+        lineOfTherapy: 'first',
+        regulatoryDesignations: { breakthrough: true, fastTrack: false, orphan: false, prime: false },
+        molecularTargets: ['EGFR'],
+        deliveryRoute: 'iv',
+        peakSalesOverrideM: 1200,
+        bbbPenetration: 'high',
+        skipMe: () => 'function is dropped',
+        nan: Number.NaN,
+      };
+      const modifiers = [{ name: 'Monoclonal antibody', multiplier: 1.2, context: 'ctx', extra: 'stripped' }];
+
+      const request = new NextRequest('http://localhost/api/calculations', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...validPostBody,
+          inputs,
+          modifiers,
+          calculation_fingerprint: ' v5.1.0-abc123 ',
+        }),
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const inserted = (insertChain.insert as jest.Mock).mock.calls[0][0];
+      // Existing scalar columns are untouched
+      expect(inserted.modality).toBe('mab');
+      expect(inserted.output_upfront_mid).toBe(100);
+      // New columns
+      expect(inserted.calculation_fingerprint).toBe('v5.1.0-abc123');
+      expect(inserted.modifiers).toEqual([{ name: 'Monoclonal antibody', multiplier: 1.2, context: 'ctx' }]);
+      expect(inserted.inputs).toMatchObject({
+        competitivePosition: 'firstInClass',
+        dataQuality: 'strong',
+        biomarker: 'yes',
+        lineOfTherapy: 'first',
+        regulatoryDesignations: { breakthrough: true },
+        molecularTargets: ['EGFR'],
+        deliveryRoute: 'iv',
+        peakSalesOverrideM: 1200,
+        bbbPenetration: 'high',
+      });
+      expect(inserted.inputs.skipMe).toBeUndefined();
+      expect(inserted.inputs.nan).toBeNull();
+    });
+
+    it('should drop oversized inputs (> 32KB) with a warning but still save', async () => {
+      const insertChain = createChain();
+      (insertChain.single as jest.Mock).mockResolvedValueOnce({ data: { id: 'calc-big' }, error: null });
+      fromChains = [insertChain, createChain()];
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const request = new NextRequest('http://localhost/api/calculations', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...validPostBody,
+          inputs: { blob: 'x'.repeat(40_000), phase: 'phase2' },
+          modifiers: [{ name: 'small', multiplier: 1 }],
+        }),
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      const inserted = (insertChain.insert as jest.Mock).mock.calls[0][0];
+      expect(inserted.inputs).toBeNull();
+      expect(inserted.modifiers).toEqual([{ name: 'small', multiplier: 1 }]);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('inputs payload'));
+      warn.mockRestore();
+    });
+
+    it('should leave new columns null when the client omits them', async () => {
+      const insertChain = createChain();
+      (insertChain.single as jest.Mock).mockResolvedValueOnce({ data: { id: 'calc-legacy' }, error: null });
+      fromChains = [insertChain, createChain()];
+
+      const request = new NextRequest('http://localhost/api/calculations', {
+        method: 'POST',
+        body: JSON.stringify(validPostBody),
+      });
+      await POST(request);
+      const inserted = (insertChain.insert as jest.Mock).mock.calls[0][0];
+      expect(inserted.inputs).toBeNull();
+      expect(inserted.modifiers).toBeNull();
+      expect(inserted.calculation_fingerprint).toBeNull();
+    });
+
     it('should return 500 when DB insert fails', async () => {
       // Chain 0: insert into calculations fails
       const insertChain = createChain();

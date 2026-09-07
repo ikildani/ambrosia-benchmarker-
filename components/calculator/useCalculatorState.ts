@@ -1,5 +1,6 @@
 import { useReducer, useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import type { CustomAssumptions } from '@/lib/financial/types';
+import { isPeakSalesOverrideSet, tripleFromScalar, type PeakSalesTriple } from './peakSalesBaseline';
 import type {
   TherapeuticArea,
   Phase,
@@ -227,8 +228,31 @@ type CalculatorAction =
   | { type: 'BULK_SET'; fields: Partial<CalculatorFormState> }
   | { type: 'SET_CUSTOM_ASSUMPTIONS'; assumptions: CustomAssumptions }
   | { type: 'RESET_CUSTOM_ASSUMPTIONS' }
+  | { type: 'SET_PEAK_SALES_OVERRIDE'; triple: PeakSalesTriple | null }
   | { type: 'TOGGLE_MOLECULAR_TARGET'; slug: string }
   | { type: 'RESET' };
+
+/**
+ * Peak sales has two UI entry points (PeakSalesOverrideInput scalar and the
+ * CustomAssumptionsPanel low/median/high section) but ONE state. Both fields
+ * are always written together so either path yields identical engine input:
+ *   - peakSalesOverrideM              = triple.median (scalar the engine spreads 0.7x/1.5x)
+ *   - customAssumptions.peakSalesOverride = triple   (takes precedence in rnpv-engine)
+ */
+function applyPeakSalesOverride(state: CalculatorFormState, triple: PeakSalesTriple | null): CalculatorFormState {
+  const set = isPeakSalesOverrideSet(triple);
+  const rest: CustomAssumptions = { ...(state.customAssumptions ?? {}) };
+  delete rest.peakSalesOverride;
+  const nextAssumptions: CustomAssumptions = set ? { ...rest, peakSalesOverride: triple } : rest;
+  const hasAny = Object.values(nextAssumptions).some(
+    (v) => v != null && (typeof v !== 'object' || Object.keys(v).length > 0),
+  );
+  return {
+    ...state,
+    peakSalesOverrideM: set ? triple.median : null,
+    customAssumptions: hasAny ? nextAssumptions : null,
+  };
+}
 
 function reducer(state: CalculatorFormState, action: CalculatorAction): CalculatorFormState {
   switch (action.type) {
@@ -400,11 +424,22 @@ function reducer(state: CalculatorFormState, action: CalculatorAction): Calculat
       return next;
     }
 
-    case 'SET_CUSTOM_ASSUMPTIONS':
-      return { ...state, customAssumptions: action.assumptions };
+    case 'SET_CUSTOM_ASSUMPTIONS': {
+      // Keep the scalar mirror in sync with the panel's peakSalesOverride:
+      // set → median; cleared by the panel → null; untouched → leave as-is.
+      const incoming = action.assumptions.peakSalesOverride;
+      const previouslySet = isPeakSalesOverrideSet(state.customAssumptions?.peakSalesOverride);
+      const peakSalesOverrideM = isPeakSalesOverrideSet(incoming)
+        ? incoming.median
+        : previouslySet ? null : state.peakSalesOverrideM;
+      return { ...state, customAssumptions: action.assumptions, peakSalesOverrideM };
+    }
 
     case 'RESET_CUSTOM_ASSUMPTIONS':
-      return { ...state, customAssumptions: null };
+      return { ...state, customAssumptions: null, peakSalesOverrideM: null };
+
+    case 'SET_PEAK_SALES_OVERRIDE':
+      return applyPeakSalesOverride(state, action.triple);
 
     case 'TOGGLE_MOLECULAR_TARGET': {
       const current = state.molecularTargets;
@@ -495,6 +530,8 @@ export interface CalculatorActions {
   bulkSet: (fields: Partial<CalculatorFormState>) => void;
   setCustomAssumptions: (v: CustomAssumptions) => void;
   resetCustomAssumptions: () => void;
+  /** Single writer for peak sales — updates peakSalesOverrideM AND customAssumptions.peakSalesOverride. */
+  setPeakSalesOverride: (triple: PeakSalesTriple | null) => void;
   switchTherapeuticArea: (area: TherapeuticArea) => void;
   reset: () => void;
   dispatch: React.Dispatch<CalculatorAction>;
@@ -602,7 +639,13 @@ export function useCalculatorState(): [CalculatorFormState, CalculatorActions, b
       dispatch({ type: 'TOGGLE_MOLECULAR_TARGET', slug });
     },
     toggleDifferentiationFactor: (key) => dispatch({ type: 'TOGGLE_DIFFERENTIATION', key }),
-    setPeakSalesOverrideM: (v) => dispatch({ type: 'SET_FIELD', field: 'peakSalesOverrideM', value: v }),
+    // Scalar entry point (PeakSalesOverrideInput) — routed through the same
+    // action as the panel so both fields stay consistent.
+    setPeakSalesOverrideM: (v) => dispatch({
+      type: 'SET_PEAK_SALES_OVERRIDE',
+      triple: v != null && v > 0 ? tripleFromScalar(v) : null,
+    }),
+    setPeakSalesOverride: (triple) => dispatch({ type: 'SET_PEAK_SALES_OVERRIDE', triple }),
     setAssetName: (v) => dispatch({ type: 'SET_FIELD', field: 'assetName', value: v }),
     setRegulatoryDesignations: (v) => dispatch({ type: 'SET_FIELD', field: 'regulatoryDesignations', value: v }),
     setBbbPenetration: (v) => dispatch({ type: 'SET_FIELD', field: 'bbbPenetration', value: v }),

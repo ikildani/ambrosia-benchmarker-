@@ -82,7 +82,8 @@ import { TherapeuticAreaSelector, AreaSwitchModal, AssetDetailsSection, Advanced
 import { AssetDifferentiationSection } from './calculator/AssetDifferentiationSection';
 import { MolecularTargetSelector } from './calculator/MolecularTargetSelector';
 import PeakSalesOverrideInput from './calculator/PeakSalesOverrideInput';
-import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
+import { getPeakSalesBaseline } from './calculator/peakSalesBaseline';
+import { ensureBenchmarksLoaded } from '@/lib/benchmarks';
 import { getValidationWarnings } from '@/lib/validationWarnings';
 import type { WizardStep } from './calculator/index';
 
@@ -160,6 +161,14 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const resultsRef = useRef<HTMLDivElement>(null);
   const prevResultRef = useRef(calc.result);
 
+  // Warm the Supabase calibration overlay on mount (fire-and-forget) so the
+  // first calculateDealTerms() in a fresh tab uses the same calibrated
+  // baselines as every later run. useCalculation also awaits it before each
+  // calculation, so a fast user cannot beat the warm-up.
+  useEffect(() => {
+    void ensureBenchmarksLoaded();
+  }, []);
+
   // Show toast when form was restored from localStorage
   useEffect(() => {
     if (wasRestored) {
@@ -184,6 +193,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   const previewResult = useMemo(() => {
     return calculateDealTerms(buildCalculationInput(state));
   }, [state]);
+
+  // Peak-sales baseline shared by PeakSalesOverrideInput (asset step) and the
+  // CustomAssumptionsPanel "Peak Sales" section (deal step): indication typical
+  // asset peak, else phase multiple of the live estimate, else null (the panel
+  // shows "Model default: computed at calculation time", never 0).
+  const peakSalesBaseline = useMemo(() => getPeakSalesBaseline({
+    indication: state.indication || null,
+    phase: state.phase || null,
+    totalDealValueMedian: previewResult.terms.totalDealValue.median,
+  }), [state.indication, state.phase, previewResult.terms.totalDealValue.median]);
 
   // Selection summary chips for wizard context
   const selectionSummary = useMemo(() => {
@@ -813,7 +832,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                             value={state.peakSalesOverrideM}
                             onChange={actions.setPeakSalesOverrideM}
                             indicationName={state.indication}
-                            engineDefaultM={getIndicationTypicalAssetPeak(state.indication) ?? undefined}
+                            engineDefaultM={peakSalesBaseline?.median ?? undefined}
                             // R60d: cohort lookup via /api/deals/peak-sales-consensus
                             therapeuticArea={state.therapeuticArea}
                             indicationSlug={state.indication}
@@ -858,6 +877,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           onChange={(v) => v ? actions.setCustomAssumptions(v) : actions.resetCustomAssumptions()}
                           tier={tier as 'free' | 'pro' | 'report'}
                           onUpgradeClick={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+                          peakSalesBaseline={peakSalesBaseline}
                         />
                       </div>
                     );
@@ -885,6 +905,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           onChange={(v) => v ? actions.setCustomAssumptions(v) : actions.resetCustomAssumptions()}
                           tier={tier as 'free' | 'pro' | 'report'}
                           onUpgradeClick={() => { setPaywallReason('pro_feature'); setShowPaywall(true); }}
+                          peakSalesBaseline={peakSalesBaseline}
                         />
                       </div>
                     );

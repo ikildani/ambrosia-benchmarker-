@@ -8,6 +8,7 @@ import PerPhaseTransitionTable from './PerPhaseTransitionTable';
 import CustomAssumptionsBadge from './CustomAssumptionsBadge';
 import type { CustomAssumptions } from '@/lib/financial/types';
 import type { ResolvedDefaults } from '@/lib/financial/default-assumptions';
+import { isPeakSalesOverrideSet, tripleFromScalar, PEAK_SALES_SCALAR_SPREAD, type PeakSalesTriple } from './peakSalesBaseline';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -37,7 +38,7 @@ function countOverrides(assumptions: CustomAssumptions | null): number {
   if (assumptions.phaseCosts) count += Object.keys(assumptions.phaseCosts).length;
   if (assumptions.revenueCurve) count += Object.keys(assumptions.revenueCurve).length;
   if (assumptions.cogsPercent != null) count++;
-  if (assumptions.peakSalesOverride) count++;
+  if (isPeakSalesOverrideSet(assumptions.peakSalesOverride)) count++;
   return count;
 }
 
@@ -64,7 +65,7 @@ function countSectionOverrides(
     case 'cogs':
       return assumptions.cogsPercent != null ? 1 : 0;
     case 'peakSales':
-      return assumptions.peakSalesOverride ? 1 : 0;
+      return isPeakSalesOverrideSet(assumptions.peakSalesOverride) ? 1 : 0;
     default:
       return 0;
   }
@@ -131,6 +132,13 @@ interface CustomAssumptionsPanelProps {
   onChange: (assumptions: CustomAssumptions | null) => void;
   tier: 'free' | 'pro' | 'report';
   onUpgradeClick?: () => void;
+  /**
+   * Peak-sales baseline ($M) from components/calculator/peakSalesBaseline.ts —
+   * the same source PeakSalesOverrideInput shows. null/undefined = not
+   * resolvable at this step; the inputs then read "Model default: computed at
+   * calculation time" instead of 0.
+   */
+  peakSalesBaseline?: PeakSalesTriple | null;
 }
 
 function CustomAssumptionsPanelInner({
@@ -139,6 +147,7 @@ function CustomAssumptionsPanelInner({
   onChange,
   tier,
   onUpgradeClick,
+  peakSalesBaseline = null,
 }: CustomAssumptionsPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -216,22 +225,44 @@ function CustomAssumptionsPanelInner({
 
   const handlePeakSalesChange = useCallback(
     (key: 'low' | 'median' | 'high', v: number | undefined) => {
-      const current = assumptions?.peakSalesOverride ?? {
-        low: 0,
-        median: 0,
-        high: 0,
-      };
+      const existing = assumptions?.peakSalesOverride;
+      const current: PeakSalesTriple | null = isPeakSalesOverrideSet(existing) ? existing : null;
+
       if (v != null) {
-        const next = { ...current, [key]: v };
-        update({ peakSalesOverride: next });
+        // Seed unset fields from the current override, else the shared baseline,
+        // else derive a full triple from the single value with the engine's
+        // scalar spread (0.7x / 1.5x) — never leave a field at 0.
+        let seed: PeakSalesTriple;
+        if (current) seed = current;
+        else if (peakSalesBaseline) seed = peakSalesBaseline;
+        else {
+          const median = key === 'median' ? v
+            : key === 'low' ? v / PEAK_SALES_SCALAR_SPREAD.low
+            : v / PEAK_SALES_SCALAR_SPREAD.high;
+          seed = tripleFromScalar(Math.round(median));
+        }
+        update({ peakSalesOverride: { ...seed, [key]: v } });
+        return;
+      }
+
+      // Clearing one field: revert it to the baseline value if known; if that
+      // leaves the whole triple equal to the baseline (or no baseline exists),
+      // drop the override entirely so the engine computes its own default.
+      if (!current) {
+        update({ peakSalesOverride: undefined });
+        return;
+      }
+      if (peakSalesBaseline) {
+        const next = { ...current, [key]: peakSalesBaseline[key] };
+        const equalsBaseline = (['low', 'median', 'high'] as const).every(
+          (k) => next[k] === peakSalesBaseline[k],
+        );
+        update({ peakSalesOverride: equalsBaseline ? undefined : next });
       } else {
-        // If clearing one field, check if others remain
-        const next = { ...current, [key]: 0 };
-        const allZero = next.low === 0 && next.median === 0 && next.high === 0;
-        update({ peakSalesOverride: allZero ? undefined : next });
+        update({ peakSalesOverride: undefined });
       }
     },
-    [assumptions?.peakSalesOverride, update],
+    [assumptions, peakSalesBaseline, update],
   );
 
   // ---------------------------------------------------------------------------
@@ -461,7 +492,7 @@ function CustomAssumptionsPanelInner({
                 >
                   <NumberInputWithDefault
                     label="Low"
-                    defaultValue={0}
+                    defaultValue={peakSalesBaseline ? peakSalesBaseline.low : null}
                     value={assumptions?.peakSalesOverride?.low || undefined}
                     onChange={(v) => handlePeakSalesChange('low', v)}
                     suffix="$M"
@@ -472,7 +503,7 @@ function CustomAssumptionsPanelInner({
                   />
                   <NumberInputWithDefault
                     label="Median"
-                    defaultValue={0}
+                    defaultValue={peakSalesBaseline ? peakSalesBaseline.median : null}
                     value={assumptions?.peakSalesOverride?.median || undefined}
                     onChange={(v) => handlePeakSalesChange('median', v)}
                     suffix="$M"
@@ -483,7 +514,7 @@ function CustomAssumptionsPanelInner({
                   />
                   <NumberInputWithDefault
                     label="High"
-                    defaultValue={0}
+                    defaultValue={peakSalesBaseline ? peakSalesBaseline.high : null}
                     value={assumptions?.peakSalesOverride?.high || undefined}
                     onChange={(v) => handlePeakSalesChange('high', v)}
                     suffix="$M"
