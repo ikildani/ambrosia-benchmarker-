@@ -15,13 +15,15 @@
  */
 
 import { useMemo } from 'react';
-import { getClosestComparables, type ComparableDealForUI } from '@/lib/peer-benchmark';
+import { getClosestComparablesWithMeta } from '@/lib/peer-benchmark';
+import { relaxationLabel } from '@/lib/comparable-scoring';
 import type { DealStructure } from '@/lib/financial/deal-structure-classifier';
 
 interface Props {
   therapeuticArea?: string;
   phase?: string;
   modality?: string;
+  indication?: string;
   dealType?: string;
   territory?: string;
   dealStructure?: DealStructure;
@@ -98,12 +100,13 @@ function StarBadge({ score }: { score: number }) {
 }
 
 export function ComparableDealsPanel(props: Props) {
-  const comparables: ComparableDealForUI[] = useMemo(
+  const { deals: comparables, relaxation, excludedApprovedMA } = useMemo(
     () =>
-      getClosestComparables({
+      getClosestComparablesWithMeta({
         therapeuticArea: props.therapeuticArea,
         phase: props.phase,
         modality: props.modality,
+        indication: props.indication,
         dealType: props.dealType,
         territory: props.territory,
         dealStructure: props.dealStructure,
@@ -115,6 +118,7 @@ export function ComparableDealsPanel(props: Props) {
       props.therapeuticArea,
       props.phase,
       props.modality,
+      props.indication,
       props.dealType,
       props.territory,
       props.dealStructure,
@@ -154,6 +158,21 @@ export function ComparableDealsPanel(props: Props) {
           {comparables.length} shown
         </div>
       </div>
+
+      {(relaxation !== 'none' || excludedApprovedMA > 0) && (
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+          {relaxation !== 'none' && (
+            <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 font-medium text-amber-300">
+              {relaxationLabel(relaxation)}
+            </span>
+          )}
+          {excludedApprovedMA > 0 && (
+            <span className="text-slate-500">
+              {excludedApprovedMA} approved-stage {excludedApprovedMA === 1 ? 'acquisition' : 'acquisitions'} excluded
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         {comparables.map((d, i) => (

@@ -11,20 +11,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import {
+  scoreCompMatch,
+  selectWithRelaxation,
+  shouldExcludeForStage,
+  computeCompStats,
+  type CompRelaxation,
+} from '@/lib/comparable-scoring';
 
 export const dynamic = 'force-dynamic';
-
-const PHASE_ORDER: Record<string, number> = {
-  discovery: 0, preclinical: 1, phase_1: 2, phase_1_2: 2.5,
-  phase_2: 3, phase_2_3: 3.5, phase_3: 4, nda_filed: 5, approved: 6,
-};
-
-function adjacentPhases(phase: string): string[] {
-  const rank = PHASE_ORDER[phase] ?? 3;
-  return Object.entries(PHASE_ORDER)
-    .filter(([, r]) => Math.abs(r - rank) <= 1.5)
-    .map(([p]) => p);
-}
 
 async function resolveUserTier(request: NextRequest, supabase: ReturnType<typeof createServiceClient>): Promise<string> {
   // Cookie auth
@@ -84,19 +79,10 @@ interface TransparencyDeal {
   confidence_score: number | null;
   match_quality: 'exact' | 'strong' | 'partial';
   url_status?: string | null;
-}
-
-function computeStats(values: number[]): { min: number; p25: number; median: number; p75: number; max: number } | null {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const n = sorted.length;
-  return {
-    min: sorted[0],
-    p25: sorted[Math.floor(n * 0.25)] ?? sorted[0],
-    median: n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)],
-    p75: sorted[Math.floor(n * 0.75)] ?? sorted[n - 1],
-    max: sorted[n - 1],
-  };
+  /** 0–1 composite match score (shared weight table). */
+  match_score?: number;
+  /** True when this deal is approved-stage M&A included only via the explicit toggle. */
+  approved_stage_ma?: boolean;
 }
 
 export async function GET(request: NextRequest) {
@@ -106,6 +92,10 @@ export async function GET(request: NextRequest) {
   const modality = params.get('modality');
   const dealType = params.get('dealType');
   const territory = params.get('territory');
+  const indication = params.get('indication');
+  // Task 2: approved-stage acquisitions/mergers are excluded from pre-approval
+  // comp pools unless the user explicitly opts in via the DealTransparency toggle.
+  const includeApprovedMA = params.get('includeApprovedMA') === 'true' || params.get('includeApprovedMA') === '1';
 
   if (!ta) {
     return NextResponse.json({ error: 'ta parameter required' }, { status: 400 });
@@ -115,14 +105,12 @@ export async function GET(request: NextRequest) {
   const userTier = await resolveUserTier(request, supabase);
   const hasPro = userTier === 'pro' || userTier === 'portfolio' || userTier === 'report';
 
-  // Build the query — start with exact TA match
-  const phases = phase ? adjacentPhases(phase) : [];
-
   // Fetch all deals for this TA (indexed query)
   const { data: allDeals, error } = await supabase
     .from('deals')
     .select('id, licensor_name, licensee_name, asset_name, announced_date, phase_at_signing, modality, deal_type, territory, therapeutic_area, upfront_usd, milestones_total_usd, milestones_development_usd, milestones_regulatory_usd, milestones_commercial_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, source_type, confidence_score, indication_specific, indication_category, raw_text_excerpt, url_status')
     .eq('is_synthetic', false)
+    .or('is_canonical.is.null,is_canonical.eq.true')
     .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
     .eq('therapeutic_area', ta)
     .not('therapeutic_area', 'eq', 'other')
@@ -132,48 +120,69 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to query deals' }, { status: 500 });
   }
 
-  // Score each deal by match quality
-  const scored: (TransparencyDeal & { score: number })[] = allDeals.map(d => {
-    let matchCount = 1; // TA already matches
-    if (phase && d.phase_at_signing === phase) matchCount++;
-    if (modality && d.modality === modality) matchCount++;
-    if (dealType && d.deal_type === dealType) matchCount++;
+  const currentYear = new Date().getFullYear();
 
-    // Adjacent phase bonus (partial credit)
-    const isAdjacentPhase = phase && d.phase_at_signing && phases.includes(d.phase_at_signing) && d.phase_at_signing !== phase;
-
-    const match_quality: 'exact' | 'strong' | 'partial' =
-      matchCount >= 3 ? 'exact' : matchCount >= 2 ? 'strong' : 'partial';
-
-    // Recency weight — last 3 years get a boost
-    const year = d.announced_date ? parseInt(d.announced_date.substring(0, 4)) : 2020;
-    const currentYear = new Date().getFullYear();
-    const recencyBonus = Math.max(0, 1 - (currentYear - year) * 0.08);
-
-    // Territory: global always relevant, regional only if matches
-    const territoryMatch = !territory || !d.territory || d.territory === 'global' || d.territory === territory;
-
-    const score = matchCount * 30 + (isAdjacentPhase ? 10 : 0) + recencyBonus * 10 + (territoryMatch ? 5 : 0);
-
-    return { ...d, match_quality, score };
+  // Stage/structure sanity filter
+  let excludedApprovedMA = 0;
+  const stageFiltered = allDeals.filter(d => {
+    const isMA = shouldExcludeForStage(phase, d.phase_at_signing, d.deal_type);
+    if (isMA) excludedApprovedMA++;
+    return includeApprovedMA || !isMA;
   });
 
+  // Score each deal with the shared weight table (TA 3 · phase 4 · adjacent 2 ·
+  // modality 3 · indication 3 · deal type 2 · recency 2).
+  const scoredAll = stageFiltered.map(d => {
+    const year = d.announced_date ? parseInt(d.announced_date.substring(0, 4)) : 2020;
+    const { score, normalized, breakdown } = scoreCompMatch(
+      { therapeuticArea: ta, phase, modality, indication, dealType },
+      { therapeuticArea: d.therapeutic_area, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], dealType: d.deal_type, year },
+      { currentYear },
+    );
+
+    const match_quality: 'exact' | 'strong' | 'partial' =
+      breakdown.ta && breakdown.phase && breakdown.modality ? 'exact'
+        : breakdown.ta && (breakdown.phase || breakdown.adjacentPhase || breakdown.modality || breakdown.indication) ? 'strong'
+          : 'partial';
+
+    // Territory: global always relevant, regional only if matches (small tiebreak)
+    const territoryMatch = !territory || !d.territory || d.territory === 'global' || d.territory === territory;
+
+    const approved_stage_ma = shouldExcludeForStage(phase, d.phase_at_signing, d.deal_type);
+
+    return {
+      ...d,
+      match_quality,
+      match_score: normalized,
+      approved_stage_ma,
+      score: score + (territoryMatch ? 0.25 : 0),
+      breakdown,
+    } as TransparencyDeal & { score: number; breakdown: ReturnType<typeof scoreCompMatch>['breakdown'] };
+  });
+
+  // Pass threshold: TA + one of {same phase, adjacent phase, indication}.
+  // Relax progressively when the strict pool is thin (< 5).
+  const { items: pooled, relaxation } = selectWithRelaxation(scoredAll, d => d.breakdown);
+  if (relaxation !== 'none') {
+    console.info(`[deals/transparency] relaxation=${relaxation} ta=${ta} phase=${phase ?? '?'} modality=${modality ?? '?'} strictPool<5`);
+  }
+
   // Sort by score descending, then by announced_date descending
-  scored.sort((a, b) => b.score - a.score || (b.announced_date || '').localeCompare(a.announced_date || ''));
+  const scored = pooled
+    .map(({ breakdown, ...d }) => d)
+    .sort((a, b) => b.score - a.score || (b.announced_date || '').localeCompare(a.announced_date || ''));
+  const dealPool = scored;
 
-  // If too few exact/strong matches, include partial
-  const strongMatches = scored.filter(d => d.match_quality !== 'partial');
-  const dealPool = strongMatches.length >= 5 ? scored : scored;
-
-  // Compute stats from all deals with financial data
+  // Compute stats from pool deals with disclosed financial data. Each stat
+  // carries its own n so the UI can say "n = X in pool · Y with disclosed upfront".
   const upfrontValues = dealPool.filter(d => d.upfront_usd != null && d.upfront_usd > 0).map(d => d.upfront_usd! / 1_000_000);
   const totalValues = dealPool.filter(d => d.total_deal_value_usd != null && d.total_deal_value_usd > 0).map(d => d.total_deal_value_usd! / 1_000_000);
   const royaltyValues = dealPool.filter(d => d.royalty_low_pct != null).map(d => d.royalty_low_pct!);
 
   const stats = {
-    upfront: computeStats(upfrontValues),
-    totalValue: computeStats(totalValues),
-    royalty: computeStats(royaltyValues),
+    upfront: computeCompStats(upfrontValues),
+    totalValue: computeCompStats(totalValues),
+    royalty: computeCompStats(royaltyValues),
   };
 
   const totalCount = scored.length;
@@ -236,6 +245,10 @@ export async function GET(request: NextRequest) {
       exactCount,
       strongCount,
       withTermsCount,
+      poolCount: dealPool.length,
+      relaxation: relaxation as CompRelaxation,
+      excludedApprovedMA,
+      includeApprovedMA,
       stats,
       confidence,
       quarterlyTrend,
@@ -254,10 +267,14 @@ export async function GET(request: NextRequest) {
     exactCount,
     strongCount,
     withTermsCount,
+    poolCount: dealPool.length,
+    relaxation: relaxation as CompRelaxation,
+    excludedApprovedMA,
+    includeApprovedMA,
     stats,
     confidence,
     quarterlyTrend,
     deals,
-    methodology: 'Estimates are derived from weighted median benchmarks calibrated against all matching deals. The comparable transactions below are the individual data points. Deals are scored by therapeutic area, development phase, modality, and recency.',
+    methodology: 'Estimates are derived from weighted median benchmarks calibrated against all matching deals. The comparable transactions below are the individual data points. Deals are scored by therapeutic area (3), development phase (4, adjacent 2), modality (3), indication (3), deal type (2), and recency (2); a deal must match TA plus phase or indication to enter the pool.',
   });
 }

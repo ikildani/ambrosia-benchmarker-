@@ -33,7 +33,8 @@ import { calculateCompetitiveDynamics, calculateRealOptions } from './advanced-u
 import type { CompetitiveDynamicsResult, RealOptionsResult } from './advanced-upgrades';
 import { checkCrossEngineConsistency } from './consistency-checks';
 import { assertInvariants, checkScenarioInvariants } from './invariants';
-import { calculateEnsembleValuation } from './ensemble-valuation';
+import { calculateEnsembleValuation, type ComparablesOverride, type EnsembleResultWithSource } from './ensemble-valuation';
+export type { ComparablesOverride } from './ensemble-valuation';
 import { computeCalculationFingerprint } from './calculation-version';
 import { computeRegulatoryRisk, type RegulatoryRiskResult } from './regulatory-risk';
 import { computeGlobalRegulatoryRisk } from './global-regulatory-risk';
@@ -70,8 +71,9 @@ export interface FinancialModelResult {
   lifecycleExtensions: LifecycleExtensionResult;
   competitiveDynamics: CompetitiveDynamicsResult;
   realOptions: RealOptionsResult;
-  /** Tier 3 Item 7: blended valuation across rNPV / comparables / real options */
-  ensemble: EnsembleResult;
+  /** Tier 3 Item 7: blended valuation across rNPV / comparables / real options.
+   *  `comparablesSource === 'custom'` when the user's comp set drove Method 2. */
+  ensemble: EnsembleResultWithSource;
   /** Deterministic fingerprint for full model reproducibility (inputs + engine version) */
   calculationFingerprint?: string;
 
@@ -291,6 +293,12 @@ export function runFinancialModel(
   result: CalculationResult,
   epidemiologyDataset?: Record<string, { prevalencePerMillion: number; incidencePerMillion: number; diagnosedPercent: number; treatedPercent: number; drugEligiblePercent: number; annualCostOfTherapy: number; peakSalesRangeM?: { low: number; median: number; high: number }; sources: string[] }>,
   pipelineData?: import('./advanced-upgrades').PipelineIntelligence,
+  /**
+   * User-curated comp set from the Comparable Transactions panel. When present
+   * (and it has ≥ 3 disclosed comps) the ensemble's comparable-transactions
+   * method uses it instead of its own TA + modality + phase ±1 filter.
+   */
+  comparablesOverride?: ComparablesOverride | null,
 ): FinancialModelResult {
   // Step 1: Market size estimation (if epi data available)
   let marketSize: MarketSizeEstimate | null = null;
@@ -370,7 +378,7 @@ export function runFinancialModel(
   // Step 11: Ensemble Valuation (Tier 3 Item 7) — inverse-variance blend of
   // rNPV + comparable transactions + real options. Surfaces a single headline
   // number that is robust to method-specific bias.
-  const ensemble = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, rnpvInput);
+  const ensemble = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, rnpvInput, undefined, comparablesOverride);
 
   // Layer 2: Cross-engine consistency checks — logs to Sentry, never throws.
   try {

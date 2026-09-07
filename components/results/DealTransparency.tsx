@@ -7,6 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import type { CalculationInput } from '@/lib/calculations';
 import type { UserTier } from '@/types/tier';
 import DealDetailModal from './DealDetailModal';
+import { relaxationLabel, type CompRelaxation } from '@/lib/comparable-scoring';
 
 interface TransparencyDeal {
   id: string;
@@ -35,9 +36,23 @@ interface TransparencyDeal {
   indication_category?: string | null;
   raw_text_excerpt?: string | null;
   url_status?: 'alive' | 'dead' | 'unknown' | null;
+  match_score?: number;
+  /** Approved-stage M&A included only via the explicit toggle. */
+  approved_stage_ma?: boolean;
 }
 
-interface Stats { min: number; p25: number; median: number; p75: number; max: number }
+interface Stats {
+  min: number;
+  /** Outlier-capped bar bounds — bar renders p5–p95, true min/max in tooltip. */
+  p5?: number;
+  p25: number;
+  median: number;
+  p75: number;
+  p95?: number;
+  max: number;
+  /** Number of disclosed values behind the stat. */
+  n?: number;
+}
 
 interface QuarterlyTrend { label: string; quarter: string; year: number; medianUpfront: number | null; dealCount: number }
 
@@ -57,6 +72,12 @@ interface TransparencyResponse {
   exactCount: number;
   strongCount: number;
   withTermsCount: number;
+  /** Deals in the comp pool the stats are computed from. */
+  poolCount?: number;
+  relaxation?: CompRelaxation;
+  /** Approved-stage M&A deals in this TA (excluded unless includeApprovedMA). */
+  excludedApprovedMA?: number;
+  includeApprovedMA?: boolean;
   stats: { upfront: Stats | null; totalValue: Stats | null; royalty: Stats | null };
   confidence: ConfidenceData;
   quarterlyTrend: QuarterlyTrend[];
@@ -114,29 +135,37 @@ function valueColor(v: number | null, median: number | null): string {
   return 'text-slate-200';
 }
 
-function StatBar({ label, stats }: { label: string; stats: Stats | null }) {
+function StatBar({ label, stats, fmt = fmtM }: { label: string; stats: Stats | null; fmt?: (v: number) => string }) {
   if (!stats) return null;
+  // Bar spans p5–p95 so a single $74B outlier cannot flatten the IQR band.
+  const lo = stats.p5 ?? stats.min;
+  const hi = stats.p95 ?? stats.max;
+  const span = hi - lo;
+  const pos = (v: number) => (span > 0 ? Math.max(0, Math.min(100, ((v - lo) / span) * 100)) : 50);
+  const capped = lo > stats.min || hi < stats.max;
+  const tooltip = `${label}: true range ${fmt(stats.min)} – ${fmt(stats.max)}${capped ? ' · bar shows p5–p95' : ''}${stats.n != null ? ` · n = ${stats.n} disclosed` : ''}`;
   return (
-    <div className="flex items-center gap-3 text-xs">
+    <div className="flex items-center gap-3 text-xs" title={tooltip}>
       <span className="text-slate-500 w-20 flex-shrink-0">{label}</span>
       <div className="flex-1 flex items-center gap-1 font-mono">
-        <span className="text-slate-500">{fmtM(stats.min)}</span>
+        <span className="text-slate-500" title={capped ? `p5 (min ${fmt(stats.min)})` : 'min'}>{fmt(lo)}</span>
         <div className="flex-1 h-1.5 bg-slate-700 rounded-full relative mx-1">
           <div
             className="absolute h-full bg-gradient-to-r from-teal-600 to-teal-400 rounded-full"
             style={{
-              left: `${stats.max > stats.min ? ((stats.p25 - stats.min) / (stats.max - stats.min)) * 100 : 0}%`,
-              width: `${stats.max > stats.min ? ((stats.p75 - stats.p25) / (stats.max - stats.min)) * 100 : 100}%`,
+              left: `${span > 0 ? pos(stats.p25) : 0}%`,
+              width: `${span > 0 ? Math.max(0, pos(stats.p75) - pos(stats.p25)) : 100}%`,
             }}
           />
           <div
             className="absolute w-0.5 h-3 -top-[3px] bg-white rounded-full"
-            style={{ left: `${stats.max > stats.min ? ((stats.median - stats.min) / (stats.max - stats.min)) * 100 : 50}%` }}
+            style={{ left: `${pos(stats.median)}%` }}
           />
         </div>
-        <span className="text-slate-500">{fmtM(stats.max)}</span>
+        <span className="text-slate-500" title={capped ? `p95 (max ${fmt(stats.max)})` : 'max'}>{fmt(hi)}</span>
       </div>
-      <span className="text-teal-400 font-semibold font-mono w-16 text-right">{fmtM(stats.median)}</span>
+      <span className="text-teal-400 font-semibold font-mono w-16 text-right">{fmt(stats.median)}</span>
+      <span className="text-slate-600 font-mono w-10 text-right text-[10px]">{stats.n != null ? `n=${stats.n}` : ''}</span>
     </div>
   );
 }
@@ -162,6 +191,9 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
   const [yearFilter, setYearFilter] = useState<'all' | '3y' | '5y'>('all');
   const [matchFilter, setMatchFilter] = useState<'all' | 'exact' | 'strong'>('all');
   const [sortKey, setSortKey] = useState<'relevance' | 'year' | 'upfront' | 'total'>('relevance');
+  // Task 2: approved-stage acquisitions/mergers are excluded from pre-approval
+  // comp pools and stat bars by default; this toggle opts them back in.
+  const [includeApprovedMA, setIncludeApprovedMA] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -170,13 +202,15 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
       const params = new URLSearchParams({ ta: inputs.therapeuticArea || '', phase: inputs.phase || '', modality: inputs.modality || '' });
       if (inputs.dealType) params.set('dealType', inputs.dealType);
       if (inputs.territory) params.set('territory', inputs.territory);
+      if (inputs.indication) params.set('indication', inputs.indication);
+      if (includeApprovedMA) params.set('includeApprovedMA', 'true');
       if (user?.email) params.set('email', user.email);
       const res = await fetch(`/api/deals/transparency?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       setData(await res.json());
     } catch { setError('Unable to load deal data'); }
     finally { setLoading(false); }
-  }, [inputs, user?.email]);
+  }, [inputs, user?.email, includeApprovedMA]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -246,6 +280,12 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
     : 'text-slate-400 bg-slate-500/10 border-slate-500/20';
 
   const rawMedian = data.stats.upfront?.median ?? null;
+  const rawMedianN = data.stats.upfront?.n ?? null;
+  const poolCount = data.poolCount ?? data.totalCount;
+  const nUpfront = data.stats.upfront?.n ?? 0;
+  const nTotal = data.stats.totalValue?.n ?? 0;
+  const relaxNote = relaxationLabel(data.relaxation);
+  const isPreApprovalQuery = inputs.phase !== 'approved';
   const calcM = calculationMedian != null ? calculationMedian : null;
   const deltaAbs = rawMedian != null && calcM != null ? calcM - rawMedian : null;
   const deltaPct = rawMedian != null && calcM != null && rawMedian > 0 ? ((calcM - rawMedian) / rawMedian) * 100 : null;
@@ -273,6 +313,9 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
               <p className="text-xs text-slate-400">
                 {data.exactCount} exact · {data.strongCount} strong · {data.withTermsCount} with disclosed terms
               </p>
+              {relaxNote && (
+                <p className="text-[11px] text-amber-400 mt-0.5">{relaxNote}</p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -315,6 +358,7 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
             <div>
               <span className="text-slate-500">Raw data median: </span>
               <span className="text-white font-mono font-semibold">{fmtM(rawMedian)}</span>
+              {rawMedianN != null && <span className="text-slate-500 ml-1">(n = {rawMedianN} with disclosed upfront)</span>}
             </div>
             {deltaPct != null && (
               <div className={`ml-auto font-mono font-semibold ${Math.abs(deltaPct) <= 15 ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -327,11 +371,27 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
           </div>
         )}
 
-        {/* Statistical Summary */}
+        {/* Statistical Summary — bars span p5–p95; hover for true min/max */}
         <div className="space-y-2 mt-3">
           <StatBar label="Upfront" stats={data.stats.upfront} />
           <StatBar label="Total Value" stats={data.stats.totalValue} />
-          <StatBar label="Royalty %" stats={data.stats.royalty} />
+          <StatBar label="Royalty %" stats={data.stats.royalty} fmt={v => `${v.toFixed(1)}%`} />
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500 pt-1">
+            <span>
+              n = {poolCount} in pool · {nUpfront} with disclosed upfront · {nTotal} with disclosed total · bars show p5–p95 (hover for true range)
+            </span>
+            {isPreApprovalQuery && ((data.excludedApprovedMA ?? 0) > 0 || includeApprovedMA) && (
+              <label className="inline-flex items-center gap-1.5 cursor-pointer select-none text-slate-400 hover:text-slate-200">
+                <input
+                  type="checkbox"
+                  className="accent-teal-500 w-3 h-3"
+                  checked={includeApprovedMA}
+                  onChange={e => setIncludeApprovedMA(e.target.checked)}
+                />
+                Include approved-stage M&amp;A ({data.excludedApprovedMA ?? 0})
+              </label>
+            )}
+          </div>
         </div>
       </div>
 
@@ -445,7 +505,12 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
                         <span className="text-slate-300">{deal.licensee_name || '?'}</span>
                       </td>
                       <td className="px-3 py-3 text-slate-400 max-w-[150px] truncate">{deal.asset_name || '—'}</td>
-                      <td className="px-3 py-3 text-slate-400">{fmtPhase(deal.phase_at_signing)}</td>
+                      <td className="px-3 py-3 text-slate-400">
+                        {fmtPhase(deal.phase_at_signing)}
+                        {deal.approved_stage_ma && (
+                          <span className="ml-1.5 px-1.5 py-px text-[9px] font-semibold rounded border border-rose-500/30 bg-rose-500/10 text-rose-300" title="Approved-stage acquisition — included via toggle">M&amp;A</span>
+                        )}
+                      </td>
                       <td className={`px-3 py-3 text-right font-mono font-medium ${valueColor(deal.upfront_usd, data.stats.upfront?.median ?? null)}`}>
                         {fmtUsd(deal.upfront_usd)}
                       </td>
@@ -490,7 +555,9 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
               </p>
               <p className="text-[11px] text-slate-600">
                 Median upfront: <span className="text-teal-400 font-mono">{data.stats.upfront ? fmtM(data.stats.upfront.median) : '—'}</span>
+                <span className="text-slate-600"> (n = {nUpfront})</span>
                 {' · '}Median total: <span className="text-teal-400 font-mono">{data.stats.totalValue ? fmtM(data.stats.totalValue.median) : '—'}</span>
+                <span className="text-slate-600"> (n = {nTotal})</span>
               </p>
             </div>
           )}

@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
 import type { UserTier } from '@/types/tier';
 import { BUYER_TIER_LABELS, BUYER_TIER_COLORS } from '@/lib/buyer-tier';
+import { relaxationLabel, type CompRelaxation } from '@/lib/comparable-scoring';
+import type { ComparablesOverride } from '@/lib/financial/ensemble-valuation';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,21 +29,39 @@ interface EnrichedDeal {
   dealType: string | null;
   territory: string | null;
   buyerTier: string | null;
+  confidenceScore?: number | null;
+  verificationStatus?: string | null;
+  sourceUrl?: string | null;
+  sourceType?: string | null;
+  provenanceTier?: string | null;
   matchScore: number;
-  matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; indication: boolean; recency: number };
+  matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; adjacentPhase?: boolean; indication: boolean; dealType?: boolean; recency: number };
   relevanceReasons: string[];
 }
 
 interface BenchmarkRange {
   upfront: { p25: number; median: number; p75: number };
   totalValue: { p25: number; median: number; p75: number };
+  /** Deals in the set (shown). */
   n: number;
+  /** Deals with a disclosed upfront — the upfront range is computed from these. */
+  nUpfront?: number;
+  /** Deals with a disclosed total value — the total range is computed from these. */
+  nTotal?: number;
 }
 
 interface ComparableDealsProps {
   inputs: CalculationInput;
   tier: UserTier;
   onBuyReport?: () => void;
+  /**
+   * Fires with the user's custom comp set whenever it changes (null when the
+   * selection is reset to the full market set). Results.tsx feeds this into
+   * runFinancialModel so the ensemble's comparable-transactions method uses it.
+   */
+  onSelectionChange?: (selected: ComparablesOverride | null) => void;
+  /** Ids to restore as the active custom set after a remount (tab switch). */
+  initialSelectedIds?: string[] | null;
 }
 
 type RecencyFilter = 'all' | '24mo' | '12mo';
@@ -62,6 +82,36 @@ function fmtM(val: number): string {
   return `$${Math.round(val)}M`;
 }
 
+/** Small per-row data-quality badge: Verified / Confidence NN / Source link. */
+function ProvenanceBadge({ deal }: { deal: EnrichedDeal }) {
+  const verified = deal.verificationStatus === 'verified' || (deal.confidenceScore != null && deal.confidenceScore >= 85);
+  const srcLabel = deal.sourceType === 'sec_8k' ? 'SEC' : deal.sourceType === 'sec_10k' ? '10-K' : deal.sourceType === 'press_release' ? 'PR' : 'Source';
+  const tier = deal.provenanceTier ? `Tier ${deal.provenanceTier}` : null;
+  return (
+    <span className="inline-flex items-center gap-1 flex-wrap">
+      {verified ? (
+        <span className="text-[10px] px-1 py-px rounded bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 font-medium" title={tier ? `Verified · ${tier}` : 'Verified'}>Verified</span>
+      ) : deal.confidenceScore != null ? (
+        <span className="text-[10px] px-1 py-px rounded bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300" title={tier ? `Extraction confidence · ${tier}` : 'Extraction confidence'}>Confidence {deal.confidenceScore}</span>
+      ) : (
+        <span className="text-[10px] px-1 py-px rounded bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-300" title="Not yet verified">Unverified</span>
+      )}
+      {deal.sourceUrl && (
+        <a
+          href={deal.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="text-[10px] text-teal-600 dark:text-teal-400 underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300"
+          title="Open source document"
+        >
+          {srcLabel}
+        </a>
+      )}
+    </span>
+  );
+}
+
 function computeBenchmark(deals: EnrichedDeal[], selectedIds: Set<string>): BenchmarkRange | null {
   const selected = deals.filter(d => selectedIds.has(d.id));
   const upfrontPairs = selected
@@ -75,6 +125,8 @@ function computeBenchmark(deals: EnrichedDeal[], selectedIds: Set<string>): Benc
     upfront: { p25: weightedQuantile(upfrontPairs, 0.25), median: weightedQuantile(upfrontPairs, 0.5), p75: weightedQuantile(upfrontPairs, 0.75) },
     totalValue: { p25: weightedQuantile(totalPairs, 0.25), median: weightedQuantile(totalPairs, 0.5), p75: weightedQuantile(totalPairs, 0.75) },
     n: selected.length,
+    nUpfront: upfrontPairs.length,
+    nTotal: totalPairs.length,
   };
 }
 
@@ -225,11 +277,19 @@ function FilterSelect({
 const MIN_COMPS = 3;
 const FREE_DEAL_LIMIT = 3;
 
-export default function ComparableDeals({ inputs, tier, onBuyReport }: ComparableDealsProps) {
+export default function ComparableDeals({ inputs, tier, onBuyReport, onSelectionChange, initialSelectedIds }: ComparableDealsProps) {
   const [deals, setDeals] = useState<EnrichedDeal[]>([]);
   const [fullBenchmark, setFullBenchmark] = useState<BenchmarkRange | null>(null);
   const [totalAvailable, setTotalAvailable] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [relaxation, setRelaxation] = useState<CompRelaxation>('none');
+  const [excludedApprovedMA, setExcludedApprovedMA] = useState(0);
+
+  // Refs so the fetch effect and the selection effect never re-fire on prop identity changes
+  const initialSelectedIdsRef = useRef<string[] | null | undefined>(initialSelectedIds);
+  initialSelectedIdsRef.current = initialSelectedIds;
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
 
   // Interaction state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -258,14 +318,25 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
     fetch(`/api/deals/comparable?${params}`)
       .then(res => res.json())
       .then(data => {
-        const d = data.deals || [];
+        const d: EnrichedDeal[] = data.deals || [];
         setDeals(d);
         setTotalAvailable(data.totalAvailable || d.length);
         setFullBenchmark(data.benchmarkRange || null);
-        setSelectedIds(new Set(d.map((deal: EnrichedDeal) => deal.id)));
-        setSelectionActive(false);
+        setRelaxation((data.relaxation as CompRelaxation) || 'none');
+        setExcludedApprovedMA(data.excludedApprovedMA || 0);
+        // Restore a custom set carried by the parent (survives tab switches);
+        // otherwise start from the full market set.
+        const ids = new Set(d.map(deal => deal.id));
+        const restore = initialSelectedIdsRef.current;
+        if (restore && restore.length >= MIN_COMPS && restore.every(id => ids.has(id))) {
+          setSelectedIds(new Set(restore));
+          setSelectionActive(true);
+        } else {
+          setSelectedIds(ids);
+          setSelectionActive(false);
+        }
       })
-      .catch(() => { setDeals([]); setTotalAvailable(0); setFullBenchmark(null); })
+      .catch(() => { setDeals([]); setTotalAvailable(0); setFullBenchmark(null); setRelaxation('none'); setExcludedApprovedMA(0); })
       .finally(() => setLoading(false));
   }, [inputs.therapeuticArea, inputs.modality, inputs.indication, inputs.phase, inputs.dealType]);
 
@@ -321,6 +392,21 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
     return computeBenchmark(deals, selectedIds);
   }, [deals, selectedIds, selectionActive, fullBenchmark]);
 
+  // Lift the custom comp set to the parent so it can drive the ensemble.
+  useEffect(() => {
+    const cb = onSelectionChangeRef.current;
+    if (!cb) return;
+    if (!selectionActive || !selectedBenchmark || selectedIds.size < MIN_COMPS) { cb(null); return; }
+    const selected = deals.filter(d => selectedIds.has(d.id));
+    cb({
+      ids: selected.map(d => d.id),
+      upfront: selectedBenchmark.upfront,
+      totalValue: selectedBenchmark.totalValue,
+      n: selected.length,
+      totalValuesM: selected.filter(d => d.totalValueM && d.totalValueM > 0).map(d => d.totalValueM!),
+    });
+  }, [selectionActive, selectedBenchmark, selectedIds, deals]);
+
   const deviationPct = useMemo(() => {
     if (!fullBenchmark || !selectedBenchmark || !selectionActive) return 0;
     if (fullBenchmark.upfront.median === 0) return 0;
@@ -367,7 +453,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
           </h3>
           {selectionActive && (
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 font-semibold border border-amber-200 dark:border-amber-800/30">
-              Custom comp set
+              Custom comp set{onSelectionChange && selectedIds.size >= MIN_COMPS ? ' · applied to ensemble' : ''}
             </span>
           )}
         </div>
@@ -385,8 +471,24 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
         )}
       </div>
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        {hasFullAccess ? 'Select deals to build your comp set. Benchmark range updates in real time.' : 'Recent deals with similar characteristics'}
+        {hasFullAccess ? 'Select deals to build your comp set. Benchmark range and the ensemble valuation update in real time.' : 'Recent deals with similar characteristics'}
       </p>
+
+      {/* Coverage notes: relaxation ladder + stage filter */}
+      {!loading && (relaxation !== 'none' || excludedApprovedMA > 0) && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+          {relaxation !== 'none' && (
+            <span className="px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/30 font-medium">
+              {relaxationLabel(relaxation)}
+            </span>
+          )}
+          {excludedApprovedMA > 0 && (
+            <span className="text-slate-500 dark:text-slate-400">
+              {excludedApprovedMA} approved-stage {excludedApprovedMA === 1 ? 'acquisition' : 'acquisitions'} excluded (not comparable to a pre-approval deal)
+            </span>
+          )}
+        </div>
+      )}
 
       {/* ── Distribution Charts ──────────────────────────────────────── */}
       {hasFullAccess && !loading && selectedBenchmark && (
@@ -396,7 +498,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
               {selectionActive ? 'Your Comp Set Distribution' : 'Market Distribution'}
             </p>
             <span className="text-[10px] text-slate-400 dark:text-slate-500">
-              n = {selectedBenchmark.n} · recency-weighted · teal dots = selected
+              n = {selectedBenchmark.n} shown · {selectedBenchmark.nUpfront ?? '—'} with disclosed upfront · {selectedBenchmark.nTotal ?? '—'} with disclosed total · recency-weighted
             </span>
           </div>
           <DealDistributionChart deals={deals} selectedIds={selectedIds} benchmark={selectedBenchmark} field="upfrontM" label="Upfront Payment Distribution" />
@@ -525,6 +627,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
                   {deal.matchBreakdown.ta && <span className="text-[10px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">TA</span>}
                   {deal.matchBreakdown.modality && <span className="text-[10px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Mod</span>}
                   {deal.matchBreakdown.phase && <span className="text-[10px] px-1 py-px rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300">Phase</span>}
+                  {deal.matchBreakdown.adjacentPhase && <span className="text-[10px] px-1 py-px rounded bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300">±1 Phase</span>}
                   {deal.matchBreakdown.indication && <span className="text-[10px] px-1 py-px rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300">Ind</span>}
                   {deal.buyerTier && BUYER_TIER_LABELS[deal.buyerTier as keyof typeof BUYER_TIER_LABELS] && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${BUYER_TIER_COLORS[deal.buyerTier as keyof typeof BUYER_TIER_COLORS] || ''}`}>
@@ -533,6 +636,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
                   )}
                   {deal.phase && <span className="text-[10px] text-slate-400 dark:text-slate-500">{deal.phase}</span>}
                   {deal.modality && <span className="text-[10px] text-slate-400 dark:text-slate-500">· {deal.modality}</span>}
+                  <ProvenanceBadge deal={deal} />
                 </div>
               </div>
 
@@ -544,7 +648,7 @@ export default function ComparableDeals({ inputs, tier, onBuyReport }: Comparabl
                 {deal.upfront ? (
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 font-mono tabular-nums">{deal.upfront}</span>
                 ) : (
-                  <span className="text-xs text-slate-400 dark:text-slate-600">—</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 italic" title="Upfront not disclosed — shown but excluded from the upfront range">Undisclosed</span>
                 )}
               </div>
 

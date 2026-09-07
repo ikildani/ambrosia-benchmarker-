@@ -40,6 +40,37 @@ import type {
 import type { RealOptionsResult } from './advanced-upgrades';
 import { COMPARABLE_DEALS, type ComparableDeal } from '@/lib/comparableDeals';
 import { normalizePhaseForDB, phaseWindowDB } from './deal-type-normalization';
+import { shouldExcludeForStage } from '@/lib/comparable-scoring';
+
+// ---------------------------------------------------------------------------
+// Custom comp-set override (lifted from components/ComparableDeals.tsx)
+// ---------------------------------------------------------------------------
+
+/**
+ * A user-curated comparable set. When supplied, Method 2 uses this set
+ * instead of its own TA + modality + phase ±1 filter. The same "< 3 comps →
+ * method dropped" rule applies (measured on disclosed total values).
+ */
+export interface ComparablesOverride {
+  /** Deal ids selected in the Comparable Transactions panel. */
+  ids: string[];
+  /** Recency-weighted upfront quantiles ($M). */
+  upfront: { p25: number; median: number; p75: number };
+  /** Recency-weighted total-deal-value quantiles ($M). */
+  totalValue: { p25: number; median: number; p75: number };
+  /** Number of deals selected (shown). */
+  n: number;
+  /** Disclosed total values ($M) of the selected deals — exact sample variance when present. */
+  totalValuesM?: number[];
+}
+
+/** EnsembleResult plus provenance of the comparable-transactions method. */
+export interface EnsembleResultWithSource extends EnsembleResult {
+  /** 'custom' when the user's comp set drove Method 2, otherwise 'auto'. */
+  comparablesSource: 'auto' | 'custom';
+  /** Disclosed-comp count behind Method 2 when source is 'custom'. */
+  customCompCount?: number;
+}
 
 // ---------------------------------------------------------------------------
 // Tunable constants
@@ -68,6 +99,38 @@ interface ComparableMethodResult {
   sampleSize: number;
   widenLevel: 0 | 1 | 2;
   matchedDeals: ComparableDeal[];
+  source?: 'auto' | 'custom';
+}
+
+/** Minimum disclosed comps for a custom set to be used (else Method 2 is dropped). */
+const OVERRIDE_MIN_N = 3;
+
+/**
+ * Method 2 from a user-curated comp set. Variance is the sample variance of
+ * the disclosed total values when provided; otherwise it is inferred from the
+ * IQR under a normal approximation (σ ≈ IQR / 1.349).
+ */
+function computeOverrideMethod(override: ComparablesOverride): ComparableMethodResult {
+  const values = (override.totalValuesM ?? []).filter(v => Number.isFinite(v) && v > 0).sort((a, b) => a - b);
+  const effectiveN = override.totalValuesM ? values.length : override.n;
+  if (effectiveN < OVERRIDE_MIN_N || !(override.totalValue.median > 0)) {
+    return { value: 0, variance: Number.POSITIVE_INFINITY, sampleSize: effectiveN, widenLevel: 0, matchedDeals: [], source: 'custom' };
+  }
+  let variance: number;
+  if (values.length >= 2) {
+    variance = sampleVariance(values);
+  } else {
+    const iqr = Math.max(override.totalValue.p75 - override.totalValue.p25, 0);
+    variance = (iqr / 1.349) ** 2;
+  }
+  return {
+    value: override.totalValue.median,
+    variance: Math.max(variance, MIN_VARIANCE),
+    sampleSize: effectiveN,
+    widenLevel: 0,
+    matchedDeals: [],
+    source: 'custom',
+  };
 }
 
 /**
@@ -110,9 +173,10 @@ function computeComparableMethod(
     return d.modalities.includes(targetModality);
   };
 
-  /** Has a usable totalValueM. */
+  /** Has a usable totalValueM and is not approved-stage M&A for a pre-approval target. */
   const hasValue = (d: ComparableDeal): boolean =>
-    typeof d.totalValueM === 'number' && Number.isFinite(d.totalValueM) && d.totalValueM > 0;
+    typeof d.totalValueM === 'number' && Number.isFinite(d.totalValueM) && d.totalValueM > 0
+    && !shouldExcludeForStage(rnpvInput.phase, d.phase, d.dealType);
 
   // Level 0: TA + modality + phase ±1
   const level0 = comparableDeals.filter(
@@ -259,6 +323,7 @@ function inverseVarianceWeights(variances: number[]): number[] {
  * @param realOptions   - Result from `calculateRealOptions(rnpvInput, rnpv, monteCarlo)`
  * @param rnpvInput     - The original `RNPVInput` (used for comparable filter)
  * @param comparableDeals - Comparable deal universe (defaults to COMPARABLE_DEALS)
+ * @param comparablesOverride - Optional user-curated comp set; replaces the auto filter for Method 2
  * @returns EnsembleResult with the blended value, per-method weights, and narrative
  */
 export function calculateEnsembleValuation(
@@ -267,7 +332,8 @@ export function calculateEnsembleValuation(
   realOptions: RealOptionsResult,
   rnpvInput: RNPVInput,
   comparableDeals: ComparableDeal[] = COMPARABLE_DEALS,
-): EnsembleResult {
+  comparablesOverride?: ComparablesOverride | null,
+): EnsembleResultWithSource {
   // ── 1. Compute each method's central value ──
   // For rNPV we use the implied total deal value (not raw NPV) so all three
   // methods are denominated in the same units ($M of deal value).
@@ -275,8 +341,11 @@ export function calculateEnsembleValuation(
     ?? rnpv.riskAdjustedNPV;
   const realOptionsValue = realOptions.totalOptionValue;
 
-  const compResult = computeComparableMethod(rnpvInput, comparableDeals);
+  const compResult = comparablesOverride
+    ? computeOverrideMethod(comparablesOverride)
+    : computeComparableMethod(rnpvInput, comparableDeals);
   const compValue = compResult.value;
+  const isCustom = compResult.source === 'custom';
 
   // ── 2. Compute each method's variance ──
   const rnpvVariance = computeRnpvVariance(rnpv, monteCarlo);
@@ -324,7 +393,11 @@ export function calculateEnsembleValuation(
           : compResult.widenLevel === 1 ? 'medium'
             : 'low',
       rationale:
-        compResult.matchedDeals.length === 0
+        isCustom
+          ? (Number.isFinite(compResult.variance)
+              ? `Median of your custom comp set (${compResult.sampleSize} deals with disclosed total value). Variance is the sample variance of the selected deals.`
+              : `Your custom comp set has fewer than ${OVERRIDE_MIN_N} deals with disclosed total value. This method excluded from the blend.`)
+        : compResult.matchedDeals.length === 0
           ? `No comparable deals found for ${rnpvInput.therapeuticArea} / ${rnpvInput.modality} / ${rnpvInput.phase}. This method excluded from the blend.`
           : `Median of ${compResult.sampleSize} disclosed deals${
               compResult.widenLevel === 0
@@ -374,6 +447,8 @@ export function calculateEnsembleValuation(
     agreement,
     fallbackUsed,
     narrative,
+    comparablesSource: isCustom ? 'custom' : 'auto',
+    customCompCount: isCustom ? compResult.sampleSize : undefined,
   };
 }
 
@@ -414,6 +489,7 @@ function formatM(value: number): string {
 /** @internal exposed only for unit tests */
 export const __test = {
   computeComparableMethod,
+  computeOverrideMethod,
   computeRnpvVariance,
   computeRealOptionsVariance,
   inverseVarianceWeights,

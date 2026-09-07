@@ -11,11 +11,21 @@
 import { EXTENDED_COMPARABLE_DEALS } from '@/data/comparable-deals-extended';
 import { SUPABASE_COMPARABLE_DEALS } from '@/data/comparable-deals-supabase';
 import { classifyDealStructure, type DealStructure } from '@/lib/financial/deal-structure-classifier';
+import {
+  scoreCompMatch,
+  selectWithRelaxation,
+  shouldExcludeForStage,
+  COMP_MATCH_WEIGHTS,
+  COMP_MAX_SCORE,
+  type CompRelaxation,
+} from '@/lib/comparable-scoring';
 
 export interface PeerBenchmarkInput {
   therapeuticArea?: string;
   phase?: string;
   modality?: string;
+  /** Indication slug (e.g. 'pancreatic'). Scores +3 when the corpus deal matches. */
+  indication?: string;
   /** Candidate deal's upfront ($M) — the point we're benchmarking */
   candidateUpfront_M?: number;
   /** Candidate total deal value ($M). */
@@ -95,6 +105,14 @@ export interface ComparableDealForUI {
   verified: boolean;
 }
 
+export interface ClosestComparablesResult {
+  deals: ComparableDealForUI[];
+  /** Which rung of the relaxation ladder produced the pool. */
+  relaxation: CompRelaxation;
+  /** Approved-stage M&A rows dropped because the candidate is pre-approval. */
+  excludedApprovedMA: number;
+}
+
 let cachedCorpus: MinimalDeal[] | null = null;
 
 function combinedCorpus(): MinimalDeal[] {
@@ -146,21 +164,23 @@ function combinedCorpus(): MinimalDeal[] {
  * this returns actual deal rows with full metadata so the calculator
  * results page can show named comparables the BD user can verify.
  *
- * Match ranking scores each corpus deal on:
- *   TA match      : 1.0 (required — hard filter)
- *   Phase match   : 0.3  (exact), 0.15 (±1 phase), 0.0 otherwise
- *   Modality match: 0.3  (exact), 0.15 (same family), 0.0 otherwise
- *   Structure match: 0.2 (when candidate structure supplied)
- *   Recency       : 0.2 × (deal year - 2015) / 11  (favors recent)
+ * Ranking uses the shared weight table in lib/comparable-scoring.ts
+ * (TA 3 · same phase 4 · adjacent phase 2 · modality 3 · indication 3 ·
+ * deal type 2 · recency 2, max 17). A modality-family match earns half the
+ * modality weight; a deal-structure match earns half the deal-type weight
+ * when the exact deal type does not match. matchScore = score / 17.
  *
- * Max score = 1.0 (perfect TA + phase + modality + structure + recency).
+ * Pass rule: TA + one of {same phase, adjacent phase, indication}; relaxes
+ * to TA + modality, then TA only, when fewer than 5 deals pass. Approved-stage
+ * acquisitions are excluded for pre-approval candidates.
+ *
  * Ties broken by recency then by |candidate.upfront - comp.upfront|.
  */
-export function getClosestComparables(
+export function getClosestComparablesWithMeta(
   input: PeerBenchmarkInput & { limit?: number },
-): ComparableDealForUI[] {
+): ClosestComparablesResult {
   const corpus = combinedCorpus();
-  if (!input.therapeuticArea) return [];
+  if (!input.therapeuticArea) return { deals: [], relaxation: 'none', excludedApprovedMA: 0 };
   const limit = input.limit ?? 8;
 
   const FAMILY: Record<string, string[]> = {
@@ -177,56 +197,39 @@ export function getClosestComparables(
     return false;
   }
 
-  const phaseOrder = ['preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'approved'];
-  function phaseDistance(a: string, b: string): number {
-    const ia = phaseOrder.indexOf(a);
-    const ib = phaseOrder.indexOf(b);
-    if (ia < 0 || ib < 0) return Infinity;
-    return Math.abs(ia - ib);
-  }
-
-  const matches = corpus
+  let excludedApprovedMA = 0;
+  const scored = corpus
     .filter(d => d.therapeuticArea === input.therapeuticArea)
-    .map(d => {
-      let score = 0;
-      const reasons: string[] = ['same TA'];
-
-      // Phase
-      if (input.phase) {
-        const dist = phaseDistance(d.phase, input.phase);
-        if (dist === 0) {
-          score += 0.3;
-          reasons.push('exact phase');
-        } else if (dist === 1) {
-          score += 0.15;
-          reasons.push('±1 phase');
-        }
-      }
-
-      // Modality
-      if (input.modality) {
-        if (d.modality === input.modality) {
-          score += 0.3;
-          reasons.push('exact modality');
-        } else if (sameFamily(d.modality, input.modality)) {
-          score += 0.15;
-          reasons.push('same modality family');
-        }
-      }
-
-      // Structure
-      if (input.dealStructure && d.structure === input.dealStructure) {
-        score += 0.2;
-        reasons.push('same deal structure');
-      }
-
-      // Recency
-      const years = 11; // 2015-2026 window
-      const normalizedRecency = Math.max(0, Math.min(1, (d.year - 2015) / years));
-      score += 0.2 * normalizedRecency;
-
-      return { deal: d, score, reasons };
+    .filter(d => {
+      if (shouldExcludeForStage(input.phase, d.phase, d.dealType)) { excludedApprovedMA++; return false; }
+      return true;
     })
+    .map(d => {
+      const r = scoreCompMatch(
+        { therapeuticArea: input.therapeuticArea, phase: input.phase, modality: input.modality, indication: input.indication, dealType: input.dealType },
+        { therapeuticArea: d.therapeuticArea, phase: d.phase, modalities: [d.modality], indications: [d.indication], dealType: d.dealType, year: d.year },
+        { recency: 'continuous' },
+      );
+      let score = r.score;
+      const reasons = [...r.reasons];
+
+      // Partial credit: same modality family (half weight)
+      if (input.modality && !r.breakdown.modality && sameFamily(d.modality, input.modality)) {
+        score += COMP_MATCH_WEIGHTS.modality / 2;
+        reasons.push('Same modality family');
+      }
+      // Partial credit: same deal structure when deal type itself differs (half weight)
+      if (input.dealStructure && !r.breakdown.dealType && d.structure === input.dealStructure) {
+        score += COMP_MATCH_WEIGHTS.dealType / 2;
+        reasons.push('Same deal structure');
+      }
+
+      return { deal: d, score, breakdown: r.breakdown, reasons };
+    });
+
+  const { items, relaxation } = selectWithRelaxation(scored, s => s.breakdown);
+
+  const matches = items
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       if (b.deal.year !== a.deal.year) return b.deal.year - a.deal.year;
@@ -240,7 +243,7 @@ export function getClosestComparables(
     })
     .slice(0, limit);
 
-  return matches.map(m => ({
+  const deals = matches.map(m => ({
     licensor: m.deal.licensor,
     licensee: m.deal.licensee,
     year: m.deal.year,
@@ -253,10 +256,19 @@ export function getClosestComparables(
     totalDealValueM: m.deal.totalDealValue,
     headline: m.deal.headline,
     sourceUrl: m.deal.sourceUrl,
-    matchScore: Math.round(m.score * 100) / 100,
+    matchScore: Math.round(Math.min(m.score / COMP_MAX_SCORE, 1) * 100) / 100,
     matchReason: m.reasons.join(' · '),
     verified: m.deal.verified,
   }));
+
+  return { deals, relaxation, excludedApprovedMA };
+}
+
+/** Array-only convenience wrapper around getClosestComparablesWithMeta. */
+export function getClosestComparables(
+  input: PeerBenchmarkInput & { limit?: number },
+): ComparableDealForUI[] {
+  return getClosestComparablesWithMeta(input).deals;
 }
 
 function percentile(sorted: number[], p: number): number {
@@ -378,7 +390,8 @@ const MIN_POOL_FOR_TA = 5;
  *   4. global: full corpus
  */
 export function computePeerBenchmark(input: PeerBenchmarkInput): PeerBenchmarkResult {
-  const corpus = combinedCorpus();
+  // Stage sanity: approved-stage M&A is not a peer for a pre-approval candidate.
+  const corpus = combinedCorpus().filter(d => !shouldExcludeForStage(input.phase, d.phase, d.dealType));
 
   // Try strict — including dealStructure match when supplied. If the
   // same-structure pool is too small, we drop the structure filter

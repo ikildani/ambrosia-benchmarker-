@@ -11,6 +11,13 @@ import {
 } from '@/lib/comparableDeals';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
 import { classifyBuyerTier } from './buyer-tier';
+import {
+  scoreCompMatch,
+  selectWithRelaxation,
+  shouldExcludeForStage,
+  type CompRelaxation,
+  type CompMatchBreakdown,
+} from '@/lib/comparable-scoring';
 
 // Format dollar amount from raw USD number to display string
 function formatDealValue(usd: number | null): string | null {
@@ -32,14 +39,17 @@ export async function getRelevantDealsWithDB(
 
     const { data: dbDeals } = await supabase
       .from('deals')
-      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, asset_name, phase_at_signing')
+      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, asset_name, phase_at_signing, deal_type')
       .eq('terms_disclosed', true)
       .eq('is_synthetic', false)
+      .or('is_canonical.is.null,is_canonical.eq.true')
       .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+      // Filter on TA in SQL first so older exact-match comps are not crowded out by recency
+      .eq('therapeutic_area', therapeuticArea)
       .not('total_deal_value_usd', 'is', null)
       .gt('total_deal_value_usd', 0)
       .order('announced_date', { ascending: false })
-      .limit(200);
+      .limit(500);
 
     const mappedDbDeals: (ComparableDeal & { _source: 'db' })[] = (dbDeals || []).map(d => {
       const value = formatDealValue(d.total_deal_value_usd) || formatDealValue(d.upfront_usd) || 'Undisclosed';
@@ -55,6 +65,8 @@ export async function getRelevantDealsWithDB(
         modalities: d.modality ? [d.modality] : undefined,
         indications: [d.indication_category, d.indication_specific].filter(Boolean) as string[] | undefined,
         therapeuticArea: ta,
+        dealType: (d.deal_type as ComparableDeal['dealType']) || undefined,
+        phase: d.phase_at_signing || undefined,
         _source: 'db' as const,
       };
     });
@@ -69,19 +81,19 @@ export async function getRelevantDealsWithDB(
 
     const allDeals: ComparableDeal[] = [...COMPARABLE_DEALS, ...uniqueDbDeals];
 
-    const currentYear = new Date().getFullYear();
+    // Shared weight table (phase > modality). No phase is available on this
+    // legacy path, so the pass rule reduces to TA + indication, relaxing to
+    // TA + modality, then TA only.
     const scored = allDeals.map(deal => {
-      let score = 0;
-      if (deal.therapeuticArea === therapeuticArea || deal.therapeuticArea === 'both') score += 1;
-      if (modality && deal.modalities?.includes(modality)) score += 3;
-      if (indication && deal.indications?.includes(indication)) score += 3;
-      if (deal.year === currentYear) score += 2;
-      else if (deal.year === currentYear - 1) score += 1;
-      return { deal, score };
+      const r = scoreCompMatch(
+        { therapeuticArea, modality, indication },
+        { therapeuticArea: deal.therapeuticArea, secondaryTAs: deal.secondaryTAs, phase: deal.phase, modalities: deal.modalities, indications: deal.indications, dealType: deal.dealType, year: deal.year },
+      );
+      return { deal, score: r.score, breakdown: r.breakdown };
     });
 
-    return scored
-      .filter(s => s.score > 0)
+    const { items } = selectWithRelaxation(scored, s => s.breakdown);
+    return items
       .sort((a, b) => b.score - a.score)
       .slice(0, maxDeals)
       .map(s => s.deal);
@@ -101,39 +113,28 @@ export async function findComparableDealsWithDB(
 
     const { data: dbDeals } = await supabase
       .from('deals')
-      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing')
+      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type')
       .eq('terms_disclosed', true)
       .eq('is_synthetic', false)
+      .or('is_canonical.is.null,is_canonical.eq.true')
       .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+      // Filter on TA in SQL first so older exact-match comps are not crowded out by recency
+      .eq('therapeutic_area', inputs.therapeuticArea)
       .not('total_deal_value_usd', 'is', null)
       .gt('total_deal_value_usd', 0)
       .order('announced_date', { ascending: false })
-      .limit(200);
+      .limit(500);
 
     const dbScored = (dbDeals || []).map((d, idx) => {
-      let score = 0;
-      const reasons: string[] = [];
-      const ta = d.therapeutic_area || '';
-
-      if (ta === inputs.therapeuticArea || ta === 'both') {
-        score += 3;
-        reasons.push('Same therapeutic area');
-      }
-      if (inputs.modality && d.modality === inputs.modality) {
-        score += 4;
-        reasons.push('Same modality');
-      }
-      if (inputs.indication && (d.indication_category === inputs.indication || d.indication_specific === inputs.indication)) {
-        score += 3;
-        reasons.push('Same indication');
-      }
-
       const year = d.announced_date ? new Date(d.announced_date).getFullYear() : new Date().getFullYear();
-      const currentYear = new Date().getFullYear();
-      if (year === currentYear) { score += 2; reasons.push('Recent deal'); }
-      else if (year === currentYear - 1) { score += 1; }
+      const { score, breakdown, reasons } = scoreCompMatch(
+        { therapeuticArea: inputs.therapeuticArea, modality: inputs.modality, indication: inputs.indication, phase: inputs.phase },
+        { therapeuticArea: d.therapeutic_area, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], year },
+      );
 
       return {
+        breakdown,
+        dealType: d.deal_type as string | null,
         deal: {
           id: `db-${idx}`,
           parties: `${d.licensor_name || 'Unknown'} / ${d.licensee_name || 'Unknown'}`,
@@ -149,23 +150,14 @@ export async function findComparableDealsWithDB(
     });
 
     const staticScored = COMPARABLE_DEALS.map((deal, idx) => {
-      let score = 0;
-      const reasons: string[] = [];
-
-      if (deal.therapeuticArea === inputs.therapeuticArea || deal.therapeuticArea === 'both') {
-        score += 3;
-        reasons.push('Same therapeutic area');
-      }
-      if (inputs.modality && deal.modalities?.includes(inputs.modality)) {
-        score += 4;
-        reasons.push('Same modality');
-      }
-      if (inputs.indication && deal.indications?.includes(inputs.indication)) {
-        score += 3;
-        reasons.push('Same indication');
-      }
+      const { score, breakdown, reasons } = scoreCompMatch(
+        { therapeuticArea: inputs.therapeuticArea, modality: inputs.modality, indication: inputs.indication, phase: inputs.phase },
+        { therapeuticArea: deal.therapeuticArea, secondaryTAs: deal.secondaryTAs, phase: deal.phase, modalities: deal.modalities, indications: deal.indications, dealType: deal.dealType, year: deal.year },
+      );
 
       return {
+        breakdown,
+        dealType: deal.dealType ?? null,
         deal: {
           id: `deal-${idx}`,
           parties: `${deal.licensor} / ${deal.licensee}`,
@@ -181,9 +173,12 @@ export async function findComparableDealsWithDB(
     const staticKeys = new Set(staticScored.map(s => s.key));
     const uniqueDb = dbScored.filter(d => !staticKeys.has(d.key));
 
-    const all = [...staticScored, ...uniqueDb];
-    return all
-      .filter(s => s.score >= 2)
+    // Stage sanity: no approved-stage M&A in a pre-approval comp pool.
+    const all = [...staticScored, ...uniqueDb].filter(
+      s => !shouldExcludeForStage(inputs.phase, s.deal.phase, s.dealType),
+    );
+    const { items } = selectWithRelaxation(all, s => s.breakdown);
+    return items
       .sort((a, b) => b.score - a.score)
       .slice(0, maxDeals)
       .map(s => s.deal);
@@ -214,53 +209,110 @@ export interface EnrichedComparableDeal {
   licenseeCountry: string | null;
   crossBorder: boolean;
   dealCorridor: string | null;
+  // Per-row provenance so data quality is visible next to each comp
+  confidenceScore: number | null;
+  verificationStatus: string | null;
+  sourceUrl: string | null;
+  sourceType: string | null;
+  provenanceTier: string | null;
+  /** 0–1, score / COMP_MAX_SCORE */
   matchScore: number;
-  matchBreakdown: { ta: boolean; modality: boolean; phase: boolean; indication: boolean; recency: number };
+  matchBreakdown: CompMatchBreakdown;
   relevanceReasons: string[];
 }
 
 export interface ComparableBenchmarkRange {
   upfront: { p25: number; median: number; p75: number };
   totalValue: { p25: number; median: number; p75: number };
+  /** Deals in the comp set (shown). */
   n: number;
+  /** Deals with a disclosed upfront — the upfront range is computed from these. */
+  nUpfront: number;
+  /** Deals with a disclosed total value — the total range is computed from these. */
+  nTotal: number;
+}
+
+export interface EnrichedComparableResult {
+  deals: EnrichedComparableDeal[];
+  benchmarkRange: ComparableBenchmarkRange;
+  /** Which rung of the relaxation ladder produced this pool. */
+  relaxation: CompRelaxation;
+  /** Approved-stage M&A deals dropped because the query phase is pre-approval. */
+  excludedApprovedMA: number;
+}
+
+/** Recency-weighted p25 / median / p75 over disclosed values. */
+export function computeBenchmarkRange(
+  deals: Pick<EnrichedComparableDeal, 'upfrontM' | 'totalValueM' | 'year'>[],
+): ComparableBenchmarkRange {
+  const upfrontPairs = deals
+    .filter(d => d.upfrontM && d.upfrontM > 0)
+    .map(d => ({ value: d.upfrontM!, weight: recencyWeight(d.year) }));
+  const totalPairs = deals
+    .filter(d => d.totalValueM && d.totalValueM > 0)
+    .map(d => ({ value: d.totalValueM!, weight: recencyWeight(d.year) }));
+
+  return {
+    upfront: {
+      p25: weightedQuantile(upfrontPairs, 0.25),
+      median: weightedQuantile(upfrontPairs, 0.5),
+      p75: weightedQuantile(upfrontPairs, 0.75),
+    },
+    totalValue: {
+      p25: weightedQuantile(totalPairs, 0.25),
+      median: weightedQuantile(totalPairs, 0.5),
+      p75: weightedQuantile(totalPairs, 0.75),
+    },
+    n: deals.length,
+    nUpfront: upfrontPairs.length,
+    nTotal: totalPairs.length,
+  };
 }
 
 export async function findEnrichedComparableDeals(
   inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string; dealType?: string },
   maxDeals: number = 30,
-): Promise<{ deals: EnrichedComparableDeal[]; benchmarkRange: ComparableBenchmarkRange }> {
+): Promise<EnrichedComparableResult> {
   const supabase = createServiceClient();
 
   const { data: dbDeals } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name, licensor_country, licensee_country, cross_border, deal_corridor')
+    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name, licensor_country, licensee_country, cross_border, deal_corridor, confidence_score, verification_status, source_url, source_type, provenance_tier')
     .eq('terms_disclosed', true)
     .eq('is_synthetic', false)
+    .or('is_canonical.is.null,is_canonical.eq.true')
     .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+    // Filter on TA in SQL first (indexed). The relaxation ladder never widens
+    // beyond TA, so this is lossless — and it means an older exact-match comp
+    // is no longer pushed out by 500 more-recent deals from other TAs.
+    .eq('therapeutic_area', inputs.therapeuticArea)
     .not('total_deal_value_usd', 'is', null)
     .gt('total_deal_value_usd', 0)
     .order('announced_date', { ascending: false })
-    .limit(500);
+    .limit(1000);
 
   const currentYear = new Date().getFullYear();
-  const MAX_SCORE = 14;
 
-  const scored = (dbDeals || []).map(d => {
-    let score = 0;
-    const reasons: string[] = [];
-    const breakdown = { ta: false, modality: false, phase: false, indication: false, recency: 0 };
+  // Stage/structure sanity filter — approved-stage acquisitions/mergers are
+  // not comps for a pre-approval licensing query.
+  let excludedApprovedMA = 0;
+  const stageFiltered = (dbDeals || []).filter(d => {
+    if (shouldExcludeForStage(inputs.phase, d.phase_at_signing, d.deal_type)) {
+      excludedApprovedMA++;
+      return false;
+    }
+    return true;
+  });
+
+  const scored = stageFiltered.map(d => {
     const ta = d.therapeutic_area || '';
     const year = d.announced_date ? new Date(d.announced_date).getFullYear() : currentYear;
 
-    if (ta === inputs.therapeuticArea) { score += 3; breakdown.ta = true; reasons.push('Same TA'); }
-    if (inputs.modality && d.modality === inputs.modality) { score += 4; breakdown.modality = true; reasons.push('Same modality'); }
-    if (inputs.indication && (d.indication_category === inputs.indication || d.indication_specific === inputs.indication)) {
-      score += 3; breakdown.indication = true; reasons.push('Same indication');
-    }
-    if (inputs.phase && d.phase_at_signing === inputs.phase) { score += 2; breakdown.phase = true; reasons.push('Same phase'); }
-
-    if (year >= currentYear) { score += 2; breakdown.recency = 2; reasons.push('Current year'); }
-    else if (year >= currentYear - 1) { score += 1; breakdown.recency = 1; }
+    const { score, normalized, breakdown, reasons } = scoreCompMatch(
+      { therapeuticArea: inputs.therapeuticArea, phase: inputs.phase, modality: inputs.modality, indication: inputs.indication, dealType: inputs.dealType },
+      { therapeuticArea: ta, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], dealType: d.deal_type, year },
+      { currentYear },
+    );
 
     const upfrontRaw = d.upfront_usd ? Number(d.upfront_usd) : null;
     const totalRaw = d.total_deal_value_usd ? Number(d.total_deal_value_usd) : null;
@@ -287,41 +339,30 @@ export async function findEnrichedComparableDeals(
         licenseeCountry: d.licensee_country || null,
         crossBorder: d.cross_border || false,
         dealCorridor: d.deal_corridor || null,
-        matchScore: Math.min(score / MAX_SCORE, 1),
+        confidenceScore: d.confidence_score ?? null,
+        verificationStatus: d.verification_status || null,
+        sourceUrl: d.source_url || null,
+        sourceType: d.source_type || null,
+        provenanceTier: d.provenance_tier ? String(d.provenance_tier).trim() : null,
+        matchScore: normalized,
         matchBreakdown: breakdown,
         relevanceReasons: reasons,
       } as EnrichedComparableDeal,
       score,
+      breakdown,
     };
   });
 
-  const filtered = scored
-    .filter(s => s.score >= 2)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, maxDeals);
+  // Pass threshold: TA + one of {phase, adjacent phase, indication}; relax if thin.
+  const { items, relaxation } = selectWithRelaxation(scored, s => s.breakdown);
+  if (relaxation !== 'none') {
+    console.info(`[comparableDeals] relaxation=${relaxation} for ${inputs.therapeuticArea}/${inputs.phase ?? '?'}/${inputs.modality} (strict pool too thin)`);
+  }
 
-  const deals = filtered.map(s => s.deal);
+  const deals = items
+    .sort((a, b) => b.score - a.score || b.deal.year - a.deal.year)
+    .slice(0, maxDeals)
+    .map(s => s.deal);
 
-  const upfrontPairs = deals
-    .filter(d => d.upfrontM && d.upfrontM > 0)
-    .map(d => ({ value: d.upfrontM!, weight: recencyWeight(d.year) }));
-  const totalPairs = deals
-    .filter(d => d.totalValueM && d.totalValueM > 0)
-    .map(d => ({ value: d.totalValueM!, weight: recencyWeight(d.year) }));
-
-  const benchmarkRange: ComparableBenchmarkRange = {
-    upfront: {
-      p25: weightedQuantile(upfrontPairs, 0.25),
-      median: weightedQuantile(upfrontPairs, 0.5),
-      p75: weightedQuantile(upfrontPairs, 0.75),
-    },
-    totalValue: {
-      p25: weightedQuantile(totalPairs, 0.25),
-      median: weightedQuantile(totalPairs, 0.5),
-      p75: weightedQuantile(totalPairs, 0.75),
-    },
-    n: deals.length,
-  };
-
-  return { deals, benchmarkRange };
+  return { deals, benchmarkRange: computeBenchmarkRange(deals), relaxation, excludedApprovedMA };
 }

@@ -64,7 +64,8 @@ import JargonTooltip from './ui/JargonTooltip';
 const ResultsTour = dynamic(() => import('./ResultsTour'), { ssr: false });
 import { TOUR_STEP_IDS } from './ResultsTour';
 import { shouldShowResultsTour } from '@/lib/tour';
-import { runFinancialModel, type FinancialModelResult } from '@/lib/financial/run-financial-model';
+import { runFinancialModel, type FinancialModelResult, type ComparablesOverride } from '@/lib/financial/run-financial-model';
+import type { PipelineIntelligence as PipelineIntelligenceData } from '@/lib/financial/advanced-upgrades';
 import type { CompetitiveLandscape, DealFlowForecast } from '@/lib/financial/types';
 import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity';
 // R70: findComparableDeals import removed — inline "Top 3" table replaced
@@ -572,10 +573,25 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     return bm.n >= 3 ? bm : null;
   }, [fullInputs]);
 
-  // Compute percentile context for a given metric value against the peer benchmark upfront percentiles
-  const getPercentileContext = useCallback((metricMedian: number): { percentile: number; label: string } | undefined => {
+  // Confidence for the headline cards, derived from peer-benchmark breadth
+  // rather than hardcoded: n >= 15 on a strict match → high, n >= 5 (not
+  // global) → medium, else low. Milestone cards step down from there.
+  const peerConfidence: 'high' | 'medium' | 'low' = useMemo(() => {
+    if (!peerBenchmark) return 'low';
+    const { n, matchLevel } = peerBenchmark;
+    if (n >= 15 && matchLevel === 'strict') return 'high';
+    if (n >= 5 && matchLevel !== 'global') return 'medium';
+    return 'low';
+  }, [peerBenchmark]);
+  const stepDownConfidence = (l: 'high' | 'medium' | 'low'): 'high' | 'medium' | 'low' => (l === 'high' ? 'medium' : 'low');
+  const milestoneConfidence = stepDownConfidence(peerConfidence);
+  const commercialConfidence = stepDownConfidence(milestoneConfidence);
+
+  // Compute percentile context for a metric value against the matching peer
+  // benchmark distribution (upfront vs total deal value are separate).
+  const getPercentileContext = useCallback((metricMedian: number, metric: 'upfront' | 'totalDeal' = 'upfront'): { percentile: number; label: string } | undefined => {
     if (!peerBenchmark) return undefined;
-    const { p10, p25, p50, p75, p90 } = peerBenchmark.upfrontPercentiles;
+    const { p10, p25, p50, p75, p90 } = metric === 'totalDeal' ? peerBenchmark.totalDealPercentiles : peerBenchmark.upfrontPercentiles;
     // Linear interpolation to estimate percentile
     const points = [
       { p: 10, v: p10 },
@@ -722,6 +738,32 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
   // Financial modeling state
   const [financialModel, setFinancialModel] = useState<FinancialModelResult | null>(null);
+
+  // Custom comp set lifted out of ComparableDeals — drives the ensemble's
+  // comparable-transactions method when present (null = auto filter).
+  const [comparablesOverride, setComparablesOverride] = useState<ComparablesOverride | null>(null);
+  const comparablesOverrideRef = useRef<ComparablesOverride | null>(null);
+  comparablesOverrideRef.current = comparablesOverride;
+  // Latest ClinicalTrials.gov pipeline payload so override re-runs keep real competitor data
+  const pipelineDataRef = useRef<PipelineIntelligenceData | undefined>(undefined);
+
+  const handleComparableSelection = useCallback((sel: ComparablesOverride | null) => {
+    setComparablesOverride(prev => {
+      if (!sel && !prev) return prev;
+      if (sel && prev
+        && prev.ids.length === sel.ids.length
+        && prev.ids.every((id, i) => id === sel.ids[i])
+        && prev.totalValue.median === sel.totalValue.median
+        && prev.upfront.median === sel.upfront.median) return prev;
+      return sel;
+    });
+  }, []);
+
+  // A new query invalidates any custom comp set
+  useEffect(() => {
+    setComparablesOverride(null);
+    pipelineDataRef.current = undefined;
+  }, [fullInputs?.therapeuticArea, fullInputs?.phase, fullInputs?.modality, fullInputs?.indication, fullInputs?.dealType]);
   const [serverData, setServerData] = useState<{ competitiveLandscape?: CompetitiveLandscape; dealFlowForecast?: DealFlowForecast }>({});
 
   // Tornado sensitivity (memoized, computed alongside financial model)
@@ -802,7 +844,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     let cancelled = false;
     try {
       // Initial synchronous run with template-based competitive dynamics
-      const fm = runFinancialModel(fullInputs, result, epiData.indications);
+      const fm = runFinancialModel(fullInputs, result, epiData.indications, undefined, comparablesOverrideRef.current);
       setFinancialModel(fm);
 
       // Async upgrade: fetch real pipeline competitors and re-run the model
@@ -826,11 +868,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           if (cancelled) return;
           if (payload?.data?.knownCompetitors?.length > 0) {
             // Re-run with real pipeline intelligence
+            pipelineDataRef.current = payload.data;
             const upgradedFm = runFinancialModel(
               fullInputs,
               result,
               epiData.indications,
               payload.data,
+              comparablesOverrideRef.current,
             );
             if (!cancelled) setFinancialModel(upgradedFm);
           }
@@ -841,6 +885,24 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     }
     return () => { cancelled = true; };
   }, [fullInputs, result]);
+
+  // Re-run the (synchronous, ~300ms) financial model when the custom comp set
+  // changes. Debounced 300ms so rapid checkbox toggles coalesce.
+  const overrideRunMountedRef = useRef(false);
+  useEffect(() => {
+    if (!overrideRunMountedRef.current) { overrideRunMountedRef.current = true; return; }
+    if (!fullInputs || !result) return;
+    const timer = setTimeout(() => {
+      try {
+        const fm = runFinancialModel(fullInputs, result, epiData.indications, pipelineDataRef.current, comparablesOverride);
+        setFinancialModel(fm);
+      } catch (err) {
+        captureClientError(err, 'Results', { context: 'FinancialModel comparablesOverride re-run' });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comparablesOverride]);
 
   // Eager partner match fetch — needed by BuyerSpecificPanel in Analysis tab
   // Retries if first attempt failed (e.g., auth timeout) when tier resolves
@@ -1499,8 +1561,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             previousValue={hasFullAccess ? previousTerms?.upfront : undefined}
             currentValue={hasFullAccess ? terms.upfront.median : undefined}
             warningText={hasFullAccess ? fieldWarnings['upfront'] : undefined}
-            percentileContext={hasFullAccess ? getPercentileContext(terms.upfront.median) : undefined}
-            confidenceLevel="high"
+            percentileContext={hasFullAccess ? getPercentileContext(terms.upfront.median, 'upfront') : undefined}
+            confidenceLevel={peerConfidence}
           />
 
           {/* Total Deal Value — locked for free users */}
@@ -1531,8 +1593,8 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             previousValue={previousTerms?.totalDealValue}
             currentValue={terms.totalDealValue.median}
             warningText={fieldWarnings['totalDealValue']}
-            percentileContext={getPercentileContext(terms.totalDealValue.median)}
-            confidenceLevel="high"
+            percentileContext={getPercentileContext(terms.totalDealValue.median, 'totalDeal')}
+            confidenceLevel={peerConfidence}
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '100ms' }} onClick={onUpgrade}>
@@ -1559,7 +1621,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             drillDown={drillDown?.devMilestones} isExpanded={expandedCard === 'devMilestones'} onToggle={() => toggleCard('devMilestones')} canExpand={true}
             isPro={isPro} onProClick={() => handleProFeatureClick('comparable_deals')} animationIndex={2} tooltipContent={metricTooltips.devMilestones}
             previousValue={previousTerms?.devMilestones} currentValue={terms.devMilestones.median} warningText={fieldWarnings['devMilestones'] || fieldWarnings['milestones']}
-            confidenceLevel="medium"
+            confidenceLevel={milestoneConfidence}
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '200ms' }} onClick={onUpgrade}>
@@ -1582,7 +1644,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             drillDown={drillDown?.regMilestones} isExpanded={expandedCard === 'regMilestones'} onToggle={() => toggleCard('regMilestones')} canExpand={true}
             isPro={isPro} onProClick={() => handleProFeatureClick('comparable_deals')} animationIndex={3} tooltipContent={metricTooltips.regMilestones}
             previousValue={previousTerms?.regMilestones} currentValue={terms.regMilestones.median} warningText={fieldWarnings['regMilestones']}
-            confidenceLevel="medium"
+            confidenceLevel={milestoneConfidence}
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '300ms' }} onClick={onUpgrade}>
@@ -1605,7 +1667,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             drillDown={drillDown?.commMilestones} isExpanded={expandedCard === 'commMilestones'} onToggle={() => toggleCard('commMilestones')} canExpand={true}
             isPro={isPro} onProClick={() => handleProFeatureClick('comparable_deals')} animationIndex={4} tooltipContent={metricTooltips.commMilestones}
             previousValue={previousTerms?.commMilestones} currentValue={terms.commMilestones.median} warningText={fieldWarnings['commMilestones']}
-            confidenceLevel="low"
+            confidenceLevel={commercialConfidence}
           />
           ) : (
           <div className="relative metric-card border-neutral-200 dark:border-slate-600 motion-safe:animate-metric-cascade overflow-hidden" style={{ animationDelay: '400ms' }} onClick={onUpgrade}>
@@ -2017,7 +2079,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         <div id="section-comparable-deals">
         {fullInputs && (
           <FinancialErrorBoundary fallbackTitle="Comparable Deals unavailable">
-            <ComparableDeals inputs={fullInputs} tier={tier} onBuyReport={onBuyReport} />
+            <ComparableDeals
+              inputs={fullInputs}
+              tier={tier}
+              onBuyReport={onBuyReport}
+              onSelectionChange={handleComparableSelection}
+              initialSelectedIds={comparablesOverride?.ids ?? null}
+            />
           </FinancialErrorBoundary>
         )}
         </div>
@@ -2044,6 +2112,15 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* Financial Modeling — World-Class Tier */}
         {financialModel && (
           <>
+            {financialModel.ensemble?.comparablesSource === 'custom' && (
+              <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-lg text-xs bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 text-amber-700 dark:text-amber-300">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>
+                  Ensemble uses your custom comp set (n={financialModel.ensemble.customCompCount ?? comparablesOverride?.n ?? 0}).
+                  The comparable-transactions method is weighted from the deals you selected in the Comparables tab.
+                </span>
+              </div>
+            )}
             <div id={TOUR_STEP_IDS.RNPV}>
             <FinancialErrorBoundary fallbackTitle="rNPV Analysis unavailable">
               <RnpvAnalysis

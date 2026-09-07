@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     // deals lets Pro users toggle comps; free users see the list but can't
     // interact (paywall CTA shown client-side).
     if (enriched) {
-      const { deals: enrichedDeals, benchmarkRange } = await findEnrichedComparableDeals(
+      const { deals: enrichedDeals, benchmarkRange, relaxation, excludedApprovedMA } = await findEnrichedComparableDeals(
         { therapeuticArea, modality, indication, phase, dealType },
         30,
       );
@@ -84,6 +84,9 @@ export async function GET(request: NextRequest) {
         totalAvailable: enrichedDeals.length,
         enriched: true,
         tier,
+        /** 'none' | 'modality_only' | 'ta_only' — UI shows "Thin coverage" when not 'none' */
+        relaxation,
+        excludedApprovedMA,
       });
     }
 

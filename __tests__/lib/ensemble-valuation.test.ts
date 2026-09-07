@@ -297,3 +297,45 @@ describe('calculateEnsembleValuation — end-to-end', () => {
     expect(comp.sampleSize).toBeGreaterThanOrEqual(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Custom comp-set override (lifted from ComparableDeals.tsx via Results.tsx)
+// ---------------------------------------------------------------------------
+
+describe('comparablesOverride — custom comp set drives Method 2', () => {
+  const override = {
+    ids: ['a', 'b', 'c', 'd'],
+    upfront: { p25: 40, median: 60, p75: 90 },
+    totalValue: { p25: 500, median: 800, p75: 1200 },
+    n: 4,
+    totalValuesM: [500, 700, 900, 1200],
+  };
+
+  test('uses the override median and sample variance when >= 3 disclosed comps', () => {
+    const r = __test.computeOverrideMethod(override);
+    expect(r.source).toBe('custom');
+    expect(r.value).toBe(800);
+    expect(r.sampleSize).toBe(4);
+    expect(r.variance).toBe(__test.sampleVariance([500, 700, 900, 1200]));
+  });
+
+  test('drops Method 2 (Infinity variance) when the custom set has < 3 disclosed comps', () => {
+    const r = __test.computeOverrideMethod({ ...override, totalValuesM: [500, 700], n: 2 });
+    expect(r.variance).toBe(Number.POSITIVE_INFINITY);
+    expect(r.source).toBe('custom');
+  });
+
+  test('end-to-end: ensemble reports comparablesSource = custom and uses the override value', () => {
+    const input = makeRNPVInput();
+    const { rnpv, monteCarlo, realOptions } = runFullPipeline(input);
+    const auto = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, input);
+    const custom = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, input, undefined, override);
+    expect(auto.comparablesSource).toBe('auto');
+    expect(custom.comparablesSource).toBe('custom');
+    expect(custom.customCompCount).toBe(4);
+    const compMethod = custom.methods.find(m => m.name === 'Comparable Transactions')!;
+    expect(compMethod.value).toBe(800);
+    expect(compMethod.sampleSize).toBe(4);
+    expect(Number.isFinite(custom.ensembleValue)).toBe(true);
+  });
+});
