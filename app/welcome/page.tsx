@@ -22,7 +22,7 @@ interface SessionData {
 // ---------------------------------------------------------------------------
 
 const ENGINES: { name: string; description: string; icon: string }[] = [
-  { name: 'Deal Terms', description: 'Benchmark upfront, milestones, and royalties across 1,500+ deals', icon: 'handshake' },
+  { name: 'Deal Terms', description: `Benchmark upfront, milestones, and royalties across ${DEAL_STATS.TOTAL_DEALS} deals`, icon: 'handshake' },
   { name: 'rNPV', description: 'Risk-adjusted NPV with phase-specific LoA and discount rates', icon: 'chart-line' },
   { name: 'Monte Carlo', description: '10,000-iteration probabilistic simulation with confidence intervals', icon: 'dice' },
   { name: 'Sensitivity Analysis', description: 'Tornado charts isolating key value drivers', icon: 'sliders' },

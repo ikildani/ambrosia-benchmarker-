@@ -11,15 +11,38 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { staticBenchmarks, type PhaseConfig } from '@/lib/benchmarks';
+import { recencyWeight } from '@/lib/financial/calibration';
+import { ENGINE_VERSION } from '@/lib/financial/calculation-version';
 
 export interface BucketSummary {
   n: number;
+  /** Recency-weighted hit rates (2.5-year half-life, see lib/financial/calibration.ts). */
   hit25: number;
   hit35: number;
   hit50: number;
   meanAbsErrorPct: number;
   medianSignedErrorPct: number;
   rmseUpfront_M: number;
+  /**
+   * Unweighted hit counts recomputed from the per-case `results` array.
+   * Absent when the scope cannot be reconstructed from per-case rows
+   * (e.g. the hash-split holdout sets).
+   */
+  raw?: { hit25: number; hit35: number; hit50: number; n: number };
+}
+
+/** Coverage of the engine's own range (median ± phase rangeWidth) on one scope. */
+export interface BandCoverage {
+  label: string;
+  n: number;
+  /** Unweighted: actual upfront fell inside [pred×(1−w), pred×(1+w)]. */
+  covered: number;
+  coverage: number;
+  /** Recency-weighted share (same 2.5-year half-life as the hit rates). */
+  weightedCoverage: number;
+  /** Mean band half-width applied across the scope (e.g. 0.30 = ±30%). */
+  meanHalfWidth: number;
 }
 
 export interface SliceRow {
@@ -46,7 +69,24 @@ export interface WorstMiss {
 }
 
 export interface AccuracyDashboardData {
+  /** ISO timestamp of the last backtest run (from baseline-errors.json). */
   runAt: string;
+  /** Engine version string from lib/financial/calculation-version.ts. */
+  engineVersion: string;
+  /** data/benchmarks.json metadata — the benchmark tables the engine reads. */
+  benchmarks: { version: string; lastUpdated: string };
+  /**
+   * Recency half-life (years) used for every weighted aggregate on this page.
+   * Mirrors the default argument of recencyWeight().
+   */
+  recencyHalfLifeYears: number;
+  /** Weight a deal signed 24 months before the reference year receives (relative to 1.0 today). */
+  recencyWeightAt24Months: number;
+  /**
+   * Engine-range coverage computed from per-case rows: core, full, and
+   * per-phase (full scope). Empty when the report carries no `results`.
+   */
+  bandCoverage: BandCoverage[];
   featureFlags: Record<string, boolean>;
   coreScope: BucketSummary;
   fullScope: BucketSummary;
@@ -133,9 +173,13 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
         predictedUpfront_M: number;
         upfrontErrorPct: number;
       }>;
+      results?: BacktestResultRow[];
     };
 
-    const toBucket = (s: typeof report.coreScope): BucketSummary => ({
+    const rows = report.results ?? [];
+    const coreRows = rows.filter(isCoreScope);
+
+    const toBucket = (s: typeof report.coreScope, scopeRows?: BacktestResultRow[]): BucketSummary => ({
       n: s.totalDeals,
       hit25: s.hitRate25,
       hit35: s.hitRate35,
@@ -143,6 +187,9 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
       meanAbsErrorPct: s.meanAbsErrorPct,
       medianSignedErrorPct: s.medianSignedErrorPct,
       rmseUpfront_M: s.rmseUpfront_M,
+      // Only attach raw counts when the per-case rows reproduce the report's n,
+      // so the k/n shown next to a weighted rate is for the same deals.
+      raw: scopeRows && scopeRows.length === s.totalDeals ? rawHits(scopeRows) : undefined,
     });
 
     const toSlices = (raw: Record<string, SliceRaw>): SliceRow[] =>
@@ -158,11 +205,27 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
         .filter(s => s.n >= 2)
         .sort((a, b) => b.n - a.n);
 
+    const bandCoverage: BandCoverage[] = rows.length === 0 ? [] : [
+      bandCoverageFor('Core scope (Phase 2/3 licensing, co-dev, collaboration)', coreRows),
+      bandCoverageFor('Full scope (all disclosed deals)', rows),
+      ...PHASE_ORDER
+        .map(phase => bandCoverageFor(`Full scope — ${phase}`, rows.filter(r => r.case.phase === phase)))
+        .filter(b => b.n >= 2),
+    ];
+
     return {
       runAt: report.runAt,
+      engineVersion: ENGINE_VERSION,
+      benchmarks: {
+        version: staticBenchmarks.metadata.version,
+        lastUpdated: staticBenchmarks.metadata.lastUpdated,
+      },
+      recencyHalfLifeYears: RECENCY_HALF_LIFE_YEARS,
+      recencyWeightAt24Months: recencyWeight(REFERENCE_YEAR - 2, REFERENCE_YEAR, RECENCY_HALF_LIFE_YEARS),
+      bandCoverage,
       featureFlags: report.featureFlags,
-      coreScope: toBucket(report.coreScope),
-      fullScope: toBucket(report.fullScope),
+      coreScope: toBucket(report.coreScope, coreRows),
+      fullScope: toBucket(report.fullScope, rows),
       slicesByTA: toSlices(report.coreScope.byTherapeuticArea),
       slicesByPhase: toSlices(report.coreScope.byPhase),
       slicesByModality: toSlices(report.coreScope.byModality),
@@ -199,6 +262,104 @@ interface SliceRaw {
   hitRate35: number;
   meanSignedErrorPct: number;
   meanAbsErrorPct: number;
+}
+
+/** One per-case row from the backtest report's `results` array. */
+interface BacktestResultRow {
+  case: {
+    id: string;
+    year: number;
+    therapeuticArea: string;
+    phase: string;
+    dealType: string;
+    actualUpfront_M: number;
+  };
+  predictedUpfront_M: number;
+  upfrontErrorPct: number;
+  within25: boolean;
+  within35: boolean;
+  within50: boolean;
+}
+
+// Mirrors the default arguments of recencyWeight() in lib/financial/calibration.ts.
+const RECENCY_HALF_LIFE_YEARS = 2.5;
+const REFERENCE_YEAR = 2026;
+
+// Mirrors getCoreScopeBacktestCases() in lib/financial/backtest/deal-backtest.ts.
+const CORE_PHASES = new Set(['phase2', 'phase2_3', 'phase3']);
+const CORE_DEAL_TYPES = new Set(['licensing', 'codevelopment', 'collaboration']);
+const PHASE_ORDER = ['preclinical', 'phase1', 'phase2', 'phase3', 'approved'];
+
+function isCoreScope(r: BacktestResultRow): boolean {
+  return CORE_PHASES.has(r.case.phase) && CORE_DEAL_TYPES.has(r.case.dealType);
+}
+
+function rawHits(rows: BacktestResultRow[]): NonNullable<BucketSummary['raw']> {
+  return {
+    n: rows.length,
+    hit25: rows.filter(r => r.within25).length,
+    hit35: rows.filter(r => r.within35).length,
+    hit50: rows.filter(r => r.within50).length,
+  };
+}
+
+// Mirrors the TA → phaseConfig selection in lib/calculations.ts (unknown TAs
+// fall back to the default oncology config, as the engine does).
+const PHASE_CONFIG_BY_TA: Record<string, PhaseConfig> = {
+  metabolic: staticBenchmarks.metabolicPhaseConfig,
+  immunology: staticBenchmarks.immunologyPhaseConfig,
+  neurology: staticBenchmarks.neurologyPhaseConfig,
+  cardiovascular: staticBenchmarks.cardiovascularPhaseConfig,
+  infectiousDisease: staticBenchmarks.infectiousDiseasePhaseConfig,
+  ophthalmology: staticBenchmarks.ophthalmologyPhaseConfig,
+  womensHealth: staticBenchmarks.womensHealthPhaseConfig,
+  rareDisease: staticBenchmarks.rareDiseasePhaseConfig,
+  hematology: staticBenchmarks.hematologyPhaseConfig,
+  dermatology: staticBenchmarks.dermatologyPhaseConfig,
+  gastroenterology: staticBenchmarks.gastroenterologyPhaseConfig,
+};
+
+/** Half-width of the engine's displayed range for a TA/phase (e.g. 0.35 = ±35%). */
+export function engineRangeHalfWidth(therapeuticArea: string, phase: string): number | undefined {
+  const cfg = PHASE_CONFIG_BY_TA[therapeuticArea] ?? staticBenchmarks.phaseConfig;
+  return cfg.rangeWidths[phase];
+}
+
+/**
+ * Engine-range coverage: does the actual upfront fall inside the range the
+ * engine would have displayed — predicted median × (1 ± rangeWidth[phase])?
+ * This is the engine's own band, NOT the comparable-derived p25–p75 shown on
+ * the results page (the backtest does not record that band per case).
+ */
+function bandCoverageFor(label: string, rows: BacktestResultRow[]): BandCoverage {
+  let covered = 0;
+  let weightSum = 0;
+  let weightedCovered = 0;
+  let widthSum = 0;
+  let n = 0;
+  for (const r of rows) {
+    const w = engineRangeHalfWidth(r.case.therapeuticArea, r.case.phase);
+    if (w == null || !(r.predictedUpfront_M > 0)) continue;
+    n++;
+    widthSum += w;
+    const low = r.predictedUpfront_M * (1 - w);
+    const high = r.predictedUpfront_M * (1 + w);
+    const inside = r.case.actualUpfront_M >= low && r.case.actualUpfront_M <= high;
+    const rw = recencyWeight(r.case.year, REFERENCE_YEAR, RECENCY_HALF_LIFE_YEARS);
+    weightSum += rw;
+    if (inside) {
+      covered++;
+      weightedCovered += rw;
+    }
+  }
+  return {
+    label,
+    n,
+    covered,
+    coverage: n > 0 ? covered / n : 0,
+    weightedCoverage: weightSum > 0 ? weightedCovered / weightSum : 0,
+    meanHalfWidth: n > 0 ? widthSum / n : 0,
+  };
 }
 
 /**

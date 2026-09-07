@@ -4,6 +4,8 @@ import { getRelevantDealsWithDB } from '@/lib/comparableDeals.server';
 import { getCumulativePoS } from '@/lib/financial/pos-tables';
 import { CircuitBreaker } from './circuit-breaker';
 import { createLogger } from '@/lib/logger';
+import { scoreCompMatch } from '@/lib/comparable-scoring';
+import { DEAL_MEMO_CONFIDENCE } from '@/lib/config/constants';
 
 // Output types
 export interface DealMemo {
@@ -13,8 +15,50 @@ export interface DealMemo {
   risk_factors: string[];
   negotiation_priorities: string[];
   comparable_analysis: string;
+  /**
+   * Computed from comparable-deal counts (see computeConfidenceLevel), never
+   * self-reported by the model.
+   */
   confidence_level: 'high' | 'medium' | 'low';
+  /**
+   * Human-readable basis for confidence_level, e.g. "18 comparables, 9 tight matches".
+   * Optional because memos persisted before this field existed lack it.
+   */
+  confidence_basis?: string;
   generatedAt: string;
+}
+
+/**
+ * Confidence is a function of how many comparable deals back the memo:
+ * "tight" comps share the therapeutic area and the indication or modality.
+ * Thresholds live in DEAL_MEMO_CONFIDENCE.
+ */
+export function computeConfidenceLevel(
+  inputs: Pick<CalculationInput, 'therapeuticArea' | 'modality' | 'indication'>,
+  comparableDeals: ComparableDeal[],
+): { level: DealMemo['confidence_level']; basis: string } {
+  const tight = comparableDeals.filter(deal => {
+    const { breakdown } = scoreCompMatch(
+      { therapeuticArea: inputs.therapeuticArea, modality: inputs.modality, indication: inputs.indication },
+      {
+        therapeuticArea: deal.therapeuticArea,
+        secondaryTAs: deal.secondaryTAs,
+        phase: deal.phase,
+        modalities: deal.modalities,
+        indications: deal.indications,
+        dealType: deal.dealType,
+        year: deal.year,
+      },
+    );
+    return breakdown.ta && (breakdown.indication || breakdown.modality);
+  }).length;
+
+  const level: DealMemo['confidence_level'] =
+    tight >= DEAL_MEMO_CONFIDENCE.HIGH_MIN ? 'high'
+      : tight >= DEAL_MEMO_CONFIDENCE.MEDIUM_MIN ? 'medium'
+      : 'low';
+  const basis = `${comparableDeals.length} comparable deals, ${tight} sharing therapeutic area and indication or modality (high ≥ ${DEAL_MEMO_CONFIDENCE.HIGH_MIN}, medium ≥ ${DEAL_MEMO_CONFIDENCE.MEDIUM_MIN})`;
+  return { level, basis };
 }
 
 export interface DealMemoInput {
@@ -367,8 +411,7 @@ Respond with ONLY a JSON object (no markdown, no backticks, just the raw JSON):
   "market_context": "3-4 sentences on the current M&A/licensing environment for this specific therapeutic area and modality combination, referencing recent deal activity",
   "risk_factors": ["TA-specific risk 1 with numbers", "TA-specific risk 2 with numbers", "TA-specific risk 3 with numbers", "TA-specific risk 4 with numbers"],
   "negotiation_priorities": ["what to fight for 1 - specific", "what to concede 1 - specific", "key timing consideration"],
-  "comparable_analysis": "3-4 sentences tying the most relevant comparable transactions to this asset, explaining why they're relevant or how they differ",
-  "confidence_level": "high or medium or low"
+  "comparable_analysis": "3-4 sentences tying the most relevant comparable transactions to this asset, explaining why they're relevant or how they differ"
 }`;
 }
 
@@ -430,12 +473,16 @@ export class DealMemoGenerator {
     const log = createLogger('deal-memo');
     const elapsed = log.startTimer();
 
-    const comparableDeals = await getRelevantDealsWithDB(
+    // Fetch a wider pool for the confidence computation; the prompt still
+    // lists only the top PROMPT_COMPS so the model's context is unchanged.
+    const comparablePool = await getRelevantDealsWithDB(
       input.inputs.therapeuticArea,
       input.inputs.modality,
       input.inputs.indication,
-      8
+      DEAL_MEMO_CONFIDENCE.COMPS_FETCHED
     );
+    const comparableDeals = comparablePool.slice(0, DEAL_MEMO_CONFIDENCE.PROMPT_COMPS);
+    const confidence = computeConfidenceLevel(input.inputs, comparablePool);
 
     const prompt = buildMemoPrompt(input, comparableDeals);
     let lastError: Error | null = null;
@@ -452,7 +499,7 @@ export class DealMemoGenerator {
           });
 
           const text = await callAnthropicAPI(prompt, 2500);
-          const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt'>>(text);
+          const parsed = parseJsonResponse<Omit<DealMemo, 'generatedAt' | 'confidence_level' | 'confidence_basis'>>(text);
 
           if (!parsed.executive_summary || !parsed.valuation_rationale || !Array.isArray(parsed.risk_factors)) {
             throw new Error('AI response missing required fields (executive_summary, valuation_rationale, or risk_factors)');
@@ -461,7 +508,12 @@ export class DealMemoGenerator {
           const durationMs = elapsed();
           log.info('Memo generated', { durationMs, attempt: attempt + 1 });
 
-          return { ...parsed, generatedAt: new Date().toISOString() };
+          return {
+            ...parsed,
+            confidence_level: confidence.level,
+            confidence_basis: confidence.basis,
+            generatedAt: new Date().toISOString(),
+          };
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
           const durationMs = elapsed();

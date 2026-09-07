@@ -11,6 +11,8 @@ interface WaterfallDataPoint {
 interface WaterfallChartProps {
   data: WaterfallDataPoint[];
   title?: string;
+  /** What each bar's median represents, e.g. "Median upfronts by phase (2020-2026)". */
+  caption?: string;
 }
 
 const formatVal = (v: number) => {
@@ -18,12 +20,14 @@ const formatVal = (v: number) => {
   return `$${Math.round(v)}M`;
 };
 
-export function WaterfallChart({ data, title }: WaterfallChartProps) {
+export function WaterfallChart({ data, title, caption }: WaterfallChartProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return <div className="h-80 animate-pulse bg-slate-50 rounded-xl" />;
 
   const maxVal = Math.max(...data.map(d => d.value));
+  // n in the caption is the sum of the per-bar sample sizes actually plotted.
+  const totalN = data.reduce((sum, d) => sum + d.n, 0);
 
   // Calculate jumps between phases
   const jumps = data.map((d, i) => {
@@ -86,7 +90,7 @@ export function WaterfallChart({ data, title }: WaterfallChartProps) {
       </div>
 
       <p className="text-[11px] text-slate-400 mt-4 text-center tracking-wide">
-        Source: Ambrosia Ventures | Oncology median upfronts by phase (2020-2026) | n=1,223 deals with disclosed terms
+        Source: Ambrosia Ventures | {caption ?? 'Median upfronts by group'} | n={totalN.toLocaleString()} deals with disclosed terms
       </p>
     </div>
   );

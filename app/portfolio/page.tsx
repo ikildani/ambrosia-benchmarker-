@@ -536,7 +536,7 @@ export default function PortfolioPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
               {[
-                { icon: BarChart3, label: 'Deal Benchmarking',     sub: '1,500+ transactions' },
+                { icon: BarChart3, label: 'Deal Benchmarking',     sub: `${DEAL_STATS.TOTAL_DEALS} transactions` },
                 { icon: LineChart, label: 'rNPV Modeling',         sub: 'TA-specific PoS curves' },
                 { icon: Layers,    label: 'Monte Carlo',           sub: '10,000-iter simulations' },
                 { icon: Brain,     label: 'AI Deal Memos',         sub: 'Institutional-quality' },

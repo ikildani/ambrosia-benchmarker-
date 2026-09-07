@@ -892,7 +892,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
   // ─────────────────────────────────────────────────────────────────────
   server.tool(
     'get_comparable_deals',
-    'Find comparable pharmaceutical transactions from a curated database of 280+ deals. Uses hedonic regression scoring to rank deals by relevance across modality, indication, phase, territory, deal type, and recency. Returns deal parties, values, years, and relevance explanations.',
+    'Find comparable pharmaceutical transactions from the curated comparable-deal corpus. Deals are ranked by an additive match score across therapeutic area, modality, indication, phase, deal type, and recency (see /methodology). Returns deal parties, values, years, and relevance explanations.',
     {
       therapeuticArea: therapeuticAreaEnum,
       phase: phaseEnum.optional().describe('Development phase filter. Improves relevance scoring.'),
@@ -2196,7 +2196,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
           { name: 'match_partners', category: 'Intelligence', description: 'Find best-fit partners from 700+ companies scored across 9 dimensions with Pharma Intent signals.' },
           { name: 'compute_negotiation_zopa', category: 'Negotiation', description: 'Zone of Possible Agreement for 1-3 buyers with counterparty premiums and BATNA-anchored positions.' },
           { name: 'get_regulatory_risk', category: 'Regulatory', description: 'Global regulatory risk across 7 agencies with rejection probability, review timelines, and designation impacts.' },
-          { name: 'get_comparable_deals', category: 'Intelligence', description: 'Find comparable transactions from 280+ curated deals using hedonic regression scoring.' },
+          { name: 'get_comparable_deals', category: 'Intelligence', description: 'Find comparable transactions from the curated comparable-deal corpus using additive match scoring (TA, modality, indication, phase, deal type, recency).' },
           { name: 'get_market_intelligence', category: 'Intelligence', description: 'Upcoming Phase 3 readouts and FDA AdComm calendar for near-term catalysts.' },
           { name: 'run_scenario_comparison', category: 'Financial Modeling', description: 'Bear/Base/Bull scenario comparison with probability-weighted expected value.' },
           { name: 'analyze_lifecycle_extensions', category: 'Financial Modeling', description: 'Label expansion, pediatric exclusivity, combination approval opportunities and franchise premium.' },
@@ -2604,7 +2604,7 @@ export async function GET() {
       {
         name: 'get_comparable_deals',
         category: 'Intelligence',
-        description: 'Find comparable transactions from 280+ curated deals using hedonic regression scoring.',
+        description: 'Find comparable transactions from the curated comparable-deal corpus using additive match scoring (TA, modality, indication, phase, deal type, recency).',
       },
       {
         name: 'get_market_intelligence',
@@ -2693,7 +2693,7 @@ export async function GET() {
       {
         name: 'query_deal_database',
         category: 'Intelligence',
-        description: 'Natural language query against 1,500+ deals. Ask any question and get a data-backed answer with supporting deal data.',
+        description: `Natural language query against ${DEAL_STATS.TOTAL_DEALS} deals. Ask any question and get a data-backed answer with supporting deal data.`,
       },
     ],
     resources: [

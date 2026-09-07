@@ -44,6 +44,10 @@ export function DealVolumeStackedChart({ data }: DealVolumeStackedChartProps) {
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return <div className="h-80 animate-pulse bg-slate-50 rounded-xl" />;
 
+  // Caption counts come from the chart's own dataset, never a hardcoded figure.
+  const totalDeals = data.reduce((sum, d) => sum + d.total, 0);
+  const period = data.length > 0 ? `${data[0].year}-${data[data.length - 1].year}` : '';
+
   return (
     <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
       <div className="h-72 sm:h-80">
@@ -83,7 +87,7 @@ export function DealVolumeStackedChart({ data }: DealVolumeStackedChartProps) {
         </ResponsiveContainer>
       </div>
       <p className="text-[11px] text-slate-400 mt-3 text-center tracking-wide">
-        Source: Ambrosia Ventures | 2,339 transactions (2020-2026 YTD) | SEC filings, FTC premerger filings, press releases
+        Source: Ambrosia Ventures | {totalDeals.toLocaleString()} transactions{period ? ` (${period})` : ''} | SEC filings, FTC premerger filings, press releases
       </p>
     </div>
   );

@@ -131,3 +131,19 @@ export const BENCHMARK_VERSION = {
   LABEL: '2025-2026 Market Benchmarks v5.0',
   YEAR_RANGE: '2025-2026',
 } as const;
+
+/**
+ * Deal-memo confidence is computed from comparable-deal counts, never
+ * self-reported by the LLM. "Tight" comps share the therapeutic area AND
+ * (indication OR modality) with the queried asset.
+ */
+export const DEAL_MEMO_CONFIDENCE = {
+  /** Comparable pool fetched for the memo (top MEMO_PROMPT_COMPS are shown to the model). */
+  COMPS_FETCHED: 20,
+  /** How many comps are listed in the prompt text. */
+  PROMPT_COMPS: 8,
+  /** tight-match count >= HIGH_MIN -> 'high' */
+  HIGH_MIN: 15,
+  /** tight-match count >= MEDIUM_MIN -> 'medium', else 'low' */
+  MEDIUM_MIN: 5,
+} as const;
