@@ -2,6 +2,7 @@
 // Import this ONLY from API routes / server components (uses next/headers)
 
 import { createServiceClient } from '@/lib/supabase/server';
+import { phasesMatch, modalitiesMatch, indicationMatches } from '@/lib/comparables/match-normalize';
 import {
   ComparableDeal,
   ComparableDealForUI,
@@ -119,11 +120,11 @@ export async function findComparableDealsWithDB(
         score += 3;
         reasons.push('Same therapeutic area');
       }
-      if (inputs.modality && d.modality === inputs.modality) {
+      if (inputs.modality && modalitiesMatch(inputs.modality, d.modality)) {
         score += 4;
         reasons.push('Same modality');
       }
-      if (inputs.indication && (d.indication_category === inputs.indication || d.indication_specific === inputs.indication)) {
+      if (inputs.indication && indicationMatches(inputs.indication, d.indication_category, d.indication_specific)) {
         score += 3;
         reasons.push('Same indication');
       }
@@ -253,11 +254,11 @@ export async function findEnrichedComparableDeals(
     const year = d.announced_date ? new Date(d.announced_date).getFullYear() : currentYear;
 
     if (ta === inputs.therapeuticArea) { score += 3; breakdown.ta = true; reasons.push('Same TA'); }
-    if (inputs.modality && d.modality === inputs.modality) { score += 4; breakdown.modality = true; reasons.push('Same modality'); }
-    if (inputs.indication && (d.indication_category === inputs.indication || d.indication_specific === inputs.indication)) {
+    if (inputs.modality && modalitiesMatch(inputs.modality, d.modality)) { score += 4; breakdown.modality = true; reasons.push('Same modality'); }
+    if (inputs.indication && indicationMatches(inputs.indication, d.indication_category, d.indication_specific)) {
       score += 3; breakdown.indication = true; reasons.push('Same indication');
     }
-    if (inputs.phase && d.phase_at_signing === inputs.phase) { score += 2; breakdown.phase = true; reasons.push('Same phase'); }
+    if (inputs.phase && phasesMatch(inputs.phase, d.phase_at_signing)) { score += 2; breakdown.phase = true; reasons.push('Same phase'); }
 
     if (year >= currentYear) { score += 2; breakdown.recency = 2; reasons.push('Current year'); }
     else if (year >= currentYear - 1) { score += 1; breakdown.recency = 1; }

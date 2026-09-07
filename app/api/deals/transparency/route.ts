@@ -11,20 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { phasesMatch, phaseDistance, modalitiesMatch, dealTypesMatch } from '@/lib/comparables/match-normalize';
 
 export const dynamic = 'force-dynamic';
-
-const PHASE_ORDER: Record<string, number> = {
-  discovery: 0, preclinical: 1, phase_1: 2, phase_1_2: 2.5,
-  phase_2: 3, phase_2_3: 3.5, phase_3: 4, nda_filed: 5, approved: 6,
-};
-
-function adjacentPhases(phase: string): string[] {
-  const rank = PHASE_ORDER[phase] ?? 3;
-  return Object.entries(PHASE_ORDER)
-    .filter(([, r]) => Math.abs(r - rank) <= 1.5)
-    .map(([p]) => p);
-}
 
 async function resolveUserTier(request: NextRequest, supabase: ReturnType<typeof createServiceClient>): Promise<string> {
   // Cookie auth
@@ -116,8 +105,6 @@ export async function GET(request: NextRequest) {
   const hasPro = userTier === 'pro' || userTier === 'portfolio' || userTier === 'report';
 
   // Build the query — start with exact TA match
-  const phases = phase ? adjacentPhases(phase) : [];
-
   // Fetch all deals for this TA (indexed query)
   const { data: allDeals, error } = await supabase
     .from('deals')
@@ -135,12 +122,17 @@ export async function GET(request: NextRequest) {
   // Score each deal by match quality
   const scored: (TransparencyDeal & { score: number })[] = allDeals.map(d => {
     let matchCount = 1; // TA already matches
-    if (phase && d.phase_at_signing === phase) matchCount++;
-    if (modality && d.modality === modality) matchCount++;
-    if (dealType && d.deal_type === dealType) matchCount++;
+    // Calculator inputs ('phase2', 'smallMolecule', 'licensing') and DB rows
+    // ('phase_2', 'small_molecule', 'license') use different spellings —
+    // compare through the shared normalizers, never raw strings.
+    const samePhase = !!phase && phasesMatch(phase, d.phase_at_signing);
+    if (samePhase) matchCount++;
+    if (modality && modalitiesMatch(modality, d.modality)) matchCount++;
+    if (dealType && dealTypesMatch(dealType, d.deal_type)) matchCount++;
 
-    // Adjacent phase bonus (partial credit)
-    const isAdjacentPhase = phase && d.phase_at_signing && phases.includes(d.phase_at_signing) && d.phase_at_signing !== phase;
+    // Adjacent phase bonus (partial credit): one ladder step away
+    const distance = phase ? phaseDistance(phase, d.phase_at_signing) : null;
+    const isAdjacentPhase = !samePhase && distance === 1;
 
     const match_quality: 'exact' | 'strong' | 'partial' =
       matchCount >= 3 ? 'exact' : matchCount >= 2 ? 'strong' : 'partial';
