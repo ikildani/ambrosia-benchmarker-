@@ -85,7 +85,7 @@ export default function DealDetailModal({ deal, userPhase, onClose }: Props) {
     {
       label: 'Royalty Rate',
       value: deal.royalty_low_pct != null
-        ? `${(deal.royalty_low_pct * 100).toFixed(1)}%${deal.royalty_high_pct != null && deal.royalty_high_pct !== deal.royalty_low_pct ? ` – ${(deal.royalty_high_pct * 100).toFixed(1)}%` : ''}`
+        ? `${deal.royalty_low_pct.toFixed(1)}%${deal.royalty_high_pct != null && deal.royalty_high_pct !== deal.royalty_low_pct ? ` – ${deal.royalty_high_pct.toFixed(1)}%` : ''}`
         : 'Undisclosed',
     },
   ];

@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
   // Compute stats from all deals with financial data
   const upfrontValues = dealPool.filter(d => d.upfront_usd != null && d.upfront_usd > 0).map(d => d.upfront_usd! / 1_000_000);
   const totalValues = dealPool.filter(d => d.total_deal_value_usd != null && d.total_deal_value_usd > 0).map(d => d.total_deal_value_usd! / 1_000_000);
-  const royaltyValues = dealPool.filter(d => d.royalty_low_pct != null).map(d => d.royalty_low_pct! * 100);
+  const royaltyValues = dealPool.filter(d => d.royalty_low_pct != null).map(d => d.royalty_low_pct!);
 
   const stats = {
     upfront: computeStats(upfrontValues),

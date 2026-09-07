@@ -90,8 +90,8 @@ function fmtUsd(v: number | null): string {
 
 function fmtRoyalty(low: number | null, high: number | null): string {
   if (low == null && high == null) return 'Undisclosed';
-  const l = low != null ? (low * 100).toFixed(1) : '?';
-  const h = high != null ? (high * 100).toFixed(1) : '?';
+  const l = low != null ? low.toFixed(1) : '?';
+  const h = high != null ? high.toFixed(1) : '?';
   return low === high ? `${l}%` : `${l}–${h}%`;
 }
 
@@ -203,8 +203,8 @@ export default function DealTransparency({ inputs, tier, onUpgrade, calculationM
         d.upfront_usd != null ? (d.upfront_usd / 1e6).toFixed(1) : '',
         adj.adjusted != null ? (adj.adjusted / 1e6).toFixed(1) : '',
         d.total_deal_value_usd != null ? (d.total_deal_value_usd / 1e6).toFixed(1) : '',
-        d.royalty_low_pct != null ? (d.royalty_low_pct * 100).toFixed(1) : '',
-        d.royalty_high_pct != null ? (d.royalty_high_pct * 100).toFixed(1) : '',
+        d.royalty_low_pct != null ? d.royalty_low_pct.toFixed(1) : '',
+        d.royalty_high_pct != null ? d.royalty_high_pct.toFixed(1) : '',
         d.match_quality, d.source_url || '',
       ];
     });
