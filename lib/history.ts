@@ -43,6 +43,28 @@ export interface CalculationHistoryItem {
   };
   hasPDF: boolean;
   pdfGeneratedAt?: string;
+  /** Engine-version + input hash (migration 097). Present for DB-backed rows. */
+  fingerprint?: string | null;
+  /** Populated only for team-scope history (migration 100). */
+  owner?: HistoryOwner;
+}
+
+export interface HistoryOwner {
+  id: string | null;
+  email: string | null;
+  name: string | null;
+  isMe: boolean;
+}
+
+export type HistoryScope = 'personal' | 'team';
+
+/** Short display label for a history row's owner ("Jane Doe", else "jane", else "Teammate"). */
+export function ownerLabel(owner: HistoryOwner | undefined): string {
+  if (!owner) return '';
+  if (owner.isMe) return 'You';
+  if (owner.name) return owner.name;
+  if (owner.email) return owner.email.split('@')[0];
+  return 'Teammate';
 }
 
 const HISTORY_KEY = 'calculation_history';

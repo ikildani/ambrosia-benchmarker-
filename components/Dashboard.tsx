@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo, startTransition } from 'react';
 import { toast } from 'sonner';
-import { clearHistory, getHistoryItemWithDefaults, type CalculationHistoryItem } from '@/lib/history';
+import { clearHistory, getHistoryItemWithDefaults, type CalculationHistoryItem, type HistoryScope } from '@/lib/history';
 import { useCalculationHistory } from '@/lib/hooks/useCalculationHistory';
+import { useAuth } from '@/contexts/AuthContext';
 import { captureClientError } from '@/lib/sentry-client';
 import HistoryDetailModal from './HistoryDetailModal';
 import WatchlistPanel from './watchlist/WatchlistPanel';
@@ -46,7 +47,10 @@ export default function Dashboard({
   onUpgrade,
   onSignOut,
 }: DashboardProps) {
-  const { history, loading: historyLoading, deleteItem: deleteHistoryItem } = useCalculationHistory();
+  // Team workspace (migration 100): members can flip history to the whole team.
+  const { teamId, teamName } = useAuth();
+  const [historyScope, setHistoryScope] = useState<HistoryScope>('personal');
+  const { history, loading: historyLoading, deleteItem: deleteHistoryItem } = useCalculationHistory(teamId ? historyScope : 'personal');
   const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'history' | 'watchlist' | 'settings' | 'api'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -562,6 +566,10 @@ export default function Dashboard({
               onRecalculate={handleRecalculate}
               onNavigateToCalculator={onNavigateToCalculator}
               formatCurrency={formatCurrency}
+              showTeamToggle={!!teamId}
+              historyScope={teamId ? historyScope : 'personal'}
+              onScopeChange={setHistoryScope}
+              teamName={teamName}
             />
           </div>
 

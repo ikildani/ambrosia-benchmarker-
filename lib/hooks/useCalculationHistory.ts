@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getHistory, CalculationHistoryItem } from '@/lib/history';
+import { getHistory, type CalculationHistoryItem, type HistoryScope } from '@/lib/history';
 
 interface DatabaseCalculation {
   id: string;
   user_id: string | null;
+  therapeutic_area?: string | null;
+  calculation_fingerprint?: string | null;
+  /** Present only on ?scope=team responses (migration 100). */
+  owner?: { id: string | null; email: string | null; name: string | null; is_me: boolean };
   session_id: string | null;
   anonymous_id: string | null;
   modality: string;
@@ -93,7 +97,12 @@ function mapDatabaseToHistoryItem(calc: DatabaseCalculation): CalculationHistory
   return {
     id: calc.id,
     timestamp: calc.created_at,
+    fingerprint: calc.calculation_fingerprint ?? null,
+    owner: calc.owner
+      ? { id: calc.owner.id, email: calc.owner.email, name: calc.owner.name, isMe: calc.owner.is_me }
+      : undefined,
     inputs: {
+      therapeuticArea: calc.therapeutic_area || undefined,
       phase: calc.development_phase,
       modality: calc.modality,
       indication: calc.indication_specific || calc.indication_category || '',
@@ -124,10 +133,18 @@ interface UseCalculationHistoryResult {
   error: string | null;
   refresh: () => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
+  /** Effective scope: 'team' is only honoured for authenticated users. */
+  scope: HistoryScope;
 }
 
-export function useCalculationHistory(): UseCalculationHistoryResult {
+/**
+ * @param scope 'personal' (default) merges DB rows with localStorage;
+ *              'team' fetches every active teammate's calculations
+ *              (GET /api/calculations?scope=team) with owner info attached.
+ */
+export function useCalculationHistory(scope: HistoryScope = 'personal'): UseCalculationHistoryResult {
   const { user, isAuthenticated } = useAuth();
+  const effectiveScope: HistoryScope = isAuthenticated && user?.id ? scope : 'personal';
   const [history, setHistory] = useState<CalculationHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +154,18 @@ export function useCalculationHistory(): UseCalculationHistoryResult {
     setError(null);
 
     try {
-      if (isAuthenticated && user?.id) {
+      if (isAuthenticated && user?.id && effectiveScope === 'team') {
+        // Team workspace: everyone on the team sees each other's estimates.
+        // No localStorage merge — local items are personal by definition.
+        const response = await fetch(
+          `/api/calculations?scope=team&user_id=${encodeURIComponent(user.id)}&limit=100`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch team calculation history');
+        }
+        const data = await response.json();
+        setHistory((data.calculations || []).map(mapDatabaseToHistoryItem));
+      } else if (isAuthenticated && user?.id) {
         // Fetch from database for authenticated users
         const response = await fetch(`/api/calculations?user_id=${encodeURIComponent(user.id)}&limit=50`);
 
@@ -163,13 +191,14 @@ export function useCalculationHistory(): UseCalculationHistoryResult {
       }
     } catch (err) {
       console.error('Error fetching history:', err);
-      setError('Failed to load calculation history');
-      // Fall back to localStorage on error
-      setHistory(getHistory());
+      setError(effectiveScope === 'team' ? 'Failed to load team history' : 'Failed to load calculation history');
+      // Fall back to localStorage on error (personal scope only — never show
+      // personal local items under the Team toggle)
+      setHistory(effectiveScope === 'team' ? [] : getHistory());
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, effectiveScope]);
 
   const deleteItem = useCallback(async (id: string) => {
     try {
@@ -209,5 +238,6 @@ export function useCalculationHistory(): UseCalculationHistoryResult {
     error,
     refresh: fetchHistory,
     deleteItem,
+    scope: effectiveScope,
   };
 }

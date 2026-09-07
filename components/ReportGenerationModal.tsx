@@ -12,6 +12,8 @@ import epiData from '@/data/epidemiology.json';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import type { NegotiationPlaybook } from '@/lib/ai/playbook-generator';
 import { captureClientError } from '@/lib/sentry-client';
+import { recordClientAuditEvent } from '@/lib/audit-client';
+import { computeCalculationFingerprint } from '@/lib/financial/calculation-version';
 
 type ModalStep = 'idle' | 'analyzing' | 'generating_memo' | 'compiling' | 'building' | 'success' | 'error';
 
@@ -279,6 +281,15 @@ export default function ReportGenerationModal({
           markComplete('building');
           setCurrentStep('success');
           p.onDownloadComplete();
+          // Audit trail (migration 100): Excel is generated in the browser, so
+          // the completion is reported from here. Same fingerprint as the saved row.
+          recordClientAuditEvent({
+            event_type: 'results_exported',
+            resource_type: 'report',
+            resource_id: p.reportId ?? null,
+            calculation_fingerprint: computeCalculationFingerprint(p.fullInputs as unknown as Record<string, unknown>),
+            metadata: { format: 'excel', indication: p.labels.indication, phase: p.labels.phase, modality: p.labels.modality },
+          });
           await delay(1500);
           if (!abortRef.current) p.onClose();
           return;
@@ -430,6 +441,13 @@ export default function ReportGenerationModal({
         // PDF ready — show success with download/view buttons
         setCurrentStep('success');
         p.onDownloadComplete();
+        recordClientAuditEvent({
+          event_type: 'results_exported',
+          resource_type: 'report',
+          resource_id: p.reportId ?? null,
+          calculation_fingerprint: computeCalculationFingerprint(p.fullInputs as unknown as Record<string, unknown>),
+          metadata: { format: 'pdf', indication: p.labels.indication, phase: p.labels.phase, modality: p.labels.modality },
+        });
       } catch (err) {
         captureClientError(err, 'ReportGenerationModal', { context: 'Report generation pipeline failed' });
         if (!abortRef.current) {

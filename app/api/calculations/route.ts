@@ -7,7 +7,37 @@ import { captureApiError } from '@/lib/sentry-api';
 import { calculationRequestSchema, clampInt } from '@/lib/api-validation';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { notifyCalculation } from '@/lib/slack/notify';
+import { recordAuditEvent } from '@/lib/audit-log';
 import { z } from 'zod';
+
+// ── Team-scope history (migration 100) ───────────────────────────────────────
+// GET ?scope=team returns calculations owned by every active member of the
+// caller's team. The service-role client bypasses RLS, so membership is
+// checked explicitly here (team_members is canonical; user_profiles.team_id
+// is a denormalised copy and is not trusted for authorisation).
+const TEAM_HISTORY_COLUMNS = [
+  'id', 'user_id', 'created_at', 'calculation_version', 'calculation_fingerprint',
+  'therapeutic_area', 'modality', 'development_phase',
+  'indication_category', 'indication_specific', 'territory_scope', 'deal_type',
+  'output_upfront_low', 'output_upfront_mid', 'output_upfront_high',
+  'output_milestones_total', 'output_royalty_low', 'output_royalty_high',
+  'output_total_deal_value_low', 'output_total_deal_value_high',
+].join(', ');
+
+/** Active team membership for a user, or null. Exported for the route test via module scope only. */
+async function getActiveTeamMembership(
+  supabase: ReturnType<typeof createServiceClient>,
+  userId: string
+): Promise<{ team_id: string; role: string } | null> {
+  const { data } = await supabase
+    .from('team_members')
+    .select('team_id, role')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .limit(1)
+    .maybeSingle();
+  return (data as { team_id: string; role: string } | null) || null;
+}
 
 /** Sanitize numeric output — reject NaN/Infinity, return null for invalid */
 function safeNum(v: unknown): number | null {
@@ -192,6 +222,27 @@ export async function POST(request: NextRequest) {
       return apiError('Failed to save calculation', 500);
     }
 
+    // Audit trail (migration 100) — authenticated users only; never throws.
+    if (verifiedUserId) {
+      void recordAuditEvent({
+        event_type: 'calculation_created',
+        resource_type: 'calculation',
+        user_id: verifiedUserId,
+        resource_id: calculation!.id,
+        calculation_fingerprint: calculationData.calculation_fingerprint,
+        metadata: {
+          therapeutic_area: calculationData.therapeutic_area,
+          modality: calculationData.modality,
+          development_phase: calculationData.development_phase,
+          indication: calculationData.indication_specific || calculationData.indication_category || null,
+          deal_type: calculationData.deal_type,
+          upfront_mid: calculationData.output_upfront_mid,
+          total_deal_value_high: calculationData.output_total_deal_value_high,
+        },
+        request,
+      });
+    }
+
     // Fire event and update session count (non-blocking — don't let these fail the response)
     const validSessionId = calculationData.session_id;
 
@@ -283,6 +334,77 @@ export async function GET(request: NextRequest) {
     const countOnly = searchParams.get('count') === 'true';
     const monthOnly = searchParams.get('month') === 'true'; // Get count for current month only
     const limit = clampInt(searchParams.get('limit'), 1, 100, 50);
+    const scope = searchParams.get('scope') === 'team' ? 'team' : 'personal';
+
+    // Team scope: authenticated caller only; user_id param is optional (it is
+    // still validated against the session when supplied).
+    if (scope === 'team') {
+      const authUser = await getAuthenticatedUser(request);
+      if (!authUser) return apiError('Authentication required', 401);
+      if (requestedUserId && requestedUserId !== authUser.id) {
+        return apiError('Unauthorized: user_id does not match session', 403);
+      }
+
+      const membership = await getActiveTeamMembership(supabase, authUser.id);
+      if (!membership) return apiError('Not a team member', 403, 'NOT_TEAM_MEMBER');
+
+      const { data: members, error: membersError } = await supabase
+        .from('team_members')
+        .select('user_id')
+        .eq('team_id', membership.team_id)
+        .eq('status', 'active');
+      if (membersError) {
+        console.error('Team members fetch error:', membersError);
+        return apiError('Failed to fetch team', 500);
+      }
+      const memberIds = (members || []).map((m: { user_id: string }) => m.user_id);
+      if (!memberIds.includes(authUser.id)) memberIds.push(authUser.id);
+
+      const { data: rows, error: rowsError } = await supabase
+        .from('calculations')
+        .select(TEAM_HISTORY_COLUMNS)
+        .in('user_id', memberIds)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (rowsError) {
+        console.error('Team calculation fetch error:', rowsError);
+        return apiError('Failed to fetch team calculations', 500);
+      }
+
+      const { data: profiles } = await supabase
+        .from('user_profiles')
+        .select('id, email, full_name')
+        .in('id', memberIds);
+      const profileMap = new Map(
+        ((profiles || []) as Array<{ id: string; email: string | null; full_name: string | null }>)
+          .map((p) => [p.id, p])
+      );
+
+      const calculations = ((rows || []) as unknown as Array<Record<string, unknown> & { user_id: string | null }>)
+        .map((row) => {
+          const owner = row.user_id ? profileMap.get(row.user_id) : undefined;
+          return {
+            ...row,
+            owner: {
+              id: row.user_id,
+              email: owner?.email || null,
+              name: owner?.full_name || null,
+              is_me: row.user_id === authUser.id,
+            },
+          };
+        });
+
+      void recordAuditEvent({
+        event_type: 'team_history_viewed',
+        resource_type: 'history',
+        user_id: authUser.id,
+        team_id: membership.team_id,
+        metadata: { count: calculations.length },
+        request,
+      });
+
+      return apiSuccess({ calculations, scope: 'team', team_id: membership.team_id, role: membership.role });
+    }
 
     if (!requestedUserId && !anonymousId) {
       return apiError('user_id or anonymous_id is required', 400);

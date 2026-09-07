@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { CalculationResult } from '@/lib/calculations';
 import type { FinancialModelResult } from '@/lib/financial/run-financial-model';
+import { recordClientAuditEvent } from '@/lib/audit-client';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -65,6 +66,15 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels, f
       }
 
       setShareUrl(data.shareUrl);
+      // Audit trail (migration 100). The share route stamps a provenance
+      // fingerprint on the row; reuse it so the event links to the estimate.
+      recordClientAuditEvent({
+        event_type: 'results_shared',
+        resource_type: 'share',
+        resource_id: data.shareToken ?? null,
+        calculation_fingerprint: data.provenance?.fingerprint ?? null,
+        metadata: { expires_in: expiresIn, indication: labels.indication, phase: labels.phase, modality: labels.modality },
+      });
     } catch (err) {
       setError('Failed to create share link');
     } finally {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { formatDate, type CalculationHistoryItem } from '@/lib/history';
+import { formatDate, ownerLabel, type CalculationHistoryItem, type HistoryScope } from '@/lib/history';
 import EmptyState from '@/components/ui/EmptyState';
 
 interface HistoryTabProps {
@@ -17,6 +17,11 @@ interface HistoryTabProps {
   onRecalculate: (item: CalculationHistoryItem) => void;
   onNavigateToCalculator: () => void;
   formatCurrency: (value: number) => string;
+  /** Team workspace (migration 100): shown only when the user belongs to a team. */
+  showTeamToggle?: boolean;
+  historyScope?: HistoryScope;
+  onScopeChange?: (scope: HistoryScope) => void;
+  teamName?: string | null;
 }
 
 const HistoryTab = React.memo(function HistoryTab({
@@ -34,15 +39,49 @@ const HistoryTab = React.memo(function HistoryTab({
   onRecalculate,
   onNavigateToCalculator,
   formatCurrency,
+  showTeamToggle = false,
+  historyScope = 'personal',
+  onScopeChange,
+  teamName,
 }: HistoryTabProps) {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const isTeamScope = historyScope === 'team';
 
   return (
     <div aria-live="polite" className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
-        <div>
-          <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and manage your past deal analyses</p>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-slate-900 dark:text-white">Calculation History</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {isTeamScope
+                ? `Every estimate run by ${teamName ? `the ${teamName} team` : 'your team'}, newest first`
+                : 'View and manage your past deal analyses'}
+            </p>
+          </div>
+          {showTeamToggle && onScopeChange && (
+            <div
+              role="tablist"
+              aria-label="History scope"
+              className="inline-flex items-center gap-1 p-1 rounded-full bg-slate-100 dark:bg-slate-700 self-start"
+            >
+              {([['personal', 'Mine'], ['team', 'Team']] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  role="tab"
+                  aria-selected={historyScope === value}
+                  onClick={() => onScopeChange(value)}
+                  className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    historyScope === value
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Search & Controls */}
@@ -124,8 +163,20 @@ const HistoryTab = React.memo(function HistoryTab({
                     </svg>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <p className="font-semibold text-slate-900 dark:text-white">{item.labels.phase}</p>
+                      {isTeamScope && item.owner && (
+                        <span
+                          title={item.owner.email || undefined}
+                          className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                            item.owner.isMe
+                              ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                          }`}
+                        >
+                          {ownerLabel(item.owner)}
+                        </span>
+                      )}
                       {item.inputs.therapeuticArea === 'neurology' && (
                         <span className="px-2 py-0.5 bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
                           Neuro
@@ -142,6 +193,11 @@ const HistoryTab = React.memo(function HistoryTab({
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       {formatDate(item.timestamp)}
+                      {isTeamScope && item.fingerprint && (
+                        <span className="ml-2 font-mono text-[10px] text-slate-400 dark:text-slate-500" title="Calculation fingerprint (engine version + input hash)">
+                          {item.fingerprint}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -192,12 +248,14 @@ const HistoryTab = React.memo(function HistoryTab({
                     </svg>
                     Recalculate
                   </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setPendingDeleteId(item.id); }}
-                    className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    Delete
-                  </button>
+                  {(!item.owner || item.owner.isMe) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPendingDeleteId(item.id); }}
+                      className="text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -217,8 +275,10 @@ const HistoryTab = React.memo(function HistoryTab({
       ) : (
         <EmptyState
           icon="calculator"
-          title="No calculations yet"
-          description="Run your first deal analysis to see your calculation history here."
+          title={isTeamScope ? 'No team calculations yet' : 'No calculations yet'}
+          description={isTeamScope
+            ? 'Estimates run by any active member of your team will appear here.'
+            : 'Run your first deal analysis to see your calculation history here.'}
           action={{
             label: 'New Calculation',
             onClick: () => onNavigateToCalculator(),
