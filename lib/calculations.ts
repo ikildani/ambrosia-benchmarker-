@@ -1,4 +1,70 @@
 import { getBenchmarksSync } from '@/lib/benchmarks';
+import { POS_BY_THERAPEUTIC_AREA } from '@/lib/financial/pos-tables';
+import { DEFAULT_DISCOUNT_RATES } from '@/lib/financial/discount-rates';
+import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
+
+// ---------------------------------------------------------------------------
+// Custom Model Assumptions → headline range (see block inside calculateDealTerms)
+// ---------------------------------------------------------------------------
+
+/** Median peak-sales multiple of total deal value by phase (mirrors run-financial-model.ts). */
+const PEAK_SALES_MULTIPLE_MEDIAN: Record<string, number> = {
+  discovery: 16, preclinical: 12, phase1: 8, phase1_2: 6.5, phase2: 5,
+  phase2_3: 4, phase3: 3, nda_filed: 2.2, approved: 1.5,
+};
+
+/** Transition keys from the current phase to approval, in order. */
+const TRANSITIONS_TO_APPROVAL: Record<string, string[]> = {
+  discovery: ['discoveryToPreclinical', 'preclinicalToPhase1', 'phase1ToPhase2', 'phase2ToPhase3', 'phase3ToApproval', 'ndaFiledToApproval'],
+  preclinical: ['preclinicalToPhase1', 'phase1ToPhase2', 'phase2ToPhase3', 'phase3ToApproval', 'ndaFiledToApproval'],
+  phase1: ['phase1ToPhase2', 'phase2ToPhase3', 'phase3ToApproval', 'ndaFiledToApproval'],
+  phase1_2: ['phase1_2ToPhase2', 'phase2ToPhase3', 'phase3ToApproval', 'ndaFiledToApproval'],
+  phase2: ['phase2ToPhase3', 'phase3ToApproval', 'ndaFiledToApproval'],
+  phase2_3: ['phase2_3ToPhase3', 'phase3ToApproval', 'ndaFiledToApproval'],
+  phase3: ['phase3ToApproval', 'ndaFiledToApproval'],
+  nda_filed: ['ndaFiledToApproval'],
+  approved: [],
+};
+
+/** Approximate years from signing to peak sales, used for the discount-rate elasticity. */
+const YEARS_TO_PEAK: Record<string, number> = {
+  discovery: 12, preclinical: 10, phase1: 8, phase1_2: 7.5, phase2: 7,
+  phase2_3: 6, phase3: 5, nda_filed: 4, approved: 3,
+};
+
+/** Accept both 'phase2ToPhase3' and 'p2_to_p3' style override keys. */
+function readTransitionOverride(rates: Partial<Record<string, number>>, key: string): number | null {
+  const aliases: Record<string, string[]> = {
+    discoveryToPreclinical: ['discovery_to_preclinical'],
+    preclinicalToPhase1: ['preclinical_to_p1', 'preclinical_to_phase1'],
+    phase1ToPhase2: ['p1_to_p2'],
+    phase1_2ToPhase2: ['p1_2_to_p2'],
+    phase2ToPhase3: ['p2_to_p3'],
+    phase2_3ToPhase3: ['p2_3_to_p3'],
+    phase3ToApproval: ['p3_to_approval'],
+    ndaFiledToApproval: ['nda_to_approval', 'nda_filed_to_approval'],
+  };
+  for (const k of [key, ...(aliases[key] ?? [])]) {
+    const v = rates[k];
+    if (typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= 1) return v;
+  }
+  return null;
+}
+
+function clampMultiplier(value: number, lo: number, hi: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(hi, Math.max(lo, value));
+}
+
+function scaleRange(r: { low: number; median: number; high: number }, m: number): void {
+  r.low = Math.round(r.low * m);
+  r.median = Math.round(r.median * m);
+  r.high = Math.round(r.high * m);
+}
+
+function fmtM(v: number): string {
+  return v >= 1000 ? `${(v / 1000).toFixed(1)}B` : `${Math.round(v)}M`;
+}
 import { validateCalculationOutput, type GuardrailWarning } from './output-guardrails';
 export type { GuardrailWarning } from './output-guardrails';
 
@@ -386,6 +452,13 @@ export interface CalculationInput {
   // When set (>0), takes precedence over the engine's indication-based anchor.
   // null/undefined/0 = engine uses indication + TA defaults as before.
   peakSalesOverrideM?: number | null;
+  /**
+   * The peak-sales default the UI displayed next to the override input ($M).
+   * When present, the headline-range peak-sales overlay compares the user's
+   * override against this number, so "what you saw" and "what moved the
+   * number" are the same reference.
+   */
+  referencePeakSalesM?: number | null;
 
   // Deal-type-specific structural inputs (mirror RNPVInput).
   // Reformulation: sub-type selection drives PoS uplift, cost, and duration profiles.
@@ -417,7 +490,31 @@ export interface MilestoneBreakdown {
 export interface FactorImpact {
   name: string;
   impact: 'positive' | 'negative' | 'neutral';
+  /** Raw multiplier effect as shown in the wizard, e.g. +25. */
   percentage: number;
+  /** Effect actually applied after dampening exponents, e.g. +17. */
+  appliedPercentage?: number;
+  /** Plain-language reason for the modifier, when available. */
+  context?: string;
+}
+
+/** Where the starting number came from, so the user can audit the base of the estimate. */
+export interface BaselineProvenance {
+  phase: Phase;
+  therapeuticArea: TherapeuticArea;
+  totalValueMedian: number;
+  upfrontMedian: number;
+  royaltyBase: number;
+  royaltyMax: number;
+  /** Number of disclosed deals behind the calibrated baseline; null when static. */
+  sampleSize: number | null;
+  /** ISO timestamp of the last calibration run; null when static. */
+  calibratedAt: string | null;
+  source: 'calibrated' | 'static';
+  rangeWidthPercent: number;
+  /** Product of all dampened multipliers applied to the baseline median. */
+  effectiveMultiplier: number;
+  dealTypeMultiplier: number;
 }
 
 export interface DrillDownData {
@@ -425,6 +522,7 @@ export interface DrillDownData {
   rangeWidthPercent: number;
   factors: FactorImpact[];
   breakdown?: MilestoneBreakdown[];
+  baseline?: BaselineProvenance;
 }
 
 export interface DrillDownCollection {
@@ -458,7 +556,7 @@ export interface CalculationResult {
   tieredRoyalties: TieredRoyalties;
   dealRecommendation: DealRecommendation;
   negotiationInsight: string;
-  modifiers: { name: string; multiplier: number; context?: string }[];
+  modifiers: { name: string; multiplier: number; context?: string; applied?: number }[];
   labels: {
     phase: string;
     modality: string;
@@ -1054,7 +1152,12 @@ function sanitizeRoyaltyRange(r: { low: number; high: number }): { low: number; 
 }
 
 export function calculateDealTerms(input: CalculationInput): CalculationResult {
-  const modifiers: { name: string; multiplier: number; context?: string }[] = [];
+  // Resolve benchmarks per call, not per module load. The module-level
+  // snapshot below is taken before the Supabase calibration overlay has
+  // loaded, so using it here meant the engine silently ran on static JSON
+  // forever while other surfaces showed calibrated numbers.
+  const benchmarks = getBenchmarksSync();
+  const modifiers: { name: string; multiplier: number; context?: string; applied?: number }[] = [];
   const isNeurology = input.therapeuticArea === 'neurology';
   const isImmunology = input.therapeuticArea === 'immunology';
   const isMetabolic = input.therapeuticArea === 'metabolic';
@@ -1526,6 +1629,54 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     safeMultiplier(1 + interactionBonus) *
     safeMultiplier(Math.pow(targetRouteMultiplier, 0.80));
 
+  // Record the post-dampening ("applied") effect of every modifier so the UI
+  // can show "+25% shown → +17% applied" instead of only the raw multiplier.
+  // Components are listed in the order the modifiers were pushed above; each
+  // modifier consumes the first unconsumed component with an identical value.
+  // Additive terms (regulatory designations, interaction bonus) and the deal
+  // type factor are applied as-is, so their "applied" equals the multiplier.
+  {
+    const components: { value: number; exp: number; used: boolean }[] = [
+      { value: modalityMultiplier, exp: 1.0, used: false },
+      { value: indicationMultiplier, exp: indicationExp, used: false },
+      { value: territoryMultiplier, exp: 1.0, used: false },
+      { value: biomarkerMultiplier, exp: 0.9, used: false },
+      { value: lotMultiplier, exp: lotExp, used: false },
+      { value: comboMultiplier, exp: comboExp, used: false },
+      { value: competitiveMultiplier, exp: 0.7, used: false },
+      { value: dataQualityMultiplier, exp: 0.5, used: false },
+      { value: bbbMultiplier, exp: 0.8, used: false },
+      { value: diseaseProgMultiplier, exp: 0.7, used: false },
+      { value: biomarkerValMultiplier, exp: 0.75, used: false },
+      { value: immuneResetMultiplier, exp: 0.85, used: false },
+      { value: targetSpecMultiplier, exp: 0.7, used: false },
+      { value: diseaseSevMultiplier, exp: 0.75, used: false },
+      { value: mechDiffMultiplier, exp: 0.80, used: false },
+      { value: weightLossMultiplier, exp: 0.85, used: false },
+      { value: routeMultiplier, exp: 0.75, used: false },
+      { value: comorbidityMultiplier, exp: 0.70, used: false },
+      { value: cvEndpointMultiplier, exp: 0.80, used: false },
+      { value: cvPopRiskMultiplier, exp: 0.75, used: false },
+      { value: resistanceMultiplier, exp: 0.85, used: false },
+      { value: pubHealthMultiplier, exp: 0.70, used: false },
+      { value: ocularDeliveryMultiplier, exp: 0.80, used: false },
+      { value: durabilityMultiplier, exp: 0.85, used: false },
+      { value: whPopMultiplier, exp: 0.75, used: false },
+      { value: whRegMultiplier, exp: 0.70, used: false },
+      { value: targetRouteMultiplier, exp: 0.80, used: false },
+    ];
+    for (const m of modifiers) {
+      if (m.applied !== undefined) continue;
+      const c = components.find(x => !x.used && Math.abs(x.value - m.multiplier) < 1e-9 && x.value !== 1);
+      if (c) {
+        c.used = true;
+        m.applied = Math.pow(m.multiplier, c.exp);
+      } else {
+        m.applied = m.multiplier;
+      }
+    }
+  }
+
   // Calculate total deal value
   const baseTotalValue = phaseBaseline.totalValue;
   const rangeWidth = phaseConfig.rangeWidths[input.phase];
@@ -1657,6 +1808,92 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     median: adjustedMedian,
     high: Math.round(adjustedMedian * (1 + rangeWidth))
   };
+
+  // --------------------------------------------------------------------------
+  // Custom Model Assumptions → headline range.
+  // Until now these overrides reached only the rNPV engine, so a user who
+  // changed peak sales watched the upfront/milestone range not move. Each
+  // override scales the benchmark range with a deliberately conservative
+  // elasticity and a hard clamp, and appears as its own modifier row so the
+  // effect is visible in "Why This Range?".
+  // --------------------------------------------------------------------------
+  {
+    const ca = input.customAssumptions;
+
+    // Peak sales: sqrt elasticity vs. the model's own default peak. The
+    // reference is, in order: the default the UI displayed next to the input
+    // (referencePeakSalesM), the indication's typical asset peak (the same
+    // number PeakSalesOverrideInput shows), and finally the phase multiple of
+    // deal value. Using the displayed default keeps "what you saw" and "what
+    // moved the number" identical.
+    const userPeak = ca?.peakSalesOverride?.median ?? input.peakSalesOverrideM ?? null;
+    if (userPeak != null && Number.isFinite(userPeak) && userPeak > 0) {
+      const typicalPeak = getIndicationTypicalAssetPeak(String(input.indication));
+      const referencePeak =
+        (input.referencePeakSalesM != null && input.referencePeakSalesM > 0 ? input.referencePeakSalesM : null)
+        ?? (typicalPeak != null && typicalPeak > 0 ? typicalPeak : null)
+        ?? totalDealValue.median * (PEAK_SALES_MULTIPLE_MEDIAN[input.phase] ?? 5);
+      if (referencePeak > 0) {
+        const m = clampMultiplier(Math.pow(userPeak / referencePeak, 0.5), 0.5, 2.0);
+        if (Math.abs(m - 1) >= 0.01) {
+          scaleRange(totalDealValue, m);
+          modifiers.push({
+            name: 'Your peak sales assumption',
+            multiplier: m,
+            applied: m,
+            context: `You entered $${fmtM(userPeak)} peak annual sales vs. the model default of $${fmtM(referencePeak)}. Square-root elasticity, capped at 0.5×–2×.`,
+          });
+        }
+      }
+    }
+
+    // Probability of success: cumulative PoS to approval, user vs. base table.
+    const rates = ca?.phaseTransitionRates;
+    if (rates && Object.keys(rates).length > 0) {
+      const base = (POS_BY_THERAPEUTIC_AREA[input.therapeuticArea] ?? POS_BY_THERAPEUTIC_AREA.oncology) as unknown as Record<string, number>;
+      const path = TRANSITIONS_TO_APPROVAL[input.phase] ?? [];
+      let baseCum = 1;
+      let userCum = 1;
+      let overridden = 0;
+      for (const k of path) {
+        const b = base[k] ?? 1;
+        const u = readTransitionOverride(rates, k);
+        baseCum *= b;
+        userCum *= u ?? b;
+        if (u != null && Math.abs(u - b) > 1e-6) overridden++;
+      }
+      if (overridden > 0 && baseCum > 0 && userCum > 0) {
+        const m = clampMultiplier(Math.pow(userCum / baseCum, 0.6), 0.5, 1.6);
+        if (Math.abs(m - 1) >= 0.01) {
+          scaleRange(totalDealValue, m);
+          modifiers.push({
+            name: 'Your probability-of-success assumptions',
+            multiplier: m,
+            applied: m,
+            context: `Cumulative PoS to approval ${(userCum * 100).toFixed(1)}% vs. base ${(baseCum * 100).toFixed(1)}% (${overridden} transition${overridden === 1 ? '' : 's'} overridden). Elasticity 0.6, capped at 0.5×–1.6×.`,
+          });
+        }
+      }
+    }
+
+    // Discount rate: present-value scaling over the years to peak sales.
+    if (ca?.discountRate != null && Number.isFinite(ca.discountRate) && ca.discountRate > 0 && ca.discountRate < 1) {
+      const baseRate = DEFAULT_DISCOUNT_RATES[input.therapeuticArea]?.[input.phase] ?? 0.11;
+      if (Math.abs(ca.discountRate - baseRate) > 1e-4) {
+        const years = YEARS_TO_PEAK[input.phase] ?? 6;
+        const m = clampMultiplier(Math.pow((1 + baseRate) / (1 + ca.discountRate), years), 0.7, 1.3);
+        if (Math.abs(m - 1) >= 0.01) {
+          scaleRange(totalDealValue, m);
+          modifiers.push({
+            name: 'Your discount rate',
+            multiplier: m,
+            applied: m,
+            context: `${(ca.discountRate * 100).toFixed(1)}% vs. model default ${(baseRate * 100).toFixed(1)}% for this phase, compounded over ~${years} years to peak. Capped at 0.7×–1.3×.`,
+          });
+        }
+      }
+    }
+  }
 
   // --------------------------------------------------------------------------
   // Deal-type structural overlays (co-dev cost sharing, option exercise fee,
@@ -1909,6 +2146,21 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const labels = benchmarks.labels;
 
   // Generate drill-down data
+  const baselineProvenance: BaselineProvenance = {
+    phase: input.phase,
+    therapeuticArea: input.therapeuticArea,
+    totalValueMedian: phaseBaseline.totalValue.median,
+    upfrontMedian: phaseBaseline.upfront.median,
+    royaltyBase: phaseBaseline.royalty.base,
+    royaltyMax: phaseBaseline.royalty.max,
+    sampleSize: phaseBaseline.meta?.sampleSize ?? null,
+    calibratedAt: phaseBaseline.meta?.calibratedAt ?? null,
+    source: phaseBaseline.meta?.source ?? 'static',
+    rangeWidthPercent: Math.round(rangeWidth * 100),
+    effectiveMultiplier,
+    dealTypeMultiplier,
+  };
+
   const drillDown = generateDrillDownData(
     input,
     modifiers,
@@ -1916,7 +2168,8 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     devMilestones,
     regMilestones,
     commMilestones,
-    tieredRoyalties
+    tieredRoyalties,
+    baselineProvenance
   );
 
   const calcResult: CalculationResult = {
@@ -2077,34 +2330,42 @@ function generateWomensHealthMilestoneExplanation(phase: Phase, upfrontPercent: 
 
 function generateDrillDownData(
   input: CalculationInput,
-  modifiers: { name: string; multiplier: number; context?: string }[],
+  modifiers: { name: string; multiplier: number; context?: string; applied?: number }[],
   rangeWidth: number,
   devMilestones: { low: number; median: number; high: number },
   regMilestones: { low: number; median: number; high: number },
   commMilestones: { low: number; median: number; high: number },
-  tieredRoyalties: TieredRoyalties
+  tieredRoyalties: TieredRoyalties,
+  baseline?: BaselineProvenance
 ): DrillDownCollection {
   const phaseLabels = benchmarks.labels.phases;
   const rangePercent = Math.round(rangeWidth * 100);
 
-  // Convert modifiers to factor impacts
+  // Convert modifiers to factor impacts. `percentage` is the raw multiplier
+  // the user saw in the wizard; `appliedPercentage` is what actually moved
+  // the number after the dampening exponents.
   const factors: FactorImpact[] = modifiers.map(mod => ({
     name: mod.name,
     impact: mod.multiplier > 1 ? 'positive' : mod.multiplier < 1 ? 'negative' : 'neutral',
-    percentage: Math.round((mod.multiplier - 1) * 100)
+    percentage: Math.round((mod.multiplier - 1) * 100),
+    appliedPercentage: Math.round(((mod.applied ?? mod.multiplier) - 1) * 100),
+    context: mod.context,
   }));
 
-  // Phase-specific range explanations
+  // Phase-specific range explanations. The band is a fixed width per phase
+  // around the adjusted median. It is NOT a percentile of comparable deals;
+  // the p25–p75 of actual deals lives on the Comparables tab.
+  const bandNote = `The low and high are the median ±${rangePercent}%, a fixed directional band for this phase, not a percentile range of comparable deals.`;
   const rangeExplanations: Partial<Record<Phase, string>> = {
-    discovery: `Discovery-stage assets have the widest valuation range (±${rangePercent}%) due to minimal validation and high attrition risk.`,
-    preclinical: `Preclinical assets have the widest valuation range (±${rangePercent}%) due to significant development uncertainty and limited clinical validation.`,
-    phase1: `Phase 1 assets show moderate variance (±${rangePercent}%) as initial safety data reduces but doesn't eliminate development risk.`,
-    phase1_2: `Phase 1/2 assets show moderate variance (±${rangePercent}%) as initial safety and early efficacy data provide partial de-risking.`,
-    phase2: `Phase 2 assets typically see ±${rangePercent}% variance based on efficacy signals, competitive dynamics, and pathway clarity.`,
-    phase2_3: `Phase 2/3 adaptive assets see ±${rangePercent}% variance — efficacy trends from Phase 2 part inform risk, but pivotal data is pending.`,
-    phase3: `Phase 3 assets have tighter ranges (±${rangePercent}%) given substantial de-risking, though regulatory and commercial uncertainties remain.`,
-    nda_filed: `NDA/BLA-filed assets have narrow ranges (±${rangePercent}%) with primary risk being regulatory decision timing and label breadth.`,
-    approved: `Approved assets show the tightest ranges (±${rangePercent}%) with valuations driven primarily by commercial execution factors.`,
+    discovery: `Discovery-stage assets carry the widest band (±${rangePercent}%) due to minimal validation and high attrition risk. ${bandNote}`,
+    preclinical: `Preclinical assets carry the widest band (±${rangePercent}%) due to significant development uncertainty and limited clinical validation. ${bandNote}`,
+    phase1: `Phase 1 assets carry a moderate band (±${rangePercent}%) as initial safety data reduces but doesn't eliminate development risk. ${bandNote}`,
+    phase1_2: `Phase 1/2 assets carry a moderate band (±${rangePercent}%) as initial safety and early efficacy data provide partial de-risking. ${bandNote}`,
+    phase2: `Phase 2 assets carry a ±${rangePercent}% band reflecting efficacy signals, competitive dynamics, and pathway clarity. ${bandNote}`,
+    phase2_3: `Phase 2/3 adaptive assets carry a ±${rangePercent}% band — efficacy trends from the Phase 2 part inform risk, but pivotal data is pending. ${bandNote}`,
+    phase3: `Phase 3 assets carry a tighter band (±${rangePercent}%) given substantial de-risking, though regulatory and commercial uncertainties remain. ${bandNote}`,
+    nda_filed: `NDA/BLA-filed assets carry a narrow band (±${rangePercent}%) with primary risk being regulatory decision timing and label breadth. ${bandNote}`,
+    approved: `Approved assets carry the tightest band (±${rangePercent}%) with valuations driven primarily by commercial execution factors. ${bandNote}`,
   };
 
   // Development milestone breakdown by phase
@@ -2176,13 +2437,15 @@ function generateDrillDownData(
 
   return {
     upfront: {
-      rangeExplanation: `Upfront payments are guaranteed at signing. The range reflects market variability and negotiation outcomes for ${phaseLabels[input.phase]} assets.`,
+      rangeExplanation: `Upfront payments are guaranteed at signing. The band reflects market variability and negotiation outcomes for ${phaseLabels[input.phase]} assets. ${bandNote}`,
       rangeWidthPercent: rangePercent,
+      baseline,
       factors: factors.filter(f => f.impact !== 'neutral')
     },
     totalDealValue: {
       rangeExplanation: rangeExplanations[input.phase] ?? rangeExplanations['phase2']!,
       rangeWidthPercent: rangePercent,
+      baseline,
       factors: factors.filter(f => f.impact !== 'neutral')
     },
     devMilestones: {

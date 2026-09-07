@@ -11,6 +11,17 @@ interface DrillDownPanelProps {
   onUpgradeClick?: () => void;
 }
 
+const PHASE_LABEL: Record<string, string> = {
+  discovery: 'Discovery', preclinical: 'Preclinical', phase1: 'Phase 1', phase1_2: 'Phase 1/2',
+  phase2: 'Phase 2', phase2_3: 'Phase 2/3', phase3: 'Phase 3', nda_filed: 'NDA/BLA filed', approved: 'Approved',
+};
+const TA_LABEL: Record<string, string> = {
+  oncology: 'oncology', neurology: 'neurology', immunology: 'immunology', metabolic: 'metabolic',
+  cardiovascular: 'cardiovascular', infectiousDisease: 'infectious disease', ophthalmology: 'ophthalmology',
+  womensHealth: "women's health", rareDisease: 'rare disease', hematology: 'hematology',
+  dermatology: 'dermatology', gastroenterology: 'gastroenterology',
+};
+
 const staggerChildren = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06 } },
@@ -39,6 +50,35 @@ function DrillDownPanelInner({
         <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Why This Range?</h5>
         <p className="text-sm text-neutral-600 dark:text-slate-300 leading-relaxed">{data.rangeExplanation}</p>
       </motion.div>
+
+      {/* Starting point — where the number comes from */}
+      {data.baseline && (
+        <motion.div className="mb-4" variants={fadeUp}>
+          <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Starting Point</h5>
+          <div className="rounded-lg border border-neutral-200 dark:border-slate-700/60 bg-neutral-50 dark:bg-slate-800/40 px-3 py-2.5 text-sm space-y-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+              <span className="text-neutral-600 dark:text-slate-300">
+                {PHASE_LABEL[data.baseline.phase] ?? data.baseline.phase} {TA_LABEL[data.baseline.therapeuticArea] ?? data.baseline.therapeuticArea} baseline
+              </span>
+              <span className="font-mono text-neutral-800 dark:text-slate-100">
+                {formatCurrency(data.baseline.totalValueMedian)} total · {formatCurrency(data.baseline.upfrontMedian)} upfront · {data.baseline.royaltyBase}–{data.baseline.royaltyMax}% royalty
+              </span>
+            </div>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-xs text-neutral-500 dark:text-slate-400">
+              <span>
+                {data.baseline.source === 'calibrated' && data.baseline.sampleSize
+                  ? `Median of ${data.baseline.sampleSize} disclosed deals${data.baseline.calibratedAt ? `, calibrated ${new Date(data.baseline.calibratedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : ''}`
+                  : 'Curated static baseline (calibration overlay not loaded)'}
+              </span>
+              <span className="font-mono">
+                × {data.baseline.effectiveMultiplier.toFixed(2)} modifiers
+                {data.baseline.dealTypeMultiplier !== 1 ? ` × ${data.baseline.dealTypeMultiplier.toFixed(2)} deal type` : ''}
+                {' '}± {data.baseline.rangeWidthPercent}% band
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Breakdown Table */}
       {data.breakdown && data.breakdown.length > 0 && (
@@ -87,8 +127,8 @@ function DrillDownPanelInner({
         <motion.div variants={fadeUp}>
           <h5 className="text-xs font-semibold text-neutral-500 dark:text-slate-400 uppercase tracking-wider mb-2">Key Factors</h5>
           <div className="space-y-1.5">
-            {data.factors.slice(0, 5).map((factor, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-sm">
+            {data.factors.map((factor, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-sm" title={factor.context ?? undefined}>
                 {factor.impact === 'positive' ? (
                   <svg className="w-4 h-4 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -106,12 +146,20 @@ function DrillDownPanelInner({
                   {factor.name}
                   {factor.percentage !== 0 && (
                     <span className="font-semibold ml-1">
-                      ({factor.percentage > 0 ? '+' : ''}{factor.percentage}%)
+                      ({factor.percentage > 0 ? '+' : ''}{factor.percentage}%
+                      {factor.appliedPercentage !== undefined && factor.appliedPercentage !== factor.percentage && (
+                        <span className="font-normal text-neutral-500 dark:text-slate-400"> → {factor.appliedPercentage > 0 ? '+' : ''}{factor.appliedPercentage}% applied</span>
+                      )})
                     </span>
                   )}
                 </span>
               </div>
             ))}
+            {data.factors.some(f => f.appliedPercentage !== undefined && f.appliedPercentage !== f.percentage) && (
+              <p className="text-xs text-neutral-500 dark:text-slate-400 pt-1">
+                Shown % is the raw factor; applied % is after dampening, so stacked premiums don't compound linearly.
+              </p>
+            )}
           </div>
         </motion.div>
       )}

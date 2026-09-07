@@ -11,6 +11,12 @@ export interface PhaseBaselineEntry {
   upfront: { low: number; median: number; high: number };
   totalValue: { low: number; median: number; high: number };
   royalty: { base: number; max: number };
+  /** Provenance of the numbers above. Absent on static JSON baselines. */
+  meta?: {
+    sampleSize: number;
+    calibratedAt: string | null;
+    source: 'calibrated' | 'static';
+  };
 }
 
 /** Phase baselines keyed by phase string. */
@@ -209,6 +215,7 @@ interface CalibrationRow {
   royalty_max: number | null;
   multiplier: number | null;
   sample_size: number;
+  calibrated_at?: string | null;
 }
 
 // Map therapeutic_area to the correct baselines key in Benchmarks
@@ -255,7 +262,7 @@ export async function refreshCalibrationCache(): Promise<void> {
         'calibration_type, therapeutic_area, phase, modality, ' +
         'upfront_low, upfront_median, upfront_high, ' +
         'total_value_low, total_value_median, total_value_high, ' +
-        'royalty_base, royalty_max, multiplier, sample_size'
+        'royalty_base, royalty_max, multiplier, sample_size, calibrated_at'
       )
       .eq('is_active', true);
 
@@ -292,6 +299,23 @@ function deepClone<T>(obj: T): T {
  *
  * Only calibrations with sample_size >= 5 are applied.
  */
+/**
+ * Await the calibration overlay before the first calculation so that every
+ * run in a session uses the same (calibrated) baselines. Without this, the
+ * first calculateDealTerms() call in a fresh tab silently uses static JSON
+ * while later calls use Supabase-calibrated values, and the same inputs
+ * produce different numbers. Resolves immediately when the cache is warm.
+ */
+export async function ensureBenchmarksLoaded(): Promise<void> {
+  const now = Date.now();
+  if (calibrationCache !== null && (now - cacheTimestamp) <= CACHE_TTL_MS) return;
+  try {
+    await refreshCalibrationCache();
+  } catch {
+    // Static defaults remain in use; getBenchmarksSync() handles null cache.
+  }
+}
+
 export function getBenchmarksSync(): Benchmarks {
   const now = Date.now();
 
@@ -349,6 +373,13 @@ export function getBenchmarksSync(): Benchmarks {
       // Override royalty
       if (cal.royalty_base !== null) phaseData.royalty.base = cal.royalty_base;
       if (cal.royalty_max !== null) phaseData.royalty.max = cal.royalty_max;
+
+      // Carry provenance so the results page can say "n=40 deals, calibrated <date>".
+      phaseData.meta = {
+        sampleSize: cal.sample_size,
+        calibratedAt: cal.calibrated_at ?? null,
+        source: 'calibrated',
+      };
     }
 
     if (cal.calibration_type === 'modality_multiplier' && cal.modality && cal.multiplier !== null) {
