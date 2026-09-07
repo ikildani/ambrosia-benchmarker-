@@ -1,9 +1,19 @@
 /**
  * Peer benchmark — compute where a given deal sits in the distribution of
- * comparable real deals from the corpus. Sidebar on /calculator results
- * shows "your deal at Xth percentile" as inputs change.
+ * comparable real deals.
  *
- * Deliberately sync + fast. Reads from the bundled corpus, no DB call.
+ * Two populations live here:
+ *
+ *   1. `summarizePeerBenchmarkPool` (pure) — the ONE population the results
+ *      page should use. It is fed by lib/peer-benchmark.server.ts with the
+ *      same scored / stage-filtered / canonical / non-synthetic Supabase pool
+ *      that the Comparables tab renders (findEnrichedComparableDeals), and
+ *      uses the same recency-weighted quantiles as computeBenchmarkRange, so
+ *      the hero p50 and the Comparables-tab market median are the same number.
+ *
+ *   2. `computePeerBenchmark` (sync, bundled corpus) — kept only as an
+ *      OFFLINE FALLBACK while /api/deals/peer-benchmark is loading or
+ *      unavailable. Any UI that renders it must tag it "offline sample".
  *
  * @module lib/peer-benchmark
  */
@@ -11,6 +21,7 @@
 import { EXTENDED_COMPARABLE_DEALS } from '@/data/comparable-deals-extended';
 import { SUPABASE_COMPARABLE_DEALS } from '@/data/comparable-deals-supabase';
 import { classifyDealStructure, type DealStructure } from '@/lib/financial/deal-structure-classifier';
+import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
 import {
   scoreCompMatch,
   selectWithRelaxation,
@@ -383,11 +394,19 @@ const MIN_POOL_FOR_WIDENED = 5;
 const MIN_POOL_FOR_TA = 5;
 
 /**
- * Compute peer benchmark with progressive filter widening:
+ * Compute peer benchmark over the BUNDLED STATIC corpus with progressive
+ * filter widening:
  *   1. strict: TA + phase + modality
  *   2. widened: TA + phase (modality dropped)
  *   3. ta-only: TA alone
  *   4. global: full corpus
+ *
+ * @deprecated For UI use. The results page must consume the live pool via
+ * GET /api/deals/peer-benchmark (lib/peer-benchmark.server.ts) so the hero
+ * band, confidence badge and percentile context agree with the Comparables
+ * tab. Use this only as an offline fallback (wrap with `toOfflineSample`) or
+ * in tests. Percentiles here are unweighted nearest-rank over a snapshot;
+ * the live path is recency-weighted over the current Supabase pool.
  */
 export function computePeerBenchmark(input: PeerBenchmarkInput): PeerBenchmarkResult {
   // Stage sanity: approved-stage M&A is not a peer for a pre-approval candidate.
@@ -441,4 +460,148 @@ export function computePeerBenchmark(input: PeerBenchmarkInput): PeerBenchmarkRe
   }
 
   return computeStats(corpus, input, 'global');
+}
+
+
+// ---------------------------------------------------------------------------
+// Shared summary shape — the ONE comp population for the results page
+// ---------------------------------------------------------------------------
+
+export type PeerBenchmarkSource = 'live' | 'offline sample';
+export type PeerBenchmarkWeighting = 'recency' | 'unweighted';
+export type PeerBenchmarkMatchLevel = PeerBenchmarkResult['matchLevel'];
+
+export interface PeerBenchmarkPercentiles {
+  p10: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p90: number;
+}
+
+/**
+ * Aggregate benchmark consumed by DirectionalRangeHero, QueryConfidenceBadge
+ * and Results.getPercentileContext. Contains no deal rows, so it is safe to
+ * serve to every tier.
+ */
+export interface PeerBenchmarkSummary {
+  /** Deals in the pool (same n the Comparables tab shows). */
+  n: number;
+  /** Coarse breadth label shared with the static path. */
+  matchLevel: PeerBenchmarkMatchLevel;
+  /** Live relaxation rung ('none' | 'modality_only' | 'ta_only'); null for the offline sample. */
+  relaxation: CompRelaxation | null;
+  /** Percentiles of disclosed upfronts ($M). */
+  upfrontPercentiles: PeerBenchmarkPercentiles;
+  /** Percentiles of disclosed total deal values ($M). */
+  totalDealPercentiles: PeerBenchmarkPercentiles;
+  /** Percentiles of disclosed royalty-low rates (%), or null when unavailable. */
+  royaltyPercentiles: PeerBenchmarkPercentiles | null;
+  nDisclosedUpfront: number;
+  nDisclosedTotal: number;
+  nDisclosedRoyalty: number;
+  /** Approved-stage M&A rows dropped because the query is pre-approval. */
+  excludedApprovedMA: number;
+  source: PeerBenchmarkSource;
+  weighting: PeerBenchmarkWeighting;
+}
+
+/** Minimal row the pool summarizer needs — a subset of EnrichedComparableDeal. */
+export interface PeerBenchmarkPoolDeal {
+  upfrontM: number | null;
+  totalValueM: number | null;
+  year: number;
+  /** Royalty low rate (%), when the caller enriched the row with it. */
+  royaltyLowPct?: number | null;
+}
+
+/** Map the live relaxation rung onto the coarse matchLevel vocabulary. */
+export function relaxationToMatchLevel(r: CompRelaxation): PeerBenchmarkMatchLevel {
+  if (r === 'none') return 'strict';
+  if (r === 'modality_only') return 'widened';
+  return 'ta-only';
+}
+
+const PCTS: Array<[keyof PeerBenchmarkPercentiles, number]> = [
+  ['p10', 0.1], ['p25', 0.25], ['p50', 0.5], ['p75', 0.75], ['p90', 0.9],
+];
+
+function weightedPercentileSet(pairs: { value: number; weight: number }[]): PeerBenchmarkPercentiles {
+  const out = { p10: 0, p25: 0, p50: 0, p75: 0, p90: 0 };
+  for (const [k, q] of PCTS) out[k] = weightedQuantile(pairs, q);
+  return out;
+}
+
+/**
+ * Recency-weighted p10..p90 over a comp pool. Pure — no I/O.
+ *
+ * Uses exactly the same pairs (value > 0, weight = recencyWeight(year)) and
+ * the same weightedQuantile as lib/comparableDeals.server.ts::computeBenchmarkRange,
+ * so for the same pool `upfrontPercentiles.p50 === benchmarkRange.upfront.median`.
+ * A jest test pins that equality.
+ */
+export function summarizePeerBenchmarkPool(
+  deals: PeerBenchmarkPoolDeal[],
+  meta: { relaxation: CompRelaxation; excludedApprovedMA?: number },
+): PeerBenchmarkSummary {
+  const upfrontPairs = deals
+    .filter(d => d.upfrontM && d.upfrontM > 0)
+    .map(d => ({ value: d.upfrontM!, weight: recencyWeight(d.year) }));
+  const totalPairs = deals
+    .filter(d => d.totalValueM && d.totalValueM > 0)
+    .map(d => ({ value: d.totalValueM!, weight: recencyWeight(d.year) }));
+  const royaltyPairs = deals
+    .filter(d => d.royaltyLowPct != null && d.royaltyLowPct > 0)
+    .map(d => ({ value: d.royaltyLowPct!, weight: recencyWeight(d.year) }));
+
+  return {
+    n: deals.length,
+    matchLevel: relaxationToMatchLevel(meta.relaxation),
+    relaxation: meta.relaxation,
+    upfrontPercentiles: weightedPercentileSet(upfrontPairs),
+    totalDealPercentiles: weightedPercentileSet(totalPairs),
+    royaltyPercentiles: royaltyPairs.length >= 3 ? weightedPercentileSet(royaltyPairs) : null,
+    nDisclosedUpfront: upfrontPairs.length,
+    nDisclosedTotal: totalPairs.length,
+    nDisclosedRoyalty: royaltyPairs.length,
+    excludedApprovedMA: meta.excludedApprovedMA ?? 0,
+    source: 'live',
+    weighting: 'recency',
+  };
+}
+
+/**
+ * Wrap a static-corpus result as an explicitly labelled offline sample. The
+ * UI shows the `source` tag so a reader never mistakes the bundled snapshot
+ * for the live pool.
+ */
+export function toOfflineSample(result: PeerBenchmarkResult): PeerBenchmarkSummary {
+  return {
+    n: result.n,
+    matchLevel: result.matchLevel,
+    relaxation: null,
+    upfrontPercentiles: { ...result.upfrontPercentiles },
+    totalDealPercentiles: { ...result.totalDealPercentiles },
+    royaltyPercentiles: null,
+    nDisclosedUpfront: result.n,
+    nDisclosedTotal: result.n,
+    nDisclosedRoyalty: 0,
+    excludedApprovedMA: 0,
+    source: 'offline sample',
+    weighting: 'unweighted',
+  };
+}
+
+/** Human copy for the pool scope, shared by the hero and the badge. */
+export function describePeerBenchmarkScope(b: Pick<PeerBenchmarkSummary, 'n' | 'matchLevel' | 'relaxation' | 'source'>): string {
+  const { n } = b;
+  if (b.source === 'live' && b.relaxation) {
+    if (b.relaxation === 'none') return `${n} disclosed deals — same TA + phase/indication match`;
+    if (b.relaxation === 'modality_only') return `${n} disclosed deals — TA + modality (widened)`;
+    return `${n} disclosed deals — TA only (widened)`;
+  }
+  if (b.matchLevel === 'strict') return `${n} similar disclosed deals — TA + phase + modality`;
+  if (b.matchLevel === 'widened') return `${n} disclosed deals — TA + phase (modality widened)`;
+  if (b.matchLevel === 'ta-only') return `${n} disclosed deals — TA only`;
+  return `${n} disclosed deals (broad match)`;
 }

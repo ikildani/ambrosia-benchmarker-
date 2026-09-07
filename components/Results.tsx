@@ -71,7 +71,8 @@ import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity
 // R70: findComparableDeals import removed — inline "Top 3" table replaced
 // by ComparableDealsPanel (structure-aware, ranked, with source URLs).
 import epiData from '@/data/epidemiology.json';
-import { computePeerBenchmark } from '@/lib/peer-benchmark';
+import { computePeerBenchmark, toOfflineSample, type PeerBenchmarkSummary } from '@/lib/peer-benchmark';
+import { PeerBenchmarkContext } from './results/PeerBenchmarkContext';
 import type { UserTier } from '@/types/tier';
 
 // Dynamic import for TornadoChart (Recharts-heavy, below the fold)
@@ -560,18 +561,68 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     return map;
   }, [result.warnings]);
 
-  // Peer benchmark for percentile context on MetricCards
-  const peerBenchmark = useMemo(() => {
+  // ── Peer benchmark: ONE comp population ─────────────────────────────────
+  // The hero band, QueryConfidenceBadge and MetricCard percentile context all
+  // read `peerBenchmark`. It is the live Supabase pool (same scored/filtered
+  // pool the Comparables tab renders, recency-weighted) fetched once per
+  // query from /api/deals/peer-benchmark. Until that arrives — or if it
+  // fails — the bundled static corpus is used and tagged 'offline sample' so
+  // the UI never presents the snapshot as the live pool.
+  const peerQueryKey = fullInputs
+    ? [fullInputs.therapeuticArea, fullInputs.phase, fullInputs.modality, fullInputs.indication, fullInputs.dealType, fullInputs.territory]
+        .map(v => v ?? '').join('|')
+    : '';
+
+  const offlinePeerBenchmark = useMemo<PeerBenchmarkSummary | null>(() => {
     if (!fullInputs) return null;
-    const bm = computePeerBenchmark({
+    return toOfflineSample(computePeerBenchmark({
       therapeuticArea: fullInputs.therapeuticArea,
       phase: fullInputs.phase,
       modality: fullInputs.modality,
+      indication: fullInputs.indication,
       dealType: fullInputs.dealType,
       territory: fullInputs.territory,
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peerQueryKey]);
+
+  const [livePeerBenchmark, setLivePeerBenchmark] = useState<{ key: string; value: PeerBenchmarkSummary } | null>(null);
+
+  useEffect(() => {
+    if (!fullInputs?.therapeuticArea) return;
+    const key = peerQueryKey;
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      therapeuticArea: fullInputs.therapeuticArea,
+      phase: fullInputs.phase || '',
+      modality: fullInputs.modality || '',
+      indication: fullInputs.indication || '',
+      dealType: fullInputs.dealType || '',
+      territory: fullInputs.territory || '',
     });
-    return bm.n >= 3 ? bm : null;
-  }, [fullInputs]);
+    fetch(`/api/deals/peer-benchmark?${params}`, { signal: controller.signal })
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`peer-benchmark ${res.status}`))))
+      .then((data: PeerBenchmarkSummary & { error?: string }) => {
+        if (controller.signal.aborted) return;
+        if (!data || data.error || typeof data.n !== 'number' || !data.upfrontPercentiles) return;
+        setLivePeerBenchmark({ key, value: { ...data, source: 'live' } });
+      })
+      .catch(err => {
+        if (controller.signal.aborted) return;
+        // Keep the labelled offline sample; do not surface a toast for this.
+        console.warn('[Results] live peer benchmark unavailable, showing offline sample:', err);
+      });
+    return () => controller.abort();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peerQueryKey]);
+
+  // Live result wins when it belongs to the current query; otherwise the
+  // labelled offline sample. Null when there is no usable pool at all.
+  const peerBenchmark = useMemo<PeerBenchmarkSummary | null>(() => {
+    const live = livePeerBenchmark && livePeerBenchmark.key === peerQueryKey ? livePeerBenchmark.value : null;
+    const bm = live ?? offlinePeerBenchmark;
+    return bm && bm.n >= 3 ? bm : null;
+  }, [livePeerBenchmark, offlinePeerBenchmark, peerQueryKey]);
 
   // Confidence for the headline cards, derived from peer-benchmark breadth
   // rather than hardcoded: n >= 15 on a strict match → high, n >= 5 (not
@@ -589,8 +640,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
 
   // Compute percentile context for a metric value against the matching peer
   // benchmark distribution (upfront vs total deal value are separate).
-  const getPercentileContext = useCallback((metricMedian: number, metric: 'upfront' | 'totalDeal' = 'upfront'): { percentile: number; label: string } | undefined => {
+  const getPercentileContext = useCallback((metricMedian: number, metric: 'upfront' | 'totalDeal' = 'upfront'): { percentile: number; label: string; source: PeerBenchmarkSummary['source'] } | undefined => {
     if (!peerBenchmark) return undefined;
+    const nDisclosed = metric === 'totalDeal' ? peerBenchmark.nDisclosedTotal : peerBenchmark.nDisclosedUpfront;
+    if (nDisclosed < 3) return undefined;
     const { p10, p25, p50, p75, p90 } = metric === 'totalDeal' ? peerBenchmark.totalDealPercentiles : peerBenchmark.upfrontPercentiles;
     // Linear interpolation to estimate percentile
     const points = [
@@ -615,7 +668,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
       }
     }
     const label = percentile < 25 ? 'below market' : percentile > 75 ? 'above market' : 'at market';
-    return { percentile, label };
+    return { percentile, label, source: peerBenchmark.source };
   }, [peerBenchmark]);
 
   // Deal-type-aware labels — prevents licensing terminology from leaking into acquisitions, options, etc.
@@ -2122,6 +2175,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </div>
             )}
             <div id={TOUR_STEP_IDS.RNPV}>
+            <PeerBenchmarkContext.Provider value={peerBenchmark}>
             <FinancialErrorBoundary fallbackTitle="rNPV Analysis unavailable">
               <RnpvAnalysis
                 rnpvResult={financialModel.rnpv}
@@ -2142,6 +2196,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 territory={fullInputs?.territory}
               />
             </FinancialErrorBoundary>
+            </PeerBenchmarkContext.Provider>
             </div>
             {/* Buyer-Specific Valuation */}
             {financialModel.dealWaterfall && (

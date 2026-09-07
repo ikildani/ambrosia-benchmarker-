@@ -8,6 +8,10 @@ import AnimatedValue from './AnimatedValue';
 interface PercentileContext {
   percentile: number; // 0-100, where the user's value falls
   label: string; // e.g., "below market", "at market", "above market"
+  /** Which comp population produced the percentile. Anything other than
+   *  'live' is shown as an "offline sample" tag so the reader knows the
+   *  number may not match the Comparables tab. */
+  source?: 'live' | 'offline sample';
 }
 
 interface MetricCardProps {
@@ -272,6 +276,14 @@ function MetricCardInner({
                 : 'text-teal-400'
             }`}>
               Your estimate: p{Math.round(percentileContext.percentile)} — {percentileContext.label}
+              {percentileContext.source && percentileContext.source !== 'live' && (
+                <span
+                  className="ml-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-amber-400"
+                  title="Live comparable pool unavailable — percentile from the bundled static corpus"
+                >
+                  offline sample
+                </span>
+              )}
             </p>
           </div>
         )}

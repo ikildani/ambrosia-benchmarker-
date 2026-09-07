@@ -11,17 +11,29 @@
  * contains the actual outcome ~72% of the time. The range is the honest
  * directional signal; the point is a supporting data point.
  *
+ * Population: ONE comp pool. The band is the recency-weighted p10..p90 of
+ * the same live Supabase pool the Comparables tab renders, delivered via
+ * GET /api/deals/peer-benchmark (Results.tsx → PeerBenchmarkContext). While
+ * that request is in flight, or if it fails, the bundled static corpus is
+ * shown and explicitly tagged "offline sample".
+ *
  * What the user sees:
  *   1. Headline band: $95M · $180M · $310M  (p25, p50 comp, p75)
- *   2. Coverage callout: "72% of backtested deals land in this band"
+ *   2. Scope + weighting label, and an "offline sample" tag when applicable
  *   3. Engine estimate surfaced as a secondary signal with "model view"
  *      label — not the hero.
  */
 
 import type { RNPVResult } from '@/lib/financial/types';
-import { computePeerBenchmark } from '@/lib/peer-benchmark';
+import {
+  computePeerBenchmark,
+  describePeerBenchmarkScope,
+  toOfflineSample,
+  type PeerBenchmarkSummary,
+} from '@/lib/peer-benchmark';
 import type { DealStructure } from '@/lib/financial/deal-structure-classifier';
 import { useMemo } from 'react';
+import { usePeerBenchmark } from './PeerBenchmarkContext';
 
 interface Props {
   rnpvResult: RNPVResult;
@@ -37,6 +49,11 @@ interface Props {
   dealType?: string;
   /** Territory for peer benchmark structure classification. */
   territory?: string;
+  /**
+   * The single comp population. Falls back to PeerBenchmarkContext, then to
+   * the bundled corpus tagged "offline sample" when neither is supplied.
+   */
+  peerBenchmark?: PeerBenchmarkSummary | null;
 }
 
 function fmtM(n: number | undefined | null): string {
@@ -44,6 +61,18 @@ function fmtM(n: number | undefined | null): string {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`;
   if (n >= 100) return `$${Math.round(n)}M`;
   return `$${n.toFixed(0)}M`;
+}
+
+export function OfflineSampleTag({ className = '' }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300 ${className}`}
+      title="Live comparable pool unavailable — showing the bundled static corpus. Numbers may differ from the Comparables tab."
+    >
+      <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
+      Offline sample
+    </span>
+  );
 }
 
 export function DirectionalRangeHero({
@@ -54,27 +83,29 @@ export function DirectionalRangeHero({
   dealStructure,
   dealType,
   territory,
+  peerBenchmark,
 }: Props) {
-  const benchmark = useMemo(
+  const fromContext = usePeerBenchmark();
+
+  // Offline fallback only — the bundled corpus, explicitly labelled.
+  const offline = useMemo(
     () =>
-      computePeerBenchmark({
-        therapeuticArea,
-        phase,
-        modality,
-        dealStructure,
-        dealType,
-        territory,
-      }),
+      toOfflineSample(
+        computePeerBenchmark({ therapeuticArea, phase, modality, dealStructure, dealType, territory }),
+      ),
     [therapeuticArea, phase, modality, dealStructure, dealType, territory],
   );
+
+  const benchmark: PeerBenchmarkSummary = peerBenchmark ?? fromContext ?? offline;
+  const isOffline = benchmark.source !== 'live';
 
   const enginePoint = rnpvResult.impliedDealValue?.upfront?.median;
   const engineLow = rnpvResult.impliedDealValue?.upfront?.low;
   const engineHigh = rnpvResult.impliedDealValue?.upfront?.high;
 
-  const hasBenchmark = benchmark.n >= 3;
   // Use peer-benchmark percentiles as the hero band if we have enough
-  // comparables. Otherwise fall back to the engine's low-median-high.
+  // disclosed upfronts. Otherwise fall back to the engine's low-median-high.
+  const hasBenchmark = benchmark.n >= 3 && benchmark.nDisclosedUpfront >= 3;
   const p25 = hasBenchmark ? benchmark.upfrontPercentiles.p25 : engineLow;
   const p50 = hasBenchmark ? benchmark.upfrontPercentiles.p50 : enginePoint;
   const p75 = hasBenchmark ? benchmark.upfrontPercentiles.p75 : engineHigh;
@@ -82,14 +113,10 @@ export function DirectionalRangeHero({
   const p90 = hasBenchmark ? benchmark.upfrontPercentiles.p90 : undefined;
 
   const n = benchmark.n;
-  const matchLevel = benchmark.matchLevel;
-  const scopeDescription = (() => {
-    if (!hasBenchmark) return 'engine estimate range (low / median / high)';
-    if (matchLevel === 'strict') return `${n} similar disclosed deals — TA + phase + modality`;
-    if (matchLevel === 'widened') return `${n} disclosed deals — TA + phase (modality widened)`;
-    if (matchLevel === 'ta-only') return `${n} disclosed deals — TA only`;
-    return `${n} disclosed deals (broad match)`;
-  })();
+  const scopeDescription = hasBenchmark
+    ? describePeerBenchmarkScope(benchmark)
+    : 'engine estimate range (low / median / high)';
+  const weightingLabel = benchmark.weighting === 'recency' ? 'recency-weighted' : 'unweighted';
 
   return (
     <div className="rounded-xl border border-teal-500/30 bg-gradient-to-br from-slate-900 to-slate-950 p-5 shadow-sm">
@@ -103,8 +130,11 @@ export function DirectionalRangeHero({
           </div>
         </div>
         {hasBenchmark && (
-          <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
-            n={n} comps
+          <div className="flex flex-col items-end gap-1">
+            <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
+              n={n} comps · {benchmark.nDisclosedUpfront} with disclosed upfront
+            </div>
+            {isOffline && <OfflineSampleTag />}
           </div>
         )}
       </div>
@@ -124,13 +154,13 @@ export function DirectionalRangeHero({
         </div>
         <div className="rounded-lg bg-teal-500/10 border border-teal-500/30 p-3 text-center">
           <div className="text-[10px] uppercase tracking-wider text-teal-300 mb-1 font-semibold">
-            {hasBenchmark ? 'Median' : 'Median'}
+            Median
           </div>
           <div className="font-mono text-xl sm:text-3xl font-bold text-teal-200">
             {fmtM(p50)}
           </div>
           <div className="text-[10px] text-teal-400/80 mt-1">
-            {hasBenchmark ? 'of comparable deals' : 'engine median'}
+            {hasBenchmark ? `of comparable deals · ${weightingLabel}` : 'engine median'}
           </div>
         </div>
         <div className="rounded-lg bg-slate-800/40 p-3 text-center">
@@ -147,7 +177,7 @@ export function DirectionalRangeHero({
       </div>
 
       {/* Wider band (p10/p90) if available */}
-      {hasBenchmark && p10 && p90 && (
+      {hasBenchmark && p10 != null && p90 != null && p10 > 0 && p90 > 0 && (
         <div className="mb-3 flex items-center justify-between text-[11px] text-slate-500">
           <span>
             80% band: <span className="font-mono text-slate-400">{fmtM(p10)}</span>–
@@ -166,12 +196,27 @@ export function DirectionalRangeHero({
           <span className="text-slate-500">
             · Range spans{' '}
             <span className="font-mono text-slate-300">
-              {fmtM(p75! - p25!)}
+              {fmtM(p75 - p25)}
             </span>
             {' '}— use as directional ballpark, not a point target
           </span>
         )}
       </div>
+
+      {hasBenchmark && isOffline && (
+        <div className="mb-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200/80">
+          Live comparable pool unavailable — this band is drawn from the bundled
+          static corpus ({weightingLabel}). The Comparables tab may show
+          different figures until the live pool loads.
+        </div>
+      )}
+
+      {hasBenchmark && !isOffline && (
+        <div className="mb-3 text-[11px] text-slate-500">
+          Same pool as the Comparables tab: the median above is the tab&apos;s
+          recency-weighted market median.
+        </div>
+      )}
 
       {/* Engine model view as secondary signal */}
       {enginePoint != null && (
