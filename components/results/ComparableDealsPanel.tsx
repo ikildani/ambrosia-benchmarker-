@@ -14,9 +14,10 @@
  * form their own view from the comps.
  */
 
-import { useMemo } from 'react';
-import { getClosestComparablesWithMeta } from '@/lib/peer-benchmark';
-import { relaxationLabel } from '@/lib/comparable-scoring';
+import { useEffect, useMemo, useState } from 'react';
+import { getClosestComparablesWithMeta, type ComparableDealForUI } from '@/lib/peer-benchmark';
+import { relaxationLabel, type CompRelaxation } from '@/lib/comparable-scoring';
+import { OfflineSampleTag } from './DirectionalRangeHero';
 import type { DealStructure } from '@/lib/financial/deal-structure-classifier';
 
 interface Props {
@@ -99,8 +100,78 @@ function StarBadge({ score }: { score: number }) {
   );
 }
 
+/** Shape returned by GET /api/deals/comparable?enriched=true (subset we need). */
+interface LiveEnrichedDeal {
+  id: string;
+  licensor: string;
+  licensee: string;
+  year: number;
+  phase: string | null;
+  modality: string | null;
+  indication: string | null;
+  therapeuticArea: string | null;
+  dealType: string | null;
+  upfrontM: number | null;
+  totalValueM: number | null;
+  sourceUrl?: string | null;
+  verificationStatus?: string | null;
+  matchScore: number;
+  relevanceReasons?: string[];
+}
+
+function toUiDeal(d: LiveEnrichedDeal): ComparableDealForUI {
+  return {
+    licensor: d.licensor,
+    licensee: d.licensee,
+    year: d.year,
+    therapeuticArea: d.therapeuticArea ?? '',
+    phase: d.phase ?? '',
+    modality: d.modality ?? '',
+    indication: d.indication ?? '',
+    dealType: d.dealType ?? '',
+    upfrontM: d.upfrontM ?? 0,
+    totalDealValueM: d.totalValueM ?? 0,
+    sourceUrl: d.sourceUrl ?? undefined,
+    matchScore: d.matchScore,
+    matchReason: (d.relevanceReasons ?? []).join(' · '),
+    verified: d.verificationStatus === 'verified',
+  };
+}
+
 export function ComparableDealsPanel(props: Props) {
-  const { deals: comparables, relaxation, excludedApprovedMA } = useMemo(
+  // Live pool: the same scored, filtered, relaxed set the Comparables tab and
+  // the summary hero use. The bundled corpus below is only the offline fallback.
+  const [live, setLive] = useState<{ key: string; deals: ComparableDealForUI[]; relaxation: CompRelaxation; excludedApprovedMA: number } | null>(null);
+  const liveKey = [props.therapeuticArea, props.phase, props.modality, props.indication, props.dealType].join('|');
+  useEffect(() => {
+    if (!props.therapeuticArea) return;
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      therapeuticArea: props.therapeuticArea ?? '',
+      modality: props.modality ?? '',
+      indication: props.indication ?? '',
+      phase: props.phase ?? '',
+      dealType: props.dealType ?? '',
+      enriched: 'true',
+    });
+    fetch(`/api/deals/comparable?${params}`, { signal: controller.signal })
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (!data || !Array.isArray(data.deals)) return;
+        const deals = (data.deals as LiveEnrichedDeal[]).map(toUiDeal).slice(0, props.limit ?? 6);
+        setLive({
+          key: liveKey,
+          deals,
+          relaxation: (data.relaxation as CompRelaxation) ?? 'none',
+          excludedApprovedMA: Number(data.excludedApprovedMA ?? 0),
+        });
+      })
+      .catch(() => { /* offline fallback stays in place */ });
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveKey, props.limit]);
+
+  const offline = useMemo(
     () =>
       getClosestComparablesWithMeta({
         therapeuticArea: props.therapeuticArea,
@@ -128,6 +199,11 @@ export function ComparableDealsPanel(props: Props) {
     ],
   );
 
+  const isLive = live != null && live.key === liveKey;
+  const comparables = isLive ? live.deals : offline.deals;
+  const relaxation = isLive ? live.relaxation : offline.relaxation;
+  const excludedApprovedMA = isLive ? live.excludedApprovedMA : offline.excludedApprovedMA;
+
   if (!comparables.length) {
     return (
       <div className="rounded-lg border border-slate-700/50 bg-slate-900/30 p-4">
@@ -154,8 +230,11 @@ export function ComparableDealsPanel(props: Props) {
             Anchor your negotiation on these — not a model point estimate.
           </div>
         </div>
-        <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
-          {comparables.length} shown
+        <div className="flex flex-col items-end gap-1">
+          <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
+            {comparables.length} shown
+          </div>
+          {!isLive && <OfflineSampleTag />}
         </div>
       </div>
 
