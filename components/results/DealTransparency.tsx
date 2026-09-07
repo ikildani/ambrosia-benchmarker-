@@ -146,7 +146,8 @@ function phaseAdjust(dealUpfront: number | null, dealPhase: string | null, userP
   const userRank = PHASE_RANK[userPhase] ?? 3;
   const compRank = PHASE_RANK[dealPhase] ?? 3;
   const delta = userRank - compRank;
-  const pct = delta * -15;
+  // Comp later than user → discount it; comp earlier → mark it up. 15% per phase step.
+  const pct = delta * 15;
   return { adjusted: dealUpfront * (1 + pct / 100), pct };
 }
 
