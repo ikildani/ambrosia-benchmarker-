@@ -12,7 +12,7 @@ import { useTracking } from './TrackingProvider';
 import { captureClientError } from '@/lib/sentry-client';
 import { PRICING, DEAL_STATS } from '@/lib/config/constants';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
-import { staticBenchmarks as benchmarks } from '@/lib/benchmarks';
+import { staticBenchmarks as benchmarks, getBenchmarksSync } from '@/lib/benchmarks';
 import { getHistory, formatDate as historyFormatDate } from '@/lib/history';
 import type { CalculationHistoryItem } from '@/lib/history';
 
@@ -909,14 +909,18 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
     const ta = fullInputs.therapeuticArea;
     const phase = fullInputs.phase;
 
-    // Pick the right baselines for the therapeutic area
+    // Pick the right baselines for the therapeutic area. Must use the
+    // calibrated (Supabase-overlaid) baselines — the same ones the engine
+    // used — otherwise the "% above median" line compares against the
+    // static JSON and contradicts the peer-percentile "at market" label.
+    const live = getBenchmarksSync();
     const baselines = ta === 'metabolic'
-      ? benchmarks.metabolicPhaseBaselines[phase]
+      ? live.metabolicPhaseBaselines[phase]
       : ta === 'immunology'
-      ? benchmarks.immunologyPhaseBaselines[phase]
+      ? live.immunologyPhaseBaselines[phase]
       : ta === 'neurology'
-      ? benchmarks.neurologyPhaseBaselines[phase]
-      : benchmarks.phaseBaselines[phase];
+      ? live.neurologyPhaseBaselines[phase]
+      : live.phaseBaselines[phase];
 
     if (!baselines) return {};
 
