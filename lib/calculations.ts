@@ -1710,10 +1710,15 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   //
   // COLLABORATION: Research-stage, highly contingent on early data
   //   Real-world: Preclinical collab $20-100M total, Phase 2 $200-800M
+  // Calibration round R73 (Sep 2026, docs/calibration-per-factor-2026-09.md):
+  // per-factor regression over 462 disclosed deals found the acquisition
+  // factor set too low at every phase (Phase 2 engine 0.90 vs implied 1.65,
+  // 95% CI 1.24-2.24, n=50). Values moved to the lower CI bound; discovery,
+  // NDA-filed and approved were not identifiable and are unchanged.
   const phaseAcquisitionMultipliers: Partial<Record<Phase, number>> = {
-    discovery: 0.30,    preclinical: 0.60,  phase1: 0.60,
-    phase1_2: 0.70,     phase2: 0.90,       phase2_3: 1.10,
-    phase3: 1.35,       nda_filed: 1.50,    approved: 1.65,
+    discovery: 0.30,    preclinical: 0.75,  phase1: 0.80,
+    phase1_2: 1.00,     phase2: 1.25,       phase2_3: 1.40,
+    phase3: 1.60,       nda_filed: 1.60,    approved: 1.65,
   };
 
   const phaseOptionMultipliers: Partial<Record<Phase, number>> = {
