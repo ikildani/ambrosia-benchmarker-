@@ -272,7 +272,8 @@ export default function ReportGenerationModal({
             partnersForExcel,
             p.fullInputs.therapeuticArea,
             p.fullInputs.treatmentApproach,
-            sensitivityData
+            sensitivityData,
+            { input: p.fullInputs }
           );
           if (abortRef.current) return;
           markComplete('building');

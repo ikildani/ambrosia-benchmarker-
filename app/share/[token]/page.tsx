@@ -6,6 +6,7 @@ import SharedCalculationView from '@/components/SharedCalculationView';
 import { ShareEmailGate } from '@/components/share/ShareEmailGate';
 import { createServerClient } from '@/lib/supabase/server';
 import { DEAL_STATS } from '@/lib/config/constants';
+import type { ShareProvenance } from '@/lib/financial/calculation-version';
 
 const ShareViewTracker = dynamic(() => import('@/components/insights/ShareViewTracker').then(m => ({ default: m.ShareViewTracker })));
 
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `${baseUrl}/api/og/share/${token}`;
 
   let title = 'Deal Analysis | Ambrosia Ventures';
-  let description = 'Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across 1,500+ transactions.';
+  let description = `Biotech licensing deal analysis — upfronts, milestones, royalties, benchmarked across ${DEAL_STATS.TOTAL_DEALS} transactions.`;
 
   try {
     const response = await fetch(`${baseUrl}/api/share/${token}`, { cache: 'no-store' });
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       const data = await response.json();
       if (data.labels) {
         title = `${data.labels.modality} ${data.labels.indication} Deal Analysis | Ambrosia Ventures`;
-        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from 1,500+ transactions.`;
+        description = `${data.labels.phase} ${data.labels.modality} deal benchmarks for ${data.labels.indication}. Upfronts, milestones, royalties from ${DEAL_STATS.TOTAL_DEALS} transactions.`;
       }
     }
   } catch { /* generic metadata fallback */ }
@@ -39,6 +40,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: { card: 'summary_large_image', title, description, images: [ogImageUrl] },
     robots: { index: false, follow: false },
   };
+}
+
+function formatUtc(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+}
+
+/**
+ * Compact audit strip: engine version, input fingerprint, baseline n/date,
+ * generation timestamp. Provenance is persisted at share-creation time
+ * (migration 099) or derived by the share API for older records.
+ */
+function ProvenanceStrip({ provenance }: { provenance?: ShareProvenance | null }) {
+  if (!provenance) return null;
+  const b = provenance.baseline;
+  const baselineText = b
+    ? b.source === 'calibrated'
+      ? `Baseline calibrated${b.sampleSize != null ? ` on ${b.sampleSize.toLocaleString()} disclosed deals` : ''}${b.calibratedAt ? ` · ${b.calibratedAt.slice(0, 10)}` : ''}`
+      : 'Baseline: static benchmarks'
+    : null;
+  const items: { label: string; value: string; mono?: boolean }[] = [
+    { label: 'Engine', value: `v${provenance.engineVersion}` },
+    { label: 'Fingerprint', value: provenance.fingerprint, mono: true },
+    ...(baselineText ? [{ label: 'Baseline', value: baselineText }] : []),
+    { label: 'Benchmarks data', value: `v${provenance.benchmarksVersion} (${provenance.benchmarksLastUpdated})` },
+    ...(formatUtc(provenance.generatedAt) ? [{ label: 'Generated', value: formatUtc(provenance.generatedAt)! }] : []),
+  ];
+  return (
+    <div
+      className="mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 flex flex-wrap items-center gap-x-5 gap-y-2"
+      aria-label="Calculation provenance"
+      data-testid="share-provenance"
+    >
+      <span className="text-[10px] font-bold text-teal-400/70 tracking-[0.15em] uppercase">Provenance</span>
+      {items.map((item) => (
+        <span key={item.label} className="text-[11px] text-slate-400 whitespace-nowrap">
+          <span className="text-slate-500">{item.label}:</span>{' '}
+          <span className={item.mono ? 'font-mono text-slate-300' : 'text-slate-300'}>{item.value}</span>
+        </span>
+      ))}
+      <a href="/methodology" className="ml-auto text-[11px] text-teal-400/80 hover:text-teal-300 transition-colors">
+        How to reproduce
+      </a>
+    </div>
+  );
 }
 
 async function getSharedCalculation(token: string) {
@@ -112,6 +160,7 @@ export default async function SharePage({ params }: Props) {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <ProvenanceStrip provenance={data.provenance} />
         {showGate ? (
           <ShareEmailGate token={token}>
             <SharedCalculationView

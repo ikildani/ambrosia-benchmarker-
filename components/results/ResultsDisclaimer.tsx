@@ -2,8 +2,33 @@
 
 import React, { useState } from 'react';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { staticBenchmarks } from '@/lib/benchmarks';
+import { ENGINE_VERSION, getBenchmarksDataVersion } from '@/lib/financial/calculation-version';
+import type { BaselineProvenance } from '@/lib/calculations';
 
-function MethodologySection() {
+// Coverage figures are derived from the shipped benchmarks data, never hardcoded:
+//  - modalities: keys of benchmarks.modalities (each has a calibrated multiplier)
+//  - therapeutic areas: one *PhaseConfig block per TA (oncology is the unprefixed `phaseConfig`)
+const MODALITY_COUNT = Object.keys(staticBenchmarks.modalities ?? {}).length;
+const THERAPEUTIC_AREA_COUNT = Object.keys(staticBenchmarks).filter((k) => /phaseConfig$/i.test(k)).length;
+const BENCHMARKS_DATA = getBenchmarksDataVersion();
+
+interface ResultsDisclaimerProps {
+  /** Baseline provenance from result.drillDown.totalDealValue.baseline, when the caller has it. */
+  baseline?: BaselineProvenance | null;
+}
+
+function baselineSentence(baseline?: BaselineProvenance | null): string | null {
+  if (!baseline) return null;
+  if (baseline.source === 'calibrated') {
+    const n = baseline.sampleSize != null ? `${baseline.sampleSize.toLocaleString()} disclosed deals` : 'disclosed deals';
+    const date = baseline.calibratedAt ? ` (calibrated ${baseline.calibratedAt.slice(0, 10)})` : '';
+    return `The baseline for this estimate was calibrated on ${n}${date}.`;
+  }
+  return `The baseline for this estimate comes from the static benchmarks release v${BENCHMARKS_DATA.version} (${BENCHMARKS_DATA.lastUpdated}).`;
+}
+
+function MethodologySection({ baseline }: ResultsDisclaimerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -36,8 +61,9 @@ function MethodologySection() {
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               All benchmarks are derived from <strong className="text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified biopharma transactions</strong> sourced
               from SEC EDGAR 8-K filings, FTC premerger filings, public press releases, ClinicalTrials.gov, and FDA regulatory databases.
-              Data is refreshed through automated ingestion pipelines. Each deal is verified against
-              original source documents before inclusion.
+              Data is refreshed through automated ingestion pipelines; the benchmarks release behind this run is
+              v{BENCHMARKS_DATA.version} ({BENCHMARKS_DATA.lastUpdated}), engine v{ENGINE_VERSION}.
+              {baselineSentence(baseline) ? ` ${baselineSentence(baseline)}` : ''}
             </p>
           </div>
 
@@ -86,9 +112,9 @@ function MethodologySection() {
           {/* Coverage */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {[
-              { value: '12', label: 'Therapeutic Areas' },
-              { value: '70', label: 'Modalities Calibrated' },
-              { value: '10', label: 'Financial Engines' },
+              { value: String(THERAPEUTIC_AREA_COUNT), label: 'Therapeutic Areas' },
+              { value: String(MODALITY_COUNT), label: 'Modalities Calibrated' },
+              { value: `v${BENCHMARKS_DATA.version}`, label: `Benchmarks Data (${BENCHMARKS_DATA.lastUpdated})` },
               { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals' },
             ].map(stat => (
               <div key={stat.label} className="text-center p-2.5 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
@@ -114,23 +140,25 @@ function MethodologySection() {
   );
 }
 
-function ResultsDisclaimerInner() {
+function ResultsDisclaimerInner({ baseline }: ResultsDisclaimerProps) {
+  const sentence = baselineSentence(baseline);
   return (
     <div className="mt-4 p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
       <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
         Benchmark ranges are calibrated against {DEAL_STATS.TOTAL_DEALS} verified transactions and reflect the market distribution for comparable deals.
-        Individual outcomes depend on asset-specific factors, competitive dynamics, and negotiation leverage.
+        {sentence ? ` ${sentence}` : ''}
+        {' '}Individual outcomes depend on asset-specific factors, competitive dynamics, and negotiation leverage.
         For definitive deal structuring, engage qualified financial and legal advisors who can incorporate non-public factors.
       </p>
     </div>
   );
 }
 
-function ResultsDisclaimerWithMethodology() {
+function ResultsDisclaimerWithMethodology({ baseline }: ResultsDisclaimerProps) {
   return (
     <>
-      <MethodologySection />
-      <ResultsDisclaimerInner />
+      <MethodologySection baseline={baseline} />
+      <ResultsDisclaimerInner baseline={baseline} />
     </>
   );
 }

@@ -7,8 +7,15 @@ import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { shareSchema, formatZodErrors } from '@/lib/api-validation';
 import type { UserTier } from '@/types/tier';
+import { buildShareProvenance } from '@/lib/financial/calculation-version';
 
 export const dynamic = 'force-dynamic';
+
+/** PostgREST error when a column in the payload does not exist (migration not yet applied). */
+function isMissingColumnError(error: { code?: string; message?: string } | null, column: string): boolean {
+  if (!error) return false;
+  return error.code === 'PGRST204' || (error.message ?? '').includes(`'${column}' column`);
+}
 
 // POST - Create a share link
 export async function POST(request: NextRequest) {
@@ -61,21 +68,40 @@ export async function POST(request: NextRequest) {
       expiresAt = expDate.toISOString();
     }
 
+    // Audit trail persisted with the share: engine version, input fingerprint,
+    // baseline n/date, benchmarks data release, generation timestamp. Captured at
+    // creation so the share page shows what produced the numbers even after the
+    // engine or data are updated.
+    const provenance = buildShareProvenance(inputs, resultsWithSummary);
+
+    const shareRow = {
+      share_token: shareToken,
+      user_id: user.id,
+      email: user.email,
+      inputs,
+      results: resultsWithSummary,
+      labels: labels || {},
+      is_public: true,
+      expires_at: expiresAt,
+    };
+
     // Create shared calculation using authenticated user
-    const { data: shared, error } = await supabase
+    let { error } = await supabase
       .from('shared_calculations')
-      .insert({
-        share_token: shareToken,
-        user_id: user.id,
-        email: user.email,
-        inputs,
-        results: resultsWithSummary,
-        labels: labels || {},
-        is_public: true,
-        expires_at: expiresAt,
-      })
+      .insert({ ...shareRow, provenance })
       .select()
       .single();
+
+    // Migration 099 (provenance column) not applied yet: store without it; the GET
+    // route derives provenance from inputs/results on read as a fallback.
+    if (error && isMissingColumnError(error, 'provenance')) {
+      console.warn('shared_calculations.provenance column missing — apply supabase/migrations/099_share_provenance.sql');
+      ({ error } = await supabase
+        .from('shared_calculations')
+        .insert(shareRow)
+        .select()
+        .single());
+    }
 
     if (error) {
       console.error('Error creating share:', error);
@@ -88,6 +114,7 @@ export async function POST(request: NextRequest) {
       shareToken,
       shareUrl,
       expiresAt,
+      provenance,
     });
   } catch (error) {
     captureApiError(error, 'share-post');

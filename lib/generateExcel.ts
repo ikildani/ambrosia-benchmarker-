@@ -2,8 +2,113 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { CalculationResult, formatCurrency } from './calculations';
 import { getRelevantDeals, findComparableDeals } from './comparableDeals';
-import type { CalculationInput } from './calculations';
+import type { CalculationInput, BaselineProvenance } from './calculations';
 import type { SensitivityData } from './sensitivity';
+import {
+  ENGINE_VERSION,
+  getEngineProvenance,
+  formatProvenanceFooter,
+  type EngineProvenance,
+} from './financial/calculation-version';
+
+/**
+ * Optional audit context for the "Assumptions & Provenance" sheet.
+ * `input` is the full wizard CalculationInput (every field is listed);
+ * `comparableCount` is the number of comparable deals shown to the user.
+ */
+export interface ExcelProvenanceOptions {
+  input?: CalculationInput;
+  comparableCount?: number;
+}
+
+/** Humanise a camelCase / snake_case key: "cvOutcomeBenefit" → "CV Outcome Benefit". */
+const INPUT_LABEL_OVERRIDES: Record<string, string> = {
+  therapeuticArea: 'Therapeutic Area',
+  phase: 'Development Phase',
+  dealType: 'Deal Type',
+  modality: 'Modality',
+  indication: 'Indication',
+  territory: 'Territory',
+  biomarker: 'Biomarker Strategy',
+  lineOfTherapy: 'Line of Therapy',
+  treatmentApproach: 'Treatment Approach',
+  combinationPotential: 'Combination Potential',
+  competitivePosition: 'Competitive Position',
+  dataQuality: 'Clinical Data Quality',
+  regulatoryDesignations: 'Regulatory Designations',
+  molecularTargets: 'Molecular Targets',
+  deliveryRoute: 'Delivery Route',
+  bbbPenetration: 'BBB Penetration',
+  cvOutcomeBenefit: 'CV Outcome Benefit',
+  cvTrialEndpoint: 'CV Trial Endpoint',
+  cvPopulationRisk: 'CV Population Risk',
+  whTargetPopulation: "Women's Health Target Population",
+  whUnmetNeed: "Women's Health Unmet Need",
+  whRegulatory: "Women's Health Regulatory Path",
+  giSegment: 'GI Segment',
+  mrdStatus: 'MRD Status',
+  hemeLineage: 'Hematologic Lineage',
+  peakSalesOverrideM: 'Peak Sales Override ($M)',
+  referencePeakSalesM: 'Reference Peak Sales Shown ($M)',
+  costSharingRatio: 'Co-Development Cost Sharing (licensee share)',
+  fastTrack: 'Fast Track',
+  breakthrough: 'Breakthrough Therapy',
+  orphan: 'Orphan Drug',
+  prime: 'PRIME (EMA)',
+};
+
+function humanizeKey(key: string): string {
+  if (INPUT_LABEL_OVERRIDES[key]) return INPUT_LABEL_OVERRIDES[key];
+  return key
+    .replace(/_/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+}
+
+function humanizeValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '';
+  if (Array.isArray(value)) return value.map(humanizeValue).filter(Boolean).join(', ');
+  if (typeof value === 'object') return JSON.stringify(value);
+  const s = String(value);
+  // Enum keys like "smallMolecule" / "lung_nsclc" → "Small Molecule" / "Lung Nsclc"
+  return s.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Flatten a CalculationInput into [label, displayValue, rawKey] rows.
+ * Nested objects (e.g. regulatoryDesignations) become "Parent · Child" rows.
+ * Undefined / null / empty values are skipped so the sheet lists what was set.
+ */
+export function flattenInputsForSheet(
+  input: Record<string, unknown>,
+  labels?: { phase?: string; modality?: string; indication?: string },
+): [string, string, string][] {
+  const rows: [string, string, string][] = [];
+  const walk = (obj: Record<string, unknown>, prefixLabel: string, prefixKey: string) => {
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === undefined || value === null || value === '') continue;
+      if (Array.isArray(value) && value.length === 0) continue;
+      const label = prefixLabel ? `${prefixLabel} · ${humanizeKey(key)}` : humanizeKey(key);
+      const rawKey = prefixKey ? `${prefixKey}.${key}` : key;
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        walk(value as Record<string, unknown>, label, rawKey);
+        continue;
+      }
+      let display = humanizeValue(value);
+      // Prefer the engine's own display labels for the three headline fields.
+      if (!prefixKey && key === 'phase' && labels?.phase) display = labels.phase;
+      if (!prefixKey && key === 'modality' && labels?.modality) display = labels.modality;
+      if (!prefixKey && key === 'indication' && labels?.indication) display = labels.indication;
+      const rawDisplay = Array.isArray(value) ? value.join(', ') : String(value);
+      rows.push([label, display, rawDisplay]);
+    }
+  };
+  walk(input, '', '');
+  return rows;
+}
 
 export interface PartnerForExcel {
   company_name: string;
@@ -155,7 +260,12 @@ function addTableHeaders(ws: ExcelJS.Worksheet, row: number, headers: string[]):
   ws.getRow(row).height = 22;
 }
 
-export async function generateExcelReport(
+/**
+ * Build the deal-analysis workbook without triggering a browser download.
+ * Exported so the sheet contents can be unit-tested; `generateExcelReport`
+ * wraps this and saves the file.
+ */
+export function buildExcelWorkbook(
   result: CalculationResult,
   inputs?: {
     modality: string;
@@ -166,12 +276,25 @@ export async function generateExcelReport(
   partners?: PartnerForExcel[],
   therapeuticArea?: string,
   treatmentApproach?: string,
-  sensitivityData?: SensitivityData
-): Promise<void> {
+  sensitivityData?: SensitivityData,
+  provenanceOptions?: ExcelProvenanceOptions,
+  generatedAt: Date = new Date()
+): ExcelJS.Workbook {
   const { terms, tieredRoyalties, dealRecommendation, negotiationInsight, modifiers, labels, dealTypeLabels: dtl } = result;
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Ambrosia Ventures';
-  wb.created = new Date();
+  wb.created = generatedAt;
+
+  // ── Provenance (engine version, fingerprint, baseline, benchmarks release) ──
+  // Fingerprint the full wizard input when available; otherwise fall back to
+  // the four headline inputs so the export always carries a reproducible hash.
+  const fingerprintSource: Record<string, unknown> = provenanceOptions?.input
+    ? (provenanceOptions.input as unknown as Record<string, unknown>)
+    : { ...(inputs ?? {}), therapeuticArea, treatmentApproach };
+  const provenance: EngineProvenance = getEngineProvenance(fingerprintSource);
+  const rnpvFingerprint = result.financialModel?.rnpv?.calculationFingerprint;
+  const baseline: BaselineProvenance | undefined = result.drillDown?.totalDealValue?.baseline;
+  const provenanceFooter = formatProvenanceFooter(provenance, baseline);
 
   // ── Sheet 1: Executive Summary ──
   const ws1 = wb.addWorksheet('Executive Summary', {
@@ -184,7 +307,7 @@ export async function generateExcelReport(
 
   ws1.getCell(2, 1).value = 'Ambrosia Ventures';
   ws1.getCell(2, 1).font = { size: 10, color: { argb: GRAY_500 } };
-  ws1.getCell(2, 2).value = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  ws1.getCell(2, 2).value = generatedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   ws1.getCell(2, 2).font = { size: 10, color: { argb: GRAY_500 } };
   ws1.getCell(2, 2).alignment = { horizontal: 'right' };
 
@@ -246,6 +369,18 @@ export async function generateExcelReport(
   ws1.getCell(r, 1).font = { size: 10, italic: true, color: { argb: NAVY } };
   ws1.getCell(r, 1).alignment = { wrapText: true };
   ws1.getRow(r).height = 50;
+
+  // Provenance footer — one line an auditor can quote to reproduce this run.
+  r += 2;
+  ws1.getCell(r, 1).value = provenanceFooter;
+  ws1.mergeCells(r, 1, r, 2);
+  ws1.getCell(r, 1).font = { size: 8, color: { argb: GRAY_500 } };
+  ws1.getCell(r, 1).alignment = { wrapText: true };
+  r++;
+  ws1.getCell(r, 1).value = `Full inputs, modifiers and data versions: see "Assumptions & Provenance" sheet. Benchmarks data v${provenance.benchmarksVersion} (${provenance.benchmarksLastUpdated}).`;
+  ws1.mergeCells(r, 1, r, 2);
+  ws1.getCell(r, 1).font = { size: 8, color: { argb: GRAY_500 } };
+  ws1.getCell(r, 1).alignment = { wrapText: true };
 
   // Print area for Executive Summary
   setPrintArea(ws1, r, 2);
@@ -723,7 +858,186 @@ export async function generateExcelReport(
     setPrintArea(ws5, 3 + partners.length, 5);
   }
 
-  // ── Sheet 6: Methodology ──
+  // ── Sheet 6: Assumptions & Provenance ──
+  // Everything an institutional reviewer needs to audit or reproduce the numbers:
+  // every wizard input, every modifier (shown vs. applied), the calibrated baseline
+  // the estimate started from, and the engine / data versions that produced it.
+  const wsP = wb.addWorksheet('Assumptions & Provenance', {
+    properties: { tabColor: { argb: GRAY_500 } },
+    pageSetup: { orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  });
+  wsP.columns = [{ width: 38 }, { width: 34 }, { width: 18 }, { width: 44 }];
+
+  addSectionHeader(wsP, 1, 'ASSUMPTIONS & PROVENANCE', 4);
+  let pr = 2;
+  wsP.getCell(pr, 1).value = 'Use this sheet to audit or reproduce any number in this workbook. Re-running the engine with the same inputs, engine version and benchmarks release yields the same fingerprint and the same outputs.';
+  wsP.mergeCells(pr, 1, pr, 4);
+  wsP.getCell(pr, 1).font = { size: 9, italic: true, color: { argb: GRAY_500 } };
+  wsP.getCell(pr, 1).alignment = { wrapText: true };
+  wsP.getRow(pr).height = 30;
+  pr += 2;
+
+  const writeKV = (rows: [string, string | number | null | undefined][]) => {
+    rows.forEach(([k, v], i) => {
+      const fill = i % 2 === 0 ? grayFill() : lightGrayFill();
+      wsP.getCell(pr, 1).value = k;
+      wsP.getCell(pr, 1).font = { bold: true, size: 10 };
+      wsP.getCell(pr, 1).fill = fill;
+      wsP.getCell(pr, 1).border = thinBorder();
+      const vc = wsP.getCell(pr, 2);
+      vc.value = v === undefined || v === null || v === '' ? '—' : v;
+      vc.font = { size: 10, color: { argb: v === undefined || v === null || v === '' ? GRAY_500 : NAVY } };
+      vc.fill = fill;
+      vc.border = thinBorder();
+      vc.alignment = { horizontal: typeof v === 'number' ? 'right' : 'left' };
+      pr++;
+    });
+  };
+
+  // Generation & engine
+  addSectionHeader(wsP, pr, 'GENERATION & ENGINE', 4);
+  pr++;
+  writeKV([
+    ['Generated At (UTC)', generatedAt.toISOString()],
+    ['Engine Version', `v${provenance.engineVersion}`],
+    ['Input Fingerprint', provenance.fingerprint],
+    ['Fingerprint Basis', provenanceOptions?.input ? 'Full wizard input (all fields below)' : 'Headline inputs only (modality, phase, indication, territory, TA)'],
+    ['rNPV Engine Fingerprint', rnpvFingerprint ?? '— (financial model not included)'],
+    ['Benchmarks Data Version', provenance.benchmarksVersion],
+    ['Benchmarks Last Updated', provenance.benchmarksLastUpdated],
+    ['Deal Database Size (verified deals)', provenance.dealDatabaseSize],
+    ['Comparable Deals Shown (n)', provenanceOptions?.comparableCount ?? comparableDeals.length],
+  ]);
+  pr++;
+
+  // Baseline provenance
+  addSectionHeader(wsP, pr, 'BASELINE PROVENANCE (starting point of the estimate)', 4);
+  pr++;
+  if (baseline) {
+    writeKV([
+      ['Baseline Phase', baseline.phase ? humanizeValue(baseline.phase) : undefined],
+      ['Baseline Therapeutic Area', baseline.therapeuticArea ? humanizeValue(baseline.therapeuticArea) : undefined],
+      ['Baseline Total Value Median ($M)', baseline.totalValueMedian],
+      ['Baseline Upfront Median ($M)', baseline.upfrontMedian],
+      ['Baseline Royalty Base (%)', baseline.royaltyBase],
+      ['Baseline Royalty Max (%)', baseline.royaltyMax],
+      ['Baseline Source', baseline.source === 'calibrated' ? 'Calibrated from disclosed deals' : baseline.source === 'static' ? 'Static benchmarks (data/benchmarks.json)' : baseline.source],
+      ['Baseline Sample Size (disclosed deals)', baseline.sampleSize ?? undefined],
+      ['Baseline Calibrated At', baseline.calibratedAt ?? undefined],
+      ['Range Width (%)', baseline.rangeWidthPercent],
+      ['Effective Multiplier (product of applied modifiers)', baseline.effectiveMultiplier !== undefined ? Math.round(baseline.effectiveMultiplier * 1000) / 1000 : undefined],
+      ['Deal Type Multiplier', baseline.dealTypeMultiplier !== undefined ? Math.round(baseline.dealTypeMultiplier * 1000) / 1000 : undefined],
+    ]);
+  } else {
+    writeKV([['Baseline', 'Not available on this result']]);
+  }
+  pr++;
+
+  // Wizard inputs
+  addSectionHeader(wsP, pr, 'WIZARD INPUTS (as entered)', 4);
+  pr++;
+  addTableHeaders(wsP, pr, ['Input', 'Value', '', 'Raw Key / Value']);
+  wsP.mergeCells(pr, 2, pr, 3);
+  pr++;
+  const inputRows = provenanceOptions?.input
+    ? flattenInputsForSheet(provenanceOptions.input as unknown as Record<string, unknown>, labels)
+    : flattenInputsForSheet({ therapeuticArea, ...(inputs ?? {}), treatmentApproach }, labels);
+  inputRows.forEach(([label, display, raw], i) => {
+    const fill = i % 2 === 0 ? grayFill() : lightGrayFill();
+    wsP.getCell(pr, 1).value = label;
+    wsP.getCell(pr, 1).font = { bold: true, size: 10 };
+    wsP.getCell(pr, 1).fill = fill;
+    wsP.getCell(pr, 1).border = thinBorder();
+    wsP.mergeCells(pr, 2, pr, 3);
+    wsP.getCell(pr, 2).value = display;
+    wsP.getCell(pr, 2).font = { size: 10, color: { argb: TEAL } };
+    wsP.getCell(pr, 2).fill = fill;
+    wsP.getCell(pr, 2).border = thinBorder();
+    wsP.getCell(pr, 3).border = thinBorder();
+    wsP.getCell(pr, 4).value = raw;
+    wsP.getCell(pr, 4).font = { size: 9, color: { argb: GRAY_500 } };
+    wsP.getCell(pr, 4).fill = fill;
+    wsP.getCell(pr, 4).border = thinBorder();
+    pr++;
+  });
+  if (inputRows.length === 0) {
+    wsP.getCell(pr, 1).value = 'No inputs supplied';
+    wsP.getCell(pr, 1).font = { size: 10, italic: true, color: { argb: GRAY_500 } };
+    pr++;
+  }
+  pr++;
+
+  // Modifiers: shown multiplier vs. applied (post-dampening) multiplier
+  addSectionHeader(wsP, pr, 'MODIFIERS (shown vs. applied)', 4);
+  pr++;
+  addTableHeaders(wsP, pr, ['Modifier', 'Multiplier (shown)', 'Applied', 'Context']);
+  pr++;
+  modifiers.forEach((m, i) => {
+    const fill = i % 2 === 0 ? grayFill() : lightGrayFill();
+    wsP.getCell(pr, 1).value = m.name;
+    wsP.getCell(pr, 1).font = { bold: true, size: 10 };
+    wsP.getCell(pr, 1).fill = fill;
+    wsP.getCell(pr, 1).border = thinBorder();
+
+    const multCell = wsP.getCell(pr, 2);
+    multCell.value = m.multiplier;
+    multCell.numFmt = '0.000"x"';
+    multCell.font = { size: 10, color: { argb: NAVY } };
+    multCell.fill = fill;
+    multCell.alignment = { horizontal: 'right' };
+    multCell.border = thinBorder();
+    applyConditionalStyle(multCell, Math.round((m.multiplier - 1) * 1000), 10);
+
+    const appliedCell = wsP.getCell(pr, 3);
+    if (typeof m.applied === 'number' && Number.isFinite(m.applied)) {
+      appliedCell.value = m.applied;
+      appliedCell.numFmt = '0.000"x"';
+      appliedCell.font = { size: 10, bold: true, color: { argb: TEAL } };
+    } else {
+      appliedCell.value = '—';
+      appliedCell.font = { size: 10, color: { argb: GRAY_500 } };
+    }
+    appliedCell.fill = fill;
+    appliedCell.alignment = { horizontal: 'right' };
+    appliedCell.border = thinBorder();
+
+    wsP.getCell(pr, 4).value = m.context ?? '';
+    wsP.getCell(pr, 4).font = { size: 9, color: { argb: GRAY_500 } };
+    wsP.getCell(pr, 4).fill = fill;
+    wsP.getCell(pr, 4).alignment = { wrapText: true };
+    wsP.getCell(pr, 4).border = thinBorder();
+    pr++;
+  });
+  if (modifiers.length === 0) {
+    wsP.getCell(pr, 1).value = 'No modifiers applied (baseline only)';
+    wsP.getCell(pr, 1).font = { size: 10, italic: true, color: { argb: GRAY_500 } };
+    pr++;
+  }
+  if (baseline?.effectiveMultiplier !== undefined) {
+    const totalFillP: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: NAVY } };
+    wsP.getCell(pr, 1).value = 'Effective multiplier (product of applied)';
+    wsP.getCell(pr, 1).font = { bold: true, size: 10, color: { argb: WHITE } };
+    wsP.getCell(pr, 1).fill = totalFillP;
+    wsP.getCell(pr, 2).fill = totalFillP;
+    const effCell = wsP.getCell(pr, 3);
+    effCell.value = baseline.effectiveMultiplier;
+    effCell.numFmt = '0.000"x"';
+    effCell.font = { bold: true, size: 10, color: { argb: WHITE } };
+    effCell.fill = totalFillP;
+    effCell.alignment = { horizontal: 'right' };
+    wsP.getCell(pr, 4).fill = totalFillP;
+    pr++;
+  }
+  pr++;
+  wsP.getCell(pr, 1).value = '"Applied" is the post-dampening effect that actually moved the number; "Multiplier (shown)" is the raw factor before dampening exponents. Multipliers compound on the baseline median.';
+  wsP.mergeCells(pr, 1, pr, 4);
+  wsP.getCell(pr, 1).font = { size: 9, italic: true, color: { argb: GRAY_500 } };
+  wsP.getCell(pr, 1).alignment = { wrapText: true };
+  wsP.getRow(pr).height = 30;
+
+  setPrintArea(wsP, pr, 4);
+
+  // ── Sheet 7: Methodology ──
   const ws6 = wb.addWorksheet('Methodology', {
     pageSetup: { orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
   });
@@ -757,6 +1071,9 @@ export async function generateExcelReport(
     '',
     'Consult qualified professionals before making business decisions.',
     '',
+    `Engine v${ENGINE_VERSION} \u00B7 Benchmarks data v${provenance.benchmarksVersion} (${provenance.benchmarksLastUpdated}) \u00B7 Fingerprint ${provenance.fingerprint}`,
+    'See the "Assumptions & Provenance" sheet for every input, modifier and baseline behind these numbers.',
+    '',
     '\u00A9 Ambrosia Ventures - solidus.ambrosiaventures.co',
   ];
   methLines.forEach((line, i) => {
@@ -771,8 +1088,29 @@ export async function generateExcelReport(
   // Print area for Methodology
   setPrintArea(ws6, 1 + methLines.length, 1);
 
+  return wb;
+}
+
+export async function generateExcelReport(
+  result: CalculationResult,
+  inputs?: {
+    modality: string;
+    phase: string;
+    indication: string;
+    territory: string;
+  },
+  partners?: PartnerForExcel[],
+  therapeuticArea?: string,
+  treatmentApproach?: string,
+  sensitivityData?: SensitivityData,
+  provenanceOptions?: ExcelProvenanceOptions
+): Promise<void> {
+  const generatedAt = new Date();
+  const wb = buildExcelWorkbook(result, inputs, partners, therapeuticArea, treatmentApproach, sensitivityData, provenanceOptions, generatedAt);
+  const { labels } = result;
+
   // Generate and download
-  const timestamp = new Date().toISOString().slice(0, 10);
+  const timestamp = generatedAt.toISOString().slice(0, 10);
   const safeModality = (labels.modality || 'report').toLowerCase().replace(/[^a-z0-9-]/g, '-');
   const filename = `deal-analysis-${safeModality}-${timestamp}.xlsx`;
 

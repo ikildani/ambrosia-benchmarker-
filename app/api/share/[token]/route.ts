@@ -4,6 +4,7 @@ import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 import { notifyShareView } from '@/lib/slack/notify';
+import { buildShareProvenance, type ShareProvenance } from '@/lib/financial/calculation-version';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +62,20 @@ export async function GET(
       }).catch(() => {});
     }
 
+    // Provenance persisted at share time (migration 099). Older rows, or rows
+    // written before the column existed, get it derived from the stored payload
+    // and stamped with the share's creation time.
+    const storedProvenance = shared.provenance as ShareProvenance | null | undefined;
+    const provenance: ShareProvenance = storedProvenance && typeof storedProvenance === 'object'
+      ? storedProvenance
+      : {
+          ...buildShareProvenance(
+            (shared.inputs ?? {}) as Record<string, unknown>,
+            shared.results,
+            shared.created_at ? new Date(shared.created_at) : new Date(),
+          ),
+        };
+
     return apiSuccess({
       inputs: shared.inputs,
       results: shared.results,
@@ -68,6 +83,7 @@ export async function GET(
       viewCount,
       createdAt: shared.created_at,
       expiresAt: shared.expires_at,
+      provenance,
     });
   } catch (error) {
     captureApiError(error, 'share-get');
