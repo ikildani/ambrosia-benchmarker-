@@ -72,7 +72,7 @@ export function useAuthActions(params: UseAuthActionsParams): AuthActionsState {
 
     if (data.user && !data.user.confirmed_at) {
       setMode('verify-email');
-      setSuccess(`We've sent a verification email to ${email}. Please check your inbox and click the link to verify your account.`);
+      setSuccess(`We've sent a verification email to ${email}. Please check your inbox and click the link to verify your account. Your 7-day Pro trial is already active — no card required.`);
 
       // Create user profile
       try {

@@ -53,7 +53,13 @@ export async function POST(request: NextRequest) {
           return apiSuccess({ message: 'Welcome email already sent' });
         }
 
-        result = await sendWelcomeEmail(email, name || 'there');
+        // New signups get an auto Pro trial (migration 098) — surface its expiry.
+        const { data: welcomeProfile } = await supabase
+          .from('user_profiles')
+          .select('pro_expires_at')
+          .eq('id', user.id)
+          .maybeSingle();
+        result = await sendWelcomeEmail(email, name || 'there', welcomeProfile?.pro_expires_at ?? null);
 
         // Update preferences
         await supabase

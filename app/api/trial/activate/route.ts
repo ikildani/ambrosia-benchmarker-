@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
     return redirect(`/?trial=signup&email=${encodeURIComponent(email)}`, appUrl);
   }
 
-  // Already on a paid plan, or already inside this email trial — just let them in.
+  // Already on a paid plan, or already inside a trial window (including the
+  // auto-trial every new signup gets from the handle_new_user trigger,
+  // migration 098) — just let them in. Never an error.
   const alreadyActive =
     profile.tier === 'pro' &&
     profile.pro_expires_at &&
@@ -68,13 +70,17 @@ export async function GET(request: NextRequest) {
     return redirect('/?trial=error', appUrl);
   }
 
-  await supabase.from('events').insert({
+  // NOTE: events has no tier_change_authorized column — including it made this
+  // insert fail silently (PGRST204) and no trial_activated events were recorded.
+  const { error: eventError } = await supabase.from('events').insert({
     user_id: profile.id,
     event_type: 'trial_activated',
     event_data: { source: 'email-trial-may2026', expires_at: expiresAt.toISOString() },
     user_tier: 'pro',
-    tier_change_authorized: true,
   });
+  if (eventError) {
+    console.error('[trial/activate] trial_activated event insert failed:', eventError.message);
+  }
 
   notifyTrialStarted({ email }).catch(() => {});
 

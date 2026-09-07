@@ -29,8 +29,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'You already have an active Pro subscription.' }, { status: 400 });
   }
 
+  // Already inside a trial window (auto-trial from signup, self-serve, or email
+  // trial). Not an error — new signups get a trial automatically via the
+  // handle_new_user trigger (migration 098), so UI callers must treat this as
+  // "nothing to do" rather than surface an error toast.
   if (profile.tier === 'pro' && profile.pro_expires_at && new Date(profile.pro_expires_at).getTime() > Date.now()) {
-    return NextResponse.json({ error: 'You already have an active trial.', alreadyActive: true }, { status: 400 });
+    const activeUntil = new Date(profile.pro_expires_at);
+    return NextResponse.json({
+      alreadyActive: true,
+      expiresAt: activeUntil.toISOString(),
+      message: `Your Pro trial is already active until ${activeUntil.toLocaleDateString()}.`,
+    });
   }
 
   const hadPriorTrial = profile.pro_expires_at && new Date(profile.pro_expires_at).getTime() < Date.now();
@@ -59,13 +68,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to start trial. Please try again.' }, { status: 500 });
   }
 
-  await supabase.from('events').insert({
+  // NOTE: events has no tier_change_authorized column — including it made this
+  // insert fail silently (PGRST204) and no trial_activated events were recorded.
+  const { error: eventError } = await supabase.from('events').insert({
     user_id: profile.id,
     event_type: 'trial_activated',
     event_data: { source: 'self-serve-trial', expires_at: expiresAt.toISOString() },
     user_tier: 'pro',
-    tier_change_authorized: true,
   });
+  if (eventError) {
+    console.error('[trial/start] trial_activated event insert failed:', eventError.message);
+  }
 
   notifyTrialStarted({ email: profile.email || authUser.email || 'unknown' }).catch(() => {});
 

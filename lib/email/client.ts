@@ -44,7 +44,11 @@ export async function sendEmail(options: EmailOptions) {
   }
 }
 
-export async function sendWelcomeEmail(to: string, name: string) {
+export async function sendWelcomeEmail(to: string, name: string, trialExpiresAt?: Date | string | null) {
+  const expiry = trialExpiresAt ? new Date(trialExpiresAt) : null;
+  const trialLine = expiry && !Number.isNaN(expiry.getTime())
+    ? `Your 7-day Pro trial is already active — no card required — and runs until <strong>${expiry.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>.`
+    : 'Your 7-day Pro trial is already active — no card required.';
   const html = `
     <!DOCTYPE html>
     <html>
@@ -62,7 +66,9 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
           <p>Thank you for signing up for Solidus!</p>
 
-          <p>You now have access to our industry-leading biotech deal benchmarking tool. Here's what you can do:</p>
+          <p>${trialLine}</p>
+
+          <p>You have full Pro access to our biotech deal benchmarking platform. Here's what you can do:</p>
 
           <ul style="padding-left: 20px;">
             <li><strong>Benchmark deals</strong> across 17+ modalities</li>

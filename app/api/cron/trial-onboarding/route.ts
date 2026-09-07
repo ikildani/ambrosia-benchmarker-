@@ -10,8 +10,12 @@ export const dynamic = 'force-dynamic';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
-function buildDay1Email(name: string): { subject: string; html: string } {
+function buildDay1Email(name: string, expiresAt?: string | null): { subject: string; html: string } {
   const firstName = name?.split(' ')[0] || 'there';
+  const expiry = expiresAt ? new Date(expiresAt) : null;
+  const expiryLine = expiry && !Number.isNaN(expiry.getTime())
+    ? ` Your trial is active until ${expiry.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.`
+    : '';
   return {
     subject: 'Welcome to Pro — here\'s your first move',
     html: `<!DOCTYPE html>
@@ -26,7 +30,7 @@ function buildDay1Email(name: string): { subject: string; html: string } {
     <div style="background: #111827; padding: 32px; border: 1px solid #1e3a5f; border-top: none; border-radius: 0 0 16px 16px;">
       <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 16px;">Hi ${firstName},</p>
       <p style="color: #94a3b8; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-        Your Pro trial is live. Here's how to get the most out of your 7 days:
+        Your Pro trial is live — no card required.${expiryLine} Here's how to get the most out of your 7 days:
       </p>
       <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; margin: 20px 0;">
         <p style="color: #14b8a6; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 16px;">Start here</p>
@@ -175,12 +179,26 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    const { data: trialUsers } = await supabase
+    // Two trial populations:
+    //   1. Stripe trials (subscription_status = 'trialing', set by the webhook)
+    //   2. Auto-trials every new signup gets from the handle_new_user trigger
+    //      (migration 098): tier='pro', pro_engagement_type='auto-trial',
+    //      still inside the trial window. The free-tier onboarding-drip cron
+    //      skips these users (tier != 'free'), so this sequence is their welcome.
+    // (Expiry window is applied in JS below: ISO timestamps contain characters
+    // PostgREST treats as reserved inside .or() filters.)
+    const nowMs = Date.now();
+    const { data: rawTrialUsers } = await supabase
       .from('user_profiles')
-      .select('id, email, full_name, pro_activated_at, subscription_status')
-      .eq('subscription_status', 'trialing');
+      .select('id, email, full_name, pro_activated_at, pro_expires_at, subscription_status, pro_engagement_type')
+      .or('subscription_status.eq.trialing,and(tier.eq.pro,pro_engagement_type.eq.auto-trial)');
 
-    if (!trialUsers || trialUsers.length === 0) {
+    const trialUsers = (rawTrialUsers || []).filter(u =>
+      u.subscription_status === 'trialing' ||
+      (u.pro_expires_at && new Date(u.pro_expires_at).getTime() > nowMs)
+    );
+
+    if (trialUsers.length === 0) {
       return NextResponse.json({ success: true, message: 'No trial users', emailsSent: 0 });
     }
 
@@ -239,7 +257,7 @@ export async function GET(request: NextRequest) {
         emailContent = buildDay4Email(user.full_name || user.email, used);
       } else if (daysSinceActivation >= 0.5 && !sent.has('trial_onboarding_day1_sent')) {
         emailType = 'day1';
-        emailContent = buildDay1Email(user.full_name || user.email);
+        emailContent = buildDay1Email(user.full_name || user.email, user.pro_expires_at);
       }
 
       if (!emailType || !emailContent) continue;
