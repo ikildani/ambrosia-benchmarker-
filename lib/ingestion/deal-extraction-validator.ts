@@ -416,3 +416,14 @@ export function validateDealDate(
 
   return { valid: true };
 }
+
+/**
+ * Royalty columns are stored as whole percents (10 = 10%). LLM extractors
+ * sometimes return decimals (0.10). Biopharma royalties below 1% are not a
+ * real thing, so any value in (0, 1) is treated as a fraction and scaled.
+ */
+export function normalizeRoyaltyPct(value: number | null | undefined): number | null {
+  if (value == null || Number.isNaN(value)) return null;
+  if (value > 0 && value < 1) return Math.round(value * 10000) / 100;
+  return value;
+}

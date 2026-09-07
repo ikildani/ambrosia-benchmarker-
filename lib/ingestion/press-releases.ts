@@ -5,7 +5,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ExtractedDeal } from './sec-edgar';
 import { fetchWithTimeout } from '../fetch-with-timeout';
-import { validateExtractedDeal, extractAuditExcerpt } from './deal-extraction-validator';
+import { validateExtractedDeal, extractAuditExcerpt, normalizeRoyaltyPct } from './deal-extraction-validator';
 
 // === RSS Feed Sources ===
 // Each source provides deal announcements that we filter and extract from
@@ -367,8 +367,8 @@ If it IS a deal, return:
   "milestones_development_usd": number or null,
   "milestones_regulatory_usd": number or null,
   "milestones_commercial_usd": number or null,
-  "royalty_low_pct": decimal or null,
-  "royalty_high_pct": decimal or null,
+  "royalty_low_pct": whole percent number or null (e.g., 10 for 10%, never 0.10),
+  "royalty_high_pct": whole percent number or null (e.g., 20 for 20%, never 0.20),
   "total_deal_value_usd": number or null,
   "equity_investment_usd": number or null,
   "includes_manufacturing": boolean,
@@ -580,8 +580,8 @@ export async function runPressReleaseIngestion(
               milestones_development_usd: deal.milestones_development_usd,
               milestones_regulatory_usd: deal.milestones_regulatory_usd,
               milestones_commercial_usd: deal.milestones_commercial_usd,
-              royalty_low_pct: deal.royalty_low_pct,
-              royalty_high_pct: deal.royalty_high_pct,
+              royalty_low_pct: normalizeRoyaltyPct(deal.royalty_low_pct),
+              royalty_high_pct: normalizeRoyaltyPct(deal.royalty_high_pct),
               total_deal_value_usd: deal.total_deal_value_usd,
               equity_investment_usd: deal.equity_investment_usd,
               includes_manufacturing: deal.includes_manufacturing,

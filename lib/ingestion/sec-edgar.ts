@@ -4,7 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { validateExtractedDeal, extractAuditExcerpt } from './deal-extraction-validator';
+import { validateExtractedDeal, extractAuditExcerpt, normalizeRoyaltyPct } from './deal-extraction-validator';
 
 const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 const SEC_COMPANY_SEARCH = 'https://data.sec.gov/submissions';
@@ -615,8 +615,8 @@ If it IS a deal, return this structure:
   "milestones_development_usd": number or null,
   "milestones_regulatory_usd": number or null,
   "milestones_commercial_usd": number or null,
-  "royalty_low_pct": decimal or null (e.g., 0.10 for 10%),
-  "royalty_high_pct": decimal or null,
+  "royalty_low_pct": whole percent number or null (e.g., 10 for 10%, never 0.10),
+  "royalty_high_pct": whole percent number or null (e.g., 20 for 20%, never 0.20),
   "total_deal_value_usd": number or null,
   "equity_investment_usd": number or null,
   "includes_manufacturing": boolean,
@@ -864,8 +864,8 @@ export async function runDailyIngestion(
             milestones_development_usd: deal.milestones_development_usd,
             milestones_regulatory_usd: deal.milestones_regulatory_usd,
             milestones_commercial_usd: deal.milestones_commercial_usd,
-            royalty_low_pct: deal.royalty_low_pct,
-            royalty_high_pct: deal.royalty_high_pct,
+            royalty_low_pct: normalizeRoyaltyPct(deal.royalty_low_pct),
+            royalty_high_pct: normalizeRoyaltyPct(deal.royalty_high_pct),
             total_deal_value_usd: deal.total_deal_value_usd,
             equity_investment_usd: deal.equity_investment_usd,
             includes_manufacturing: deal.includes_manufacturing,
