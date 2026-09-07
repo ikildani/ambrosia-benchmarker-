@@ -19,6 +19,7 @@ const mockSupabase = {
   upsert: jest.fn().mockReturnThis(),
   eq: jest.fn().mockReturnThis(),
   single: jest.fn(),
+  maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
 };
 
 jest.mock('@/lib/supabase/server', () => ({
@@ -133,7 +134,8 @@ describe('/api/email/send', () => {
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.id).toBe('email-123');
-    expect(mockSendWelcomeEmail).toHaveBeenCalledWith('test@example.com', 'Test User');
+    // Third argument is the auto-trial expiry (null when the profile lookup returns nothing).
+    expect(mockSendWelcomeEmail).toHaveBeenCalledWith('test@example.com', 'Test User', null);
   });
 
   it('should return 429 when rate limited', async () => {

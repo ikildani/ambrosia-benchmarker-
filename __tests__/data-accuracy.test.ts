@@ -249,12 +249,14 @@ describe('Deal Type Impact', () => {
     });
   });
 
-  it('Phase 2 acquisition total value is within 60-110% of licensing (phase-adjusted, not always premium)', () => {
-    // Acquisition multiplier is phase-adjusted: early-stage = discount (buying risk),
-    // late-stage = premium (control). Phase 2 acquisition ≈ 0.90x of licensing.
+  it('Phase 2 acquisition total value is within 90-145% of licensing (R73 per-factor calibration)', () => {
+    // Acquisition multiplier is phase-adjusted. Calibration round R73
+    // (docs/calibration-per-factor-2026-09.md) found disclosed Phase 2
+    // acquisitions price above licensing total value (implied 1.65x, CI
+    // 1.24-2.24, n=50); the engine now uses the lower CI bound, 1.25x.
     const ratio = results.acquisition.terms.totalDealValue.median / results.licensing.terms.totalDealValue.median;
-    expect(ratio).toBeGreaterThan(0.60);
-    expect(ratio).toBeLessThan(1.10);
+    expect(ratio).toBeGreaterThan(0.90);
+    expect(ratio).toBeLessThan(1.45);
   });
 
   it('acquisition upfront % should be much higher than licensing (70%+ vs 15-35%)', () => {

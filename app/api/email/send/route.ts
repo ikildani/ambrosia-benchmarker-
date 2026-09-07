@@ -54,12 +54,19 @@ export async function POST(request: NextRequest) {
         }
 
         // New signups get an auto Pro trial (migration 098) — surface its expiry.
-        const { data: welcomeProfile } = await supabase
-          .from('user_profiles')
-          .select('pro_expires_at')
-          .eq('id', user.id)
-          .maybeSingle();
-        result = await sendWelcomeEmail(email, name || 'there', welcomeProfile?.pro_expires_at ?? null);
+        // The lookup is best-effort: a welcome email must never fail because of it.
+        let trialExpiresAt: string | null = null;
+        try {
+          const { data: welcomeProfile } = await supabase
+            .from('user_profiles')
+            .select('pro_expires_at')
+            .eq('id', user.id)
+            .maybeSingle();
+          trialExpiresAt = welcomeProfile?.pro_expires_at ?? null;
+        } catch (lookupError) {
+          console.warn('[email/send] trial expiry lookup failed:', lookupError);
+        }
+        result = await sendWelcomeEmail(email, name || 'there', trialExpiresAt);
 
         // Update preferences
         await supabase
