@@ -167,6 +167,12 @@ export async function runBenchmarkCalibration(
     .from('deals')
     .select('id, upfront_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, phase_at_signing, therapeutic_area, modality')
     .eq('terms_disclosed', true)
+    // Only verifier-confirmed, canonical, non-synthetic deals may shape a
+    // baseline. Confidence score alone let LLM-seeded rows that were never
+    // checked (some of them fabricated) into the medians.
+    .eq('verification_status', 'verified')
+    .eq('is_synthetic', false)
+    .or('is_canonical.is.null,is_canonical.eq.true')
     .gte('confidence_score', 75);
 
   if (queryError) {
