@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Preclinical Asset Valuation for Licensing: Benchmark Data & Deal Structures | Ambrosia Ventures',
+  title: 'Preclinical Asset Valuation for Licensing: Benchmark Data & Deal Structures',
   description: 'Preclinical licensing deals command a $22M median upfront and $400M total value in oncology. Benchmark data across 12 therapeutic areas, platform vs. single-asset structures, and rNPV methodology.',
   keywords: [
     'preclinical asset valuation licensing',

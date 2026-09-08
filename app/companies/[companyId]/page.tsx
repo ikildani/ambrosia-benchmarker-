@@ -271,13 +271,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { companyId } = await params;
 
   if (!UUID_REGEX.test(companyId)) {
-    return { title: 'Company Not Found | Ambrosia Ventures' };
+    return { title: 'Company Not Found' };
   }
 
   try {
     const data = await getCompanySEOData(companyId);
     if (!data) {
-      return { title: 'Company Not Found | Ambrosia Ventures' };
+      return { title: 'Company Not Found' };
     }
 
     const { company, deals, topTAs, topModalities } = data;
@@ -345,7 +345,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
   } catch {
-    return { title: 'Company Profile | Ambrosia Ventures' };
+    return { title: 'Company Profile' };
   }
 }
 

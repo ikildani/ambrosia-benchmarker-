@@ -191,7 +191,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!post) return { title: 'Post Not Found', robots: { index: false, follow: false } };
 
   return {
-    title: `${post.title} | Ambrosia Ventures`,
+    title: `${post.title}`,
     description: post.metaDescription,
     authors: [{ name: post.author }],
     alternates: { canonical: `${BASE_URL}/blog/${post.slug}` },

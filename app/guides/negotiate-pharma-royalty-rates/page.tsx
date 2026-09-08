@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Pharma Royalty Rates by Phase & Modality: 2026 Benchmarks and Negotiation Guide | Ambrosia Ventures',
+  title: 'Pharma Royalty Rates by Phase & Modality: 2026 Benchmarks and Negotiation Guide',
   description: `Preclinical: 3% median. Phase 2: 7%. Approved: 16%. See biopharma royalty benchmarks by phase and modality from ${DEAL_STATS.TOTAL_DEALS} real deals, plus negotiation strategies that work.`,
   keywords: [
     'pharma royalty rates',

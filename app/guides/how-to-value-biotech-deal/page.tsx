@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'How to Value a Biotech Deal: 5-Step Framework With rNPV, Comps & Monte Carlo | Ambrosia Ventures',
+  title: 'How to Value a Biotech Deal: 5-Step Framework With rNPV, Comps & Monte Carlo',
   description: 'Phase 2 oncology deals command $50M median upfronts. Learn the 5-step biotech valuation framework used by top BD teams: comps, value drivers, rNPV, Monte Carlo, and deal structure benchmarking.',
   keywords: [
     'biotech valuation',

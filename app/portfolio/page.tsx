@@ -15,7 +15,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export const metadata: Metadata = {
-  title: 'Portfolio License | The Deal Intelligence Layer for Biotech & Pharma VCs | Ambrosia Ventures',
+  title: 'Portfolio License | The Deal Intelligence Layer for Biotech & Pharma VCs',
   description:
     'Multi-seat Pro access plus 16 fund-level capabilities for biotech and pharma VC firms. Admin dashboard, quarterly portfolio reports, white-label deliverables, dedicated analyst hours, and an enterprise infrastructure layer. From $30,000/yr for 5 seats.',
   keywords: [

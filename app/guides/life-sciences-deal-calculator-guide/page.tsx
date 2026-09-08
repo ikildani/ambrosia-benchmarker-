@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: `Biotech Deal Calculator: 14 Engines, ${DEAL_STATS.TOTAL_DEALS} Deals, Instant Benchmarks | Ambrosia Ventures`,
+  title: `Biotech Deal Calculator: 14 Engines, ${DEAL_STATS.TOTAL_DEALS} Deals, Instant Benchmarks`,
   description: `Replace weeks of spreadsheet modeling with 14 specialized engines. Benchmark upfronts, milestones, royalties, rNPV, and Monte Carlo against ${DEAL_STATS.TOTAL_DEALS} real biopharma deals in under 2 minutes.`,
   keywords: [
     'biotech deal calculator',

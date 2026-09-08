@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Out-Licensing Benchmarks Asia Pacific: Japan, China & Regional Deal Data | Ambrosia Ventures',
+  title: 'Out-Licensing Benchmarks Asia Pacific: Japan, China & Regional Deal Data',
   description: 'APAC out-licensing benchmarks covering Japan, China, Korea, and Australia. Territory economics, comparable deals, and regional licensing strategies from 280+ transactions.',
   keywords: [
     'out-licensing benchmarks Asia Pacific',

@@ -9,7 +9,7 @@ import * as Sentry from '@sentry/nextjs';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Company Profiles — Biotech & Pharma Deal Intelligence | Ambrosia Ventures',
+  title: 'Company Profiles — Biotech & Pharma Deal Intelligence',
   description: 'Explore deal history, clinical pipelines, patent cliffs, and benchmark comparisons for 700+ biotech and pharma companies across oncology, neurology, immunology, metabolic, cardiovascular, and more.',
   openGraph: {
     title: 'Company Profiles — Biotech & Pharma Deal Intelligence',

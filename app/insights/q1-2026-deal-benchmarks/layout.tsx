@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Benchmarks Q1 2026 — Free Report | Ambrosia Ventures',
+  title: 'Biopharma Deal Benchmarks Q1 2026 — Free Report',
   description: `Free report: upfront ranges, milestone structures, and royalty benchmarks across 12 therapeutic areas. Sourced from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions. Download instantly.`,
   keywords: [
     'biopharma deal benchmarks', 'licensing upfront benchmarks', 'pharma deal terms 2026',

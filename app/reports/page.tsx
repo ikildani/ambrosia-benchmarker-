@@ -5,7 +5,7 @@ import { BarChart3, ArrowRight } from 'lucide-react';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Life Sciences Deal Reports | Market Intelligence | Ambrosia Ventures',
+  title: 'Life Sciences Deal Reports | Market Intelligence',
   description: 'Data-driven reports on biopharma licensing trends, deal volume, modality shifts, and market outlook. Annual and quarterly market intelligence for BD professionals.',
   keywords: ['biopharma deal reports', 'life sciences deal trends', 'pharma licensing market report', 'biotech deal data'],
   openGraph: {

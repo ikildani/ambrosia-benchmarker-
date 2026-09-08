@@ -4,7 +4,7 @@ import { getAllProgrammaticPages, formatCurrency } from '@/lib/seo/programmatic-
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Data by Therapeutic Area, Phase & Territory | Ambrosia Ventures',
+  title: 'Biopharma Deal Data by Therapeutic Area, Phase & Territory',
   description:
     'Browse 300+ data pages covering biopharma deal benchmarks across every therapeutic area, clinical phase, and territory combination. Upfront payments, total deal values, royalty rates, and comparable transactions.',
   alternates: {

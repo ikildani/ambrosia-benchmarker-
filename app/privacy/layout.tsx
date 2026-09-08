@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Ambrosia Ventures',
+  title: 'Privacy Policy',
   description: 'Privacy policy for Solidus. Learn how we collect, use, and protect your data.',
   openGraph: {
-    title: 'Privacy Policy | Ambrosia Ventures',
+    title: 'Privacy Policy',
     description: 'Privacy policy for Solidus.',
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/privacy',

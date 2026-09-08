@@ -21,7 +21,7 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const PAGE_URL = `${BASE_URL}/insights/pharma-licensing-royalty-rates`;
 
 export const metadata: Metadata = {
-  title: 'Pharma Licensing Royalty Rates: Benchmark Data by Phase, Modality & Therapeutic Area | Ambrosia Ventures',
+  title: 'Pharma Licensing Royalty Rates: Benchmark Data by Phase, Modality & Therapeutic Area',
   description: 'Comprehensive royalty rate benchmarks for biopharma licensing deals. Ranges from 3% (discovery) to 25% (approved), broken down by development phase, modality, and therapeutic area with real deal examples.',
   keywords: [
     'pharma licensing royalty rates',

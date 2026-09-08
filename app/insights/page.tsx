@@ -4,11 +4,11 @@ import { getAllInsightSlugs } from '@/lib/insightPages';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Insights | Ambrosia Ventures',
+  title: 'Biopharma Deal Insights',
   description: `Data-driven insights on biopharma deal structure, licensing benchmarks, upfront payments, milestones, and royalty rates across ${DEAL_STATS.TOTAL_DEALS} transactions.`,
   alternates: { canonical: 'https://solidus.ambrosiaventures.co/insights' },
   openGraph: {
-    title: 'Biopharma Deal Insights | Ambrosia Ventures',
+    title: 'Biopharma Deal Insights',
     description: 'Data-driven insights on biopharma deal structure, licensing benchmarks, and valuation trends.',
     url: 'https://solidus.ambrosiaventures.co/insights',
     type: 'website',

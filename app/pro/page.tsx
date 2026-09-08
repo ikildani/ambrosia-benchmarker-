@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Pro Plan | Unlimited Deal Intelligence | Ambrosia Ventures',
+  title: 'Pro Plan | Unlimited Deal Intelligence',
   // Deal count should match LIVE_DEAL_COUNT in lib/config/constants.ts
   description:
     'Unlock 14 deal engines, 12 therapeutic areas, and unlimited calculations. rNPV, Monte Carlo, real options, partner matching, and more for biopharma BD professionals.',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     'biopharma partner matching platform',
   ],
   openGraph: {
-    title: 'Pro Plan | Unlimited Deal Intelligence | Ambrosia Ventures',
+    title: 'Pro Plan | Unlimited Deal Intelligence',
     description: 'Unlock 14 deal engines, 12 therapeutic areas, and unlimited calculations for biopharma deal professionals.',
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/pro',

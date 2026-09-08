@@ -17,7 +17,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Pharma Partner Identification Guide — Data-Driven Partnering Strategy | Ambrosia Ventures',
+  title: 'Pharma Partner Identification Guide — Data-Driven Partnering Strategy',
   description: `How to identify the right pharma licensing partner using pipeline gap analysis, intent scoring, and deal velocity data from ${DEAL_STATS.TOTAL_DEALS} transactions and ${DEAL_STATS.TOTAL_COMPANIES} company profiles.`,
   keywords: [
     'pharma partner identification',

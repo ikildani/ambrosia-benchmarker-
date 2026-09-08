@@ -5,7 +5,7 @@ import { BookOpen } from 'lucide-react';
 import { glossaryTerms, glossaryCategories } from '@/lib/glossaryTerms';
 
 export const metadata: Metadata = {
-  title: 'Biotech Licensing Glossary | Deal Terms Explained | Ambrosia Ventures',
+  title: 'Biotech Licensing Glossary | Deal Terms Explained',
   description: 'Comprehensive glossary of biotech licensing deal terms. Learn about upfront payments, milestones, royalties, CVRs, and more pharmaceutical partnership terminology.',
   keywords: ['biotech glossary', 'licensing terms', 'pharma deal terminology', 'milestone payments explained', 'royalty rates', 'biotech M&A terms'],
   openGraph: {

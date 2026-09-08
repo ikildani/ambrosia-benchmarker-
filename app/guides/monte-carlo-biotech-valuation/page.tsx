@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide | Ambrosia Ventures',
+  title: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide',
   description: `Learn how Monte Carlo simulation quantifies uncertainty in biotech deal valuation. Compare with rNPV, see real probability distributions from ${DEAL_STATS.TOTAL_DEALS} deals, and run your own scenarios on Solidus. Free simulator included.`,
   keywords: [
     'Monte Carlo simulation biotech',

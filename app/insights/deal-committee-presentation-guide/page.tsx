@@ -18,7 +18,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Deal Committee Presentation Guide — How to Get BD Deals Approved | Ambrosia Ventures',
+  title: 'Deal Committee Presentation Guide — How to Get BD Deals Approved',
   description: `How to build a deal committee presentation that gets approved. Comparable transactions, rNPV scenarios, and negotiation playbooks from ${DEAL_STATS.TOTAL_DEALS} biopharma deals.`,
   keywords: [
     'deal committee presentation',

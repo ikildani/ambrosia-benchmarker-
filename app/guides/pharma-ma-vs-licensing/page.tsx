@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Pharma M&A vs. Licensing in 2026: Decision Framework With Cost Comparisons | Ambrosia Ventures',
+  title: 'Pharma M&A vs. Licensing in 2026: Decision Framework With Cost Comparisons',
   description: 'Licensing requires 10-30% of M&A capital for comparable asset access. See when to acquire vs. license, with M&A premium data (median 60-70%) and hybrid structures reshaping biopharma BD.',
   keywords: [
     'pharma M&A vs licensing',

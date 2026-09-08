@@ -3,7 +3,7 @@ import PortfolioAdminLayoutClient from './PortfolioAdminLayoutClient';
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
-  title: 'Portfolio Admin | Ambrosia Ventures',
+  title: 'Portfolio Admin',
 };
 
 export default function PortfolioAdminLayout({

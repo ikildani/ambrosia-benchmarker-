@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows | Ambrosia Ventures',
+  title: 'Biotech Out-Licensing Deal Terms 2025-2026: What the Data Shows',
   description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biotech out-licensing deals reveals benchmark terms for licensing, acquisition, co-development, option, and collaboration structures across all major therapeutic areas.`,
   keywords: [
     'biotech out-licensing deal terms 2025',

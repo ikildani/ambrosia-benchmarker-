@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Welcome to Ambrosia Pro | Ambrosia Ventures',
+  title: 'Welcome to Ambrosia Pro',
   description: 'Set up your Ambrosia Pro account and explore 14 institutional-grade deal intelligence engines.',
   robots: { index: false, follow: false },
 };
