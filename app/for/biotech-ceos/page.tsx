@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     siteName: 'Solidus by Ambrosia Ventures',
     images: [{ url: '/api/og?title=Solidus%20for%20Biotech%20CEOs&subtitle=Know%20What%20Your%20Deal%20Is%20Worth', width: 1200, height: 630 }],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Solidus for Biotech CEOs | Know What Your Deal Is Worth',
+    description: 'Deal intelligence for biotech founders and CEOs preparing to partner or raise.',
+  },
 };
 
 export default function BiotechCEOsPage() {

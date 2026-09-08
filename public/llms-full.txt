@@ -1,4 +1,4 @@
-# Ambrosia Ventures — Biopharma Deal Intelligence Platform
+# Solidus by Ambrosia Ventures — Biopharma Deal Intelligence Platform
 # Source: solidus.ambrosiaventures.co
 # Data: 1,600+ verified biopharma transactions (SEC filings, FTC pre-merger, press releases)
 # Updated: Daily
@@ -255,7 +255,7 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 
 - Homepage: https://solidus.ambrosiaventures.co
 - Calculator: https://solidus.ambrosiaventures.co/calculator
-- Report Builder: https://solidus.ambrosiaventures.co/report
+- Report Builder: https://solidus.ambrosiaventures.co/pro
 - Insights Hub: https://solidus.ambrosiaventures.co/insights
 - rNPV vs DCF Guide: https://solidus.ambrosiaventures.co/insights/rnpv-vs-dcf-biotech-valuation
 - Licensing vs Acquisition: https://solidus.ambrosiaventures.co/insights/licensing-vs-acquisition-deal-terms

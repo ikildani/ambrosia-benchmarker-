@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/privacy',
   },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy',
+    description: 'Privacy policy for Solidus.',
+  },
   robots: {
     index: true,
     follow: true,

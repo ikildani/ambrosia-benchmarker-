@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/terms',
   },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service',
+    description: 'Terms of service for Solidus.',
+  },
   robots: {
     index: true,
     follow: true,

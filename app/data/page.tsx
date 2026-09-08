@@ -10,6 +10,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/data',
   },
+  openGraph: {
+    title: 'Biopharma Deal Data by Therapeutic Area, Phase & Territory',
+    description: '300+ data pages of biopharma deal benchmarks: upfronts, total deal values, royalty rates, and comparable transactions.',
+    url: 'https://solidus.ambrosiaventures.co/data',
+    type: 'website',
+    images: [{ url: '/api/og?title=Biopharma%20Deal%20Data&subtitle=By%20Therapeutic%20Area%2C%20Phase%20%26%20Territory&type=landing', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Biopharma Deal Data by Therapeutic Area, Phase & Territory',
+    description: '300+ data pages of biopharma deal benchmarks: upfronts, total deal values, royalty rates, and comparable transactions.',
+  },
 };
 
 export default function DataIndexPage() {

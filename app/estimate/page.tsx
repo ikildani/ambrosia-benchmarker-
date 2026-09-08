@@ -13,6 +13,12 @@ export const metadata: Metadata = {
     type: 'website',
     url: `${BASE_URL}/estimate`,
     siteName: 'Solidus',
+    images: [{ url: '/api/og?title=What%27s%20Your%20Asset%20Worth%3F&subtitle=Instant%20Biopharma%20Deal%20Estimates&type=landing', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "What's Your Asset Worth? | Solidus",
+    description: 'Instant deal term prediction for biopharma licensing. Free, no signup required.',
   },
 };
 

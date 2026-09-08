@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Security — Ambrosia Ventures',
     description: 'Enterprise-grade security for biopharma deal intelligence. Encryption, access controls, data isolation, and compliance.',
+    url: 'https://solidus.ambrosiaventures.co/security',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Security — Ambrosia Ventures',
+    description: 'Enterprise-grade security for biopharma deal intelligence. Encryption, access controls, data isolation, and compliance.',
   },
 };
 

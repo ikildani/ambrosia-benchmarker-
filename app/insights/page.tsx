@@ -12,6 +12,12 @@ export const metadata: Metadata = {
     description: 'Data-driven insights on biopharma deal structure, licensing benchmarks, and valuation trends.',
     url: 'https://solidus.ambrosiaventures.co/insights',
     type: 'website',
+    images: [{ url: '/api/og?title=Biopharma%20Deal%20Insights&subtitle=Benchmarks%2C%20Valuation%20%26%20Deal%20Structure&type=landing', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Biopharma Deal Insights',
+    description: 'Data-driven insights on biopharma deal structure, licensing benchmarks, and valuation trends.',
   },
 };
 

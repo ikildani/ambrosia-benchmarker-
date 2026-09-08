@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     siteName: 'Solidus by Ambrosia Ventures',
     images: [{ url: '/api/og?title=Solidus%20for%20BD%20Teams&subtitle=Deal%20Intelligence%20for%20Business%20Development', width: 1200, height: 630 }],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Solidus for BD Teams | Biopharma Deal Benchmarking',
+    description: 'Benchmark deal terms against verified transactions before you negotiate.',
+  },
 };
 
 export default function BDTeamsPage() {

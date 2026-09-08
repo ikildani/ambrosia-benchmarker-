@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     siteName: 'Solidus by Ambrosia Ventures',
     images: [{ url: '/api/og?title=Solidus%20for%20VC%20Operating%20Partners&subtitle=Portfolio%20Deal%20Intelligence', width: 1200, height: 630 }],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Solidus for VC Operating Partners | Portfolio Deal Intelligence',
+    description: 'Portfolio-wide deal benchmarking for life sciences investors.',
+  },
 };
 
 export default function VCOperatingPartnersPage() {

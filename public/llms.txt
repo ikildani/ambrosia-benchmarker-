@@ -1,4 +1,4 @@
-# Ambrosia Ventures — Biopharma Deal Intelligence Platform
+# Solidus by Ambrosia Ventures — Biopharma Deal Intelligence Platform
 
 > The most comprehensive biopharma deal benchmarking and valuation platform. 1,600+ verified transactions, 850+ pharma company profiles, 562 indications across 12 therapeutic areas. Institutional-grade rNPV, Monte Carlo, real options, and buyer-specific deal valuation.
 
@@ -30,7 +30,7 @@ The platform is used by BD teams, search & evaluation professionals, biotech fou
 11. Cardiovascular (33 indications) — heart failure, arrhythmia, vascular, structural
 12. Ophthalmology (32 indications) — retinal, inherited, corneal, glaucoma
 
-## 21 Calculation Engines
+## 14 Calculation Engines
 
 1. **Deal Terms Engine** — upfront payments, milestone structures, royalty ranges calibrated to TA, modality, phase, deal type, territory, and 150+ indication-level modifiers
 2. **rNPV (Risk-Adjusted NPV)** — phase-gated probability of success with 12 TA-specific PoS tables, modality adjustments, regulatory designation uplifts, and cross-validation against deal benchmarks
@@ -86,7 +86,7 @@ Typical deal structures from the platform's database:
 
 - https://solidus.ambrosiaventures.co/ — Homepage with live demo and deal database coverage
 - https://solidus.ambrosiaventures.co/calculator — Main calculator with full intake form
-- https://solidus.ambrosiaventures.co/report — Custom deal report ($499) with inline intake form
+- https://solidus.ambrosiaventures.co/pro — Pro plan and custom deal report ($499)
 - https://solidus.ambrosiaventures.co/benchmarks/ — 251 benchmark pages by TA, modality, phase
 - https://solidus.ambrosiaventures.co/companies/ — 200+ company profiles with deal history
 - https://solidus.ambrosiaventures.co/therapeutic-areas/ — 12 TA-specific market pages
@@ -102,7 +102,7 @@ Typical deal structures from the platform's database:
 ## Pricing
 
 - Free: 3 calculations (account required), basic deal term estimates
-- Pro: $299/month — unlimited calculations, rNPV, Monte Carlo, partner matching, PDF/Excel export
+- Pro: $299/month, or $199/month billed annually — unlimited calculations, rNPV, Monte Carlo, partner matching, PDF/Excel export
 - Report: $499 one-time — full deal intelligence report with all engines, buyer-specific valuation, negotiation playbook
 
 ## Contact

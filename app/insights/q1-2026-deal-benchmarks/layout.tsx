@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: 'Ambrosia Ventures',
     type: 'article',
     images: [{
-      url: 'https://solidus.ambrosiaventures.co/og/deal-benchmarks-2026.png',
+      url: '/api/og?title=Biopharma%20Deal%20Benchmarks%20Q1%202026&subtitle=Free%20Report&type=landing',
       width: 1200,
       height: 630,
       alt: 'Biopharma Deal Benchmarks 2026 — Ambrosia Ventures',
