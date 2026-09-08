@@ -277,7 +277,11 @@ export async function findEnrichedComparableDeals(
 
   const { data: dbDeals } = await supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name, licensor_country, licensee_country, cross_border, deal_corridor, confidence_score, verification_status, source_url, source_type, provenance_tier')
+    .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name, confidence_score, verification_status, source_url, source_type, provenance_tier')
+    // NOTE: licensor_country / licensee_country / cross_border / deal_corridor
+    // (migration 079) are not present on the production deals table. Selecting
+    // them makes the whole query fail and the comparables list render empty.
+    // Do not add them back until the migration is applied.
     .eq('terms_disclosed', true)
     .eq('is_synthetic', false)
     .or('is_canonical.is.null,is_canonical.eq.true')
@@ -335,10 +339,10 @@ export async function findEnrichedComparableDeals(
         dealType: d.deal_type || null,
         territory: d.territory || null,
         buyerTier: classifyBuyerTier(d.licensee_name || ''),
-        licensorCountry: d.licensor_country || null,
-        licenseeCountry: d.licensee_country || null,
-        crossBorder: d.cross_border || false,
-        dealCorridor: d.deal_corridor || null,
+        licensorCountry: null,
+        licenseeCountry: null,
+        crossBorder: false,
+        dealCorridor: null,
         confidenceScore: d.confidence_score ?? null,
         verificationStatus: d.verification_status || null,
         sourceUrl: d.source_url || null,

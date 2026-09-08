@@ -26,6 +26,8 @@
  * @module lib/comparable-scoring
  */
 
+import { modalitiesMatch, indicationMatches, dealTypesMatch } from '@/lib/comparables/match-normalize';
+
 export const COMP_MATCH_WEIGHTS = {
   ta: 3,
   phase: 4,
@@ -220,19 +222,19 @@ export function scoreCompMatch(query: CompQuery, deal: CompCandidate, opts: Comp
   }
 
   // Modality
-  const qMod = norm(query.modality);
-  if (qMod && (deal.modalities || []).some(m => norm(m) === qMod)) {
+  // Calculator ('smallMolecule') and DB ('small_molecule') spellings differ —
+  // compare through the shared normalizers, never raw strings.
+  if (query.modality && (deal.modalities || []).some(m => modalitiesMatch(query.modality, m))) {
     score += W.modality; breakdown.modality = true; reasons.push('Same modality');
   }
 
   // Indication
-  const qInd = norm(query.indication);
-  if (qInd && (deal.indications || []).some(i => norm(i) === qInd)) {
+  if (query.indication && indicationMatches(query.indication, ...(deal.indications || []))) {
     score += W.indication; breakdown.indication = true; reasons.push('Same indication');
   }
 
   // Deal type
-  if (query.dealType && deal.dealType && canonicalDealType(query.dealType) === canonicalDealType(deal.dealType)) {
+  if (query.dealType && deal.dealType && (dealTypesMatch(query.dealType, deal.dealType) || canonicalDealType(query.dealType) === canonicalDealType(deal.dealType))) {
     score += W.dealType; breakdown.dealType = true; reasons.push('Same deal type');
   }
 
