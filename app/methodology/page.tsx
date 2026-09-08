@@ -175,6 +175,7 @@ export default function MethodologyPage() {
                     ['Same indication', COMP_MATCH_WEIGHTS.indication],
                     ['Same deal structure', COMP_MATCH_WEIGHTS.dealType],
                     ['Recency (current year full points, prior year half)', COMP_MATCH_WEIGHTS.recency],
+                    ['Verifier-confirmed against a primary source', COMP_MATCH_WEIGHTS.verified],
                   ].map(([label, pts]) => (
                     <tr key={String(label)} className="border-t border-slate-200 dark:border-slate-700">
                       <td className="py-2 pr-4">{label}</td>

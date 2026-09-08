@@ -34,6 +34,8 @@ export const COMP_MATCH_WEIGHTS = {
   indication: 3,
   dealType: 2,
   recency: 2,
+  /** Verifier-confirmed rows outrank unverified ones at otherwise equal match. */
+  verified: 1,
 } as const;
 
 /** Sum of all weights (phase and adjacentPhase are mutually exclusive → use phase). */
@@ -43,7 +45,8 @@ export const COMP_MAX_SCORE =
   COMP_MATCH_WEIGHTS.modality +
   COMP_MATCH_WEIGHTS.indication +
   COMP_MATCH_WEIGHTS.dealType +
-  COMP_MATCH_WEIGHTS.recency; // 17
+  COMP_MATCH_WEIGHTS.recency +
+  COMP_MATCH_WEIGHTS.verified; // 18
 
 /** Below this many strict matches the ladder relaxes one rung. */
 export const MIN_POOL_BEFORE_RELAX = 5;
@@ -59,6 +62,8 @@ export interface CompMatchBreakdown {
   dealType: boolean;
   /** 0–2 */
   recency: number;
+  /** True when the deal passed the Perplexity/Claude verifier. */
+  verified?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -152,6 +157,8 @@ export interface CompCandidate {
   indications?: (string | null | undefined)[] | null;
   dealType?: string | null;
   year?: number | null;
+  /** verification_status === 'verified' on live rows; curated corpus rows may pass their own flag. */
+  verified?: boolean | null;
 }
 
 export interface CompScoreResult {
@@ -240,6 +247,11 @@ export function scoreCompMatch(query: CompQuery, deal: CompCandidate, opts: Comp
       breakdown.recency = 1;
     }
     score += breakdown.recency;
+  }
+
+  // Verification: a confirmed deal beats an unverified one at equal match.
+  if (deal.verified) {
+    score += W.verified; breakdown.verified = true; reasons.push('Verifier-confirmed');
   }
 
   return { score, normalized: Math.min(score / COMP_MAX_SCORE, 1), breakdown, reasons };

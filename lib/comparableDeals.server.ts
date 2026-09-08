@@ -113,7 +113,7 @@ export async function findComparableDealsWithDB(
 
     const { data: dbDeals } = await supabase
       .from('deals')
-      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type')
+      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, verification_status')
       .eq('terms_disclosed', true)
       .eq('is_synthetic', false)
       .or('is_canonical.is.null,is_canonical.eq.true')
@@ -129,7 +129,7 @@ export async function findComparableDealsWithDB(
       const year = d.announced_date ? new Date(d.announced_date).getFullYear() : new Date().getFullYear();
       const { score, breakdown, reasons } = scoreCompMatch(
         { therapeuticArea: inputs.therapeuticArea, modality: inputs.modality, indication: inputs.indication, phase: inputs.phase },
-        { therapeuticArea: d.therapeutic_area, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], year },
+        { therapeuticArea: d.therapeutic_area, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], year, verified: d.verification_status === 'verified' },
       );
 
       return {
@@ -310,7 +310,7 @@ export async function findEnrichedComparableDeals(
 
     const { score, normalized, breakdown, reasons } = scoreCompMatch(
       { therapeuticArea: inputs.therapeuticArea, phase: inputs.phase, modality: inputs.modality, indication: inputs.indication, dealType: inputs.dealType },
-      { therapeuticArea: ta, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], dealType: d.deal_type, year },
+      { therapeuticArea: ta, phase: d.phase_at_signing, modalities: [d.modality], indications: [d.indication_category, d.indication_specific], dealType: d.deal_type, year, verified: d.verification_status === 'verified' },
       { currentYear },
     );
 

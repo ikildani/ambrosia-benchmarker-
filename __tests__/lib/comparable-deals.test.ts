@@ -159,13 +159,25 @@ describe('comparable-scoring weight table', () => {
     expect(b.breakdown.phase).toBe(true);
   });
 
-  it('full match totals COMP_MAX_SCORE (17) with current-year recency', () => {
+  it('full match totals COMP_MAX_SCORE (18) with current-year recency and verification', () => {
     const r = scoreCompMatch(query, {
       therapeuticArea: 'oncology', phase: 'phase_2', modalities: ['smallMolecule'],
-      indications: ['gi', 'pancreatic'], dealType: 'license', year: 2026,
+      indications: ['gi', 'pancreatic'], dealType: 'license', year: 2026, verified: true,
     }, { currentYear: 2026 });
     expect(r.score).toBe(COMP_MAX_SCORE);
     expect(r.normalized).toBe(1);
+  });
+
+  it('an unverified deal scores one point below an otherwise identical verified one', () => {
+    const base = {
+      therapeuticArea: 'oncology', phase: 'phase_2', modalities: ['smallMolecule'],
+      indications: ['gi', 'pancreatic'], dealType: 'license', year: 2026,
+    };
+    const verified = scoreCompMatch(query, { ...base, verified: true }, { currentYear: 2026 });
+    const unverified = scoreCompMatch(query, { ...base, verified: false }, { currentYear: 2026 });
+    expect(verified.score - unverified.score).toBe(1);
+    expect(verified.breakdown.verified).toBe(true);
+    expect(unverified.breakdown.verified).toBeFalsy();
   });
 });
 
