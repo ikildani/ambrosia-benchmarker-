@@ -7,57 +7,47 @@ import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 import { SEO_INSIGHT_SLUGS } from '@/lib/insights/seo-pages';
 import { getAllProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
 import { getAllPseoSlugs } from '@/lib/pseoPages';
+import { listAllSlugs as listPlaybookSlugs } from '@/lib/playbook-data';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 // ---------------------------------------------------------------------------
 // Sub-sitemap IDs — each produces a separate /sitemap/{id}.xml
-// Next.js generates a sitemap index at /sitemap.xml pointing to each.
+//
+// NOTE: Next.js does NOT generate a sitemap index for generateSitemaps().
+// The index at /sitemap.xml is served by app/sitemap.xml/route.ts, which
+// must list every id below. Keep the two in sync via SITEMAP_IDS.
 // ---------------------------------------------------------------------------
-const SITEMAP = {
+export const SITEMAP = {
   CORE: 0,       // Static pages, therapeutic areas, compare pages
-  CONTENT: 1,    // Blog, landing pages, guides, reports, backlinks
+  CONTENT: 1,    // Blog, landing pages, guides, reports, playbooks
   BENCHMARKS: 2, // Benchmark deal pages + pSEO (modality x phase)
   INSIGHTS: 3,   // Insight pages, SEO insights, lead magnets
   COMPANIES: 4,  // Company profiles (DB-driven)
   REFERENCE: 5,  // Glossary terms + programmatic data pages
 } as const;
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Returns a deterministic Date for a given slug within a date range.
- * Uses a simple string hash so each slug always maps to the same date
- * (stable across builds) and dates spread naturally across the range.
- */
-function staggeredDate(slug: string, rangeStart: string, rangeDays: number): Date {
-  let hash = 0;
-  for (let i = 0; i < slug.length; i++) {
-    hash = ((hash << 5) - hash) + slug.charCodeAt(i);
-    hash |= 0;
-  }
-  const offset = Math.abs(hash) % rangeDays;
-  const d = new Date(rangeStart);
-  d.setDate(d.getDate() + offset);
-  return d;
-}
+export const SITEMAP_IDS: number[] = Object.values(SITEMAP);
 
 // ---------------------------------------------------------------------------
-// generateSitemaps — tells Next.js to produce a sitemap index
+// generateSitemaps — tells Next.js to produce one file per id
 // ---------------------------------------------------------------------------
 export async function generateSitemaps() {
-  return Object.values(SITEMAP).map((id) => ({ id }));
+  return SITEMAP_IDS.map((id) => ({ id }));
 }
 
 // ---------------------------------------------------------------------------
-// Main sitemap handler — dispatches by sub-sitemap id
+// Main sitemap handler — dispatches by sub-sitemap id.
+//
+// Next.js passes `id` as a STRING at request time ("0", not 0). A strict
+// switch against the numeric constants silently matched nothing and every
+// shard shipped empty for weeks. Always coerce before dispatching.
 // ---------------------------------------------------------------------------
 export default async function sitemap(
-  { id }: { id: number },
+  { id }: { id: number | string },
 ): Promise<MetadataRoute.Sitemap> {
-  switch (id) {
+  const shard = Number(id);
+  switch (shard) {
     case SITEMAP.CORE:
       return getCorePages();
     case SITEMAP.CONTENT:
@@ -76,57 +66,72 @@ export default async function sitemap(
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+type Freq = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
+
+/**
+ * Static entry with no lastModified. We deliberately omit lastmod for pages
+ * whose true edit date we don't track — Google ignores sitemaps whose
+ * lastmod values are fabricated, and only DB-backed rows carry a real
+ * updated_at.
+ */
+function staticEntry(path: string, changeFrequency: Freq, priority: number): MetadataRoute.Sitemap[number] {
+  return { url: path ? `${BASE_URL}${path}` : BASE_URL, changeFrequency, priority };
+}
+
+// ---------------------------------------------------------------------------
 // 0 — Core static pages
 // ---------------------------------------------------------------------------
-function getCorePages(): MetadataRoute.Sitemap {
-  const taPages = [
-    'oncology', 'neurology', 'immunology', 'cardiovascular', 'metabolic',
-    'rareDisease', 'infectiousDisease', 'ophthalmology', 'dermatology',
-    'womensHealth', 'gastroenterology', 'hematology',
-  ];
+export const TA_SLUGS = [
+  'oncology', 'neurology', 'immunology', 'cardiovascular', 'metabolic',
+  'rareDisease', 'infectiousDisease', 'ophthalmology', 'dermatology',
+  'womensHealth', 'gastroenterology', 'hematology',
+] as const;
 
+function getCorePages(): MetadataRoute.Sitemap {
   return [
-    { url: BASE_URL, lastModified: '2026-07-28', changeFrequency: 'weekly', priority: 1 },
-    { url: `${BASE_URL}/calculator`, lastModified: '2026-07-14', changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${BASE_URL}/insights`, lastModified: '2026-07-20', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/glossary`, lastModified: '2026-06-10', changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${BASE_URL}/pulse`, lastModified: '2026-07-25', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/privacy`, lastModified: '2026-01-15', changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${BASE_URL}/terms`, lastModified: '2026-01-15', changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${BASE_URL}/press`, lastModified: '2026-06-20', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/playbook`, lastModified: '2026-07-08', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/tracker`, lastModified: '2026-07-28', changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${BASE_URL}/trade-space`, lastModified: '2026-07-18', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/simulator`, lastModified: '2026-07-12', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/intelligence`, lastModified: '2026-07-27', changeFrequency: 'daily', priority: 0.7 },
-    { url: `${BASE_URL}/methodology`, lastModified: '2026-05-15', changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${BASE_URL}/therapeutic-areas`, lastModified: '2026-07-22', changeFrequency: 'weekly', priority: 0.8 },
-    // 12 TA-specific pages — staggered across Jun-Jul 2026
-    ...taPages.map((ta) => ({
-      url: `${BASE_URL}/therapeutic-areas/${ta}`,
-      lastModified: staggeredDate(ta, '2026-06-01', 50),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    })),
-    { url: `${BASE_URL}/benchmark`, lastModified: '2026-07-20', changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${BASE_URL}/contact`, lastModified: '2026-03-10', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/compare`, lastModified: '2026-06-05', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/compare/evaluate-pharma`, lastModified: '2026-06-01', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/compare/capital-iq`, lastModified: '2026-06-08', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/compare/cortellis`, lastModified: '2026-06-15', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/compare/dealforma`, lastModified: '2026-07-01', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/about`, lastModified: '2026-04-20', changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${BASE_URL}/for/bd-teams`, lastModified: '2026-08-26', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/for/biotech-ceos`, lastModified: '2026-08-26', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/for/vc-operating-partners`, lastModified: '2026-08-26', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/pro`, lastModified: '2026-06-25', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/portfolio`, lastModified: '2026-06-25', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/companies`, lastModified: '2026-07-22', changeFrequency: 'weekly', priority: 0.8 },
+    staticEntry('', 'weekly', 1),
+    staticEntry('/calculator', 'weekly', 0.9),
+    staticEntry('/estimate', 'weekly', 0.8),
+    staticEntry('/start', 'monthly', 0.7),
+    staticEntry('/insights', 'weekly', 0.8),
+    staticEntry('/glossary', 'monthly', 0.7),
+    staticEntry('/pulse', 'weekly', 0.8),
+    staticEntry('/radar', 'weekly', 0.7),
+    staticEntry('/privacy', 'yearly', 0.3),
+    staticEntry('/terms', 'yearly', 0.3),
+    staticEntry('/security', 'yearly', 0.4),
+    staticEntry('/press', 'monthly', 0.6),
+    staticEntry('/playbook', 'weekly', 0.8),
+    staticEntry('/tracker', 'weekly', 0.9),
+    staticEntry('/trade-space', 'weekly', 0.8),
+    staticEntry('/simulator', 'weekly', 0.8),
+    staticEntry('/intelligence', 'daily', 0.7),
+    staticEntry('/methodology', 'monthly', 0.7),
+    staticEntry('/methodology/engine', 'monthly', 0.7),
+    staticEntry('/therapeutic-areas', 'weekly', 0.8),
+    ...TA_SLUGS.map((ta) => staticEntry(`/therapeutic-areas/${ta}`, 'weekly', 0.8)),
+    staticEntry('/benchmark', 'weekly', 0.9),
+    staticEntry('/contact', 'monthly', 0.6),
+    staticEntry('/compare', 'weekly', 0.8),
+    staticEntry('/compare/evaluate-pharma', 'monthly', 0.8),
+    staticEntry('/compare/capital-iq', 'monthly', 0.8),
+    staticEntry('/compare/cortellis', 'monthly', 0.8),
+    staticEntry('/compare/dealforma', 'monthly', 0.8),
+    staticEntry('/about', 'monthly', 0.7),
+    staticEntry('/for/bd-teams', 'monthly', 0.9),
+    staticEntry('/for/biotech-ceos', 'monthly', 0.9),
+    staticEntry('/for/vc-operating-partners', 'monthly', 0.9),
+    staticEntry('/pro', 'monthly', 0.9),
+    staticEntry('/portfolio', 'monthly', 0.9),
+    staticEntry('/companies', 'weekly', 0.8),
   ];
 }
 
 // ---------------------------------------------------------------------------
-// 1 — Content pages (blog, landing, guides, reports, backlinks)
+// 1 — Content pages (blog, landing, guides, reports, playbooks)
 // ---------------------------------------------------------------------------
 async function getContentPages(): Promise<MetadataRoute.Sitemap> {
   let blogPages: MetadataRoute.Sitemap = [];
@@ -205,32 +210,36 @@ async function getContentPages(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Guide pages — staggered realistic dates
+  // Counterparty playbooks — one page per buyer
+  let playbookPages: MetadataRoute.Sitemap = [];
+  try {
+    const slugs = await listPlaybookSlugs();
+    playbookPages = slugs.map((slug) => staticEntry(`/playbook/${slug}`, 'monthly', 0.7));
+  } catch {
+    console.log('Sitemap [content]: Playbook data not available');
+  }
+
   const guidePages: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/guides`, lastModified: '2026-06-01', changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${BASE_URL}/guides/how-to-value-biotech-deal`, lastModified: '2026-03-12', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/guides/negotiate-pharma-royalty-rates`, lastModified: '2026-03-25', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/guides/biotech-licensing-deal-structure`, lastModified: '2026-04-08', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/guides/rnpv-biotech-valuation`, lastModified: '2026-04-18', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/guides/pharma-ma-vs-licensing`, lastModified: '2026-05-02', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/guides/biopharma-licensing-benchmarks`, lastModified: '2026-05-20', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/guides/life-sciences-deal-calculator-guide`, lastModified: '2026-06-01', changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/guides/monte-carlo-biotech-valuation`, lastModified: '2026-07-15', changeFrequency: 'monthly', priority: 0.8 },
+    staticEntry('/guides', 'monthly', 0.7),
+    staticEntry('/guides/how-to-value-biotech-deal', 'monthly', 0.8),
+    staticEntry('/guides/negotiate-pharma-royalty-rates', 'monthly', 0.8),
+    staticEntry('/guides/biotech-licensing-deal-structure', 'monthly', 0.8),
+    staticEntry('/guides/rnpv-biotech-valuation', 'monthly', 0.8),
+    staticEntry('/guides/pharma-ma-vs-licensing', 'monthly', 0.8),
+    staticEntry('/guides/biopharma-licensing-benchmarks', 'monthly', 0.9),
+    staticEntry('/guides/life-sciences-deal-calculator-guide', 'monthly', 0.9),
+    staticEntry('/guides/monte-carlo-biotech-valuation', 'monthly', 0.8),
   ];
 
-  // Report pages
   const reportPages: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/reports`, lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${BASE_URL}/reports/deal-trends-2026`, lastModified: '2026-04-10', changeFrequency: 'monthly', priority: 0.8 },
+    staticEntry('/reports', 'monthly', 0.7),
+    staticEntry('/reports/deal-trends-2026', 'monthly', 0.8),
+    staticEntry('/reports/q1-2026-biopharma-deal-benchmarks', 'monthly', 0.9),
+    staticEntry('/reports/q2-2026-biopharma-deal-benchmarks', 'monthly', 0.9),
+    staticEntry('/press/data-kit', 'monthly', 0.8),
   ];
 
-  // Backlink engine pages
-  const backlinkPages: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/press/data-kit`, lastModified: '2026-05-10', changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/reports/q1-2026-biopharma-deal-benchmarks`, lastModified: '2026-04-01', changeFrequency: 'monthly', priority: 0.9 },
-  ];
-
-  return [...blogIndex, ...blogPages, ...landingPages, ...guidePages, ...reportPages, ...backlinkPages];
+  return [...blogIndex, ...blogPages, ...landingPages, ...playbookPages, ...guidePages, ...reportPages];
 }
 
 // ---------------------------------------------------------------------------
@@ -241,55 +250,51 @@ async function getBenchmarkPages(): Promise<MetadataRoute.Sitemap> {
   const pseoSlugs = getAllPseoSlugs();
 
   return [
-    { url: `${BASE_URL}/benchmarks`, lastModified: '2026-07-20', changeFrequency: 'weekly', priority: 0.8 },
-    ...benchmarkSlugs.map((slug) => ({
-      url: `${BASE_URL}/benchmarks/${slug}`,
-      lastModified: staggeredDate(slug, '2026-04-01', 100),
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    })),
-    ...pseoSlugs.map((slug) => ({
-      url: `${BASE_URL}/benchmarks/data/${slug}`,
-      lastModified: staggeredDate(slug, '2026-05-01', 75),
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    })),
+    staticEntry('/benchmarks', 'weekly', 0.8),
+    ...benchmarkSlugs.map((slug) => staticEntry(`/benchmarks/${slug}`, 'monthly', 0.8)),
+    ...pseoSlugs.map((slug) => staticEntry(`/benchmarks/data/${slug}`, 'monthly', 0.7)),
   ];
 }
 
 // ---------------------------------------------------------------------------
 // 3 — Insight pages (all types)
 // ---------------------------------------------------------------------------
+
+/**
+ * Hand-written insight pages that live as physical folders under
+ * app/insights/<slug>/ and therefore appear in neither getAllInsightSlugs()
+ * (pSEO, served by app/insights/[slug]) nor SEO_INSIGHT_SLUGS.
+ * Add a slug here whenever a new folder is created.
+ */
+export const HANDWRITTEN_INSIGHT_SLUGS = [
+  'adc-vs-bispecific-deal-benchmarks-2026',
+  'biopharma-deal-benchmarking-tools-2026',
+  'biopharma-deal-benchmarks-2026',
+  'biotech-fundraising-deal-benchmarks',
+  'deal-committee-presentation-guide',
+  'how-much-is-my-biotech-asset-worth',
+  'licensing-vs-acquisition-deal-terms',
+  'pharma-partner-identification-guide',
+  'phase-2-vs-phase-3-deal-economics',
+  'q1-2026-deal-benchmarks',
+  'rnpv-vs-dcf-biotech-valuation',
+] as const;
+
 function getInsightPages(): MetadataRoute.Sitemap {
-  const insightSlugs = getAllInsightSlugs();
+  const seen = new Set<string>();
+  const entries: MetadataRoute.Sitemap = [];
 
-  // Regular insight pages
-  const insightPages: MetadataRoute.Sitemap = insightSlugs.map((slug) => ({
-    url: `${BASE_URL}/insights/${slug}`,
-    lastModified: staggeredDate(slug, '2026-03-01', 120),
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
+  const add = (slug: string, priority: number) => {
+    if (seen.has(slug)) return;
+    seen.add(slug);
+    entries.push(staticEntry(`/insights/${slug}`, 'monthly', priority));
+  };
 
-  // SEO long-form insight pages
-  const seoInsightPages: MetadataRoute.Sitemap = SEO_INSIGHT_SLUGS.map((slug) => ({
-    url: `${BASE_URL}/insights/${slug}`,
-    lastModified: staggeredDate(slug, '2026-04-01', 90),
-    changeFrequency: 'monthly' as const,
-    priority: 0.9,
-  }));
+  HANDWRITTEN_INSIGHT_SLUGS.forEach((slug) => add(slug, 0.9));
+  SEO_INSIGHT_SLUGS.forEach((slug) => add(slug, 0.9));
+  getAllInsightSlugs().forEach((slug) => add(slug, 0.7));
 
-  // Lead magnet pages
-  const leadMagnetPages: MetadataRoute.Sitemap = [
-    {
-      url: `${BASE_URL}/insights/biopharma-deal-benchmarks-2026`,
-      lastModified: '2026-06-15',
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-  ];
-
-  return [...insightPages, ...seoInsightPages, ...leadMagnetPages];
+  return entries;
 }
 
 // ---------------------------------------------------------------------------
@@ -332,21 +337,8 @@ function getReferencePages(): MetadataRoute.Sitemap {
   const programmaticSlugs = getAllProgrammaticSlugs();
 
   return [
-    // Programmatic data index
-    { url: `${BASE_URL}/data`, lastModified: '2026-07-15', changeFrequency: 'weekly', priority: 0.7 },
-    // Individual glossary terms
-    ...termSlugs.map((slug) => ({
-      url: `${BASE_URL}/glossary/${slug}`,
-      lastModified: staggeredDate(slug, '2026-02-01', 120),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    })),
-    // Programmatic data pages (TA x Phase x Territory)
-    ...programmaticSlugs.map((slug) => ({
-      url: `${BASE_URL}/data/${slug}`,
-      lastModified: staggeredDate(slug, '2026-04-01', 90),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    })),
+    staticEntry('/data', 'weekly', 0.7),
+    ...termSlugs.map((slug) => staticEntry(`/glossary/${slug}`, 'monthly', 0.6)),
+    ...programmaticSlugs.map((slug) => staticEntry(`/data/${slug}`, 'monthly', 0.6)),
   ];
 }

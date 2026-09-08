@@ -4,6 +4,13 @@
  * redirect chains, and server errors.
  */
 
+/**
+ * Solidus publishes ~1,000 URLs across six shards. Anything far below that
+ * means a shard silently returned [] (this happened when Next.js started
+ * passing sitemap ids as strings) and must surface as an issue.
+ */
+export const MIN_EXPECTED_URLS = 300;
+
 export interface SitemapHealthResult {
   totalUrls: number;
   checked: number;
@@ -51,28 +58,58 @@ export async function validateSitemap(
     };
   }
 
-  // 2. Extract <loc> URLs via regex (no XML parser dependency)
-  const locRegex = /<loc>\s*(.*?)\s*<\/loc>/g;
-  const urls: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = locRegex.exec(sitemapXml)) !== null) {
-    urls.push(match[1]);
+  // 2. Extract <loc> URLs. If this is a sitemap index, fetch every child
+  //    sitemap and aggregate their page URLs — otherwise a healthy-looking
+  //    index of six empty shards would report "0 issues".
+  const issues: SitemapHealthResult['issues'] = [];
+  let urls: string[] = [];
+
+  if (/<sitemapindex[\s>]/i.test(sitemapXml)) {
+    const childSitemaps = extractLocs(sitemapXml);
+    if (childSitemaps.length === 0) {
+      issues.push({ url: sitemapUrl, status: 0, error: 'Sitemap index lists no child sitemaps' });
+    }
+    for (const child of childSitemaps) {
+      try {
+        const res = await fetch(child, { signal: AbortSignal.timeout(15_000) });
+        if (!res.ok) {
+          issues.push({ url: child, status: res.status, error: 'Failed to fetch child sitemap' });
+          continue;
+        }
+        const childUrls = extractLocs(await res.text());
+        if (childUrls.length === 0) {
+          issues.push({ url: child, status: res.status, error: 'Child sitemap is empty' });
+        }
+        urls.push(...childUrls);
+      } catch (err) {
+        issues.push({
+          url: child,
+          status: 0,
+          error: `Child sitemap fetch error: ${err instanceof Error ? err.message : 'Unknown'}`,
+        });
+      }
+    }
+  } else {
+    urls = extractLocs(sitemapXml);
   }
 
   if (urls.length === 0) {
-    return {
-      totalUrls: 0,
-      checked: 0,
-      healthy: 0,
-      issues: [{ url: sitemapUrl, status: 0, error: 'No <loc> entries found in sitemap' }],
-    };
+    issues.push({ url: sitemapUrl, status: 0, error: 'No <loc> entries found in sitemap' });
+    return { totalUrls: 0, checked: 0, healthy: 0, issues };
+  }
+
+  if (urls.length < MIN_EXPECTED_URLS) {
+    issues.push({
+      url: sitemapUrl,
+      status: 0,
+      error: `Sitemap has only ${urls.length} URLs (expected at least ${MIN_EXPECTED_URLS}) — a shard is probably empty`,
+    });
   }
 
   // 3. Random sample up to maxChecks
   const sampled = shuffleAndTake(urls, maxChecks);
 
   // 4. Check each URL with HEAD request
-  const issues: SitemapHealthResult['issues'] = [];
   let healthy = 0;
 
   // Process in parallel batches of 10 to avoid overwhelming the server
@@ -108,6 +145,16 @@ export async function validateSitemap(
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
+
+function extractLocs(xml: string): string[] {
+  const locRegex = /<loc>\s*(.*?)\s*<\/loc>/g;
+  const out: string[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = locRegex.exec(xml)) !== null) {
+    out.push(match[1].trim());
+  }
+  return out;
+}
 
 async function checkUrl(
   url: string,
