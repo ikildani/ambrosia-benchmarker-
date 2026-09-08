@@ -4,6 +4,7 @@ import CompaniesPageClient from './CompaniesPageClient';
 import { resolveUserTier } from '@/lib/auth/tier-check';
 import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 import { createServiceClient } from '@/lib/supabase/server';
+import * as Sentry from '@sentry/nextjs';
 
 export const revalidate = 3600;
 
@@ -38,12 +39,15 @@ async function getPublicCompanyDirectory() {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('companies')
-    .select('id, name, company_type, deals_last_12mo, total_deals')
+    .select('id, name, company_type, deals_last_12mo, deals_last_24mo')
     .order('deals_last_12mo', { ascending: false, nullsFirst: false })
     .limit(100);
 
   if (error) {
+    // This used to select a non-existent `total_deals` column, fail silently,
+    // and render a directory with zero links — orphaning every company page.
     console.error('Companies directory fetch error:', error.message);
+    Sentry.captureException(new Error(`Companies directory query failed: ${error.message}`));
     return [];
   }
   return data || [];
@@ -112,9 +116,9 @@ export default async function CompaniesPage() {
                     {TYPE_LABELS[company.company_type] || company.company_type || 'Biopharma'}
                   </span>
                 </div>
-                {company.total_deals != null && company.total_deals > 0 && (
+                {company.deals_last_24mo != null && company.deals_last_24mo > 0 && (
                   <span className="ml-3 shrink-0 rounded-full bg-slate-800/60 px-2 py-0.5 text-xs tabular-nums text-slate-400">
-                    {company.total_deals} deal{company.total_deals !== 1 ? 's' : ''}
+                    {company.deals_last_24mo} deal{company.deals_last_24mo !== 1 ? 's' : ''} · 24mo
                   </span>
                 )}
               </Link>
