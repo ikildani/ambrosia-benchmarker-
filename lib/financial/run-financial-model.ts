@@ -170,6 +170,11 @@ function buildRNPVInput(
       const baseRate = DEFAULT_DISCOUNT_RATES[inputs.therapeuticArea]?.[inputs.phase];
       return baseRate ? baseRate + (TERRITORY_RISK_PREMIUM[inputs.territory] || 0) : undefined;
     })(),
+    benchmarkUpfront: {
+      low: result.terms.upfront.low,
+      median: result.terms.upfront.median,
+      high: result.terms.upfront.high,
+    },
     benchmarkDealValue: {
       low: result.terms.totalDealValue.low,
       median: result.terms.totalDealValue.median,

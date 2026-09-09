@@ -205,6 +205,12 @@ export interface RNPVInput {
    * comparing the two methodologies and explaining any divergence.
    */
   benchmarkDealValue?: { low: number; median: number; high: number };
+  /**
+   * Comp-engine upfront range for the same program. Before Phase 2 the rNPV
+   * method returns near-zero or negative value by construction, so the engine
+   * floors its implied upfront at this observed market low.
+   */
+  benchmarkUpfront?: { low: number; median: number; high: number };
 
   /**
    * Additional years added to (or subtracted from) time-to-market.
@@ -933,6 +939,18 @@ export interface MonteCarloResult {
 
   /** 80% confidence interval [P10, P90] */
   confidenceInterval80: { low: number; high: number };
+  /**
+   * Deterministic run of the sampler's own simplified NPV at base inputs
+   * (no scenario shift, no noise). The consistency check compares P50 to
+   * this, not to the main engine, because the sampler is a reduced model.
+   */
+  samplerBaseline?: number;
+  /**
+   * Deterministic evaluation of the sampler's model at each scenario's
+   * shifted inputs (no noise). P50 of the noisy mixture must fall inside the
+   * bear..bull envelope; a P50 outside it indicates a sampling fault.
+   */
+  samplerEnvelope?: { bear: number; base: number; bull: number };
 
   /** Fraction of iterations yielding a positive NPV (0-1) */
   probabilityOfPositiveNPV: number;
