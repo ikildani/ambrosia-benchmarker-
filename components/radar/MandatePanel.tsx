@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { RADAR_TA_OPTIONS, RADAR_MODALITY_OPTIONS, radarLabel } from '@/lib/radar/vocab';
 
 interface Mandate {
   id: string;
@@ -21,31 +22,10 @@ interface Mandate {
   created_at: string;
 }
 
-const TA_OPTIONS = [
-  'oncology', 'neurology', 'immunology', 'metabolic', 'cardiovascular',
-  'rare_disease', 'infectious_disease', 'ophthalmology', 'respiratory',
-  'dermatology', 'hematology', 'womens_health',
-];
-
-const MODALITY_OPTIONS = [
-  'small_molecule', 'monoclonal_antibody', 'adc', 'bispecific', 'car_t',
-  'cell_therapy', 'gene_therapy', 'mrna', 'peptide', 'oligonucleotide',
-  'vaccine', 'radiopharmaceutical',
-];
-
-function formatLabel(raw: string): string {
-  const MAP: Record<string, string> = {
-    small_molecule: 'Small Molecule', monoclonal_antibody: 'mAb', adc: 'ADC',
-    bispecific: 'Bispecific', car_t: 'CAR-T', cell_therapy: 'Cell',
-    gene_therapy: 'Gene', mrna: 'mRNA', peptide: 'Peptide',
-    oligonucleotide: 'Oligo', vaccine: 'Vaccine', radiopharmaceutical: 'Radiopharma',
-    oncology: 'Oncology', neurology: 'Neurology', immunology: 'Immunology',
-    metabolic: 'Metabolic', cardiovascular: 'Cardio', rare_disease: 'Rare Disease',
-    infectious_disease: 'Infectious', ophthalmology: 'Ophtho', respiratory: 'Respiratory',
-    dermatology: 'Derm', hematology: 'Hematology', womens_health: "Women's",
-  };
-  return MAP[raw] || raw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+// Vocabulary from lib/radar/vocab.ts so mandate criteria match stored asset values.
+const TA_OPTIONS = RADAR_TA_OPTIONS.map(o => o.value);
+const MODALITY_OPTIONS = RADAR_MODALITY_OPTIONS.map(o => o.value);
+const formatLabel = radarLabel;
 
 interface Props {
   onBack: () => void;

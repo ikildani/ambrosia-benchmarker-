@@ -1,12 +1,21 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import {
+  RADAR_TA_OPTIONS,
+  RADAR_MODALITY_OPTIONS,
+  RADAR_PHASE_OPTIONS,
+  RADAR_PARTNERSHIP_OPTIONS,
+  RADAR_REGION_OPTIONS,
+  RADAR_COUNTRY_OPTIONS,
+} from '@/lib/radar/vocab';
 
 interface Filters {
   ta: string;
   modality: string;
   phase: string;
   partnership: string;
+  region: string;
   country: string;
   sort: string;
   q: string;
@@ -19,55 +28,16 @@ interface Props {
   nlSearching?: boolean;
 }
 
-const TA_OPTIONS = [
-  { value: '', label: 'All' },
-  { value: 'oncology', label: 'Oncology' },
-  { value: 'neurology', label: 'Neurology' },
-  { value: 'immunology', label: 'Immunology' },
-  { value: 'metabolic', label: 'Metabolic' },
-  { value: 'cardiovascular', label: 'Cardio' },
-  { value: 'rare_disease', label: 'Rare Disease' },
-  { value: 'infectious_disease', label: 'Infectious' },
-  { value: 'ophthalmology', label: 'Ophtho' },
-  { value: 'respiratory', label: 'Respiratory' },
-  { value: 'dermatology', label: 'Derm' },
-  { value: 'hematology', label: 'Hematology' },
-  { value: 'womens_health', label: "Women's" },
-];
-
-const MODALITY_OPTIONS = [
-  { value: '', label: 'All' },
-  { value: 'small_molecule', label: 'Small Molecule' },
-  { value: 'monoclonal_antibody', label: 'mAb' },
-  { value: 'adc', label: 'ADC' },
-  { value: 'bispecific', label: 'Bispecific' },
-  { value: 'car_t', label: 'CAR-T' },
-  { value: 'cell_therapy', label: 'Cell' },
-  { value: 'gene_therapy', label: 'Gene' },
-  { value: 'mrna', label: 'mRNA' },
-  { value: 'peptide', label: 'Peptide' },
-  { value: 'oligonucleotide', label: 'Oligo' },
-  { value: 'vaccine', label: 'Vaccine' },
-  { value: 'radiopharmaceutical', label: 'Radiopharma' },
-];
-
-const PHASE_OPTIONS = [
-  { value: '', label: 'All' },
-  { value: 'Early Phase 1', label: 'P1 Early' },
-  { value: 'Phase 1', label: 'P1' },
-  { value: 'Phase 1/Phase 2', label: 'P1/2' },
-  { value: 'Phase 2', label: 'P2' },
-  { value: 'Phase 2/Phase 3', label: 'P2/3' },
-  { value: 'Phase 3', label: 'P3' },
-  { value: 'Phase 4', label: 'P4' },
-];
-
-const PARTNERSHIP_OPTIONS = [
-  { value: '', label: 'All' },
-  { value: 'unpartnered', label: 'Unpartnered' },
-  { value: 'partially_partnered', label: 'Partial' },
-  { value: 'partnered', label: 'Partnered' },
-];
+// Vocabulary comes from lib/radar/vocab.ts so filter values always match the
+// strings stored in clinical_assets (previous local copies used values the
+// database never contained, e.g. 'monoclonal_antibody' and 'Phase 2').
+const ALL = { value: '', label: 'All' };
+const TA_OPTIONS = [ALL, ...RADAR_TA_OPTIONS];
+const MODALITY_OPTIONS = [ALL, ...RADAR_MODALITY_OPTIONS];
+const PHASE_OPTIONS = [ALL, ...RADAR_PHASE_OPTIONS];
+const PARTNERSHIP_OPTIONS = [ALL, ...RADAR_PARTNERSHIP_OPTIONS];
+const REGION_OPTIONS = [ALL, ...RADAR_REGION_OPTIONS];
+const COUNTRY_OPTIONS = [ALL, ...RADAR_COUNTRY_OPTIONS];
 
 const SORT_OPTIONS = [
   { value: 'licensing_intent', label: 'Intent Score' },
@@ -77,7 +47,7 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Recently Updated' },
 ];
 
-type FilterSection = 'ta' | 'modality' | 'phase' | 'partnership' | null;
+type FilterSection = 'ta' | 'modality' | 'phase' | 'partnership' | 'geography' | null;
 
 export function RadarFilters({ filters, onChange, onNLSearch, nlSearching }: Props) {
   const [expandedSection, setExpandedSection] = useState<FilterSection>(null);
@@ -90,7 +60,7 @@ export function RadarFilters({ filters, onChange, onNLSearch, nlSearching }: Pro
     setExpandedSection(prev => prev === section ? null : section);
   };
 
-  const activeFilterCount = [filters.ta, filters.modality, filters.phase, filters.partnership].filter(Boolean).length;
+  const activeFilterCount = [filters.ta, filters.modality, filters.phase, filters.partnership, filters.region, filters.country].filter(Boolean).length;
 
   return (
     <div className="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 p-5">
@@ -140,7 +110,7 @@ export function RadarFilters({ filters, onChange, onNLSearch, nlSearching }: Pro
       </div>
 
       {/* Filter category buttons */}
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex flex-wrap items-center gap-2 mt-4">
         <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Filters</span>
 
         <FilterCategoryButton
@@ -174,12 +144,23 @@ export function RadarFilters({ filters, onChange, onNLSearch, nlSearching }: Pro
           expanded={expandedSection === 'partnership'}
           onClick={() => toggleSection('partnership')}
         />
+        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700" />
+        <FilterCategoryButton
+          label="Geography"
+          active={!!filters.region || !!filters.country}
+          activeValue={
+            COUNTRY_OPTIONS.find(o => o.value === filters.country)?.label
+            || REGION_OPTIONS.find(o => o.value === filters.region)?.label
+          }
+          expanded={expandedSection === 'geography'}
+          onClick={() => toggleSection('geography')}
+        />
 
         {activeFilterCount > 0 && (
           <>
             <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 ml-1" />
             <button
-              onClick={() => onChange({ ...filters, ta: '', modality: '', phase: '', partnership: '', country: '' })}
+              onClick={() => onChange({ ...filters, ta: '', modality: '', phase: '', partnership: '', region: '', country: '' })}
               className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
             >
               Clear all ({activeFilterCount})
@@ -220,6 +201,24 @@ export function RadarFilters({ filters, onChange, onNLSearch, nlSearching }: Pro
           onChange={(v) => set('partnership', v)}
           accent="teal"
         />
+      )}
+      {expandedSection === 'geography' && (
+        <>
+          <PillRow
+            options={REGION_OPTIONS}
+            value={filters.region}
+            onChange={(v) => onChange({ ...filters, region: v, country: '' })}
+            accent="amber"
+            label="Region"
+          />
+          <PillRow
+            options={COUNTRY_OPTIONS}
+            value={filters.country}
+            onChange={(v) => onChange({ ...filters, country: v, region: '' })}
+            accent="indigo"
+            label="Country"
+          />
+        </>
       )}
 
       {/* Mobile sort (hidden on lg) */}

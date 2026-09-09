@@ -15,6 +15,7 @@ interface Filters {
   modality: string;
   phase: string;
   partnership: string;
+  region: string;
   country: string;
   sort: string;
   q: string;
@@ -25,6 +26,7 @@ const DEFAULT_FILTERS: Filters = {
   modality: '',
   phase: '',
   partnership: '',
+  region: '',
   country: '',
   sort: 'licensing_intent',
   q: '',
@@ -78,6 +80,7 @@ export function RadarFeed() {
     if (filters.modality) params.set('modality', filters.modality);
     if (filters.phase) params.set('phase', filters.phase);
     if (filters.partnership) params.set('partnership', filters.partnership);
+    if (filters.region) params.set('region', filters.region);
     if (filters.country) params.set('country', filters.country);
     if (filters.sort) params.set('sort', filters.sort);
     if (debouncedQ) params.set('q', debouncedQ);
@@ -93,7 +96,7 @@ export function RadarFeed() {
     } finally {
       setLoading(false);
     }
-  }, [filters.ta, filters.modality, filters.phase, filters.partnership, filters.country, filters.sort, debouncedQ, page]);
+  }, [filters.ta, filters.modality, filters.phase, filters.partnership, filters.region, filters.country, filters.sort, debouncedQ, page]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
@@ -160,7 +163,7 @@ export function RadarFeed() {
   useEffect(() => { if (viewMode === 'acquirer' && !acquirerData) fetchAcquirerView(); }, [viewMode, acquirerData, fetchAcquirerView]);
 
   // Reset page on filter change
-  useEffect(() => { setPage(1); }, [filters.ta, filters.modality, filters.phase, filters.partnership, filters.country, debouncedQ]);
+  useEffect(() => { setPage(1); }, [filters.ta, filters.modality, filters.phase, filters.partnership, filters.region, filters.country, filters.sort, debouncedQ]);
 
   const handleFilterChange = useCallback((newFilters: Filters) => {
     setFilters(newFilters);
