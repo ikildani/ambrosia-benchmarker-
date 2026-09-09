@@ -9,8 +9,7 @@
  *                founder-led sequence runs. Logs a manual_sequence_suppressed
  *                event per user.
  *
- *   --reopen     reopen Pro for the win-back accounts (7 days) and grant
- *                open-ended Pro to the advisory guest. Logs a
+ *   --reopen     reopen Pro for the win-back accounts (7 days). Logs a
  *                winback_access_reopened event per user.
  *
  *   --apply      actually write. Without it the script only prints the plan.
@@ -70,8 +69,6 @@ const COHORT = [
   'jonatanstaaf@hotmail.se',
   'ronbhagia@gmail.com',
   'mehdi.chelbi@biper-tx.com',
-  // Advisory guest
-  'helenmccormack38@gmail.com',
 ];
 
 /** Win-back: Pro reopened for 7 days, no card. */
@@ -85,8 +82,8 @@ const WINBACK_7D = [
   'mehdi.chelbi@biper-tx.com',
 ];
 
-/** Advisory prospect: open-ended Pro, no expiry, no pitch. */
-const ADVISORY_GUEST = ['helenmccormack38@gmail.com'];
+/** Advisory prospects handled personally, outside this campaign. */
+const ADVISORY_GUEST: string[] = [];
 
 const args = new Set(process.argv.slice(2));
 const APPLY = args.has('--apply');
