@@ -23,6 +23,7 @@ import { classifyCompanyCountry, deriveRegion } from '@/lib/ingestion/company-ge
 import { inferModalityFromIntervention } from '@/lib/ingestion/clinical-trials';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 import { validateAssetData } from '@/lib/radar/validation';
+import { resolveDrugLocal } from '@/lib/radar/drug-master';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -822,6 +823,29 @@ export async function indexAssetUniverse(
           last_enriched_at: nowIso,
           updated_at: nowIso,
         };
+
+        // ── Drug master (local-only, no network) ─────────────────────
+        // Attach the drug_master_id when the name or one of its raw aliases
+        // (incl. the stripped "(pembrolizumab)" parenthetical) is already
+        // known. Misses stay 'unresolved' for the drug-resolve cron, which
+        // does the external GSRS / ChEMBL / PubChem lookups.
+        try {
+          const drug = await resolveDrugLocal(supabase, {
+            rawName: group.canonicalName,
+            otherNames: [...group.aliases],
+            interventionType: group.trials[0]?.intervention_type ?? null,
+            sponsorName: group.companyName,
+          });
+          if (drug.drugId) {
+            assetData.drug_master_id = drug.drugId;
+            assetData.drug_resolution_status = drug.status;
+            assetData.drug_resolution_confidence = drug.confidence;
+            assetData.drug_resolved_at = nowIso;
+            if (!assetData.modality && drug.modality) assetData.modality = drug.modality;
+          }
+        } catch (err) {
+          errors.push(`drug resolve failed ${group.companyName}/${group.canonicalName}: ${err instanceof Error ? err.message : String(err)}`);
+        }
 
         // ── Validate before upsert ───────────────────────────────────
         const validation = validateAssetData(assetData);
