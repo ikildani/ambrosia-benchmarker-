@@ -351,6 +351,18 @@
       "schedule": "15 * * * *"
     },
     {
+      "path": "/api/cron/partnership-refresh?limit=1500",
+      "schedule": "15 */6 * * *"
+    },
+    {
+      "path": "/api/cron/press-releases?persist_only=true",
+      "schedule": "5 */2 * * *"
+    },
+    {
+      "path": "/api/cron/press-releases?backfill=true&months=24",
+      "schedule": "35 4 * * *"
+    },
+    {
       "path": "/api/cron/asset-universe",
       "schedule": "30 */2 * * *"
     },
