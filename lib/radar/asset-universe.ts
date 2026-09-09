@@ -2,8 +2,12 @@
  * Asset Radar — Layer 1: Asset Universe Engine
  *
  * Indexes ClinicalTrials.gov data into canonical `clinical_assets` entities.
- * Groups company_trials by intervention_name, resolves partnership status
- * against the deals table, and enriches with regulatory/geographic data.
+ * Groups trials into assets — by is_primary_asset rows in trial_interventions
+ * (migration 106, written by the sponsor-agnostic sweep) when a trial has
+ * them, else by company_trials.intervention_name — resolves partnership
+ * status against the deals table, and enriches with geographic data.
+ * Companies whose owner_type is 'cro' are never indexed: CROs run trials,
+ * they do not own assets.
  *
  * Run: daily at 6:30 AM UTC via /api/cron/asset-universe
  * Depends on: trials-update (5 AM), deals-update (3 AM) running first
@@ -16,6 +20,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { classifyCompanyCountry, deriveRegion } from '@/lib/ingestion/company-geography';
+import { inferModalityFromIntervention } from '@/lib/ingestion/clinical-trials';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 import { validateAssetData } from '@/lib/radar/validation';
 
@@ -54,6 +59,19 @@ interface CompanyRow {
   assets_indexed_at: string | null;
 }
 
+/** trial_interventions row (migration 106) — one per intervention per study. */
+interface TrialInterventionRow {
+  nct_id: string;
+  company_id: string | null;
+  name: string;
+  name_normalized: string;
+  intervention_type: string | null;
+  arm_role: string;
+  is_primary_asset: boolean;
+  other_names: string[] | null;
+  description: string | null;
+}
+
 interface AssetGroup {
   companyId: string;
   companyName: string;
@@ -81,6 +99,10 @@ export interface IndexResult {
   /** Rows rejected by validation or by a failed upsert chunk */
   assetsFailed: number;
   partnershipsResolved: number;
+  /** Selected companies skipped because owner_type = 'cro' (stamped so they rotate out) */
+  croCompaniesSkipped: number;
+  /** Trials grouped through trial_interventions rather than intervention_name */
+  trialsFromInterventions: number;
   errors: string[];
   timedOut: boolean;
   /** Whether the data_ingestion_log row was written */
@@ -333,17 +355,20 @@ export async function resolvePartnershipStatus(
 // TRIAL GROUPING → ASSET ENTITIES
 // ═══════════════════════════════════════════════════════════════════════
 
-function groupTrialsIntoAssets(trials: CompanyTrialRow[]): { groups: AssetGroup[]; skippedNonDrug: number } {
+/** Key for the per-trial interventions map: company_id + nct_id. */
+function trialKey(companyId: string, nctId: string): string {
+  return `${companyId}\u0000${nctId}`;
+}
+
+function groupTrialsIntoAssets(
+  trials: CompanyTrialRow[],
+  interventionsByTrial: Map<string, TrialInterventionRow[]>,
+): { groups: AssetGroup[]; skippedNonDrug: number; fromInterventions: number } {
   const groups = new Map<string, AssetGroup>();
   let skippedNonDrug = 0;
+  let fromInterventions = 0;
 
-  for (const trial of trials) {
-    // Only drug/biologic/genetic/combination-product interventions become assets
-    if (!isDrugInterventionType(trial.intervention_type)) { skippedNonDrug++; continue; }
-
-    const canonical = canonicalizeAssetName(trial.intervention_name || '');
-    if (!canonical) continue;
-
+  const addToGroup = (trial: CompanyTrialRow, canonical: string, rawNames: string[], modality: string | null) => {
     const key = `${trial.company_id}::${normalizeForMatching(canonical)}`;
 
     if (!groups.has(key)) {
@@ -363,18 +388,54 @@ function groupTrialsIntoAssets(trials: CompanyTrialRow[]): { groups: AssetGroup[
     }
 
     const group = groups.get(key)!;
-    group.trials.push(trial);
+    // A trial contributes once per asset even if the sweep listed the
+    // intervention under several names that canonicalize the same way.
+    if (!group.nctIds.has(trial.nct_id)) group.trials.push(trial);
     if (trial.nct_id) group.nctIds.add(trial.nct_id);
-    if (trial.modality && trial.modality !== 'other') group.modalities.add(trial.modality);
+    if (modality && modality !== 'other') group.modalities.add(modality);
     if (trial.indication_category) group.indications.add(trial.indication_category);
     if (trial.indication_specific) group.indicationsSpecific.add(trial.indication_specific);
     if (trial.phase) group.phases.add(trial.phase);
-    if (trial.intervention_name && trial.intervention_name !== canonical) {
-      group.aliases.add(trial.intervention_name);
+    for (const raw of rawNames) {
+      if (raw && raw !== canonical) group.aliases.add(raw);
     }
+  };
+
+  for (const trial of trials) {
+    const ivRows = interventionsByTrial.get(trialKey(trial.company_id, trial.nct_id));
+
+    if (ivRows) {
+      // Sweep path: one asset per is_primary_asset intervention. Comparator,
+      // placebo and background arms are in the table but never become assets.
+      fromInterventions++;
+      for (const iv of ivRows) {
+        if (!iv.is_primary_asset || !isDrugInterventionType(iv.intervention_type)) continue;
+        const canonical = canonicalizeAssetName(iv.name);
+        if (!canonical) continue;
+        const ivModality = inferModalityFromIntervention([
+          { name: iv.name, type: iv.intervention_type || '', description: iv.description },
+        ]);
+        addToGroup(
+          trial,
+          canonical,
+          [iv.name, ...(iv.other_names || [])],
+          ivModality !== 'other' ? ivModality : trial.modality,
+        );
+      }
+      continue;
+    }
+
+    // Legacy path (trials without trial_interventions rows): the first
+    // drug-class intervention stored in company_trials.intervention_name.
+    if (!isDrugInterventionType(trial.intervention_type)) { skippedNonDrug++; continue; }
+
+    const canonical = canonicalizeAssetName(trial.intervention_name || '');
+    if (!canonical) continue;
+
+    addToGroup(trial, canonical, trial.intervention_name ? [trial.intervention_name] : [], trial.modality);
   }
 
-  return { groups: Array.from(groups.values()), skippedNonDrug };
+  return { groups: Array.from(groups.values()), skippedNonDrug, fromInterventions };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -435,6 +496,58 @@ async function fetchTrialsForCompanies(
     from += PAGE_SIZE;
   }
   return { trials: all, error: null };
+}
+
+const INTERVENTION_COLUMNS = 'nct_id, company_id, name, name_normalized, intervention_type, arm_role, is_primary_asset, other_names, description';
+
+/**
+ * trial_interventions rows (migration 106) for a batch of companies, keyed
+ * by company_id + nct_id. Trials absent from the map fall back to the
+ * legacy intervention_name path in groupTrialsIntoAssets.
+ */
+async function fetchInterventionsForCompanies(
+  supabase: SupabaseClient,
+  companyIds: string[],
+): Promise<{ byTrial: Map<string, TrialInterventionRow[]>; error: string | null }> {
+  const byTrial = new Map<string, TrialInterventionRow[]>();
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from('trial_interventions')
+      .select(INTERVENTION_COLUMNS)
+      .in('company_id', companyIds)
+      .order('nct_id', { ascending: true })
+      .order('name_normalized', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) return { byTrial, error: error.message };
+    if (!data || data.length === 0) break;
+    for (const row of data as unknown as TrialInterventionRow[]) {
+      if (!row.company_id) continue;
+      const key = trialKey(row.company_id, row.nct_id);
+      const list = byTrial.get(key);
+      if (list) list.push(row); else byTrial.set(key, [row]);
+    }
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return { byTrial, error: null };
+}
+
+/** companies.owner_type (migration 106) for the selected companies. */
+async function fetchOwnerTypes(
+  supabase: SupabaseClient,
+  companyIds: string[],
+): Promise<{ byId: Map<string, string>; error: string | null }> {
+  const byId = new Map<string, string>();
+  for (let i = 0; i < companyIds.length; i += 200) {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('id, owner_type')
+      .in('id', companyIds.slice(i, i + 200));
+    if (error) return { byId, error: error.message };
+    for (const row of data ?? []) byId.set(row.id, row.owner_type ?? 'unknown');
+  }
+  return { byId, error: null };
 }
 
 function assetKey(companyName: string, assetName: string): string {
@@ -516,6 +629,8 @@ export async function indexAssetUniverse(
   let assetsSkipped = 0;
   let assetsFailed = 0;
   let partnershipsResolved = 0;
+  let croCompaniesSkipped = 0;
+  let trialsFromInterventions = 0;
   let timedOut = false;
 
   const isOutOfTime = () => Date.now() - startTime > MAX_RUNTIME_MS;
@@ -539,13 +654,15 @@ export async function indexAssetUniverse(
         company_limit: companyLimit,
         batch_size: batchSize,
         partnerships_resolved: partnershipsResolved,
+        cro_companies_skipped: croCompaniesSkipped,
+        trials_from_interventions: trialsFromInterventions,
         timed_out: timedOut,
         ...(cursorNote ? { cursor: cursorNote } : {}),
       },
     });
     const duration = Math.round((Date.now() - startTime) / 1000);
-    console.log(`[asset-universe] Done: ${companiesProcessed} companies, ${trialsFetched} trials, ${assetsIndexed} assets inserted, ${assetsUpdated} updated, ${assetsSkipped} skipped, ${assetsFailed} failed, ${partnershipsResolved} partnerships resolved, ${errors.length} errors, ${duration}s${timedOut ? ' (timed out)' : ''}${logged ? '' : ' [LOG WRITE FAILED]'}`);
-    return { companiesProcessed, trialsFetched, assetsIndexed, assetsUpdated, assetsSkipped, assetsFailed, partnershipsResolved, errors, timedOut, logged };
+    console.log(`[asset-universe] Done: ${companiesProcessed} companies, ${trialsFetched} trials (${trialsFromInterventions} via trial_interventions), ${assetsIndexed} assets inserted, ${assetsUpdated} updated, ${assetsSkipped} skipped, ${assetsFailed} failed, ${partnershipsResolved} partnerships resolved, ${croCompaniesSkipped} CRO companies skipped, ${errors.length} errors, ${duration}s${timedOut ? ' (timed out)' : ''}${logged ? '' : ' [LOG WRITE FAILED]'}`);
+    return { companiesProcessed, trialsFetched, assetsIndexed, assetsUpdated, assetsSkipped, assetsFailed, partnershipsResolved, croCompaniesSkipped, trialsFromInterventions, errors, timedOut, logged };
   };
 
   // ── Company selection (cursor: assets_indexed_at NULLS FIRST) ─────────
@@ -561,10 +678,29 @@ export async function indexAssetUniverse(
   const cursorStart = companies[0]?.assets_indexed_at ?? null;
   const cursorEnd = companies[companies.length - 1]?.assets_indexed_at ?? null;
 
-  for (let i = 0; i < companies.length; i += batchSize) {
+  // ── Owner types (migration 106): CROs never own assets ──────────────
+  // The RPC (migration 102) is left untouched; CRO rows it returns are
+  // stamped here so they rotate to the back of the cursor instead of being
+  // re-selected first on every run.
+  const { byId: ownerTypeById, error: ownerTypeError } = await fetchOwnerTypes(supabase, companies.map(c => c.id));
+  if (ownerTypeError) {
+    errors.push(`owner_type lookup error (is migration 106 applied?): ${ownerTypeError}`);
+  }
+  const croIds = companies.filter(c => ownerTypeById.get(c.id) === 'cro').map(c => c.id);
+  if (croIds.length > 0) {
+    const { error: croStampError } = await supabase
+      .from('companies')
+      .update({ assets_indexed_at: new Date().toISOString() })
+      .in('id', croIds);
+    if (croStampError) errors.push(`CRO cursor stamp error: ${croStampError.message}`);
+    croCompaniesSkipped += croIds.length;
+  }
+  const indexable = companies.filter(c => ownerTypeById.get(c.id) !== 'cro');
+
+  for (let i = 0; i < indexable.length; i += batchSize) {
     if (isOutOfTime()) { timedOut = true; break; }
 
-    const batch = companies.slice(i, i + batchSize);
+    const batch = indexable.slice(i, i + batchSize);
     const batchIds = batch.map(c => c.id);
     const batchLabel = `batch ${Math.floor(i / batchSize) + 1}`;
 
@@ -576,9 +712,17 @@ export async function indexAssetUniverse(
     }
     trialsFetched += trials.length;
 
+    // ── Per-intervention arm roles from the sweep (migration 106) ──────
+    // A missing table degrades to the legacy path and is surfaced as an error.
+    const { byTrial: interventionsByTrial, error: interventionError } = await fetchInterventionsForCompanies(supabase, batchIds);
+    if (interventionError) {
+      errors.push(`trial_interventions fetch error for ${batchLabel} (is migration 106 applied?): ${interventionError}`);
+    }
+
     // ── Group trials into asset entities ───────────────────────────────
-    const { groups: allGroups, skippedNonDrug } = groupTrialsIntoAssets(trials);
+    const { groups: allGroups, skippedNonDrug, fromInterventions } = groupTrialsIntoAssets(trials, interventionsByTrial);
     assetsSkipped += skippedNonDrug;
+    trialsFromInterventions += fromInterventions;
 
     // Drop groups whose only phases are not_applicable / unknown
     const assetGroups = allGroups.filter(g => {
@@ -664,6 +808,10 @@ export async function indexAssetUniverse(
           territory_rights_available: partnership.availableTerritories,
           originator_country: geo.country,
           originator_region: geo.region,
+          // TODO(migration): surface the owner type on the asset. clinical_assets
+          // (migration 090) has no lead_sponsor_type column; when one is added,
+          // write ownerTypeById.get(group.companyId) ?? 'unknown' here so the
+          // UI can facet industry vs academic / hospital / government owners.
           confidence_score: confidence,
           data_sources: ['clinicaltrials'],
           first_posted_date: startDates[0] || null,

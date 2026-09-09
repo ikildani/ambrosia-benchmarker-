@@ -128,7 +128,7 @@ export interface CTStudy {
   secondaryOutcomes: Array<{ measure: string; description: string | null; timeFrame: string | null }>;
 }
 
-interface Intervention {
+export interface Intervention {
   name: string;
   type: string;
   description: string | null;
@@ -682,7 +682,7 @@ export function inferIndicationFromConditions(conditions: string[]): {
  * CHECK values: early_phase_1, phase_1, phase_1_2, phase_2, phase_2_3,
  * phase_3, phase_4, not_applicable, unknown.
  */
-function mapPhase(ctPhases: string[] | string | undefined | null): string {
+export function mapPhase(ctPhases: string[] | string | undefined | null): string {
   const phases = (Array.isArray(ctPhases) ? ctPhases : ctPhases ? [ctPhases] : [])
     .map(p => String(p).toUpperCase().replace(/[\s/-]+/g, ''))
     .filter(Boolean);
@@ -702,7 +702,7 @@ function mapPhase(ctPhases: string[] | string | undefined | null): string {
   return 'unknown';
 }
 
-function mapStatus(ctStatus: string | undefined): string {
+export function mapStatus(ctStatus: string | undefined): string {
   if (!ctStatus) return 'unknown';
 
   const statusMap: Record<string, string> = {
@@ -725,7 +725,7 @@ function sleep(ms: number): Promise<void> {
 
 // ClinicalTrials.gov returns dates as "YYYY-MM-DD", "YYYY-MM", or "YYYY"
 // Normalize to full "YYYY-MM-DD" for Postgres date columns
-function normalizeDate(dateStr: string | null | undefined): string | null {
+export function normalizeDate(dateStr: string | null | undefined): string | null {
   if (!dateStr) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr; // Already full date
   if (/^\d{4}-\d{2}$/.test(dateStr)) return `${dateStr}-01`; // Year-month → add day
