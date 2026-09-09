@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { DueDiligencePanel } from './DueDiligencePanel';
 
 interface AssetDetail {
+  comparables?: { n: number; relaxation: string; insufficient_comps: boolean; min_comps: number; excluded_approved_ma: number };
   asset: Record<string, unknown>;
   linkedDeals: Record<string, unknown>[];
   comparableDeals: Record<string, unknown>[];
@@ -314,19 +315,39 @@ function OverviewTab({ data }: { data: AssetDetail }) {
   return (
     <div className="space-y-6">
       {/* Predicted Deal Terms */}
-      {data.thesis && (
-        <div className="rounded-xl border border-amber-200/60 dark:border-amber-800/30 bg-gradient-to-br from-amber-50/50 to-white dark:from-amber-900/10 dark:to-slate-900 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Predicted Deal Terms</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-medium">
-              {String((data.thesis as Record<string, unknown>).comp_count)} comps
+      {data.thesis && (() => {
+        const t = data.thesis as Record<string, unknown>;
+        const insufficient = t.insufficient_comps === true || t.predicted_upfront_mid == null;
+        const compCount = Number(t.comp_count ?? 0);
+        const relaxation = String(t.comp_relaxation ?? 'none');
+        const confidence = t.thesis_confidence != null ? Number(t.thesis_confidence) : null;
+        const relaxationLabel = relaxation === 'ta_only'
+          ? 'therapeutic area only'
+          : relaxation === 'modality_only'
+            ? 'therapeutic area + modality'
+            : 'phase-matched';
+        return (
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/40 dark:bg-amber-900/10 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Predicted Deal Terms</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              {compCount} verified comps · {relaxationLabel}
+              {confidence != null && !insufficient ? ` · confidence ${confidence}/100` : ''}
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-6">
-            <TermRange label="Upfront" low={(data.thesis as Record<string, unknown>).predicted_upfront_low as number | null} mid={(data.thesis as Record<string, unknown>).predicted_upfront_mid as number | null} high={(data.thesis as Record<string, unknown>).predicted_upfront_high as number | null} unit="$M" />
-            <TermRange label="Total Value" low={(data.thesis as Record<string, unknown>).predicted_total_low as number | null} mid={(data.thesis as Record<string, unknown>).predicted_total_mid as number | null} high={(data.thesis as Record<string, unknown>).predicted_total_high as number | null} unit="$M" />
-            <TermRange label="Royalty" low={(data.thesis as Record<string, unknown>).predicted_royalty_low as number | null} mid={(data.thesis as Record<string, unknown>).predicted_royalty_mid as number | null} high={(data.thesis as Record<string, unknown>).predicted_royalty_high as number | null} unit="%" />
+          {insufficient ? (
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Not enough comparable transactions to predict terms for this profile.
+              Solidus requires at least {String(data.comparables?.min_comps ?? 5)} verified deals with disclosed terms;
+              {' '}{compCount} matched. Open the calculator to model this asset with explicit assumptions.
+            </p>
+          ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <TermRange label="Upfront" low={t.predicted_upfront_low as number | null} mid={t.predicted_upfront_mid as number | null} high={t.predicted_upfront_high as number | null} unit="$M" />
+            <TermRange label="Total Value" low={t.predicted_total_low as number | null} mid={t.predicted_total_mid as number | null} high={t.predicted_total_high as number | null} unit="$M" />
+            <TermRange label="Royalty" low={t.predicted_royalty_low as number | null} mid={t.predicted_royalty_mid as number | null} high={t.predicted_royalty_high as number | null} unit="%" />
           </div>
+          )}
           {/* Likely acquirers */}
           {((data.thesis as Record<string, unknown>).likely_acquirers as { name: string; dealCount: number }[])?.length > 0 && (
             <div className="mt-4 pt-3 border-t border-amber-200/30 dark:border-amber-800/20">
@@ -341,7 +362,8 @@ function OverviewTab({ data }: { data: AssetDetail }) {
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
 
       {/* Trials */}
       {data.trials.length > 0 && (
