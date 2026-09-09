@@ -850,6 +850,20 @@ export function runMonteCarlo(
 
   // ----- Assemble result ------------------------------------------------
 
+  // Deterministic scenario envelope of the sampler's own model. Each scenario
+  // is evaluated at its shifted inputs with no noise; the noisy mixture's P50
+  // must land between the bear and bull evaluations.
+  const samplerEnvelope = (): { bear: number; base: number; bull: number } => {
+    const evalScenario = (name: string): number => {
+      const sc = phaseConfigs.find(c => c.name === name) ?? phaseConfigs[0];
+      const pos = Math.max(0.001, Math.min(0.999, basePoS * (1 + sc.posShiftFraction)));
+      const peak = basePeakSales * (1 + sc.peakSalesMultiplier);
+      const rate = Math.max(0.01, baseRate + sc.discountRateShift);
+      return r1(computeIterationRNPV(rnpv, pos, peak, rate, sc.timelineShift, 1.0));
+    };
+    return { bear: evalScenario('bear'), base: evalScenario('base'), bull: evalScenario('bull') };
+  };
+
   const mcResult: MonteCarloResult = {
     iterations,
 
@@ -870,6 +884,10 @@ export function runMonteCarlo(
 
     confidenceInterval95: { low: p2_5, high: p97_5 },
     confidenceInterval80: { low: p10, high: p90 },
+    // Same reduced model at base inputs, no scenario shift, no noise: the
+    // reference the P50 consistency check is measured against.
+    samplerBaseline: r1(computeIterationRNPV(rnpv, basePoS, basePeakSales, baseRate, 0, 1.0)),
+    samplerEnvelope: samplerEnvelope(),
 
     probabilityOfPositiveNPV,
 
