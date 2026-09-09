@@ -351,6 +351,10 @@
       "schedule": "15 * * * *"
     },
     {
+      "path": "/api/cron/registry-sweep",
+      "schedule": "0 */2 * * *"
+    },
+    {
       "path": "/api/cron/drug-resolve",
       "schedule": "20 */2 * * *"
     },
