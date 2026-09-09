@@ -162,8 +162,11 @@ export function checkRNPVInvariants(
   }
 
   // 5. phase-bounded yearsToMarket ceiling
+  // Scenario reruns add a deliberate time-to-market delta after the pathway
+  // is built; allow it so a +4y compound delay does not read as duplication.
+  const ttmAdjustment = isFiniteNumber(input.timeToMarketAdjustment) ? input.timeToMarketAdjustment : 0;
   const ceiling = MAX_YEARS_TO_MARKET_BY_PHASE[input.phase];
-  if (ceiling != null && isFiniteNumber(result.yearsToMarket) && result.yearsToMarket > ceiling) {
+  if (ceiling != null && isFiniteNumber(result.yearsToMarket) && result.yearsToMarket > ceiling + Math.max(0, ttmAdjustment)) {
     out.push(
       v('critical', 'rnpv.years_to_market_phase_ceiling',
         `yearsToMarket ${result.yearsToMarket.toFixed(1)}y exceeds industry ceiling of ${ceiling}y for phase=${input.phase}. (Detects pathway duplication bugs.)`,
@@ -239,7 +242,9 @@ export function checkRNPVInvariants(
 
   // 11. Sum of phaseTransitions[].yearsToComplete should approximately equal yearsToMarket
   if (Array.isArray(result.phaseTransitions) && result.phaseTransitions.length > 0 && isFiniteNumber(result.yearsToMarket)) {
-    const sumPhaseYears = result.phaseTransitions.reduce((s, t) => s + (t.yearsToComplete || 0), 0);
+    // Include the scenario time-to-market delta: the engine applies it after
+    // summing the pathway, so the transitions alone never add up to it.
+    const sumPhaseYears = result.phaseTransitions.reduce((s, t) => s + (t.yearsToComplete || 0), 0) + ttmAdjustment;
     // Allow 1y slack for data-quality timeline multipliers + market-access delay
     // that are applied after the core pathway sum.
     if (sumPhaseYears > 0 && Math.abs(sumPhaseYears - result.yearsToMarket) > Math.max(2, result.yearsToMarket * 0.35)) {
@@ -489,6 +494,14 @@ export interface AssertInvariantsOptions {
  *   - Throws on the first critical if `options.throw === true`.
  *   - Returns the full violation list (including warnings).
  */
+/** (context, sorted rule set) signatures already sent to Sentry in this process/page. */
+const reportedSignatures = new Set<string>();
+
+/** Test hook: forget which signatures were already reported. */
+export function resetInvariantReporting(): void {
+  reportedSignatures.clear();
+}
+
 export function assertInvariants(
   violations: InvariantViolation[],
   options: AssertInvariantsOptions = {},
@@ -499,10 +512,17 @@ export function assertInvariants(
     const err = new Error(
       `Invariant violation(s) [${criticals.length}]: ${criticals.map(c => c.rule).join(', ')}`,
     );
-    captureClientError(err, options.context || 'rnpv-invariants', {
-      violations: criticals,
-      ...(options.extra || {}),
-    });
+    // Report each (context, rule-set) once per process/page. Before this,
+    // every calculation that tripped the same rule produced its own Sentry
+    // critical, which buried genuine regressions under thousands of repeats.
+    const signature = `${options.context || 'rnpv-invariants'}|${criticals.map(c => c.rule).sort().join(',')}`;
+    if (!reportedSignatures.has(signature)) {
+      reportedSignatures.add(signature);
+      captureClientError(err, options.context || 'rnpv-invariants', {
+        violations: criticals,
+        ...(options.extra || {}),
+      });
+    }
 
     if (options.throw) {
       throw err;
