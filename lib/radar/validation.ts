@@ -19,11 +19,19 @@ export interface ValidationResult {
 // ASSET VALIDATION
 // ═══════════════════════════════════════════════════════════════════════
 
+/**
+ * Canonical phases are the company_trials CHECK values (migration 002):
+ * early_phase_1, phase_1, phase_1_2, phase_2, phase_2_3, phase_3, phase_4,
+ * not_applicable, unknown. Pre-clinical / approved and the legacy spellings
+ * (phase1, phase1_phase2, early_phase1) are tolerated for rows that came from
+ * other sources, but new rows from asset-universe always use the CHECK values.
+ */
 const VALID_PHASES = new Set([
-  'discovery', 'preclinical', 'early_phase1', 'phase_1', 'phase1',
-  'phase_1_2', 'phase1_phase2', 'phase_2', 'phase2',
-  'phase_2_3', 'phase2_phase3', 'phase_3', 'phase3',
-  'phase_4', 'phase4', 'approved', 'unknown',
+  'early_phase_1', 'phase_1', 'phase_1_2', 'phase_2', 'phase_2_3',
+  'phase_3', 'phase_4', 'not_applicable', 'unknown',
+  // tolerated legacy / non-CT.gov values
+  'discovery', 'preclinical', 'approved',
+  'early_phase1', 'phase1', 'phase1_phase2', 'phase2', 'phase2_phase3', 'phase3', 'phase4',
 ]);
 
 const VALID_MODALITIES = new Set([

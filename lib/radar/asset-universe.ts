@@ -7,10 +7,17 @@
  *
  * Run: daily at 6:30 AM UTC via /api/cron/asset-universe
  * Depends on: trials-update (5 AM), deals-update (3 AM) running first
+ *
+ * Cursor: companies.assets_indexed_at (migration 102). Companies are selected
+ * server-side by radar_companies_to_index(), which only returns companies with
+ * at least one drug-bearing trial, least-recently indexed first (never-indexed
+ * first). companies.updated_at is NOT touched by this module.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { classifyCompanyCountry } from '@/lib/ingestion/company-geography';
+import { classifyCompanyCountry, deriveRegion } from '@/lib/ingestion/company-geography';
+import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import { validateAssetData } from '@/lib/radar/validation';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -37,6 +44,16 @@ interface CompanyTrialRow {
   primary_completion_date: string | null;
 }
 
+interface CompanyRow {
+  id: string;
+  name: string;
+  hq_country: string | null;
+  hq_region: string | null;
+  headquarters_country: string | null;
+  headquarters_region: string | null;
+  assets_indexed_at: string | null;
+}
+
 interface AssetGroup {
   companyId: string;
   companyName: string;
@@ -53,33 +70,64 @@ interface AssetGroup {
 
 export interface IndexResult {
   companiesProcessed: number;
+  /** Trials fetched from company_trials for the processed companies */
+  trialsFetched: number;
+  /** New clinical_assets rows */
   assetsIndexed: number;
+  /** Existing clinical_assets rows refreshed */
   assetsUpdated: number;
+  /** Groups dropped (non-drug intervention, no informative phase, generic name) */
+  assetsSkipped: number;
+  /** Rows rejected by validation or by a failed upsert chunk */
+  assetsFailed: number;
   partnershipsResolved: number;
   errors: string[];
   timedOut: boolean;
+  /** Whether the data_ingestion_log row was written */
+  logged: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // PHASE ORDERING
 // ═══════════════════════════════════════════════════════════════════════
 
+/**
+ * Ordinal rank per phase. Keys are normalized (lower-case, no whitespace,
+ * '-' → '_') so both company_trials CHECK values (early_phase_1, phase_1_2,
+ * phase_2_3, ...) and legacy spellings (phase1_phase2, ...) rank correctly.
+ * phase_1_2 sits between phase_1 and phase_2; phase_2_3 between phase_2 and
+ * phase_3. Non-informative phases (unknown / not_applicable) rank 0.
+ */
 const PHASE_ORDER: Record<string, number> = {
-  'early_phase1': 1, 'phase1': 2, 'phase_1': 2,
-  'phase1_phase2': 3, 'phase_1_2': 3,
+  'not_applicable': 0, 'na': 0, 'unknown': 0,
+  'early_phase1': 1, 'early_phase_1': 1, 'earlyphase1': 1,
+  'phase1': 2, 'phase_1': 2,
+  'phase1_phase2': 3, 'phase_1_2': 3, 'phase1_2': 3, 'phase1/phase2': 3,
   'phase2': 4, 'phase_2': 4,
-  'phase2_phase3': 5, 'phase_2_3': 5,
+  'phase2_phase3': 5, 'phase_2_3': 5, 'phase2_3': 5, 'phase2/phase3': 5,
   'phase3': 6, 'phase_3': 6,
   'phase4': 7, 'phase_4': 7,
   'approved': 8,
 };
 
+/** Phases that carry no development-stage information. */
+const NON_INFORMATIVE_PHASES = new Set(['not_applicable', 'na', 'unknown']);
+
+function normalizePhaseKey(phase: string): string {
+  return phase.toLowerCase().replace(/\s+/g, '').replace(/-/g, '_');
+}
+
+export function isInformativePhase(phase: string | null | undefined): boolean {
+  if (!phase) return false;
+  return !NON_INFORMATIVE_PHASES.has(normalizePhaseKey(phase));
+}
+
 export function resolveHighestPhase(phases: string[]): string {
   let highest = 'unknown';
   let highestOrder = -1;
   for (const p of phases) {
-    const normalized = p.toLowerCase().replace(/\s+/g, '').replace(/-/g, '_');
-    const order = PHASE_ORDER[normalized] ?? 0;
+    if (!p) continue;
+    const order = PHASE_ORDER[normalizePhaseKey(p)] ?? 0;
     if (order > highestOrder) {
       highestOrder = order;
       highest = p;
@@ -118,6 +166,75 @@ function normalizeForMatching(name: string): string {
   return name.toLowerCase()
     .replace(/[^a-z0-9]/g, '')
     .replace(/\s+/g, '');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DRUG-BEARING INTERVENTIONS
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * CT.gov intervention types that describe a licensable drug/biologic asset.
+ * Devices, procedures, behavioral, dietary supplements, radiation, diagnostic
+ * tests and "other" are excluded — they were producing device/procedure
+ * "assets" in clinical_assets.
+ */
+export const DRUG_INTERVENTION_TYPES = new Set(['DRUG', 'BIOLOGICAL', 'GENETIC', 'COMBINATION_PRODUCT']);
+
+export function isDrugInterventionType(type: string | null | undefined): boolean {
+  if (!type) return false;
+  return DRUG_INTERVENTION_TYPES.has(type.trim().toUpperCase().replace(/\s+/g, '_'));
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GEOGRAPHY (canonical: ISO 3166-1 alpha-2 + region slug)
+// ═══════════════════════════════════════════════════════════════════════
+
+/** Full country names still present in companies.hq_country → ISO-2. */
+const COUNTRY_NAME_TO_ISO: Record<string, string> = {
+  'united states': 'US', 'united states of america': 'US', 'usa': 'US', 'u.s.': 'US', 'u.s.a.': 'US',
+  'switzerland': 'CH',
+  'uk': 'GB', 'u.k.': 'GB', 'united kingdom': 'GB', 'great britain': 'GB', 'england': 'GB', 'scotland': 'GB', 'wales': 'GB',
+  'japan': 'JP',
+  'china': 'CN', "people's republic of china": 'CN', 'prc': 'CN',
+  'south korea': 'KR', 'korea': 'KR', 'republic of korea': 'KR', 'korea, republic of': 'KR',
+  'germany': 'DE', 'france': 'FR', 'denmark': 'DK', 'belgium': 'BE', 'italy': 'IT', 'ireland': 'IE',
+  'canada': 'CA', 'netherlands': 'NL', 'the netherlands': 'NL', 'holland': 'NL',
+  'israel': 'IL', 'india': 'IN', 'spain': 'ES', 'sweden': 'SE', 'brazil': 'BR', 'hong kong': 'HK',
+  'finland': 'FI', 'taiwan': 'TW', 'norway': 'NO', 'indonesia': 'ID', 'australia': 'AU',
+  'singapore': 'SG', 'austria': 'AT', 'mexico': 'MX', 'argentina': 'AR', 'south africa': 'ZA',
+  'united arab emirates': 'AE', 'saudi arabia': 'SA', 'turkey': 'TR', 'poland': 'PL',
+  'portugal': 'PT', 'czech republic': 'CZ', 'czechia': 'CZ', 'hungary': 'HU', 'greece': 'GR',
+  'new zealand': 'NZ', 'thailand': 'TH', 'malaysia': 'MY', 'philippines': 'PH', 'vietnam': 'VN',
+  'luxembourg': 'LU', 'iceland': 'IS',
+};
+
+/** Normalize any stored country value (ISO-2, 'UK', full name) to ISO-2 or null. */
+export function normalizeCountryCode(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.toLowerCase() === 'unknown') return null;
+  if (/^[A-Za-z]{2}$/.test(trimmed)) {
+    const iso = trimmed.toUpperCase();
+    return iso === 'UK' ? 'GB' : iso;
+  }
+  return COUNTRY_NAME_TO_ISO[trimmed.toLowerCase()] ?? null;
+}
+
+/**
+ * Resolve canonical geography for an asset: prefer the ISO-2
+ * companies.headquarters_country (migration 079), then the legacy full-name
+ * hq_country, then the name-based classifier. Region is always derived from
+ * the country so the two can never disagree.
+ */
+function resolveAssetGeography(company: CompanyRow | undefined, companyName: string): { country: string | null; region: string | null } {
+  let country = normalizeCountryCode(company?.headquarters_country) ?? normalizeCountryCode(company?.hq_country);
+  if (!country) {
+    const geo = classifyCompanyCountry(companyName);
+    country = geo.country !== 'unknown' ? geo.country : null;
+  }
+  if (!country) return { country: null, region: null };
+  const region = deriveRegion(country);
+  return { country, region: region !== 'unknown' ? region : null };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -216,10 +333,14 @@ export async function resolvePartnershipStatus(
 // TRIAL GROUPING → ASSET ENTITIES
 // ═══════════════════════════════════════════════════════════════════════
 
-function groupTrialsIntoAssets(trials: CompanyTrialRow[]): AssetGroup[] {
+function groupTrialsIntoAssets(trials: CompanyTrialRow[]): { groups: AssetGroup[]; skippedNonDrug: number } {
   const groups = new Map<string, AssetGroup>();
+  let skippedNonDrug = 0;
 
   for (const trial of trials) {
+    // Only drug/biologic/genetic/combination-product interventions become assets
+    if (!isDrugInterventionType(trial.intervention_type)) { skippedNonDrug++; continue; }
+
     const canonical = canonicalizeAssetName(trial.intervention_name || '');
     if (!canonical) continue;
 
@@ -253,7 +374,7 @@ function groupTrialsIntoAssets(trials: CompanyTrialRow[]): AssetGroup[] {
     }
   }
 
-  return Array.from(groups.values());
+  return { groups: Array.from(groups.values()), skippedNonDrug };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -284,71 +405,204 @@ function computeConfidence(group: AssetGroup): number {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// DATA ACCESS HELPERS
+// ═══════════════════════════════════════════════════════════════════════
+
+const TRIAL_COLUMNS = 'company_id, company_name, nct_id, trial_title, intervention_name, intervention_type, modality, indication_category, indication_specific, conditions, phase, status, is_collaboration, collaborator_names, enrollment_count, start_date, last_update_posted, primary_completion_date';
+
+/** PostgREST caps a single response at max-rows (1,000 by default); page explicitly. */
+const PAGE_SIZE = 1000;
+
+async function fetchTrialsForCompanies(
+  supabase: SupabaseClient,
+  companyIds: string[],
+): Promise<{ trials: CompanyTrialRow[]; error: string | null }> {
+  const all: CompanyTrialRow[] = [];
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from('company_trials')
+      .select(TRIAL_COLUMNS)
+      .in('company_id', companyIds)
+      .not('intervention_name', 'is', null)
+      .order('company_id', { ascending: true })
+      .order('nct_id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) return { trials: all, error: error.message };
+    if (!data || data.length === 0) break;
+    all.push(...(data as unknown as CompanyTrialRow[]));
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return { trials: all, error: null };
+}
+
+function assetKey(companyName: string, assetName: string): string {
+  return `${companyName}\u0000${assetName}`;
+}
+
+/** Existing (company_name, asset_name) keys for a set of companies — paged. */
+async function fetchExistingAssetKeys(
+  supabase: SupabaseClient,
+  companyNames: string[],
+): Promise<{ keys: Set<string>; error: string | null }> {
+  const keys = new Set<string>();
+  if (companyNames.length === 0) return { keys, error: null };
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from('clinical_assets')
+      .select('company_name, asset_name')
+      .in('company_name', companyNames)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) return { keys, error: error.message };
+    if (!data || data.length === 0) break;
+    for (const row of data) keys.add(assetKey(row.company_name, row.asset_name));
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return { keys, error: null };
+}
+
+async function selectCompaniesToIndex(
+  supabase: SupabaseClient,
+  limit: number,
+  companyIds?: string[],
+): Promise<{ companies: CompanyRow[]; error: string | null }> {
+  const { data, error } = await supabase.rpc('radar_companies_to_index', {
+    p_limit: limit,
+    p_company_ids: companyIds && companyIds.length > 0 ? companyIds : null,
+  });
+  if (error) {
+    return { companies: [], error: `radar_companies_to_index failed (is migration 102 applied?): ${error.message}` };
+  }
+  return { companies: (data ?? []) as CompanyRow[], error: null };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // MAIN INDEXING FUNCTION
 // ═══════════════════════════════════════════════════════════════════════
 
 const MAX_RUNTIME_MS = 240_000;
 const COMPANY_BATCH_SIZE = 10;
+const DEFAULT_COMPANY_LIMIT = 400;
+const UPSERT_CHUNK_SIZE = 200;
+
+export interface IndexOptions {
+  /** Companies per trial-fetch/upsert batch (default 10) */
+  batchSize?: number;
+  /** Max companies to pull from the cursor this run (default 400) */
+  companyLimit?: number;
+  /** Restrict to specific companies (still filtered to those with drug trials) */
+  companyIds?: string[];
+  runType?: 'scheduled' | 'manual' | 'backfill';
+}
+
+type AssetRow = Record<string, unknown> & { company_name: string; asset_name: string; trial_count: number };
 
 export async function indexAssetUniverse(
   supabase: SupabaseClient,
-  options?: { batchSize?: number; companyIds?: string[] },
+  options?: IndexOptions,
 ): Promise<IndexResult> {
   const startTime = Date.now();
-  const batchSize = options?.batchSize ?? COMPANY_BATCH_SIZE;
+  const batchSize = Math.max(1, options?.batchSize ?? COMPANY_BATCH_SIZE);
+  const companyLimit = Math.max(1, options?.companyLimit ?? DEFAULT_COMPANY_LIMIT);
   const errors: string[] = [];
   let companiesProcessed = 0;
+  let trialsFetched = 0;
   let assetsIndexed = 0;
   let assetsUpdated = 0;
+  let assetsSkipped = 0;
+  let assetsFailed = 0;
   let partnershipsResolved = 0;
   let timedOut = false;
 
-  // Fetch companies to process (prioritize least recently enriched)
-  let companyQuery = supabase
-    .from('companies')
-    .select('id, name, hq_country, hq_region')
-    .order('updated_at', { ascending: true });
+  const isOutOfTime = () => Date.now() - startTime > MAX_RUNTIME_MS;
 
-  if (options?.companyIds?.length) {
-    companyQuery = companyQuery.in('id', options.companyIds);
+  const finish = async (cursorNote?: string): Promise<IndexResult> => {
+    const produced = assetsIndexed + assetsUpdated;
+    const status = deriveRunStatus({ errors: errors.length, timedOut, processed: companiesProcessed, produced });
+    const logged = await logRadarRun(supabase, {
+      source: 'asset_universe',
+      startedAt: startTime,
+      status,
+      runType: options?.runType ?? 'scheduled',
+      fetched: trialsFetched,
+      processed: companiesProcessed,
+      inserted: assetsIndexed,
+      updated: assetsUpdated,
+      skipped: assetsSkipped,
+      failed: assetsFailed,
+      errors,
+      parameters: {
+        company_limit: companyLimit,
+        batch_size: batchSize,
+        partnerships_resolved: partnershipsResolved,
+        timed_out: timedOut,
+        ...(cursorNote ? { cursor: cursorNote } : {}),
+      },
+    });
+    const duration = Math.round((Date.now() - startTime) / 1000);
+    console.log(`[asset-universe] Done: ${companiesProcessed} companies, ${trialsFetched} trials, ${assetsIndexed} assets inserted, ${assetsUpdated} updated, ${assetsSkipped} skipped, ${assetsFailed} failed, ${partnershipsResolved} partnerships resolved, ${errors.length} errors, ${duration}s${timedOut ? ' (timed out)' : ''}${logged ? '' : ' [LOG WRITE FAILED]'}`);
+    return { companiesProcessed, trialsFetched, assetsIndexed, assetsUpdated, assetsSkipped, assetsFailed, partnershipsResolved, errors, timedOut, logged };
+  };
+
+  // ── Company selection (cursor: assets_indexed_at NULLS FIRST) ─────────
+  const { companies, error: companyError } = await selectCompaniesToIndex(supabase, companyLimit, options?.companyIds);
+  if (companyError) {
+    errors.push(companyError);
+    return finish();
+  }
+  if (companies.length === 0) {
+    return finish('no companies with drug-bearing trials');
   }
 
-  const { data: companies, error: companyError } = await companyQuery.limit(200);
-  if (companyError || !companies) {
-    return { companiesProcessed: 0, assetsIndexed: 0, assetsUpdated: 0, partnershipsResolved: 0, errors: [companyError?.message || 'No companies found'], timedOut: false };
-  }
+  const cursorStart = companies[0]?.assets_indexed_at ?? null;
+  const cursorEnd = companies[companies.length - 1]?.assets_indexed_at ?? null;
 
   for (let i = 0; i < companies.length; i += batchSize) {
-    if (Date.now() - startTime > MAX_RUNTIME_MS) { timedOut = true; break; }
+    if (isOutOfTime()) { timedOut = true; break; }
 
     const batch = companies.slice(i, i + batchSize);
     const batchIds = batch.map(c => c.id);
+    const batchLabel = `batch ${Math.floor(i / batchSize) + 1}`;
 
-    // Fetch all trials for this batch of companies
-    const { data: trials, error: trialError } = await supabase
-      .from('company_trials')
-      .select('company_id, company_name, nct_id, trial_title, intervention_name, intervention_type, modality, indication_category, indication_specific, conditions, phase, status, is_collaboration, collaborator_names, enrollment_count, start_date, last_update_posted, primary_completion_date')
-      .in('company_id', batchIds)
-      .not('intervention_name', 'is', null);
-
+    // ── Fetch all trials for this batch of companies (paged) ───────────
+    const { trials, error: trialError } = await fetchTrialsForCompanies(supabase, batchIds);
     if (trialError) {
-      errors.push(`Trial fetch error for batch ${i}: ${trialError.message}`);
-      continue;
+      errors.push(`Trial fetch error for ${batchLabel}: ${trialError}`);
+      continue; // do not stamp — retried next run
+    }
+    trialsFetched += trials.length;
+
+    // ── Group trials into asset entities ───────────────────────────────
+    const { groups: allGroups, skippedNonDrug } = groupTrialsIntoAssets(trials);
+    assetsSkipped += skippedNonDrug;
+
+    // Drop groups whose only phases are not_applicable / unknown
+    const assetGroups = allGroups.filter(g => {
+      const informative = [...g.phases].some(isInformativePhase);
+      if (!informative) assetsSkipped++;
+      return informative;
+    });
+
+    // ── Existing keys for correct inserted/updated accounting ─────────
+    const companyNames = [...new Set(assetGroups.map(g => g.companyName))];
+    const { keys: existingKeys, error: keysError } = await fetchExistingAssetKeys(supabase, companyNames);
+    if (keysError) {
+      errors.push(`Existing-asset lookup error for ${batchLabel}: ${keysError}`);
+      continue; // do not stamp — retried next run
     }
 
-    if (!trials || trials.length === 0) {
-      companiesProcessed += batch.length;
-      continue;
-    }
-
-    // Group trials into asset entities
-    const assetGroups = groupTrialsIntoAssets(trials as CompanyTrialRow[]);
+    // ── Build rows ────────────────────────────────────────────────────
+    const rowsByKey = new Map<string, AssetRow>();
+    let batchTimedOut = false;
 
     for (const group of assetGroups) {
-      if (Date.now() - startTime > MAX_RUNTIME_MS) { timedOut = true; break; }
+      if (isOutOfTime()) { timedOut = true; batchTimedOut = true; break; }
 
       try {
-        // Resolve partnership status
         const partnership = await resolvePartnershipStatus(
           supabase,
           group.canonicalName,
@@ -357,53 +611,36 @@ export async function indexAssetUniverse(
         );
         partnershipsResolved++;
 
-        // Compute highest phase
         const highestPhase = resolveHighestPhase([...group.phases]);
-
-        // Compute enrollment
         const totalEnrollment = group.trials.reduce((sum, t) => sum + (t.enrollment_count || 0), 0);
 
-        // Get company geography
         const company = batch.find(c => c.id === group.companyId);
-        const geo = company?.hq_country
-          ? { country: company.hq_country, region: company.hq_region }
-          : classifyCompanyCountry(group.companyName);
+        const geo = resolveAssetGeography(company, group.companyName);
 
-        // Compute primary modality (most common)
         const modalityArr = [...group.modalities];
         const primaryModality = modalityArr.length > 0 ? modalityArr[0] : null;
 
-        // Compute confidence
         const confidence = computeConfidence(group);
 
-        // Find earliest trial date
-        const startDates = group.trials
-          .map(t => t.start_date)
-          .filter(Boolean)
-          .sort();
+        const startDates = group.trials.map(t => t.start_date).filter(Boolean).sort();
+        const updateDates = group.trials.map(t => t.last_update_posted).filter(Boolean).sort().reverse();
 
-        // Find latest update
-        const updateDates = group.trials
-          .map(t => t.last_update_posted)
-          .filter(Boolean)
-          .sort()
-          .reverse();
-
-        // Determine trial status (active if any trial is active)
         const statuses = group.trials.map(t => t.status).filter(Boolean);
         const hasActive = statuses.some(s =>
           ['recruiting', 'active_not_recruiting', 'not_yet_recruiting', 'enrolling_by_invitation'].includes(s!)
         );
         const trialStatus = hasActive ? 'active' : (statuses.includes('completed') ? 'completed' : 'other');
 
-        // Determine therapeutic area from indications
+        // Therapeutic area: first indication category that maps to a TA
         const indicationArr = [...group.indications];
-        const therapeuticArea = indicationArr.length > 0
-          ? deriveTA(indicationArr[0])
-          : null;
+        let therapeuticArea: string | null = null;
+        for (const cat of indicationArr) {
+          therapeuticArea = deriveTA(cat);
+          if (therapeuticArea) break;
+        }
 
-        // Upsert into clinical_assets
-        const assetData = {
+        const nowIso = new Date().toISOString();
+        const assetData: AssetRow = {
           company_id: group.companyId,
           company_name: group.companyName,
           asset_name: group.canonicalName,
@@ -425,78 +662,138 @@ export async function indexAssetUniverse(
           deal_id: partnership.dealId,
           deal_ids: partnership.dealIds,
           territory_rights_available: partnership.availableTerritories,
-          originator_country: geo.country !== 'unknown' ? geo.country : null,
-          originator_region: geo.region !== 'unknown' ? geo.region : null,
+          originator_country: geo.country,
+          originator_region: geo.region,
           confidence_score: confidence,
           data_sources: ['clinicaltrials'],
           first_posted_date: startDates[0] || null,
           last_update_date: updateDates[0] || null,
-          last_enriched_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          last_enriched_at: nowIso,
+          updated_at: nowIso,
         };
 
-        const { error: upsertError, data: upsertResult } = await supabase
-          .from('clinical_assets')
-          .upsert(assetData, { onConflict: 'company_name,asset_name' })
-          .select('id')
-          .single();
-
-        if (upsertError) {
-          if (upsertError.code !== '23505') {
-            errors.push(`Asset upsert error ${group.companyName}/${group.canonicalName}: ${upsertError.message}`);
-          }
-        } else {
-          if (upsertResult) assetsIndexed++;
-          else assetsUpdated++;
+        // ── Validate before upsert ───────────────────────────────────
+        const validation = validateAssetData(assetData);
+        if (!validation.valid) {
+          assetsFailed++;
+          errors.push(`Validation failed ${group.companyName}/${group.canonicalName}: ${validation.errors.join('; ')}`);
+          continue;
         }
+        if (validation.warnings.length > 0) {
+          console.warn(`[asset-universe] ${group.companyName}/${group.canonicalName}: ${validation.warnings.join('; ')}`);
+        }
+
+        // Two company_ids can share a company_name; the unique key is
+        // (company_name, asset_name), and PostgREST rejects duplicate keys
+        // within one upsert statement — keep the richer row.
+        const key = assetKey(assetData.company_name, assetData.asset_name);
+        const prior = rowsByKey.get(key);
+        if (!prior || assetData.trial_count > prior.trial_count) rowsByKey.set(key, assetData);
       } catch (err) {
+        assetsFailed++;
         errors.push(`Asset processing error ${group.companyName}/${group.canonicalName}: ${err instanceof Error ? err.message : String(err)}`);
       }
+    }
+
+    // ── Batched upsert (chunks of UPSERT_CHUNK_SIZE) ───────────────────
+    const rows = [...rowsByKey.values()];
+    for (let c = 0; c < rows.length; c += UPSERT_CHUNK_SIZE) {
+      const chunk = rows.slice(c, c + UPSERT_CHUNK_SIZE);
+      const { error: upsertError } = await supabase
+        .from('clinical_assets')
+        .upsert(chunk, { onConflict: 'company_name,asset_name' });
+
+      if (upsertError) {
+        assetsFailed += chunk.length;
+        errors.push(`Asset upsert error for ${batchLabel} chunk ${c / UPSERT_CHUNK_SIZE + 1} (${chunk.length} rows): ${upsertError.message}`);
+        continue;
+      }
+      for (const row of chunk) {
+        const key = assetKey(row.company_name, row.asset_name);
+        if (existingKeys.has(key)) assetsUpdated++;
+        else { assetsIndexed++; existingKeys.add(key); }
+      }
+    }
+
+    if (batchTimedOut) {
+      // Partial batch: rows built so far were persisted, but the batch is
+      // NOT stamped so the remaining groups are picked up next run.
+      break;
+    }
+
+    // ── Advance cursor for the fully processed batch ──────────────────
+    const { error: stampError } = await supabase
+      .from('companies')
+      .update({ assets_indexed_at: new Date().toISOString() })
+      .in('id', batchIds);
+    if (stampError) {
+      errors.push(`Cursor stamp error for ${batchLabel}: ${stampError.message}`);
     }
 
     companiesProcessed += batch.length;
   }
 
-  // Log to ingestion log
-  const duration = Math.round((Date.now() - startTime) / 1000);
-  await supabase.from('data_ingestion_log').insert({
-    source: 'asset_universe',
-    status: errors.length > 0 ? 'partial' : 'success',
-    records_processed: companiesProcessed,
-    records_inserted: assetsIndexed,
-    records_updated: assetsUpdated,
-    duration_seconds: duration,
-    error_details: errors.length > 0 ? errors.slice(0, 20) : null,
-    metadata: {
-      partnerships_resolved: partnershipsResolved,
-      timed_out: timedOut,
-    },
-  });
-
-  console.log(`[asset-universe] Done: ${companiesProcessed} companies, ${assetsIndexed} assets indexed, ${assetsUpdated} updated, ${partnershipsResolved} partnerships resolved, ${errors.length} errors, ${duration}s${timedOut ? ' (timed out)' : ''}`);
-
-  return { companiesProcessed, assetsIndexed, assetsUpdated, partnershipsResolved, errors, timedOut };
+  return finish(`assets_indexed_at window ${cursorStart ?? 'NULL'} → ${cursorEnd ?? 'NULL'} (${companies.length} selected)`);
 }
 
-// Simple TA derivation from indication category
-function deriveTA(indicationCategory: string): string | null {
-  const map: Record<string, string> = {
-    solid_tumor: 'oncology', solid_tumors: 'oncology', hematological: 'oncology',
-    hematologic: 'oncology', leukemia: 'oncology', lymphoma: 'oncology',
-    multiple_myeloma: 'oncology', lung_cancer: 'oncology', breast_cancer: 'oncology',
-    cns: 'neurology', alzheimers: 'neurology', parkinsons: 'neurology',
-    epilepsy: 'neurology', migraine: 'neurology', ms: 'neurology',
-    autoimmune: 'immunology', lupus: 'immunology', rheumatoid: 'immunology',
-    crohns: 'immunology', psoriatic_arthritis: 'immunology', atopic_dermatitis: 'immunology',
-    metabolic: 'metabolic', obesity: 'metabolic', diabetes: 'metabolic', nash: 'metabolic',
-    cardiovascular: 'cardiovascular', heart_failure: 'cardiovascular',
-    rare_disease: 'rare_disease', orphan: 'rare_disease',
-    infectious_disease: 'infectious_disease', hiv: 'infectious_disease', hepatitis: 'infectious_disease',
-    ophthalmology: 'ophthalmology', retinal: 'ophthalmology',
-    dermatology: 'dermatology', psoriasis: 'dermatology',
-    respiratory: 'respiratory', asthma: 'respiratory', copd: 'respiratory',
-    womens_health: 'womens_health', endometriosis: 'womens_health',
-    hematology: 'hematology', hemophilia: 'hematology', sickle_cell: 'hematology',
-  };
-  return map[indicationCategory.toLowerCase()] || null;
+// ═══════════════════════════════════════════════════════════════════════
+// THERAPEUTIC AREA DERIVATION
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Map a company_trials.indication_category (emitted by
+ * inferIndicationFromConditions in lib/ingestion/clinical-trials.ts) to the
+ * Radar therapeutic_area vocabulary (oncology, neurology, immunology,
+ * metabolic, cardiovascular, rare_disease, infectious_disease, ophthalmology,
+ * respiratory, dermatology, hematology, womens_health, gastroenterology).
+ *
+ * The classifier emits 'infectious' (and companies.indications_active /
+ * partner-matching depend on that spelling), so both 'infectious' and
+ * 'infectious_disease' map to 'infectious_disease' here.
+ */
+const INDICATION_CATEGORY_TO_TA: Record<string, string> = {
+  // ── Classifier categories (lib/ingestion/clinical-trials.ts) ────────
+  solid_tumor: 'oncology', hematological: 'oncology',
+  cns: 'neurology',
+  autoimmune: 'immunology',
+  dermatology: 'dermatology',
+  rare_disease: 'rare_disease',
+  infectious: 'infectious_disease', infectious_disease: 'infectious_disease',
+  vaccine: 'infectious_disease', vaccines: 'infectious_disease',
+  cardiovascular: 'cardiovascular',
+  metabolic: 'metabolic',
+  ophthalmology: 'ophthalmology',
+  respiratory: 'respiratory',
+  // Renal has no TA of its own in the Radar vocabulary; grouped with
+  // cardiovascular per the industry CVRM (cardiovascular-renal-metabolic) convention.
+  renal: 'cardiovascular',
+  gastroenterology: 'gastroenterology', hepatology: 'gastroenterology',
+  // Pain / analgesia programs are CNS-adjacent.
+  pain: 'neurology',
+  // Musculoskeletal (OA, osteoporosis, myopathies) grouped under immunology /
+  // rheumatology — no dedicated TA in the Radar vocabulary.
+  musculoskeletal: 'immunology',
+  womens_health: 'womens_health',
+  hematology: 'hematology',
+  // ── Legacy / alternate spellings ────────────────────────────────────
+  solid_tumors: 'oncology', hematologic: 'oncology', leukemia: 'oncology', lymphoma: 'oncology',
+  multiple_myeloma: 'oncology', lung_cancer: 'oncology', breast_cancer: 'oncology', oncology: 'oncology',
+  neurology: 'neurology', alzheimers: 'neurology', parkinsons: 'neurology',
+  epilepsy: 'neurology', migraine: 'neurology', ms: 'neurology',
+  immunology: 'immunology', lupus: 'immunology', rheumatoid: 'immunology',
+  crohns: 'immunology', psoriatic_arthritis: 'immunology', atopic_dermatitis: 'immunology',
+  obesity: 'metabolic', diabetes: 'metabolic', nash: 'metabolic',
+  heart_failure: 'cardiovascular',
+  orphan: 'rare_disease',
+  hiv: 'infectious_disease', hepatitis: 'infectious_disease',
+  retinal: 'ophthalmology',
+  psoriasis: 'dermatology',
+  asthma: 'respiratory', copd: 'respiratory',
+  endometriosis: 'womens_health',
+  hemophilia: 'hematology', sickle_cell: 'hematology',
+};
+
+export function deriveTA(indicationCategory: string | null | undefined): string | null {
+  if (!indicationCategory) return null;
+  return INDICATION_CATEGORY_TO_TA[indicationCategory.trim().toLowerCase()] || null;
 }

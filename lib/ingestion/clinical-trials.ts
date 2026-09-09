@@ -6,6 +6,31 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 const CT_API_V2 = 'https://clinicaltrials.gov/api/v2/studies';
 
+/** CT.gov intervention types that describe a licensable drug/biologic asset. */
+export const DRUG_INTERVENTION_TYPES = ['DRUG', 'BIOLOGICAL', 'GENETIC', 'COMBINATION_PRODUCT'] as const;
+
+/**
+ * CT.gov API v2 Essie expression (filter.advanced) restricting results to
+ * interventional studies with at least one drug-class intervention.
+ * Verified against the live API: AREA[StudyType]INTERVENTIONAL and
+ * AREA[InterventionType]COMBINATION_PRODUCT both resolve.
+ */
+export const DRUG_STUDY_FILTER =
+  'AREA[StudyType]INTERVENTIONAL AND (' +
+  DRUG_INTERVENTION_TYPES.map(t => `AREA[InterventionType]${t}`).join(' OR ') +
+  ')';
+
+/**
+ * The intervention that represents the asset: the first drug-class
+ * intervention (a combined trial may list a procedure or device first),
+ * falling back to the first intervention of any type.
+ */
+export function pickPrimaryIntervention<T extends { type: string }>(interventions: T[]): T | undefined {
+  const drugTypes: readonly string[] = DRUG_INTERVENTION_TYPES;
+  return interventions.find(i => drugTypes.includes((i.type || '').toUpperCase().replace(/\s+/g, '_')))
+    ?? interventions[0];
+}
+
 // Top 150+ pharma/biotech companies to track
 export const COMPANIES_TO_TRACK = [
   // Large Pharma
@@ -123,6 +148,10 @@ export async function fetchCompanyTrials(
       const params = new URLSearchParams({
         'query.spons': companyName,
         'filter.overallStatus': statusFilter.join(','),
+        // Only interventional studies of a drug/biologic/genetic/combination
+        // product. Devices, procedures, behavioral, dietary-supplement and
+        // observational studies were becoming "assets" in clinical_assets.
+        'filter.advanced': DRUG_STUDY_FILTER,
         'pageSize': '100',
         'fields': [
           'NCTId',
@@ -189,7 +218,7 @@ export async function fetchCompanyTrials(
             briefSummary: protocol?.descriptionModule?.briefSummary || null,
             sponsor: sponsor?.leadSponsor?.name || companyName,
             sponsorType: sponsor?.leadSponsor?.class || 'UNKNOWN',
-            phase: mapPhase(design?.phases?.[0]),
+            phase: mapPhase(design?.phases),
             status: mapStatus(status?.overallStatus),
             conditions: conditions?.conditions || [],
             interventions: (interventions?.interventions || []).map((i: { name?: string; type?: string; description?: string }) => ({
@@ -332,6 +361,48 @@ export function inferModalityFromIntervention(interventions: Intervention[]): st
   return 'other';
 }
 
+// ─── Term matching helpers ──────────────────────────────────────────────
+// Short tokens (acronyms such as ALL, HIV, AML, MDS, IBS) must match as whole
+// words: plain substring matching turned "allergic", "hive", "hamlet" or
+// "small" into ALL / HIV / AML hits. Longer patterns keep substring semantics
+// so stems like "neurodegenerat" and "retin" still work.
+const WHOLE_WORD_MAX_LEN = 5;
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Whole-word match that treats any non-alphanumeric character as a boundary. */
+function hasWord(text: string, term: string): boolean {
+  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(term)}(?![a-z0-9])`, 'i').test(text);
+}
+
+function matchesTerm(text: string, term: string): boolean {
+  return term.length <= WHOLE_WORD_MAX_LEN ? hasWord(text, term) : text.includes(term);
+}
+
+function matchesAny(text: string, terms: string[]): boolean {
+  return terms.some(t => matchesTerm(text, t));
+}
+
+function firstMatch(text: string, map: Record<string, string>): string | null {
+  for (const [pattern, specific] of Object.entries(map)) {
+    if (matchesTerm(text, pattern)) return specific;
+  }
+  return null;
+}
+
+/**
+ * Classify a trial's conditions into a company_trials.indication_category.
+ *
+ * Categories: solid_tumor, hematological, cns, autoimmune, dermatology,
+ * rare_disease, infectious, vaccine, cardiovascular, metabolic, ophthalmology,
+ * respiratory, renal, gastroenterology, hematology (non-malignant),
+ * womens_health, musculoskeletal, pain. lib/radar/asset-universe.ts
+ * (deriveTA) maps each of these to a Radar therapeutic_area.
+ *
+ * Order matters: more specific / higher-value categories are checked first.
+ */
 export function inferIndicationFromConditions(conditions: string[]): {
   category: string | null;
   specific: string | null;
@@ -364,19 +435,27 @@ export function inferIndicationFromConditions(conditions: string[]): {
     'urothelial': 'bladder',
     'head and neck': 'head_neck',
     'esophageal': 'esophageal',
-    'thyroid': 'thyroid',
+    // 'thyroid' alone matched hypothyroid / hyperthyroid / parathyroid trials
+    'thyroid cancer': 'thyroid',
+    'thyroid carcinoma': 'thyroid',
+    'thyroid neoplasm': 'thyroid',
+    'thyroid tumor': 'thyroid',
     'sarcoma': 'sarcoma',
     'mesothelioma': 'mesothelioma',
     'cholangiocarcinoma': 'cholangiocarcinoma',
     'endometrial': 'endometrial',
     'cervical': 'cervical',
+    'solid tumor': 'solid_tumor',
+    'solid tumour': 'solid_tumor',
+    'advanced cancer': 'solid_tumor',
+    'metastatic cancer': 'solid_tumor',
+    'neuroendocrine': 'neuroendocrine',
+    'carcinoma': 'solid_tumor',
+    'adenocarcinoma': 'solid_tumor',
   };
 
-  for (const [pattern, specific] of Object.entries(solidTumorMap)) {
-    if (text.includes(pattern)) {
-      return { category: 'solid_tumor', specific };
-    }
-  }
+  const solid = firstMatch(text, solidTumorMap);
+  if (solid) return { category: 'solid_tumor', specific: solid };
 
   // Hematological malignancies
   const hemeMap: Record<string, string> = {
@@ -399,161 +478,228 @@ export function inferIndicationFromConditions(conditions: string[]): {
     'chronic myeloid': 'cml',
     'cml': 'cml',
     'waldenström': 'waldenstrom',
+    'waldenstrom': 'waldenstrom',
     't-cell lymphoma': 'tcl',
+    'myelofibrosis': 'mpn',
+    'polycythemia': 'mpn',
+    'myeloproliferative': 'mpn',
+    'lymphoma': 'lymphoma',
+    'leukemia': 'leukemia',
+    'leukaemia': 'leukemia',
   };
 
-  for (const [pattern, specific] of Object.entries(hemeMap)) {
-    if (text.includes(pattern)) {
-      return { category: 'hematological', specific };
-    }
-  }
+  const heme = firstMatch(text, hemeMap);
+  if (heme) return { category: 'hematological', specific: heme };
 
   // CNS / Neurology — specific conditions only, no broad terms
-  if (text.includes('alzheimer') || text.includes('parkinson') ||
-      text.includes('multiple sclerosis') || text.includes('neurodegenerat') ||
-      text.includes('huntington') || text.includes('amyotrophic lateral') ||
-      text.includes('epilepsy') || text.includes('seizure') ||
-      text.includes('schizophrenia') || text.includes('major depressive') ||
-      text.includes('bipolar disorder') || text.includes('anxiety disorder') ||
-      text.includes('generalized anxiety') || text.includes('social anxiety') ||
-      text.includes('obsessive compulsive') || text.includes('ocd') ||
-      text.includes('ptsd') || text.includes('post-traumatic stress') ||
-      text.includes('adhd') || text.includes('attention deficit') ||
-      text.includes('autism spectrum') || text.includes('narcolepsy') ||
-      text.includes('insomnia') || text.includes('migraine') ||
-      text.includes('cluster headache') || text.includes('neuropathic pain') ||
-      text.includes('peripheral neuropathy') || text.includes('diabetic neuropathy') ||
-      text.includes('stroke') || text.includes('cerebrovascular') ||
-      text.includes('traumatic brain injury') || text.includes('spinal cord injury') ||
-      text.includes('dementia') || text.includes('lewy body') ||
-      text.includes('frontotemporal') || text.includes('dystonia') ||
-      text.includes('myasthenia gravis') || text.includes('cerebral palsy') ||
-      text.includes('neuropsychiatric') || text.includes('fibromyalgia') ||
-      text.includes('neuropathy') || text.includes('neuralgia') ||
-      text.includes('glioma') || text.includes('brain tumor')) {
+  if (matchesAny(text, [
+    'alzheimer', 'parkinson', 'multiple sclerosis', 'neurodegenerat',
+    'huntington', 'amyotrophic lateral', 'epilepsy', 'seizure',
+    'schizophrenia', 'major depressive', 'bipolar disorder', 'anxiety disorder',
+    'generalized anxiety', 'social anxiety', 'obsessive compulsive', 'ocd',
+    'ptsd', 'post-traumatic stress', 'adhd', 'attention deficit',
+    'autism spectrum', 'narcolepsy', 'insomnia', 'migraine',
+    'cluster headache', 'neuropathic pain', 'peripheral neuropathy', 'diabetic neuropathy',
+    'stroke', 'cerebrovascular', 'traumatic brain injury', 'spinal cord injury',
+    'dementia', 'lewy body', 'frontotemporal', 'dystonia',
+    'myasthenia gravis', 'cerebral palsy', 'neuropsychiatric', 'fibromyalgia',
+    'neuropathy', 'neuralgia', 'glioma', 'brain tumor',
+  ])) {
     return { category: 'cns', specific: null };
   }
 
   // Autoimmune / Immunology — specific conditions, not broad 'immune' or 'inflammatory'
-  if (text.includes('rheumatoid arthritis') || text.includes('lupus') ||
-      text.includes('psoriasis') || text.includes('psoriatic') ||
-      text.includes('crohn') || text.includes('ulcerative colitis') ||
-      text.includes('atopic dermatitis') || text.includes('eczema') ||
-      text.includes('inflammatory bowel') || text.includes('ibd') ||
-      text.includes('ankylosing spondylitis') || text.includes('axial spondyloarthritis') ||
-      text.includes('vasculitis') || text.includes('pemphigus') ||
-      text.includes('scleroderma') || text.includes('systemic sclerosis') ||
-      text.includes('sjögren') || text.includes('sjogren') ||
-      text.includes('celiac') || text.includes('alopecia areata') ||
-      text.includes('vitiligo') || text.includes('graft versus host') ||
-      text.includes('gvhd') || text.includes('transplant rejection') ||
-      text.includes('autoimmune') || text.includes('juvenile arthritis') ||
-      text.includes('uveitis') || text.includes('hidradenitis') ||
-      text.includes('asthma') || text.includes('allergic rhinitis') ||
-      text.includes('food allergy') || text.includes('anaphylaxis') ||
-      text.includes('chronic urticaria') || text.includes('angioedema') ||
-      text.includes('eosinophilic') || text.includes('multiple sclerosis')) {
+  if (matchesAny(text, [
+    'rheumatoid arthritis', 'lupus', 'psoriasis', 'psoriatic',
+    'crohn', 'ulcerative colitis', 'atopic dermatitis', 'eczema',
+    'inflammatory bowel', 'ibd', 'ankylosing spondylitis', 'axial spondyloarthritis',
+    'vasculitis', 'pemphigus', 'scleroderma', 'systemic sclerosis',
+    'sjögren', 'sjogren', 'celiac', 'alopecia areata',
+    'vitiligo', 'graft versus host', 'gvhd', 'transplant rejection',
+    'autoimmune', 'juvenile arthritis', 'uveitis', 'hidradenitis',
+    'asthma', 'allergic rhinitis', 'food allergy', 'anaphylaxis',
+    'chronic urticaria', 'angioedema', 'eosinophilic', 'multiple sclerosis',
+  ])) {
     return { category: 'autoimmune', specific: null };
   }
 
   // Dermatology (non-autoimmune skin conditions)
-  if (text.includes('acne') || text.includes('rosacea') ||
-      text.includes('wound healing') || text.includes('dermatitis') ||
-      text.includes('dermatology') || text.includes('pruritus') ||
-      text.includes('prurigo') || text.includes('urticaria') ||
-      text.includes('keloid') || text.includes('scarring')) {
+  if (matchesAny(text, [
+    'acne', 'rosacea', 'wound healing', 'dermatitis', 'dermatology',
+    'pruritus', 'prurigo', 'urticaria', 'keloid', 'scarring',
+  ])) {
     return { category: 'dermatology', specific: null };
   }
 
   // Rare disease
-  if (text.includes('duchenne') || text.includes('spinal muscular atrophy') ||
-      text.includes('hemophilia') || text.includes('fabry') ||
-      text.includes('gaucher') || text.includes('pompe') ||
-      text.includes('wilson disease') || text.includes('cystic fibrosis') ||
-      text.includes('sickle cell') || text.includes('thalassemia') ||
-      text.includes('phenylketonuria') || text.includes('pku') ||
-      text.includes('lysosomal') || text.includes('hunter syndrome') ||
-      text.includes('hurler') || text.includes('niemann-pick') ||
-      text.includes('batten') || text.includes('friedreich') ||
-      text.includes('progeria') || text.includes('epidermolysis bullosa') ||
-      text.includes('orphan drug')) {
+  if (matchesAny(text, [
+    'duchenne', 'spinal muscular atrophy', 'hemophilia', 'haemophilia', 'fabry',
+    'gaucher', 'pompe', 'wilson disease', 'cystic fibrosis',
+    'sickle cell', 'thalassemia', 'phenylketonuria', 'pku',
+    'lysosomal', 'hunter syndrome', 'hurler', 'niemann-pick',
+    'batten', 'friedreich', 'progeria', 'epidermolysis bullosa',
+    'orphan drug',
+  ])) {
     return { category: 'rare_disease', specific: null };
   }
 
   // Infectious
-  if (text.includes('hiv') || text.includes('hepatitis') ||
-      text.includes('covid') || text.includes('sars-cov') ||
-      text.includes('rsv') || text.includes('respiratory syncytial') ||
-      text.includes('influenza') || text.includes('tuberculosis') ||
-      text.includes('malaria') || text.includes('sepsis') ||
-      text.includes('pneumonia') || text.includes('meningitis') ||
-      text.includes('herpes') || text.includes('cytomegalovirus') ||
-      text.includes('cmv') || text.includes('ebola') ||
-      text.includes('zika') || text.includes('dengue') ||
-      text.includes('antimicrobial') || text.includes('antifungal') ||
-      text.includes('antiviral') || text.includes('antibiotic')) {
+  if (matchesAny(text, [
+    'hiv', 'hepatitis', 'covid', 'sars-cov', 'rsv', 'respiratory syncytial',
+    'influenza', 'tuberculosis', 'malaria', 'sepsis', 'pneumonia', 'meningitis',
+    'herpes', 'cytomegalovirus', 'cmv', 'ebola', 'zika', 'dengue',
+    'antimicrobial', 'antifungal', 'antiviral', 'antibiotic',
+    'bacterial infection', 'viral infection', 'fungal infection', 'urinary tract infection',
+    'clostridioides', 'clostridium difficile', 'c. difficile', 'candid', 'aspergill',
+    'human papillomavirus', 'hpv', 'chikungunya', 'mpox', 'monkeypox', 'pertussis',
+  ])) {
     return { category: 'infectious', specific: null };
   }
 
+  // Vaccines / prophylaxis (no disease term matched above)
+  if (matchesAny(text, ['vaccine', 'vaccination', 'immunization', 'immunisation', 'immunogenicity'])) {
+    return { category: 'vaccine', specific: null };
+  }
+
   // Cardiovascular
-  if (text.includes('heart failure') || text.includes('cardiovascular') ||
-      text.includes('atherosclerosis') || text.includes('hypertension') ||
-      text.includes('atrial fibrillation') || text.includes('arrhythmia') ||
-      text.includes('coronary artery') || text.includes('myocardial infarction') ||
-      text.includes('cardiomyopathy') || text.includes('thrombosis') ||
-      text.includes('pulmonary hypertension') || text.includes('aneurysm') ||
-      text.includes('peripheral artery') || text.includes('cardiac') ||
-      text.includes('venous thromboembolism') || text.includes('pulmonary embolism') ||
-      text.includes('deep vein thrombosis') || text.includes('dvt') ||
-      text.includes('heart disease') || text.includes('angina')) {
+  if (matchesAny(text, [
+    'heart failure', 'cardiovascular', 'atherosclerosis', 'hypertension',
+    'atrial fibrillation', 'arrhythmia', 'coronary artery', 'myocardial infarction',
+    'cardiomyopathy', 'thrombosis', 'pulmonary hypertension', 'aneurysm',
+    'peripheral artery', 'cardiac', 'venous thromboembolism', 'pulmonary embolism',
+    'deep vein thrombosis', 'dvt', 'heart disease', 'angina',
+  ])) {
     return { category: 'cardiovascular', specific: null };
   }
 
   // Metabolic — specific terms, not broad 'weight' or 'insulin'
-  if (text.includes('diabetes') || text.includes('diabetic') ||
-      text.includes('obesity') || text.includes('obese') ||
-      text.includes('nash') || text.includes('fatty liver') ||
-      text.includes('nafld') || text.includes('mash') ||
-      text.includes('metabolic syndrome') || text.includes('dyslipidemia') ||
-      text.includes('hyperlipidemia') || text.includes('hypercholesterolemia') ||
-      text.includes('hypertriglyceridemia') || text.includes('gout') ||
-      text.includes('hyperuricemia') || text.includes('weight management') ||
-      text.includes('weight loss') || text.includes('anti-obesity') ||
-      text.includes('glp-1') || text.includes('incretin') ||
-      text.includes('glycemic control') || text.includes('hba1c') ||
-      text.includes('type 2 diabetes') || text.includes('t2dm') ||
-      text.includes('type 1 diabetes') || text.includes('t1dm') ||
-      text.includes('thyroid') || text.includes('hypothyroid') ||
-      text.includes('hyperthyroid') || text.includes('pcos') ||
-      text.includes('polycystic ovary') || text.includes('growth hormone') ||
-      text.includes('lipodystrophy') || text.includes('endocrine')) {
+  if (matchesAny(text, [
+    'diabetes', 'diabetic', 'obesity', 'obese', 'nash', 'fatty liver',
+    'nafld', 'mash', 'metabolic syndrome', 'dyslipidemia',
+    'hyperlipidemia', 'hypercholesterolemia', 'hypertriglyceridemia', 'gout',
+    'hyperuricemia', 'weight management', 'weight loss', 'anti-obesity',
+    'glp-1', 'incretin', 'glycemic control', 'hba1c',
+    'type 2 diabetes', 't2dm', 'type 1 diabetes', 't1dm',
+    'hypothyroid', 'hyperthyroid', 'pcos', 'polycystic ovary', 'growth hormone',
+    'lipodystrophy', 'endocrine', 'steatohepatitis', 'steatotic liver',
+    'adrenal', 'cushing', 'acromegaly', 'hypoparathyroid', 'hyperparathyroid', 'hypogonadism',
+  ]) || hasWord(text, 'thyroid')) {
     return { category: 'metabolic', specific: null };
+  }
+
+  // Ophthalmology
+  if (matchesAny(text, [
+    'macular degeneration', 'amd', 'macular edema', 'macular oedema', 'retinopathy',
+    'retinitis', 'retinal', 'retina', 'glaucoma', 'dry eye', 'keratitis', 'keratoconus',
+    'myopia', 'presbyopia', 'cataract', 'ocular', 'ophthalm', 'conjunctivitis',
+    'blepharitis', 'optic neuropathy', 'geographic atrophy', 'stargardt', 'leber',
+    'intraocular', 'vitreous', 'corneal', 'thyroid eye disease',
+  ])) {
+    return { category: 'ophthalmology', specific: null };
+  }
+
+  // Respiratory
+  if (matchesAny(text, [
+    'copd', 'chronic obstructive', 'pulmonary fibrosis', 'ipf', 'interstitial lung',
+    'bronchiectasis', 'acute respiratory distress', 'ards', 'chronic cough',
+    'lung disease', 'respiratory disease', 'bronchopulmonary', 'pneumonitis',
+    'sarcoidosis', 'sleep apnea', 'sleep apnoea', 'emphysema', 'bronchitis',
+    'respiratory failure', 'lung transplant', 'alpha-1 antitrypsin',
+  ])) {
+    return { category: 'respiratory', specific: null };
+  }
+
+  // Renal
+  if (matchesAny(text, [
+    'chronic kidney disease', 'ckd', 'iga nephropathy', 'nephropathy', 'nephrotic',
+    'nephritis', 'glomerul',
+    'kidney disease', 'kidney failure', 'kidney injury', 'dialysis', 'hemodialysis',
+    'polycystic kidney', 'alport', 'hyperkalemia', 'hyperphosphatemia',
+    'kidney transplant',
+  ]) || hasWord(text, 'renal')) {
+    return { category: 'renal', specific: null };
+  }
+
+  // Gastroenterology / hepatology (non-infectious, non-autoimmune)
+  if (matchesAny(text, [
+    'primary biliary', 'primary sclerosing', 'cirrhosis', 'gastroparesis',
+    'irritable bowel', 'ibs', 'gerd', 'gastroesophageal reflux', 'constipation',
+    'short bowel', 'liver disease', 'hepatic', 'liver fibrosis', 'liver failure',
+    'pancreatitis', 'diarrhea', 'diarrhoea', 'nausea', 'vomiting', 'gastrointestinal',
+    'esophagitis', 'gastritis', 'peptic ulcer', 'biliary', 'cholestasis',
+    'liver transplant', 'hepatic encephalopathy', 'portal hypertension', 'colitis',
+  ])) {
+    return { category: 'gastroenterology', specific: null };
+  }
+
+  // Non-malignant hematology
+  if (matchesAny(text, [
+    'anemia', 'anaemia', 'thrombocytopenia', 'neutropenia', 'iron deficiency',
+    'paroxysmal nocturnal', 'pnh', 'itp', 'immune thrombocytopenia', 'aplastic',
+    'hemolytic', 'haemolytic', 'hemochromatosis', 'bleeding disorder', 'von willebrand',
+    'coagulation', 'transfusion', 'hematolog', 'haematolog', 'cytopenia',
+  ])) {
+    return { category: 'hematology', specific: null };
+  }
+
+  // Women's health
+  if (matchesAny(text, [
+    'endometriosis', 'uterine fibroid', 'menopaus', 'vasomotor', 'hot flash', 'hot flush',
+    'contracept', 'preterm', 'preeclampsia', 'pre-eclampsia', 'infertility',
+    'in vitro fertilization', 'ivf', 'vaginal', 'vulvovaginal', 'vaginosis',
+    'dysmenorrhea', 'menstrual', 'postpartum', 'pregnan', 'lactation',
+    'ovarian insufficiency', 'hypoactive sexual desire', 'heavy menstrual bleeding',
+  ])) {
+    return { category: 'womens_health', specific: null };
+  }
+
+  // Musculoskeletal
+  if (matchesAny(text, [
+    'osteoarthritis', 'osteoporosis', 'osteopenia', 'sarcopenia', 'tendin', 'rotator cuff',
+    'fracture', 'bone loss', 'muscular dystrophy', 'myopathy', 'myositis',
+    'osteogenesis imperfecta', 'achondroplasia', 'spinal stenosis', 'degenerative disc',
+    'cachexia', 'muscle atrophy', 'hypophosphatasia', 'hypophosphatemia', 'fibrodysplasia',
+    'musculoskeletal',
+  ])) {
+    return { category: 'musculoskeletal', specific: null };
+  }
+
+  // Pain / analgesia (neuropathic pain is caught by CNS above)
+  if (matchesAny(text, [
+    'chronic pain', 'acute pain', 'postoperative pain', 'post-operative pain',
+    'post-surgical pain', 'postsurgical pain', 'low back pain', 'back pain', 'cancer pain',
+    'analgesi', 'opioid', 'nociceptive', 'pain management', 'bunionectomy', 'abdominoplasty',
+  ]) || hasWord(text, 'pain')) {
+    return { category: 'pain', specific: null };
   }
 
   return { category: null, specific: null };
 }
 
-function mapPhase(ctPhase: string | undefined): string {
-  if (!ctPhase) return 'unknown';
+/**
+ * Map CT.gov v2 `designModule.phases` (an ARRAY — combined-phase studies are
+ * reported as ["PHASE1","PHASE2"], not "PHASE1/PHASE2") to the company_trials
+ * CHECK values: early_phase_1, phase_1, phase_1_2, phase_2, phase_2_3,
+ * phase_3, phase_4, not_applicable, unknown.
+ */
+function mapPhase(ctPhases: string[] | string | undefined | null): string {
+  const phases = (Array.isArray(ctPhases) ? ctPhases : ctPhases ? [ctPhases] : [])
+    .map(p => String(p).toUpperCase().replace(/[\s/-]+/g, ''))
+    .filter(Boolean);
+  if (phases.length === 0) return 'unknown';
 
-  const phaseMap: Record<string, string> = {
-    'EARLY_PHASE1': 'phase_1',
-    'PHASE1': 'phase_1',
-    'PHASE2': 'phase_2',
-    'PHASE3': 'phase_3',
-    'PHASE4': 'phase_4',
-    'NA': 'not_applicable',
-  };
+  const has = (p: string) => phases.includes(p) || phases.some(x => x.includes(p) && !x.startsWith('EARLY'));
+  const hasEarly1 = phases.includes('EARLY_PHASE1') || phases.includes('EARLYPHASE1');
 
-  // Handle combined phases
-  if (ctPhase.includes('PHASE1') && ctPhase.includes('PHASE2')) {
-    return 'phase_1_2';
-  }
-  if (ctPhase.includes('PHASE2') && ctPhase.includes('PHASE3')) {
-    return 'phase_2_3';
-  }
-
-  return phaseMap[ctPhase] || 'unknown';
+  if (has('PHASE1') && has('PHASE2')) return 'phase_1_2';
+  if (has('PHASE2') && has('PHASE3')) return 'phase_2_3';
+  if (has('PHASE4')) return 'phase_4';
+  if (has('PHASE3')) return 'phase_3';
+  if (has('PHASE2')) return 'phase_2';
+  if (has('PHASE1')) return 'phase_1';
+  if (hasEarly1) return 'early_phase_1';
+  if (phases.includes('NA')) return 'not_applicable';
+  return 'unknown';
 }
 
 function mapStatus(ctStatus: string | undefined): string {
@@ -710,6 +856,7 @@ export async function runWeeklyIngestion(
         for (const trial of trials) {
           const modality = inferModalityFromIntervention(trial.interventions);
           const indication = inferIndicationFromConditions(trial.conditions);
+          const primaryIntervention = pickPrimaryIntervention(trial.interventions);
 
           trialRecords.push({
             company_id: companyId,
@@ -718,8 +865,8 @@ export async function runWeeklyIngestion(
             trial_title: trial.title,
             trial_acronym: trial.acronym,
             brief_summary: trial.briefSummary?.substring(0, 2000),
-            intervention_name: trial.interventions[0]?.name || null,
-            intervention_type: trial.interventions[0]?.type || null,
+            intervention_name: primaryIntervention?.name || null,
+            intervention_type: primaryIntervention?.type || null,
             modality: modality,
             indication_category: indication.category,
             indication_specific: indication.specific,

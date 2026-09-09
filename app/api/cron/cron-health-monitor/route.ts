@@ -34,6 +34,14 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   'trials-update': { frequency: 'daily', expectedRunsPerWeek: 7 },
   'embed-deals': { frequency: '3x-daily', expectedRunsPerWeek: 21 },
 
+  // Asset Radar crons (sources written by lib/radar/run-log.ts; schedules from vercel.json)
+  'asset_universe': { frequency: 'daily', expectedRunsPerWeek: 7 },     // 30 6 * * *
+  'licensing_signals': { frequency: 'daily', expectedRunsPerWeek: 7 },  // 0 8 * * *
+  'deal_thesis': { frequency: 'daily', expectedRunsPerWeek: 7 },        // 0 9 * * *
+  'mandate_matcher': { frequency: 'daily', expectedRunsPerWeek: 7 },    // 0 10 * * *
+  'competitive_intel': { frequency: 'daily', expectedRunsPerWeek: 7 },  // 30 10 * * *
+  'deal_creator': { frequency: 'daily', expectedRunsPerWeek: 7 },       // 30 11 * * *
+
   // SEO crons
   'seo-content': { frequency: 'daily', expectedRunsPerWeek: 7 },
   'seo-page-render': { frequency: '2x-weekly', expectedRunsPerWeek: 2 },
