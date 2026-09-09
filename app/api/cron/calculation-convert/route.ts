@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email/client';
 import { logCronRun } from '@/lib/cron-utils';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { dripSuppressionFilter } from '@/lib/email/drip-suppression';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -214,7 +215,9 @@ export async function GET(request: NextRequest) {
       .from('user_profiles')
       .select('id, email, full_name, tier')
       .in('id', highIntentUserIds)
-      .eq('tier', 'free');
+      .eq('tier', 'free')
+      // Skip accounts on a founder-led personal sequence (migration 108)
+      .or(dripSuppressionFilter(now));
 
     if (!freeUsers || freeUsers.length === 0) {
       return NextResponse.json({
