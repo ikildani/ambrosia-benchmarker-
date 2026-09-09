@@ -10,12 +10,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { isUuid } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // from the asset universe, so anonymous and free-tier callers are rejected.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const assetId = searchParams.get('asset_id');
+  if (assetId && !isUuid(assetId)) {
+    return NextResponse.json({ error: 'asset_id must be a UUID' }, { status: 400 });
+  }
   const hottest = parseInt(searchParams.get('hottest') || '0', 10);
 
   const supabase = createServiceClient();

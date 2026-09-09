@@ -10,15 +10,26 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { fetchNarrativeInputs, generateNarrative } from '@/lib/radar/narrative';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { getOrGenerateNarrative, isUuid, sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 export async function GET(request: NextRequest) {
+  // The brief bundles every intelligence layer and may trigger an Opus call
+  // for the narrative: Pro-only, and rate-limited in middleware.ts.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
+  }
+
   const assetId = request.nextUrl.searchParams.get('asset_id');
   if (!assetId) {
     return NextResponse.json({ error: 'asset_id required' }, { status: 400 });
+  }
+  if (!isUuid(assetId)) {
+    return NextResponse.json({ error: 'asset_id must be a UUID' }, { status: 400 });
   }
 
   const supabase = createServiceClient();
@@ -38,23 +49,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
   }
 
-  // Try to get trials by asset name instead
+  // Try to get trials by asset name instead. asset_name comes from our own
+  // table but is still sanitised before being embedded in an ilike pattern.
   let trials = trialsRes.data || [];
-  if (trials.length === 0 && assetRes.data.asset_name) {
+  const assetNameTerm = sanitizeSearchTerm(assetRes.data.asset_name);
+  if (trials.length === 0 && assetNameTerm) {
     const { data: trialsByName } = await supabase
       .from('company_trials')
       .select('nct_id, trial_title, phase, status, enrollment_count, start_date, primary_completion_date, is_collaboration')
       .eq('company_name', assetRes.data.company_name)
-      .ilike('intervention_name', `%${assetRes.data.asset_name}%`)
+      .ilike('intervention_name', `%${assetNameTerm}%`)
       .limit(20);
     trials = trialsByName || [];
   }
 
-  // Generate AI narrative
+  // AI narrative — served from radar_asset_narratives when inputs are unchanged
   let narrative: string | null = null;
   try {
-    const inputs = await fetchNarrativeInputs(supabase, assetId);
-    if (inputs) narrative = await generateNarrative(inputs);
+    const result = await getOrGenerateNarrative(supabase, assetId);
+    if (result) narrative = result.narrative;
   } catch { /* proceed without narrative */ }
 
   const asset = assetRes.data;

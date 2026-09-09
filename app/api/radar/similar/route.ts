@@ -8,6 +8,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { isUuid, slugOrNull } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,11 +26,21 @@ function phaseBucket(phase: string | null): string {
 }
 
 export async function GET(request: NextRequest) {
+  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // from the asset universe, so anonymous and free-tier callers are rejected.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
+  }
+
   const assetId = request.nextUrl.searchParams.get('asset_id');
   const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || '10', 10), 30);
 
   if (!assetId) {
     return NextResponse.json({ error: 'asset_id required' }, { status: 400 });
+  }
+  if (!isUuid(assetId)) {
+    return NextResponse.json({ error: 'asset_id must be a UUID' }, { status: 400 });
   }
 
   const supabase = createServiceClient();
@@ -43,11 +55,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
   }
 
-  // Fetch candidates — same TA or same modality (broad net)
+  // Fetch candidates — same TA or same modality (broad net). Values come from
+  // our own row but are slug-checked anyway since they are embedded in `.or()`.
   const conditions: string[] = [];
-  if (sourceAsset.therapeutic_area) conditions.push(`therapeutic_area.eq.${sourceAsset.therapeutic_area}`);
-  if (sourceAsset.modality) conditions.push(`modality.eq.${sourceAsset.modality}`);
-  if (sourceAsset.indication_category) conditions.push(`indication_category.eq.${sourceAsset.indication_category}`);
+  const ta = slugOrNull(sourceAsset.therapeutic_area);
+  const mod = slugOrNull(sourceAsset.modality);
+  const ind = slugOrNull(sourceAsset.indication_category);
+  if (ta) conditions.push(`therapeutic_area.eq.${ta}`);
+  if (mod) conditions.push(`modality.eq.${mod}`);
+  if (ind) conditions.push(`indication_category.eq.${ind}`);
 
   if (conditions.length === 0) {
     return NextResponse.json({ source: sourceAsset, similar: [], total: 0 });

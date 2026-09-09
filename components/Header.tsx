@@ -75,6 +75,11 @@ export default function Header({
   const isPulsePage = pathname === '/pulse';
   const isCompaniesPage = pathname?.startsWith('/companies');
   const isRadarPage = pathname?.startsWith('/radar') || false;
+  // Mirrors the gate in app/radar/page.tsx: link only when Radar is enabled
+  // (NEXT_PUBLIC_RADAR_ENABLED=true, or development with the flag unset).
+  const RADAR_ENABLED =
+    process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ||
+    (!process.env.NEXT_PUBLIC_RADAR_ENABLED && process.env.NODE_ENV === 'development');
   const isIntelligencePage = pathname?.startsWith('/playbook') || pathname?.startsWith('/trade-space') || pathname?.startsWith('/simulator') || pathname?.startsWith('/intelligence') || pathname?.startsWith('/methodology/engine') || false;
   const [intelDropdownOpen, setIntelDropdownOpen] = useState(false);
 
@@ -200,7 +205,7 @@ export default function Header({
       href: '/companies',
       isActive: isCompaniesPage,
     },
-    ...(process.env.NODE_ENV === 'development' ? [{
+    ...(RADAR_ENABLED ? [{
       label: 'Asset Radar',
       href: '/radar',
       isActive: isRadarPage,

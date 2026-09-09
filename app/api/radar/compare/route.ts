@@ -8,16 +8,26 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { isUuid } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // from the asset universe, so anonymous and free-tier callers are rejected.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
+  }
+
   const idsParam = request.nextUrl.searchParams.get('ids');
   if (!idsParam) {
     return NextResponse.json({ error: 'ids parameter required (comma-separated UUIDs)' }, { status: 400 });
   }
 
-  const ids = idsParam.split(',').map(id => id.trim()).filter(Boolean).slice(0, 5);
+  // Only well-formed UUIDs reach the `.in()` filter; anything else is dropped.
+  const ids = Array.from(new Set(idsParam.split(',').map(id => id.trim()).filter(isUuid))).slice(0, 5);
   if (ids.length < 2) {
     return NextResponse.json({ error: 'At least 2 asset IDs required for comparison' }, { status: 400 });
   }

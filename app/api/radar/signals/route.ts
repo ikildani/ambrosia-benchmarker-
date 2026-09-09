@@ -16,15 +16,29 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { isUuid, sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // from the asset universe, so anonymous and free-tier callers are rejected.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const assetId = searchParams.get('asset_id');
-  const companyName = searchParams.get('company');
+  if (assetId && !isUuid(assetId)) {
+    return NextResponse.json({ error: 'asset_id must be a UUID' }, { status: 400 });
+  }
+  // Free text goes into ilike patterns; signal_type is a slug in `.eq()`.
+  const companyName = sanitizeSearchTerm(searchParams.get('company')) || null;
   const top = parseInt(searchParams.get('top') || '0', 10);
-  const signalType = searchParams.get('signal_type');
+  const rawSignalType = searchParams.get('signal_type');
+  const signalType = rawSignalType && /^[a-z_]{1,50}$/.test(rawSignalType) ? rawSignalType : null;
   const activeOnly = searchParams.get('active') !== 'false';
 
   const supabase = createServiceClient();
@@ -104,7 +118,8 @@ export async function GET(request: NextRequest) {
 
     const { data: assets, error } = await query;
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('[radar/signals] Query error:', error.message);
+      return NextResponse.json({ error: 'Failed to fetch signals' }, { status: 500 });
     }
 
     return NextResponse.json({

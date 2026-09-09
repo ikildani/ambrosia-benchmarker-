@@ -25,9 +25,11 @@ export const metadata: Metadata = {
     title: 'Asset Radar | Solidus',
     description: 'Clinical-stage asset intelligence. Licensing intent signals and predicted deal terms.',
   },
+  // Pre-launch: never index /radar, whether or not NEXT_PUBLIC_RADAR_ENABLED
+  // is on (the page 404s when it is off). Flip to index:true at launch.
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
 };
 

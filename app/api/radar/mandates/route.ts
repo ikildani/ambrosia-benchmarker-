@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient, createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import { resolveUserTier } from '@/lib/auth/tier-check';
+import { mandateFieldsSchema, formatValidationError } from '@/app/api/radar/_lib/mandate-schema';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  // Mandates are Pro-only saved searches; rows are filtered by the caller's user_id.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
@@ -19,7 +21,8 @@ export async function GET() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[radar/mandates] GET error:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch mandates' }, { status: 500 });
   }
 
   // Also fetch unread match counts per mandate
@@ -46,12 +49,24 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Pro-only; the mandate is always owned by the session user.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const parsed = mandateFieldsSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: formatValidationError(parsed.error) }, { status: 400 });
+  }
+  const input = parsed.data;
 
   const supabase = createServiceClient();
 
@@ -67,21 +82,21 @@ export async function POST(request: NextRequest) {
 
   const mandateData = {
     user_id: auth.userId,
-    name: body.name || 'My Search',
-    description: body.description || null,
-    therapeutic_areas: body.therapeutic_areas || [],
-    modalities: body.modalities || [],
-    phase_min: body.phase_min || null,
-    phase_max: body.phase_max || null,
-    countries: body.countries || [],
-    regions: body.regions || [],
-    partnership_statuses: body.partnership_statuses || ['unpartnered', 'partially_partnered'],
-    min_licensing_intent: body.min_licensing_intent || 0,
-    min_deal_readiness: body.min_deal_readiness || 0,
-    min_confidence: body.min_confidence || 0,
-    notify_email: body.notify_email || false,
-    notify_in_app: body.notify_in_app !== false,
-    digest_frequency: body.digest_frequency || 'daily',
+    name: input.name || 'My Search',
+    description: input.description || null,
+    therapeutic_areas: input.therapeutic_areas || [],
+    modalities: input.modalities || [],
+    phase_min: input.phase_min || null,
+    phase_max: input.phase_max || null,
+    countries: input.countries || [],
+    regions: input.regions || [],
+    partnership_statuses: input.partnership_statuses || ['unpartnered', 'partially_partnered'],
+    min_licensing_intent: input.min_licensing_intent || 0,
+    min_deal_readiness: input.min_deal_readiness || 0,
+    min_confidence: input.min_confidence || 0,
+    notify_email: input.notify_email || false,
+    notify_in_app: input.notify_in_app !== false,
+    digest_frequency: input.digest_frequency || 'daily',
   };
 
   const { data: mandate, error } = await supabase
@@ -91,7 +106,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[radar/mandates] POST error:', error.message);
+    return NextResponse.json({ error: 'Failed to create mandate' }, { status: 500 });
   }
 
   return NextResponse.json({ mandate }, { status: 201 });

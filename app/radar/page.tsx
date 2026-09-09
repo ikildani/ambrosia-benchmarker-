@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import { RadarFeed } from '@/components/radar/RadarFeed';
 import { RadarWatchlist } from '@/components/radar/RadarWatchlist';
@@ -11,7 +12,20 @@ import AuthModal from '@/components/AuthModal';
 
 type RadarView = 'feed' | 'watchlist' | 'mandates';
 
+/**
+ * Launch gate. NEXT_PUBLIC_RADAR_ENABLED is inlined at build time on both the
+ * server and the client, so the decision is identical in SSR and hydration
+ * (the previous window.location check produced a hydration mismatch).
+ * Default: on in development, off everywhere else until launch.
+ */
+const RADAR_ENABLED =
+  process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ||
+  (!process.env.NEXT_PUBLIC_RADAR_ENABLED && process.env.NODE_ENV === 'development');
+
 export default function RadarPage() {
+  // Gate before rendering anything: a disabled Radar is a 404, not a teaser.
+  if (!RADAR_ENABLED) notFound();
+
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-slate-600 animate-spin" /></div>}>
       <RadarPageInner />
@@ -35,15 +49,6 @@ function RadarPageInner() {
   } = useAuth();
 
   const [view, setView] = useState<RadarView>('feed');
-
-  // Asset Radar is dev-only until launch
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
-        <p className="text-sm">Coming soon.</p>
-      </div>
-    );
-  }
 
   const isPro = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 

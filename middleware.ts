@@ -27,6 +27,14 @@ const ROUTE_RATE_LIMITS: Record<string, RateLimitConfig> = {
   '/api/embed': RATE_LIMIT_CONFIGS.default,
   '/api/watchlist': RATE_LIMIT_CONFIGS.default,
   '/api/promo': { limit: 10, windowSeconds: 60 },
+  // Asset Radar: narrative/export call Opus, search calls Sonnet — cap them
+  // like the other AI generation endpoints. signals is a plain DB read that
+  // the asset-detail modal fetches on every open, so it gets the `deals`
+  // budget (30/min) rather than the 5/min AI budget.
+  '/api/radar/narrative': RATE_LIMIT_CONFIGS.aiGeneration,
+  '/api/radar/export': RATE_LIMIT_CONFIGS.aiGeneration,
+  '/api/radar/search': RATE_LIMIT_CONFIGS.aiGeneration,
+  '/api/radar/signals': RATE_LIMIT_CONFIGS.deals,
 };
 
 function getRateLimitConfig(pathname: string): RateLimitConfig | null {

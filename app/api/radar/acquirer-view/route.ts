@@ -11,11 +11,21 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { resolveUserTier } from '@/lib/auth/tier-check';
+import { sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const companyName = request.nextUrl.searchParams.get('company');
+  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // from the asset universe, so anonymous and free-tier callers are rejected.
+  const auth = await resolveUserTier();
+  if (!auth.hasProAccess) {
+    return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
+  }
+
+  // Free text goes into an ilike pattern: strip PostgREST/LIKE metacharacters.
+  const companyName = sanitizeSearchTerm(request.nextUrl.searchParams.get('company')) || null;
   const top = parseInt(request.nextUrl.searchParams.get('top') || '0', 10);
 
   const supabase = createServiceClient();

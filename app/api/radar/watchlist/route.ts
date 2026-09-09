@@ -4,15 +4,28 @@
  * GET  /api/radar/watchlist — list user's watched assets with current scores
  * POST /api/radar/watchlist — add asset to watchlist { asset_id, tags?, notes?, priority? }
  * DELETE /api/radar/watchlist?asset_id=UUID — remove from watchlist
+ *
+ * Auth-only (not Pro): the watchlist is the free-tier hook into Radar. Every
+ * query is scoped to the session user's user_id.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
 import { resolveUserTier } from '@/lib/auth/tier-check';
+import { isUuid, uuidSchema } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
+const watchlistAddSchema = z.object({
+  asset_id: uuidSchema,
+  tags: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+  notes: z.string().trim().max(2000).nullable().optional(),
+  priority: z.enum(['high', 'normal', 'low']).default('normal'),
+});
+
 export async function GET() {
+  // Signed-in users only; rows are filtered by the caller's user_id.
   const auth = await resolveUserTier();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -54,17 +67,26 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Signed-in users only; the row is always keyed to the session user.
   const auth = await resolveUserTier();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { asset_id, tags, notes, priority } = body;
-
-  if (!asset_id) {
-    return NextResponse.json({ error: 'asset_id required' }, { status: 400 });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
+
+  const parsed = watchlistAddSchema.safeParse(body);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const message = issue?.path?.[0] === 'asset_id' ? 'asset_id required' : (issue?.message || 'Invalid request');
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+  const { asset_id, tags, notes, priority } = parsed.data;
 
   const supabase = createServiceClient();
 
@@ -81,21 +103,23 @@ export async function POST(request: NextRequest) {
       user_id: auth.userId,
       asset_id,
       score_at_add: asset?.licensing_intent_score || 0,
-      tags: tags || [],
+      tags,
       notes: notes || null,
-      priority: priority || 'normal',
+      priority,
     }, { onConflict: 'user_id,asset_id' })
     .select()
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[radar/watchlist] POST error:', error.message);
+    return NextResponse.json({ error: 'Failed to update watchlist' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, item: data });
 }
 
 export async function DELETE(request: NextRequest) {
+  // Signed-in users only; the user_id filter prevents deleting another user's row.
   const auth = await resolveUserTier();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -104,6 +128,9 @@ export async function DELETE(request: NextRequest) {
   const assetId = request.nextUrl.searchParams.get('asset_id');
   if (!assetId) {
     return NextResponse.json({ error: 'asset_id required' }, { status: 400 });
+  }
+  if (!isUuid(assetId)) {
+    return NextResponse.json({ error: 'asset_id must be a UUID' }, { status: 400 });
   }
 
   const supabase = createServiceClient();
@@ -115,7 +142,8 @@ export async function DELETE(request: NextRequest) {
     .eq('asset_id', assetId);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[radar/watchlist] DELETE error:', error.message);
+    return NextResponse.json({ error: 'Failed to remove from watchlist' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

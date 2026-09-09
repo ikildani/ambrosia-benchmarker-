@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { resolveUserTier } from '@/lib/auth/tier-check';
+import { isUuid, sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,17 @@ interface TimelineEvent {
 }
 
 export async function GET(request: NextRequest) {
+  // Auth-only (not Pro), matching the watchlist it feeds: previously the
+  // asset_id branch had no guard at all. Applied to both branches up front.
+  const auth = await resolveUserTier();
+  if (!auth.userId) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
   const assetId = request.nextUrl.searchParams.get('asset_id');
+  if (assetId && !isUuid(assetId)) {
+    return NextResponse.json({ error: 'asset_id must be a UUID' }, { status: 400 });
+  }
   const isWatchlist = request.nextUrl.searchParams.get('watchlist') === 'true';
 
   const supabase = createServiceClient();
@@ -44,13 +55,17 @@ export async function GET(request: NextRequest) {
 
     if (!asset) return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
 
-    // Trial milestones
-    const { data: trials } = await supabase
-      .from('company_trials')
-      .select('nct_id, trial_title, phase, status, start_date, primary_completion_date, last_update_posted')
-      .ilike('intervention_name', `%${asset.asset_name}%`)
-      .order('primary_completion_date', { ascending: true })
-      .limit(20);
+    // Trial milestones (asset_name is ours, but sanitised before the ilike
+    // pattern; if nothing usable remains, skip the trial lookup entirely)
+    const assetNameTerm = sanitizeSearchTerm(asset.asset_name);
+    const { data: trials } = assetNameTerm
+      ? await supabase
+          .from('company_trials')
+          .select('nct_id, trial_title, phase, status, start_date, primary_completion_date, last_update_posted')
+          .ilike('intervention_name', `%${assetNameTerm}%`)
+          .order('primary_completion_date', { ascending: true })
+          .limit(20)
+      : { data: null };
 
     if (trials) {
       for (const trial of trials) {
@@ -133,11 +148,6 @@ export async function GET(request: NextRequest) {
 
   // ── Watchlist timeline ─────────────────────────────
   if (isWatchlist) {
-    const auth = await resolveUserTier();
-    if (!auth.userId) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
     const { data: watchlist } = await supabase
       .from('radar_watchlist')
       .select('asset_id')
