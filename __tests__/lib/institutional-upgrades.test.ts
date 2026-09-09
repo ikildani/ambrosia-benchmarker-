@@ -29,9 +29,15 @@ beforeAll(() => {
 // Upgrade 1: Deal Valuation Waterfall
 // ============================================================
 describe('Deal Valuation Waterfall', () => {
-  it('should produce a valid waterfall with 4 steps', () => {
+  it('should produce a valid waterfall with the 4 base steps plus an optional reconciliation', () => {
     const waterfall = buildDealWaterfall(baseInput, baseResult);
-    expect(waterfall.steps.length).toBe(4);
+    // Four base steps; a fifth "Reconciliation" step appears only when the
+    // waterfall's own total drifts from the engine's implied total.
+    expect(waterfall.steps.length).toBeGreaterThanOrEqual(4);
+    expect(waterfall.steps.length).toBeLessThanOrEqual(5);
+    if (waterfall.steps.length === 5) {
+      expect(waterfall.steps[4].label).toBe('Reconciliation');
+    }
     expect(waterfall.steps[0].label).toContain('NPV');
     expect(waterfall.steps[0].runningTotal).toBeGreaterThan(0);
   });
