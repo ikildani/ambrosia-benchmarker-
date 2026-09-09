@@ -18,7 +18,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Licensing vs Acquisition Deal Terms Compared — 2026 Data | Ambrosia Ventures',
+  title: 'Licensing vs Acquisition Deal Terms Compared — 2026 Data',
   description: `Side-by-side comparison of licensing vs acquisition deal structures from ${DEAL_STATS.TOTAL_DEALS} biopharma transactions. Upfront percentages, milestone allocation, royalties, timelines, and when to pursue each path.`,
   keywords: [
     'licensing vs acquisition',

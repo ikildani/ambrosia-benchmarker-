@@ -22,7 +22,7 @@ export async function generateMetadata({
   const ogUrl = `${baseUrl}/api/og?type=insight&stat=${encodeURIComponent(insight.stat)}&title=${encodeURIComponent(insight.title)}`;
 
   return {
-    title: `${insight.stat} — ${insight.title} | Ambrosia Ventures`,
+    title: `${insight.stat} — ${insight.title}`,
     description: insight.metaDescription,
     openGraph: {
       title: `${insight.stat} — ${insight.title}`,

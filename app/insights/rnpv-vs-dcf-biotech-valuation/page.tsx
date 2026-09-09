@@ -18,7 +18,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'rNPV vs DCF for Biotech Valuation — When to Use Each | Ambrosia Ventures',
+  title: 'rNPV vs DCF for Biotech Valuation — When to Use Each',
   description: `Analysis of ${DEAL_STATS.TOTAL_DEALS} biopharma deals shows when rNPV vs DCF valuation applies, how probability-of-success adjustment changes asset value by 5-20x, and why leading BD teams use both methods.`,
   keywords: [
     'rNPV vs DCF',

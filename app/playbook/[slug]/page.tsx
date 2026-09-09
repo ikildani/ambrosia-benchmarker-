@@ -27,6 +27,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical: `https://solidus.ambrosiaventures.co/playbook/${slug}`,
     },
+    openGraph: {
+      title: `${buyer.companyName} — Counterparty Playbook`,
+      description: `How ${buyer.companyName} prices deals across ${buyer.sampleSize} disclosed transactions: per-TA and per-phase premiums vs. market medians.`,
+      url: `https://solidus.ambrosiaventures.co/playbook/${slug}`,
+      type: 'article',
+      images: [{ url: `/api/og?title=${encodeURIComponent(buyer.companyName)}&subtitle=Counterparty%20Playbook&type=landing`, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${buyer.companyName} — Counterparty Playbook`,
+      description: `How ${buyer.companyName} prices deals across ${buyer.sampleSize} disclosed transactions.`,
+    },
   };
 }
 

@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: `Pharma Licensing Benchmarks 2026: Upfronts, Royalties & Milestones From ${DEAL_STATS.TOTAL_DEALS} Deals | Ambrosia Ventures`,
+  title: `Pharma Licensing Benchmarks 2026: Upfronts, Royalties & Milestones From ${DEAL_STATS.TOTAL_DEALS} Deals`,
   description: `Median Phase 2 upfront: $50M. Phase 3: $150M. See 2026 biopharma deal benchmarks by phase, modality, and TA from ${DEAL_STATS.TOTAL_DEALS} disclosed transactions. Free calculator included.`,
   keywords: [
     'pharma licensing benchmarks',

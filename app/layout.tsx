@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
@@ -72,8 +72,15 @@ export const metadata: Metadata = {
     site: "@AmbrosiaVC",
   },
   other: {
-    "msapplication-TileColor": "#0EA5A5",
+    "msapplication-TileColor": "#0a0d1b",
   },
+};
+
+// Next 15 wants viewport/themeColor split out of metadata. Matches app/manifest.ts.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0a0d1b",
 };
 
 export default function RootLayout({

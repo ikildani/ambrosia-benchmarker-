@@ -3,6 +3,8 @@
  * Generates 1,500-2,500 word articles triggered by competitor intelligence
  * alerts — optimized for speed-to-publish while maintaining data authority.
  */
+import { taBenchmarkHref } from '@/lib/seo/ta-links';
+
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,7 +143,7 @@ This is reactive content — concise but substantive. Every paragraph must earn 
 
 ### Internal links (weave naturally, 2-3 total)
 - [Run Your Own Deal Benchmark](/calculator) — custom benchmarks
-- [${taLabel} Deal Benchmarks](/benchmarks?ta=${topicParams.therapeuticArea}) — TA-specific data
+- [${taLabel} Deal Benchmarks](${taBenchmarkHref(topicParams.therapeuticArea)}) — TA-specific data
 - [Get a Full Deal Report](/report) — personalized analysis
 
 ### SEO Requirements

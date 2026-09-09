@@ -18,7 +18,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Best Biopharma Deal Benchmarking Tools in 2026 — Platform Comparison | Ambrosia Ventures',
+  title: 'Best Biopharma Deal Benchmarking Tools in 2026 — Platform Comparison',
   description: `Compare biopharma deal benchmarking tools and pharma licensing intelligence platforms in 2026. How ${DEAL_STATS.TOTAL_DEALS} transactions, 8 calculation engines, and predictive analytics change BD outcomes.`,
   keywords: [
     'biopharma deal benchmarking tool',

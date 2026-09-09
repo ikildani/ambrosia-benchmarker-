@@ -16,6 +16,8 @@
  */
 
 import { type SupabaseClient } from '@supabase/supabase-js';
+import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
+import { taToSlug, phaseToSlug } from '@/lib/benchmarkPagesGenerated';
 
 // ── Label maps ──────────────────────────────────────────────────────────────
 
@@ -204,6 +206,22 @@ const COMPETITORS = [
 const ALL_PHASES = Object.keys(PHASE_LABELS);
 const ALL_TAS = Object.keys(TA_LABELS);
 
+/**
+ * Minimum real deals behind a "how much" post. Three data points produced
+ * templated near-duplicates that Google left in "crawled - currently not
+ * indexed"; a median over eight or more deals is a defensible benchmark.
+ */
+export const MIN_DEALS_FOR_HOW_MUCH = 8;
+
+/**
+ * A phase x TA combination that already has a hand-built or generated
+ * /benchmarks/<ta>-<phase>-deal-benchmarks page must not also get a blog
+ * post — the two would compete for the same query.
+ */
+export function hasBenchmarkPageFor(ta: string, phase: string, slugs: ReadonlySet<string>): boolean {
+  return slugs.has(`${taToSlug(ta)}-${phaseToSlug(phase)}-deal-benchmarks`);
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function slugify(text: string): string {
@@ -361,10 +379,13 @@ async function generateHowMuch(
     .in('topic_key', comboKeys);
 
   const usedKeys = new Set((existingLogs || []).map((r) => r.topic_key));
+  const benchmarkSlugs = new Set(getAllBenchmarkSlugs());
 
-  // Shuffle combos so we don't always start with the same phase/TA
+  // Shuffle combos so we don't always start with the same phase/TA.
+  // Skip combos already logged AND combos that already have a benchmark page.
   const shuffled = combos
     .filter((c) => !usedKeys.has(`how_much:${c.phase}:${c.ta}`))
+    .filter((c) => !hasBenchmarkPageFor(c.ta, c.phase, benchmarkSlugs))
     .sort(() => Math.random() - 0.5);
 
   for (const combo of shuffled) {
@@ -383,7 +404,7 @@ async function generateHowMuch(
       console.error('[topic-rotation] how_much query failed:', error.message);
       continue;
     }
-    if (!deals || deals.length < 3) continue; // need at least 3 data points
+    if (!deals || deals.length < MIN_DEALS_FOR_HOW_MUCH) continue;
 
     // Compute percentiles on upfront_usd
     const upfronts = deals
@@ -391,7 +412,7 @@ async function generateHowMuch(
       .filter((v) => v > 0)
       .sort((a, b) => a - b);
 
-    if (upfronts.length < 3) continue;
+    if (upfronts.length < MIN_DEALS_FOR_HOW_MUCH) continue;
 
     const medianUpfront = percentile(upfronts, 50);
     const p25Upfront = percentile(upfronts, 25);

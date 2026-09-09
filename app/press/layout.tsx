@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Press & Media | Ambrosia Ventures',
+  title: 'Press & Media',
   description: 'Press resources, media kit, and company information for Ambrosia Ventures. Access logos, fact sheets, and contact information for press inquiries.',
   keywords: [
     'Ambrosia Ventures press',
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     'life sciences analytics',
   ],
   openGraph: {
-    title: 'Press & Media | Ambrosia Ventures',
+    title: 'Press & Media',
     description: 'Press resources and media information for Ambrosia Ventures.',
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/press',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Press & Media | Ambrosia Ventures',
+    title: 'Press & Media',
     description: 'Press resources for the biopharma deal intelligence platform.',
   },
   alternates: {

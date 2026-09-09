@@ -3,6 +3,8 @@
  * Targets A+ quality: 2,500-3,500 words, original insights, data tables,
  * specific deal examples, frameworks, and actionable guidance.
  */
+import { taBenchmarkHref } from '@/lib/seo/ta-links';
+
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,8 +138,7 @@ Short articles get penalized by Google and fail to demonstrate authority. This a
 
 ### Internal links (weave naturally, 3-5 total)
 - [Solidus](/calculator) — custom benchmarks
-- [${taLabel} Deal Benchmarks](/benchmarks?ta=${therapeuticArea}) — TA-specific data
-- [Therapeutic Area Overview](/therapeutic-areas/${therapeuticArea}) — ${taLabel} landscape
+- [${taLabel} Deal Benchmarks](${taBenchmarkHref(therapeuticArea)}) — ${taLabel} landscape and TA-specific data
 - [Get a Full Deal Report](/report) — personalized analysis
 
 ### SEO Requirements

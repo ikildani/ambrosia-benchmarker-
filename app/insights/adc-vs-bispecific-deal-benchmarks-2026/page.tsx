@@ -40,7 +40,7 @@ const ReportViewTracker = dynamic(() => import('@/components/insights/ReportView
 const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
 
 export const metadata: Metadata = {
-  title: 'ADC vs Bispecific Antibody Deal Benchmarks — 2026 Market Data | Ambrosia Ventures',
+  title: 'ADC vs Bispecific Antibody Deal Benchmarks — 2026 Market Data',
   description: `ADC and bispecific antibody deal terms compared from ${DEAL_STATS.TOTAL_DEALS} biopharma transactions. Upfront premiums, total deal values, recent mega-deals, and why ADCs command 25-30% higher valuations.`,
   keywords: [
     'ADC deal terms',

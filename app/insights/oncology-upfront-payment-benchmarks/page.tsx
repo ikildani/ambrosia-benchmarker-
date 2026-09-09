@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks | Ambrosia Ventures',
+  title: 'Average Upfront Payments in Oncology Licensing Deals: 2020-2026 Benchmarks',
   description: `Oncology licensing deal upfronts range from $14M at discovery to $800M for approved assets. Benchmark data across 7 development phases and 8 modalities from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
   keywords: [
     'average upfront payment oncology licensing deal',

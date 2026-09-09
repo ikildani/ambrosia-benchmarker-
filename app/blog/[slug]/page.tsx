@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { blogPosts, getBlogPost, getAllBlogSlugs, type BlogPost } from '@/lib/blogPosts';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -188,10 +188,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const post = await resolvePost(slug);
 
-  if (!post) return { title: 'Post Not Found' };
+  if (!post) return { title: 'Post Not Found', robots: { index: false, follow: false } };
 
   return {
-    title: `${post.title} | Ambrosia Ventures`,
+    title: `${post.title}`,
     description: post.metaDescription,
     authors: [{ name: post.author }],
     alternates: { canonical: `${BASE_URL}/blog/${post.slug}` },
@@ -220,7 +220,10 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = await resolvePost(slug);
 
-  if (!post) redirect('/blog');
+  // Archived / unknown posts must 404, not redirect. A 307 to /blog made
+  // Google file 89 archived posts under "Page with redirect" and refuse to
+  // drop them; a 404 lets them fall out of the index.
+  if (!post) notFound();
 
   const htmlContent = addHeadingIds(markdownToHtml(post.content));
   const toc = extractTOC(htmlContent);

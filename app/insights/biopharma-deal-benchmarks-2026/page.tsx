@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Benchmarks 2026: 3 Data Insights from 3,447 Deals | Ambrosia Ventures',
+  title: 'Biopharma Deal Benchmarks 2026: 3 Data Insights from 3,447 Deals',
   description: 'Analysis of 3,447 biopharma licensing deals reveals the Phase 2 upfront inflection, immunology\'s 4x oncology premium, and ADC deal normalization. Free data report.',
   keywords: [
     'biopharma deal benchmarks 2026',

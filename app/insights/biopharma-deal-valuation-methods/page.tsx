@@ -20,7 +20,7 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const PAGE_URL = `${BASE_URL}/insights/biopharma-deal-valuation-methods`;
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Valuation: Comparable Transactions, rNPV & Monte Carlo Compared | Ambrosia Ventures',
+  title: 'Biopharma Deal Valuation: Comparable Transactions, rNPV & Monte Carlo Compared',
   description: 'Compare the three core biopharma deal valuation methods: comparable transactions, risk-adjusted NPV (rNPV), and Monte Carlo simulation. Includes PoS rates by phase, discount rate guidance, and the institutional approach to combining all three.',
   keywords: [
     'biopharma deal valuation methods',

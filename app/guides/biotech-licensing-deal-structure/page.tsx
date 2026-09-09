@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked | Ambrosia Ventures',
+  title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked',
   description: `Option/license deals now account for 35% of new transactions, up from 5% in 2023. See how upfronts, milestones, and royalties are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
   keywords: [
     'biotech licensing deal structure',

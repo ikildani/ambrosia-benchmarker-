@@ -22,6 +22,7 @@ import type {
   MarketTrendData,
   ComparisonData,
 } from '@/lib/seo/topic-rotation';
+import { taBenchmarkHref } from '@/lib/seo/ta-links';
 
 // ── Shared constants ────────────────────────────────────────────────────────
 
@@ -114,7 +115,7 @@ ${data.mechanismOfAction ? `- **Mechanism of Action**: ${data.mechanismOfAction}
 
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Solidus</a> — custom benchmarks
-${data.therapeuticArea ? `- <a href="/benchmarks?ta=${data.therapeuticArea}">${data.therapeuticArea} Deal Benchmarks</a>` : ''}
+${data.therapeuticArea ? `- <a href="${taBenchmarkHref(data.therapeuticArea)}">${data.therapeuticArea} Deal Benchmarks</a>` : ''}
 
 ## FAQ SECTION
 Include 2–3 questions a BD professional would actually ask about this specific deal. Answers must be 3–5 sentences with specific data.
@@ -197,7 +198,7 @@ ${sampleDealsTable}
 
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Solidus</a>
-- <a href="/benchmarks?ta=${data.therapeuticArea}">${data.taLabel} Benchmarks</a>
+- <a href="${taBenchmarkHref(data.therapeuticArea)}">${data.taLabel} Benchmarks</a>
 
 ## FAQ SECTION
 Include 3–4 questions a biotech founder or BD professional would ask about deal pricing in this space. Answers must be 3–5 sentences with specific numbers from the data above.
@@ -272,7 +273,7 @@ ${recentDealsRows}
 ## INTERNAL LINKS (weave naturally)
 - <a href="/calculator">Partner Matching</a> — find your best buyer fit
 - <a href="/calculator">Solidus</a> — benchmark your terms
-${data.therapeuticAreas[0] ? `- <a href="/benchmarks?ta=${data.therapeuticAreas[0]}">${data.therapeuticAreas[0]} Benchmarks</a>` : ''}
+${data.therapeuticAreas[0] ? `- <a href="${taBenchmarkHref(data.therapeuticAreas[0])}">${data.therapeuticAreas[0]} Benchmarks</a>` : ''}
 
 ## FAQ SECTION
 Include 3–4 questions about ${data.companyName}'s deal behavior and what it means for potential partners. Answers must be 3–5 sentences with specific data from above.

@@ -136,7 +136,7 @@
     },
     {
       "path": "/api/cron/seo-content",
-      "schedule": "0 6 * * *"
+      "schedule": "0 6 * * 2"
     },
     {
       "path": "/api/cron/seo-health",

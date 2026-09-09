@@ -4,7 +4,7 @@ import { BookOpen, ArrowRight, Clock, ChevronRight } from 'lucide-react';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biotech Deal Guides | Licensing & Valuation Resources | Ambrosia Ventures',
+  title: 'Biotech Deal Guides | Licensing & Valuation Resources',
   description: 'In-depth guides on biopharma licensing deal valuation, comparable transactions analysis, rNPV modeling, and Monte Carlo simulation. Written for BD and licensing professionals.',
   keywords: ['biotech deal guide', 'biopharma valuation', 'licensing deal tutorial', 'rNPV analysis', 'deal benchmarking'],
   openGraph: {

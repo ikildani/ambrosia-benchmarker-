@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Biotech Licensing Deal Terms in Europe: Benchmarks & Regional Deal Dynamics | Ambrosia Ventures',
+  title: 'Biotech Licensing Deal Terms in Europe: Benchmarks & Regional Deal Dynamics',
   description: 'European biotech licensing benchmarks covering territory split economics, EMA vs FDA regulatory arbitrage, and EU-specific deal structures. Data from 280+ comparable transactions.',
   keywords: [
     'biotech licensing deal terms Europe',

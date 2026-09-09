@@ -12,10 +12,10 @@ import { DEAL_STATS, PRICING, BENCHMARK_PRICING } from '@/lib/config/constants';
 import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
-  title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
+  title: 'Deal Intelligence Report — $499',
   description: `Board-ready biopharma deal benchmarking in 60 seconds. rNPV valuation, comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} verified SEC filings.`,
   openGraph: {
-    title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
+    title: 'Deal Intelligence Report — $499',
     description: `Board-ready biopharma deal benchmarking. Comparable deals, partner matching, sensitivity analysis, and negotiation playbook from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/report',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Intelligence Report — $499 | Ambrosia Ventures',
+    title: 'Deal Intelligence Report — $499',
     description: `Board-ready biopharma deal benchmarking from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     images: ['/api/og'],
   },

@@ -5,7 +5,7 @@ import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Press Data Kit — Biopharma Deal Benchmarks | Ambrosia Ventures',
+  title: 'Press Data Kit — Biopharma Deal Benchmarks',
   description: 'Citation-ready statistics, embeddable charts, and brand assets for journalists and analysts covering biopharma deal economics.',
   openGraph: {
     title: 'Press Data Kit — Biopharma Deal Benchmarks',

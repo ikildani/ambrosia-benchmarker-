@@ -8,7 +8,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Life Sciences Deal Intelligence Blog | Ambrosia Ventures',
+  title: 'Life Sciences Deal Intelligence Blog',
   description:
     'Expert analysis of biotech deal trends, pharma licensing insights, and negotiation strategies. Data-driven perspectives on biopharma M&A from the Ambrosia Ventures deal intelligence team.',
   keywords: [

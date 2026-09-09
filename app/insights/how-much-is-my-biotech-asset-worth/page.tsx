@@ -17,7 +17,7 @@ const InlineEmailCapture = dynamic(() => import('@/components/insights/InlineEma
 const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').then(m => ({ default: m.CiteThisData })));
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 export const metadata: Metadata = {
-  title: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide | Ambrosia Ventures',
+  title: 'How Much Is My Biotech Asset Worth? Phase-by-Phase Valuation Guide',
   description: `Biotech asset valuation benchmarks from ${DEAL_STATS.TOTAL_DEALS} real transactions. Phase-by-phase deal values for licensing, upfront payments, milestones, and royalties across 12 therapeutic areas.`,
   keywords: [
     'how much is my biotech asset worth',

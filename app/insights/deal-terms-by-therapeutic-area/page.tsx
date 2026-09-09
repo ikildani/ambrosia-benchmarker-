@@ -21,7 +21,7 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const PAGE_URL = `${BASE_URL}/insights/deal-terms-by-therapeutic-area`;
 
 export const metadata: Metadata = {
-  title: 'Biopharma Deal Terms by Therapeutic Area: A 12-TA Comparison | Ambrosia Ventures',
+  title: 'Biopharma Deal Terms by Therapeutic Area: A 12-TA Comparison',
   description: 'Compare biopharma licensing deal benchmarks across 12 therapeutic areas. Metabolic/obesity commands the highest total values ($4.5B at Phase 3), while immunology leads Phase 2 upfronts at $120M median.',
   keywords: [
     'biopharma deal benchmarks by therapeutic area',

@@ -35,7 +35,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Phase 2 vs Phase 3 Deal Economics — The Proof-of-Concept Inflection | Ambrosia Ventures',
+  title: 'Phase 2 vs Phase 3 Deal Economics — The Proof-of-Concept Inflection',
   description: `How deal value inflects at proof-of-concept: Phase 2 upfronts jump 2.1x from Phase 1 while Phase 3 delivers another 2.3x. Analysis of ${DEAL_STATS.TOTAL_DEALS} deals shows when to out-license at each stage.`,
   keywords: [
     'phase 2 vs phase 3 deal',

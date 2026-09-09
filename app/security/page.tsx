@@ -3,12 +3,19 @@ import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 
 export const metadata: Metadata = {
-  title: 'Security | Ambrosia Ventures',
+  title: 'Security',
   description: 'How Ambrosia Ventures protects your data. Infrastructure security, application security, data handling, compliance, and privacy practices for the Biopharma Deal Intelligence Platform.',
   alternates: {
     canonical: '/security',
   },
   openGraph: {
+    title: 'Security — Ambrosia Ventures',
+    description: 'Enterprise-grade security for biopharma deal intelligence. Encryption, access controls, data isolation, and compliance.',
+    url: 'https://solidus.ambrosiaventures.co/security',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
     title: 'Security — Ambrosia Ventures',
     description: 'Enterprise-grade security for biopharma deal intelligence. Encryption, access controls, data isolation, and compliance.',
   },

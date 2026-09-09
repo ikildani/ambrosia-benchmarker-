@@ -47,7 +47,7 @@ const EmailGatedDownload = dynamic(() => import('@/components/insights/EmailGate
 const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
 
 export const metadata: Metadata = {
-  title: `Q1 2026 Biopharma Deal Benchmarks Report: Analysis of ${DEAL_STATS.TOTAL_DEALS} Transactions (2020-2026) | Ambrosia Ventures`,
+  title: `Q1 2026 Biopharma Deal Benchmarks Report: Analysis of ${DEAL_STATS.TOTAL_DEALS} Transactions (2020-2026)`,
   description: `Institutional-grade quarterly analysis of biopharma deal economics across 13 therapeutic areas. Phase-by-phase benchmarks with sample sizes, upfront/TDV medians, conditional value trends, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
   keywords: ['biopharma deal benchmarks 2026', 'pharma deal economics Q1 2026', 'biopharma licensing benchmarks', 'pharma acquisitions 2026', 'co-development deals', 'oncology deal benchmarks', 'metabolic deal benchmarks', 'modality premiums biopharma', 'phase 2 upfront benchmarks'],
   openGraph: {

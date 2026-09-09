@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'How to Calculate rNPV for Biotech: Risk-Adjusted NPV Guide With PoS Rates by TA | Ambrosia Ventures',
+  title: 'How to Calculate rNPV for Biotech: Risk-Adjusted NPV Guide With PoS Rates by TA',
   description: `Phase 1 oncology PoS: ~8%. Rare disease: ~15%. Learn rNPV calculation step by step with PoS rates across 12 TAs, calibrated against ${DEAL_STATS.TOTAL_DEALS} real deals. Free rNPV calculator included.`,
   keywords: [
     'rNPV calculation',

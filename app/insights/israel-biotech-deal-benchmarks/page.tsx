@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Israel Biotech Deal Benchmarks: Licensing & Partnership Data for the Startup Nation | Ambrosia Ventures',
+  title: 'Israel Biotech Deal Benchmarks: Licensing & Partnership Data for the Startup Nation',
   description: 'Israeli biotech licensing benchmarks covering deal structures, academic tech transfer, and partnership patterns. Data from 1,600+ Israeli life sciences companies and 280+ comparable transactions.',
   keywords: [
     'Israel biotech deal benchmarks',

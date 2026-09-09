@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Reset Password | Ambrosia Ventures',
+  title: 'Reset Password',
   robots: { index: false, follow: false },
 };
 

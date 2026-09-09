@@ -224,7 +224,7 @@ const TA_LANDSCAPE: Record<string, { competition: string; trend: string }> = {
 // ── Slug-safe modality keys ──────────────────────────────────────────────────
 // Convert camelCase modality to URL-safe slug segments.
 
-function modalityToSlug(mod: string): string {
+export function modalityToSlug(mod: string): string {
   const overrides: Record<string, string> = {
     smallMolecule: 'small-molecule',
     mab: 'monoclonal-antibody',
@@ -285,7 +285,7 @@ function modalityToSlug(mod: string): string {
   return overrides[mod] || mod.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
 }
 
-function taToSlug(ta: string): string {
+export function taToSlug(ta: string): string {
   const overrides: Record<string, string> = {
     oncology: 'oncology',
     neurology: 'neurology',
@@ -303,7 +303,7 @@ function taToSlug(ta: string): string {
   return overrides[ta] || ta.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
-function phaseToSlug(phase: string): string {
+export function phaseToSlug(phase: string): string {
   const overrides: Record<string, string> = {
     preclinical: 'preclinical',
     phase1: 'phase-1',

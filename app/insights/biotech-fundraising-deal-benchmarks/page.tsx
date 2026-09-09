@@ -18,7 +18,7 @@ const CiteThisData = dynamic(() => import('@/components/insights/CiteThisData').
 const ReportViewTracker = dynamic(() => import('@/components/insights/ReportViewTracker').then(m => ({ default: m.ReportViewTracker })));
 
 export const metadata: Metadata = {
-  title: 'Biotech Fundraising vs Licensing — Deal Benchmarks & Decision Framework | Ambrosia Ventures',
+  title: 'Biotech Fundraising vs Licensing — Deal Benchmarks & Decision Framework',
   description: `Should you raise capital or out-license? Fundraising vs licensing value comparison by phase, with decision frameworks and deal benchmarks from ${DEAL_STATS.TOTAL_DEALS} transactions.`,
   keywords: [
     'biotech fundraising benchmarks',

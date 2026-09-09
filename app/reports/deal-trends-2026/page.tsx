@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Life Sciences Deal Trends 2026 | Annual Market Report | Ambrosia Ventures',
+  title: 'Life Sciences Deal Trends 2026 | Annual Market Report',
   description: 'Comprehensive 2026 biopharma deal trends report covering deal volume by therapeutic area, hottest modalities (ADCs, bispecifics, radiopharmaceuticals), phase trends, geographic shifts, and 2027 outlook.',
   keywords: [
     'life sciences deal trends 2026',

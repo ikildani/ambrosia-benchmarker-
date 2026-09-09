@@ -18,7 +18,7 @@ const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgres
 const MiniCalculator = dynamic(() => import('@/components/insights/MiniCalculator').then(m => ({ default: m.MiniCalculator })));
 
 export const metadata: Metadata = {
-  title: 'Phase 2 Licensing Milestone Payments: How Much Should You Expect? | Ambrosia Ventures',
+  title: 'Phase 2 Licensing Milestone Payments: How Much Should You Expect?',
   description: 'Phase 2 licensing deals have a median total value of $1.1B in oncology, with milestones split 40% clinical, 25% regulatory, and 35% commercial. Benchmark data across 6 therapeutic areas.',
   keywords: [
     'how much milestone payment phase 2 licensing',

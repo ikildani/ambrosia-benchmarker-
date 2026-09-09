@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'rare disease deal terms', 'ADC deal benchmarks', 'bispecific antibody deal terms',
   ],
   openGraph: {
-    title: 'Deal Intelligence Brief — Full Indication Deal Landscape | Ambrosia Ventures',
+    title: 'Deal Intelligence Brief — Full Indication Deal Landscape',
     description:
       `The complete deal landscape for any biopharma indication. 52 deal calculations, AI narrative, partner matching, rNPV + Monte Carlo valuation. Calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions. $2,500 all-inclusive with white-label branding.`,
     url: 'https://solidus.ambrosiaventures.co/benchmark',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Intelligence Brief — $2,500 | Ambrosia Ventures',
+    title: 'Deal Intelligence Brief — $2,500',
     description: `Full deal landscape for any biopharma indication. 52 calculations, AI narrative, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, partner matching, white-label branding. 24hr delivery.`,
     images: ['/api/og?title=Deal%20Intelligence%20Brief&subtitle=52%20Deal%20Calculations%20%C2%B7%20AI%20Narrative%20%C2%B7%2024hr%20Delivery'],
   },
