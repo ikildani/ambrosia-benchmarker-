@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email/client';
 import { logCronRun } from '@/lib/cron-utils';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { dripSuppressionFilter } from '@/lib/email/drip-suppression';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -131,7 +132,9 @@ export async function GET(request: NextRequest) {
       .eq('tier', 'pro')
       .not('pro_expires_at', 'is', null)
       .lte('pro_expires_at', twoDaysFromNow.toISOString())
-      .gte('pro_expires_at', now.toISOString());
+      .gte('pro_expires_at', now.toISOString())
+      // Skip accounts on a founder-led personal sequence (migration 108)
+      .or(dripSuppressionFilter(now));
 
     if (!expiringUsers || expiringUsers.length === 0) {
       return NextResponse.json({
