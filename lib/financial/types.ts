@@ -205,6 +205,12 @@ export interface RNPVInput {
    * comparing the two methodologies and explaining any divergence.
    */
   benchmarkDealValue?: { low: number; median: number; high: number };
+  /**
+   * Comp-engine upfront range for the same program. Before Phase 2 the rNPV
+   * method returns near-zero or negative value by construction, so the engine
+   * floors its implied upfront at this observed market low.
+   */
+  benchmarkUpfront?: { low: number; median: number; high: number };
 
   /**
    * Additional years added to (or subtracted from) time-to-market.
