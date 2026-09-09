@@ -43,9 +43,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
     }
 
+    // ?persist_only=true stores every feed item in press_releases without the
+    // Opus deal-extraction pass (cheap, safe to run every 2 hours);
+    // ?backfill=true&months=24 pages the feeds that support paging.
+    const searchParams = request.nextUrl.searchParams;
     const result = await runPressReleaseIngestion(supabase, anthropicApiKey, {
       maxArticlesPerSource: 15,
       timeBudgetMs: 250_000, // 250s safe margin for 300s Vercel limit
+      persistOnly: searchParams.get('persist_only') === 'true',
+      backfill: searchParams.get('backfill') === 'true',
+      months: Number(searchParams.get('months')) || 24,
     });
 
     const durationMs = Date.now() - startTime;
