@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runCompetitiveIntel } from '@/lib/radar/competitive-intel';
+import { deriveRunStatus } from '@/lib/radar/run-log';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -34,15 +35,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await runCompetitiveIntel(supabase);
+    const status = deriveRunStatus({
+      errors: result.errors.length,
+      timedOut: result.timedOut,
+      processed: result.assetsAnalyzed,
+      produced: result.signalsInserted,
+    });
 
     return NextResponse.json({
       success: true,
+      status,
       assets_analyzed: result.assetsAnalyzed,
       signals_detected: result.signalsDetected,
       signals_inserted: result.signalsInserted,
       heat_scores_updated: result.heatScoresUpdated,
+      error_count: result.errors.length,
       errors: result.errors.slice(0, 10),
       timed_out: result.timedOut,
+      log_written: result.logWritten,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

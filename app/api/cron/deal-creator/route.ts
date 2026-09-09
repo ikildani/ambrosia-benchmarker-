@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runDealCreator } from '@/lib/radar/deal-creator';
+import { deriveRunStatus } from '@/lib/radar/run-log';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -34,14 +35,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await runDealCreator(supabase);
+    const status = deriveRunStatus({
+      errors: result.errors.length,
+      timedOut: result.timedOut,
+      processed: result.acquirersAnalyzed,
+      produced: result.opportunitiesCreated,
+    });
 
     return NextResponse.json({
       success: true,
+      status,
       acquirers_analyzed: result.acquirersAnalyzed,
       assets_considered: result.assetsConsidered,
+      assets_excluded_partnered: result.assetsExcludedPartnered,
       opportunities_created: result.opportunitiesCreated,
+      error_count: result.errors.length,
       errors: result.errors.slice(0, 10),
       timed_out: result.timedOut,
+      log_written: result.logWritten,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

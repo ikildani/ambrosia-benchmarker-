@@ -3,9 +3,10 @@
  *
  * Answers "who else is circling this asset?" by mining 6 signal types:
  *
- * 1. User Interest — anonymized Solidus platform behavior (calculations,
- *    views, watchlist adds) on the same asset/company/indication. No PII
- *    exposed — just aggregate counts (N orgs looked at this).
+ * 1. User Interest — anonymized Solidus platform behavior (calculations)
+ *    on the same indication / modality. Published only when at least
+ *    MIN_DISTINCT_USERS distinct signed-in users are behind it, and only
+ *    as a bucket ('5–9', '10–24', '25+') — never an exact small count.
  *
  * 2. Competitor Deals — recent deals in the same TA/modality/indication
  *    by other companies. If Pfizer just did an ADC deal in NSCLC, every
@@ -31,6 +32,9 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { modalitiesMatch } from '@/lib/comparables/match-normalize';
+import { radarPhaseKey } from './deal-thesis';
+import { logRadarRun, deriveRunStatus } from './run-log';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -76,61 +80,89 @@ export interface CompetitiveIntelResult {
   heatScoresUpdated: number;
   errors: string[];
   timedOut: boolean;
+  /** False when the data_ingestion_log insert failed. */
+  logWritten: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // SIGNAL 1: USER INTEREST (anonymized platform behavior)
 // ═══════════════════════════════════════════════════════════════════════
 
+/**
+ * k-anonymity floor: a user_interest signal is published only when this
+ * many distinct signed-in users (calculations.user_id) are behind it.
+ * Anonymous sessions are NOT counted — session_id is not a stable proxy for
+ * an organisation, and counting it would let one visitor look like many.
+ */
+export const MIN_DISTINCT_USERS = 5;
+
+export type InterestBucket = '5–9' | '10–24' | '25+';
+
+/** Bucket a distinct-user count; null below the k-anonymity floor. */
+export function bucketInterest(distinctUsers: number): { label: InterestBucket; floor: number } | null {
+  if (distinctUsers >= 25) return { label: '25+', floor: 25 };
+  if (distinctUsers >= 10) return { label: '10–24', floor: 10 };
+  if (distinctUsers >= MIN_DISTINCT_USERS) return { label: '5–9', floor: MIN_DISTINCT_USERS };
+  return null;
+}
+
 async function detectUserInterest(
   supabase: SupabaseClient,
   asset: AssetForIntel,
 ): Promise<IntelSignal | null> {
+  if (!asset.indication_category) return null;
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  // Count unique users/sessions that ran calculations for this company
-  // or indication (proxy for interest in this asset's space)
-  const { count: calcCount } = await supabase
+  // Pull (user_id, modality) for signed-in calculations in this indication;
+  // distinct-user counts are computed here, never persisted raw.
+  const { data: rows, error } = await supabase
     .from('calculations')
-    .select('id', { count: 'exact', head: true })
-    .ilike('indication_category', asset.indication_category || '__none__')
-    .gte('created_at', thirtyDaysAgo.toISOString());
-
-  if (!calcCount || calcCount < 3) return null;
-
-  // Count calculations matching this asset's modality + indication (tighter match)
-  const { count: exactCount } = await supabase
-    .from('calculations')
-    .select('id', { count: 'exact', head: true })
-    .eq('modality', asset.modality || '__none__')
-    .ilike('indication_category', asset.indication_category || '__none__')
-    .gte('created_at', thirtyDaysAgo.toISOString());
-
-  // Count unique session_ids as proxy for unique orgs
-  const { data: sessions } = await supabase
-    .from('calculations')
-    .select('session_id')
-    .ilike('indication_category', asset.indication_category || '__none__')
+    .select('user_id, modality')
+    .ilike('indication_category', asset.indication_category)
+    .not('user_id', 'is', null)
     .gte('created_at', thirtyDaysAgo.toISOString())
-    .limit(100);
+    .limit(5000);
 
-  const uniqueSessions = sessions ? new Set(sessions.map(s => s.session_id).filter(Boolean)).size : 0;
+  if (error || !rows || rows.length === 0) return null;
 
+  const allUsers = new Set<string>();
+  const exactUsers = new Set<string>();
+  for (const r of rows) {
+    if (!r.user_id) continue;
+    allUsers.add(r.user_id);
+    if (asset.modality && modalitiesMatch(asset.modality, r.modality)) exactUsers.add(r.user_id);
+  }
+
+  const bucket = bucketInterest(allUsers.size);
+  if (!bucket) return null;
+  const exactBucket = bucketInterest(exactUsers.size);
+
+  // Intensity from buckets only (never from the exact count).
   let intensity = 0;
-  if (exactCount && exactCount >= 10) intensity = 70;
-  else if (exactCount && exactCount >= 5) intensity = 50;
-  else if (calcCount >= 20) intensity = 40;
-  else if (calcCount >= 10) intensity = 25;
+  if (exactBucket?.label === '25+' || exactBucket?.label === '10–24') intensity = 70;
+  else if (exactBucket?.label === '5–9') intensity = 50;
+  else if (bucket.label === '25+') intensity = 45;
+  else if (bucket.label === '10–24') intensity = 30;
   else intensity = 15;
+
+  const exactCopy = exactBucket ? `; ${exactBucket.label} of them on ${asset.modality}` : '';
 
   return {
     type: 'user_interest',
     intensity,
-    evidence: `${calcCount} calculations in ${asset.indication_category || 'this space'} (${exactCount || 0} exact modality match) from ${uniqueSessions} unique sessions in 30 days`,
-    interestCount: calcCount,
-    uniqueOrgs: uniqueSessions,
-    metadata: { calcCount, exactCount: exactCount || 0, uniqueSessions },
+    evidence: `${bucket.label} distinct Solidus users ran ${asset.indication_category.replace(/_/g, ' ')} deal models in the last 30 days${exactCopy}`,
+    // Integer columns receive the bucket floor, not the exact count.
+    interestCount: bucket.floor,
+    uniqueOrgs: bucket.floor,
+    metadata: {
+      basis: 'distinct_user_ids',
+      min_distinct_users: MIN_DISTINCT_USERS,
+      users_bucket: bucket.label,
+      exact_modality_bucket: exactBucket?.label ?? null,
+      window_days: 30,
+    },
   };
 }
 
@@ -172,7 +204,7 @@ async function detectCompetitorDeals(
 
   for (const [acquirer, acquirerDeals] of acquirerMap) {
     // Same modality = direct competitor
-    const sameModality = acquirerDeals.filter(d => d.modality === asset.modality);
+    const sameModality = acquirerDeals.filter(d => modalitiesMatch(asset.modality, d.modality));
     const intensity = sameModality.length >= 2 ? 80
       : sameModality.length === 1 ? 60
       : acquirerDeals.length >= 3 ? 50
@@ -194,6 +226,7 @@ async function detectCompetitorDeals(
           dealCount: acquirerDeals.length,
           sameModalityCount: sameModality.length,
           latestDeal: acquirerDeals[0].asset_name,
+          dealIds: acquirerDeals.map(d => d.id),
         },
       });
     }
@@ -332,7 +365,7 @@ async function detectTrialCrowding(
   if (!asset.indication_category) return null;
 
   // Count other assets in the same indication + modality that are active
-  const baseQuery = supabase
+  const { data: competitors, count: totalInIndication } = await supabase
     .from('clinical_assets')
     .select('id, company_name, asset_name, phase, modality', { count: 'exact' })
     .eq('indication_category', asset.indication_category)
@@ -340,20 +373,17 @@ async function detectTrialCrowding(
     .in('trial_status', ['active'])
     .limit(50);
 
-  const { data: competitors, count: totalInIndication } = asset.modality
-    ? await baseQuery
-    : await baseQuery;
-
   if (!competitors || competitors.length === 0) return null;
 
-  // Same modality competitors (direct competition)
+  // Same modality competitors (direct competition) — alias/family aware
   const sameModality = asset.modality
-    ? competitors.filter(c => c.modality === asset.modality)
+    ? competitors.filter(c => modalitiesMatch(asset.modality, c.modality))
     : [];
 
   // Same phase competitors (competing for same acquirer attention)
-  const samePhase = asset.phase
-    ? competitors.filter(c => c.phase === asset.phase)
+  const assetPhase = radarPhaseKey(asset.phase);
+  const samePhase = assetPhase !== 'unknown'
+    ? competitors.filter(c => radarPhaseKey(c.phase) === assetPhase)
     : [];
 
   const intensity = sameModality.length >= 10 ? 85
@@ -500,15 +530,17 @@ async function persistIntel(
   supabase: SupabaseClient,
   asset: AssetForIntel,
   signals: IntelSignal[],
+  errors: string[],
 ): Promise<number> {
   let inserted = 0;
 
   // Deactivate old signals for this asset
-  await supabase
+  const { error: deactivateError } = await supabase
     .from('competitive_intel')
     .update({ is_active: false })
     .eq('asset_id', asset.id)
     .eq('is_active', true);
+  if (deactivateError) errors.push(`Intel deactivate error ${asset.asset_name}: ${deactivateError.message}`);
 
   // Insert new signals
   for (const signal of signals) {
@@ -533,15 +565,17 @@ async function persistIntel(
         is_active: true,
       });
 
-    if (!error) inserted++;
+    if (error) errors.push(`Intel insert error ${asset.asset_name}/${signal.type}: ${error.message}`);
+    else inserted++;
   }
 
   // Update competitive_heat on clinical_assets
   const heat = computeCompetitiveHeat(signals);
-  await supabase
+  const { error: heatError } = await supabase
     .from('clinical_assets')
     .update({ competitive_heat: heat })
     .eq('id', asset.id);
+  if (heatError) errors.push(`Heat update error ${asset.asset_name}: ${heatError.message}`);
 
   return inserted;
 }
@@ -580,7 +614,9 @@ export async function runCompetitiveIntel(
 
   const { data: assets, error: assetError } = await query.limit(200);
   if (assetError || !assets) {
-    return { assetsAnalyzed: 0, signalsDetected: 0, signalsInserted: 0, heatScoresUpdated: 0, errors: [assetError?.message || 'No assets found'], timedOut: false };
+    const message = assetError?.message || 'No assets found';
+    const logWritten = await logRadarRun(supabase, { source: 'competitive_intel', startedAt: startTime, status: 'failed', errors: [message] });
+    return { assetsAnalyzed: 0, signalsDetected: 0, signalsInserted: 0, heatScoresUpdated: 0, errors: [message], timedOut: false, logWritten };
   }
 
   for (let i = 0; i < assets.length; i += batchSize) {
@@ -595,7 +631,7 @@ export async function runCompetitiveIntel(
         const signals = await analyzeAsset(supabase, asset as AssetForIntel);
         signalsDetected += signals.length;
 
-        const persisted = await persistIntel(supabase, asset as AssetForIntel, signals);
+        const persisted = await persistIntel(supabase, asset as AssetForIntel, signals, errors);
         signalsInserted += persisted;
         if (signals.length > 0) heatScoresUpdated++;
         assetsAnalyzed++;
@@ -605,19 +641,22 @@ export async function runCompetitiveIntel(
     }
   }
 
-  const duration = Math.round((Date.now() - startTime) / 1000);
-  await supabase.from('data_ingestion_log').insert({
+  const status = deriveRunStatus({ errors: errors.length, timedOut, processed: assetsAnalyzed, produced: signalsInserted });
+  const logWritten = await logRadarRun(supabase, {
     source: 'competitive_intel',
-    status: errors.length > 0 ? 'partial' : 'success',
-    records_processed: assetsAnalyzed,
-    records_inserted: signalsInserted,
-    records_updated: heatScoresUpdated,
-    duration_seconds: duration,
-    error_details: errors.length > 0 ? errors.slice(0, 20) : null,
-    metadata: { signals_detected: signalsDetected, timed_out: timedOut },
+    startedAt: startTime,
+    status,
+    fetched: assets.length,
+    processed: assetsAnalyzed,
+    inserted: signalsInserted,
+    updated: heatScoresUpdated,
+    failed: errors.length,
+    errors,
+    parameters: { signals_detected: signalsDetected, timed_out: timedOut, min_distinct_users: MIN_DISTINCT_USERS },
   });
 
+  const duration = Math.round((Date.now() - startTime) / 1000);
   console.log(`[competitive-intel] Done: ${assetsAnalyzed} assets, ${signalsDetected} signals, ${signalsInserted} inserted, ${heatScoresUpdated} heat scores updated, ${errors.length} errors, ${duration}s${timedOut ? ' (timed out)' : ''}`);
 
-  return { assetsAnalyzed, signalsDetected, signalsInserted, heatScoresUpdated, errors, timedOut };
+  return { assetsAnalyzed, signalsDetected, signalsInserted, heatScoresUpdated, errors, timedOut, logWritten };
 }

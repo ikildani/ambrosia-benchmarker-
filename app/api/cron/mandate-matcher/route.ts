@@ -24,13 +24,22 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await runMandateMatching(supabase);
+    const status = result.errors.length > 0 || result.timedOut
+      ? 'partial'
+      : result.mandatesProcessed > 0 && result.matchesCreated === 0 && result.newMandates > 0
+        ? 'partial'
+        : 'completed';
 
     return NextResponse.json({
       success: true,
+      status,
       mandates_processed: result.mandatesProcessed,
+      new_mandates: result.newMandates,
       matches_created: result.matchesCreated,
+      error_count: result.errors.length,
       errors: result.errors.slice(0, 10),
       timed_out: result.timedOut,
+      log_written: result.logWritten,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
