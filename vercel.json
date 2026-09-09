@@ -347,12 +347,16 @@
       "schedule": "0 3 * * *"
     },
     {
+      "path": "/api/cron/ctgov-sweep",
+      "schedule": "15 * * * *"
+    },
+    {
       "path": "/api/cron/asset-universe",
-      "schedule": "30 6 * * *"
+      "schedule": "30 */2 * * *"
     },
     {
       "path": "/api/cron/licensing-signals",
-      "schedule": "0 8 * * *"
+      "schedule": "0 */4 * * *"
     },
     {
       "path": "/api/cron/deal-thesis",

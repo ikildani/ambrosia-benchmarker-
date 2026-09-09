@@ -35,8 +35,10 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   'embed-deals': { frequency: '3x-daily', expectedRunsPerWeek: 21 },
 
   // Asset Radar crons (sources written by lib/radar/run-log.ts; schedules from vercel.json)
-  'asset_universe': { frequency: 'daily', expectedRunsPerWeek: 7 },     // 30 6 * * *
-  'licensing_signals': { frequency: 'daily', expectedRunsPerWeek: 7 },  // 0 8 * * *
+  // asset_universe rows also carry parameters.stage for the sweeps that share the source
+  // (ctgov_sweep hourly, registry_sweep, drug_resolve, partnership_refresh).
+  'asset_universe': { frequency: 'every-2h', expectedRunsPerWeek: 84 },  // 30 */2 * * * + ctgov-sweep 15 * * * *
+  'licensing_signals': { frequency: 'every-4h', expectedRunsPerWeek: 42 },  // 0 */4 * * *
   'deal_thesis': { frequency: 'daily', expectedRunsPerWeek: 7 },        // 0 9 * * *
   'mandate_matcher': { frequency: 'daily', expectedRunsPerWeek: 7 },    // 0 10 * * *
   'competitive_intel': { frequency: 'daily', expectedRunsPerWeek: 7 },  // 30 10 * * *

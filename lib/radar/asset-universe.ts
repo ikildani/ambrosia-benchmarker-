@@ -599,7 +599,10 @@ async function selectCompaniesToIndex(
 
 const MAX_RUNTIME_MS = 240_000;
 const COMPANY_BATCH_SIZE = 10;
-const DEFAULT_COMPANY_LIMIT = 400;
+// 2,000 companies per run: the sponsor-agnostic CT.gov sweep creates tens of
+// thousands of sponsor companies; the 240 s time budget is the real cap and only
+// fully processed batches are stamped, so a high default is safe.
+const DEFAULT_COMPANY_LIMIT = 2000;
 const UPSERT_CHUNK_SIZE = 200;
 
 export interface IndexOptions {
