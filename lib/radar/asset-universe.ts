@@ -751,13 +751,13 @@ export async function indexAssetUniverse(
       if (isOutOfTime()) { timedOut = true; batchTimedOut = true; break; }
 
       try {
-        const partnership = await resolvePartnershipStatus(
-          supabase,
-          group.canonicalName,
-          group.companyName,
-          [...group.aliases],
-        );
-        partnershipsResolved++;
+        // Partnership status is no longer resolved here. The per-asset deal
+        // queries capped throughput at ~150 companies per run, which would
+        // take two weeks to index the 24k sponsor companies from the CT.gov
+        // sweep. lib/radar/partnership.ts refreshes it set-based every 6 h,
+        // picking never-checked rows (partnership_checked_at IS NULL) first,
+        // and the upsert below leaves the partnership_* columns untouched on
+        // existing rows.
 
         const highestPhase = resolveHighestPhase([...group.phases]);
         const totalEnrollment = group.trials.reduce((sum, t) => sum + (t.enrollment_count || 0), 0);
@@ -804,12 +804,6 @@ export async function indexAssetUniverse(
           nct_ids: [...group.nctIds],
           trial_count: group.trials.length,
           enrollment_total: totalEnrollment,
-          partnership_status: partnership.status,
-          partner_company_id: partnership.partnerCompanyId,
-          partner_company_name: partnership.partnerName,
-          deal_id: partnership.dealId,
-          deal_ids: partnership.dealIds,
-          territory_rights_available: partnership.availableTerritories,
           originator_country: geo.country,
           originator_region: geo.region,
           // TODO(migration): surface the owner type on the asset. clinical_assets
