@@ -24,6 +24,7 @@ import { inferModalityFromIntervention } from '@/lib/ingestion/clinical-trials';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 import { validateAssetData } from '@/lib/radar/validation';
 import { resolveDrugLocal } from '@/lib/radar/drug-master';
+import { normalizeKey } from '@/lib/radar/drug-name';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -737,6 +738,29 @@ export async function indexAssetUniverse(
 
     // ── Existing keys for correct inserted/updated accounting ─────────
     const companyNames = [...new Set(assetGroups.map(g => g.companyName))];
+
+    // ── Drug-alias prefilter (one query per batch, not per asset) ─────
+    // resolveDrugLocal issues at least one drug_aliases query per asset and
+    // nearly every asset misses while drug_master is small, which capped the
+    // indexer at ~120 companies per run. Fetch every candidate key for the
+    // batch in a few IN queries and only resolve groups that have a hit.
+    const aliasKeysByGroup = new Map<AssetGroup, string[]>();
+    const allAliasKeys = new Set<string>();
+    for (const g of assetGroups) {
+      const keys = [...new Set([g.canonicalName, ...g.aliases].map(n => normalizeKey(n)).filter(Boolean))];
+      aliasKeysByGroup.set(g, keys);
+      for (const k of keys) allAliasKeys.add(k);
+    }
+    const knownAliasKeys = new Set<string>();
+    const aliasKeyList = [...allAliasKeys];
+    for (let i = 0; i < aliasKeyList.length; i += 200) {
+      const { data, error } = await supabase
+        .from('drug_aliases')
+        .select('alias_normalized')
+        .in('alias_normalized', aliasKeyList.slice(i, i + 200));
+      if (error) { errors.push(`drug_aliases prefilter failed: ${error.message}`); break; }
+      for (const row of data ?? []) knownAliasKeys.add(String((row as { alias_normalized: string }).alias_normalized));
+    }
     const { keys: existingKeys, error: keysError } = await fetchExistingAssetKeys(supabase, companyNames);
     if (keysError) {
       errors.push(`Existing-asset lookup error for ${batchLabel}: ${keysError}`);
@@ -824,13 +848,15 @@ export async function indexAssetUniverse(
         // known. Misses stay 'unresolved' for the drug-resolve cron, which
         // does the external GSRS / ChEMBL / PubChem lookups.
         try {
-          const drug = await resolveDrugLocal(supabase, {
+          const drug = !(aliasKeysByGroup.get(group) ?? []).some(k => knownAliasKeys.has(k))
+            ? null
+            : await resolveDrugLocal(supabase, {
             rawName: group.canonicalName,
             otherNames: [...group.aliases],
             interventionType: group.trials[0]?.intervention_type ?? null,
             sponsorName: group.companyName,
           });
-          if (drug.drugId) {
+          if (drug && drug.drugId) {
             assetData.drug_master_id = drug.drugId;
             assetData.drug_resolution_status = drug.status;
             assetData.drug_resolution_confidence = drug.confidence;
