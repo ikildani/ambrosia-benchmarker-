@@ -1047,12 +1047,18 @@ async function resolveSponsors(
       trial_count: (existing?.trial_count ?? 0) + (ctx?.trialCount ?? 0),
     };
     // Never overwrite a hand-edited resolution on an existing alias row.
+    // Every row in a PostgREST bulk upsert must carry the same keys (missing
+    // keys are written as NULL, which both wipes the hand edit and violates
+    // the NOT NULL on relationship), so existing values are re-sent verbatim.
     if (!existing) {
       row.company_id = res.companyId;
-      row.relationship = res.relationship;
+      row.relationship = res.relationship ?? 'unknown';
     } else if (!existing.company_id && res.companyId) {
       row.company_id = res.companyId;
-      row.relationship = res.relationship;
+      row.relationship = res.relationship ?? 'unknown';
+    } else {
+      row.company_id = existing.company_id ?? null;
+      row.relationship = existing.relationship ?? 'unknown';
     }
     aliasRows.set(res.normalized, row);
   }

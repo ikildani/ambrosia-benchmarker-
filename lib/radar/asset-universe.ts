@@ -871,16 +871,31 @@ export async function indexAssetUniverse(
     }
 
     // ── Batched upsert (chunks of UPSERT_CHUNK_SIZE) ───────────────────
+    // PostgREST bulk upserts require every row to carry the same keys: a
+    // key missing from one row is written as NULL for that row, which
+    // clobbers existing values (and violates NOT NULL on
+    // drug_resolution_status). Rows are grouped by key signature so
+    // locally-resolved and unresolved assets go in separate statements.
     const rows = [...rowsByKey.values()];
-    for (let c = 0; c < rows.length; c += UPSERT_CHUNK_SIZE) {
-      const chunk = rows.slice(c, c + UPSERT_CHUNK_SIZE);
+    const bySignature = new Map<string, AssetRow[]>();
+    for (const row of rows) {
+      const sig = Object.keys(row).sort().join(',');
+      if (!bySignature.has(sig)) bySignature.set(sig, []);
+      bySignature.get(sig)!.push(row);
+    }
+    const uniformChunks: AssetRow[][] = [];
+    for (const group of bySignature.values()) {
+      for (let c = 0; c < group.length; c += UPSERT_CHUNK_SIZE) uniformChunks.push(group.slice(c, c + UPSERT_CHUNK_SIZE));
+    }
+    for (let c = 0; c < uniformChunks.length; c++) {
+      const chunk = uniformChunks[c];
       const { error: upsertError } = await supabase
         .from('clinical_assets')
         .upsert(chunk, { onConflict: 'company_name,asset_name' });
 
       if (upsertError) {
         assetsFailed += chunk.length;
-        errors.push(`Asset upsert error for ${batchLabel} chunk ${c / UPSERT_CHUNK_SIZE + 1} (${chunk.length} rows): ${upsertError.message}`);
+        errors.push(`Asset upsert error for ${batchLabel} chunk ${c + 1} (${chunk.length} rows): ${upsertError.message}`);
         continue;
       }
       for (const row of chunk) {
