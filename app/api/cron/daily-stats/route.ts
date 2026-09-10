@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { notifyDailyStats } from '@/lib/slack/notify';
 import { updateDealCountIfChanged } from '@/lib/seo/deal-count-updater';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { buildRosterMessages, classifyRosterUser, summarizeRoster } from '@/lib/slack/roster';
 
 export const maxDuration = 30;
 
@@ -93,10 +94,22 @@ export async function GET(request: NextRequest) {
       await updateDealCountIfChanged(verifiedDeals);
     }
 
+    // ── Full user roster with free / pro / trial drill-down ──
+    const { data: allUsers } = await supabase
+      .from('user_profiles')
+      .select('id, email, full_name, tier, subscription_status, pro_engagement_type, pro_activated_at, pro_expires_at, stripe_subscription_id, created_at')
+      .order('created_at', { ascending: false });
+
+    const rosterRows = allUsers || [];
+    const rosterSummary = summarizeRoster(rosterRows.map(r => classifyRosterUser(r, today)));
+
     await notifyDailyStats({
       totalUsers: totalUsers || 0,
       freeUsers: Math.max(freeUsers, 0),
       proUsers: proUsers || 0,
+      proPaidUsers: rosterSummary.proPaid,
+      proTrialUsers: rosterSummary.proTrial,
+      proTrialExpiringSoon: rosterSummary.proTrialExpiringSoon,
       reportUsers: reportUsers || 0,
       newSignupsToday: newSignupsToday || 0,
       newProToday: newProToday || 0,
@@ -105,14 +118,8 @@ export async function GET(request: NextRequest) {
       newsletterSubscribers: newsletterSubscribers || 0,
     });
 
-    // ── Full user roster with last activity ──
-    const { data: allUsers } = await supabase
-      .from('user_profiles')
-      .select('id, email, full_name, tier, created_at, updated_at')
-      .order('created_at', { ascending: false });
-
     // Get last login from Supabase Auth
-    const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 100 });
+    const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
     const loginMap = new Map<string, string | null>();
     for (const au of authData?.users || []) {
       if (au.email) loginMap.set(au.email.toLowerCase(), au.last_sign_in_at || null);
@@ -134,33 +141,21 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Send full user roster to Slack
+    // Send roster to Slack, grouped: Pro trial (with expiry) / Pro paid / Report / Free
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-    if (webhookUrl && allUsers && allUsers.length > 0) {
-      const userLines = allUsers.map(u => {
-        const tier = (u.tier || 'free').toUpperCase();
-        const joined = new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const lastLogin = loginMap.get(u.email?.toLowerCase());
-        const loginStr = lastLogin ? new Date(lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never';
-        const lastCalc = lastCalcMap.get(u.id);
-        const calcStr = lastCalc ? new Date(lastCalc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never';
-        return `${u.email} | ${tier} | Joined ${joined} | Login: ${loginStr} | Calc: ${calcStr}`;
-      }).join('\n');
-
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: 'Daily User Roster',
-          attachments: [{
-            color: '#2563eb',
-            blocks: [
-              { type: 'header', text: { type: 'plain_text', text: 'All Users — Daily Roster' } },
-              { type: 'section', text: { type: 'mrkdwn', text: '```\n' + userLines + '\n```' } },
-            ],
-          }],
-        }),
-      }).then(() => {}, () => {});
+    if (webhookUrl && rosterRows.length > 0) {
+      const messages = buildRosterMessages(
+        rosterRows,
+        { lastLoginByEmail: loginMap, lastCalcByUserId: lastCalcMap },
+        today,
+      );
+      for (const message of messages) {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(message),
+        }).then(() => {}, () => {});
+      }
     }
 
     // Intelligence tracking
@@ -177,6 +172,9 @@ export async function GET(request: NextRequest) {
         totalUsers: totalUsers || 0,
         freeUsers: Math.max(freeUsers, 0),
         proUsers: proUsers || 0,
+        proPaidUsers: rosterSummary.proPaid,
+        proTrialUsers: rosterSummary.proTrial,
+        proTrialExpiringSoon: rosterSummary.proTrialExpiringSoon,
         reportUsers: reportUsers || 0,
       },
     });

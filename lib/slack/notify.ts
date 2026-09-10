@@ -284,6 +284,12 @@ export async function notifyDailyStats(stats: {
   totalUsers: number;
   freeUsers: number;
   proUsers: number;
+  /** Pro users with a paid subscription or engagement (not on trial). */
+  proPaidUsers?: number;
+  /** Pro users currently on a trial (Stripe trialing or in-app trial). */
+  proTrialUsers?: number;
+  /** Trials expiring within 3 days (or already past, pending downgrade). */
+  proTrialExpiringSoon?: number;
   reportUsers: number;
   newSignupsToday: number;
   newProToday: number;
@@ -292,6 +298,12 @@ export async function notifyDailyStats(stats: {
   newsletterSubscribers: number;
 }): Promise<void> {
   const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const hasTrialBreakdown = stats.proPaidUsers !== undefined && stats.proTrialUsers !== undefined;
+  const proLine = hasTrialBreakdown
+    ? `├ Pro: ${stats.proUsers.toLocaleString()}  (paid ${stats.proPaidUsers!.toLocaleString()} · trial ${stats.proTrialUsers!.toLocaleString()}${stats.proTrialExpiringSoon ? ` · ${stats.proTrialExpiringSoon} expiring ≤3d` : ''})`
+    : `├ Pro: ${stats.proUsers.toLocaleString()}`;
+  // MRR only counts paid Pro seats — trials do not bill.
+  const billableProUsers = hasTrialBreakdown ? stats.proPaidUsers! : stats.proUsers;
 
   await postToSlack(
     [{
@@ -306,7 +318,7 @@ export async function notifyDailyStats(stats: {
             text: [
               `*Total Users:* ${stats.totalUsers.toLocaleString()}`,
               `├ Free: ${stats.freeUsers.toLocaleString()}`,
-              `├ Pro: ${stats.proUsers.toLocaleString()}`,
+              proLine,
               `└ Report: ${stats.reportUsers.toLocaleString()}`,
             ].join('\n'),
           },
@@ -324,12 +336,12 @@ export async function notifyDailyStats(stats: {
         {
           type: 'context',
           elements: [
-            { type: 'mrkdwn', text: `Newsletter subscribers: ${stats.newsletterSubscribers.toLocaleString()} | Pro MRR: $${(stats.proUsers * PRICING.PRO_PRICE_NUM).toLocaleString()}/mo` },
+            { type: 'mrkdwn', text: `Newsletter subscribers: ${stats.newsletterSubscribers.toLocaleString()} | Pro MRR: $${(billableProUsers * PRICING.PRO_PRICE_NUM).toLocaleString()}/mo` },
           ],
         },
       ],
     }],
-    `Daily stats: ${stats.totalUsers} users (${stats.freeUsers} free, ${stats.proUsers} pro, ${stats.reportUsers} report) | ${stats.newSignupsToday} new today`,
+    `Daily stats: ${stats.totalUsers} users (${stats.freeUsers} free, ${stats.proUsers} pro${hasTrialBreakdown ? ` [${stats.proPaidUsers} paid / ${stats.proTrialUsers} trial]` : ''}, ${stats.reportUsers} report) | ${stats.newSignupsToday} new today`,
   );
 }
 
