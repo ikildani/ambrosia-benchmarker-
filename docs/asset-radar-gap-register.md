@@ -44,6 +44,19 @@ Audit date: September 9, 2026. Five parallel audits (universe, scoring, thesis/f
 
 Migrations applied to production Sep 9: 092, 093, 101, 102, 103, 104 (plus 079 earlier the same night).
 
+## Phase 2 status (shipped Sep 9 to 10)
+
+| Piece | State on Sep 10 |
+|---|---|
+| Sponsor-agnostic CT.gov sweep | Caught up in one day: 229,919 trials, 501,802 interventions, 23,421 sponsor companies created, 13,316 sponsor aliases. Now runs every 6 hours. |
+| Drug master | 2,099 drug nodes, 2,392 assets resolved; drug-resolve cron every 2 hours at ~150 external resolutions per run. |
+| Registries | CTIS, ISRCTN, Health Canada, IRCT, ReBEC, DRKS, jRCT, CRIS sweeping on cursors, ~500 trials per 2-hour run. MFDS needs `MFDS_API_KEY`; ANZCTR needs `ANZCTR_API_USER` / `ANZCTR_API_PASSWORD`. CDE, ChiCTR, CTRI, PACTR, MyTrial need the off-Vercel Playwright worker. |
+| Partnership refresh | Running every 6 hours; legacy substring "partnered" rows being re-evaluated. |
+| Press releases | Persisted every 2 hours with company resolution; Endpoints, STAT, Labiotech backfilling by page; GlobeNewswire archive is not pageable. |
+| Universe indexer | Was blocked for a day by a cursor-RPC timeout (11.4 s, fixed to 19 ms in migration 110) and a NULL-key upsert bug; both fixed Sep 10 20:54 UTC. Expect the asset count to climb from 6,409 toward 15,000+ over the following days at 2,000 companies per 2-hour run. |
+
+Migrations applied Sep 9 to 10: 105 to 110.
+
 ## P1 — build plan, in order
 
 ### Phase 2: universe to 30,000+ across every geography (weeks 1 to 4)
