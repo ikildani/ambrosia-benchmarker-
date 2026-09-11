@@ -1774,12 +1774,22 @@ export async function detectLicensingSignals(
 
   if (options?.assetIds?.length) assetQuery = assetQuery.in('id', options.assetIds);
 
-  const { data: assetRows, error: assetError } = await assetQuery.limit(limit);
-  if (assetError) {
-    errors.push(`queue fetch: ${assetError.message}`);
-    return finish(0, 'queue fetch failed');
+  // PostgREST caps an unranged select at 1,000 rows regardless of .limit(),
+  // so the queue is paged with .range() up to the requested limit.
+  const assets: AssetForScoring[] = [];
+  const QUEUE_PAGE = 1000;
+  for (let from = 0; from < limit; from += QUEUE_PAGE) {
+    const to = Math.min(from + QUEUE_PAGE, limit) - 1;
+    const { data: pageRows, error: assetError } = await assetQuery.range(from, to);
+    if (assetError) {
+      errors.push(`queue fetch: ${assetError.message}`);
+      if (assets.length === 0) return finish(0, 'queue fetch failed');
+      break;
+    }
+    const page = (pageRows ?? []) as AssetForScoring[];
+    assets.push(...page);
+    if (page.length < to - from + 1) break;
   }
-  const assets = (assetRows ?? []) as AssetForScoring[];
   if (assets.length === 0) return finish(0, 'queue empty');
 
   // ── Group by company, then pack companies into waves ──

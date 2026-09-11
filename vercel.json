@@ -376,7 +376,7 @@
     },
     {
       "path": "/api/cron/licensing-signals",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/cron/deal-thesis",
