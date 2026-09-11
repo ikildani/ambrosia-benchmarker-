@@ -31,6 +31,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { pgArrayLiteral } from '@/lib/radar/pg-array';
 import { createHash } from 'crypto';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 
@@ -1365,7 +1366,7 @@ async function fetchCompanyEvidence(
   const prRes = await supabase
     .from('press_releases')
     .select('id, headline, body_text, published_at, source_url, companies_mentioned')
-    .overlaps('companies_mentioned', companyNames)
+    .overlaps('companies_mentioned', pgArrayLiteral(companyNames))
     .gte('published_at', twelveMonthsAgoIso)
     .order('published_at', { ascending: false })
     .limit(2000);

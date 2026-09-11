@@ -28,6 +28,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { pgArrayLiteral } from '@/lib/radar/pg-array';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -1038,7 +1039,7 @@ export async function refreshPartnershipBatch(
     const res = await supabase
       .from('press_releases')
       .select('id, headline, body_text, published_at, source_url, companies_mentioned, company_ids')
-      .overlaps('companies_mentioned', names)
+      .overlaps('companies_mentioned', pgArrayLiteral(names))
       .overlaps('categories', ['licensing', 'm&a'])
       .gte('published_at', pressCutoff.toISOString())
       .order('published_at', { ascending: false })
