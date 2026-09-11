@@ -518,6 +518,9 @@ async function fetchInterventionsForCompanies(
       .from('trial_interventions')
       .select(INTERVENTION_COLUMNS)
       .in('company_id', companyIds)
+      // Order must match idx_trial_interventions_company_nct_name (migration
+      // 111) so paging is an index walk instead of a re-sort per page.
+      .order('company_id', { ascending: true })
       .order('nct_id', { ascending: true })
       .order('name_normalized', { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
