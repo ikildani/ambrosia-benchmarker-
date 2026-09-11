@@ -600,7 +600,10 @@ async function selectCompaniesToIndex(
 // ═══════════════════════════════════════════════════════════════════════
 
 const MAX_RUNTIME_MS = 240_000;
-const COMPANY_BATCH_SIZE = 10;
+// 50 companies per batch: each batch costs a fixed set of round trips (trials,
+// interventions, existing keys, alias prefilter, stamp); at 10 the indexer
+// managed ~250 companies per 240 s run against the 24k-company backlog.
+const COMPANY_BATCH_SIZE = 50;
 // 2,000 companies per run: the sponsor-agnostic CT.gov sweep creates tens of
 // thousands of sponsor companies; the 240 s time budget is the real cap and only
 // fully processed batches are stamped, so a high default is safe.
