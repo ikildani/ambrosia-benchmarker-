@@ -893,6 +893,15 @@ export interface MonteCarloInput {
    * Default 0.15 means pricing sampled +/- 15% of base.
    */
   pricingVariation?: number;
+
+  /**
+   * Main engine risk-adjusted NPV ($M). When supplied, the sampled
+   * distribution is recentred so its median equals this value (scaled when
+   * signs agree and the factor is moderate, otherwise shifted additively).
+   * The sampler is a reduced model whose own baseline sits 2-3x above the
+   * main engine; without recentring the two disagree on every run.
+   */
+  engineRNPV?: number;
 }
 
 /**
@@ -951,6 +960,20 @@ export interface MonteCarloResult {
    * bear..bull envelope; a P50 outside it indicates a sampling fault.
    */
   samplerEnvelope?: { bear: number; base: number; bull: number };
+  /**
+   * How the distribution was recentred onto the main engine. `samplerP50`
+   * is the sampler's own median before recentring; afterwards the published
+   * P50 equals `engineRNPV` to rounding. `method` is 'none' when no
+   * engineRNPV was supplied. `factor` is a multiplier for 'scale' and an
+   * additive delta ($M) for 'shift'.
+   */
+  recentering?: {
+    method: 'scale' | 'shift' | 'none';
+    factor: number;
+    samplerBaseline: number;
+    samplerP50: number;
+    engineRNPV: number | null;
+  };
 
   /** Fraction of iterations yielding a positive NPV (0-1) */
   probabilityOfPositiveNPV: number;

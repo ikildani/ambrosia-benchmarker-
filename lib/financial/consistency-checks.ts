@@ -10,6 +10,7 @@
  * least one is wrong — and that's a finding worth surfacing to Sentry.
  */
 
+import { applyRecentering } from './monte-carlo';
 import type {
   RNPVResult,
   MonteCarloResult,
@@ -53,54 +54,42 @@ export function checkCrossEngineConsistency(
   const mainRnpv = rnpv.riskAdjustedNPV;
   const mainDealMedian = rnpv.impliedDealValue?.totalDeal?.median;
 
-  // 1. CRITICAL: MC P50 must fall inside the sampler's own deterministic
-  //    bear..bull envelope (same reduced model, scenario-shifted inputs, no
-  //    noise). The sampler is a simplified engine with its own phase
-  //    durations, revenue curve and PoS tables, so comparing its median to the
-  //    full engine's rNPV measured model divergence, not a sampling fault, and
-  //    fired on every run. An early-stage mixture (bear weight 40%) also has a
-  //    P50 legitimately below its base scenario, so a single-point tolerance
-  //    is wrong; the envelope is the invariant a sampling bug would break.
+  // 1. CRITICAL: MC P50 must equal the main engine rNPV within 30% once the
+  //    distribution has been recentred on the engine (monte-carlo.ts). The
+  //    sampler is a reduced model whose own baseline sits 2-3x above the
+  //    engine, so this rule applies only when recentring ran; without it the
+  //    comparison measured model divergence and fired on every run.
   const mcP50 = monteCarlo.percentiles?.p50;
+  const rc = monteCarlo.recentering;
+  const recentred = !!rc && rc.method !== 'none';
+  if (recentred && Number.isFinite(mainRnpv) && Number.isFinite(mcP50) && Math.abs(mainRnpv) > 5) {
+    const divergence = Math.abs(mainRnpv - mcP50) / Math.abs(mainRnpv);
+    if (divergence > 0.30) {
+      out.push(
+        v('critical', 'consistency.main_vs_mc_p50',
+          `MC P50 $${mcP50.toFixed(0)}M diverges from main rNPV $${mainRnpv.toFixed(0)}M by ${(divergence * 100).toFixed(0)}% after recentring (tolerance: 30%).`,
+          { mainRnpv, mcP50, divergence, recentering: rc }),
+      );
+    }
+  }
+
+  // 1b. CRITICAL: MC P50 must fall inside the sampler's own deterministic
+  //     bear..bull envelope, mapped through the same recentring. An
+  //     early-stage mixture (bear weight 40%) legitimately has a P50 below its
+  //     base scenario, so the envelope, not a single point, is the invariant
+  //     a sampling fault would break.
   const envelope = monteCarlo.samplerEnvelope;
   if (envelope && Number.isFinite(envelope.bear) && Number.isFinite(envelope.bull) && Number.isFinite(mcP50)) {
-    const lo = Math.min(envelope.bear, envelope.bull);
-    const hi = Math.max(envelope.bear, envelope.bull);
+    const e1 = applyRecentering(envelope.bear, rc);
+    const e2 = applyRecentering(envelope.bull, rc);
+    const lo = Math.min(e1, e2);
+    const hi = Math.max(e1, e2);
     const tol = Math.max(2, 0.05 * (hi - lo));
     if (mcP50 < lo - tol || mcP50 > hi + tol) {
       out.push(
         v('critical', 'consistency.mc_p50_outside_sampler_envelope',
           `MC P50 $${mcP50.toFixed(0)}M lies outside the sampler's deterministic bear..bull envelope $${lo.toFixed(0)}M..$${hi.toFixed(0)}M (tolerance ±$${tol.toFixed(0)}M).`,
-          { mcP50, envelope, tolerance: tol }),
-      );
-    }
-  }
-
-  // 1a. WARNING: P50 vs the sampler's base-scenario evaluation. Wide for early
-  //     stages by construction (bear-weighted mixture); informational.
-  const samplerBaseline = monteCarlo.samplerBaseline;
-  if (Number.isFinite(samplerBaseline) && Number.isFinite(mcP50) && Math.abs(samplerBaseline as number) > 5) {
-    const base = samplerBaseline as number;
-    const divergence = Math.abs(base - mcP50) / Math.abs(base);
-    if (divergence > 0.30) {
-      out.push(
-        v('warning', 'consistency.mc_p50_vs_sampler_baseline',
-          `MC P50 $${mcP50.toFixed(0)}M vs sampler base-scenario $${base.toFixed(0)}M: ${(divergence * 100).toFixed(0)}% (mixture skew, informational).`,
-          { mcP50, samplerBaseline: base, divergence }),
-      );
-    }
-  }
-
-  // 1b. WARNING: Main engine rNPV vs MC P50, informational model divergence.
-  //     Expected to be wide for early-stage assets whose rNPV is a small
-  //     residual of large revenue and cost terms.
-  if (Number.isFinite(mainRnpv) && Number.isFinite(mcP50) && Math.abs(mainRnpv) > 5) {
-    const divergence = Math.abs(mainRnpv - mcP50) / Math.abs(mainRnpv);
-    if (divergence > 0.30) {
-      out.push(
-        v('warning', 'consistency.main_vs_mc_p50',
-          `Main rNPV $${mainRnpv.toFixed(0)}M vs MC P50 $${mcP50.toFixed(0)}M: ${(divergence * 100).toFixed(0)}% model divergence (informational).`,
-          { mainRnpv, mcP50, divergence }),
+          { mcP50, envelope: { lo, hi }, recentering: rc, tolerance: tol }),
       );
     }
   }

@@ -347,7 +347,9 @@ export function runFinancialModel(
   const rnpv = calculateRNPV(rnpvInput);
 
   // Step 3: Monte Carlo simulation (10K iterations, seeded for reproducibility)
-  const monteCarlo = runMonteCarlo({ rnpvInput }, 42);
+  // Recentre the sampler's distribution on the engine's rNPV so both engines
+  // publish the same point estimate (see monte-carlo.ts, recentering).
+  const monteCarlo = runMonteCarlo({ rnpvInput, engineRNPV: rnpv.riskAdjustedNPV }, 42);
 
   // Step 4: FX sensitivity (use peak annual revenue, not lifetime sum)
   const baseRevenue = rnpv.cashFlows.length > 0

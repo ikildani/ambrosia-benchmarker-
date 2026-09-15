@@ -151,12 +151,22 @@ describe('4. codev headline is monotonic in rNPV', () => {
   });
 });
 
-describe('5. Monte Carlo P50 is measured against the sampler envelope', () => {
-  it.each([phase2NSCLC, phase1GastricADCCodev, preclinicalCNS])('no critical P50 rule on %#', input => {
+describe('5. Monte Carlo is recentred on the engine and its P50 rule is meaningful', () => {
+  it.each([phase2NSCLC, phase1GastricADCCodev, preclinicalCNS])('P50 equals the engine rNPV within 30% on %#', input => {
     const rnpv = calculateRNPV(input);
-    const mc = runMonteCarlo({ rnpvInput: input }, 42);
+    const mc = runMonteCarlo({ rnpvInput: input, engineRNPV: rnpv.riskAdjustedNPV }, 42);
     expect(Number.isFinite(mc.samplerBaseline)).toBe(true);
     expect(mc.samplerEnvelope).toBeDefined();
+    expect(mc.recentering).toBeDefined();
+    expect(mc.recentering!.method).not.toBe('none');
+    if (Math.abs(rnpv.riskAdjustedNPV) > 5) {
+      const divergence = Math.abs(mc.percentiles.p50 - rnpv.riskAdjustedNPV) / Math.abs(rnpv.riskAdjustedNPV);
+      expect(divergence).toBeLessThanOrEqual(0.30);
+    }
+    // Percentile ordering survives recentring.
+    const p = mc.percentiles;
+    expect(p.p10).toBeLessThanOrEqual(p.p50);
+    expect(p.p50).toBeLessThanOrEqual(p.p90);
     const violations = checkCrossEngineConsistency(
       rnpv,
       mc,
@@ -168,10 +178,31 @@ describe('5. Monte Carlo P50 is measured against the sampler envelope', () => {
     const criticalRules = violations.filter(v => v.severity === 'critical').map(v => v.rule);
     expect(criticalRules).not.toContain('consistency.main_vs_mc_p50');
     expect(criticalRules).not.toContain('consistency.mc_p50_outside_sampler_envelope');
-    expect(criticalRules).not.toContain('consistency.mc_p50_vs_sampler_baseline');
-    // Model divergence is still visible, as a warning.
-    const info = violations.find(v => v.rule === 'consistency.main_vs_mc_p50');
-    if (info) expect(info.severity).toBe('warning');
+  });
+
+  it('without an engine rNPV the sampler is left alone and only the envelope rule applies', () => {
+    const rnpv = calculateRNPV(phase2NSCLC);
+    const mc = runMonteCarlo({ rnpvInput: phase2NSCLC }, 42);
+    expect(mc.recentering!.method).toBe('none');
+    const criticalRules = checkCrossEngineConsistency(
+      rnpv, mc, undefined,
+      generateScenarioComparison(phase2NSCLC, rnpv, calculateRNPV),
+      buildDealWaterfall(phase2NSCLC, rnpv), undefined,
+    ).filter(v => v.severity === 'critical').map(v => v.rule);
+    expect(criticalRules).not.toContain('consistency.main_vs_mc_p50');
+    expect(criticalRules).not.toContain('consistency.mc_p50_outside_sampler_envelope');
+  });
+
+  it('a recentred distribution that drifts from the engine is caught', () => {
+    const rnpv = calculateRNPV(phase2NSCLC);
+    const mc = runMonteCarlo({ rnpvInput: phase2NSCLC, engineRNPV: rnpv.riskAdjustedNPV }, 42);
+    const drifted = { ...mc, percentiles: { ...mc.percentiles, p50: rnpv.riskAdjustedNPV * 2 } };
+    const rules = checkCrossEngineConsistency(
+      rnpv, drifted, undefined,
+      generateScenarioComparison(phase2NSCLC, rnpv, calculateRNPV),
+      buildDealWaterfall(phase2NSCLC, rnpv), undefined,
+    ).filter(v => v.severity === 'critical').map(v => v.rule);
+    expect(rules).toContain('consistency.main_vs_mc_p50');
   });
 });
 
