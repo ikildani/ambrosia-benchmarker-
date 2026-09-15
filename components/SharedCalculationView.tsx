@@ -2,12 +2,9 @@
 
 import { CalculationResult, formatCurrency, formatRange } from '@/lib/calculations';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { buildMethodStatement, METHOD_COPY, type ShareFinancialSummary } from '@/lib/financial/method-copy';
 
-interface FinancialSummary {
-  riskAdjustedNPV: number;
-  confidenceInterval80: { low: number; high: number };
-  cumulativePoS: number;
-}
+type FinancialSummary = ShareFinancialSummary;
 
 interface SharedCalculationViewProps {
   results: CalculationResult;
@@ -44,8 +41,8 @@ export default function SharedCalculationView({ results, labels, financialSummar
 
   return (
     <div className="space-y-4">
-      {/* ── Valuation Headline (R24): rNPV + 80% CI band + PoS ── */}
-      {financialSummary && (
+      {/* ── Headline: blended fair value (ensemble) with its methods ── */}
+      {financialSummary?.ensemble && financialSummary.ensemble.valueM > 0 && (
         <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15]">
           <div className="flex items-center justify-between mb-4 md:mb-5">
             <div className="flex items-center gap-3">
@@ -55,34 +52,59 @@ export default function SharedCalculationView({ results, labels, financialSummar
                 </svg>
               </Icon>
               <div>
-                <p className="text-sm font-semibold text-slate-300">Risk-Adjusted NPV (rNPV)</p>
-                <p className="hidden md:block text-[11px] text-slate-400 mt-0.5">Valuation with 80% confidence band (P10 – P90) from Monte Carlo</p>
+                <p className="text-sm font-semibold text-slate-300">Blended Fair Value</p>
+                <p className="hidden md:block text-[11px] text-slate-400 mt-0.5">Three methods weighed by how tightly each is known</p>
               </div>
             </div>
-            <Tag>Institutional</Tag>
+            <Tag c={financialSummary.ensemble.agreement === 'tight' ? 'emerald' : financialSummary.ensemble.agreement === 'moderate' ? 'teal' : 'cyan'}>
+              {financialSummary.ensemble.agreement === 'tight' ? 'Methods agree' : financialSummary.ensemble.agreement === 'moderate' ? 'Moderate spread' : 'Wide spread'}
+            </Tag>
           </div>
-          {/* Mobile: stacked layout. Desktop: grid */}
-          <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-5 md:items-end">
+          <div className="md:grid md:grid-cols-3 md:gap-5 md:items-end">
             <div className="md:col-span-2">
               <p className="text-3xl md:text-4xl lg:text-5xl font-black text-teal-400 tracking-tight font-mono">
-                {formatCurrency(financialSummary.riskAdjustedNPV)}
+                {formatCurrency(financialSummary.ensemble.valueM)}
               </p>
+              {financialSummary.ensemble.stdDevM > 0 && (
+                <p className="text-sm text-slate-400 mt-2 font-mono">± {formatCurrency(financialSummary.ensemble.stdDevM)} standard error</p>
+              )}
             </div>
-            {/* CI band — full width on mobile */}
-            <div className="md:hidden rounded-lg bg-white/[0.04] border border-white/[0.06] p-3">
-              <p className="text-lg font-semibold text-slate-300 font-mono">
-                80% CI: {formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}
-              </p>
-              <p className="text-xs text-slate-400 mt-1">P10 – P90 from Monte Carlo simulation</p>
+            <div className="text-left md:text-right mt-3 md:mt-0">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Probability of approval</p>
+              <p className="text-2xl font-black text-white tracking-tight font-mono">{Math.round(financialSummary.cumulativePoS * 100)}%</p>
             </div>
-            <p className="hidden md:block text-sm text-slate-400 mt-2 font-mono md:col-span-2">
-              80% CI: <span className="text-slate-300">{formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}</span>
-            </p>
-            <div className="text-left md:text-right">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cumulative PoS</p>
-              <p className="text-2xl font-black text-white tracking-tight font-mono">
-                {Math.round(financialSummary.cumulativePoS * 100)}%
-              </p>
+          </div>
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {[...financialSummary.ensemble.methods].sort((x, y) => y.weight - x.weight).map(m => (
+              <div key={m.name} className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-3">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{m.name === 'rNPV' ? 'Risk-adjusted NPV' : m.name}</p>
+                <p className="text-lg font-semibold text-slate-100 font-mono mt-1">{formatCurrency(m.valueM)}</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {Math.round(m.weight * 100)}% of the blend
+                  {m.name === 'Comparable Transactions' && m.sampleSize ? ` · ${m.sampleSize} deals` : ''}
+                  {m.name === 'rNPV' ? ` · ${Math.round(financialSummary.cumulativePoS * 100)}% PoS` : ''}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Legacy headline: rNPV + 80% band, for shares saved before the blend existed ── */}
+      {financialSummary && !financialSummary.ensemble && financialSummary.riskAdjustedNPV > 0 && (
+        <div className="p-4 md:p-6 rounded-2xl bg-gradient-to-br from-teal-500/[0.08] to-cyan-500/[0.04] border border-teal-500/[0.15]">
+          <div className="flex items-center justify-between mb-4 md:mb-5">
+            <p className="text-sm font-semibold text-slate-300">Risk-Adjusted NPV</p>
+            <Tag>Institutional</Tag>
+          </div>
+          <div className="md:grid md:grid-cols-3 md:gap-5 md:items-end">
+            <div className="md:col-span-2">
+              <p className="text-3xl md:text-4xl lg:text-5xl font-black text-teal-400 tracking-tight font-mono">{formatCurrency(financialSummary.riskAdjustedNPV)}</p>
+              <p className="text-sm text-slate-400 mt-2 font-mono">80% band: <span className="text-slate-300">{formatCurrency(financialSummary.confidenceInterval80.low)} – {formatCurrency(financialSummary.confidenceInterval80.high)}</span></p>
+            </div>
+            <div className="text-left md:text-right mt-3 md:mt-0">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Probability of approval</p>
+              <p className="text-2xl font-black text-white tracking-tight font-mono">{Math.round(financialSummary.cumulativePoS * 100)}%</p>
             </div>
           </div>
         </div>
@@ -119,6 +141,19 @@ export default function SharedCalculationView({ results, labels, financialSummar
           <p className="text-sm text-slate-400 mt-1.5">Expected: <span className="font-bold text-emerald-400">{formatCurrency(terms.totalDealValue.median)}</span></p>
           <Bar pct={85} color="from-emerald-500 to-emerald-400" />
         </div>
+      </div>
+
+      {/* ── How this number was produced ── */}
+      <div className="p-4 md:p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
+        <p className="text-sm font-semibold text-slate-300 mb-3">{METHOD_COPY.heading}</p>
+        <dl className="space-y-3">
+          {buildMethodStatement({ summary: financialSummary ?? null, benchmarkSampleSize: results.drillDown?.totalDealValue?.baseline?.sampleSize ?? null, phaseLabel: labels.phase }).map(line => (
+            <div key={line.label}>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{line.label}</dt>
+              <dd className="text-sm text-slate-300 mt-1 leading-relaxed">{line.text}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
       {/* ── Deal Structure ── */}
