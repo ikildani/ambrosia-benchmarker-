@@ -163,6 +163,11 @@ describe('zero-calc and win-back tracks', () => {
     expect(e.subject).toBe('NSCLC terms have moved since May');
     expect(e.text).toContain('I have reopened Pro on your account for seven days, no card.');
   });
+  it('win-back T1 does not claim the set has grown when there are no comps', () => {
+    const e = buildTouch('winback', 't1', ctx({ profile: { ...profile, proEngagementType: 'winback-sep2026' }, comps: [], indicationDealCount: 0 }));
+    expect(e.text).not.toContain('set has grown');
+    expect(e.text).toContain('Partner matching now shows buyer intent');
+  });
   it('win-back T2 names the closing weekday', () => {
     const e = buildTouch('winback', 't2', ctx({ profile: { ...profile, proEngagementType: 'winback-sep2026', proExpiresAt: '2026-09-16T03:00:00.000Z' } }));
     expect(e.text).toContain('closes Wednesday');

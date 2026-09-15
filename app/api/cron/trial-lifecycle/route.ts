@@ -203,7 +203,9 @@ export async function GET(request: NextRequest) {
         .eq('therapeutic_area', calc.therapeuticArea)
         .not('upfront_usd', 'is', null)
         .gt('upfront_usd', 0);
-      if (term) q = q.or(`indication_specific.ilike.%${term}%,asset_description.ilike.%${term}%`);
+      // Match the exact key (rows store keys like "ms") or the words a press
+      // release would use (asset descriptions say "multiple sclerosis").
+      if (term) q = q.or(`indication_specific.eq.${calc.indication},indication_specific.ilike.%${term}%,asset_description.ilike.%${term}%`);
       const { data, count } = await q
         .order('verified', { ascending: false })
         .order('announced_date', { ascending: false })

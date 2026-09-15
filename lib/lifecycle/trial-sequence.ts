@@ -608,7 +608,7 @@ function winbackT1(ctx: SequenceContext, calc: SequenceCalculation | null): Sequ
     '',
     `${factSentence(ctx, calc)} ${stageSentence(calc)}`,
     '',
-    `I have reopened Pro on your account for seven days, no card. The ${ind} set has grown since ${since} and partner matching now shows buyer intent, so it is worth a second look:`,
+    `I have reopened Pro on your account for seven days, no card. ${ctx.comps.length > 0 ? `The ${ind} set has grown since ${since} and partner` : 'Partner'} matching now shows buyer intent, so it is worth a second look:`,
     '',
     cta,
     '',
