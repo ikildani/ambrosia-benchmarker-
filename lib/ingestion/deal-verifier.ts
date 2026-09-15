@@ -84,6 +84,13 @@ export function extractCitationUrls(data: unknown): string[] {
   if (Array.isArray(d.search_results)) d.search_results.forEach(push);
   if (Array.isArray(d.output)) {
     for (const item of d.output as Array<Record<string, unknown>>) {
+      // Responses API (fast-search preset, observed 2026-09): citations arrive as
+      // a separate output item `{ type: 'search_results', results: [{ url }] }`
+      // and `annotations` on the message are empty. Before this branch the
+      // verifier never saw a citation and sourceUrlsAdded stayed at zero.
+      if (item?.type === 'search_results' && Array.isArray(item.results)) {
+        (item.results as unknown[]).forEach(push);
+      }
       for (const content of (Array.isArray(item?.content) ? item.content : []) as Array<Record<string, unknown>>) {
         for (const ann of (Array.isArray(content?.annotations) ? content.annotations : []) as Array<Record<string, unknown>>) {
           if (ann?.type === 'url_citation') push(ann);
