@@ -21,7 +21,8 @@ const MAX_EMAILS_PER_RUN = 50;
 //   Day 5-7:  "Still benchmarking?" — social proof + data hook
 //   Day 12-14: "Last chance" — limited-time incentive
 //
-// Dedup: tracks via events table (post_trial_drip_day1, _day5, _day12)
+// Dedup: tracks via events table (post_trial_drip_day1, _day5). Any account the
+// founder-led trial sequence has touched (trial_seq_*) is skipped entirely.
 // ---------------------------------------------------------------------------
 
 interface ExpiredTrialUser {
@@ -169,60 +170,7 @@ function buildDay5Email(firstName: string, topTa: string, recentDealCount: numbe
   };
 }
 
-function buildDay12Email(firstName: string): { subject: string; html: string } {
-  const name = firstName || 'there';
-
-  return {
-    subject: 'Last chance: 20% off your first month of Pro',
-    html: `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0; padding:0; background-color:#0b1120; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <div style="max-width:600px; margin:0 auto; padding:24px;">
-    <div style="text-align:center; padding:32px 24px; background:linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); border-radius:16px 16px 0 0; border:1px solid #1e3a5f; border-bottom:none;">
-      <img src="${BASE_URL}/icon-color.png" alt="Ambrosia Ventures" width="48" height="48" style="margin-bottom:16px;">
-      <h1 style="color:#fff; margin:0; font-size:22px; font-weight:700;">Last Chance</h1>
-      <p style="color:#f59e0b; margin:8px 0 0; font-size:14px; font-weight:600;">20% off expires soon</p>
-    </div>
-
-    <div style="background:#111827; padding:32px; border:1px solid #1e3a5f; border-top:none; border-radius:0 0 16px 16px;">
-      <p style="color:#e2e8f0; font-size:16px; margin:0 0 16px;">Hi ${name},</p>
-
-      <p style="color:#94a3b8; font-size:15px; line-height:1.7; margin:0 0 16px;">
-        Your Pro trial ended two weeks ago. Before we close this out, we wanted to offer you something we don't usually do:
-      </p>
-
-      <div style="background:linear-gradient(135deg, rgba(20,184,166,0.1) 0%, rgba(6,182,212,0.1) 100%); border:1px solid rgba(20,184,166,0.3); border-radius:12px; padding:24px; margin:20px 0; text-align:center;">
-        <p style="color:#14b8a6; font-size:24px; font-weight:700; margin:0;">20% Off Your First Month</p>
-        <p style="color:#94a3b8; font-size:14px; margin:8px 0 0;">Use code <strong style="color:#e2e8f0; background:#0f172a; padding:2px 8px; border-radius:4px; font-family:monospace;">COMEBACK20</strong> at checkout</p>
-        <p style="color:#64748b; font-size:13px; margin:8px 0 0;">Applies to monthly or annual plans</p>
-      </div>
-
-      <p style="color:#94a3b8; font-size:15px; line-height:1.7; margin:16px 0;">
-        This is the last email we'll send about your trial. If now isn't the right time, no worries — you can always come back.
-      </p>
-
-      <div style="text-align:center; margin:28px 0;">
-        <a href="${BASE_URL}/pro?promo=COMEBACK20" style="display:inline-block; background:linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%); color:#fff; padding:14px 36px; text-decoration:none; border-radius:12px; font-weight:600; font-size:15px;">
-          Reactivate with 20% Off
-        </a>
-      </div>
-
-      <p style="color:#94a3b8; font-size:15px; margin:20px 0 0;">
-        Best,<br>
-        <strong style="color:#e2e8f0;">The Ambrosia Ventures Team</strong>
-      </p>
-    </div>
-
-    <div style="text-align:center; padding:24px; color:#475569; font-size:12px; line-height:1.5;">
-      <p style="margin:0;">Ambrosia Ventures | <a href="https://ambrosiaventures.co" style="color:#14b8a6; text-decoration:none;">ambrosiaventures.co</a></p>
-      <p style="margin:8px 0 0;"><a href="${BASE_URL}/unsubscribe" style="color:#475569; text-decoration:underline;">Unsubscribe</a></p>
-    </div>
-  </div>
-</body>
-</html>`,
-  };
-}
+// Day-12 discount email removed (Sep 2026): the trial sequence holds full price.
 
 // ---------------------------------------------------------------------------
 // Cron handler
@@ -248,7 +196,6 @@ export async function GET(request: NextRequest) {
     const results = {
       day1Sent: 0,
       day5Sent: 0,
-      day12Sent: 0,
       skipped: 0,
       errors: [] as string[],
     };
@@ -299,12 +246,17 @@ export async function GET(request: NextRequest) {
       .from('events')
       .select('user_id, event_type')
       .in('user_id', userIds)
-      .in('event_type', ['post_trial_drip_day1', 'post_trial_drip_day5', 'post_trial_drip_day12']);
+      .in('event_type', ['post_trial_drip_day1', 'post_trial_drip_day5', 'trial_seq_t1', 'trial_seq_t2', 'trial_seq_t3']);
 
     const sentMap = new Map<string, Set<string>>();
     for (const event of existingEvents || []) {
       if (!sentMap.has(event.user_id)) sentMap.set(event.user_id, new Set());
       sentMap.get(event.user_id)!.add(event.event_type);
+    }
+    // The founder-led trial sequence owns any account it has emailed.
+    const sequenceOwned = new Set<string>();
+    for (const [uid, types] of sentMap) {
+      if ([...types].some(t => t.startsWith('trial_seq_'))) sequenceOwned.add(uid);
     }
 
     // Get calculation counts per user for personalization
@@ -341,6 +293,7 @@ export async function GET(request: NextRequest) {
 
     for (const user of eligibleUsers) {
       if (emailsSent >= MAX_EMAILS_PER_RUN) break;
+      if (sequenceOwned.has(user.id)) { results.skipped++; continue; }
 
       const days = daysSinceExpiry(user.pro_expires_at, now);
       const sent = sentMap.get(user.id) || new Set();
@@ -400,29 +353,7 @@ export async function GET(request: NextRequest) {
             results.errors.push(`Day5 failed for ${user.email}: ${result.error}`);
           }
         }
-
-        // Day 12-14: Last chance with incentive
-        else if (days >= 12 && days <= 14 && !sent.has('post_trial_drip_day12')) {
-          const { subject, html } = buildDay12Email(firstName);
-          const result = await sendEmail({ to: user.email, subject, html });
-
-          if (result.success) {
-            await supabase.from('events').insert({
-              user_id: user.id,
-              event_type: 'post_trial_drip_day12',
-              event_data: {
-                email: user.email,
-                days_since_expiry: days,
-                promo_code: 'COMEBACK20',
-              },
-            });
-            results.day12Sent++;
-            emailsSent++;
-          } else {
-            results.errors.push(`Day12 failed for ${user.email}: ${result.error}`);
-          }
-        }
-
+        // Day 12-14 incentive email removed (Sep 2026).
         else {
           results.skipped++;
         }
@@ -449,7 +380,7 @@ export async function GET(request: NextRequest) {
                   { type: 'mrkdwn', text: `*Eligible:*\n${eligibleUsers.length}` },
                   { type: 'mrkdwn', text: `*Day 1-2 (Features):*\n${results.day1Sent}` },
                   { type: 'mrkdwn', text: `*Day 5-7 (Social Proof):*\n${results.day5Sent}` },
-                  { type: 'mrkdwn', text: `*Day 12-14 (Last Chance):*\n${results.day12Sent}` },
+                  
                 ],
               },
             ],

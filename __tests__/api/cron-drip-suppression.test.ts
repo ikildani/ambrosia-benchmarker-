@@ -49,8 +49,8 @@ function cronRequest(path: string) {
 }
 
 const CRONS: Array<{ name: string; path: string; load: () => Promise<{ GET: (r: NextRequest) => Promise<Response> }> }> = [
+  // smart-trial-extend is retired (Sep 2026) and no longer queries user_profiles.
   { name: 'post-trial-drip', path: '/api/cron/post-trial-drip', load: () => import('@/app/api/cron/post-trial-drip/route') },
-  { name: 'smart-trial-extend', path: '/api/cron/smart-trial-extend', load: () => import('@/app/api/cron/smart-trial-extend/route') },
   { name: 'onboarding-drip', path: '/api/cron/onboarding-drip', load: () => import('@/app/api/cron/onboarding-drip/route') },
 ];
 

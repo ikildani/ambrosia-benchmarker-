@@ -213,13 +213,21 @@ export async function GET(request: NextRequest) {
     // 2. Get user profiles — filter to free tier only
     const { data: freeUsers } = await supabase
       .from('user_profiles')
-      .select('id, email, full_name, tier')
+      .select('id, email, full_name, tier, pro_expires_at')
       .in('id', highIntentUserIds)
       .eq('tier', 'free')
       // Skip accounts on a founder-led personal sequence (migration 108)
       .or(dripSuppressionFilter(now));
 
-    if (!freeUsers || freeUsers.length === 0) {
+    // Accounts inside a trial-lifecycle window (T-5 .. T+5 around pro_expires_at)
+    // hear from Issa directly; the automated conversion email stays out of it.
+    const inLifecycleWindow = (exp: string | null | undefined) => {
+      if (!exp) return false;
+      const days = (new Date(exp).getTime() - now.getTime()) / 86400000;
+      return days >= -5 && days <= 8;
+    };
+    const eligibleFreeUsers = (freeUsers || []).filter(u => !inLifecycleWindow((u as { pro_expires_at?: string | null }).pro_expires_at));
+    if (!eligibleFreeUsers || eligibleFreeUsers.length === 0) {
       return NextResponse.json({
         success: true,
         highIntentUsers: highIntentUserIds.length,
@@ -229,7 +237,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. Check which users already received this email
-    const freeUserIds = freeUsers.map(u => u.id);
+    const freeUserIds = eligibleFreeUsers.map(u => u.id);
     const { data: priorSends } = await supabase
       .from('events')
       .select('user_id')
@@ -241,7 +249,7 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
     const errors: string[] = [];
 
-    for (const user of freeUsers) {
+    for (const user of eligibleFreeUsers) {
       if (alreadySentSet.has(user.id)) {
         console.log(`[calculation-convert] Skipping ${user.email} — already sent`);
         continue;
@@ -311,7 +319,7 @@ export async function GET(request: NextRequest) {
     // Log cron run
     await logCronRun(supabase, 'calculation-convert', {
       fetched: highIntentUserIds.length,
-      processed: freeUsers.length - alreadySentSet.size,
+      processed: eligibleFreeUsers.length - alreadySentSet.size,
       inserted: emailsSent,
       errors,
     });
@@ -328,12 +336,12 @@ export async function GET(request: NextRequest) {
       }).then(() => {}, () => {});
     }
 
-    console.log(`[calculation-convert] Done: ${highIntentUserIds.length} high-intent, ${freeUsers.length} free, ${emailsSent} emails sent`);
+    console.log(`[calculation-convert] Done: ${highIntentUserIds.length} high-intent, ${eligibleFreeUsers.length} free, ${emailsSent} emails sent`);
 
     // Intelligence tracking
     try {
       await runCronIntelligence(supabase, 'calculation-convert', {
-        processed: freeUsers.length,
+        processed: eligibleFreeUsers.length,
         inserted: emailsSent,
       });
     } catch {}
@@ -341,7 +349,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       highIntentUsers: highIntentUserIds.length,
-      freeUsersTargeted: freeUsers.length,
+      freeUsersTargeted: eligibleFreeUsers.length,
       alreadySent: alreadySentSet.size,
       emailsSent,
       errors: errors.length > 0 ? errors : undefined,
