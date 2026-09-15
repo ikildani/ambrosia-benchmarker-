@@ -1,20 +1,28 @@
 /**
  * Cron: Drug Master Resolver
  *
- * Resolves clinical_assets rows to drug_master nodes (migration 107) using
- * the alias table first and free public sources (NCATS GSRS, ChEMBL, PubChem)
- * on a miss. Writes drug_master_id / drug_resolution_status / confidence on
- * the asset, records owners in drug_owners, and reports cross-company
- * duplicate groups in the run log.
+ * Resolves clinical_assets rows to drug_master nodes (migration 107) in two
+ * passes per invocation (lib/radar/drug-master.ts resolveAssetsBatch):
  *
- * Schedule: every 2 hours until the backlog clears, then daily after
- * asset-universe (see vercel.json). Time budget 250 s, ~3 external req/s.
+ *   local     up to 5,000 queued assets, no network: batched drug_aliases
+ *             lookups, placebo / procedure names closed as non-drug, unmatched
+ *             industry-owned names minted as internal rows in bulk.
+ *   external  internal drug rows still unchecked, industry-owned and
+ *             late-phase first, against NCATS GSRS / ChEMBL / PubChem with
+ *             per-host limiters and a 30-day negative cache (migration 113).
+ *
+ * Schedule (vercel.json): backlog `20 * * * *` (hourly) until the run log
+ * reports backlog.unresolved_never_attempted = 0 and
+ * backlog.internal_pending_external < ~1,000; then `20 3 * * *` (daily, after
+ * asset-universe). Time budget 250 s.
  *
  * Query params (all optional):
- *   ?limit=400        assets per run
- *   ?external=0       skip GSRS/ChEMBL/PubChem (alias + internal rows only)
- *   ?retry=1          also retry internal 'unresolvable' rows older than 30 days
- *   ?budget=250000    wall-clock budget in ms
+ *   ?limit=5000         assets the local pass takes per run
+ *   ?external=0|1       skip / run the external pass (default 1)
+ *   ?external_limit=900 internal drug rows the external pass takes per run
+ *   ?concurrency=4      drug rows resolved concurrently in the external pass (1-8)
+ *   ?retry=0            do not re-check internal rows whose last external check is > 30 days old
+ *   ?budget=250000      wall-clock budget in ms (max 280000)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -48,17 +56,23 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
   const params = request.nextUrl.searchParams;
   const limit = parsePositiveInt(params.get('limit'), undefined);
+  const externalLimit = parsePositiveInt(params.get('external_limit'), undefined);
+  const externalConcurrency = parsePositiveInt(params.get('concurrency'), undefined);
   const timeBudgetMs = Math.min(parsePositiveInt(params.get('budget'), 250_000) ?? 250_000, 280_000);
   const allowExternal = params.get('external') !== '0';
-  const retryUnresolvable = params.get('retry') === '1';
+  // ?retry=0 restricts the external pass to never-checked internal rows.
+  const recheckDays = params.get('retry') === '0' ? 36_500 : undefined;
+  const manual = ['limit', 'external', 'external_limit', 'concurrency', 'retry', 'budget'].some(k => params.has(k));
 
   try {
     const result = await resolveAssetsBatch(supabase, {
       limit,
       timeBudgetMs,
       allowExternal,
-      retryUnresolvable,
-      runType: params.has('limit') || params.has('retry') ? 'manual' : 'scheduled',
+      externalLimit,
+      externalConcurrency,
+      recheckDays,
+      runType: manual ? 'manual' : 'scheduled',
     });
 
     return NextResponse.json({
@@ -75,6 +89,9 @@ export async function GET(request: NextRequest) {
       aliases_recorded: result.aliasesRecorded,
       owners_written: result.ownersWritten,
       external_calls: result.externalCalls,
+      local: result.local,
+      external: result.external,
+      backlog: result.backlog,
       cross_company_duplicates: result.crossCompanyDuplicates.count,
       duplicate_groups: result.crossCompanyDuplicates.groups.slice(0, 20),
       errors: result.errors.slice(0, 10),

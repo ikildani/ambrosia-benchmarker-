@@ -18,6 +18,18 @@ import {
   splitCombination,
 } from '@/lib/radar/drug-name';
 import { RADAR_MODALITY_OPTIONS } from '@/lib/radar/vocab';
+import {
+  ExternalBudget,
+  NEGATIVE_CACHE_TTL_DAYS,
+  externalCandidatesForDrug,
+  externalPriority,
+  groupUnitsByCandidateKeys,
+  isNegativeCacheFresh,
+  pickInternalPreferredName,
+  planLocalResolution,
+  prioritizeForExternal,
+  resolutionForDrug,
+} from '@/lib/radar/drug-master';
 
 describe('normalizeKey', () => {
   it('collapses hyphens, spaces and case so MK-3475 == MK3475 == mk 3475', () => {
@@ -318,5 +330,193 @@ describe('inferModalityFromName', () => {
     expect(modalityFromChemblType('Antibody')).toBe('antibody');
     expect(modalityFromChemblType('Protein')).toBeNull();
     expect(modalityFromChemblType('Unknown')).toBeNull();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// lib/radar/drug-master.ts — pure throughput helpers (no Supabase, no network)
+// ═══════════════════════════════════════════════════════════════════════
+
+
+describe('planLocalResolution (local pass candidate keys)', () => {
+  it('builds keys from the display, the parenthetical INN and the extracted code', () => {
+    const plan = planLocalResolution('MK-3475 (pembrolizumab)');
+    expect(plan.kind).toBe('single');
+    expect(plan.units).toHaveLength(1);
+    expect(plan.units[0].key).toBe('mk3475');
+    expect(new Set(plan.units[0].candidateKeys)).toEqual(new Set(['mk3475', 'pembrolizumab']));
+  });
+
+  it('adds asset alias candidates for singles and dedupes by key', () => {
+    const plan = planLocalResolution('Pembrolizumab 200 mg', ['KEYTRUDA®', 'MK-3475', 'pembrolizumab']);
+    expect(plan.kind).toBe('single');
+    const keys = plan.units[0].candidateKeys;
+    expect(new Set(keys)).toEqual(new Set(['pembrolizumab', 'keytruda', 'mk3475']));
+    expect(keys.length).toBe(3);
+    expect(plan.units[0].extraCandidates.map(normalizeKey)).toEqual(expect.arrayContaining(['keytruda', 'mk3475']));
+  });
+
+  it('ignores alias strings that are combinations or CJK', () => {
+    const plan = planLocalResolution('ABC-123', ['ABC-123 + placebo + XYZ-9', '阿司匹林']);
+    expect(plan.units[0].candidateKeys).toEqual(['abc123']);
+  });
+
+  it('closes placebo, procedures and empty strings as non_drug with the reason', () => {
+    expect(planLocalResolution('Placebo')).toMatchObject({ kind: 'non_drug', reason: 'placebo', units: [] });
+    expect(planLocalResolution('Ureteroscopy')).toMatchObject({ kind: 'non_drug', reason: 'non_drug', units: [] });
+    expect(planLocalResolution('   ')).toMatchObject({ kind: 'non_drug', reason: 'empty', units: [] });
+    expect(planLocalResolution("Investigator's choice chemotherapy").kind).toBe('non_drug');
+  });
+
+  it('splits combinations into one unit per component and drops placebo parts', () => {
+    const plan = planLocalResolution('Pembrolizumab + Lenvatinib + placebo');
+    expect(plan.kind).toBe('combination');
+    expect(plan.units.map(u => u.key).sort()).toEqual(['lenvatinib', 'pembrolizumab']);
+    // asset aliases never leak into combination components
+    const withAliases = planLocalResolution('Pembrolizumab + Lenvatinib', ['KEYTRUDA']);
+    expect(withAliases.units.every(u => !u.candidateKeys.includes('keytruda'))).toBe(true);
+  });
+
+  it('collapses a combination whose only drug-like part is one agent to a single', () => {
+    const plan = planLocalResolution('Pembrolizumab with chemotherapy');
+    expect(plan.kind).toBe('single');
+    expect(plan.units[0].key).toBe('pembrolizumab');
+  });
+
+  it('keeps CJK names as one exact-key unit flagged cjk', () => {
+    const plan = planLocalResolution('阿司匹林');
+    expect(plan.kind).toBe('single');
+    expect(plan.units[0].cjk).toBe(true);
+    expect(plan.units[0].candidateKeys).toEqual([normalizeKey('阿司匹林')]);
+  });
+});
+
+describe('groupUnitsByCandidateKeys (cross-sponsor dedupe before minting internal rows)', () => {
+  it('merges units that share any key, transitively', () => {
+    const units = [
+      { name: 'a', candidateKeys: ['abc123'] },
+      { name: 'b', candidateKeys: ['abc123', 'drugxumab'] },
+      { name: 'c', candidateKeys: ['drugxumab'] },
+      { name: 'd', candidateKeys: ['xyz9'] },
+    ];
+    const groups = groupUnitsByCandidateKeys(units).map(g => g.map(u => u.name).sort());
+    expect(groups).toHaveLength(2);
+    expect(groups).toEqual(expect.arrayContaining([['a', 'b', 'c'], ['d']]));
+  });
+
+  it('keeps distinct codes apart (ABC-123 is never ABC-124)', () => {
+    const groups = groupUnitsByCandidateKeys([
+      { candidateKeys: ['abc123'] },
+      { candidateKeys: ['abc124'] },
+    ]);
+    expect(groups).toHaveLength(2);
+  });
+
+  it('returns an empty list for no units', () => {
+    expect(groupUnitsByCandidateKeys([])).toEqual([]);
+  });
+});
+
+describe('pickInternalPreferredName', () => {
+  it('prefers a lowercased INN, then a code, then the first display', () => {
+    const inn = planLocalResolution('MK-3475 (Pembrolizumab)').units;
+    expect(pickInternalPreferredName(inn)).toBe('pembrolizumab');
+    const code = planLocalResolution('ABBV-400 tablets').units;
+    expect(pickInternalPreferredName(code)).toBe('ABBV-400');
+    const display = planLocalResolution('KEYTRUDA').units;
+    expect(pickInternalPreferredName(display)).toBe('KEYTRUDA');
+  });
+});
+
+describe('external pass prioritisation', () => {
+  it('ranks industry-owned above academic, then later phase, then more assets', () => {
+    const items = [
+      { id: 'academic-p3', industry: false, phase: 'phase_3', assetCount: 50 },
+      { id: 'industry-p1', industry: true, phase: 'phase_1', assetCount: 1 },
+      { id: 'industry-p2', industry: true, phase: 'phase_2', assetCount: 1 },
+      { id: 'industry-p2-many', industry: true, phase: 'phase_2', assetCount: 12 },
+      { id: 'industry-unknown', industry: true, phase: null },
+    ];
+    expect(prioritizeForExternal(items).map(i => i.id)).toEqual([
+      'industry-p2-many', 'industry-p2', 'industry-p1', 'industry-unknown', 'academic-p3',
+    ]);
+    expect(externalPriority({ industry: true, phase: 'phase_2' })).toBeGreaterThan(externalPriority({ industry: false, phase: 'phase_4', assetCount: 99 }));
+  });
+
+  it('orders lookup candidates INN → code → other and never sends identifiers', () => {
+    const candidates = externalCandidatesForDrug('ABC-123', [
+      { alias: 'CHEMBL12345', alias_type: 'chembl' },
+      { alias: '12345-67-8', alias_type: 'cas' },
+      { alias: 'drugxumab', alias_type: 'inn' },
+      { alias: 'BRANDY', alias_type: 'brand' },
+      { alias: 'abc 123', alias_type: 'code' },
+    ]);
+    expect(candidates).toEqual(['drugxumab', 'ABC-123', 'BRANDY']);
+  });
+});
+
+describe('negative cache TTL', () => {
+  const now = Date.parse('2026-09-15T12:00:00Z');
+
+  it('honours rows younger than 30 days and re-queries older ones', () => {
+    expect(NEGATIVE_CACHE_TTL_DAYS).toBe(30);
+    expect(isNegativeCacheFresh('2026-09-01T00:00:00Z', now)).toBe(true);
+    expect(isNegativeCacheFresh('2026-08-16T12:01:00Z', now)).toBe(true);
+    expect(isNegativeCacheFresh('2026-08-16T12:00:00Z', now)).toBe(false);
+    expect(isNegativeCacheFresh('2026-08-16T11:59:00Z', now)).toBe(false);
+    expect(isNegativeCacheFresh('2026-01-01T00:00:00Z', now)).toBe(false);
+  });
+
+  it('treats a missing or malformed timestamp as not cached', () => {
+    expect(isNegativeCacheFresh(null, now)).toBe(false);
+    expect(isNegativeCacheFresh('not a date', now)).toBe(false);
+  });
+
+  it('respects a custom TTL', () => {
+    expect(isNegativeCacheFresh('2026-09-10T00:00:00Z', now, 3)).toBe(false);
+    expect(isNegativeCacheFresh('2026-09-14T00:00:00Z', now, 3)).toBe(true);
+  });
+});
+
+describe('ExternalBudget (per-host limiters)', () => {
+  it('rates each host independently and counts calls per host and in total', async () => {
+    const budget = new ExternalBudget(10, { ratesPerSec: { gsrs: 1000, chembl: 1000, pubchem: 1000 } });
+    expect(await budget.acquire('gsrs')).toBe(true);
+    expect(await budget.acquire('chembl')).toBe(true);
+    expect(await budget.acquire('pubchem')).toBe(true);
+    expect(await budget.acquire('gsrs')).toBe(true);
+    expect(budget.used).toBe(4);
+    expect(budget.usedByHost).toEqual({ gsrs: 2, chembl: 1, pubchem: 1 });
+  });
+
+  it('denies calls past the cap and past the deadline', async () => {
+    const capped = new ExternalBudget(1, { ratesPerSec: { gsrs: 1000, chembl: 1000, pubchem: 1000 } });
+    expect(await capped.acquire('gsrs')).toBe(true);
+    expect(capped.canCall()).toBe(false);
+    expect(await capped.acquire('chembl')).toBe(false);
+    const expired = new ExternalBudget(10, { deadlineMs: Date.now() - 1 });
+    expect(expired.canCall()).toBe(false);
+    expect(await expired.acquire('pubchem')).toBe(false);
+  });
+
+  it('spaces consecutive calls on one host without delaying another host', async () => {
+    const budget = new ExternalBudget(10, { ratesPerSec: { gsrs: 10, chembl: 1000, pubchem: 1000 } });
+    const t0 = Date.now();
+    await budget.acquire('gsrs');
+    await budget.acquire('gsrs');
+    const gsrsElapsed = Date.now() - t0;
+    expect(gsrsElapsed).toBeGreaterThanOrEqual(90);
+    const t1 = Date.now();
+    await budget.acquire('chembl');
+    expect(Date.now() - t1).toBeLessThan(50);
+  });
+});
+
+describe('resolutionForDrug', () => {
+  it('maps drug rows to asset status exactly as the per-asset path does', () => {
+    expect(resolutionForDrug({ source: 'gsrs+chembl', confidence: 92 }, false)).toEqual({ status: 'resolved', confidence: 92 });
+    expect(resolutionForDrug({ source: 'internal', confidence: 30 }, false)).toEqual({ status: 'unresolvable', confidence: 30 });
+    expect(resolutionForDrug({ source: 'pubchem', confidence: 55 }, false)).toEqual({ status: 'unresolvable', confidence: 55 });
+    expect(resolutionForDrug({ source: 'gsrs', confidence: 85 }, true)).toEqual({ status: 'ambiguous', confidence: 50 });
   });
 });

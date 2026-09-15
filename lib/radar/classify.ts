@@ -929,7 +929,9 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
   const model = opts.model ?? DEFAULT_MODEL;
   const batchSize = Math.max(1, Math.min(opts.batchSize ?? DEFAULT_BATCH_SIZE, 25));
   const concurrency = Math.max(1, opts.concurrency ?? DEFAULT_CONCURRENCY);
-  const maxRequests = opts.maxRequests ?? Math.ceil(limit / batchSize) * 2;
+  // Default cap: every batch may exhaust its retries. (×2 let a single
+  // rate-limited batch hit the cap before its third attempt.)
+  const maxRequests = opts.maxRequests ?? Math.ceil(limit / batchSize) * RETRY_MAX_ATTEMPTS;
   const dryRun = opts.dryRun ?? false;
   const errors: string[] = [];
   const usage = emptyUsage();

@@ -25,6 +25,7 @@ import {
   type PartnershipDeal,
   type PressHit,
 } from '@/lib/radar/partnership';
+import { incrementalSince, isStampEligible, needsRecheck } from '@/lib/radar/partnership';
 
 import {
   buildCompanyMentionIndex,
@@ -560,5 +561,66 @@ describe('press-release classifier', () => {
     );
     expect(row.source_url).toMatch(/^urn:press:[0-9a-f]{40}$/);
     expect(row.published_at).toBe('2026-09-08T00:00:00.000Z');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// Throughput helpers: bulk-stamp eligibility, steady-state re-check, watermark
+// ═══════════════════════════════════════════════════════════════════════
+
+
+describe('isStampEligible (bulk unpartnered stamp)', () => {
+  const base = { partnershipCheckedAt: null, dealIds: [] as string[], licensorDealCount: 0, collaboratorTrialRows: 0, pressMentions: 0 };
+
+  it('is eligible only when every evidence source is empty', () => {
+    expect(isStampEligible(base)).toBe(true);
+    expect(isStampEligible({ ...base, licensorDealCount: 1 })).toBe(false);
+    expect(isStampEligible({ ...base, collaboratorTrialRows: 1 })).toBe(false);
+    expect(isStampEligible({ ...base, pressMentions: 1 })).toBe(false);
+  });
+
+  it('never stamps an asset that was already checked or carries legacy deal_ids', () => {
+    expect(isStampEligible({ ...base, partnershipCheckedAt: '2026-09-01T00:00:00Z' })).toBe(false);
+    expect(isStampEligible({ ...base, dealIds: ['deal-1'] })).toBe(false);
+    expect(isStampEligible({ ...base, dealIds: null })).toBe(true);
+  });
+});
+
+describe('needsRecheck (steady state)', () => {
+  const now = new Date('2026-09-15T12:00:00Z');
+
+  it('never-checked assets always need a check', () => {
+    expect(needsRecheck(null, {}, now)).toEqual({ recheck: true, reason: 'never' });
+  });
+
+  it('re-checks when a deal, press item or trial row arrived after the last check', () => {
+    const checked = '2026-09-10T00:00:00Z';
+    expect(needsRecheck(checked, { deals: '2026-09-11T00:00:00Z' }, now)).toEqual({ recheck: true, reason: 'deal' });
+    expect(needsRecheck(checked, { press: '2026-09-12T00:00:00Z' }, now)).toEqual({ recheck: true, reason: 'press' });
+    expect(needsRecheck(checked, { trials: '2026-09-13T00:00:00Z' }, now)).toEqual({ recheck: true, reason: 'trial' });
+    expect(needsRecheck(checked, { deals: '2026-09-09T00:00:00Z', press: '2026-09-01T00:00:00Z' }, now)).toEqual({ recheck: false, reason: null });
+  });
+
+  it('falls back to the rolling window when nothing changed', () => {
+    expect(needsRecheck('2026-08-01T00:00:00Z', {}, now)).toEqual({ recheck: true, reason: 'rolling' });
+    expect(needsRecheck('2026-09-01T00:00:00Z', {}, now)).toEqual({ recheck: false, reason: null });
+    expect(needsRecheck('2026-09-01T00:00:00Z', {}, now, 7)).toEqual({ recheck: true, reason: 'rolling' });
+  });
+});
+
+describe('incrementalSince (change-detection watermark)', () => {
+  const now = new Date('2026-09-15T12:00:00Z');
+
+  it('looks one hour behind the previous run', () => {
+    expect(incrementalSince('2026-09-15T06:00:00Z', now).toISOString()).toBe('2026-09-15T05:00:00.000Z');
+  });
+
+  it('uses a one-week lookback on the first run or a bad cursor', () => {
+    expect(incrementalSince(null, now).toISOString()).toBe('2026-09-08T12:00:00.000Z');
+    expect(incrementalSince('garbage', now).toISOString()).toBe('2026-09-08T12:00:00.000Z');
+  });
+
+  it('never returns a watermark in the future', () => {
+    expect(incrementalSince('2026-09-20T00:00:00Z', now).getTime()).toBeLessThanOrEqual(now.getTime());
   });
 });
