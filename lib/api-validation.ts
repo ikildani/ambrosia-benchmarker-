@@ -306,6 +306,13 @@ export const profileUpdateSchema = z.object({
   full_name: z.string().max(100, 'Name must be under 100 characters').optional(),
   company_name: z.string().max(200, 'Company name must be under 200 characters').optional(),
   job_title: z.string().max(100, 'Job title must be under 100 characters').optional(),
+  job_function: z.enum(['bd_licensing', 'investor', 'founder_exec', 'consultant', 'corporate_dev', 'other']).optional(),
+  company_type: z.enum(['pharma_large', 'pharma_mid', 'biotech', 'investor_vc', 'investor_pe', 'advisor', 'other']).optional(),
+  company_domain: z.string().max(253).regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, 'Invalid domain').optional(),
+  // Identity step bookkeeping (migration 112)
+  profile_completed_at: z.string().datetime().optional(),
+  profile_prompt_dismissed_at: z.string().datetime().optional(),
+  profile_enrichment_source: z.enum(['user']).optional(),
   phone_number: z.string()
     .max(30, 'Phone number too long')
     .regex(/^[\d\s\-+().]*$/, 'Invalid phone number format')

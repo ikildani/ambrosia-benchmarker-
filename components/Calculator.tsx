@@ -121,7 +121,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // ── Custom hooks ───────────────────────────────────────────────────────────
   const [state, actions, wasRestored] = useCalculatorState();
   const { trackCalculation, trackParameterChange, sessionId, anonymousId } = useTracking();
-  const { user, isAuthenticated, openAuthModal } = useAuth();
+  const { user, isAuthenticated, openAuthModal, profileComplete, requestProfileCompletion } = useAuth();
   const prefersReducedMotion = useReducedMotion();
 
   const calc = useCalculation({
@@ -137,6 +137,25 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       setShowPaywall(true);
     },
   });
+
+  // Identity gate: a free-tier user's first calculation waits for the
+  // "Tell us about yourself" step (name, company, role). If the step opens,
+  // the calculation runs automatically once it is saved.
+  const pendingCalcRef = useRef(false);
+  const runCalculate = () => {
+    if (isAuthenticated && tier === 'free' && requestProfileCompletion()) {
+      pendingCalcRef.current = true;
+      return;
+    }
+    calc.handleCalculate(state);
+  };
+  useEffect(() => {
+    if (profileComplete && pendingCalcRef.current) {
+      pendingCalcRef.current = false;
+      calc.handleCalculate(state);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileComplete]);
 
   // ── Resolved defaults for Custom Assumptions panel ─────────────────────────
   const resolvedDefaults = useMemo(() => getResolvedDefaults({
@@ -519,7 +538,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
-        calc.handleCalculate(state);
+        runCalculate();
       }
     };
     window.addEventListener('keydown', handler);
@@ -632,7 +651,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               {/* Calculate button */}
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => calc.handleCalculate(state)}
+                  onClick={() => runCalculate()}
                   disabled={calc.isCalculating || (state.phase === '' && state.modality === '')}
                   className="flex-1 sm:flex-none px-8 py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-glow disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
@@ -676,7 +695,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               steps={activeSteps}
               currentStep={state.wizardStep}
               onStepChange={actions.setWizardStep}
-              onCalculate={() => calc.handleCalculate(state)}
+              onCalculate={() => runCalculate()}
               isCalculating={calc.isCalculating}
               selectionSummary={selectionSummary}
             >
@@ -988,7 +1007,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
               <h3 className="font-semibold text-red-800 dark:text-red-300 mb-1">Calculation Failed</h3>
               <p className="text-sm text-red-600 dark:text-red-400 mb-3">{calc.calculationError}</p>
               <button
-                onClick={() => calc.handleCalculate(state)}
+                onClick={() => runCalculate()}
                 className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Retry Calculation
