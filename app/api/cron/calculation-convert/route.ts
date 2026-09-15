@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email/client';
 import { logCronRun } from '@/lib/cron-utils';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { firstNameFrom } from '@/lib/email/greeting';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -267,7 +268,7 @@ export async function GET(request: NextRequest) {
         const upfrontRange = upfrontLow && upfrontHigh ? `${formatM(upfrontLow)}–${formatM(upfrontHigh)}` : undefined;
         const totalDealRange = totalLow && totalHigh ? `${formatM(totalLow)}–${formatM(totalHigh)}` : undefined;
 
-        const firstName = user.full_name?.split(' ')[0] || '';
+        const firstName = firstNameFrom(user.full_name) ?? '';
         const { subject, html } = buildConversionEmail(
           firstName,
           calcCount,

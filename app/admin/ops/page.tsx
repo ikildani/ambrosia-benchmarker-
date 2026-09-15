@@ -38,6 +38,18 @@ interface EventRow {
   count: number;
 }
 
+interface UserRow {
+  email: string;
+  full_name: string | null;
+  company_name: string | null;
+  job_function: string | null;
+  company_type: string | null;
+  tier: string;
+  profile_enrichment_source: string | null;
+  profile_completed_at: string | null;
+  created_at: string;
+}
+
 interface BuyerRow {
   company_name: string;
   premium_multiplier: number;
@@ -56,6 +68,7 @@ async function loadOpsData() {
     sharesResp,
     buyersResp,
     usersResp,
+    recentUsersResp,
   ] = await Promise.all([
     supabase
       .from('events')
@@ -70,6 +83,11 @@ async function loadOpsData() {
       .select('company_name, premium_multiplier, sample_size, confidence')
       .order('sample_size', { ascending: false })
       .limit(10),
+    supabase
+      .from('user_profiles')
+      .select('email, full_name, company_name, job_function, company_type, tier, profile_enrichment_source, profile_completed_at, created_at')
+      .order('created_at', { ascending: false })
+      .limit(40),
     supabase
       .from('user_profiles')
       .select('*', { count: 'exact', head: true }),
@@ -99,6 +117,7 @@ async function loadOpsData() {
     totalShares: sharesResp.count ?? 0,
     topBuyers: (buyersResp.data as BuyerRow[]) ?? [],
     totalUsers: usersResp.count ?? 0,
+    recentUsers: (recentUsersResp.data as UserRow[]) ?? [],
   };
 }
 
@@ -181,6 +200,44 @@ export default async function OpsDashboard() {
               ))}
             </tbody>
           </table>
+        </Card>
+
+        {/* Who the users are: identity coverage from signup capture + enrichment */}
+        <Card title="Recent users — identity coverage" className="mt-6">
+          <div className="mb-3 text-xs text-slate-500">
+            {opsData.recentUsers.filter(u => u.full_name && u.company_name).length} of {opsData.recentUsers.length} most recent have name and company.
+            Source: user = typed at signup · apollo / companies / domain = enriched.
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="pb-2 text-left font-normal">Email</th>
+                  <th className="pb-2 text-left font-normal">Name</th>
+                  <th className="pb-2 text-left font-normal">Company</th>
+                  <th className="pb-2 text-left font-normal">Role</th>
+                  <th className="pb-2 text-left font-normal">Type</th>
+                  <th className="pb-2 text-left font-normal">Tier</th>
+                  <th className="pb-2 text-left font-normal">Source</th>
+                  <th className="pb-2 text-left font-normal">Joined</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {opsData.recentUsers.map(u => (
+                  <tr key={u.email}>
+                    <td className="py-2 text-slate-700">{u.email}</td>
+                    <td className={`py-2 ${u.full_name ? 'text-slate-900' : 'text-amber-600'}`}>{u.full_name || 'missing'}</td>
+                    <td className={`py-2 ${u.company_name ? 'text-slate-900' : 'text-amber-600'}`}>{u.company_name || 'missing'}</td>
+                    <td className="py-2 text-slate-600">{u.job_function || '—'}</td>
+                    <td className="py-2 text-slate-600">{u.company_type || '—'}</td>
+                    <td className="py-2 font-mono text-xs text-slate-600">{u.tier}</td>
+                    <td className="py-2 text-xs text-slate-600">{u.profile_enrichment_source || (u.profile_completed_at ? 'user' : '—')}</td>
+                    <td className="py-2 font-mono text-xs text-slate-500">{u.created_at.slice(0, 10)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
 
         {/* Top buyers in counterparty_premiums */}
