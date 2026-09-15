@@ -15,12 +15,14 @@ export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  /** Plain-text alternative. Lifecycle emails from Issa set this so plain-text clients get the real email. */
+  text?: string;
   from?: string;
   replyTo?: string;
 }
 
 export async function sendEmail(options: EmailOptions) {
-  const { to, subject, html, from, replyTo } = options;
+  const { to, subject, html, text, from, replyTo } = options;
 
   if (!initSendGrid()) {
     console.log('SendGrid API key not configured, skipping email');
@@ -34,6 +36,7 @@ export async function sendEmail(options: EmailOptions) {
       replyTo: replyTo || DEFAULT_REPLY_TO,
       subject,
       html,
+      ...(text ? { text } : {}),
     });
 
     return { success: true, id: response.headers['x-message-id'] };
