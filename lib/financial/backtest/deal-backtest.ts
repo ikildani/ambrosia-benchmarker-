@@ -679,6 +679,33 @@ function isDataQualitySuspect(d: ExtendedComparableDeal): boolean {
   return false;
 }
 
+/**
+ * Score an arbitrary set of deals with the same case mapping, quality rules
+ * and scorer the corpus backtest uses, so a cohort pulled live from the
+ * database (e.g. verified rows with a citation) is measured on identical
+ * terms. Same floor ($20M upfront), same disclosed-total requirement, same
+ * data-quality screen. Unweighted: callers decide how to aggregate.
+ */
+export function scoreExtendedDeals(deals: ExtendedComparableDeal[]): DealBacktestResult[] {
+  const cases = deals
+    .filter(d => d.upfront >= MICRO_DEAL_UPFRONT_FLOOR_M && d.totalDealValue > 0)
+    // Human-verified rows face only the engine-applicability rules. The
+    // fabrication heuristics (asset-name patterns, indication slug used as an
+    // asset name) exist for extracted rows; on a verified row the indication
+    // column legitimately holds a slug and must not disqualify the deal.
+    .filter(d => (d.verified === true ? !isEngineInapplicable(d) : !isDataQualitySuspect(d)))
+    .map(dealToCase);
+  return cases.map(c => scoreCase(c, []));
+}
+
+/** Deal archetypes the rNPV engine cannot fairly price, regardless of data quality. */
+function isEngineInapplicable(d: ExtendedComparableDeal): boolean {
+  if (d.modality === 'other') return true;
+  if (d.licensor && STRUCTURAL_MISMATCH_PARTIES.has(d.licensor)) return true;
+  if (d.licensee && STRUCTURAL_MISMATCH_PARTIES.has(d.licensee)) return true;
+  return false;
+}
+
 export function getAllBacktestCases(): DealBacktestCase[] {
   return COMBINED_CORPUS
     .filter(d => d.upfront >= MICRO_DEAL_UPFRONT_FLOOR_M && d.totalDealValue > 0)
