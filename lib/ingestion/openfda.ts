@@ -135,40 +135,7 @@ const SPONSOR_TO_COMPANY: Record<string, string> = {
   'CELLTRION': 'Celltrion',
 };
 
-// Derive therapeutic area from FDA pharmacological class
-function deriveTherapeuticAreaFromFDA(pharmClasses: string[]): string {
-  const text = pharmClasses.join(' ').toLowerCase();
 
-  if (text.includes('antineoplastic') || text.includes('kinase inhibitor') || text.includes('tumor')) return 'oncology';
-  if (text.includes('immunosuppressant') || text.includes('anti-inflammatory') || text.includes('tnf')) return 'immunology';
-  if (text.includes('cns') || text.includes('antipsychotic') || text.includes('anticonvulsant') || text.includes('dopamine') || text.includes('serotonin') || text.includes('neurological')) return 'neurology';
-  if (text.includes('cardiovascular') || text.includes('antihypertensive') || text.includes('anticoagulant')) return 'cardiovascular';
-  if (text.includes('antiviral') || text.includes('antibiotic') || text.includes('antifungal') || text.includes('anti-infective')) return 'infectious';
-  if (text.includes('metabolic') || text.includes('antidiabetic') || text.includes('insulin') || text.includes('lipid')) return 'metabolic';
-  if (text.includes('respiratory') || text.includes('bronchodilator') || text.includes('pulmonary')) return 'respiratory';
-  if (text.includes('dermatolog') || text.includes('topical')) return 'dermatology';
-  if (text.includes('ophthalm') || text.includes('ocular')) return 'ophthalmology';
-
-  return 'other';
-}
-
-// Derive indication category from pharm classes
-function deriveIndicationCategory(pharmClasses: string[]): string | null {
-  const text = pharmClasses.join(' ').toLowerCase();
-
-  if (text.includes('antineoplastic')) return 'solid_tumor';
-  if (text.includes('kinase inhibitor') && !text.includes('cns')) return 'solid_tumor';
-  if (text.includes('immunosuppressant') || text.includes('anti-inflammatory')) return 'autoimmune';
-  if (text.includes('cns') || text.includes('antipsychotic') || text.includes('anticonvulsant')) return 'cns';
-  if (text.includes('cardiovascular') || text.includes('antihypertensive')) return 'cardiovascular';
-  if (text.includes('antiviral') || text.includes('antibiotic')) return 'infectious';
-  if (text.includes('antidiabetic') || text.includes('metabolic')) return 'metabolic';
-  if (text.includes('respiratory') || text.includes('bronchodilator')) return 'respiratory';
-  if (text.includes('dermatolog')) return 'dermatology';
-  if (text.includes('ophthalm')) return 'ophthalmology';
-
-  return null;
-}
 
 export async function runOpenFDAIngestion(
   supabase: SupabaseClient,
