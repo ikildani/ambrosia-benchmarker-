@@ -184,6 +184,7 @@ export async function runOpenFDAIngestion(
   let approvalsFetched = 0;
   let matchedToCompanies = 0;
   let inserted = 0;
+  let skippedApprovals = 0;
 
   console.log(`[openfda] Starting ingestion (${daysBack} days lookback)...`);
 
@@ -285,52 +286,15 @@ export async function runOpenFDAIngestion(
           ...(result.openfda?.pharm_class_moa || []),
         ];
 
-        const therapeuticArea = deriveTherapeuticAreaFromFDA(pharmClasses);
-        const indicationCategory = deriveIndicationCategory(pharmClasses);
-
-        // Determine modality from product info
         const appNum = result.application_number || '';
-        const isBiologic = appNum.startsWith('BLA');
-        const modality = isBiologic ? 'antibody' : 'small_molecule';
-
         const assetName = brandName || genericName || substanceName;
-        const assetDescription = [
-          genericName && brandName ? `${genericName} (${brandName})` : (genericName || brandName),
-          `FDA ${isBiologic ? 'BLA' : 'NDA'} ${result.application_number}`,
-          pharmClasses.length > 0 ? `Class: ${pharmClasses[0]}` : null,
-        ].filter(Boolean).join(' — ');
 
-        const { error: insertError } = await supabase.from('deals').insert({
-          licensor_name: companyName,
-          licensor_id: companyId,
-          licensee_name: null, // Regulatory approval — no licensee party
-          asset_name: assetName,
-          asset_description: assetDescription,
-          modality,
-          indication_category: indicationCategory,
-          phase_at_signing: 'approved',
-          territory: 'us',
-          territories_included: ['United States'],
-          deal_type: 'other', // Regulatory milestone
-          announced_date: approvalDate,
-          source_type: 'openfda',
-          source_url: `https://api.fda.gov/drug/drugsfda.json?search=application_number:${result.application_number}`,
-          source_filing_id: sourceId,
-          terms_disclosed: false,
-          confidence_score: 95,
-          extraction_model: 'openfda_api',
-          extraction_timestamp: new Date().toISOString(),
-          therapeutic_area: therapeuticArea,
-        });
-
-        if (insertError) {
-          if (insertError.code !== '23505') { // Skip duplicates
-            errors.push(`Insert ${sourceId}: ${insertError.message}`);
-          }
-        } else {
-          inserted++;
-          console.log(`[openfda] Inserted: ${companyName} — ${assetName} (${appNum})`);
-        }
+        // deals.licensee_name is NOT NULL (migration 002): a regulatory approval
+        // has no counterparty, so these rows can never land in deals. Every
+        // nightly run used to fail on this insert. Count them and move on until
+        // approvals get their own table.
+        skippedApprovals++;
+        console.log(`[openfda] Skipped approval (no licensee): ${companyName} — ${assetName} (${appNum})`);
       } catch (error) {
         errors.push(`Processing error: ${error}`);
       }
@@ -395,35 +359,8 @@ export async function runOpenFDAIngestion(
             ...(result.openfda?.pharm_class_moa || []),
           ];
 
-          const { error: insertError } = await supabase.from('deals').insert({
-            licensor_name: companyName,
-            licensor_id: companyId,
-            licensee_name: null, // Supplemental approval — no licensee party
-            asset_name: brandName || genericName,
-            asset_description: `New indication approval — ${genericName || brandName} (${result.application_number})`,
-            modality: (result.application_number || '').startsWith('BLA') ? 'antibody' : 'small_molecule',
-            indication_category: deriveIndicationCategory(pharmClasses),
-            phase_at_signing: 'approved',
-            territory: 'us',
-            territories_included: ['United States'],
-            deal_type: 'other',
-            announced_date: approvalDate,
-            source_type: 'openfda',
-            source_url: `https://api.fda.gov/drug/drugsfda.json?search=application_number:${result.application_number}`,
-            source_filing_id: sourceId,
-            terms_disclosed: false,
-            confidence_score: 95,
-            extraction_model: 'openfda_api',
-            extraction_timestamp: new Date().toISOString(),
-            therapeutic_area: deriveTherapeuticAreaFromFDA(pharmClasses),
-          });
-
-          if (insertError && insertError.code !== '23505') {
-            errors.push(`Suppl insert ${sourceId}: ${insertError.message}`);
-          } else if (!insertError) {
-            inserted++;
-            console.log(`[openfda] New indication: ${companyName} — ${brandName || genericName}`);
-          }
+          skippedApprovals++;
+          console.log(`[openfda] Skipped new-indication approval (no licensee): ${companyName} — ${brandName || genericName}`);
         }
       }
     } catch (error) {
@@ -441,10 +378,14 @@ export async function runOpenFDAIngestion(
     records_fetched: approvalsFetched,
     records_processed: matchedToCompanies,
     records_inserted: inserted,
+    records_skipped: skippedApprovals,
     records_failed: errors.length,
     errors: errors.slice(0, 50),
     status: errors.length > 0 ? 'partial' : 'completed',
     completed_at: new Date().toISOString(),
+    notes: skippedApprovals > 0
+      ? `${skippedApprovals} approvals skipped: deals.licensee_name is NOT NULL and approvals have no counterparty`
+      : null,
   });
 
   console.log(`[openfda] Done: ${approvalsFetched} fetched, ${matchedToCompanies} matched, ${inserted} inserted`);
