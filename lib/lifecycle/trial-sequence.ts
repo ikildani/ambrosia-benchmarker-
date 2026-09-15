@@ -456,6 +456,11 @@ function stageSentence(calc: SequenceCalculation): string {
   return `Late-stage terms pull toward regulatory and commercial milestones rather than upfront, and the territory split usually decides the structure.`;
 }
 
+/** True when the fact sentence will cite a named comp rather than a fallback. */
+function hasNamedComp(ctx: SequenceContext): boolean {
+  return ctx.comps.some(c => c.upfrontUsd != null && c.upfrontUsd > 0);
+}
+
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -481,7 +486,9 @@ function searchModuleLine(ctx: SequenceContext, calc: SequenceCalculation | null
 function activeT1(ctx: SequenceContext, calc: SequenceCalculation): SequenceEmail {
   const ind = indicationLabel(calc.indication);
   const cta = deepLink(calc);
-  const subject = `${ind} ${phaseLabel(calc.phase)}, the comp that matters`;
+  const subject = hasNamedComp(ctx)
+    ? `${ind} ${phaseLabel(calc.phase)}, the comp that matters`
+    : `${ind} ${phaseLabel(calc.phase)}: what buyers actually quote`;
   const text = [
     greeting(ctx.profile),
     '',
@@ -500,7 +507,7 @@ function activeT1(ctx: SequenceContext, calc: SequenceCalculation): SequenceEmai
 
 function activeT2(ctx: SequenceContext, calc: SequenceCalculation): SequenceEmail {
   const ind = indicationLabel(calc.indication);
-  const subject = `re: ${ind} ${phaseLabel(calc.phase)}, the comp that matters`;
+  const subject = `re: ${activeT1(ctx, calc).subject}`;
   const terrain = ctx.offers.terrainAccess ? ', and locks in 60 days of Terrain free at its October launch' : '';
   const text = [
     greeting(ctx.profile),
@@ -602,7 +609,9 @@ function winbackT1(ctx: SequenceContext, calc: SequenceCalculation | null): Sequ
   }
   const ind = indicationLabel(calc.indication);
   const since = monthOf(calc.createdAt);
-  const subject = `${ind} terms have moved since ${since}`;
+  const subject = hasNamedComp(ctx)
+    ? `${ind} terms have moved since ${since}`
+    : `${ind}: what buyers actually quote`;
   const text = [
     greeting(ctx.profile),
     '',
@@ -620,7 +629,7 @@ function winbackT1(ctx: SequenceContext, calc: SequenceCalculation | null): Sequ
 function winbackT2(ctx: SequenceContext, calc: SequenceCalculation | null): SequenceEmail {
   const cta = deepLink(calc);
   const ind = calc ? indicationLabel(calc.indication) : null;
-  const subject = ind ? `re: ${ind} terms have moved since ${monthOf(calc!.createdAt)}` : 're: your Solidus trial, second attempt';
+  const subject = `re: ${winbackT1(ctx, calc).subject}`;
   const text = [
     greeting(ctx.profile),
     '',

@@ -108,11 +108,15 @@ describe('active T1', () => {
     expect(e.text).toContain('HUTCHMED');
   });
 
-  it('falls back to a disclosed-deal count, then to an honest no-comps line', () => {
+  it('falls back to a disclosed-deal count, then to an honest no-comps line, with a subject to match', () => {
     const withCount = buildTouch('active', 't1', ctx({ comps: [], indicationDealCount: 35 }));
     expect(withCount.text).toContain('NSCLC has 35 deals with disclosed terms');
+    expect(withCount.subject).toBe('NSCLC Phase 2: what buyers actually quote');
     const none = buildTouch('active', 't1', ctx({ comps: [], indicationDealCount: 0, calculations: [{ ...calc, indication: 'tbi', therapeuticArea: 'neurology' }] }));
     expect(none.text).toContain('has no disclosed licence with terms in the last decade');
+    expect(none.subject).toBe('traumatic brain injury Phase 2: what buyers actually quote');
+    // T2 replies to whichever T1 subject was used.
+    expect(buildTouch('active', 't2', ctx({ comps: [], indicationDealCount: 0 })).subject).toBe('re: NSCLC Phase 2: what buyers actually quote');
   });
 
   it('adds the Terrain close only when the flag is on, and never in the subject', () => {
@@ -188,10 +192,14 @@ describe('zero-calc and win-back tracks', () => {
     expect(e.subject).toBe('NSCLC terms have moved since May');
     expect(e.text).toContain('I have reopened Pro on your account for seven days, no card.');
   });
-  it('win-back T1 does not claim the set has grown when there are no comps', () => {
-    const e = buildTouch('winback', 't1', ctx({ profile: { ...profile, proEngagementType: 'winback-sep2026' }, comps: [], indicationDealCount: 0 }));
+  it('win-back with no comps uses a subject that matches the fallback body', () => {
+    const wb = { ...profile, proEngagementType: 'winback-sep2026' };
+    const e = buildTouch('winback', 't1', ctx({ profile: wb, comps: [], indicationDealCount: 0 }));
+    expect(e.subject).toBe('NSCLC: what buyers actually quote');
     expect(e.text).not.toContain('set has grown');
+    expect(e.text).not.toContain('terms have moved');
     expect(e.text).toContain('Partner matching now shows buyer intent');
+    expect(buildTouch('winback', 't2', ctx({ profile: wb, comps: [], indicationDealCount: 0 })).subject).toBe('re: NSCLC: what buyers actually quote');
   });
   it('win-back T2 names the closing weekday', () => {
     const e = buildTouch('winback', 't2', ctx({ profile: { ...profile, proEngagementType: 'winback-sep2026', proExpiresAt: '2026-09-16T03:00:00.000Z' } }));
