@@ -72,13 +72,17 @@ export interface ClinicalAssetRow {
   classification_status?: ClassificationStatus;
   classified_at?: string | null;
   classification_confidence?: number | null;
+  classification_model?: string | null;
+  classification_evidence?: Record<string, unknown>;
+  target_class?: string | null;
+  moa_short?: string | null;
   /** Joined from companies.owner_type in API responses. */
   owner_type?: OwnerType | null;
 }
 
 /** Columns the feed/table needs; keep the select list in one place. */
 export const ASSET_LIST_COLUMNS =
-  'id, company_id, company_name, asset_name, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, phase, trial_status, trial_count, enrollment_total, partnership_status, partner_company_name, territory_rights_available, licensing_intent_score, score_confidence, competitive_heat, deal_readiness_score, confidence_score, originator_country, originator_region, first_posted_date, last_update_date, last_scored_at, nct_ids, drug_master_id';
+  'id, company_id, company_name, asset_name, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, phase, trial_status, trial_count, enrollment_total, partnership_status, partner_company_name, territory_rights_available, licensing_intent_score, score_confidence, competitive_heat, deal_readiness_score, confidence_score, originator_country, originator_region, first_posted_date, last_update_date, last_scored_at, nct_ids, drug_master_id, target_class, moa_short, classification_status';
 
 export interface ScoreFactorContribution {
   factor: string;
