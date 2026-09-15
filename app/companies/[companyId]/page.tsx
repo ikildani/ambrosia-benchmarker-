@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/server';
 import CompanyPageClient from './CompanyPageClient';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 // ISR: regenerate company pages every hour
 export const revalidate = 3600;
@@ -192,13 +193,12 @@ async function getCompanySEOData(companyId: string) {
   // Parallel queries for SEO-visible data
   const [recentDealsResult, trialsResult, trendDealsResult] = await Promise.all([
     // Recent deals (last 12 months)
-    // R68: exclude is_synthetic=true so 845 flagged fakes stay off
+    // Audit 2026-09-14: shared quality filter keeps flagged/rejected rows off
     // company-detail pages shown to BD users.
-    supabase
+    applyDealQualityFilter(supabase
       .from('deals')
-      .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct, terms_disclosed')
+      .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct, terms_disclosed'))
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-      .eq('is_synthetic', false)
       .gte('announced_date', oneYearAgo)
       .order('announced_date', { ascending: false })
       .limit(20),
@@ -212,12 +212,11 @@ async function getCompanySEOData(companyId: string) {
       .order('start_date', { ascending: false })
       .limit(50),
 
-    // 3-year deal count for trend (R68: filter flagged fakes)
-    supabase
+    // 3-year deal count for trend (same quality filter)
+    applyDealQualityFilter(supabase
       .from('deals')
-      .select('announced_date, modality, indication_category, therapeutic_area')
+      .select('announced_date, modality, indication_category, therapeutic_area'))
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-      .eq('is_synthetic', false)
       .gte('announced_date', threeYearsAgo),
   ]);
 

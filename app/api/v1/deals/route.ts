@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { validateApiKey } from '@/lib/api-v1-auth';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,13 +24,11 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
 
-  let query = supabase
+  let query = applyDealQualityFilter(supabase
     .from('deals')
     // Column names must match the deals schema (phase_at_signing, upfront_usd,
     // is_synthetic). The previous names did not exist and every call 500'd.
-    .select('id, licensor_name, licensee_name, therapeutic_area, indication_category, indication_specific, modality, phase_at_signing, total_deal_value_usd, upfront_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, deal_type, territory, source_url, confidence_score, verification_status', { count: 'exact' })
-    .eq('is_synthetic', false)
-    .or('is_canonical.is.null,is_canonical.eq.true')
+    .select('id, licensor_name, licensee_name, therapeutic_area, indication_category, indication_specific, modality, phase_at_signing, total_deal_value_usd, upfront_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, deal_type, territory, source_url, confidence_score, verification_status', { count: 'exact' }))
     .order('announced_date', { ascending: false })
     .range(offset, offset + limit - 1);
 

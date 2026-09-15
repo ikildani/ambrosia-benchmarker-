@@ -18,6 +18,7 @@ import {
   type CompRelaxation,
   type CompMatchBreakdown,
 } from '@/lib/comparable-scoring';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 // Format dollar amount from raw USD number to display string
 function formatDealValue(usd: number | null): string | null {
@@ -37,13 +38,10 @@ export async function getRelevantDealsWithDB(
   try {
     const supabase = createServiceClient();
 
-    const { data: dbDeals } = await supabase
+    const { data: dbDeals } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, asset_name, phase_at_signing, deal_type')
+      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, asset_name, phase_at_signing, deal_type'))
       .eq('terms_disclosed', true)
-      .eq('is_synthetic', false)
-      .or('is_canonical.is.null,is_canonical.eq.true')
-      .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
       // Filter on TA in SQL first so older exact-match comps are not crowded out by recency
       .eq('therapeutic_area', therapeuticArea)
       .not('total_deal_value_usd', 'is', null)
@@ -111,13 +109,10 @@ export async function findComparableDealsWithDB(
   try {
     const supabase = createServiceClient();
 
-    const { data: dbDeals } = await supabase
+    const { data: dbDeals } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, verification_status')
+      .select('licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, verification_status'))
       .eq('terms_disclosed', true)
-      .eq('is_synthetic', false)
-      .or('is_canonical.is.null,is_canonical.eq.true')
-      .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
       // Filter on TA in SQL first so older exact-match comps are not crowded out by recency
       .eq('therapeutic_area', inputs.therapeuticArea)
       .not('total_deal_value_usd', 'is', null)

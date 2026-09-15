@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase/server';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { generateFAQSchema } from '@/lib/seo/structured-data';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 interface TAConfig {
   name: string;
@@ -212,24 +213,21 @@ export default async function TherapeuticAreaPage({ params }: { params: Promise<
   const supabase = createServiceClient();
 
   // Fetch live stats for this TA.
-  // R68 (2026-04-15): exclude is_synthetic=true so 845 flagged fakes
-  // don't appear on public TA pages or in the deal-count.
+  // Audit 2026-09-14: the shared quality filter excludes synthetic, non-canonical
+  // and verifier-flagged/rejected rows from every public surface.
   const [dealCountResult, recentDealsResult, dealTypeBreakdown] = await Promise.all([
-    supabase.from('deals').select('id', { count: 'exact', head: true })
+    applyDealQualityFilter(supabase.from('deals').select('id', { count: 'exact', head: true }))
+      .eq('therapeutic_area', ta),
+    applyDealQualityFilter(supabase.from('deals')
+      .select('licensor_name, licensee_name, asset_name, deal_type, upfront_usd, total_deal_value_usd, announced_date, modality, phase_at_signing'))
       .eq('therapeutic_area', ta)
-      .eq('is_synthetic', false),
-    supabase.from('deals')
-      .select('licensor_name, licensee_name, asset_name, deal_type, upfront_usd, total_deal_value_usd, announced_date, modality, phase_at_signing')
-      .eq('therapeutic_area', ta)
-      .eq('is_synthetic', false)
       .eq('terms_disclosed', true)
       .not('upfront_usd', 'is', null)
       .order('announced_date', { ascending: false })
       .limit(10),
-    supabase.from('deals')
-      .select('deal_type')
-      .eq('therapeutic_area', ta)
-      .eq('is_synthetic', false),
+    applyDealQualityFilter(supabase.from('deals')
+      .select('deal_type'))
+      .eq('therapeutic_area', ta),
   ]);
 
   const totalDeals = dealCountResult.count || 0;
