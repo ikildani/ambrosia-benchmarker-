@@ -199,6 +199,10 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/profile-enrich",
+      "schedule": "0 8 * * *"
+    },
+    {
       "path": "/api/cron/churn-prevention",
       "schedule": "0 10 * * 3"
     },

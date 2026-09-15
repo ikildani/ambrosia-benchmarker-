@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { firstNameFrom } from '@/lib/email/greeting';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -40,8 +41,8 @@ function daysSinceExpiry(proExpiresAt: string, now: Date): number {
 // Email builders
 // ---------------------------------------------------------------------------
 
-function buildDay1Email(name: string, calcCount: number): { subject: string; html: string } {
-  const firstName = name?.split(' ')[0] || 'there';
+function buildDay1Email(name: string | null, calcCount: number): { subject: string; html: string } {
+  const firstName = firstNameFrom(name) ?? 'there';
   const calcLine = calcCount > 0
     ? `During your trial, you ran <strong>${calcCount} calculation${calcCount !== 1 ? 's' : ''}</strong>. Those analyses — and all the Pro features behind them — are now locked.`
     : 'Your Pro access has expired, and the advanced features you had access to are now locked.';
@@ -341,14 +342,14 @@ export async function GET(request: NextRequest) {
 
       const days = daysSinceExpiry(user.pro_expires_at, now);
       const sent = sentMap.get(user.id) || new Set();
-      const firstName = user.full_name?.split(' ')[0] || '';
+      const firstName = firstNameFrom(user.full_name) ?? '';
       const calcInfo = userCalcMap.get(user.id) || { count: 0, topTa: 'oncology' };
 
       try {
         // Day 1-2: Feature highlights
         if (days >= 1 && days <= 2 && !sent.has('post_trial_drip_day1')) {
           const { subject, html } = buildDay1Email(
-            user.full_name || user.email,
+            user.full_name,
             calcInfo.count,
           );
           const result = await sendEmail({ to: user.email, subject, html });

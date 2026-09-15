@@ -8,6 +8,13 @@ import { syncUsageFromDatabase } from '@/lib/usage';
 import { captureClientError } from '@/lib/sentry-client';
 import type { UserTier, TeamContext, TeamRole, PortfolioSubTier } from '@/types/tier';
 import { DEFAULT_TEAM_CONTEXT } from '@/types/tier';
+import dynamic from 'next/dynamic';
+import type { ProfileSeed } from '@/components/ProfileCompletionModal';
+
+const ProfileCompletionModal = dynamic(() => import('@/components/ProfileCompletionModal'), { ssr: false });
+
+/** Session-scoped memory of a dismissed identity prompt; it returns next session. */
+const PROFILE_PROMPT_DISMISSED_KEY = 'profile_prompt_dismissed';
 
 interface User {
   id: string;  // Unique user identifier (UUID)
@@ -112,6 +119,11 @@ interface AuthContextType {
   // Loading state
   isLoading: boolean;
   isTeamLoading: boolean;
+
+  // Identity capture (name, company, role). null = unknown / not loaded yet.
+  profileComplete: boolean | null;
+  /** Opens the identity step if the profile is incomplete. Returns true when it opened (caller should wait). */
+  requestProfileCompletion: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -123,6 +135,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [teamContext, setTeamContext] = useState<TeamContext>(DEFAULT_TEAM_CONTEXT);
   const [isTeamLoading, setIsTeamLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [profileSeed, setProfileSeed] = useState<ProfileSeed | null>(null);
+  const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(true);
   const previousTierRef = useRef<UserTier>('free');
@@ -271,6 +286,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
               // Sync usage count from database (fire-and-forget — not gating UI)
               syncUsageFromDatabase(supabaseUser.id).catch(console.error);
+              void loadProfileIdentity(supabaseUser.id, supabaseUser.email || '');
             }
           } catch (error) {
             clearTimeout(sessionTimeout);
@@ -344,6 +360,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // Sync usage count from database (so it persists across devices)
             syncUsageFromDatabase(supabaseUser.id).catch(console.error);
+            void loadProfileIdentity(supabaseUser.id, supabaseUser.email || '');
 
             // Create user profile if it doesn't exist (for OAuth users)
             // Using ignoreDuplicates to avoid overwriting existing profiles (especially tier)
@@ -363,6 +380,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setTierState('free');
             setTeamContext(DEFAULT_TEAM_CONTEXT);
+            setProfileSeed(null);
+            setProfileComplete(null);
+            setShowProfileModal(false);
             localStorage.removeItem('is_authenticated');
             localStorage.removeItem('user_data');
             localStorage.removeItem('user_tier');
@@ -576,6 +596,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowAuthModal(false);
   }, []);
 
+  /**
+   * Load identity fields, enrich empty ones server-side, and decide whether
+   * to show the "Tell us about yourself" step. Runs after every sign-in.
+   */
+  const loadProfileIdentity = useCallback(async (uid: string, email: string) => {
+    try {
+      const supabase = createClient();
+      if (!supabase) return;
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('full_name, company_name, job_function, company_type, profile_completed_at, profile_prompt_dismissed_at')
+        .eq('id', uid)
+        .single();
+      let seed: ProfileSeed = {
+        email,
+        full_name: data?.full_name ?? null,
+        company_name: data?.company_name ?? null,
+        job_function: data?.job_function ?? null,
+        company_type: data?.company_type ?? null,
+      };
+      const complete = !!(seed.full_name?.trim() && seed.company_name?.trim() && (data?.profile_completed_at || seed.job_function));
+      if (!complete) {
+        // Fill what we can from the email domain / companies table / Apollo so
+        // the step opens pre-filled. Best effort; never blocks sign-in.
+        try {
+          const res = await fetch('/api/user/profile/enrich', { method: 'POST' });
+          if (res.ok) {
+            const json = await res.json();
+            const filled = (json?.data?.filled ?? json?.filled ?? {}) as Partial<ProfileSeed>;
+            seed = { ...seed, ...Object.fromEntries(Object.entries(filled).filter(([, v]) => v != null && v !== '')) };
+          }
+        } catch { /* ignore */ }
+      }
+      setProfileSeed(seed);
+      setProfileComplete(complete);
+      if (!complete) {
+        let dismissedThisSession = false;
+        try { dismissedThisSession = sessionStorage.getItem(PROFILE_PROMPT_DISMISSED_KEY) === '1'; } catch { /* ignore */ }
+        if (!dismissedThisSession) setShowProfileModal(true);
+      }
+    } catch (err) {
+      captureClientError(err, 'AuthContext', { context: 'loadProfileIdentity failed' });
+    }
+  }, []);
+
+  const requestProfileCompletion = useCallback((): boolean => {
+    if (profileComplete === false && profileSeed) {
+      setShowProfileModal(true);
+      return true;
+    }
+    return false;
+  }, [profileComplete, profileSeed]);
+
   const value: AuthContextType = {
     isAuthenticated,
     user,
@@ -596,11 +669,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     closeAuthModal,
     isLoading,
     isTeamLoading,
+    profileComplete,
+    requestProfileCompletion,
   };
 
   return (
     <AuthContext.Provider value={value}>
       {children}
+      {profileSeed && (
+        <ProfileCompletionModal
+          isOpen={showProfileModal}
+          seed={profileSeed}
+          onCompleted={(v) => {
+            setProfileSeed(prev => prev ? { ...prev, ...v } : prev);
+            setProfileComplete(true);
+            setShowProfileModal(false);
+            setUser(prev => prev ? { ...prev, name: v.full_name, company: v.company_name } : prev);
+          }}
+          onDismiss={() => {
+            try { sessionStorage.setItem(PROFILE_PROMPT_DISMISSED_KEY, '1'); } catch { /* ignore */ }
+            setShowProfileModal(false);
+          }}
+        />
+      )}
     </AuthContext.Provider>
   );
 }

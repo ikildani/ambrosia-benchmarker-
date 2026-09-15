@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { firstNameFrom } from '@/lib/email/greeting';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -62,7 +63,7 @@ function ctaButton(text: string, href: string): string {
 }
 
 function buildDay0Email(name: string): { subject: string; html: string } {
-  const firstName = name?.split(' ')[0] || 'there';
+  const firstName = firstNameFrom(name) ?? 'there';
   return {
     subject: 'Your biopharma deal benchmarks are ready',
     html: buildEmailWrapper(`
@@ -101,7 +102,7 @@ function buildDay0Email(name: string): { subject: string; html: string } {
 }
 
 function buildDay3Email(name: string): { subject: string; html: string } {
-  const firstName = name?.split(' ')[0] || 'there';
+  const firstName = firstNameFrom(name) ?? 'there';
   return {
     subject: 'How much is your biotech asset actually worth?',
     html: buildEmailWrapper(`
@@ -137,7 +138,7 @@ function buildDay3Email(name: string): { subject: string; html: string } {
 }
 
 function buildDay7Email(name: string): { subject: string; html: string } {
-  const firstName = name?.split(' ')[0] || 'there';
+  const firstName = firstNameFrom(name) ?? 'there';
   return {
     subject: "You've seen the benchmarks. Here's what Pro unlocks.",
     html: buildEmailWrapper(`
@@ -283,7 +284,7 @@ export async function GET(request: NextRequest) {
 
       const createdAt = new Date(user.created_at);
       const daysSinceSignup = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-      const displayName = user.full_name || user.email;
+      const displayName = firstNameFrom(user.full_name) ?? '';
 
       try {
         // Day 0: Welcome email (signup day)
