@@ -123,7 +123,8 @@ export function decideSource(
     url: selected.url,
     sourceType: 'press_release',
     provenanceTier: 'B',
-    path: selected.path,
+    // allowFirstHttps=false above guarantees the selector never returns 'first_https'.
+    path: selected.path as 'preferred_host' | 'company_domain',
   };
 }
 
