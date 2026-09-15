@@ -179,6 +179,10 @@
       "schedule": "0 7 * * *"
     },
     {
+      "path": "/api/cron/source-unsourced-deals",
+      "schedule": "30 8 * * *"
+    },
+    {
       "path": "/api/cron/deal-completeness",
       "schedule": "0 9 * * 0"
     },
