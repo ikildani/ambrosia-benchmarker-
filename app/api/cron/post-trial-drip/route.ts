@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { dripSuppressionFilter } from '@/lib/email/drip-suppression';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -266,7 +267,9 @@ export async function GET(request: NextRequest) {
       .eq('subscription_status', 'expired')
       .not('pro_expires_at', 'is', null)
       .gte('pro_expires_at', fourteenDaysAgo.toISOString())
-      .lte('pro_expires_at', oneDayAgo.toISOString());
+      .lte('pro_expires_at', oneDayAgo.toISOString())
+      // Skip accounts on a founder-led personal sequence (migration 108)
+      .or(dripSuppressionFilter(now));
 
     if (!expiredUsers || expiredUsers.length === 0) {
       return NextResponse.json({

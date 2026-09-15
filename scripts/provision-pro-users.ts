@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
  * Provision Pro user accounts and send welcome emails.
- * Usage: npx tsx scripts/provision-pro-users.ts
+ * Usage: npx tsx scripts/provision-pro-users.ts <email> <first name> [...]
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -24,10 +24,14 @@ interface UserToProvision {
   name: string;
 }
 
-const users: UserToProvision[] = [
-  { email: 'jules@scirena.bio', name: 'Jules' },
-  { email: 'manu@scirena.bio', name: 'Manu' },
-];
+// Usage: npx tsx scripts/provision-pro-users.ts <email> <first name> [<email> <first name> ...]
+const argv = process.argv.slice(2);
+if (argv.length < 2 || argv.length % 2 !== 0) {
+  console.error('Usage: npx tsx scripts/provision-pro-users.ts <email> <first name> [<email> <first name> ...]');
+  process.exit(1);
+}
+const users: UserToProvision[] = [];
+for (let i = 0; i < argv.length; i += 2) users.push({ email: argv[i].toLowerCase(), name: argv[i + 1] });
 
 function buildWelcomeEmail(name: string, magicLink?: string | null): string {
   const ctaUrl = magicLink || APP_URL;
@@ -94,6 +98,7 @@ async function main() {
         id: authUser.user.id,
         email: user.email,
         tier: 'pro',
+        pro_engagement_type: 'complimentary',
         tier_change_authorized: true,
         email_verified: true,
       }, { onConflict: 'id' });
