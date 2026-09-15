@@ -19,7 +19,11 @@ export type RadarRunSource =
   | 'deal_thesis'
   | 'mandate_matcher'
   | 'competitive_intel'
-  | 'deal_creator';
+  | 'deal_creator'
+  | 'company_financials'
+  | 'management_intent'
+  | 'patents_assignee'
+  | 'catalysts';
 
 export interface RadarRunLog {
   source: RadarRunSource;
