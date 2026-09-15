@@ -3,7 +3,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Benchmarks Q1 2026 — Free Report',
-  description: `Free report: upfront ranges, milestone structures, and royalty benchmarks across 12 therapeutic areas. Sourced from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions. Download instantly.`,
+  description: `Free report: upfront ranges, milestone structures, and royalty benchmarks across 12 therapeutic areas. Sourced from ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations. Download instantly.`,
   keywords: [
     'biopharma deal benchmarks', 'licensing upfront benchmarks', 'pharma deal terms 2026',
     'biotech licensing deal data', 'Phase 2 deal terms', 'ADC licensing benchmarks',
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Biopharma Deal Benchmarks 2026 — Free Report',
-    description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} verified transactions. Free download.`,
+    description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations. Free download.`,
     url: 'https://solidus.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',
     siteName: 'Ambrosia Ventures',
     type: 'article',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Biopharma Deal Benchmarks 2026 — Free Report',
-    description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
+    description: `Upfront ranges, milestone structures, and royalty benchmarks across 12 TAs. ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/insights/q1-2026-deal-benchmarks',

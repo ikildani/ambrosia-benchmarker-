@@ -352,7 +352,7 @@ export default function RNPVvsDCFPage() {
               <blockquote className="text-xl sm:text-2xl font-bold leading-snug tracking-tight">
                 &ldquo;The difference between rNPV and DCF is not a modeling preference — it is the difference between a defensible valuation and a headline number.&rdquo;
               </blockquote>
-              <p className="mt-4 text-sm text-slate-400">Based on analysis of {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions</p>
+              <p className="mt-4 text-sm text-slate-400">Based on analysis of {DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations</p>
             </div>
           </section>
 

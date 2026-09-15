@@ -9,7 +9,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Biopharma Deal Tracker 2026 — M&A, Licensing & Partnerships | Solidus',
-  description: `Track every biopharma deal in real time. ${DEAL_STATS.TOTAL_DEALS} verified M&A, licensing, and partnership transactions across 12 therapeutic areas. Filter by deal type, stage, modality, and value. Updated daily. Free to explore.`,
+  description: `Track every biopharma deal in real time. ${DEAL_STATS.TOTAL_DEALS} tracked M&A, licensing, and partnership transactions across 12 therapeutic areas, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations. Filter by deal type, stage, modality, and value. Updated daily. Free to explore.`,
   keywords: [
     'biotech M&A tracker',
     'pharma deal tracker 2026',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Biopharma Deal Tracker 2026 — M&A, Licensing & Partnerships | Solidus',
-    description: `Track every biopharma deal in real time. ${DEAL_STATS.TOTAL_DEALS} verified transactions across 12 therapeutic areas. Updated daily.`,
+    description: `Track every biopharma deal in real time. ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations across 12 therapeutic areas. Updated daily.`,
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/tracker',
     images: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Biopharma Deal Tracker 2026 — M&A, Licensing & Partnerships',
-    description: `${DEAL_STATS.TOTAL_DEALS} verified biopharma deals tracked in real time. M&A, licensing, partnerships across 12 TAs. Free to explore.`,
+    description: `${DEAL_STATS.TOTAL_DEALS} tracked biopharma deals, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations tracked in real time. M&A, licensing, partnerships across 12 TAs. Free to explore.`,
     images: [`/api/og?title=${encodeURIComponent('Biopharma Deal Tracker 2026')}`],
   },
 };
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     question: 'How many deals does the Solidus tracker cover?',
-    answer: `Solidus tracks ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions spanning licensing agreements, acquisitions, collaborations, option deals, and co-development partnerships. The database covers deals from 2011 to present, with comprehensive coverage of 2024-2026 activity across 12 therapeutic areas.`,
+    answer: `Solidus tracks ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations spanning licensing agreements, acquisitions, collaborations, option deals, and co-development partnerships. The database covers deals from 2011 to present, with comprehensive coverage of 2024-2026 activity across 12 therapeutic areas.`,
   },
   {
     question: 'How often is the deal data updated?',
@@ -128,7 +128,7 @@ export default function TrackerPage() {
 
   const webPageSchema = generateWebPageSchema({
     name: 'Biopharma Deal Tracker 2026',
-    description: `Track every biopharma deal in real time. ${DEAL_STATS.TOTAL_DEALS} verified M&A, licensing, and partnership transactions across 12 therapeutic areas.`,
+    description: `Track every biopharma deal in real time. ${DEAL_STATS.TOTAL_DEALS} tracked M&A, licensing, and partnership transactions across 12 therapeutic areas, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
     url: 'https://solidus.ambrosiaventures.co/tracker',
   });
 
@@ -138,7 +138,7 @@ export default function TrackerPage() {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Biopharma Deal Tracker 2026',
-    description: `Real-time database of ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions including M&A, licensing, collaborations, and partnerships across 12 therapeutic areas. Includes upfront payments, milestone structures, royalty rates, and deal terms.`,
+    description: `Real-time database of ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations including M&A, licensing, collaborations, and partnerships across 12 therapeutic areas. Includes upfront payments, milestone structures, royalty rates, and deal terms.`,
     url: 'https://solidus.ambrosiaventures.co/tracker',
     keywords: [
       'biopharma deal tracker',
@@ -223,7 +223,7 @@ export default function TrackerPage() {
 
               <p className="text-lg sm:text-xl text-slate-400 leading-relaxed mb-10 max-w-2xl">
                 Every M&A, licensing, and partnership deal across life sciences — tracked,
-                benchmarked, and analyzed. {DEAL_STATS.TOTAL_DEALS} verified transactions.
+                benchmarked, and analyzed. {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.
                 12 therapeutic areas. Real-time coverage.
               </p>
 
@@ -253,7 +253,7 @@ export default function TrackerPage() {
           <div className="max-w-5xl mx-auto px-4 py-10 sm:py-12">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
               {[
-                { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals', sublabel: 'M&A, licensing, partnerships' },
+                { value: DEAL_STATS.VERIFIED_DEALS, label: 'Verified Deals', sublabel: 'M&A, licensing, partnerships' },
                 { value: '12', label: 'Therapeutic Areas', sublabel: 'Oncology to rare disease' },
                 { value: '23+', label: 'Modalities Tracked', sublabel: 'ADCs, CAR-T, gene therapy, mAbs' },
                 { value: 'Daily', label: 'Update Frequency', sublabel: 'SEC, FTC, press releases' },
@@ -451,11 +451,11 @@ export default function TrackerPage() {
               },
               {
                 title: 'Venture Capital & Investment',
-                description: 'Evaluate portfolio company licensing potential. Size exit scenarios against verified deal comps. Track competitor deal activity across your thesis areas.',
+                description: 'Evaluate portfolio company licensing potential. Size exit scenarios against cited deal comps. Track competitor deal activity across your thesis areas.',
               },
               {
                 title: 'Strategy & Consulting',
-                description: 'Arm client presentations with current, verified deal data. Build competitive landscape analyses that reference actual transaction terms, not estimates.',
+                description: 'Arm client presentations with current, cited deal data. Build competitive landscape analyses that reference actual transaction terms, not estimates.',
               },
             ].map((persona) => (
               <div

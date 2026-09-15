@@ -341,7 +341,7 @@ export default function LicensingVsAcquisitionPage() {
               <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
                 &ldquo;For a drug that achieves $3B+ in peak annual sales, licensing economics can deliver $4-6B in total value &mdash; potentially exceeding a $3B acquisition price.&rdquo;
               </blockquote>
-              <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+              <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020&ndash;2026)</p>
             </div>
           </section>
 

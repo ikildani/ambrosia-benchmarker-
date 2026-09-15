@@ -155,7 +155,7 @@ export default function CortellisComparePage() {
         <p className="text-lg text-slate-400 max-w-3xl">
           Clarivate Cortellis is an enterprise standard for pipeline and regulatory intelligence
           with 15,500+ deal records. Solidus delivers the deal economics and modeling layer
-          that modern BD teams need — {DEAL_STATS.TOTAL_DEALS} verified transactions, 21
+          that modern BD teams need — {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations, 21
           analytical engines, and pricing starting at {PRICING.PRO_ANNUAL_MONTHLY}.
         </p>
       </section>

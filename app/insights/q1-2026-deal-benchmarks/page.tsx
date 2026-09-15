@@ -69,7 +69,7 @@ export default function Q1BenchmarksReport() {
               </h1>
 
               <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-lg">
-                Upfront ranges, milestone structures, royalty benchmarks, and deal-flow trends across all 12 therapeutic areas — sourced from {DEAL_STATS.TOTAL_DEALS} verified transactions in the Solidus corpus.
+                Upfront ranges, milestone structures, royalty benchmarks, and deal-flow trends across all 12 therapeutic areas — sourced from {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations in the Solidus corpus.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
@@ -188,7 +188,7 @@ export default function Q1BenchmarksReport() {
               The comp set your committee needs.
             </h2>
             <p className="mt-3 text-slate-400 max-w-2xl mx-auto">
-              Every section is anchored to verified closed transactions — not estimates, not models, not survey data.
+              Every section is anchored to closed transactions with disclosed terms — not estimates, not models, not survey data.
             </p>
           </div>
 
@@ -271,7 +271,7 @@ export default function Q1BenchmarksReport() {
         <div className="max-w-4xl mx-auto text-center">
           <Image src="/logo-white.png" alt="Ambrosia Ventures" width={160} height={32} className="h-6 w-auto mx-auto opacity-40 mb-6" />
           <p className="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            Report data sourced from the Solidus deal intelligence platform — {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions,
+            Report data sourced from the Solidus deal intelligence platform — {DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations,
             1,308 company profiles, 14 valuation engines. Updated weekly from SEC EDGAR, ClinicalTrials.gov, press disclosures,
             and proprietary calibration corpus.
           </p>

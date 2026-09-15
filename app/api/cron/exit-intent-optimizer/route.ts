@@ -54,7 +54,7 @@ const VARIANTS: ExitIntentVariant[] = [
     headline: 'Your deal terms may be below market',
     subtext: 'Get a free analysis showing how your terms compare to recent deals in your therapeutic area.',
     buttonText: 'See My Deal Analysis',
-    footnote: `Instant benchmarking against ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
+    footnote: `Instant benchmarking against ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
   },
 ];
 

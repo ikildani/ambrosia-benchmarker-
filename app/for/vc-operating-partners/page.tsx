@@ -6,7 +6,7 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'Solidus for VC Operating Partners | Portfolio Deal Intelligence',
-  description: `Deal intelligence for biotech VC and CVC operating partners. Benchmark deal terms across your entire portfolio with ${DEAL_STATS.TOTAL_DEALS} verified transactions, 21 engines, and dedicated analyst support.`,
+  description: `Deal intelligence for biotech VC and CVC operating partners. Benchmark deal terms across your entire portfolio with ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations, 21 engines, and dedicated analyst support.`,
   keywords: [
     'biotech VC deal intelligence',
     'CVC deal benchmarking',

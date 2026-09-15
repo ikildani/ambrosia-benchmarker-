@@ -6,7 +6,7 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'Solidus for Biotech CEOs | Know What Your Deal Is Worth',
-  description: `Deal intelligence for biotech founders and CEOs preparing for licensing, partnering, or M&A. Benchmark your asset against ${DEAL_STATS.TOTAL_DEALS} verified pharma transactions.`,
+  description: `Deal intelligence for biotech founders and CEOs preparing for licensing, partnering, or M&A. Benchmark your asset against ${DEAL_STATS.TOTAL_DEALS} tracked pharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
   keywords: [
     'biotech CEO deal preparation',
     'biotech licensing valuation',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${BASE_URL}/for/biotech-ceos` },
   openGraph: {
     title: 'Solidus for Biotech CEOs | Know What Your Deal Is Worth',
-    description: 'Benchmark your asset before the first meeting. Know what fair terms look like — backed by verified transactions, not anecdote.',
+    description: 'Benchmark your asset before the first meeting. Know what fair terms look like — backed by cited transactions, not anecdote.',
     type: 'website',
     url: `${BASE_URL}/for/biotech-ceos`,
     siteName: 'Solidus by Ambrosia Ventures',

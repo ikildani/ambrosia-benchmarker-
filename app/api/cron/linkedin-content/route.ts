@@ -363,7 +363,7 @@ FORMAT (return ONLY this JSON array, nothing else):
     return {
       title: d.title || 'Untitled Draft',
       body,
-      first_comment: d.first_comment || `Deal benchmarks across ${DEAL_STATS.TOTAL_DEALS} verified transactions → ${d.link_url || 'solidus.ambrosiaventures.co'}`,
+      first_comment: d.first_comment || `Deal benchmarks across ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations → ${d.link_url || 'solidus.ambrosiaventures.co'}`,
       link_url: d.link_url || 'https://solidus.ambrosiaventures.co/pulse',
     };
   });

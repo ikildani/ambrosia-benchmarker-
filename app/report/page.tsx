@@ -13,7 +13,7 @@ import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
   title: 'Deal Intelligence Report — $499',
-  description: `Board-ready biopharma deal benchmarking in 60 seconds. rNPV valuation, comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} verified SEC filings.`,
+  description: `Board-ready biopharma deal benchmarking in 60 seconds. rNPV valuation, comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by ${DEAL_STATS.CORPUS_CLAIM}.`,
   openGraph: {
     title: 'Deal Intelligence Report — $499',
     description: `Board-ready biopharma deal benchmarking. Comparable deals, partner matching, sensitivity analysis, and negotiation playbook from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
@@ -131,7 +131,7 @@ const faqs = [
   },
   {
     q: 'Where does the data come from?',
-    a: `Our database contains ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions sourced from SEC 8-K filings, FTC premerger filings, press releases, and regulatory databases. Data is updated daily.`,
+    a: `Our database contains ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations sourced from SEC 8-K filings, FTC premerger filings, press releases, and regulatory databases. Data is updated daily.`,
   },
   {
     q: 'Can I try before I buy?',
@@ -198,7 +198,7 @@ export default function ReportPage() {
                 <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
                   <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
                   <span className="text-[11px] font-bold text-teal-400/90 tracking-[0.12em] uppercase">
-                    {DEAL_STATS.TOTAL_DEALS} Verified Transactions
+                    {DEAL_STATS.VERIFIED_DEALS} Verified Transactions
                   </span>
                 </div>
 
@@ -255,7 +255,7 @@ export default function ReportPage() {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
             {[
-              { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals', sub: 'SEC 8-K + FTC + press' },
+              { value: DEAL_STATS.VERIFIED_DEALS, label: 'Verified Deals', sub: 'SEC 8-K + FTC + press' },
               { value: DEAL_STATS.TOTAL_COMPANIES, label: 'Companies Profiled', sub: 'AI-scored partner matching' },
               { value: '14', label: 'Analysis Engines', sub: 'rNPV, Monte Carlo, VaR/CVaR, + more' },
               { value: 'Daily', label: 'Data Refresh', sub: 'Automated pipeline' },

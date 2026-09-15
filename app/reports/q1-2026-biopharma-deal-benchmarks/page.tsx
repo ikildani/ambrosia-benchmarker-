@@ -48,11 +48,11 @@ const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m
 
 export const metadata: Metadata = {
   title: `Q1 2026 Biopharma Deal Benchmarks Report: Analysis of ${DEAL_STATS.TOTAL_DEALS} Transactions (2020-2026)`,
-  description: `Institutional-grade quarterly analysis of biopharma deal economics across 13 therapeutic areas. Phase-by-phase benchmarks with sample sizes, upfront/TDV medians, conditional value trends, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
+  description: `Institutional-grade quarterly analysis of biopharma deal economics across 13 therapeutic areas. Phase-by-phase benchmarks with sample sizes, upfront/TDV medians, conditional value trends, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
   keywords: ['biopharma deal benchmarks 2026', 'pharma deal economics Q1 2026', 'biopharma licensing benchmarks', 'pharma acquisitions 2026', 'co-development deals', 'oncology deal benchmarks', 'metabolic deal benchmarks', 'modality premiums biopharma', 'phase 2 upfront benchmarks'],
   openGraph: {
     title: 'Q1 2026 Biopharma Deal Benchmarks Report',
-    description: `Institutional-grade analysis of biopharma deal economics from ${DEAL_STATS.TOTAL_DEALS} verified transactions (2020-2026). Phase-by-phase medians with sample sizes across 13 therapeutic areas.`,
+    description: `Institutional-grade analysis of biopharma deal economics from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026). Phase-by-phase medians with sample sizes across 13 therapeutic areas.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/reports/q1-2026-biopharma-deal-benchmarks',
     images: [{ url: '/api/og?title=Q1%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Analysis%20of%202%2C600%2B%20Transactions&type=insight', width: 1200, height: 630 }],
@@ -174,9 +174,9 @@ export default async function Q1BenchmarkReportPage() {
     { '@type': 'ListItem', position: 3, name: 'Q1 2026 Biopharma Deal Benchmarks' },
   ]};
   const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q1 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' }, datePublished: '2026-03-30', dateModified: '2026-03-30', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } } };
-  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, total deal values, and deal structure economics from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
+  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q1 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, total deal values, and deal structure economics from ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
-    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, press releases, and ClinicalTrials.gov. Deals with undisclosed terms are excluded. Updated weekly via automated ingestion plus manual verification.` } },
+    { '@type': 'Question', name: 'What data sources does the Q1 2026 benchmark report use?', acceptedAnswer: { '@type': 'Answer', text: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, press releases, and ClinicalTrials.gov. Deals with undisclosed terms are excluded. Updated weekly via automated ingestion plus manual verification.` } },
     { '@type': 'Question', name: 'Why are immunology Phase 2 upfronts higher than oncology?', acceptedAnswer: { '@type': 'Answer', text: 'Immunology Phase 2 median upfront is $400M (n=15) versus oncology at $282M (n=236). The smaller immunology sample is concentrated in high-value anti-TL1A and CAR-T autoimmune transactions, while oncology reflects a broader distribution across mechanisms and targets.' } },
     { '@type': 'Question', name: 'How should I interpret the sample sizes?', acceptedAnswer: { '@type': 'Answer', text: 'Larger samples (n>100) produce more stable estimates. Smaller samples (n<20) should be treated as directional. We report interquartile ranges (P25-P75) to convey dispersion. Medians are used throughout to minimize distortion from mega-deals.' } },
   ]};
@@ -233,7 +233,7 @@ export default async function Q1BenchmarkReportPage() {
                 Biopharma Deal<br className="hidden sm:block" /> Benchmarks
               </h1>
               <p className="text-base text-slate-500 max-w-xl leading-relaxed">
-                A quarterly analysis of deal economics across 13 therapeutic areas, drawn from {DEAL_STATS.TOTAL_DEALS} verified transactions with publicly disclosed terms. All figures represent medians with sample sizes reported throughout.
+                A quarterly analysis of deal economics across 13 therapeutic areas, drawn from {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations with publicly disclosed terms. All figures represent medians with sample sizes reported throughout.
               </p>
             </div>
             <div className="mt-6 sm:mt-0 flex-shrink-0 text-right">
@@ -246,7 +246,7 @@ export default async function Q1BenchmarkReportPage() {
           <div className="border-t border-b border-slate-200 py-5 mb-8">
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
               {[
-                { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals' },
+                { value: DEAL_STATS.VERIFIED_DEALS, label: 'Verified Deals' },
                 { value: '13', label: 'Therap. Areas' },
                 { value: '$282M', label: 'Onco Ph2 Upfront' },
                 { value: '190', label: 'Q1 2026 Deals' },
@@ -403,7 +403,7 @@ export default async function Q1BenchmarkReportPage() {
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n={DEAL_STATS.TOTAL_DEALS} verified transactions with publicly disclosed terms. 2026 YTD through March 31.</p>
+            <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n={DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations with publicly disclosed terms. 2026 YTD through March 31.</p>
           </div>
 
           {/* Insight callout */}
@@ -524,7 +524,7 @@ export default async function Q1BenchmarkReportPage() {
             <div className="text-6xl sm:text-7xl font-bold text-teal-700 tabular-nums tracking-tight flex-shrink-0">$400M</div>
             <div className="mt-4 sm:mt-0">
               <p className="text-slate-700 leading-relaxed">Immunology Phase 2 median upfront (n=15, P25-P75: $98M-$1.25B). This compares to oncology at $282M (n=236), where the substantially larger sample produces a tighter interquartile range of $198M-$386M. The immunology premium reflects concentrated high-value TL1A and CAR-T autoimmune transactions rather than a broad-based repricing of the therapeutic area.</p>
-              <p className="text-xs text-slate-400 mt-2">Immunology Phase 2 · 2020-2026 · Ambrosia Ventures analysis of 15 verified transactions</p>
+              <p className="text-xs text-slate-400 mt-2">Immunology Phase 2 · 2020-2026 · Ambrosia Ventures analysis of 15 transactions with disclosed terms</p>
             </div>
           </div>
         </section>
@@ -688,7 +688,7 @@ export default async function Q1BenchmarkReportPage() {
                   </tbody>
                 </table>
               </div>
-              <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n={DEAL_STATS.TOTAL_DEALS} verified transactions (2020-2026). 2026 YTD through March 31.</p>
+              <p className="text-xs text-slate-400 mt-3">Source: Ambrosia Ventures. n={DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026). 2026 YTD through March 31.</p>
             </div>
 
             <div className="mt-10 mb-2">
@@ -1006,7 +1006,7 @@ export default async function Q1BenchmarkReportPage() {
           <div className="max-w-4xl mx-auto px-6 py-16">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your Own Deal</h2>
-            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
           </div>
         </section>
@@ -1065,7 +1065,7 @@ export default async function Q1BenchmarkReportPage() {
         <section className="max-w-4xl mx-auto px-6 pb-12">
           <InlineEmailCapture
             heading="Get the Q2 Report First"
-            description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+            description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`}
             source="q1-2026-report"
           />
         </section>
@@ -1092,7 +1092,7 @@ export default async function Q1BenchmarkReportPage() {
           <h2 className="text-lg font-bold text-slate-900 mb-4" id="faq">Frequently Asked Questions</h2>
           <div className="divide-y divide-slate-200">
             {[
-              { q: 'What data sources does this report use?', a: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, company press releases, and ClinicalTrials.gov. Deals with undisclosed financial terms are excluded. New transactions are ingested weekly via automated monitoring and verified before inclusion.` },
+              { q: 'What data sources does this report use?', a: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, company press releases, and ClinicalTrials.gov. Deals with undisclosed financial terms are excluded. New transactions are ingested weekly via automated monitoring and verified before inclusion.` },
               { q: 'How should I interpret small sample sizes?', a: 'Cohorts with n>100 (e.g., oncology Phase 2, n=236) produce stable medians with tight interquartile ranges. Cohorts with n<20 (e.g., immunology Phase 2, n=15) are directional — the median is real but the confidence interval is wide. Cohorts with n<10 (e.g., hematology Phase 2, n=5) should be treated as indicative only. We report sample sizes and P25-P75 ranges throughout to enable readers to calibrate confidence.' },
               { q: 'Why are upfront percentages rising?', a: 'Average upfront as % of TDV increased from 20.3% (2021) to 29.0% (2026 YTD). Three factors drive this: (1) tighter biotech capital markets requiring larger upfronts to fund operations, (2) competitive intensity among buyers for differentiated assets, and (3) seller sophistication in negotiating upfront-weighted structures that reduce milestone risk.' },
               { q: 'What does conditional value mean?', a: 'Conditional value is the share of total deal value tied to milestones and contingent payments (regulatory, commercial, sales-based). A 71% conditional value means 71 cents of every deal dollar is contingent on future events. The declining trend (from 80% in 2021 to 71% in 2026) means more value is shifting to upfront payments.' },

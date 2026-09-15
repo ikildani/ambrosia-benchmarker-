@@ -1,5 +1,6 @@
 #!/usr/bin/env npx tsx
 import { cover, ft, wrap, render } from './erc-pdf-lib';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // ═══════════════════════════════════════
 // 2-PAGE TEASER
@@ -240,7 +241,7 @@ ${ft('CIM — IP & Transaction',5)}
 <div class="cn" style="text-align:center;padding:32px">
 <p style="font-size:9px;text-transform:uppercase;letter-spacing:.2em;color:#14b8a6;margin-bottom:12px">Exclusive Sell-Side Advisor</p>
 <p style="font-size:20px;font-weight:800;margin-bottom:4px">Ambrosia Ventures</p>
-<p class="sm" style="color:#94a3b8;margin-bottom:20px">Deal Intelligence Platform · 1,900+ Verified Transactions</p>
+<p class="sm" style="color:#94a3b8;margin-bottom:20px">Deal Intelligence Platform · ${DEAL_STATS.CORPUS_CLAIM}</p>
 <div style="border-top:1px solid rgba(255,255,255,.15);padding-top:16px">
 <p style="font-size:14px;font-weight:700">Issa Kildani</p>
 <p class="sm" style="color:#14b8a6">Managing Partner</p>

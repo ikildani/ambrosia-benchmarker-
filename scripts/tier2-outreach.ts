@@ -25,6 +25,7 @@ import {
   type Indication,
   type TherapeuticArea,
 } from '../lib/calculations';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -224,7 +225,7 @@ Body uses \\n for line breaks. End with just "Issa".`;
 function fallback(c: Contact, p: ProfileResult, url: string) {
   return {
     subject: `${p.therapeuticArea} deal benchmarks for ${c['Company Name']}`,
-    body: `${c['First Name']},\n\nWe built a deal analysis specific to ${p.therapeuticArea} — upfront ranges, comparable transactions, and partner intelligence from 1,600+ verified deals.\n\nPut this together for your space: ${url}\n\nIssa`,
+    body: `${c['First Name']},\n\nWe built a deal analysis specific to ${p.therapeuticArea} — upfront ranges, comparable transactions, and partner intelligence from ${DEAL_STATS.CORPUS_CLAIM}.\n\nPut this together for your space: ${url}\n\nIssa`,
   };
 }
 

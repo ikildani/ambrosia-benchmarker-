@@ -332,7 +332,7 @@ export default function ADCvsBispecificPage() {
               <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
                 &ldquo;ADCs command a 25-30% upfront premium over bispecifics &mdash; the largest sustained modality gap in oncology deal-making.&rdquo;
               </blockquote>
-              <p className="mt-4 text-sm text-slate-400">Based on {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+              <p className="mt-4 text-sm text-slate-400">Based on {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020&ndash;2026)</p>
             </div>
           </section>
 
@@ -642,7 +642,7 @@ export default function ADCvsBispecificPage() {
           <section className="my-12">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your ADC or Bispecific Deal</h2>
-            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="adc" />
           </section>
 
@@ -674,7 +674,7 @@ export default function ADCvsBispecificPage() {
           <section className="mb-12">
             <InlineEmailCapture
               heading="Get Weekly ADC & Bispecific Deal Intelligence"
-              description={`Join 2,000+ BD professionals who receive our weekly analysis of modality-specific licensing trends, new deal benchmarks, and negotiation insights from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              description={`Join 2,000+ BD professionals who receive our weekly analysis of modality-specific licensing trends, new deal benchmarks, and negotiation insights from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`}
               source="adc-vs-bispecific-insight"
             />
           </section>

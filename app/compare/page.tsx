@@ -144,7 +144,7 @@ export default function ComparePage() {
         {/* Stats bar */}
         <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals' },
+            { value: DEAL_STATS.VERIFIED_DEALS, label: 'Verified Deals' },
             { value: '14', label: 'Calculation Engines' },
             { value: '562', label: 'Indications' },
             { value: PRICING.PRO_MONTHLY, label: 'Starting Price' },

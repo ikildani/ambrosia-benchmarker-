@@ -8,6 +8,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const OUTPUT_DIR = path.join(process.cwd(), 'tmp-erc-pdfs');
 if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -177,7 +178,7 @@ function coverPage(title: string, subtitle: string, docType: string): string {
       </div>
       <div style="background: ${TEAL}; padding: 12px 60px; display: flex; justify-content: space-between;">
         <span style="font-size: 9px; color: #fff; font-weight: 600;">Powered by Ambrosia Ventures Proprietary Engine</span>
-        <span style="font-size: 9px; color: #fff;">1,900+ Verified Transactions · 14 Integrated Engines · 850+ Companies Scored</span>
+        <span style="font-size: 9px; color: #fff;">${DEAL_STATS.CORPUS_CLAIM} · 14 Integrated Engines · 850+ Companies Scored</span>
       </div>
     </div>
   `;

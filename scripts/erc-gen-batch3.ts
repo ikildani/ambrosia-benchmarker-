@@ -1,5 +1,6 @@
 #!/usr/bin/env npx tsx
 import { cover, ft, wrap, render } from './erc-pdf-lib';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // ═══════════════════════════════════════
 // DEAL TERMS VALUATION (14-Engine)
@@ -146,7 +147,7 @@ ${ft('Deal Terms — Track 2 Engines',4)}
 </div>
 <p class="xs mt3" style="color:#94a3b8">With $1.2B+ headline milestone structure: see Strategic Valuation Roadmap</p>
 </div>
-<div class="card mt3" style="text-align:center"><p class="xxs sc">Valuation powered by Ambrosia Ventures proprietary platform (solidus.ambrosiaventures.co). 14 integrated engines · 1,900+ verified transactions · Calibrated quarterly. © 2026 Ambrosia Ventures.</p></div>
+<div class="card mt3" style="text-align:center"><p class="xxs sc">Valuation powered by Ambrosia Ventures proprietary platform (solidus.ambrosiaventures.co). 14 integrated engines · ${DEAL_STATS.CORPUS_CLAIM} · Calibrated quarterly. © 2026 Ambrosia Ventures.</p></div>
 ${ft('Deal Terms — Summary',5)}
 </div>
 `);

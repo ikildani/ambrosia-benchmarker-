@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { notifyDailyStats } from '@/lib/slack/notify';
 import { updateDealCountIfChanged } from '@/lib/seo/deal-count-updater';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { buildRosterMessages, classifyRosterUser, summarizeRoster } from '@/lib/slack/roster';
 
@@ -79,19 +80,23 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active');
 
-    // Auto-update deal count in constants.ts if rounded value changed
-    // Query verified deals (excluding 'other' TA, matching /api/deals/stats).
-    // R66 (2026-04-14): also exclude is_synthetic=true so the LIVE_DEAL_COUNT
-    // doesn't include the 845 fabricated rows flagged by migrations 051 + 053.
-    const { count: verifiedDeals } = await supabase
+    // Auto-update the two public deal counts in constants.ts if either rounded
+    // value changed. Audit 2026-09-14: LIVE = tracked (shared quality filter),
+    // VERIFIED = verified=true. Both exclude 'other' and internal '_' TAs.
+    const { count: liveDeals } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_synthetic', false)
+      .select('*', { count: 'exact', head: true }))
       .not('therapeutic_area', 'eq', 'other')
       .not('therapeutic_area', 'like', '\\__%');
 
-    if (verifiedDeals != null) {
-      await updateDealCountIfChanged(verifiedDeals);
+    const { count: verifiedDeals } = await applyDealQualityFilter(supabase
+      .from('deals')
+      .select('*', { count: 'exact', head: true }), { verifiedOnly: true })
+      .not('therapeutic_area', 'eq', 'other')
+      .not('therapeutic_area', 'like', '\\__%');
+
+    if (liveDeals != null && verifiedDeals != null) {
+      await updateDealCountIfChanged(liveDeals, verifiedDeals);
     }
 
     // ── Full user roster with free / pro / trial drill-down ──
