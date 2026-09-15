@@ -678,11 +678,14 @@ export function eventTypeFor(touch: Touch): string {
 
 /** Minimal HTML wrapper so a plain-text email renders identically in HTML clients. */
 export function textToHtml(text: string): string {
+  // The plain-text body is the source of truth and carries raw URLs (a raw
+  // "&" between query parameters). Only the HTML twin is entity-escaped, and
+  // the anchor href is escaped separately so it round-trips to the raw URL.
+  const escapeHtml = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const esc = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1">$1</a>');
+    .split(/(https?:\/\/[^\s]+)/g)
+    .map((part, i) => (i % 2 === 1 ? `<a href="${escapeHtml(part)}">${escapeHtml(part)}</a>` : escapeHtml(part)))
+    .join('');
   return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#111;white-space:pre-wrap">${esc}</div>`;
 }
 
@@ -706,5 +709,15 @@ export function lintEmail(email: SequenceEmail): string[] {
   // Usage counts read as surveillance: "you opened four times", "13 sessions", "you ran 8".
   if (/\b(you (opened|ran|logged in)|\d+ (sessions?|times|runs|logins?))\b/i.test(email.text)) out.push('usage count in body');
   if (/\b(eleven|thirteen|four|three|two|five|six|seven|eight|nine|ten) (sessions|times)\b/i.test(email.text)) out.push('usage count in body (words)');
+  // The text alternative must never carry HTML entities: "&amp;" inside a
+  // deep link drops the second query parameter for every recipient.
+  if (/&(amp|lt|gt|quot|#\d+);/.test(email.text)) out.push('html entity in plain-text body');
+  for (const u of urls) {
+    try {
+      new URL(u);
+    } catch {
+      out.push(`unparseable URL: ${u}`);
+    }
+  }
   return out;
 }

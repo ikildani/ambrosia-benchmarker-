@@ -12,6 +12,7 @@ import {
   offersFromEnv,
   formatMoney,
   indicationSearchTerm,
+  textToHtml,
   BANNED_PHRASES,
   PRICING_URL,
   type SequenceContext,
@@ -75,6 +76,15 @@ describe('copy rules hold on every track and touch', () => {
           expect(urls.length).toBeGreaterThanOrEqual(1);
           expect((email.text.match(/\$299/g) || []).length).toBeLessThanOrEqual(1);
           expect((email.text.match(/\$199/g) || []).length).toBeLessThanOrEqual(1);
+          // Plain text carries raw URLs: no entities, and every deep link keeps both query parameters.
+          expect(email.text).not.toMatch(/&(amp|lt|gt|quot|#\d+);/);
+          for (const u of urls) {
+            const parsed = new URL(u);
+            if (parsed.pathname === '/calculator' && parsed.search) {
+              expect(parsed.searchParams.get('therapeuticArea')).toBe('oncology');
+              expect(parsed.searchParams.get('modality')).toBe('smallMolecule');
+            }
+          }
         });
       }
     }
@@ -135,6 +145,21 @@ describe('active T1', () => {
   it('greets without a name when the profile has none', () => {
     const e = buildTouch('active', 't1', ctx({ profile: { ...profile, fullName: null } }));
     expect(e.text.startsWith('Hello,')).toBe(true);
+  });
+});
+
+describe('plain-text and HTML alternatives', () => {
+  it('keeps a raw ampersand in the text body and escapes only the HTML twin', () => {
+    const e = buildTouch('active', 't1', ctx());
+    expect(e.text).toContain('therapeuticArea=oncology&modality=smallMolecule');
+    expect(e.text).not.toContain('&amp;');
+    const html = textToHtml(e.text);
+    expect(html).toContain('href="https://solidus.ambrosiaventures.co/calculator?therapeuticArea=oncology&amp;modality=smallMolecule"');
+    expect(html).not.toMatch(/href="[^"]*[^;]&modality/);
+  });
+  it('lint rejects a text body carrying an HTML entity', () => {
+    const bad = { track: 'active' as const, touch: 't1' as const, subject: 'a b c d', text: 'x https://solidus.ambrosiaventures.co/calculator?a=1&amp;b=2', cta: '' };
+    expect(lintEmail(bad)).toContain('html entity in plain-text body');
   });
 });
 
