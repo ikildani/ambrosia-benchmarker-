@@ -74,9 +74,11 @@ export async function GET(request: NextRequest) {
     .select('notes')
     .eq('source', 'perplexity_discovery')
     .not('notes', 'is', null)
-    .order('id', { ascending: false })
+    // id is a uuid, so ordering by it returned an arbitrary fixed row and the
+    // rotation cursor never advanced (every run reused the same TA set).
+    .order('started_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   const lastIndex = lastRun?.notes ? parseInt(lastRun.notes, 10) : -1;
   const currentIndex = (isNaN(lastIndex) ? 0 : (lastIndex + 1)) % TA_ROTATION.length;
