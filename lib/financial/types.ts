@@ -1601,6 +1601,13 @@ export interface EnsembleResult {
   agreement: 'tight' | 'moderate' | 'wide';
   /** True when at least one method had to fall back (sparse comps, etc.) */
   fallbackUsed: boolean;
+  /**
+   * True before Phase 2 when a comp set exists: the rNPV and real-options
+   * variances are floored at 4x the comparables variance so comparable
+   * transactions carry at least two thirds of the blend. See
+   * ensemble-valuation.ts, step 2b.
+   */
+  earlyPhasePrior?: boolean;
   /** Plain-English summary of the blend and any caveats */
   narrative: string;
 }

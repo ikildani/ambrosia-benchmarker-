@@ -348,9 +348,23 @@ export function calculateEnsembleValuation(
   const isCustom = compResult.source === 'custom';
 
   // ── 2. Compute each method's variance ──
-  const rnpvVariance = computeRnpvVariance(rnpv, monteCarlo);
+  const rnpvVarianceRaw = computeRnpvVariance(rnpv, monteCarlo);
   const compVariance = compResult.variance;
-  const realOptionsVariance = computeRealOptionsVariance(realOptions);
+  const realOptionsVarianceRaw = computeRealOptionsVariance(realOptions);
+
+  // ── 2b. Phase prior: before Phase 2 the DCF family has no signal ──
+  // Cumulative PoS of 2-9% and 9-14 years to market make the risk-adjusted
+  // NPV a small residual of two large numbers; it lands near zero or negative
+  // however good the asset is, while real deals at those stages price
+  // optionality. Comparable transactions are the only method anchored in
+  // prices buyers paid, so when a comp set exists its variance caps the two
+  // DCF-family variances: rNPV and real options are floored at 4x the
+  // comparables variance, which puts at least two thirds of the blend on
+  // comparables. From Phase 2 onward the pure inverse-variance blend applies.
+  const EARLY_PHASES: ReadonlySet<string> = new Set(['discovery', 'preclinical', 'phase1', 'phase1_2']);
+  const earlyPhasePrior = EARLY_PHASES.has(rnpvInput.phase) && Number.isFinite(compVariance) && compVariance > 0;
+  const rnpvVariance = earlyPhasePrior ? Math.max(rnpvVarianceRaw, 4 * compVariance) : rnpvVarianceRaw;
+  const realOptionsVariance = earlyPhasePrior ? Math.max(realOptionsVarianceRaw, 4 * compVariance) : realOptionsVarianceRaw;
 
   // ── 3. Inverse-variance weighting ──
   const variances = [rnpvVariance, compVariance, realOptionsVariance];
@@ -380,7 +394,7 @@ export function calculateEnsembleValuation(
       variance: rnpvVariance,
       weight: weights[0],
       confidence: variances[0] < (rnpvValue * 0.5) ** 2 ? 'high' : 'medium',
-      rationale: `Risk-adjusted DCF from the rNPV engine (${(rnpv.cumulativePoS * 100).toFixed(0)}% cumulative PoS, ${(rnpv.discountRate * 100).toFixed(1)}% discount rate). Variance derived from Monte Carlo P10/P90 spread.`,
+      rationale: `Risk-adjusted DCF from the rNPV engine (${(rnpv.cumulativePoS * 100).toFixed(0)}% cumulative PoS, ${(rnpv.discountRate * 100).toFixed(1)}% discount rate). Variance derived from Monte Carlo P10/P90 spread.${earlyPhasePrior ? ' Weight capped before Phase 2: comparable transactions carry the blend at this stage.' : ''}`,
     },
     {
       name: 'Comparable Transactions',
@@ -446,6 +460,7 @@ export function calculateEnsembleValuation(
     spread,
     agreement,
     fallbackUsed,
+    earlyPhasePrior,
     narrative,
     comparablesSource: isCustom ? 'custom' : 'auto',
     customCompCount: isCustom ? compResult.sampleSize : undefined,

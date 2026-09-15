@@ -230,6 +230,31 @@ export const shareSchema = z.object({
         high: z.number(),
       }),
       cumulativePoS: z.number().min(0).max(1),
+      // Method statement inputs (share + brief pages, lib/financial/method-copy.ts)
+      yearsToMarket: z.number().optional(),
+      discountRate: z.number().optional(),
+      peakSalesMedianM: z.number().optional(),
+      rnpvImpliedTotalMedianM: z.number().optional(),
+      monteCarloRecentering: z.enum(['scale', 'shift', 'none']).optional(),
+      ensemble: z
+        .object({
+          valueM: z.number(),
+          stdDevM: z.number(),
+          agreement: z.enum(['tight', 'moderate', 'wide']),
+          earlyPhasePrior: z.boolean().optional(),
+          methods: z
+            .array(
+              z.object({
+                name: z.enum(['rNPV', 'Comparable Transactions', 'Real Options']),
+                valueM: z.number(),
+                weight: z.number().min(0).max(1),
+                sampleSize: z.number().optional(),
+                confidence: z.enum(['high', 'medium', 'low']),
+              }),
+            )
+            .max(3),
+        })
+        .optional(),
     })
     .optional()
     .nullable(),
