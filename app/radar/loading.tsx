@@ -1,9 +1,13 @@
+import { TableSkeleton } from '@/components/radar/feed/FeedStates';
+
 export default function RadarLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-amber-200 dark:border-amber-800 border-t-amber-500 animate-spin" />
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Loading Asset Radar...</p>
+    <div className="min-h-screen bg-neutral-50 pt-16 dark:bg-neutral-950 sm:pt-20">
+      <div className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6">
+        <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">Loading assets</p>
+        <div className="rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <TableSkeleton />
+        </div>
       </div>
     </div>
   );
