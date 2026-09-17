@@ -8,6 +8,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ExtractedDeal } from './sec-edgar';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import { validateExtractedDeal, extractAuditExcerpt, normalizeRoyaltyPct } from './deal-extraction-validator';
+import { FunnelCounter } from './funnel';
+import { insertCitedDeal } from './insert-deal';
 import { readSyncCursor, writeSyncCursor } from '../radar/sync-cursor';
 
 // === RSS Feed Sources ===
@@ -142,13 +144,6 @@ const FEED_SOURCES: FeedSource[] = [
     dealKeywords: ['license agreement', 'collaboration agreement', 'exclusive license', 'acquisition', 'deal', 'partnership', 'co-develop', 'option agreement', 'milestone', 'royalt'],
   },
   {
-    name: 'Reuters_Healthcare',
-    family: 'news',
-    url: 'https://www.reuters.com/arc/outboundfeeds/v3/all/healthcare-pharmaceuticals/?outputType=xml',
-    type: 'rss',
-    dealKeywords: ['deal', 'license', 'collaboration', 'acquisition', 'acquire', 'merger', 'agreement', 'upfront', 'milestone', 'billion', 'million', 'buyout', 'takeover'],
-  },
-  {
     name: 'Labiotech_EU',
     family: 'news',
     paging: 'wordpress',
@@ -234,16 +229,20 @@ export interface RSSItem {
 
 // === RSS Parsing ===
 
+/** Some publishers (Endpoints News among them) answer 403 to a non-browser User-Agent. */
+const RESEARCH_UA = 'Ambrosia Ventures Deal Intelligence research@ambrosiaventures.co';
+const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
+
+/** Fetch with the research UA, retry once with a browser UA on 401/403/406. */
+async function fetchWithUaFallback(url: string, accept: string, timeoutMs: number): Promise<Response> {
+  const first = await fetchWithTimeout(url, { timeoutMs, retries: 1, headers: { 'User-Agent': RESEARCH_UA, Accept: accept } });
+  if (first.ok || ![401, 403, 406].includes(first.status)) return first;
+  return fetchWithTimeout(url, { timeoutMs, retries: 1, headers: { 'User-Agent': BROWSER_UA, Accept: accept } });
+}
+
 export async function fetchRSSFeed(source: FeedSource): Promise<RSSItem[]> {
   try {
-    const response = await fetchWithTimeout(source.url, {
-      timeoutMs: 15_000,
-      headers: {
-        'User-Agent': 'Ambrosia Ventures Deal Intelligence research@ambrosiaventures.co',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
-      },
-    });
-
+    const response = await fetchWithUaFallback(source.url, 'application/rss+xml, application/xml, text/xml', 15_000);
     if (!response.ok) {
       console.warn(`[press-releases] ${source.name}: HTTP ${response.status}`);
       return [];
@@ -556,14 +555,7 @@ function isPotentialDeal(item: RSSItem, keywords: string[]): boolean {
 
 async function fetchArticleContent(url: string): Promise<string> {
   try {
-    const response = await fetchWithTimeout(url, {
-      timeoutMs: 15_000,
-      headers: {
-        'User-Agent': 'Ambrosia Ventures Deal Intelligence research@ambrosiaventures.co',
-        'Accept': 'text/html',
-      },
-    });
-
+    const response = await fetchWithUaFallback(url, 'text/html', 15_000);
     if (!response.ok) return '';
 
     const html = await response.text();
@@ -706,6 +698,8 @@ ${content}`;
 
 export interface PressReleaseIngestionOptions {
   maxArticlesPerSource?: number;
+  /** Run every stage except writes to deals/companies; the funnel is still counted. */
+  dryRun?: boolean;
   timeBudgetMs?: number;
   /**
    * Backfill mode: page older items from every feed that supports paging and
@@ -731,8 +725,10 @@ export interface PressReleaseIngestionResult {
   deals_extracted: number;
   deals_inserted: number;
   /** Rows upserted into press_releases (every fetched item, not only deals). */
-  press_releases_persisted: number;
+    press_releases_persisted: number;
   errors: string[];
+  /** Per-stage counts of where items were dropped (see FunnelCounter). */
+  funnel?: Record<string, unknown>;
 }
 
 export async function runPressReleaseIngestion(
@@ -765,9 +761,10 @@ export async function runPressReleaseIngestion(
   let potentialDeals = 0;
   let dealsExtracted = 0;
   let dealsInserted = 0;
-  let persisted = 0;
-
-  console.log(`[press-releases] Starting ingestion from ${FEED_SOURCES.length} sources (budget: ${timeBudget}ms)...`);
+    let persisted = 0;
+  const funnel = new FunnelCounter();
+  const dryRun = !!options?.dryRun;
+  console.log(`[press-releases] Starting ingestion from ${FEED_SOURCES.length} sources (budget: ${timeBudget}ms${dryRun ? ', DRY RUN' : ''})...`);
 
   // Company index for companies_mentioned resolution (additive; never blocks deal extraction)
   let mentionIndex: CompanyMentionIndex = { entries: [] };
@@ -779,13 +776,15 @@ export async function runPressReleaseIngestion(
 
   for (const source of FEED_SOURCES) {
     if (Date.now() - startTime > timeBudget) {
-      console.log(`[press-releases] Time budget exceeded after ${FEED_SOURCES.indexOf(source)} sources, stopping`);
+            console.log(`[press-releases] Time budget exceeded after ${FEED_SOURCES.indexOf(source)} sources, stopping`);
+      funnel.count('time_budget', 'sources_remaining');
       break;
     }
     try {
       console.log(`[press-releases] Fetching ${source.name}...`);
-      const items = await fetchRSSFeed(source);
+            const items = await fetchRSSFeed(source);
       articlesFound += items.length;
+      for (let i = 0; i < items.length; i++) funnel.count('fetched');
 
       // Persist EVERY item to press_releases (Phase 3 data source). Failures are logged, never thrown.
       if (items.length > 0) {
@@ -802,11 +801,12 @@ export async function runPressReleaseIngestion(
           .filter(item => isPotentialDeal(item, source.dealKeywords))
           .slice(0, maxPerSource);
 
-      potentialDeals += dealItems.length;
+            potentialDeals += dealItems.length;
+      if (!options?.persistOnly) for (let i = 0; i < items.length - dealItems.length; i++) funnel.count('keyword_filtered');
       console.log(`[press-releases] ${source.name}: ${items.length} items, ${dealItems.length} potential deals`);
 
-      for (const item of dealItems) {
-        if (Date.now() - startTime > timeBudget) break;
+            for (const item of dealItems) {
+        if (Date.now() - startTime > timeBudget) { funnel.count('time_budget', 'items_remaining'); break; }
         try {
           // Check if we've already processed this article
           const guid = item.guid || item.link;
@@ -817,22 +817,25 @@ export async function runPressReleaseIngestion(
             .limit(1)
             .single();
 
-          if (existing) continue;
-
+                    if (existing) { funnel.count('already_in_table'); continue; }
           // Fetch full article content for better extraction
           let content = item.description;
+          let articleFetched = false;
           if (item.link) {
             const fullContent = await fetchArticleContent(item.link);
+            articleFetched = fullContent.length > 0;
             if (fullContent.length > content.length) {
               content = fullContent;
             }
           }
-
-          if (content.length < 100) continue;
+          if (!articleFetched) funnel.count('content_unavailable', source.family, item.link);
+          if (content.length < 100) { funnel.count('content_too_short', articleFetched ? 'article' : 'rss_only', item.title); continue; }
 
           // Extract deal using Claude
-          const deal = await extractDealFromArticle(item.title, content, source.name, anthropicApiKey);
-
+                    const deal = await extractDealFromArticle(item.title, content, source.name, anthropicApiKey);
+          if (!deal) funnel.count('not_a_deal', articleFetched ? 'article' : 'rss_only', item.title);
+          else if (deal.confidence_score < 85) funnel.count('confidence_gate', deal.confidence_score >= 75 ? '75-84' : 'below-75', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score} ${articleFetched ? 'article' : 'rss_only'}`);
+          else if (!deal.licensor || !deal.licensee) funnel.count('missing_parties', undefined, item.title);
           if (deal && deal.confidence_score >= 85 && deal.licensor && deal.licensee) {
             // Phase 4 (2026-04-14): shared fabrication validator.
             const validation = validateExtractedDeal({
@@ -852,9 +855,7 @@ export async function runPressReleaseIngestion(
                 `[press-releases] Rejected pre-insert [${validation.rejectCode}]: ` +
                 `${deal.licensor} → ${deal.licensee} — ${validation.rejectReason}`
               );
-              errors.push(
-                `Validation-rejected (${validation.rejectCode}) ${guid}: ${validation.rejectReason}`
-              );
+                            funnel.count('validator_rejected', validation.rejectCode, `${deal.licensor} → ${deal.licensee}: ${validation.rejectReason}`);
               continue;
             }
             dealsExtracted++;
@@ -862,8 +863,8 @@ export async function runPressReleaseIngestion(
             // Find or create companies
             const { findOrCreateCompany, deriveTherapeuticArea } = await import('./sec-edgar');
             const { classifyAndEnrichDeal, classifyCompanyCountry } = await import('./company-geography');
-            const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
-            const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
+                        const licensorId = dryRun ? null : await findOrCreateCompany(supabase, deal.licensor, false);
+            const licenseeId = dryRun ? null : await findOrCreateCompany(supabase, deal.licensee, true);
             const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
             const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
 
@@ -892,7 +893,12 @@ export async function runPressReleaseIngestion(
               if (!isNaN(d.getTime())) announcedDate = d.toISOString().split('T')[0];
             } catch { /* ignore */ }
 
-            const { data: insertedDeal, error: insertError } = await supabase.from('deals').insert({
+                        const insertResult = await insertCitedDeal(supabase, {
+              sourceType: 'press_release',
+              sourceUrl: item.link,
+              sourceFilingId: guid,
+              extractionModel: 'claude-opus-4-6',
+              row: {
               licensor_name: deal.licensor,
               licensor_id: licensorId,
               licensee_name: deal.licensee,
@@ -943,27 +949,23 @@ export async function runPressReleaseIngestion(
               indications_licensed: deal.indications_licensed,
               includes_diagnostics: deal.includes_diagnostics || false,
               announced_date: announcedDate,
-              source_type: 'press_release',
-              source_url: item.link,
-              source_filing_id: guid,
-              terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
+                            terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
               confidence_score: deal.confidence_score,
               extraction_notes: `Source: ${source.name}. ${deal.extraction_notes || ''}`.trim(),
-              extraction_model: 'claude-opus-4-6',
-              extraction_timestamp: new Date().toISOString(),
               therapeutic_area: therapeuticArea,
-              verification_status: 'pending',
               raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
-            }).select('id').single();
-
-            if (insertError) {
-              if (insertError.code !== '23505') { // Skip duplicate errors
-                errors.push(`Insert error: ${insertError.message}`);
-              }
-            } else {
+              },
+            }, { dryRun });
+            if (insertResult.outcome === 'inserted') {
               dealsInserted++;
-              console.log(`[press-releases] Extracted: ${deal.licensor} → ${deal.licensee} (${deal.modality}) from ${source.name}`);
-              if (insertedDeal?.id && item.link) await linkPressReleaseToDeal(supabase, item.link, insertedDeal.id);
+              funnel.count(dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`);
+              console.log(`[press-releases] ${dryRun ? 'Would insert' : 'Extracted'}: ${deal.licensor} → ${deal.licensee} (${deal.modality}) from ${source.name}`);
+              if (!dryRun && insertResult.id && item.link) await linkPressReleaseToDeal(supabase, item.link, insertResult.id);
+            } else if (insertResult.outcome === 'duplicate') {
+              funnel.count('insert_duplicate');
+            } else {
+              funnel.count('insert_error', insertResult.outcome, insertResult.error);
+              errors.push(`Insert error: ${insertResult.error}`);
             }
           }
 
@@ -984,19 +986,24 @@ export async function runPressReleaseIngestion(
   }
 
   // Log ingestion
-  await supabase.from('data_ingestion_log').insert({
-    source: 'press_releases',
-    run_type: 'scheduled',
-    parameters: { sources: FEED_SOURCES.length, maxPerSource, press_releases_persisted: persisted, persist_only: !!options?.persistOnly },
-    records_fetched: articlesFound,
-    records_processed: potentialDeals,
-    records_inserted: dealsInserted,
-    records_updated: persisted,
-    records_failed: errors.length,
-    errors: errors.slice(0, 50),
-    status: errors.length > 0 ? 'partial' : 'completed',
-    completed_at: new Date().toISOString(),
-  });
+    console.log(`[press-releases] funnel: ${funnel.summary()}`);
+  if (!dryRun) {
+    await supabase.from('data_ingestion_log').insert({
+      source: 'press_releases',
+      run_type: 'scheduled',
+      parameters: { sources: FEED_SOURCES.length, maxPerSource, press_releases_persisted: persisted, persist_only: !!options?.persistOnly, funnel: funnel.toJSON() },
+      records_fetched: articlesFound,
+      records_processed: potentialDeals,
+      records_inserted: dealsInserted,
+      records_updated: persisted,
+      records_failed: errors.length,
+      errors: errors.slice(0, 50),
+      // Zero fetched from 20+ live feeds is an outage, never a clean run.
+      status: articlesFound === 0 || errors.length > 0 ? 'partial' : 'completed',
+      notes: articlesFound === 0 ? 'zero-fetch: every feed returned nothing; treat as an outage' : null,
+      completed_at: new Date().toISOString(),
+    });
+  }
 
   console.log(`[press-releases] Done: ${articlesFound} articles, ${persisted} persisted, ${potentialDeals} potential deals, ${dealsExtracted} extracted, ${dealsInserted} inserted`);
 
@@ -1008,6 +1015,7 @@ export async function runPressReleaseIngestion(
     deals_inserted: dealsInserted,
     press_releases_persisted: persisted,
     errors,
+    funnel: funnel.toJSON(),
   };
 }
 

@@ -8,6 +8,17 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 /**
  * Log a cron run result to the data_ingestion_log table.
  */
+/**
+ * Ingestion sources that return records on every normal run. A run that
+ * fetches zero from one of these is logged 'partial' with a note, never
+ * 'completed' — silent zero-fetch was how every live deal source went dark
+ * for two weeks in Sep 2026 while the log showed green.
+ */
+export const SOURCES_EXPECTING_RECORDS: ReadonlySet<string> = new Set([
+  'edgar_realtime', 'press_releases', 'press_releases_cron', 'cron_deal_backfill', 'sec_edgar',
+  'edgar_fts_backfill', 'hkex_announcements', 'hkex_backfill', 'sec_10k_ingest',
+]);
+
 export async function logCronRun(
   supabase: SupabaseClient,
   source: string,
@@ -15,21 +26,40 @@ export async function logCronRun(
     fetched?: number;
     processed?: number;
     inserted?: number;
+    skipped?: number;
     errors?: string[];
     parameters?: Record<string, unknown>;
+    /** Per-stage drop counts; stored under parameters.funnel. */
+    funnel?: Record<string, unknown>;
+    /** Explicit status; otherwise derived (errors → partial, zero-fetch on an expecting source → partial). */
+    status?: 'completed' | 'partial' | 'failed';
+    notes?: string;
+    /** Override the SOURCES_EXPECTING_RECORDS lookup for this run (e.g. edgar_realtime before filings exist for the day). */
+    expectRecords?: boolean;
   }
 ): Promise<void> {
+  const fetched = result.fetched || 0;
+  const errors = (result.errors || []).slice(0, 50);
+  const expectRecords = result.expectRecords ?? SOURCES_EXPECTING_RECORDS.has(source);
+  let status: 'completed' | 'partial' | 'failed' = result.status ?? (errors.length > 0 ? 'partial' : 'completed');
+  let notes = result.notes;
+  if (!result.status && expectRecords && fetched === 0) {
+    status = 'partial';
+    notes = [notes, 'zero-fetch: this source normally returns records; treat as an outage until it recovers'].filter(Boolean).join(' | ');
+  }
   try {
     await supabase.from('data_ingestion_log').insert({
       source,
       run_type: 'cron',
-      parameters: result.parameters || {},
-      records_fetched: result.fetched || 0,
+      parameters: { ...(result.parameters || {}), ...(result.funnel ? { funnel: result.funnel } : {}) },
+      records_fetched: fetched,
       records_processed: result.processed || 0,
       records_inserted: result.inserted || 0,
-      records_failed: result.errors?.length || 0,
-      errors: (result.errors || []).slice(0, 50),
-      status: 'completed',
+      records_skipped: result.skipped || 0,
+      records_failed: errors.length,
+      errors,
+      status,
+      notes: notes ?? null,
       completed_at: new Date().toISOString(),
     });
   } catch {
