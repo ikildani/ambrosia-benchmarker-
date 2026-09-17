@@ -2,22 +2,24 @@
  * Asset Radar — Signals API
  *
  * GET /api/radar/signals?asset_id=X
- *   Returns signal breakdown for a specific asset:
- *   - Current factor scores and composite licensing_intent_score
- *   - Individual signal records with evidence
- *   - Score trend over time (from snapshots)
+ *   Score decomposition for one asset: all nine factor contributions
+ *   (ScoreFactorContribution[], zero-score factors included with the sources
+ *   checked), the waterfall from weighted evidence through the phase and
+ *   availability multipliers to the composite, model version, the raw
+ *   licensing_signals rows, and the 7/30/90-day trend from snapshots.
  *
  * GET /api/radar/signals?top=20
- *   Returns the top N assets by licensing_intent_score with their signals.
+ *   Top N assets by licensing_intent_score.
  *
  * GET /api/radar/signals?company=X
- *   Returns all signals for assets owned by a specific company.
+ *   All signals for assets owned by a company.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { resolveUserTier } from '@/lib/auth/tier-check';
 import { isUuid, sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
+import { buildScoreBreakdown, deltaOverDays, type SignalEvidenceRow, type SnapshotLike } from '@/components/radar/asset/score-breakdown';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,10 +47,13 @@ export async function GET(request: NextRequest) {
 
   // ── Single asset detail view ───────────────────────────────────
   if (assetId) {
+    const since = new Date();
+    since.setUTCDate(since.getUTCDate() - 90);
+
     const [assetResult, signalsResult, snapshotsResult] = await Promise.all([
       supabase
         .from('clinical_assets')
-        .select('id, company_name, asset_name, modality, therapeutic_area, indication_category, phase, trial_status, partnership_status, licensing_intent_score, competitive_heat, deal_readiness_score, confidence_score, trial_count')
+        .select('id, company_name, asset_name, modality, therapeutic_area, indication_category, phase, trial_status, partnership_status, territory_rights_available, licensing_intent_score, score_confidence, competitive_heat, deal_readiness_score, confidence_score, trial_count, last_scored_at')
         .eq('id', assetId)
         .single(),
 
@@ -62,33 +67,62 @@ export async function GET(request: NextRequest) {
 
       supabase
         .from('asset_signal_snapshots')
-        .select('licensing_intent_score, competitive_heat, deal_readiness_score, factor_scores, score_delta, trend, snapshot_date')
+        .select('*')
         .eq('asset_id', assetId)
+        .gte('snapshot_date', since.toISOString().slice(0, 10))
         .order('snapshot_date', { ascending: false })
-        .limit(30),
+        .limit(120),
     ]);
 
     if (assetResult.error || !assetResult.data) {
       return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
     }
 
+    const signals = (signalsResult.data || []) as Array<Record<string, unknown>>;
+    const snapshots = (snapshotsResult.data || []) as Array<Record<string, unknown>>;
+
     // Group signals by type for factor breakdown
-    const signalsByType: Record<string, typeof signalsResult.data> = {};
-    if (signalsResult.data) {
-      for (const sig of signalsResult.data) {
-        if (!signalsByType[sig.signal_type]) signalsByType[sig.signal_type] = [];
-        signalsByType[sig.signal_type]!.push(sig);
-      }
+    const signalsByType: Record<string, typeof signals> = {};
+    for (const sig of signals) {
+      const t = String(sig.signal_type);
+      if (!signalsByType[t]) signalsByType[t] = [];
+      signalsByType[t]!.push(sig);
     }
+
+    const breakdown = buildScoreBreakdown({
+      currentScore: assetResult.data.licensing_intent_score,
+      currentConfidence: assetResult.data.score_confidence ?? assetResult.data.confidence_score,
+      snapshot: (snapshots[0] as unknown as SnapshotLike | undefined) ?? null,
+      signals: signals as unknown as SignalEvidenceRow[],
+    });
+
+    const points = snapshots.map(s => ({
+      date: String(s.snapshot_date),
+      score: Number(s.licensing_intent_score) || 0,
+      delta: Number(s.score_delta) || 0,
+      trend: (s.trend as string | null) ?? null,
+    }));
 
     return NextResponse.json({
       asset: assetResult.data,
-      signals: signalsResult.data || [],
+      score: breakdown,
+      contributions: breakdown.contributions,
+      waterfall: breakdown.waterfall,
+      model_version: breakdown.model_version,
+      signals,
       signals_by_type: signalsByType,
-      trend: snapshotsResult.data || [],
-      current_trend: snapshotsResult.data?.[0]?.trend || 'stable',
-      score_delta_7d: computeNDayDelta(snapshotsResult.data || [], 7),
-      score_delta_30d: computeNDayDelta(snapshotsResult.data || [], 30),
+      trend: snapshots.map(s => ({
+        licensing_intent_score: s.licensing_intent_score,
+        competitive_heat: s.competitive_heat,
+        deal_readiness_score: s.deal_readiness_score,
+        score_delta: s.score_delta,
+        trend: s.trend,
+        snapshot_date: s.snapshot_date,
+      })),
+      current_trend: points[0]?.trend || 'stable',
+      score_delta_7d: deltaOverDays(points, 7) ?? 0,
+      score_delta_30d: deltaOverDays(points, 30) ?? 0,
+      score_delta_90d: deltaOverDays(points, 90) ?? 0,
     });
   }
 
@@ -96,7 +130,7 @@ export async function GET(request: NextRequest) {
   if (top > 0) {
     let query = supabase
       .from('clinical_assets')
-      .select('id, company_name, asset_name, modality, therapeutic_area, indication_category, phase, trial_status, partnership_status, licensing_intent_score, competitive_heat, deal_readiness_score, confidence_score')
+      .select('id, company_name, asset_name, modality, therapeutic_area, indication_category, phase, trial_status, partnership_status, licensing_intent_score, score_confidence, competitive_heat, deal_readiness_score, confidence_score')
       .gt('licensing_intent_score', 0)
       .order('licensing_intent_score', { ascending: false })
       .limit(Math.min(top, 100));
@@ -165,19 +199,4 @@ export async function GET(request: NextRequest) {
       by_signal_type: '/api/radar/signals?top=20&signal_type=cash_runway',
     },
   }, { status: 400 });
-}
-
-function computeNDayDelta(
-  snapshots: Array<{ snapshot_date: string; licensing_intent_score: number }>,
-  days: number,
-): number {
-  if (snapshots.length < 2) return 0;
-  const latest = snapshots[0];
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-
-  const older = snapshots.find(s => new Date(s.snapshot_date) <= cutoff);
-  if (!older) return 0;
-
-  return Math.round(latest.licensing_intent_score - older.licensing_intent_score);
 }
