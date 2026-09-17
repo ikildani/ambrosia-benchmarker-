@@ -292,7 +292,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>Deal Intelligence Platforms: Best Balance</h3>
             <p>
-              Platforms that combine large transaction databases with analytical engines deliver benchmarks in minutes, not weeks. The best platforms provide {DEAL_STATS.TOTAL_DEALS}+ verified transactions, multiple valuation methodologies, partner identification, and scenario analysis at 90-95% lower cost than consulting engagements.
+              Platforms that combine large transaction databases with analytical engines deliver benchmarks in minutes, not weeks. The best platforms track {DEAL_STATS.TOTAL_DEALS} transactions with a clearly stated share verified against primary sources, and offer multiple valuation methodologies, partner identification, and scenario analysis at 90-95% lower cost than consulting engagements.
             </p>
           </div>
 

@@ -1465,7 +1465,7 @@ export default async function Q2BenchmarkReportPage() {
             <div>
               <h3 className="text-sm font-bold text-slate-900 mb-2">Sample Selection</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                This report analyzes {DEAL_STATS.TOTAL_DEALS} biopharma transactions executed between January 1, 2020 and June 30, 2026. Transactions are sourced from SEC 8-K filings, FTC premerger notification filings, company press releases, investor presentations, and ClinicalTrials.gov. Each transaction is verified against at least one primary source before inclusion. New deals are ingested weekly (approximately 38 per week) via automated SEC EDGAR monitoring plus manual verification.
+                This report analyzes {DEAL_STATS.TOTAL_DEALS} biopharma transactions executed between January 1, 2020 and June 30, 2026. Transactions are sourced from SEC 8-K filings, FTC premerger notification filings, company press releases, investor presentations, and ClinicalTrials.gov. Deals marked verified carry a primary-source citation; unverified deals are tracked from press releases and filings pending verification. New deals are ingested daily via automated SEC EDGAR and press-release monitoring plus manual verification.
               </p>
             </div>
 
