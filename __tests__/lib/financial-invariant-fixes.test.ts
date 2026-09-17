@@ -21,6 +21,8 @@ import {
 } from '@/lib/financial/invariants';
 import { checkCrossEngineConsistency } from '@/lib/financial/consistency-checks';
 import type { RNPVInput } from '@/lib/financial/types';
+import { runFinancialModel } from '@/lib/financial/run-financial-model';
+import { calculateDealTerms, type CalculationInput } from '@/lib/calculations';
 
 jest.mock('@/lib/sentry-client', () => ({ captureClientError: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -225,5 +227,36 @@ describe('6. Sentry receives each (context, rule-set) once', () => {
     assertInvariants([{ severity: 'critical' as const, rule: 'b', message: 'm', context: {} }], { context: 'c1' });
     assertInvariants([{ severity: 'critical' as const, rule: 'a', message: 'm', context: {} }], { context: 'c2' });
     expect(captureClientError).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('7. the blended headline rests on the same comparables as the published range', () => {
+  const calcInput = {
+    therapeuticArea: 'oncology', phase: 'phase1', dealType: 'codevelopment', modality: 'adc', indication: 'gastric', territory: 'global',
+    biomarker: 'unselected', lineOfTherapy: '2L', treatmentApproach: 'symptomatic', combinationPotential: 'some',
+    competitivePosition: 'racing', dataQuality: 'promising',
+    regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+  } as unknown as CalculationInput;
+
+  it('uses the calibrated benchmark as the comparables method and lets it carry the blend before Phase 2', () => {
+    const terms = calculateDealTerms(calcInput);
+    const model = runFinancialModel(calcInput, terms);
+    expect(model.ensemble.comparablesSource).toBe('benchmark');
+    expect(model.ensemble.earlyPhasePrior).toBe(true);
+    const comps = model.ensemble.methods.find(m => m.name === 'Comparable Transactions')!;
+    expect(comps.value).toBeCloseTo(terms.terms.totalDealValue.median, 0);
+    expect(comps.weight).toBeGreaterThanOrEqual(0.6);
+    expect(model.monteCarlo.recentering?.method).not.toBe('none');
+    if (Math.abs(model.rnpv.riskAdjustedNPV) > 5) {
+      expect(Math.abs(model.monteCarlo.percentiles.p50 - model.rnpv.riskAdjustedNPV) / Math.abs(model.rnpv.riskAdjustedNPV)).toBeLessThanOrEqual(0.3);
+    }
+  });
+
+  it('a user-curated comp set still takes precedence over the benchmark', () => {
+    const terms = calculateDealTerms(calcInput);
+    const custom = { ids: ['a', 'b', 'c', 'd'], upfront: { p25: 50, median: 80, p75: 120 }, totalValue: { p25: 500, median: 800, p75: 1200 }, n: 4, totalValuesM: [500, 700, 900, 1200] };
+    const model = runFinancialModel(calcInput, terms, undefined, undefined, custom);
+    expect(model.ensemble.comparablesSource).toBe('custom');
+    expect(model.ensemble.customCompCount).toBe(4);
   });
 });
