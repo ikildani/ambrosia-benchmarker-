@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { aggregateDealsByQuarter, computeMomentumSignals, type MomentumSignal } from '@/lib/services/trend-aggregation';
 import { computeLicensingWindow, type LicensingWindowResult } from '@/lib/services/licensing-window';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -248,10 +249,9 @@ async function getAlertFeed(
 
   const filterTAs = targetTA ? [targetTA] : userTAs.length > 0 ? userTAs : [];
 
-  let query = supabase
+  let query = applyDealQualityFilter(supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, modality')
-    .eq('is_synthetic', false)
+    .select('id, licensor_name, licensee_name, asset_name, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, modality'))
     .order('announced_date', { ascending: false })
     .limit(20);
 

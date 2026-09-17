@@ -2,6 +2,7 @@ import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAuth } from '@/lib/auth-helpers';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,11 +55,10 @@ export async function GET(request: NextRequest) {
 
     // Deals matching modality watches
     if (modalityWatches.length > 0) {
-      const { data: modalityDeals } = await supabase
+      const { data: modalityDeals } = await applyDealQualityFilter(supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, modality, upfront_usd, announced_date, asset_name')
-        .in('modality', modalityWatches)
-        .eq('is_synthetic', false)  // R68
+        .in('modality', modalityWatches))
         .gte('announced_date', thirtyDaysAgo)
         .order('announced_date', { ascending: false })
         .limit(20);
@@ -77,11 +77,10 @@ export async function GET(request: NextRequest) {
 
     // Deals matching company watches
     if (companyWatches.length > 0) {
-      const { data: companyDeals } = await supabase
+      const { data: companyDeals } = await applyDealQualityFilter(supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, licensee_id, licensor_id, modality, upfront_usd, announced_date, asset_name')
-        .or(`licensee_id.in.(${companyWatches.join(',')}),licensor_id.in.(${companyWatches.join(',')})`)
-        .eq('is_synthetic', false)  // R68
+        .or(`licensee_id.in.(${companyWatches.join(',')}),licensor_id.in.(${companyWatches.join(',')})`))
         .gte('announced_date', thirtyDaysAgo)
         .order('announced_date', { ascending: false })
         .limit(20);
@@ -100,11 +99,10 @@ export async function GET(request: NextRequest) {
 
     // Deals matching indication watches
     if (indicationWatches.length > 0) {
-      const { data: indicationDeals } = await supabase
+      const { data: indicationDeals } = await applyDealQualityFilter(supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, indication_category, indication_specific, modality, announced_date, asset_name')
-        .or(`indication_category.in.(${indicationWatches.join(',')}),indication_specific.in.(${indicationWatches.join(',')})`)
-        .eq('is_synthetic', false)  // R68
+        .or(`indication_category.in.(${indicationWatches.join(',')}),indication_specific.in.(${indicationWatches.join(',')})`))
         .gte('announced_date', thirtyDaysAgo)
         .order('announced_date', { ascending: false })
         .limit(20);

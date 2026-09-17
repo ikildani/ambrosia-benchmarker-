@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { weightedQuantile, recencyWeight } from '@/lib/math/quantile';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export interface QuarterData {
   quarter: string;
@@ -64,10 +65,9 @@ function toMillions(usd: number | null): number | null {
 }
 
 async function fetchDeals(supabase: SupabaseClient, fromYear?: number, toYear?: number): Promise<DealRow[]> {
-  let query = supabase
+  let query = applyDealQualityFilter(supabase
     .from('deals')
-    .select('announced_date, upfront_usd, milestones_total_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, therapeutic_area, modality, phase_at_signing, deal_type, terms_disclosed')
-    .eq('is_synthetic', false)
+    .select('announced_date, upfront_usd, milestones_total_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, therapeutic_area, modality, phase_at_signing, deal_type, terms_disclosed'))
     .order('announced_date', { ascending: true });
 
   if (fromYear) query = query.gte('announced_date', `${fromYear}-01-01`);
@@ -221,10 +221,9 @@ export async function computeEstimate(
   modality: string,
   territory: string = 'global'
 ): Promise<EstimateResult> {
-  const { data: deals, error } = await supabase
+  const { data: deals, error } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('upfront_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, announced_date, phase_at_signing, modality, therapeutic_area, territory')
-    .eq('is_synthetic', false)
+    .select('upfront_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, announced_date, phase_at_signing, modality, therapeutic_area, territory'))
     .eq('terms_disclosed', true)
     .order('announced_date', { ascending: false })
     .limit(500);

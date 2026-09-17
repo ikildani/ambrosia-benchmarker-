@@ -5,6 +5,7 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { pulseQuerySchema, formatZodErrors } from '@/lib/api-validation';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export async function GET(request: NextRequest) {
   const identifier = getIdentifier(request);
@@ -100,11 +101,9 @@ export async function GET(request: NextRequest) {
     const [snapshotResult, dealsResult] = await Promise.all([
       snapshotQuery.single(),
 
-      supabase
+      applyDealQualityFilter(supabase
         .from('deals')
-        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type, verification_status')
-        .eq('is_synthetic', false)
-        .neq('verification_status', 'rejected')
+        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type, verification_status'))
         .gte('announced_date', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .lte('announced_date', new Date().toISOString().split('T')[0])
         .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")')

@@ -14,6 +14,7 @@
 
 import type { DealFlowForecast } from '@/lib/financial/types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Exponential decay factor for weighted regression.
@@ -562,11 +563,10 @@ export async function forecastDealFlow(
   let liveDealCounts: Record<string, number> = {};
   if (supabase) {
     try {
-      const { data: deals } = await supabase
+      const { data: deals } = await applyDealQualityFilter(supabase
         .from('deals')
         .select('announced_date, therapeutic_area')
-        .eq('therapeutic_area', therapeuticArea)
-        .eq('is_synthetic', false)  // R68
+        .eq('therapeutic_area', therapeuticArea))
         .gte('announced_date', '2022-01-01')
         .order('announced_date', { ascending: true });
 

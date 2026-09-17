@@ -5,6 +5,7 @@ import { getAllPseoSlugs, getPseoBySlug, getRelatedPseoPages, formatDollar } fro
 import { createServiceClient } from '@/lib/supabase/server';
 import ReportCTA from '@/components/ReportCTA';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -50,9 +51,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 async function getRepresentativeDeals(dbModalityPattern: string, dbPhase: string) {
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
+    const { data } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, deal_type')
+      .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, deal_type'))
       .ilike('modality', dbModalityPattern)
       .eq('phase_at_signing', dbPhase)
       .gt('upfront_usd', 0)
