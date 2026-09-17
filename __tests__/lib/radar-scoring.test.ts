@@ -8,9 +8,11 @@ import {
   FACTOR_WEIGHTS,
   PHASE_PRIOR,
   SIGNAL_TYPES,
+  V2_MODEL_VERSION,
   availabilityFactor,
   computeCompositeScore,
   computeTrend,
+  contributionsFromFactors,
   detectFactors,
   emptyEvidence,
   escapeLikePattern,
@@ -20,6 +22,8 @@ import {
   type EvidenceBundle,
   type SignalFactor,
 } from '@/lib/radar/signal-detection';
+import { emptyFeatureBundle, FEATURE_NAMES, SIGN_CONSTRAINTS, type FeatureBundle } from '@/lib/radar/backtest/features';
+import { buildModelParams, sigmoid, type ModelParams, type TrainedLogistic } from '@/lib/radar/backtest/model';
 
 const NOW = new Date('2026-09-08T08:00:00Z');
 
@@ -266,5 +270,124 @@ describe('radar scoring v2 — PostgREST pattern escaping', () => {
     expect(escapeLikePattern('AB_101 (50%) *')).toBe('AB\\_101 (50\\%) _');
     expect(escapeLikePattern("O'Neil, Inc.")).toBe("O'Neil, Inc.");
     expect(escapeLikePattern('a\\b')).toBe('a\\\\b');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// scoring v3 — model path and v2 fallback
+// ═══════════════════════════════════════════════════════════════════════
+
+/** A hand-built model: every feature standardized around 0/1, one coefficient per sign. */
+function syntheticModel(): ModelParams {
+  const d = FEATURE_NAMES.length;
+  const fit: TrainedLogistic = {
+    weights: SIGN_CONSTRAINTS.map(s => (s === 0 ? 0.1 : s * 0.4)),
+    bias: -3,
+    means: new Array(d).fill(0),
+    stds: new Array(d).fill(1),
+    iterations: 1,
+    finalLoss: 0,
+    classWeightPos: 30,
+  };
+  return buildModelParams({
+    version: 'v3.synthetic', featureVersion: 'v3.0', featureNames: [...FEATURE_NAMES], signConstraints: [...SIGN_CONSTRAINTS], fit,
+    calibration: { type: 'none' }, samplingRate: 1, l2: 0.01,
+    trainWindow: { from: '2022-01-01', to: '2024-06-01' }, testWindow: { from: '2025-01-01', to: '2025-09-01' }, nTrain: 1000, positivesTrain: 40,
+  });
+}
+
+function v3Bundle(asset: AssetForScoring): FeatureBundle {
+  const b = emptyFeatureBundle({ ...asset, nct_ids: ['NCT100'], first_posted_date: '2022-01-01', originator_region: 'north_america', owner_type: 'industry' });
+  b.companyTrials = [{ nct_id: 'NCT100', company_id: 'c1', company_name: asset.company_name, phase: 'phase_2', status: 'recruiting', first_posted_date: '2022-01-01', primary_completion_date: '2026-12-01' }];
+  b.financials = [{ fiscal_period_end: '2026-06-30', filed_at: '2026-08-10', runway_months: 8, going_concern: false, atm_or_shelf_filed: true, source_url: 'https://sec/10q' }];
+  b.intentSignals = [{ signal_type: 'seeking_partner', polarity: 'bullish', quote: 'we are actively seeking a partner for ACM-101', source_url: 'https://sec/8k', observed_at: '2026-08-01', confidence: 0.9 }];
+  return b;
+}
+
+describe('radar scoring v3 — model path', () => {
+  test('without a model the v2 composite is used and contributions sum to the composite', () => {
+    const asset = baseAsset({ trial_status: 'active', trial_count: 6, regulatory_designations: ['breakthrough_therapy'] });
+    const r = scoreAssetPure(asset, fullyEvidencedBundle(asset), [], null);
+    expect(r.modelVersion).toBe(V2_MODEL_VERSION);
+    expect(r.probability).toBeNull();
+    expect(r.contributions).toHaveLength(9);
+    const sum = r.contributions.reduce((s, c) => s + c.points, 0);
+    expect(Math.round(sum)).toBe(r.licensingIntentScore);
+    expect(r.contributions.every(c => c.sources_checked.length > 0)).toBe(true);
+    expect(r.featureVector).toBeUndefined();
+  });
+
+  test('v2 contributions carry weight, score, evidence and points = score × weight × phase × availability', () => {
+    const asset = baseAsset({ partnership_status: 'partially_partnered', territory_rights_available: ['US'] });
+    const factors = fullFactors(50, 80);
+    const composite = computeCompositeScore(factors, asset);
+    const rows = contributionsFromFactors(factors, composite);
+    for (const row of rows) {
+      expect(row.weight).toBe(FACTOR_WEIGHTS[row.factor as keyof typeof FACTOR_WEIGHTS]);
+      expect(row.score).toBe(50);
+      expect(row.points).toBeCloseTo(50 * row.weight * 1.0 * 0.45, 2);
+      expect(row.confidence).toBe(80);
+    }
+  });
+
+  test('with a model the score is 100 × calibrated probability × availability, confidence = feature completeness', () => {
+    const asset = baseAsset({ trial_status: 'active', trial_count: 2 });
+    const model = { params: syntheticModel(), bundle: v3Bundle(asset) };
+    const r = scoreAssetPure(asset, emptyEvidence(asset.company_name, NOW), [], model);
+    expect(r.modelVersion).toBe('v3.synthetic');
+    expect(r.probability).not.toBeNull();
+    expect(r.licensingIntentScore).toBe(Math.round(100 * (r.probability as number) * 1.0));
+    expect(r.featureVector?.version).toBe('v3.0');
+    expect(r.scoreConfidence).toBe(Math.round((r.featureVector?.completeness ?? 0) * 100));
+    expect(r.scoreConfidence).toBeGreaterThan(0);
+    // The nine legacy detectors still run and feed licensing_signals
+    expect(r.factors).toHaveLength(9);
+  });
+
+  test('model contributions: one row per feature plus the intercept, Σ points = logit(p_raw)', () => {
+    const asset = baseAsset();
+    const model = { params: syntheticModel(), bundle: v3Bundle(asset) };
+    const r = scoreAssetPure(asset, emptyEvidence(asset.company_name, NOW), [], model);
+    expect(r.contributions).toHaveLength(FEATURE_NAMES.length + 1);
+    const intercept = r.contributions.find(c => c.factor === 'intercept')!;
+    expect(intercept.points).toBeCloseTo(-3, 4);
+    const logit = r.contributions.reduce((s, c) => s + c.points, 0);
+    expect(sigmoid(logit)).toBeCloseTo(r.probability as number, 3);
+    const runway = r.contributions.find(c => c.factor === 'runway_under_12')!;
+    expect(runway.score).toBe(1);
+    expect(runway.points).toBeCloseTo(0.4, 4);
+    expect(runway.confidence).toBe(100);
+    expect(runway.evidence_url).toBe('https://sec/10q');
+    expect(runway.sources_checked).toEqual(['company_financials']);
+    const bullish = r.contributions.find(c => c.factor === 'intent_bullish')!;
+    expect(bullish.evidence_text).toContain('seeking a partner');
+    expect(bullish.evidence_date).toBe('2026-08-01');
+    // A feature with no source data is imputed: zero points, confidence 0, explicit note
+    const patents = r.contributions.find(c => c.factor === 'patent_velocity')!;
+    expect(patents.points).toBe(0);
+    expect(patents.confidence).toBe(0);
+    expect(patents.evidence_text).toBe('No data on record');
+  });
+
+  test('availability semantics survive the model path: a partnered asset scores ~10 % of the unpartnered one', () => {
+    const open = baseAsset();
+    const taken = baseAsset({ partnership_status: 'partnered' });
+    const params = syntheticModel();
+    const a = scoreAssetPure(open, emptyEvidence(open.company_name, NOW), [], { params, bundle: v3Bundle(open) });
+    const b = scoreAssetPure(taken, emptyEvidence(taken.company_name, NOW), [], { params, bundle: v3Bundle(taken) });
+    expect(a.probability).toBeGreaterThan(0);
+    expect(b.licensingIntentScore).toBeLessThanOrEqual(Math.max(1, Math.round(a.licensingIntentScore * 0.15)));
+  });
+
+  test('failed v3 sources are tolerated: features null, confidence lower, score still produced', () => {
+    const asset = baseAsset();
+    const bundle = v3Bundle(asset);
+    bundle.sourceErrors.company_financials = 'relation "company_financials" does not exist';
+    const r = scoreAssetPure(asset, emptyEvidence(asset.company_name, NOW), [], { params: syntheticModel(), bundle });
+    const runway = r.contributions.find(c => c.factor === 'runway_months')!;
+    expect(runway.confidence).toBe(0);
+    expect(runway.evidence_text).toBe('Source unavailable');
+    expect(r.featureVector?.sources_failed).toEqual(['company_financials']);
+    expect(Number.isFinite(r.licensingIntentScore)).toBe(true);
   });
 });

@@ -1,13 +1,14 @@
 /**
- * Cron: Licensing Signal Detection (scoring v2)
+ * Cron: Licensing Signal Detection (scoring v3, v2 fallback)
  *
- * Scores clinical assets with the 9-factor licensing intent model in
- * lib/radar/signal-detection. Evidence is fetched once per company, scoring
- * is pure arithmetic, and persistence is batched, so a single 250 s run
- * covers ~2,500 assets (the queue is ordered by last_scored_at NULLS FIRST,
- * so never-scored assets go first).
+ * Scores clinical assets with lib/radar/signal-detection: the calibrated
+ * licensing-intent model from radar_score_models when one is active, else
+ * the 9-factor weighted composite. Evidence is fetched once per company,
+ * scoring is pure arithmetic, and persistence is batched, so a single 250 s
+ * run covers ~2,500 assets (the queue is ordered by last_scored_at NULLS
+ * FIRST, so never-scored assets go first).
  *
- * Schedule: 8:00 AM UTC daily (after asset-universe at 6:30 AM)
+ * Schedule: every 4 hours (0 *\/4 * * *), after asset-universe
  *
  * Manual backfill: GET /api/cron/licensing-signals?limit=6000
  *   `limit` (1..10000) overrides the default queue size and marks the run
@@ -67,8 +68,10 @@ export async function GET(request: NextRequest) {
       signals_detected: result.signalsDetected,
       signals_inserted: result.signalsInserted,
       snapshots_taken: result.snapshotsTaken,
+      model_version: result.modelVersion,
       factor_nonzero: result.factorNonZero,
       factor_errors: result.factorErrors,
+      feature_source_errors: result.featureSourceErrors,
       duration_ms: result.durationMs,
       timed_out: result.timedOut,
       logged: result.logged,

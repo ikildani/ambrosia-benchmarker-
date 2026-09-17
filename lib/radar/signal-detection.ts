@@ -1,13 +1,24 @@
 /**
- * Asset Radar — Layer 2: Licensing Signal Detection (scoring v2)
+ * Asset Radar — Layer 2: Licensing Signal Detection (scoring v3 with v2 fallback)
  *
- * 9-factor weighted model that scores every clinical asset's licensing
- * likelihood (0-100). Each factor is an independent detector that reads
- * pre-fetched evidence — company profile, press releases, research signals
- * (patents, publications, NIH grants), competitor trial/deal failures — and
- * produces a sub-score with an evidence chain.
+ * v3: the composite is a calibrated probability from the model in
+ * radar_score_models (lib/radar/backtest/model.ts) applied to the versioned
+ * feature vector in lib/radar/backtest/features.ts:
  *
- * Pipeline shape (v2):
+ *   score = round(100 × P(licensed | evidence at as_of) × availability)
+ *
+ * where P is the probability that an unpartnered asset is licensed, optioned,
+ * acquired or co-developed within 12 months, and availability keeps the v2
+ * semantics (partnered → 0.1, partially partnered → territory share).
+ * score_confidence = share of features with a non-null source. Per-feature
+ * logit contributions are persisted as ScoreFactorContribution[] in
+ * asset_signal_snapshots.factor_scores with the model version.
+ *
+ * The nine v2 detectors below still run on every asset: they produce the
+ * licensing_signals evidence rows, and when no model is active the v2
+ * weighted composite is the score (model_version 'v2-composite').
+ *
+ * Pipeline shape:
  *   1. Pull the scoring queue ordered by clinical_assets.last_scored_at
  *      (NULLS FIRST). Layer 1 no longer shares the cursor.
  *   2. Group assets by company and fetch every per-company evidence set ONCE
@@ -34,6 +45,20 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { pgArrayLiteral } from '@/lib/radar/pg-array';
 import { createHash } from 'crypto';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import type { ScoreFactorContribution } from '@/lib/radar/types';
+import {
+  FEATURE_SPECS,
+  buildFeatureVector,
+  fetchFeatureBundles,
+  type CompanyGroup,
+  type FeatureBundle,
+  type FeatureName,
+  type FeatureSpec,
+  type FeatureVector,
+  type TrialRow,
+} from '@/lib/radar/backtest/features';
+import { scoreFromFeatures, type ModelParams, type ScoreOutput } from '@/lib/radar/backtest/model';
+import { loadActiveModel } from '@/lib/radar/backtest/run';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -109,6 +134,11 @@ export interface AssetForScoring {
   licensing_intent_score: number;
   regulatory_designations?: string[] | null;
   territory_rights_available?: string[] | null;
+  /** v3 feature inputs (optional so v2 callers and tests still compile). */
+  asset_aliases?: string[] | null;
+  first_posted_date?: string | null;
+  originator_region?: string | null;
+  owner_type?: string | null;
 }
 
 export type Trend = 'surging' | 'rising' | 'stable' | 'cooling' | 'declining';
@@ -137,6 +167,14 @@ export interface ScoringResult {
   scoreDelta7d: number | null;
   scoreDelta30d: number | null;
   signalsInserted: number;
+  /** radar_score_models.version, or V2_MODEL_VERSION when the weighted composite was used. */
+  modelVersion: string;
+  /** Calibrated probability (0-1) before the availability multiplier; null on the v2 path. */
+  probability: number | null;
+  /** Persisted to asset_signal_snapshots.factor_scores (contract: lib/radar/types.ts). */
+  contributions: ScoreFactorContribution[];
+  /** Feature vector behind the model score (undefined on the v2 path). */
+  featureVector?: FeatureVector;
 }
 
 export interface DetectionResult {
@@ -158,7 +196,13 @@ export interface DetectionResult {
   durationMs: number;
   /** false when the data_ingestion_log insert itself failed. */
   logged: boolean;
+  /** Model used for this run's composites. */
+  modelVersion: string;
+  /** Per v3 source table: number of companies whose read failed (features null). */
+  featureSourceErrors: Record<string, number>;
 }
+
+export const V2_MODEL_VERSION = 'v2-composite';
 
 // ═══════════════════════════════════════════════════════════════════════
 // FACTOR WEIGHTS — single source of truth (sum = 1.0)
@@ -1290,21 +1334,118 @@ export function computeTrend(currentScore: number, priorSnapshots: SnapshotPoint
 // SCORE ONE ASSET (pure)
 // ═══════════════════════════════════════════════════════════════════════
 
+export interface ModelScoringInput {
+  params: ModelParams;
+  bundle: FeatureBundle;
+}
+
+// Built lazily: features.ts imports this module, so FEATURE_SPECS is not yet
+// populated when this file evaluates under a circular load order.
+let featureSpecByName: Map<string, FeatureSpec> | null = null;
+function featureSpec(name: string): FeatureSpec | undefined {
+  if (!featureSpecByName) featureSpecByName = new Map(FEATURE_SPECS.map(s => [s.name, s] as const));
+  return featureSpecByName.get(name);
+}
+
+/**
+ * v2 contributions: points = score × weight × phase × availability, so that
+ * Σ points = composite score (rounded once).
+ */
+export function contributionsFromFactors(factors: SignalFactor[], composite: CompositeScore): ScoreFactorContribution[] {
+  const scale = composite.phaseMultiplier * composite.availabilityFactor;
+  return factors.map(f => {
+    const weight = FACTOR_WEIGHTS[f.type] ?? 0;
+    const score = Math.max(0, Math.min(100, f.score));
+    return {
+      factor: f.type,
+      weight,
+      score,
+      points: Math.round(score * weight * scale * 100) / 100,
+      confidence: Math.max(0, Math.min(100, f.confidence)),
+      evidence_text: f.evidence ? f.evidence.slice(0, 500) : null,
+      evidence_url: f.evidenceUrl ?? null,
+      evidence_date: f.evidenceDate ?? null,
+      sources_checked: f.sourcesChecked ?? [],
+    };
+  });
+}
+
+/**
+ * v3 contributions: one row per feature (points = weight × standardized
+ * value, in logit units) plus an `intercept` row, so that
+ * Σ points = logit(p_raw). Imputed features carry confidence 0.
+ */
+export function contributionsFromModel(vector: FeatureVector, output: ScoreOutput): ScoreFactorContribution[] {
+  const rows: ScoreFactorContribution[] = output.contributions.map(c => {
+    const spec = featureSpec(c.feature);
+    const ev = vector.evidence[c.feature as FeatureName]?.[0];
+    const sources = spec?.sources ?? [];
+    const failed = sources.some(src => vector.sources_failed.includes(src));
+    return {
+      factor: c.feature,
+      weight: Math.round(c.weight * 1e4) / 1e4,
+      score: Math.round(c.value * 100) / 100,
+      points: Math.round(c.contribution * 1e4) / 1e4,
+      confidence: c.imputed ? 0 : 100,
+      evidence_text: ev ? ev.text : c.imputed ? (failed ? 'Source unavailable' : 'No data on record') : null,
+      evidence_url: ev?.source_url ?? null,
+      evidence_date: ev?.date ?? null,
+      sources_checked: sources,
+    };
+  });
+  rows.push({
+    factor: 'intercept',
+    weight: 1,
+    score: Math.round(output.intercept * 1e4) / 1e4,
+    points: Math.round(output.intercept * 1e4) / 1e4,
+    confidence: 100,
+    evidence_text: 'Base rate (model intercept, includes negative-sampling correction)',
+    evidence_url: null,
+    evidence_date: null,
+    sources_checked: [],
+  });
+  return rows;
+}
+
+/**
+ * Score one asset. With `model`, the composite is the calibrated probability
+ * × availability; without it, the v2 weighted composite. The nine detectors
+ * run either way (they feed licensing_signals and the fallback).
+ */
 export function scoreAssetPure(
   asset: AssetForScoring,
   ev: EvidenceBundle,
   priorSnapshots: SnapshotPoint[] = [],
+  model?: ModelScoringInput | null,
 ): ScoringResult {
   const factors = detectFactors(asset, ev);
   const composite = computeCompositeScore(factors, asset);
   const competitiveHeat = computeCompetitiveHeat(factors);
   const dealReadinessScore = computeDealReadiness(factors, asset);
-  const trend = computeTrend(composite.score, priorSnapshots, ev.now);
+
+  let score = composite.score;
+  let scoreConfidence = composite.confidence;
+  let modelVersion = V2_MODEL_VERSION;
+  let probability: number | null = null;
+  let contributions = contributionsFromFactors(factors, composite);
+  let featureVector: FeatureVector | undefined;
+
+  if (model) {
+    featureVector = buildFeatureVector(model.bundle, ev.now);
+    const out = scoreFromFeatures(featureVector.values, model.params);
+    probability = out.probability;
+    score = Math.max(0, Math.min(100, Math.round(100 * out.probability * composite.availabilityFactor)));
+    scoreConfidence = Math.max(0, Math.min(100, Math.round(featureVector.completeness * 100)));
+    modelVersion = model.params.version;
+    contributions = contributionsFromModel(featureVector, out);
+  }
+
+  const trend = computeTrend(score, priorSnapshots, ev.now);
 
   return {
     assetId: asset.id,
-    licensingIntentScore: composite.score,
-    scoreConfidence: composite.confidence,
+    licensingIntentScore: score,
+    scoreConfidence,
     competitiveHeat,
     dealReadinessScore,
     factors,
@@ -1314,6 +1455,10 @@ export function scoreAssetPure(
     scoreDelta7d: trend.delta7d,
     scoreDelta30d: trend.delta30d,
     signalsInserted: 0,
+    modelVersion,
+    probability,
+    contributions,
+    featureVector,
   };
 }
 
@@ -1612,27 +1757,33 @@ async function persistWave(
   }
 
   // ── asset_signal_snapshots: upsert on (asset_id, snapshot_date) ──
-  const snapshotRows = scored.map(({ asset, result }) => {
-    const factorScores: Record<string, number> = {};
-    for (const f of result.factors) factorScores[f.type] = f.score;
-    factorScores.availability_factor = result.composite.availabilityFactor;
-    factorScores.phase_multiplier = result.composite.phaseMultiplier;
-    factorScores.raw_weighted = Math.round(result.composite.rawWeighted * 100) / 100;
-    factorScores.score_confidence = result.scoreConfidence;
-    return {
-      asset_id: asset.id,
-      licensing_intent_score: result.licensingIntentScore,
-      competitive_heat: result.competitiveHeat,
-      deal_readiness_score: result.dealReadinessScore,
-      factor_scores: factorScores,
-      score_delta: result.scoreDelta,
-      trend: result.trend,
-      snapshot_date: today,
-    };
-  });
+  // factor_scores is the ScoreFactorContribution[] contract (lib/radar/types.ts).
+  const snapshotRows = scored.map(({ asset, result }) => ({
+    asset_id: asset.id,
+    licensing_intent_score: result.licensingIntentScore,
+    competitive_heat: result.competitiveHeat,
+    deal_readiness_score: result.dealReadinessScore,
+    factor_scores: result.contributions,
+    score_delta: result.scoreDelta,
+    trend: result.trend,
+    snapshot_date: today,
+    model_version: result.modelVersion,
+  }));
+
+  // Migration 115 adds model_version / score_model_version. If it has not
+  // been applied yet the upsert fails on the unknown column; retry without it
+  // rather than losing the wave.
+  const isMissingColumn = (message: string, column: string) =>
+    /column|schema cache/i.test(message) && message.includes(column);
+  const without = <T extends Record<string, unknown>>(rows: T[], column: string) =>
+    rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => k !== column)));
 
   for (const rows of chunk(snapshotRows, 500)) {
-    const { error } = await supabase.from('asset_signal_snapshots').upsert(rows, { onConflict: 'asset_id,snapshot_date' });
+    let { error } = await supabase.from('asset_signal_snapshots').upsert(rows, { onConflict: 'asset_id,snapshot_date' });
+    if (error && isMissingColumn(error.message, 'model_version')) {
+      outcome.errors.push('asset_signal_snapshots.model_version missing (apply migration 115); wrote snapshots without it');
+      ({ error } = await supabase.from('asset_signal_snapshots').upsert(without(rows, 'model_version'), { onConflict: 'asset_id,snapshot_date' }));
+    }
     if (error) outcome.errors.push(`asset_signal_snapshots upsert (${rows.length} rows): ${error.message}`);
     else outcome.snapshotsUpserted += rows.length;
   }
@@ -1646,11 +1797,16 @@ async function persistWave(
     competitive_heat: result.competitiveHeat,
     deal_readiness_score: result.dealReadinessScore,
     score_confidence: result.scoreConfidence,
+    score_model_version: result.modelVersion,
     last_scored_at: nowIso,
   }));
 
   for (const rows of chunk(assetRows, 200)) {
-    const { error } = await supabase.from('clinical_assets').upsert(rows, { onConflict: 'id' });
+    let { error } = await supabase.from('clinical_assets').upsert(rows, { onConflict: 'id' });
+    if (error && isMissingColumn(error.message, 'score_model_version')) {
+      outcome.errors.push('clinical_assets.score_model_version missing (apply migration 115); wrote scores without it');
+      ({ error } = await supabase.from('clinical_assets').upsert(without(rows, 'score_model_version'), { onConflict: 'id' }));
+    }
     if (error) outcome.errors.push(`clinical_assets score update (${rows.length} rows): ${error.message}`);
     else outcome.assetsUpdated += rows.length;
   }
@@ -1685,7 +1841,7 @@ export const MAX_RUN_LIMIT = 10_000;
 const WAVE_TARGET_ASSETS = 120;
 
 const ASSET_COLUMNS =
-  'id, company_id, company_name, asset_name, modality, therapeutic_area, indication_category, indication_specific, phase, trial_status, partnership_status, nct_ids, trial_count, confidence_score, licensing_intent_score, regulatory_designations, territory_rights_available';
+  'id, company_id, company_name, asset_name, asset_aliases, modality, therapeutic_area, indication_category, indication_specific, phase, trial_status, partnership_status, nct_ids, trial_count, confidence_score, licensing_intent_score, regulatory_designations, territory_rights_available, first_posted_date, originator_region';
 
 function zeroByFactor(): Record<SignalType, number> {
   return Object.fromEntries(SIGNAL_TYPES.map(t => [t, 0])) as Record<SignalType, number>;
@@ -1714,6 +1870,8 @@ export async function detectLicensingSignals(
   const factorNonZero = zeroByFactor();
   const factorErrors = zeroByFactor();
   const sourceErrors: Record<string, number> = {};
+  const featureSourceErrors: Record<string, number> = {};
+  let modelVersion = V2_MODEL_VERSION;
   let assetsScored = 0;
   let assetsFailed = 0;
   let signalsDetected = 0;
@@ -1737,7 +1895,9 @@ export async function detectLicensingSignals(
       failed: assetsFailed,
       errors,
       parameters: {
-        scoring_version: 2,
+        scoring_version: modelVersion === V2_MODEL_VERSION ? 2 : 3,
+        model_version: modelVersion,
+        feature_source_errors: featureSourceErrors,
         limit,
         timed_out: timedOut,
         waves: wavesProcessed,
@@ -1755,9 +1915,18 @@ export async function detectLicensingSignals(
     );
     return {
       assetsQueued: queued, assetsScored, assetsFailed, signalsDetected, signalsInserted, snapshotsTaken,
-      errors, timedOut, factorNonZero, factorErrors, durationMs, logged,
+      errors, timedOut, factorNonZero, factorErrors, durationMs, logged, modelVersion, featureSourceErrors,
     };
   };
+
+  // ── Active model (v3). Absent table or no active row → v2 composite. ──
+  let modelParams: ModelParams | null = null;
+  try {
+    modelParams = await loadActiveModel(supabase);
+    if (modelParams) modelVersion = modelParams.version;
+  } catch (err) {
+    errors.push(`active model load failed, using v2 composite: ${errMsg(err)}`);
+  }
 
   // ── Expire stale signals ──
   const expired = await expireOldSignals(supabase, now);
@@ -1811,6 +1980,7 @@ export async function detectLicensingSignals(
 
   const indicationCache = new Map<string, IndicationEvidence>();
   const taCountCache = new Map<string, { count: number | null; error?: string }>();
+  const terminationCache = new Map<string, { rows: TrialRow[]; error?: string }>();
 
   for (const wave of waves) {
     if (Date.now() - startTime > MAX_RUNTIME_MS) { timedOut = true; break; }
@@ -1846,6 +2016,31 @@ export async function detectLicensingSignals(
         sourceErrors.asset_signal_snapshots = (sourceErrors.asset_signal_snapshots ?? 0) + 1;
       }
 
+      // v3 feature bundles (financials, intent, patents, catalysts, press
+      // categories, trials, deals, siblings). Only fetched when a model is
+      // active; every source failure is tolerated and counted.
+      let featureBundles: Map<string, FeatureBundle> | null = null;
+      if (modelParams) {
+        const groups = new Map<string, CompanyGroup>();
+        for (const a of waveAssets) {
+          const key = a.company_id ?? `name:${a.company_name}`;
+          const g = groups.get(key) ?? { company_id: a.company_id, company_name: a.company_name, assets: [] };
+          g.assets.push(a);
+          groups.set(key, g);
+        }
+        try {
+          const fetched = await fetchFeatureBundles(supabase, Array.from(groups.values()), {
+            asOf: now, historyMonths: 36, includePublications: false, terminationCache,
+          });
+          featureBundles = fetched.bundles;
+          for (const [table, count] of Object.entries(fetched.sourceErrorCounts)) {
+            featureSourceErrors[table] = (featureSourceErrors[table] ?? 0) + count;
+          }
+        } catch (err) {
+          errors.push(`feature bundle fetch failed (wave scored with v2 composite): ${errMsg(err)}`);
+        }
+      }
+
       // Score (pure)
       const scored: Array<{ asset: AssetForScoring; result: ScoringResult }> = [];
       waveAssets.forEach((asset, i) => {
@@ -1865,7 +2060,17 @@ export async function detectLicensingSignals(
           if (rsErr) aEv.errors.research_signals = rsErr;
 
           const bundle: EvidenceBundle = { company: cEv, indication: iEv, asset: aEv, now };
-          const result = scoreAssetPure(asset, bundle, snapshots.byAsset.get(asset.id) ?? []);
+          let modelInput: ModelScoringInput | null = null;
+          if (modelParams && featureBundles) {
+            const fb = featureBundles.get(asset.id);
+            if (fb) {
+              // Reuse the publications already fetched for the v2 detectors.
+              fb.publications = pubs.pubs.map(p => ({ id: p.id, title: p.title, published_date: p.published_date, source_url: p.source_url }));
+              if (pubs.error) fb.sourceErrors.research_signals = pubs.error;
+              modelInput = { params: modelParams, bundle: fb };
+            }
+          }
+          const result = scoreAssetPure(asset, bundle, snapshots.byAsset.get(asset.id) ?? [], modelInput);
 
           for (const f of result.factors) {
             if (f.score > 0) { factorNonZero[f.type]++; signalsDetected++; }
