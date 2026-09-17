@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runFullBackTest, formatReportMarkdown } from '@/lib/financial/backtest/runner';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { runVerifiedCohortBacktest, VERIFIED_COHORT_ID } from '@/lib/financial/backtest/verified-cohort';
 
 function verifyCron(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -56,6 +57,32 @@ export async function GET(request: NextRequest) {
   try {
     const report = runFullBackTest({ engineVersion: 'competitive-dynamics-v13' });
 
+    // Verified-and-cited cohort: the accuracy figure published on /methodology.
+    // Scored live from the database and stored per run (migration 112). The
+    // table may not exist yet; a missing table must not fail the cron.
+    let verifiedCohort: Awaited<ReturnType<typeof runVerifiedCohortBacktest>> | null = null;
+    try {
+      const supabase = createServiceClient();
+      verifiedCohort = await runVerifiedCohortBacktest(supabase);
+      const { error } = await supabase.from('backtest_results').insert({
+        run_at: verifiedCohort.runAt,
+        cohort: VERIFIED_COHORT_ID,
+        engine_version: verifiedCohort.engineVersion,
+        eligible: verifiedCohort.eligible,
+        scored: verifiedCohort.scored,
+        upfront_median_abs_error_pct: verifiedCohort.all.upfront.medianAbsErrorPct,
+        upfront_within_35: verifiedCohort.all.upfront.within35,
+        upfront_within_50: verifiedCohort.all.upfront.within50,
+        total_median_abs_error_pct: verifiedCohort.all.totalDeal.medianAbsErrorPct,
+        total_within_35: verifiedCohort.all.totalDeal.within35,
+        total_within_50: verifiedCohort.all.totalDeal.within50,
+        report: verifiedCohort,
+      });
+      if (error) console.warn('[Back-Test Cron] backtest_results insert skipped:', error.message);
+    } catch (err) {
+      console.warn('[Back-Test Cron] verified cohort backtest failed:', err instanceof Error ? err.message : err);
+    }
+
     // Alert Slack if accuracy drops below defensible thresholds
     // Use defensible metrics (excludes edge cases: Aduhelm, Leqembi, Humira, Spinraza)
     const failingThresholds = [];
@@ -85,6 +112,7 @@ export async function GET(request: NextRequest) {
         `*All-asset metrics (${report.assetCount} assets):*\n` +
         `  MAPE: ${(report.peakErosionMetrics.mape * 100).toFixed(1)}% | Pearson R: ${report.peakErosionMetrics.pearsonR.toFixed(3)} | R²: ${report.peakErosionMetrics.rSquared.toFixed(3)}\n\n` +
         `*Calibration:* ${(report.calibrationAccuracyPeakErosion * 100).toFixed(0)}%\n` +
+        (verifiedCohort ? `*Verified-cited cohort (n=${verifiedCohort.scored}):* upfront within ±35% ${(verifiedCohort.all.upfront.within35 * 100).toFixed(0)}%, within ±50% ${(verifiedCohort.all.upfront.within50 * 100).toFixed(0)}%, median |error| ${(verifiedCohort.all.upfront.medianAbsErrorPct * 100).toFixed(0)}%\n` : '') +
         `*Timing accuracy:* ${(report.timingAccuracyCompetitorYear * 100).toFixed(0)}%\n` +
         `*Confidence:* ${report.overallConfidence.toUpperCase()}`,
         '#059669',

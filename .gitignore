@@ -42,3 +42,7 @@ next-env.d.ts
 .github/workflows/lighthouse.yml
 .env.prod
 .env.resend
+
+# Playwright
+test-results/
+playwright-report/

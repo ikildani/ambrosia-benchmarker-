@@ -83,7 +83,7 @@ function ProvenanceStrip({ provenance }: { provenance?: ShareProvenance | null }
         </span>
       ))}
       <a href="/methodology" className="ml-auto text-[11px] text-teal-400/80 hover:text-teal-300 transition-colors">
-        How to reproduce
+        Methods and measured accuracy
       </a>
     </div>
   );
