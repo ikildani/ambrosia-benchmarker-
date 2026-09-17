@@ -24,7 +24,7 @@ export const METHOD_COPY: MethodCopy[] = [
     what: 'Deals that share your therapeutic area, phase, modality, indication and structure are scored on those dimensions, and the closest set produces a recency-weighted range for upfront, milestones, royalty and total value.',
     goodAt: 'Telling you what buyers actually paid for assets like yours. Direct, auditable, and every number traces to a named deal.',
     weakAt: 'Thin indications. When fewer than five deals qualify the filter relaxes to modality or therapeutic area alone, and the range widens. The panel says which rung was used.',
-    whenItLeads: 'Before Phase 2, and whenever the comp pool is deep. This is the headline range on every share page.',
+    whenItLeads: 'Before Phase 2, and whenever the comp pool is deep. The comparable range for total deal value, upfront plus milestones plus the value of the royalty stream, is the headline range on every share page.',
   },
   {
     key: 'rnpv',
@@ -67,7 +67,7 @@ export const DATA_LEVELS: DataLevel[] = [
   {
     key: 'sourced',
     name: 'Deals with a source',
-    definition: 'Tracked deals that carry a clickable citation: an SEC filing id, a press release URL, or a source URL. Every row we add now must have one.',
+    definition: 'Tracked deals that carry a clickable citation: an SEC filing id, a press release URL, or a source URL. Rows with a citation that are still flagged for review are not counted here until review clears them. Every row we add now must have one.',
   },
   {
     key: 'verified',

@@ -273,7 +273,7 @@ export default async function MethodologyPage() {
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white !mt-0 !mb-0">How a number is produced</h2>
               </div>
               <p className="text-slate-600 dark:text-slate-300">
-                Four methods, each with a job it is good at and a job it is bad at. The share page shows the comparable range as the headline and the others beside it, so a reader can see where they agree and where they do not.
+                Four methods, each with a job it is good at and a job it is bad at. Fair value on every share page means total deal value: upfront plus milestones plus the value of the royalty stream. The share page shows the comparable range for that total as the headline, with upfront broken out, and the other methods beside it, so a reader can see where they agree and where they do not.
               </p>
               <div className="not-prose mt-6 space-y-4">
                 {METHOD_COPY.map(m => (
@@ -410,7 +410,7 @@ export default async function MethodologyPage() {
 
                   <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-8">What these figures mean</h3>
                   <p className="text-slate-600 dark:text-slate-300">
-                    Read plainly: on this cohort the rNPV-derived point estimate for upfront is not reliable on its own. It runs low on early-stage deals, where buyers pay for optionality the method does not see, and high on some late-stage ones. That is why the comparable range is the headline on every share page and the rNPV figure sits beside it as one method among four, and why the early-stage rNPV is floored at the comparable range. The figures above will move as the verified cohort grows and as the engine changes, and they are recomputed every time this page is served, so a lower number here is a finding, not a typo.
+                    Read plainly: on this cohort the rNPV-derived point estimate for upfront is not reliable on its own. It runs low on early-stage deals, where buyers pay for optionality the method does not see, and high on some late-stage ones. That is why the comparable range for total deal value is the headline on every share page and the rNPV figure sits beside it as one method among four, and why the early-stage rNPV is floored at the comparable range. The figures above will move as the verified cohort grows and as the engine changes, and they are recomputed every time this page is served, so a lower number here is a finding, not a typo.
                   </p>
                   {acc.worst.length > 0 && (
                     <>

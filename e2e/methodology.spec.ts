@@ -59,11 +59,10 @@ test.describe('Methodology and accuracy page', () => {
 
   test('carries Dataset JSON-LD and a canonical', async ({ page }) => {
     await open(page);
-    const ld = await page.locator('script[type="application/ld+json"]').first().textContent();
-    expect(ld).toBeTruthy();
-    const parsed = JSON.parse(ld!);
-    const graph = parsed['@graph'] ?? [parsed];
-    expect(graph.some((n: { '@type': string }) => n['@type'] === 'Dataset')).toBe(true);
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(blocks.length).toBeGreaterThan(0);
+    const nodes = blocks.flatMap(b => { const p = JSON.parse(b); return p['@graph'] ?? [p]; });
+    expect(nodes.some((n: { '@type': string }) => n['@type'] === 'Dataset')).toBe(true);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/methodology$/);
     await expect(page).toHaveTitle(/methodology and accuracy/i);
   });
