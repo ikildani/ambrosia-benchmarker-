@@ -356,11 +356,11 @@
     },
     {
       "path": "/api/cron/drug-resolve",
-      "schedule": "20 */2 * * *"
+      "schedule": "20 * * * *"
     },
     {
-      "path": "/api/cron/partnership-refresh?limit=1500",
-      "schedule": "15 */6 * * *"
+      "path": "/api/cron/partnership-refresh",
+      "schedule": "45 * * * *"
     },
     {
       "path": "/api/cron/press-releases?persist_only=true",
@@ -380,7 +380,7 @@
     },
     {
       "path": "/api/cron/deal-thesis",
-      "schedule": "0 9 * * *"
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/cron/link-health",
@@ -397,6 +397,34 @@
     {
       "path": "/api/cron/deal-creator",
       "schedule": "30 11 * * *"
+    },
+    {
+      "path": "/api/cron/asset-classify?limit=1200",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/company-financials",
+      "schedule": "20 */6 * * *"
+    },
+    {
+      "path": "/api/cron/management-intent",
+      "schedule": "50 */4 * * *"
+    },
+    {
+      "path": "/api/cron/patents-assignee",
+      "schedule": "40 */2 * * *"
+    },
+    {
+      "path": "/api/cron/catalysts?limit=400",
+      "schedule": "25 */2 * * *"
+    },
+    {
+      "path": "/api/cron/score-backtest",
+      "schedule": "30 */2 * * *"
+    },
+    {
+      "path": "/api/cron/radar-digest",
+      "schedule": "0 13 * * *"
     }
   ]
 }
