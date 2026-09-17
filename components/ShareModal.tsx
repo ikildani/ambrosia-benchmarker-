@@ -36,11 +36,34 @@ export default function ShareModal({ isOpen, onClose, inputs, results, labels, f
     try {
       // R24: surface rNPV headline + 80% CI band + PoS on the share page.
       // Deeper breakdowns (histogram, tornado, scenarios, waterfall) stay gated.
+      // The share page headlines the blended fair value and states the method
+      // behind every number (lib/financial/method-copy.ts), so the payload
+      // carries the ensemble and the rNPV inputs alongside the headline.
       const financialSummary = financialModel
         ? {
             riskAdjustedNPV: financialModel.rnpv.riskAdjustedNPV,
             confidenceInterval80: financialModel.monteCarlo.confidenceInterval80,
             cumulativePoS: financialModel.rnpv.cumulativePoS,
+            yearsToMarket: financialModel.rnpv.yearsToMarket,
+            discountRate: financialModel.rnpv.discountRate,
+            peakSalesMedianM: financialModel.marketSize?.peakSales?.median,
+            rnpvImpliedTotalMedianM: financialModel.rnpv.impliedDealValue?.totalDeal?.median,
+            monteCarloRecentering: financialModel.monteCarlo.recentering?.method,
+            ensemble: financialModel.ensemble
+              ? {
+                  valueM: financialModel.ensemble.ensembleValue,
+                  stdDevM: financialModel.ensemble.ensembleStdDev,
+                  agreement: financialModel.ensemble.agreement,
+                  earlyPhasePrior: financialModel.ensemble.earlyPhasePrior ?? false,
+                  methods: financialModel.ensemble.methods.map(m => ({
+                    name: m.name,
+                    valueM: m.value,
+                    weight: m.weight,
+                    sampleSize: m.sampleSize,
+                    confidence: m.confidence,
+                  })),
+                }
+              : undefined,
           }
         : undefined;
 

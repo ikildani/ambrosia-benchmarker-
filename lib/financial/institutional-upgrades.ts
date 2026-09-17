@@ -330,24 +330,27 @@ export function buildDealWaterfall(input: RNPVInput, result: RNPVResult): DealWa
       }
     }
 
-    // Snap the waterfall median to the rNPV engine's published deal-value
-    // median so the two engines cannot drift beyond rounding. Keeps the
-    // cross-engine consistency check (rule #3) green when structural
-    // overlays are in play.
-    const engineMedian = dealComponents?.totalDeal?.median;
-    if (engineMedian != null && Number.isFinite(engineMedian)) {
-      const reconcileDelta = engineMedian - running;
-      if (Math.abs(reconcileDelta) > 0.5) {
-        running = engineMedian;
-        steps.push({
-          label: 'Reconciliation',
-          adjustment: reconcileDelta,
-          runningTotal: running,
-          rationale: `Reconciliation to rNPV-engine implied deal value (${fmtM(engineMedian)}). Captures residual drift from independent component aggregation vs. direct rNPV × capture math.`,
-        });
-      } else {
-        running = engineMedian;
-      }
+  }
+  // Snap the waterfall median to the rNPV engine's published deal-value
+  // median so the two engines cannot drift beyond rounding. This used to run
+  // only for codev / option / collaboration; plain licensing and acquisition
+  // skipped it, so their strategic-premium × capture-rate total drifted from
+  // the engine's implied total on every run and tripped
+  // consistency.deal_waterfall_vs_rnpv. The step is only appended when the
+  // drift exceeds rounding, so a converged waterfall keeps its four base steps.
+  const engineMedian = dealComponents?.totalDeal?.median;
+  if (engineMedian != null && Number.isFinite(engineMedian)) {
+    const reconcileDelta = engineMedian - running;
+    if (Math.abs(reconcileDelta) > 0.5) {
+      running = engineMedian;
+      steps.push({
+        label: 'Reconciliation',
+        adjustment: reconcileDelta,
+        runningTotal: running,
+        rationale: `Reconciliation to rNPV-engine implied deal value (${fmtM(engineMedian)}). Captures residual drift from independent component aggregation vs. direct rNPV × capture math.`,
+      });
+    } else {
+      running = engineMedian;
     }
   }
 

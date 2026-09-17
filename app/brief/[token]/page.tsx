@@ -6,19 +6,26 @@ interface Props {
   params: Promise<{ token: string }>;
 }
 
+import { DEAL_STATS } from '@/lib/config/constants';
+import { buildMethodStatement, METHOD_COPY, type ShareFinancialSummary } from '@/lib/financial/method-copy';
+
+interface Range { low: number; median: number; high: number }
+
 interface SharedCalc {
   inputs: Record<string, unknown>;
   results: {
-    riskAdjustedNPV?: number;
-    unadjustedNPV?: number;
-    cumulativePoS?: number;
-    yearsToMarket?: number;
-    discountRate?: number;
-    impliedDealValue?: {
-      upfront?: { low: number; median: number; high: number };
-      totalDeal?: { low: number; median: number; high: number };
+    /** Comparable-transaction deal terms from the calculator engine: the primary range. */
+    terms?: {
+      upfront?: Range;
+      totalDealValue?: Range;
+      devMilestones?: Range;
+      regMilestones?: Range;
+      commMilestones?: Range;
     };
-    peakSales?: { low: number; median: number; high: number };
+    /** Drill-down carries the baseline provenance, including the number of disclosed transactions behind the range. */
+    drillDown?: { totalDealValue?: { baseline?: { sampleSize?: number | null } } };
+    /** Blended fair value, rNPV inputs and Monte Carlo context saved with the share. */
+    financialSummary?: ShareFinancialSummary | null;
     riskDecomposition?: {
       clinical: { impact_M: number; percentOfTotal: number };
       commercial: { impact_M: number; percentOfTotal: number };
@@ -69,22 +76,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function fmtMoney(usdM: number | undefined | null): string {
-  if (usdM == null || !Number.isFinite(usdM)) return '—';
+function fmtMoney(usdM: number): string {
   if (usdM >= 1000) return `$${(usdM / 1000).toFixed(1)}B`;
-  if (usdM <= -1000) return `-$${(-usdM / 1000).toFixed(1)}B`;
   return `$${Math.round(usdM)}M`;
 }
 
-function pct(x: number | undefined | null): string {
-  if (x == null || !Number.isFinite(x)) return '—';
-  return `${(x * 100).toFixed(0)}%`;
-}
-
-function years(x: number | undefined | null): string {
-  if (x == null || !Number.isFinite(x)) return '—';
-  return `${x.toFixed(1)}y`;
-}
+const isPositive = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x > 0;
+const isRange = (r: Range | undefined): r is Range =>
+  !!r && isPositive(r.median) && Number.isFinite(r.low) && Number.isFinite(r.high) && r.low >= 0;
 
 export default async function BriefPage({ params }: Props) {
   const { token } = await params;
@@ -92,11 +91,17 @@ export default async function BriefPage({ params }: Props) {
   if (!data) notFound();
 
   const { results, labels } = data;
-  const totalDeal = results.impliedDealValue?.totalDeal;
-  const upfront = results.impliedDealValue?.upfront;
-  const decomp = results.riskDecomposition;
+  const summary = results.financialSummary ?? null;
+  const ensemble = summary?.ensemble && isPositive(summary.ensemble.valueM) ? summary.ensemble : null;
 
-  // Dominant risk bucket — the headline reason value erodes
+  // Primary range: what buyers paid for comparable assets. The blended fair
+  // value, when present, is the headline; the rNPV is shown as one method.
+  const totalDeal = isRange(results.terms?.totalDealValue) ? results.terms!.totalDealValue! : null;
+  const upfront = isRange(results.terms?.upfront) ? results.terms!.upfront! : null;
+  const headlineValue = ensemble ? ensemble.valueM : totalDeal ? totalDeal.median : null;
+  const headlineLabel = ensemble ? 'Blended fair value' : 'Fair total deal value';
+
+  const decomp = results.riskDecomposition;
   const dominantRisk = decomp
     ? (Object.entries({
         Clinical: decomp.clinical?.percentOfTotal ?? 0,
@@ -111,6 +116,19 @@ export default async function BriefPage({ params }: Props) {
     : 'Deal Brief';
   const phaseLabel = labels?.phase || '';
 
+  // Facts that drive the number: a row is rendered only when its value exists.
+  const facts: Array<{ label: string; value: string }> = [];
+  if (summary && Number.isFinite(summary.cumulativePoS)) facts.push({ label: 'Probability of approval', value: `${(summary.cumulativePoS * 100).toFixed(0)}%` });
+  if (isPositive(summary?.yearsToMarket)) facts.push({ label: 'Years to market', value: `${summary!.yearsToMarket!.toFixed(1)}y` });
+  if (isPositive(summary?.discountRate)) facts.push({ label: 'Discount rate', value: `${(summary!.discountRate! * 100).toFixed(0)}%` });
+  if (isPositive(summary?.peakSalesMedianM)) facts.push({ label: 'Projected peak sales / yr', value: fmtMoney(summary!.peakSalesMedianM!) });
+  if (isPositive(summary?.riskAdjustedNPV)) facts.push({ label: 'Risk-adjusted NPV', value: fmtMoney(summary!.riskAdjustedNPV) });
+  const sampleSize = results.drillDown?.totalDealValue?.baseline?.sampleSize ?? null;
+  if (isPositive(sampleSize)) facts.push({ label: 'Comparable transactions', value: String(sampleSize) });
+  const rnpvBelowZero = !!summary && Number.isFinite(summary.riskAdjustedNPV) && summary.riskAdjustedNPV <= 0;
+
+  const methodLines = buildMethodStatement({ summary, benchmarkSampleSize: sampleSize, phaseLabel });
+
   // Build LinkedIn-shareable insight card URL via /api/og/insight
   const insightParams = new URLSearchParams();
   insightParams.set('headline', `${labels?.modality ? labels.modality + ' ' : ''}${labels?.indication || 'Deal'} — fair value benchmark`);
@@ -119,7 +137,7 @@ export default async function BriefPage({ params }: Props) {
     insightParams.set('primary', `${fmtMoney(totalDeal.low)} – ${fmtMoney(totalDeal.high)}`);
   }
   if (upfront) {
-    insightParams.set('secondary', `Implied upfront median ${fmtMoney(upfront.median)} · benchmarked across 1,000+ disclosed deals`);
+    insightParams.set('secondary', `Upfront median ${fmtMoney(upfront.median)} · benchmarked across ${DEAL_STATS.TOTAL_DEALS} disclosed deals`);
   }
   if (labels) {
     const attrParts = [labels.phase, labels.indication, labels.modality].filter(Boolean);
@@ -144,74 +162,98 @@ export default async function BriefPage({ params }: Props) {
         </div>
       </section>
 
-      {/* Big number — fair value range */}
+      {/* Big number — blended fair value, with the comparable-transaction range beneath it */}
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/40 to-slate-950 px-5 py-10">
         <div className="mx-auto max-w-2xl">
-          <p className="mb-2 text-xs uppercase tracking-wider text-slate-500">Fair total deal value</p>
-          {totalDeal ? (
+          {headlineValue !== null ? (
             <>
+              <p className="mb-2 text-xs uppercase tracking-wider text-slate-500">{headlineLabel}</p>
               <div className="font-mono text-5xl font-semibold text-teal-300 sm:text-6xl">
-                {fmtMoney(totalDeal.median)}
+                {fmtMoney(headlineValue)}
               </div>
-              <p className="mt-2 font-mono text-sm text-slate-400">
-                Range: {fmtMoney(totalDeal.low)} – {fmtMoney(totalDeal.high)}
-              </p>
+              {ensemble && isPositive(ensemble.stdDevM) && (
+                <p className="mt-2 font-mono text-sm text-slate-400">± {fmtMoney(ensemble.stdDevM)} standard error</p>
+              )}
             </>
           ) : (
-            <p className="text-slate-500">Total deal value unavailable.</p>
+            <p className="text-slate-500">This brief has no valuation attached. Open the full analysis below.</p>
+          )}
+
+          {totalDeal && (
+            <div className="mt-6 rounded-lg border border-slate-700/50 bg-slate-900/30 p-4">
+              <p className="text-xs uppercase tracking-wider text-slate-500">
+                Comparable-transaction range, total deal value
+              </p>
+              <p className="mt-1 font-mono text-2xl text-slate-100">
+                {fmtMoney(totalDeal.low)} – {fmtMoney(totalDeal.high)}
+              </p>
+              <p className="font-mono text-xs text-slate-500">Median {fmtMoney(totalDeal.median)}</p>
+            </div>
           )}
 
           {upfront && (
-            <div className="mt-6 rounded-lg border border-slate-700/50 bg-slate-900/30 p-4">
-              <p className="text-xs uppercase tracking-wider text-slate-500">
-                Implied upfront
-              </p>
-              <p className="mt-1 font-mono text-2xl text-slate-100">
-                {fmtMoney(upfront.median)}
-              </p>
-              <p className="font-mono text-xs text-slate-500">
-                Range: {fmtMoney(upfront.low)} – {fmtMoney(upfront.high)}
-              </p>
+            <div className="mt-3 rounded-lg border border-slate-700/50 bg-slate-900/30 p-4">
+              <p className="text-xs uppercase tracking-wider text-slate-500">Upfront</p>
+              <p className="mt-1 font-mono text-2xl text-slate-100">{fmtMoney(upfront.median)}</p>
+              <p className="font-mono text-xs text-slate-500">Range: {fmtMoney(upfront.low)} – {fmtMoney(upfront.high)}</p>
+            </div>
+          )}
+
+          {ensemble && (
+            <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {[...ensemble.methods].sort((a, b) => b.weight - a.weight).map(m => (
+                <div key={m.name} className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500">{m.name === 'rNPV' ? 'Risk-adjusted NPV' : m.name}</p>
+                  <p className="mt-1 font-mono text-lg text-slate-100">{isPositive(m.valueM) ? fmtMoney(m.valueM) : 'Below zero'}</p>
+                  <p className="text-xs text-slate-500">{Math.round(m.weight * 100)}% of the blend{m.name === 'Comparable Transactions' && m.sampleSize ? ` · ${m.sampleSize} deals` : ''}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* Three key facts */}
+      {/* What drives this number: only rows with a value */}
+      {(facts.length > 0 || rnpvBelowZero) && (
+        <section className="border-b border-slate-800/60 px-5 py-8">
+          <div className="mx-auto max-w-2xl">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              What drives this number
+            </h2>
+            <dl className="space-y-3">
+              {facts.map(f => (
+                <div key={f.label} className="flex items-baseline justify-between gap-4 border-b border-slate-800/60 pb-3">
+                  <dt className="text-sm text-slate-400">{f.label}</dt>
+                  <dd className="font-mono text-lg text-slate-100">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+            {rnpvBelowZero && (
+              <p className="mt-4 text-sm text-slate-400">
+                The risk-adjusted NPV is below zero at this stage. That is normal before Phase 2 and is why the range above is set by comparable transactions rather than projected cash flows.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* How this number was produced */}
       <section className="border-b border-slate-800/60 px-5 py-8">
         <div className="mx-auto max-w-2xl">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            What drives this number
-          </h2>
-          <dl className="space-y-3">
-            <div className="flex items-baseline justify-between gap-4 border-b border-slate-800/60 pb-3">
-              <dt className="text-sm text-slate-400">Probability of approval</dt>
-              <dd className="font-mono text-lg text-slate-100">{pct(results.cumulativePoS)}</dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-4 border-b border-slate-800/60 pb-3">
-              <dt className="text-sm text-slate-400">Years to market</dt>
-              <dd className="font-mono text-lg text-slate-100">{years(results.yearsToMarket)}</dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-4 border-b border-slate-800/60 pb-3">
-              <dt className="text-sm text-slate-400">Discount rate</dt>
-              <dd className="font-mono text-lg text-slate-100">{pct(results.discountRate)}</dd>
-            </div>
-            {results.peakSales?.median != null && (
-              <div className="flex items-baseline justify-between gap-4 border-b border-slate-800/60 pb-3">
-                <dt className="text-sm text-slate-400">Projected peak sales / yr</dt>
-                <dd className="font-mono text-lg text-slate-100">{fmtMoney(results.peakSales.median)}</dd>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500">{METHOD_COPY.heading}</h2>
+          <dl className="space-y-4">
+            {methodLines.map(line => (
+              <div key={line.label}>
+                <dt className="text-xs font-semibold text-slate-300">{line.label}</dt>
+                <dd className="mt-1 text-sm leading-relaxed text-slate-400">{line.text}</dd>
               </div>
-            )}
-            <div className="flex items-baseline justify-between gap-4 pb-1">
-              <dt className="text-sm text-slate-400">Risk-adjusted NPV</dt>
-              <dd className="font-mono text-lg text-slate-100">{fmtMoney(results.riskAdjustedNPV)}</dd>
-            </div>
+            ))}
           </dl>
         </div>
       </section>
 
       {/* Dominant risk */}
-      {dominantRisk && (
+      {dominantRisk && dominantRisk[1] > 0 && (
         <section className="border-b border-slate-800/60 bg-amber-500/5 px-5 py-7">
           <div className="mx-auto max-w-2xl">
             <p className="text-xs uppercase tracking-wider text-amber-400">Biggest risk source</p>
