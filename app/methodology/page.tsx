@@ -7,7 +7,7 @@ import { COMP_MATCH_WEIGHTS, COMP_MAX_SCORE, MIN_POOL_BEFORE_RELAX } from '@/lib
 import { runMonteCarlo } from '@/lib/financial/monte-carlo';
 import type { RNPVInput } from '@/lib/financial/types';
 import { getMethodologyStats, type MethodologyStats } from '@/lib/methodology-stats';
-import { METHOD_COPY, DATA_LEVELS, VERIFICATION_LADDER, DATA_QUALITY_CHANGELOG } from '@/lib/financial/method-copy';
+import { METHOD_COPY, DATA_LEVELS, VERIFICATION_LADDER, DATA_QUALITY_CHANGELOG } from '@/lib/financial/methodology-copy';
 import type { CohortBlock } from '@/lib/financial/backtest/verified-cohort';
 
 // Server component. Every count and every accuracy figure is computed from

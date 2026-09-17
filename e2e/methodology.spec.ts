@@ -6,8 +6,13 @@ import { test, expect } from '@playwright/test';
  * stats pipeline is broken; either is a failure.
  */
 test.describe('Methodology and accuracy page', () => {
+  // The page runs a Monte Carlo pass and a database-backed backtest at render
+  // time; on a cold dev server that is slow. Run serially and wait for DOM only.
+  test.describe.configure({ mode: 'serial', timeout: 90_000 });
+  const open = (page: import('@playwright/test').Page) => page.goto('/methodology', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+
   test('renders with live counts as numbers', async ({ page }) => {
-    await page.goto('/methodology');
+    await open(page);
     await expect(page.locator('h1')).toHaveText(/methodology and accuracy/i);
 
     for (const id of ['stat-tracked', 'stat-sourced', 'stat-verified', 'stat-companies', 'stat-quarantined']) {
@@ -26,7 +31,7 @@ test.describe('Methodology and accuracy page', () => {
   });
 
   test('accuracy table has no dashes or NaN and n adds up', async ({ page }) => {
-    await page.goto('/methodology');
+    await open(page);
     const table = page.getByTestId('accuracy-table');
     await expect(table).toBeVisible();
     const cells = await table.locator('tbody td').allTextContents();
@@ -45,7 +50,7 @@ test.describe('Methodology and accuracy page', () => {
   });
 
   test('describes all four methods and links to the broader diagnostic', async ({ page }) => {
-    await page.goto('/methodology');
+    await open(page);
     for (const key of ['comparables', 'rnpv', 'monteCarlo', 'ensemble']) {
       await expect(page.getByTestId(`method-${key}`)).toBeVisible();
     }
@@ -53,7 +58,7 @@ test.describe('Methodology and accuracy page', () => {
   });
 
   test('carries Dataset JSON-LD and a canonical', async ({ page }) => {
-    await page.goto('/methodology');
+    await open(page);
     const ld = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(ld).toBeTruthy();
     const parsed = JSON.parse(ld!);

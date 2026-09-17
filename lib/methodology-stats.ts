@@ -6,7 +6,7 @@ import { runVerifiedCohortBacktest, type VerifiedCohortReport } from '@/lib/fina
 /**
  * Live figures for /methodology and /api/methodology/stats.
  *
- * Every count is defined in lib/financial/method-copy.ts (DATA_LEVELS) and
+ * Every count is defined in lib/financial/methodology-copy.ts (DATA_LEVELS) and
  * computed here with the same filters the public surfaces use, so the page
  * cannot claim a number the product does not enforce. Cached for one hour.
  */
