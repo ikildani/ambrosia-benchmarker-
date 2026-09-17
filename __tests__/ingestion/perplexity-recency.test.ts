@@ -15,7 +15,10 @@ describe('withRecencyWindow', () => {
   it('removes runs of standalone years', () => {
     const q = 'Neurology drug deals announced at JP Morgan Healthcare Conference and ASCO 2024 2025 2026 with financial terms';
     const out = withRecencyWindow(q, since, 30);
-    expect(out).not.toMatch(/\b20\d{2}\b/);
+    // Only the rewritten query body is year-free; the appended window sentence
+    // carries the since date by design.
+    const body = out.split(' Only include deals')[0];
+    expect(body).not.toMatch(/\b20\d{2}\b/);
     expect(out).toContain('ASCO with financial terms');
   });
 
