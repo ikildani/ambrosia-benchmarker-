@@ -6,6 +6,23 @@ import { logCronRun } from '@/lib/cron-utils';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
+// Events that represent a person using the product. Keep in sync with the
+// event_type values written by the calculator, partner match, and export paths.
+const PRODUCT_ACTIVITY_EVENTS = [
+  'session_started',
+  'calculation_completed',
+  'parameter_changed',
+  'partner_match_requested',
+  'partner_clicked',
+  'partner_expanded',
+  'export_attempted',
+  'report_generated_server',
+  'share_view',
+  'upgrade_cta_clicked',
+  'pro_feature_clicked',
+  'paywall_displayed',
+];
+
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
@@ -165,11 +182,15 @@ export async function GET(request: NextRequest) {
       }
 
       try {
-        // Check activity: 3+ events in last 7 days
+        // Check activity: 3+ product events in last 7 days. Only count things
+        // the user did. System rows (trial_activated, trial_onboarding_*_sent,
+        // drip_email_sent, smart_trial_extension) are written for every trial
+        // and previously made everyone look active, so every trial got extended.
         const { count } = await supabase
           .from('events')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
+          .in('event_type', PRODUCT_ACTIVITY_EVENTS)
           .gte('created_at', new Date(now.getTime() - 7 * 86400000).toISOString());
 
         if (!count || count < 3) {

@@ -146,18 +146,37 @@ export async function GET(request: NextRequest) {
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
     // 2. Query all ingestion logs from last 7 days
-    const { data: thisWeekLogs } = await supabase
-      .from('data_ingestion_log')
-      .select('source, records_processed, records_inserted, records_failed, created_at, parameters')
-      .gte('created_at', oneWeekAgo.toISOString())
-      .order('created_at', { ascending: false });
+    // data_ingestion_log keys runs on started_at (there is no created_at column;
+    // selecting it made every query fail and the monitor reported all crons as
+    // not_running). Page in 1,000-row chunks: a week now holds >1,000 rows.
+    const thisWeekLogs: Array<{
+      source: string;
+      records_processed: number | null;
+      records_inserted: number | null;
+      records_failed: number | null;
+      started_at: string;
+      parameters: Record<string, unknown> | null;
+    }> = [];
+    for (let from = 0; from < 20_000; from += 1000) {
+      const { data: page, error: pageError } = await supabase
+        .from('data_ingestion_log')
+        .select('source, records_processed, records_inserted, records_failed, started_at, parameters')
+        .gte('started_at', oneWeekAgo.toISOString())
+        .order('started_at', { ascending: false })
+        .range(from, from + 999);
+      if (pageError) throw new Error(`data_ingestion_log query failed: ${pageError.message}`);
+      if (!page || page.length === 0) break;
+      thisWeekLogs.push(...page);
+      if (page.length < 1000) break;
+    }
 
     // 3. Query last week's logs for comparison
     const { data: lastWeekLogs } = await supabase
       .from('data_ingestion_log')
       .select('source, records_processed, records_inserted, records_failed')
-      .gte('created_at', twoWeeksAgo.toISOString())
-      .lt('created_at', oneWeekAgo.toISOString());
+      .gte('started_at', twoWeeksAgo.toISOString())
+      .lt('started_at', oneWeekAgo.toISOString())
+      .limit(5000);
 
     const thisWeek = thisWeekLogs || [];
     const lastWeek = lastWeekLogs || [];
