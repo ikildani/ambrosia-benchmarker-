@@ -229,12 +229,15 @@ describe('classify-prompt: vocabularies', () => {
   });
 
   it('JSON schema enums match the zod enums', () => {
-    const schema = buildOutputJsonSchema() as { properties: { results: { items: { properties: Record<string, { enum?: unknown[] }>; required: string[] } } } };
+    type NullableEnum = { anyOf: [{ type: 'string'; enum: unknown[] }, { type: 'null' }] };
+    const schema = buildOutputJsonSchema() as { properties: { results: { items: { properties: Record<string, NullableEnum>; required: string[] } } } };
     const props = schema.properties.results.items.properties;
-    expect(props.therapeutic_area.enum).toEqual([...THERAPEUTIC_AREAS, null]);
-    expect(props.modality.enum).toEqual([...MODALITIES, null]);
-    expect(props.indication_category.enum).toEqual([...INDICATION_CATEGORIES, null]);
-    expect(props.target_class.enum).toEqual([...TARGET_CLASSES, null]);
+    // Nullable enums are anyOf: the API rejects `enum` next to a type union.
+    const enumOf = (p: NullableEnum) => { expect(p.anyOf[1]).toEqual({ type: 'null' }); return p.anyOf[0].enum; };
+    expect(enumOf(props.therapeutic_area)).toEqual([...THERAPEUTIC_AREAS]);
+    expect(enumOf(props.modality)).toEqual([...MODALITIES]);
+    expect(enumOf(props.indication_category)).toEqual([...INDICATION_CATEGORIES]);
+    expect(enumOf(props.target_class)).toEqual([...TARGET_CLASSES]);
     expect(schema.properties.results.items.required).toEqual(Object.keys(props));
   });
 

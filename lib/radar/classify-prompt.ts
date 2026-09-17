@@ -173,8 +173,11 @@ export type ClassificationResponse = z.infer<typeof ClassificationResponseSchema
  * by zod (structured outputs only guarantee shape and enums).
  */
 export function buildOutputJsonSchema(): Record<string, unknown> {
+  // The structured-output validator rejects `enum` alongside a type union
+  // ("Enum value 'oncology' does not match declared type ['string','null']"),
+  // so nullable enums are expressed as anyOf.
   const nullableString = { type: ['string', 'null'] };
-  const nullableEnum = (values: readonly string[]) => ({ type: ['string', 'null'], enum: [...values, null] });
+  const nullableEnum = (values: readonly string[]) => ({ anyOf: [{ type: 'string', enum: [...values] }, { type: 'null' }] });
   return {
     type: 'object',
     additionalProperties: false,
