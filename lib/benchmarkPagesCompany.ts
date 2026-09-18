@@ -357,7 +357,7 @@ function buildCompanyPage(profile: CompanyProfile): CompanyBenchmarkPageData {
   const faqs: CompanyBenchmarkPageData['faqs'] = [
     {
       question: `How many deals has ${name} done?`,
-      answer: `${name} has completed ${totalDeals} verified transaction${totalDeals > 1 ? 's' : ''} tracked in our database, spanning from ${Math.min(...years)} to ${Math.max(...years)}. These deals have a combined value of ${formatValueShort(totalValueM)}.`,
+      answer: `${name} has completed ${totalDeals} transaction${totalDeals > 1 ? 's' : ''} tracked in our database, spanning from ${Math.min(...years)} to ${Math.max(...years)}. These deals have a combined value of ${formatValueShort(totalValueM)}.`,
     },
     {
       question: `What is ${name}'s typical deal structure?`,
@@ -412,7 +412,7 @@ function buildCompanyPage(profile: CompanyProfile): CompanyBenchmarkPageData {
   return {
     slug,
     title: `${name} Deal History & Licensing Benchmarks 2026`,
-    metaDescription: `Complete deal history for ${name} including licensing terms, acquisition premiums, and transaction benchmarks. ${totalDeals} verified transaction${totalDeals > 1 ? 's' : ''} tracked.`,
+    metaDescription: `Complete deal history for ${name} including licensing terms, acquisition premiums, and transaction benchmarks. ${totalDeals} transaction${totalDeals > 1 ? 's' : ''} tracked.`,
     h1: `${name} — Deal History & Benchmarks`,
     heroStats,
     contextParagraphs,

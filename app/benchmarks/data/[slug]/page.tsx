@@ -5,6 +5,7 @@ import { getAllPseoSlugs, getPseoBySlug, getRelatedPseoPages, formatDollar } fro
 import { createServiceClient } from '@/lib/supabase/server';
 import ReportCTA from '@/components/ReportCTA';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -50,9 +51,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 async function getRepresentativeDeals(dbModalityPattern: string, dbPhase: string) {
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
+    const { data } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, deal_type')
+      .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, deal_type'))
       .ilike('modality', dbModalityPattern)
       .eq('phase_at_signing', dbPhase)
       .gt('upfront_usd', 0)
@@ -155,7 +156,7 @@ export default async function PseoPage({ params }: PageProps) {
               {page.modalityLabel} {page.phaseLabel} Licensing Benchmarks
             </h1>
             <p className="text-slate-400 text-lg max-w-2xl mb-8">
-              Deal economics across {page.totalDeals} transactions with {page.dealsWithUpfront} disclosed upfront payments. Primary-source-verified from SEC EDGAR, FTC filings, and direct research.
+              Deal economics across {page.totalDeals} transactions with {page.dealsWithUpfront} disclosed upfront payments. Verified deals carry primary-source citations from SEC EDGAR, FTC filings, and company press releases.
             </p>
 
             {/* Hero Stats */}
@@ -195,7 +196,7 @@ export default async function PseoPage({ params }: PageProps) {
               The median upfront payment for {page.phaseLabel.toLowerCase()} {page.modalityLabel.toLowerCase()} licensing deals is <strong>{formatDollar(page.medianUpfrontM)}</strong>, based on {page.dealsWithUpfront} deals with disclosed terms from {yearRange}.
               {page.medianTdvM && ` Total deal values (including milestones) reach a median of ${formatDollar(page.medianTdvM)}.`}
               {page.avgRoyaltyLow !== null && ` Royalty rates typically range from ${page.avgRoyaltyLow}% to ${page.avgRoyaltyHigh}%.`}
-              {' '}All data is primary-source-verified from SEC EDGAR, FTC pre-merger filings, and company press releases.
+              {' '}Every verified deal carries a primary-source citation from SEC EDGAR, FTC pre-merger filings, and company press releases.
             </p>
           </div>
         </section>
@@ -302,7 +303,7 @@ export default async function PseoPage({ params }: PageProps) {
           <div className="max-w-3xl mx-auto">
             <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Methodology</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              This analysis draws from the Ambrosia Ventures proprietary deal database ({DEAL_STATS.TOTAL_DEALS} verified biopharma transactions, {yearRange}). All deal terms are primary-source-verified from SEC EDGAR (10-K, 10-Q, 8-K filings), FTC pre-merger notifications, FDA Orange Book, and company press releases. No secondary-source or scraped data is included. Medians are calculated from deals with disclosed financial terms only.
+              This analysis draws from the Ambrosia Ventures proprietary deal database ({DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations, {yearRange}). Verified deal terms carry primary-source citations from SEC EDGAR (10-K, 10-Q, 8-K filings), FTC pre-merger notifications, FDA Orange Book, and company press releases. No secondary-source or scraped data is included. Medians are calculated from deals with disclosed financial terms only.
             </p>
           </div>
         </section>

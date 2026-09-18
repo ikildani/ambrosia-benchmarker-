@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import type { UserTier } from '@/types/tier';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export async function GET(
   request: NextRequest,
@@ -65,7 +66,7 @@ export async function GET(
     }
 
     // Fetch recent deals (as licensee)
-    const { data: recentDeals } = await supabase
+    const { data: recentDeals } = await applyDealQualityFilter(supabase
       .from('deals')
       .select(`
         id,
@@ -83,8 +84,7 @@ export async function GET(
         licensor_name,
         terms_disclosed
       `)
-      .eq('licensee_id', companyId)
-      .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes
+      .eq('licensee_id', companyId))
       .order('announced_date', { ascending: false })
       .limit(10);
 

@@ -10,6 +10,7 @@
 
 import { fetchWithTimeout } from './fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 const PERPLEXITY_EMBED_API = 'https://api.perplexity.ai/v1/embeddings';
 const EMBED_MODEL = 'pplx-embed-v1-4b';
@@ -144,9 +145,9 @@ export async function embedUnprocessedDeals(
   const limit = options?.limit || 200;
 
   // Get deals without embeddings
-  const { data: deals } = await supabase
+  const { data: deals } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, asset_description, modality, indication_specific, indication_category, phase_at_signing, territory, deal_type, therapeutic_area, upfront_usd, total_deal_value_usd')
+    .select('id, licensor_name, licensee_name, asset_name, asset_description, modality, indication_specific, indication_category, phase_at_signing, territory, deal_type, therapeutic_area, upfront_usd, total_deal_value_usd'))
     .is('embedding', null)
     .neq('therapeutic_area', 'other')
     .order('confidence_score', { ascending: false })

@@ -148,8 +148,8 @@ export default async function BlogPage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto mb-8">
-                Data-driven analysis backed by {DEAL_STATS.TOTAL_DEALS}+ verified biopharma
-                transactions. Licensing benchmarks, negotiation strategies, and market intelligence.
+                Data-driven analysis backed by {DEAL_STATS.TOTAL_DEALS} tracked biopharma
+                transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations. Licensing benchmarks, negotiation strategies, and market intelligence.
               </p>
 
               {/* Article count + Category pills */}
@@ -302,7 +302,7 @@ export default async function BlogPage() {
               </h2>
               <p className="text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed">
                 Get data-driven deal terms for any therapeutic area, modality, and clinical phase.
-                Powered by {DEAL_STATS.TOTAL_DEALS}+ verified biopharma transactions.
+                Powered by {DEAL_STATS.CORPUS_CLAIM}.
               </p>
               <Link
                 href="/calculator"

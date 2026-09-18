@@ -86,7 +86,7 @@ export function generateOrganizationSchema(): OrganizationSchema {
     name: 'Ambrosia Ventures',
     url: BASE_URL,
     logo: `${BASE_URL}/logo.png`,
-    description: `Biopharma deal intelligence platform providing licensing benchmarks, rNPV analysis, Monte Carlo simulation, and comparable transaction data from ${DEAL_STATS.TOTAL_DEALS} verified deals across 12 therapeutic areas.`,
+    description: `Biopharma deal intelligence platform providing licensing benchmarks, rNPV analysis, Monte Carlo simulation, and comparable transaction data from ${DEAL_STATS.TOTAL_DEALS} tracked deals, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations across 12 therapeutic areas.`,
     sameAs: [
       'https://www.linkedin.com/company/ambrosia-ventures',
       'https://www.ambrosiaventures.co',

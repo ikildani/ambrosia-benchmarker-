@@ -417,8 +417,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                   Ready to Benchmark Your Deal?
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto leading-relaxed">
-                  Get instant, data-driven deal terms powered by {DEAL_STATS.TOTAL_DEALS} verified
-                  biopharma transactions across 12 therapeutic areas.
+                  Get instant, data-driven deal terms powered by {DEAL_STATS.TOTAL_DEALS} tracked
+                  biopharma transactions across 12 therapeutic areas, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Link

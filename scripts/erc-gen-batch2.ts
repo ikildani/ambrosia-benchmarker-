@@ -1,11 +1,12 @@
 #!/usr/bin/env npx tsx
 import { cover, ft, wrap, render } from './erc-pdf-lib';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // ═══════════════════════════════════════
 // COMPETITIVE LANDSCAPE
 // ═══════════════════════════════════════
 const compLandscape = wrap(`
-${cover('Competitive Landscape Analysis','Powered by Ambrosia Ventures Proprietary Engine — 1,900+ Verified Transactions · 850+ Companies Scored','Ambrosia Engine Report')}
+${cover('Competitive Landscape Analysis',`Powered by Ambrosia Ventures Proprietary Engine — ${DEAL_STATS.CORPUS_CLAIM} · 850+ Companies Scored`,'Ambrosia Engine Report')}
 
 <div class="pg">
 <p class="tag">Asset 1 — WartOlyze® · Viral Wart Treatment</p>

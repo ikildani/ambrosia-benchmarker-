@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const OUT = '/Users/issakildani/Desktop/ERC_Deal_Materials';
 const NAVY = '#0f172a';
@@ -64,7 +65,7 @@ export function cover(title: string, sub: string, type: string): string {
 </div></div>
 <div style="background:${TEAL};padding:12px 60px;display:flex;justify-content:space-between">
 <span style="font-size:9px;color:#fff;font-weight:600">Powered by Ambrosia Ventures Proprietary Engine</span>
-<span style="font-size:9px;color:#fff">1,900+ Verified Transactions · 14 Engines · 850+ Companies</span>
+<span style="font-size:9px;color:#fff">${DEAL_STATS.CORPUS_CLAIM} · 14 Engines · 850+ Companies</span>
 </div></div>`;
 }
 

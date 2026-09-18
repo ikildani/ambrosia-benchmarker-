@@ -4,6 +4,7 @@
 // what their intent signals were BEFORE the deal, then compare to companies that didn't deal.
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -96,12 +97,11 @@ export async function calibrateIntentWeights(
   // flagged fakes don't pollute the positive-sample set for weight
   // calibration. Without this filter, LLM-fabricated Y-mAbs/PI3K-101
   // style rows were training the intent model as if real signals.
-  const { data: deals, error: dealsError } = await supabase
+  const { data: deals, error: dealsError } = await applyDealQualityFilter(supabase
     .from('deals')
     .select(
       'id, licensee_id, licensee_name, licensor_id, modality, indication_category, announced_date, deal_type, upfront_usd, total_deal_value_usd'
-    )
-    .eq('is_synthetic', false)
+    ))
     .gte('announced_date', threeYearsAgo.toISOString())
     .order('announced_date', { ascending: false });
 

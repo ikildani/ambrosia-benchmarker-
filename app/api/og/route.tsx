@@ -288,7 +288,7 @@ export async function GET(request: NextRequest) {
               maxWidth: '700px',
             }}
           >
-            Benchmarks, deal structures, and valuation engines across {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions
+            Benchmarks, deal structures, and valuation engines across {DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations
           </div>
 
           <div

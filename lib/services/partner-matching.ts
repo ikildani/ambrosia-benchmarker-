@@ -20,6 +20,7 @@ import {
   type PressReleaseForIntent,
   type ResearchSignalForIntent,
 } from '@/lib/services/pharma-intent';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 // Company profile shape (matches Supabase `companies` table columns used in scoring)
 interface CompanyProfile {
@@ -555,13 +556,12 @@ export async function findPartnerMatches(
 
     // Pre-fetch deals and trials in parallel
     const [dealsResult, trialsResult] = await Promise.all([
-      supabase
+      applyDealQualityFilter(supabase
         .from('deals')
         .select(
           'id, asset_name, licensor_id, licensee_id, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
-        )
+        ))
         .or(`licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`)
-        .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes
         .gte('announced_date', new Date(Date.now() - 24 * 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('announced_date', { ascending: false }),
       supabase
@@ -804,13 +804,12 @@ async function buildDealTypePreferenceMap(
       Date.now() - 36 * 30 * 24 * 60 * 60 * 1000,
     ).toISOString();
 
-    const { data, error } = await supabase
+    const { data, error } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select('licensor_id, licensee_id, deal_type, announced_date')
+      .select('licensor_id, licensee_id, deal_type, announced_date'))
       .or(
         `licensor_id.in.(${companyIds.join(',')}),licensee_id.in.(${companyIds.join(',')})`,
       )
-      .eq('is_synthetic', false)  // R68
       .gte('announced_date', thirtySixMonthsAgo)
       .order('announced_date', { ascending: false })
       .limit(2000);
@@ -1989,13 +1988,12 @@ export async function fetchCompanyDeals(
   companyId: string,
   limit: number = 10
 ): Promise<RelevantDeal[]> {
-  const { data: deals, error } = await supabase
+  const { data: deals, error } = await applyDealQualityFilter(supabase
     .from('deals')
     .select(
       'id, asset_name, licensor_name, licensee_name, modality, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, announced_date, deal_type, territory'
-    )
+    ))
     .or(`licensor_id.eq.${companyId},licensee_id.eq.${companyId}`)
-    .eq('is_synthetic', false)  // R68
     .order('announced_date', { ascending: false })
     .limit(limit);
 
@@ -2060,13 +2058,12 @@ export async function getDealHistoryCrossReference(
 
   for (const match of matches) {
     // 1. Query real deals from DB
-    const { data: dbDeals } = await supabase
+    const { data: dbDeals } = await applyDealQualityFilter(supabase
       .from('deals')
       .select(
         'licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality, indication_category, indication_specific, deal_type'
-      )
+      ))
       .or(`licensor_id.eq.${match.company_id},licensee_id.eq.${match.company_id}`)
-      .eq('is_synthetic', false)  // R68
       .order('announced_date', { ascending: false })
       .limit(maxDealsPerPartner * 2);
 

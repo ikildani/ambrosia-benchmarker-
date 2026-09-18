@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 interface ModalityBreakdown {
   [modality: string]: {
@@ -50,17 +51,15 @@ export async function generateWeeklySnapshot(supabase: SupabaseClient): Promise<
 
   // Fetch this week's deals and trailing 90-day deals in parallel
   const [thisWeekResult, trailingResult, trialUpdatesResult] = await Promise.all([
-    supabase
+    applyDealQualityFilter(supabase
       .from('deals')
-      .select('*')
-      .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes from user digests
+      .select('*'))
       .gte('announced_date', weekAgo)
       .order('upfront_usd', { ascending: false, nullsFirst: false }),
 
-    supabase
+    applyDealQualityFilter(supabase
       .from('deals')
-      .select('modality, therapeutic_area, phase_at_signing, upfront_usd, total_deal_value_usd')
-      .eq('is_synthetic', false)  // R68
+      .select('modality, therapeutic_area, phase_at_signing, upfront_usd, total_deal_value_usd'))
       .gte('announced_date', ninetyDaysAgo)
       .lt('announced_date', weekAgo),
 

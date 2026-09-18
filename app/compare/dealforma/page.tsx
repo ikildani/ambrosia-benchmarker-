@@ -152,7 +152,7 @@ export default function DealFormaComparePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-3xl">
           DealForma has been a go-to for biopharma licensing comps since 2013. Solidus takes the
-          deal intelligence layer further with {DEAL_STATS.TOTAL_DEALS} verified transactions, 21
+          deal intelligence layer further with {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations, 21
           integrated analytical engines, and real-time benchmarking starting at{' '}
           {PRICING.PRO_ANNUAL_MONTHLY}.
         </p>

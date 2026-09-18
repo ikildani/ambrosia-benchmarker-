@@ -21,13 +21,13 @@ import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
-import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
+import { LIVE_DEAL_COUNT, VERIFIED_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
 
 export const maxDuration = 60;
 
 // ── Deals table schema for Claude's SQL generation ──────────────────────
 const DEALS_SCHEMA = `
-Table: deals (${formatDealCount(LIVE_DEAL_COUNT)} verified biopharma deals)
+Table: deals (${formatDealCount(LIVE_DEAL_COUNT)} tracked biopharma deals, ${formatDealCount(VERIFIED_DEAL_COUNT)} verified with source citations)
 
 Columns:
   id                        UUID PRIMARY KEY
@@ -189,7 +189,7 @@ function buildAnswerPrompt(question: string, data: Record<string, unknown>[], qu
   const totalResults = data.length;
   const contextStr = contextData && contextData.length > 0 ? JSON.stringify(contextData.slice(0, 15), null, 2) : null;
 
-  return `You are a senior biopharma BD analyst at Ambrosia Ventures — an elite life sciences advisory firm. You have just queried a proprietary database of ${formatDealCount(LIVE_DEAL_COUNT)} verified deals. Provide an answer that demonstrates deep market intelligence.
+  return `You are a senior biopharma BD analyst at Ambrosia Ventures — an elite life sciences advisory firm. You have just queried a proprietary database of ${formatDealCount(LIVE_DEAL_COUNT)} tracked deals, ${formatDealCount(VERIFIED_DEAL_COUNT)} verified with source citations. Provide an answer that demonstrates deep market intelligence.
 
 USER QUESTION: "${question}"
 

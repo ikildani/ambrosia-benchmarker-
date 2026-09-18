@@ -153,7 +153,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'What is the best biopharma deal benchmarking tool in 2026?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `The best biopharma deal benchmarking tools in 2026 combine real transaction data with predictive analytics. Key criteria include deal database size (2,000+ verified transactions minimum), therapeutic area coverage (10+ TAs), valuation model diversity (rNPV, Monte Carlo, sensitivity), and data freshness (weekly updates from SEC/FTC filings). Ambrosia Ventures provides all of these with ${DEAL_STATS.TOTAL_DEALS} deals, 12 TAs, 8 calculation engines, and weekly data updates.`,
+          text: `The best biopharma deal benchmarking tools in 2026 combine real transaction data with predictive analytics. Key criteria include deal database size (1,000+ transactions with primary-source citations), therapeutic area coverage (10+ TAs), valuation model diversity (rNPV, Monte Carlo, sensitivity), and data freshness (weekly updates from SEC/FTC filings). Ambrosia Ventures provides all of these with ${DEAL_STATS.TOTAL_DEALS} deals, 12 TAs, 8 calculation engines, and weekly data updates.`,
         },
       },
       {
@@ -258,7 +258,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
           <KeyTakeaways takeaways={[
             'Modern deal benchmarking platforms deliver in minutes what consultants charge $50K-$150K to produce over 4-8 weeks — with fresher data and more scenarios.',
-            'The minimum viable deal database is 2,000+ verified transactions. Below that threshold, benchmarks lack statistical significance for niche TA/modality/phase combinations.',
+            'The minimum viable deal database is 1,000+ transactions with primary-source citations. Below that threshold, benchmarks lack statistical significance for niche TA/modality/phase combinations.',
             'Predictive analytics (partner intent scoring, deal probability modeling) separate modern platforms from simple data repositories.',
             `Ambrosia Ventures provides ${DEAL_STATS.TOTAL_DEALS} deals, 8 engines, 12 TAs, and weekly updates at ${PRICING.PRO_MONTHLY} — 95% less than enterprise alternatives.`,
           ]} />
@@ -292,7 +292,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>Deal Intelligence Platforms: Best Balance</h3>
             <p>
-              Platforms that combine large transaction databases with analytical engines deliver benchmarks in minutes, not weeks. The best platforms provide {DEAL_STATS.TOTAL_DEALS}+ verified transactions, multiple valuation methodologies, partner identification, and scenario analysis at 90-95% lower cost than consulting engagements.
+              Platforms that combine large transaction databases with analytical engines deliver benchmarks in minutes, not weeks. The best platforms track {DEAL_STATS.TOTAL_DEALS} transactions with a clearly stated share verified against primary sources, and offer multiple valuation methodologies, partner identification, and scenario analysis at 90-95% lower cost than consulting engagements.
             </p>
           </div>
 
@@ -307,7 +307,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             rows={[
               ['Cost', 'Internal time only', '$50K-$150K per deal', `${PRICING.PRO_MONTHLY}`],
               ['Turnaround', '2-4 weeks', '4-8 weeks', 'Minutes'],
-              ['Deal Database', '10-30 comps', '50-100 comps', `${DEAL_STATS.TOTAL_DEALS} verified`],
+              ['Deal Database', '10-30 comps', '50-100 comps', `${DEAL_STATS.CORPUS_CLAIM}`],
               ['Data Freshness', 'Point-in-time', 'Point-in-time', 'Weekly updates'],
               ['Valuation Models', 'Spreadsheet', 'Custom models', '8 engines (rNPV, Monte Carlo, etc.)'],
               ['Partner Matching', 'Manual', 'Limited', `${DEAL_STATS.TOTAL_COMPANIES} scored`],
@@ -355,7 +355,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             </p>
 
             <p>
-              <strong>2. Database depth.</strong> Statistical significance matters. A database of 200 deals cannot produce reliable benchmarks for a Phase 2 ADC in oncology — there may be only 3-5 comparable transactions. You need 2,000+ deals to have sufficient density across TA/modality/phase combinations. Ambrosia Ventures maintains {DEAL_STATS.TOTAL_DEALS} verified transactions across 12 therapeutic areas.
+              <strong>2. Database depth.</strong> Statistical significance matters. A database of 200 deals cannot produce reliable benchmarks for a Phase 2 ADC in oncology — there may be only 3-5 comparable transactions. You need 2,000+ deals to have sufficient density across TA/modality/phase combinations. Ambrosia Ventures maintains {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations across 12 therapeutic areas.
             </p>
 
             <p>
@@ -415,7 +415,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Deal Database', `${DEAL_STATS.TOTAL_DEALS} verified`, '5,000-50,000', '50-100 per project'],
+                    ['Deal Database', `${DEAL_STATS.CORPUS_CLAIM}`, '5,000-50,000', '50-100 per project'],
                     ['rNPV Valuation Engine', true, 'Some', 'Custom builds'],
                     ['Monte Carlo Simulation', true, 'Rare', 'Sometimes'],
                     ['Tornado Sensitivity', true, false, 'Sometimes'],
@@ -579,7 +579,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           <div className="my-12">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
             <h3 className="text-lg font-bold text-slate-900 mb-2">Model Your Own Deal</h3>
-            <p className="text-slate-500 text-sm mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <p className="text-slate-500 text-sm mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
           </div>
 
@@ -617,7 +617,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           <div className="my-12">
             <InlineEmailCapture
               heading="Get Weekly Deal Intelligence"
-              description={`Join 2,000+ BD professionals who receive our weekly analysis of biopharma licensing trends, new deal benchmarks, and negotiation insights from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              description={`Join 2,000+ BD professionals who receive our weekly analysis of biopharma licensing trends, new deal benchmarks, and negotiation insights from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`}
               source="biopharma-deal-benchmarking-tools-2026"
             />
           </div>
@@ -655,7 +655,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         <InsightCTA
           variant="bottom"
           heading="Start Benchmarking With Real Data"
-          description={`Access ${DEAL_STATS.TOTAL_DEALS} verified transactions, 8 calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Free calculator or Pro at ${PRICING.PRO_MONTHLY}.`}
+          description={`Access ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations, 8 calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Free calculator or Pro at ${PRICING.PRO_MONTHLY}.`}
         />
       </main>
     </>

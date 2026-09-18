@@ -934,8 +934,8 @@ export default function PortfolioPage() {
 
             <div className="mt-10 p-5 bg-[#0d1420] border border-white/[0.06] rounded-xl">
               <p className="text-xs text-slate-500 leading-relaxed">
-                <span className="text-slate-300 font-semibold">Database integrity:</span> {DEAL_STATS.TOTAL_DEALS} verified biopharma licensing,
-                partnering, and M&amp;A transactions sourced from SEC 8-K filings, FTC premerger filings, press releases,
+                <span className="text-slate-300 font-semibold">Database integrity:</span> {DEAL_STATS.TOTAL_DEALS} tracked biopharma licensing,
+                partnering, and M&amp;A transactions ({DEAL_STATS.VERIFIED_DEALS} verified with source citations) sourced from SEC 8-K filings, FTC premerger filings, press releases,
                 clinical trial registries, and proprietary Ambrosia Ventures deal intelligence. New transactions added within
                 5 business days of public disclosure.
               </p>

@@ -48,11 +48,11 @@ const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m
 
 export const metadata: Metadata = {
   title: `Q2 2026 Biopharma Deal Benchmarks Report: Analysis of ${DEAL_STATS.TOTAL_DEALS} Transactions`,
-  description: `Institutional-grade quarterly analysis of biopharma deal economics across 12 therapeutic areas. Phase-by-phase benchmarks, risk-adjusted deal timing, royalty rate analysis, modality cycle tracking, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
+  description: `Institutional-grade quarterly analysis of biopharma deal economics across 12 therapeutic areas. Phase-by-phase benchmarks, risk-adjusted deal timing, royalty rate analysis, modality cycle tracking, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
   keywords: ['biopharma deal benchmarks Q2 2026', 'pharma deal economics 2026', 'biopharma licensing benchmarks', 'phase 2 vs phase 3 deal economics', 'radiopharmaceutical deals', 'ADC deal benchmarks', 'royalty rate benchmarks biopharma', 'metabolic deal premiums', 'GLP-1 licensing deals', 'China biotech out-licensing'],
   openGraph: {
     title: 'Q2 2026 Biopharma Deal Benchmarks Report',
-    description: `Institutional-grade analysis of biopharma deal economics from ${DEAL_STATS.TOTAL_DEALS} verified transactions. Risk-adjusted phase economics, royalty benchmarks, modality cycles, and 4 market themes reshaping dealmaking.`,
+    description: `Institutional-grade analysis of biopharma deal economics from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations. Risk-adjusted phase economics, royalty benchmarks, modality cycles, and 4 market themes reshaping dealmaking.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/reports/q2-2026-biopharma-deal-benchmarks',
     images: [{ url: '/api/og?title=Q2%202026%20Biopharma%20Deal%20Benchmarks&subtitle=Risk-Adjusted%20Phase%20Economics%20%7C%20Royalty%20Rates%20%7C%20Modality%20Cycles&type=insight', width: 1200, height: 630 }],
@@ -198,7 +198,7 @@ export default async function Q2BenchmarkReportPage() {
     { '@type': 'ListItem', position: 3, name: 'Q2 2026 Biopharma Deal Benchmarks' },
   ]};
   const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q2 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' }, datePublished: '2026-07-15', dateModified: '2026-07-15', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } } };
-  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q2 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, risk-adjusted economics, royalty rates, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
+  const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q2 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, risk-adjusted economics, royalty rates, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
     { '@type': 'Question', name: 'What is the risk-adjusted optimal exit point for biotech assets?', acceptedAnswer: { '@type': 'Answer', text: 'Based on analysis of 1,500+ deals, Phase 2 proof-of-concept is the risk-adjusted optimal exit for most single-asset biotechs. Phase 3 median upfront is $678M vs $300M at Phase 2, but after subtracting $200-500M in trial costs and accounting for 40-50% Phase 3 failure rates, the expected value of holding to Phase 3 is lower than the certain Phase 2 exit value.' } },
     { '@type': 'Question', name: 'What are current biopharma royalty rate benchmarks?', acceptedAnswer: { '@type': 'Answer', text: 'Royalty rates range from 3-7% at discovery to 18-25% for approved assets. At Phase 2, ADCs command the highest median royalty at 14%, followed by radiopharmaceuticals at 13.5% and bispecifics at 12.5%. Over 70% of licensing deals now employ tiered royalty structures with escalation clauses tied to sales thresholds.' } },
@@ -263,7 +263,7 @@ export default async function Q2BenchmarkReportPage() {
                 Biopharma Deal<br className="hidden sm:block" /> Benchmarks
               </h1>
               <p className="text-base text-slate-500 max-w-xl leading-relaxed">
-                A quarterly analysis of deal economics across 12 therapeutic areas, drawn from {DEAL_STATS.TOTAL_DEALS} verified transactions. This edition introduces risk-adjusted phase economics, royalty rate benchmarks, modality cycle tracking, and quarter-over-quarter comparisons.
+                A quarterly analysis of deal economics across 12 therapeutic areas, drawn from {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations. This edition introduces risk-adjusted phase economics, royalty rate benchmarks, modality cycle tracking, and quarter-over-quarter comparisons.
               </p>
             </div>
             <div className="mt-6 sm:mt-0 flex-shrink-0 text-right">
@@ -276,7 +276,7 @@ export default async function Q2BenchmarkReportPage() {
           <div className="border-t border-b border-slate-200 py-5 mb-8">
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
               {[
-                { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals' },
+                { value: DEAL_STATS.VERIFIED_DEALS, label: 'Verified Deals' },
                 { value: '12', label: 'Therap. Areas' },
                 { value: '$678M', label: 'Ph3 Median Upfront' },
                 { value: String(q2Count || '—'), label: 'Q2 2026 Deals' },
@@ -420,7 +420,7 @@ export default async function Q2BenchmarkReportPage() {
             <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
               &ldquo;Phase 2 proof-of-concept is the single most valuable inflection point in biopharma deal economics.&rdquo;
             </blockquote>
-            <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+            <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020&ndash;2026)</p>
           </div>
         </section>
 
@@ -1451,7 +1451,7 @@ export default async function Q2BenchmarkReportPage() {
           <div className="max-w-4xl mx-auto px-6 py-16">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your Own Deal</h2>
-            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
           </div>
         </section>
@@ -1465,7 +1465,7 @@ export default async function Q2BenchmarkReportPage() {
             <div>
               <h3 className="text-sm font-bold text-slate-900 mb-2">Sample Selection</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                This report analyzes {DEAL_STATS.TOTAL_DEALS} biopharma transactions executed between January 1, 2020 and June 30, 2026. Transactions are sourced from SEC 8-K filings, FTC premerger notification filings, company press releases, investor presentations, and ClinicalTrials.gov. Each transaction is verified against at least one primary source before inclusion. New deals are ingested weekly (approximately 38 per week) via automated SEC EDGAR monitoring plus manual verification.
+                This report analyzes {DEAL_STATS.TOTAL_DEALS} biopharma transactions executed between January 1, 2020 and June 30, 2026. Transactions are sourced from SEC 8-K filings, FTC premerger notification filings, company press releases, investor presentations, and ClinicalTrials.gov. Deals marked verified carry a primary-source citation; unverified deals are tracked from press releases and filings pending verification. New deals are ingested daily via automated SEC EDGAR and press-release monitoring plus manual verification.
               </p>
             </div>
 
@@ -1524,7 +1524,7 @@ export default async function Q2BenchmarkReportPage() {
         <section className="max-w-4xl mx-auto px-6 pb-12">
           <InlineEmailCapture
             heading="Get the Q3 Report First"
-            description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+            description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`}
             source="q2-2026-report"
           />
         </section>
@@ -1551,7 +1551,7 @@ export default async function Q2BenchmarkReportPage() {
           <h2 className="text-lg font-bold text-slate-900 mb-4" id="faq">Frequently Asked Questions</h2>
           <div className="divide-y divide-slate-200">
             {[
-              { q: 'What data sources does this report use?', a: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, company press releases, and ClinicalTrials.gov. New transactions are ingested weekly (~38/week) via automated monitoring and verified before inclusion.` },
+              { q: 'What data sources does this report use?', a: `The report analyzes ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020-2026). Sources include SEC 8-K filings, FTC premerger filings, company press releases, and ClinicalTrials.gov. New transactions are ingested weekly (~38/week) via automated monitoring and verified before inclusion.` },
               { q: 'How should I interpret small sample sizes?', a: 'Cohorts with n>100 (e.g., oncology Phase 2, n=257) produce stable medians. Cohorts with n<20 are directional — the median is real but the confidence interval is wide. Cohorts with n<10 should be treated as indicative only. We report sample sizes and P25-P75 ranges throughout.' },
               { q: 'Why is Phase 2 the risk-adjusted optimal exit?', a: 'Phase 3 median upfront ($678M) is 2.3x Phase 2 ($300M), but Phase 3 costs $200-500M, takes 2-3 years, and fails 40-50% of the time. Risk-adjusting the Phase 3 upside and subtracting trial costs yields an expected value lower than the certain Phase 2 exit. See Section 2 for the full calculation.' },
               { q: 'What are current royalty rate benchmarks?', a: 'Royalty rates range from 3-7% at discovery to 18-25% for approved assets. At Phase 2, ADCs command the highest median (14%), followed by radiopharmaceuticals (13.5%) and bispecifics (12.5%). Over 70% of deals now use tiered royalty structures. See Section 5 for full analysis.' },

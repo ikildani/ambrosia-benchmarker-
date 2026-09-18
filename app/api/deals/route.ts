@@ -6,6 +6,7 @@ import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { clampInt, dealsQuerySchema, formatZodErrors } from '@/lib/api-validation';
 import type { UserTier } from '@/types/tier';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -123,10 +124,10 @@ export async function GET(request: NextRequest) {
         licensor_id
       `, { count: 'exact' });
 
-    // R68 (2026-04-15): exclude 845 flagged fabricated rows from the main
-    // deals API — /api/deals is consumed by multiple frontend routes
-    // (calculator comparable widget, partner pages, intelligence feed).
-    query = query.eq('is_synthetic', false);
+    // Audit 2026-09-14: shared quality filter (synthetic, non-canonical,
+    // flagged/rejected) — /api/deals feeds the comparable widget, partner
+    // pages and the intelligence feed.
+    query = applyDealQualityFilter(query);
 
     // Apply filters
     const therapeuticArea = searchParams.get('therapeutic_area');
@@ -265,11 +266,10 @@ async function getDistinctValues(
 
   // Paginate to overcome PostgREST max_rows limit
   for (let page = 0; page < 5; page++) {
-    const { data } = await supabase
+    const { data } = await applyDealQualityFilter(supabase
       .from('deals')
-      .select(column)
+      .select(column))
       .not(column, 'is', null)
-      .eq('is_synthetic', false)  // R68
       .order(column)
       .range(offset, offset + pageSize - 1);
 

@@ -1,6 +1,7 @@
 import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,11 +61,10 @@ export async function GET(
     ] = await Promise.all([
       // Recent deals (last 12 months) — only real (non-synthetic) deals
       // R68 (2026-04-15): comment said "only real" but filter was missing.
-      supabase
+      applyDealQualityFilter(supabase
         .from('deals')
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct')
-        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-        .eq('is_synthetic', false)
+        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`))
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(50),
@@ -78,11 +78,10 @@ export async function GET(
         .order('start_date', { ascending: false }),
 
       // All deals for trend (3 years) — only real deals (R68: added filter)
-      supabase
+      applyDealQualityFilter(supabase
         .from('deals')
         .select('announced_date, modality, upfront_usd, indication_category')
-        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-        .eq('is_synthetic', false)
+        .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`))
         .gte('announced_date', threeYearsAgo)
         .order('announced_date', { ascending: true }),
     ]);
@@ -190,11 +189,10 @@ export async function GET(
     if (competitivePeers.length > 0) {
       const topPeerIds = competitivePeers.slice(0, 3).map((p) => p.id);
       // Fetch deals for each top peer in the last 12 months to derive stats
-      const { data: peerDeals } = await supabase
+      const { data: peerDeals } = await applyDealQualityFilter(supabase
         .from('deals')
         .select('licensee_id, licensor_id, modality')
-        .or(topPeerIds.map(id => `licensee_id.eq.${id},licensor_id.eq.${id}`).join(','))
-        .eq('is_synthetic', false)  // R68
+        .or(topPeerIds.map(id => `licensee_id.eq.${id},licensor_id.eq.${id}`).join(',')))
         .gte('announced_date', oneYearAgo);
 
       if (peerDeals) {
@@ -239,10 +237,9 @@ export async function GET(
         ? companyDealsWithUpfront.reduce((sum, d) => sum + d.upfront_usd, 0) / companyDealsWithUpfront.length
         : null;
 
-      const { data: marketAvgData } = await supabase
+      const { data: marketAvgData } = await applyDealQualityFilter(supabase
         .from('deals')
-        .select('upfront_usd')
-        .eq('is_synthetic', false)  // R68
+        .select('upfront_usd'))
         .gte('announced_date', oneYearAgo)
         .not('upfront_usd', 'is', null)
         .gt('upfront_usd', 0);

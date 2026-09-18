@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,12 +20,10 @@ export async function GET() {
 
     const counts = await Promise.all(
       tas.map(async (ta) => {
-        const { count } = await supabase
+        const { count } = await applyDealQualityFilter(supabase
           .from('deals')
-          .select('id', { count: 'exact', head: true })
-          .eq('therapeutic_area', ta)
-          .eq('is_synthetic', false)
-          .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")');
+          .select('id', { count: 'exact', head: true }))
+          .eq('therapeutic_area', ta);
         return { ta, count: count || 0 };
       })
     );

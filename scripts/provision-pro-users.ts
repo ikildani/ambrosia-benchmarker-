@@ -6,6 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import sgMail from '@sendgrid/mail';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -50,7 +51,7 @@ function buildWelcomeEmail(name: string, magicLink?: string | null): string {
     <p>Your <strong>Pro account</strong> on Solidus is live. You now have full access to:</p>
     <ul style="padding-left: 20px; color: #334155;">
       <li><strong>14 valuation engines</strong> — rNPV, Monte Carlo, Real Options, Buyer-Specific Valuation, and more</li>
-      <li><strong>1,900+ verified deals</strong> — sourced from SEC 8-K filings across 12 therapeutic areas</li>
+      <li><strong>${DEAL_STATS.CORPUS_CLAIM}</strong> — sourced from SEC 8-K filings across 12 therapeutic areas</li>
       <li><strong>AI Deal Memo & Negotiation Playbook</strong> — board-ready analysis in seconds</li>
       <li><strong>850+ ranked partner matches</strong> — scored by strategic fit, intent signals, and deal history</li>
       <li><strong>PDF & Excel export</strong> — institutional-grade reports for your stakeholders</li>

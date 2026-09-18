@@ -117,7 +117,7 @@ export default function CapitalIQComparePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-3xl">
           Capital IQ covers financial data across every industry. Ambrosia goes deep on biopharma
-          deal economics — {DEAL_STATS.TOTAL_DEALS} verified deals, 14 pharma-specific engines, and
+          deal economics — {DEAL_STATS.TOTAL_DEALS} tracked deals, {DEAL_STATS.VERIFIED_DEALS} verified with source citations, 14 pharma-specific engines, and
           transparent pricing starting at {PRICING.PRO_ANNUAL_MONTHLY}.
         </p>
       </section>

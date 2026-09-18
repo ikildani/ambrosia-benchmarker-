@@ -7,7 +7,7 @@ import {
   extractBaselineProvenance,
   type BaselineProvenanceSummary,
 } from './financial/calculation-version';
-import { LIVE_DEAL_COUNT } from './config/constants';
+import { LIVE_DEAL_COUNT, VERIFIED_DEAL_COUNT } from './config/constants';
 
 /** Per-scenario audit trail shown in the Provenance block of both exports. */
 export interface ScenarioProvenance {
@@ -156,7 +156,7 @@ export function generateComparisonPDFHTML(scenarios: SavedScenario[], generatedA
     <tr><td class="metric-label">Baseline (source · n · calibrated)</td>${prov.map((p) => `<td class="metric-value">${escapeHtml(baselineLine(p.baseline))}</td>`).join('')}</tr>
     <tr><td class="metric-label">Scenario Saved At</td>${prov.map((p) => `<td class="metric-value">${escapeHtml(p.savedAt)}</td>`).join('')}</tr>
     <tr><td class="metric-label">Benchmarks Data Version</td>${scenarios.map(() => `<td class="metric-value">v${escapeHtml(bench.version)} (${escapeHtml(bench.lastUpdated)})</td>`).join('')}</tr>
-    <tr><td class="metric-label">Deal Database Size</td>${scenarios.map(() => `<td class="metric-value">${LIVE_DEAL_COUNT.toLocaleString()} verified deals</td>`).join('')}</tr>
+    <tr><td class="metric-label">Deal Database Size</td>${scenarios.map(() => `<td class="metric-value">${LIVE_DEAL_COUNT.toLocaleString()} tracked deals (${VERIFIED_DEAL_COUNT.toLocaleString()} verified)</td>`).join('')}</tr>
     <tr><td class="metric-label">Generated At (UTC)</td>${scenarios.map(() => `<td class="metric-value">${generatedAt.toISOString()}</td>`).join('')}</tr>
   `;
 

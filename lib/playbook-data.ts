@@ -5,6 +5,7 @@
  */
 
 import { createServiceClient } from '@/lib/supabase/server';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 export interface PlaybookBuyer {
   companyId: string;
@@ -68,9 +69,9 @@ export async function loadPlaybookBuyer(slug: string): Promise<{
 
   const buyer = rowToBuyer(buyerRow);
 
-  const { data: dealRows } = await supabase
+  const { data: dealRows } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('id, announced_date, asset_name, licensor_name, indication_specific, indication_category, therapeutic_area, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, modality')
+    .select('id, announced_date, asset_name, licensor_name, indication_specific, indication_category, therapeutic_area, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, modality'))
     .eq('licensee_id', buyer.companyId)
     .not('total_deal_value_usd', 'is', null)
     .order('announced_date', { ascending: false })

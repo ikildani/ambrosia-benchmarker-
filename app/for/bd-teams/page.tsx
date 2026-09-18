@@ -6,7 +6,7 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'Solidus for BD Teams | Biopharma Deal Benchmarking',
-  description: `Deal intelligence for pharma and biotech business development teams. Benchmark upfronts, milestones, and royalties against ${DEAL_STATS.TOTAL_DEALS} verified transactions before you negotiate.`,
+  description: `Deal intelligence for pharma and biotech business development teams. Benchmark upfronts, milestones, and royalties against ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations before you negotiate.`,
   keywords: [
     'pharma BD deal benchmarking',
     'biotech licensing benchmarks',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${BASE_URL}/for/bd-teams` },
   openGraph: {
     title: 'Solidus for BD Teams | Biopharma Deal Benchmarking',
-    description: `Benchmark deal terms against ${DEAL_STATS.TOTAL_DEALS} verified transactions. Stop guessing on upfronts, milestones, and royalties.`,
+    description: `Benchmark deal terms against ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations. Stop guessing on upfronts, milestones, and royalties.`,
     type: 'website',
     url: `${BASE_URL}/for/bd-teams`,
     siteName: 'Solidus by Ambrosia Ventures',
@@ -61,7 +61,7 @@ export default function BDTeamsPage() {
             Walk into every negotiation with the data your counterparty already has.
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
-            Solidus benchmarks your deal against {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions — upfronts, milestones, royalties, and deal structures — so you negotiate from evidence, not anecdote.
+            Solidus benchmarks your deal against {DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations — upfronts, milestones, royalties, and deal structures — so you negotiate from evidence, not anecdote.
           </p>
         </div>
 

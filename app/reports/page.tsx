@@ -29,14 +29,14 @@ const reports = [
   {
     slug: 'q2-2026-biopharma-deal-benchmarks',
     title: 'Q2 2026 Biopharma Deal Benchmarks',
-    description: `Institutional-grade quarterly analysis with risk-adjusted phase economics, royalty rate benchmarks, modality cycle tracking, and 4 market themes reshaping dealmaking. From ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
+    description: `Institutional-grade quarterly analysis with risk-adjusted phase economics, royalty rate benchmarks, modality cycle tracking, and 4 market themes reshaping dealmaking. From ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
     date: 'July 2026',
     tags: ['Quarterly Report', 'Phase Economics', 'Royalty Rates', 'Modality Cycles'],
   },
   {
     slug: 'q1-2026-biopharma-deal-benchmarks',
     title: 'Q1 2026 Biopharma Deal Benchmarks',
-    description: `Quarterly analysis of deal economics across 13 therapeutic areas. Phase-by-phase benchmarks, deal structure evolution, and 3 market themes. From ${DEAL_STATS.TOTAL_DEALS} verified transactions.`,
+    description: `Quarterly analysis of deal economics across 13 therapeutic areas. Phase-by-phase benchmarks, deal structure evolution, and 3 market themes. From ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`,
     date: 'March 2026',
     tags: ['Quarterly Report', 'Deal Benchmarks', 'Market Themes'],
   },

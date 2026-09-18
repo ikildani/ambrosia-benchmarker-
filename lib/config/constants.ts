@@ -74,17 +74,29 @@ export function formatDealCount(count: number): string {
 }
 
 // AUTO-UPDATED BY CRON — do not edit manually
-// This value is the verified deal count (excludes 'other'/internal TAs)
-// Updated daily by /api/cron/daily-stats via GitHub API
-// 2026-06-29: Full cleanup — deleted rejected/synthetic/pre-2017/dupes, added landmark deals
-// Deal count reflects only verified + pending real deals with disclosed terms.
+// Updated daily by /api/cron/daily-stats via GitHub API.
+//
+// LIVE_DEAL_COUNT     = deals TRACKED: not synthetic, canonical, not flagged or
+//                       rejected by the verifier, excluding 'other'/internal TAs.
+//                       This is what a user can browse.
+// VERIFIED_DEAL_COUNT = deals VERIFIED: verified=true, which since Aug 2026
+//                       always carries a citation (source_url, press release or
+//                       SEC filing id). This is the only number that may be
+//                       described as "verified" anywhere on the site.
+// Audit 2026-09-14: the two were conflated in copy; they are not the same thing.
+// 2026-09-15: 175 fabricated rows quarantined; live count moved 1649 → 1490.
 export const LIVE_DEAL_COUNT = 1490;
+export const VERIFIED_DEAL_COUNT = 251;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
   TOTAL_DEALS_RAW: LIVE_DEAL_COUNT,
+  VERIFIED_DEALS: formatDealCount(VERIFIED_DEAL_COUNT),
+  VERIFIED_DEALS_RAW: VERIFIED_DEAL_COUNT,
+  /** The honest one-line corpus claim. Use this instead of pairing TOTAL_DEALS with "verified". */
+  CORPUS_CLAIM: `${formatDealCount(LIVE_DEAL_COUNT)} deals tracked, ${formatDealCount(VERIFIED_DEAL_COUNT)} verified with source citations`,
   TOTAL_COMPANIES: '700+',
-  TOTAL_DEALS_DESCRIPTION: 'verified biopharma deals across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, FTC premerger filings, press releases, and regulatory databases',
+  TOTAL_DEALS_DESCRIPTION: 'biopharma deals tracked across 12 therapeutic areas — licensing, acquisitions, collaborations, option agreements, and co-development — sourced from SEC 8-K filings, FTC premerger filings, press releases, and regulatory databases, with every verified deal carrying a primary-source citation',
   NEUROLOGY_DEALS: '150+',
   NEUROLOGY_DEALS_DESCRIPTION: 'neurology R&D partnerships',
   NEUROLOGY_TOTAL_VALUE: '$45.9B',

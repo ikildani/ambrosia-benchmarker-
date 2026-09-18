@@ -331,7 +331,7 @@ export default function HowMuchIsBiotechAssetWorthPage() {
               <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
                 &ldquo;A Phase 2 oncology asset is worth $800M&ndash;$2.5B in total deal value &mdash; but the difference between the low and high end is positioning, not data.&rdquo;
               </blockquote>
-              <p className="mt-4 text-sm text-slate-400">Analysis of {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020&ndash;2026)</p>
+              <p className="mt-4 text-sm text-slate-400">Analysis of {DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020&ndash;2026)</p>
             </div>
           </section>
 
@@ -483,7 +483,7 @@ export default function HowMuchIsBiotechAssetWorthPage() {
           <section className="my-12">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Section 4 &middot; Interactive</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-2" id="model-your-deal">Model Your Own Deal</h2>
-            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
           </section>
 
@@ -521,7 +521,7 @@ export default function HowMuchIsBiotechAssetWorthPage() {
           <section className="my-12">
             <InlineEmailCapture
               heading="Get Valuation Benchmarks First"
-              description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              description={`Join 2,000+ BD professionals who receive our quarterly benchmarks the day they publish — plus weekly deal intelligence from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`}
               source="how-much-is-my-biotech-asset-worth"
             />
           </section>

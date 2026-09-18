@@ -129,7 +129,7 @@ export default function BiotechFundraisingDealBenchmarksPage() {
         name: 'How do licensing benchmarks strengthen a fundraising pitch?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Including licensing comparables in a fundraising pitch deck signals optionality — investors see that the asset has a quantifiable floor value in a licensing transaction. Presenting deal benchmarks from verified transactions (median upfronts, total deal values, royalty ranges for your TA/phase/modality) gives VCs confidence that their investment has a de-risked exit path even if the IPO market closes. This typically increases valuation by 10-20% in fundraising negotiations.',
+          text: 'Including licensing comparables in a fundraising pitch deck signals optionality — investors see that the asset has a quantifiable floor value in a licensing transaction. Presenting deal benchmarks from cited transactions (median upfronts, total deal values, royalty ranges for your TA/phase/modality) gives VCs confidence that their investment has a de-risked exit path even if the IPO market closes. This typically increases valuation by 10-20% in fundraising negotiations.',
         },
       },
       {
@@ -406,7 +406,7 @@ export default function BiotechFundraisingDealBenchmarksPage() {
               <blockquote className="text-xl sm:text-2xl font-bold leading-snug tracking-tight">
                 &ldquo;A Phase 2 biotech founder choosing between a $200M Series C and a $200M licensing upfront is choosing between 30% dilution and 0% dilution for the same near-term cash.&rdquo;
               </blockquote>
-              <p className="mt-4 text-sm text-slate-400">Decision framework analysis from {DEAL_STATS.TOTAL_DEALS} verified transactions</p>
+              <p className="mt-4 text-sm text-slate-400">Decision framework analysis from {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations</p>
             </div>
           </section>
 

@@ -80,7 +80,7 @@ export default function MethodologyPage() {
             Methodology
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl">
-            Our benchmarks are calibrated against {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
+            Our benchmarks are calibrated against {DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
           </p>
           <div className="mt-5 inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300">
             <span>Engine <span className="font-mono text-slate-900 dark:text-white">v{ENGINE_VERSION}</span></span>
@@ -118,7 +118,7 @@ export default function MethodologyPage() {
             </p>
             <div className="grid sm:grid-cols-2 gap-4 not-prose mt-6">
               {[
-                { label: 'Verified Transactions', value: DEAL_STATS.TOTAL_DEALS, sub: 'Licensing, acquisitions, collaborations, options, co-development' },
+                { label: 'Verified Transactions', value: DEAL_STATS.VERIFIED_DEALS, sub: 'Licensing, acquisitions, collaborations, options, co-development' },
                 { label: 'Company Profiles', value: DEAL_STATS.TOTAL_COMPANIES, sub: 'Pharma, biotech, and specialty companies tracked' },
                 { label: 'Therapeutic Areas', value: '12', sub: 'Oncology through rare disease and women\'s health' },
                 { label: 'Data Sources', value: '10+', sub: 'Regulatory filings, press wires, agency databases' },

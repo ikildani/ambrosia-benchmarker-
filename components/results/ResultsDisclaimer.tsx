@@ -59,7 +59,7 @@ function MethodologySection({ baseline }: ResultsDisclaimerProps) {
           <div className="mb-5">
             <h5 className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-2">Data Foundation</h5>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              All benchmarks are derived from <strong className="text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified biopharma transactions</strong> sourced
+              All benchmarks are derived from <strong className="text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations</strong> sourced
               from SEC EDGAR 8-K filings, FTC premerger filings, public press releases, ClinicalTrials.gov, and FDA regulatory databases.
               Data is refreshed through automated ingestion pipelines; the benchmarks release behind this run is
               v{BENCHMARKS_DATA.version} ({BENCHMARKS_DATA.lastUpdated}), engine v{ENGINE_VERSION}.
@@ -115,7 +115,7 @@ function MethodologySection({ baseline }: ResultsDisclaimerProps) {
               { value: String(THERAPEUTIC_AREA_COUNT), label: 'Therapeutic Areas' },
               { value: String(MODALITY_COUNT), label: 'Modalities Calibrated' },
               { value: `v${BENCHMARKS_DATA.version}`, label: `Benchmarks Data (${BENCHMARKS_DATA.lastUpdated})` },
-              { value: DEAL_STATS.TOTAL_DEALS, label: 'Verified Deals' },
+              { value: DEAL_STATS.VERIFIED_DEALS, label: 'Verified Deals' },
             ].map(stat => (
               <div key={stat.label} className="text-center p-2.5 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
                 <div className="text-base font-bold text-teal-600 dark:text-teal-400">{stat.value}</div>
@@ -145,7 +145,7 @@ function ResultsDisclaimerInner({ baseline }: ResultsDisclaimerProps) {
   return (
     <div className="mt-4 p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
       <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
-        Benchmark ranges are calibrated against {DEAL_STATS.TOTAL_DEALS} verified transactions and reflect the market distribution for comparable deals.
+        Benchmark ranges are calibrated against {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations and reflect the market distribution for comparable deals.
         {sentence ? ` ${sentence}` : ''}
         {' '}Individual outcomes depend on asset-specific factors, competitive dynamics, and negotiation leverage.
         For definitive deal structuring, engage qualified financial and legal advisors who can incorporate non-public factors.

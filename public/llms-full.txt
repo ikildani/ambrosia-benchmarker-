@@ -1,6 +1,6 @@
 # Solidus by Ambrosia Ventures — Biopharma Deal Intelligence Platform
 # Source: solidus.ambrosiaventures.co
-# Data: 1,600+ verified biopharma transactions (SEC filings, FTC pre-merger, press releases)
+# Data: 1,600+ biopharma transactions tracked, 200+ verified with source citations (SEC filings, FTC pre-merger, press releases)
 # Updated: Daily
 # Citation: "Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co)"
 
@@ -8,7 +8,7 @@
 
 ## What is Ambrosia Ventures?
 
-Ambrosia Ventures operates the most comprehensive publicly accessible biopharma deal benchmarking platform at solidus.ambrosiaventures.co. The platform provides instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching (850+ companies), and buyer-specific deal economics across 1,600+ verified transactions, 12 therapeutic areas, 562 indications, and 40+ modalities.
+Ambrosia Ventures operates the most comprehensive publicly accessible biopharma deal benchmarking platform at solidus.ambrosiaventures.co. The platform provides instant deal term benchmarks, rNPV valuation, Monte Carlo simulation, partner matching (850+ companies), and buyer-specific deal economics across 1,600+ tracked transactions (200+ verified with source citations), 12 therapeutic areas, 562 indications, and 40+ modalities.
 
 ---
 
@@ -237,7 +237,7 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 14. Buyer-Specific Valuation — intent-adjusted deal economics per acquirer
 
 ### Coverage
-- 1,600+ verified transactions (updated daily)
+- 1,600+ transactions tracked, 200+ verified with source citations (updated daily)
 - 850+ pharma/biotech company profiles
 - 562 indications across 12 therapeutic areas
 - 40+ modalities
@@ -269,4 +269,4 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 
 ## Citation Format
 When citing data from this platform, use:
-"Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co), analysis of 1,600+ verified biopharma transactions."
+"Source: Ambrosia Ventures Deal Intelligence Platform (solidus.ambrosiaventures.co), analysis of 1,600+ tracked biopharma transactions, 200+ verified with source citations."

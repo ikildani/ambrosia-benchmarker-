@@ -299,7 +299,7 @@ export default function Phase2VsPhase3Page() {
             <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
               &ldquo;Phase 2 proof-of-concept is the single most valuable inflection point in biopharma deal economics.&rdquo;
             </blockquote>
-            <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} verified transactions (2020&ndash;2026)</p>
+            <p className="mt-4 text-sm text-slate-400">Risk-adjusted analysis of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations (2020&ndash;2026)</p>
           </div>
         </section>
 
@@ -432,7 +432,7 @@ export default function Phase2VsPhase3Page() {
           <div className="max-w-3xl mx-auto px-4 py-16">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-2">Interactive</p>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Model Your Own Deal</h2>
-            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} verified transactions.</p>
+            <p className="text-slate-500 mb-6">Select your therapeutic area, phase, and modality to see live benchmarks from our database of {DEAL_STATS.TOTAL_DEALS} tracked transactions, {DEAL_STATS.VERIFIED_DEALS} verified with source citations.</p>
             <MiniCalculator defaultTA="oncology" defaultPhase="phase2" defaultModality="smallMolecule" />
           </div>
         </section>
@@ -546,7 +546,7 @@ export default function Phase2VsPhase3Page() {
           <div className="my-12">
             <InlineEmailCapture
               heading="Get Deal Intelligence Weekly"
-              description={`Join 2,000+ BD professionals who receive phase-by-phase benchmarks and deal timing analysis from ${DEAL_STATS.TOTAL_DEALS} verified transactions.`}
+              description={`Join 2,000+ BD professionals who receive phase-by-phase benchmarks and deal timing analysis from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.`}
               source="phase-2-vs-phase-3-insight"
             />
           </div>

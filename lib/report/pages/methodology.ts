@@ -78,7 +78,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
       <div class="disclaimer-box">
         <div style="font-weight: 700; margin-bottom: 6px; font-size: 10px; color: ${COLORS.gray600};">ABOUT THESE BENCHMARKS</div>
         <p style="margin-bottom: 5px;">
-          This report is produced by Solidus, calibrated against ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
+          This report is produced by Solidus, calibrated against ${DEAL_STATS.TOTAL_DEALS} tracked biopharma transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations from SEC regulatory filings, FTC premerger filings, press releases, and regulatory databases. Benchmark ranges reflect the market distribution for comparable transactions across different market conditions and negotiation dynamics.
         </p>
         <p style="margin-bottom: 5px;">
           Individual deal outcomes depend on asset-specific factors including proprietary clinical data, IP landscape, competitive dynamics, regulatory interactions, and negotiation leverage. These benchmarks provide data-driven anchor points for deal strategy — for definitive structuring, engage qualified financial and legal advisors.

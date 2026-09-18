@@ -22,7 +22,7 @@ const VARIANTS: ExitIntentVariant[] = [
   { id: 'A', headline: 'Wait — before you go', subtext: 'Get a free deal benchmark report for your next calculation.', buttonText: 'Send My Free Report', footnote: `No spam, unsubscribe anytime. ${DEAL_STATS.TOTAL_DEALS} deals benchmarked.` },
   { id: 'B', headline: 'Wait — before you go', subtext: `See how your deal compares to ${DEAL_STATS.TOTAL_DEALS} real biopharma transactions.`, buttonText: 'Show Me the Data', footnote: 'Free benchmarking insight. No credit card required.' },
   { id: 'C', headline: 'Wait — before you go', subtext: 'Join 50+ biotech BD teams using data-driven deal benchmarks.', buttonText: 'Get My Free Benchmark', footnote: 'Trusted by BD teams at top-20 pharma. No spam.' },
-  { id: 'D', headline: 'Your deal terms may be below market', subtext: 'Get a free analysis showing how your terms compare to recent deals in your therapeutic area.', buttonText: 'See My Deal Analysis', footnote: `Instant benchmarking against ${DEAL_STATS.TOTAL_DEALS} verified transactions.` },
+  { id: 'D', headline: 'Your deal terms may be below market', subtext: 'Get a free analysis showing how your terms compare to recent deals in your therapeutic area.', buttonText: 'See My Deal Analysis', footnote: `Instant benchmarking against ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations.` },
 ];
 
 const DEFAULT_VARIANT: ExitIntentVariant = VARIANTS[0];

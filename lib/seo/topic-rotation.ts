@@ -18,6 +18,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js';
 import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { taToSlug, phaseToSlug } from '@/lib/benchmarkPagesGenerated';
+import { applyDealQualityFilter } from '@/lib/deals/quality-filter';
 
 // ── Label maps ──────────────────────────────────────────────────────────────
 
@@ -293,10 +294,9 @@ async function generateDealAnalysis(
   supabase: SupabaseClient,
 ): Promise<TopicParams | null> {
   // Fetch 5 most recent large deals (non-synthetic, TDV > $500M)
-  const { data: deals, error } = await supabase
+  const { data: deals, error } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('id, licensor_name, licensee_name, asset_name, modality, therapeutic_area, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, target, mechanism_of_action')
-    .eq('is_synthetic', false)
+    .select('id, licensor_name, licensee_name, asset_name, modality, therapeutic_area, phase_at_signing, deal_type, upfront_usd, total_deal_value_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, target, mechanism_of_action'))
     .gt('total_deal_value_usd', 500_000_000)
     .order('announced_date', { ascending: false })
     .limit(5);
@@ -390,12 +390,11 @@ async function generateHowMuch(
 
   for (const combo of shuffled) {
     // Fetch up to 200 deals for this phase+TA
-    const { data: deals, error } = await supabase
+    const { data: deals, error } = await applyDealQualityFilter(supabase
       .from('deals')
       .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality')
       .eq('phase_at_signing', combo.phase)
-      .eq('therapeutic_area', combo.ta)
-      .eq('is_synthetic', false)
+      .eq('therapeutic_area', combo.ta))
       .gt('upfront_usd', 0)
       .order('announced_date', { ascending: false })
       .limit(200);
@@ -486,10 +485,9 @@ async function generateBuyerIntelligence(
   supabase: SupabaseClient,
 ): Promise<TopicParams | null> {
   // Find top buyers by deal count (non-synthetic)
-  const { data: buyers, error } = await supabase
+  const { data: buyers, error } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('licensee_name')
-    .eq('is_synthetic', false)
+    .select('licensee_name'))
     .not('licensee_name', 'is', null);
 
   if (error) {
@@ -530,11 +528,10 @@ async function generateBuyerIntelligence(
     if (usedKeys.has(topicKey)) continue;
 
     // Fetch this buyer's deals
-    const { data: companyDeals, error: cdErr } = await supabase
+    const { data: companyDeals, error: cdErr } = await applyDealQualityFilter(supabase
       .from('deals')
       .select('licensor_name, asset_name, upfront_usd, total_deal_value_usd, phase_at_signing, therapeutic_area, deal_type, announced_date')
-      .eq('licensee_name', companyName)
-      .eq('is_synthetic', false)
+      .eq('licensee_name', companyName))
       .order('announced_date', { ascending: false })
       .limit(50);
 
@@ -611,10 +608,9 @@ async function generateMarketTrend(
   const previousLabel = `${formatDateISO(previousStart)} to ${formatDateISO(currentStart)}`;
 
   // Fetch deals from the last 12 months
-  const { data: deals, error } = await supabase
+  const { data: deals, error } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality, therapeutic_area')
-    .eq('is_synthetic', false)
+    .select('licensor_name, licensee_name, upfront_usd, total_deal_value_usd, announced_date, modality, therapeutic_area'))
     .gte('announced_date', formatDateISO(previousStart))
     .order('announced_date', { ascending: false })
     .limit(500);
@@ -799,10 +795,9 @@ async function generateComparison(
   const usedKeys = new Set((existingLogs || []).map((r) => r.topic_key));
 
   // Get our total deal count for the data point
-  const { count } = await supabase
+  const { count } = await applyDealQualityFilter(supabase
     .from('deals')
-    .select('id', { count: 'exact', head: true })
-    .eq('is_synthetic', false);
+    .select('id', { count: 'exact', head: true }))
 
   const uniqueDataPoints = count || 0;
 

@@ -71,7 +71,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
 
   const getSubtitle = () => {
     switch (mode) {
-      case 'signup': return `Access deal benchmarks from ${DEAL_STATS.TOTAL_DEALS} verified transactions`;
+      case 'signup': return `Access deal benchmarks from ${DEAL_STATS.TOTAL_DEALS} tracked transactions, ${DEAL_STATS.VERIFIED_DEALS} verified with source citations`;
       case 'signin': return 'Welcome back to Ambrosia Ventures';
       case 'forgot-password': return 'We\'ll send you a link to reset your password';
       case 'verify-email': return 'We sent a verification link to your email';
