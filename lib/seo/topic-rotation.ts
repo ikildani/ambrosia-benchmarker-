@@ -19,6 +19,11 @@ import { type SupabaseClient } from '@supabase/supabase-js';
 import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { taToSlug, phaseToSlug } from '@/lib/benchmarkPagesGenerated';
 
+/** Days before a dimension can get another market-trend post. */
+const MARKET_TREND_COOLDOWN_DAYS = 90;
+/** Catch-all dimensions that never deserve a trend post. */
+const EXCLUDED_TREND_DIMENSIONS = new Set(['other', 'unknown', 'undisclosed', 'n/a']);
+
 // ── Label maps ──────────────────────────────────────────────────────────────
 
 export const TA_LABELS: Record<string, string> = {
@@ -744,20 +749,28 @@ async function generateMarketTrend(
   // Sort by absolute change percent — biggest shift first
   candidates.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
 
-  // Check seo_content_log for already-used trends
-  const trendKeys = candidates.map(
-    (c) => `market_trend:${c.trendType}:${c.dimension}:${currentLabel}`,
-  );
-  const { data: existingLogs } = await supabase
+  // Dedupe by dimension, not by (trendType, dimension, period). The old key
+  // let the same dimension republish every time the period label rolled or
+  // the trend type flipped: 167 near-identical "X Deals Are Up N%" posts
+  // shipped Jul-Sep 2026 and Google refused to index the bulk. One
+  // market-trend post per dimension per MARKET_TREND_COOLDOWN_DAYS, and the
+  // catch-all "other" buckets never get a post.
+  const { data: recentLogs } = await supabase
     .from('seo_content_log')
     .select('topic_key')
-    .in('topic_key', trendKeys);
+    .like('topic_key', 'market_trend:%')
+    .gte('generated_at', new Date(Date.now() - MARKET_TREND_COOLDOWN_DAYS * 86_400_000).toISOString());
 
-  const usedKeys = new Set((existingLogs || []).map((r) => r.topic_key));
+  const recentDimensions = new Set(
+    (recentLogs || [])
+      .map((r) => (r.topic_key as string).split(':')[2])
+      .filter(Boolean),
+  );
 
   for (const candidate of candidates) {
+    if (EXCLUDED_TREND_DIMENSIONS.has(candidate.dimension.toLowerCase())) continue;
+    if (recentDimensions.has(candidate.dimension)) continue;
     const topicKey = `market_trend:${candidate.trendType}:${candidate.dimension}:${currentLabel}`;
-    if (usedKeys.has(topicKey)) continue;
 
     const direction = candidate.changePercent > 0 ? 'Surge' : 'Decline';
     const headline = `${candidate.dimensionLabel} Deal ${direction}: ${candidate.changePercent > 0 ? '+' : ''}${candidate.changePercent}% in 6 Months`;

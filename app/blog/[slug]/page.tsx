@@ -25,7 +25,7 @@ async function resolvePost(slug: string): Promise<BlogPost | null> {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('blog_posts')
-      .select('slug, title, meta_description, content, category, excerpt, published_at, tags')
+      .select('slug, title, meta_description, content, category, excerpt, published_at, tags, noindex')
       .eq('slug', slug)
       .eq('status', 'published')
       .single();
@@ -42,6 +42,7 @@ async function resolvePost(slug: string): Promise<BlogPost | null> {
       category: formatCategory(data.category),
       readTime: `${Math.max(3, Math.ceil((data.content?.length || 0) / 1500))} min read`,
       content: data.content || '',
+      noindex: data.noindex === true,
       faqs: [],
       relatedLinks: [],
     };
@@ -195,6 +196,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: post.metaDescription,
     authors: [{ name: post.author }],
     alternates: { canonical: `${BASE_URL}/blog/${post.slug}` },
+    // Templated series repeats are flagged noindex in the DB (see
+    // scripts/seo/noindex-templated-posts.ts); the sitemap skips them too.
+    ...(post.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: post.title,
       description: post.metaDescription,

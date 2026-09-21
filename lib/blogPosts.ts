@@ -12,6 +12,8 @@ export interface BlogPost {
   content: string; // HTML content
   faqs: { question: string; answer: string }[];
   relatedLinks: { href: string; label: string }[];
+  /** DB-backed posts only: true keeps the post live but out of the index and sitemap. */
+  noindex?: boolean;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -1144,7 +1146,7 @@ export const blogPosts: BlogPost[] = [
     relatedLinks: [
       { href: '/insights/rare-disease-landscape', label: 'Rare Disease Landscape Analysis' },
       { href: '/calculator', label: 'Solidus' },
-      { href: '/glossary/risk-adjusted-npv', label: 'Risk-Adjusted NPV Glossary' },
+      { href: '/glossary/risk-adjusted-npv-rnpv', label: 'Risk-Adjusted NPV Glossary' },
       { href: '/guides/rnpv-biotech-valuation', label: 'rNPV Biotech Valuation Guide' },
     ],
   },
