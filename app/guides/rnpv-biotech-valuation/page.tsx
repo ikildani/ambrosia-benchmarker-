@@ -146,7 +146,7 @@ export default function RnpvBiotechValuationPage() {
             </h2>
 
             <p className="text-slate-600 leading-relaxed">
-              <Link href="/glossary/risk-adjusted-npv" className="text-teal-600 font-medium hover:text-teal-700">Risk-adjusted NPV</Link> modifies the standard net present value calculation by incorporating the probability that a drug candidate will successfully navigate each stage of development and reach the market. The formula multiplies each future cash flow by two adjustment factors:
+              <Link href="/glossary/risk-adjusted-npv-rnpv" className="text-teal-600 font-medium hover:text-teal-700">Risk-adjusted NPV</Link> modifies the standard net present value calculation by incorporating the probability that a drug candidate will successfully navigate each stage of development and reach the market. The formula multiplies each future cash flow by two adjustment factors:
             </p>
 
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
@@ -407,7 +407,7 @@ export default function RnpvBiotechValuationPage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  Standard NPV discounts cash flows by time only, assuming the drug reaches market. <Link href="/glossary/risk-adjusted-npv" className="text-teal-600 hover:text-teal-700">Risk-adjusted NPV (rNPV)</Link> additionally applies probability-of-success adjustments at each development stage, reflecting the substantial clinical attrition risk. For a Phase 1 oncology asset with ~8% cumulative PoS, NPV could overvalue the asset by 10-12x vs. rNPV.
+                  Standard NPV discounts cash flows by time only, assuming the drug reaches market. <Link href="/glossary/risk-adjusted-npv-rnpv" className="text-teal-600 hover:text-teal-700">Risk-adjusted NPV (rNPV)</Link> additionally applies probability-of-success adjustments at each development stage, reflecting the substantial clinical attrition risk. For a Phase 1 oncology asset with ~8% cumulative PoS, NPV could overvalue the asset by 10-12x vs. rNPV.
                 </div>
               </details>
 
@@ -452,7 +452,7 @@ export default function RnpvBiotechValuationPage() {
               {[
                 { href: '/calculator', title: 'Solidus', desc: 'Run rNPV-based deal benchmarks' },
                 { href: '/methodology', title: 'Methodology', desc: 'PoS rates and model assumptions' },
-                { href: '/glossary/risk-adjusted-npv', title: 'rNPV Glossary', desc: 'Definition and industry context' },
+                { href: '/glossary/risk-adjusted-npv-rnpv', title: 'rNPV Glossary', desc: 'Definition and industry context' },
               ].map((resource) => (
                 <Link
                   key={resource.href}
