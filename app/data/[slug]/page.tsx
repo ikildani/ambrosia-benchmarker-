@@ -50,7 +50,9 @@ export async function generateMetadata({
       description: page.metaDescription,
     },
     alternates: {
-      canonical: `${baseUrl}/data/${slug}`,
+      // Thin territory variants canonicalise to the global page (see
+      // MIN_TERRITORY_COMPS in lib/seo/programmatic-pages.ts).
+      canonical: `${baseUrl}/data/${page.canonicalSlug}`,
     },
   };
 }
