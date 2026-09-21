@@ -227,7 +227,7 @@ export default async function SharePage({ params }: Props) {
                   <p className="text-3xl font-black text-white tracking-tight">$499</p>
                   <p className="text-xs text-slate-400 mt-1 mb-4">Board-ready PDF + Excel</p>
                   <a
-                    href="/report"
+                    href="/pro"
                     className="block w-full text-center px-4 py-2.5 bg-teal-500 text-white font-bold rounded-lg hover:bg-teal-400 transition-all text-sm shadow-lg shadow-teal-500/15"
                   >
                     Get Full Report
