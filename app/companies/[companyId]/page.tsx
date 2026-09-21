@@ -284,7 +284,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const typeLabel = COMPANY_TYPE_LABELS[company.company_type] || 'Life Sciences';
 
     // Build keyword-rich title targeting search intent
-    const title = `${company.name} Deal History & Licensing Activity | Ambrosia Ventures`;
+    const title = `${company.name} Deal History & Licensing Activity`;
 
     // Build rich description targeting "[company] licensing deals 2025 2026"
     const taNames = topTAs.slice(0, 3).map(([k]) => fmtTA(k)).join(', ');
