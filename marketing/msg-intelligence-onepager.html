@@ -1,0 +1,385 @@
+<title>Ambrosia Intelligence for MSG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #F9F8F5;
+    --sheet: #FFFFFF;
+    --ink: #10163A;
+    --ink-2: #3D4263;
+    --ink-3: #6B6F8C;
+    --rule: #DCDDE8;
+    --rule-soft: #ECEDF3;
+    --teal: #1A9B85;
+    --teal-ink: #137A69;
+    --teal-wash: #E6F4F1;
+    --lav: #656A9E;
+    --lav-wash: #EEEFF8;
+    --shadow: 0 1px 2px rgba(16,22,58,.06), 0 12px 40px rgba(16,22,58,.08);
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #090C1F;
+      --sheet: #10152F;
+      --ink: #E9EAF4;
+      --ink-2: #BFC2DA;
+      --ink-3: #8D91B0;
+      --rule: #2A3056;
+      --rule-soft: #1D2345;
+      --teal: #3CC4AB;
+      --teal-ink: #5FD4BE;
+      --teal-wash: #12302F;
+      --lav: #A9AEE3;
+      --lav-wash: #1C2247;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #090C1F;
+    --sheet: #10152F;
+    --ink: #E9EAF4;
+    --ink-2: #BFC2DA;
+    --ink-3: #8D91B0;
+    --rule: #2A3056;
+    --rule-soft: #1D2345;
+    --teal: #3CC4AB;
+    --teal-ink: #5FD4BE;
+    --teal-wash: #12302F;
+    --lav: #A9AEE3;
+    --lav-wash: #1C2247;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 11.5px;
+    line-height: 1.5;
+    padding-block: 32px;
+    padding-inline: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sheet {
+    max-width: 8.5in;
+    margin: 0 auto;
+    background: var(--sheet);
+    box-shadow: var(--shadow);
+    padding: 0.44in 0.55in 0.36in;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .label {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Masthead */
+  .mast {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand svg { flex: none; }
+  .brand-name {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .01em;
+  }
+  .brand-sub { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .prepared { text-align: right; display: grid; gap: 2px; }
+  .prepared strong { font-weight: 600; font-size: 11.5px; color: var(--ink); }
+  .prepared span { color: var(--ink-3); font-size: 10.5px; }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: 1.35fr 1fr; gap: 28px; align-items: end; }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.04;
+    letter-spacing: -.015em;
+  }
+  .hero h1 em { font-style: italic; color: var(--teal-ink); }
+  .hero .dek { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+  .hero .dek b { color: var(--ink); font-weight: 600; }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .stat { padding: 10px 12px 10px 0; display: grid; gap: 2px; align-content: start; }
+  .stat + .stat { padding-left: 12px; border-left: 1px solid var(--rule-soft); }
+  .stat .v {
+    font-family: var(--serif);
+    font-size: 25px;
+    line-height: 1.05;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .stat .v small { font-size: 14px; color: var(--ink-3); margin-left: 1px; }
+  .stat .k { font-size: 10px; line-height: 1.35; color: var(--ink-2); }
+
+  /* Section head */
+  .sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .sh h2 { font-family: var(--serif); font-size: 16px; font-weight: 600; letter-spacing: -.005em; }
+  .sh .label { margin-left: auto; }
+
+  .body-grid { display: grid; grid-template-columns: 1fr 1.08fr; gap: 28px; }
+
+  /* Pipeline */
+  .pipe { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: step; }
+  .pipe li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 10px;
+    position: relative;
+    padding-bottom: 8px;
+  }
+  .pipe li::before {
+    counter-increment: step;
+    content: counter(step);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--teal);
+    color: var(--teal-ink);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    display: grid; place-items: center;
+    background: var(--sheet);
+    position: relative; z-index: 1;
+  }
+  .pipe li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 10px; top: 20px; bottom: 0;
+    width: 1.5px;
+    background: var(--rule);
+  }
+  .pipe li:last-child::before { background: var(--teal); color: var(--sheet); }
+  .pipe h3 { font-size: 11.5px; font-weight: 600; line-height: 20px; }
+  .pipe h3 span { font-weight: 400; color: var(--ink-3); }
+  .pipe p { color: var(--ink-2); font-size: 10.5px; line-height: 1.45; }
+
+  /* Translation table */
+  .xlate-wrap { overflow-x: auto; }
+  .xlate { width: 100%; border-collapse: collapse; font-size: 10.5px; line-height: 1.35; }
+  .xlate th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 8.5px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 0 8px 6px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+  .xlate th:last-child { color: var(--teal-ink); }
+  .xlate td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  .xlate td:first-child { color: var(--ink-2); width: 47%; }
+  .xlate td:first-child code { font-family: var(--mono); font-size: 9.5px; color: var(--lav); }
+  .xlate td:last-child { color: var(--ink); font-weight: 500; }
+  .xlate td.arrow { width: 16px; color: var(--teal); padding-right: 6px; font-family: var(--mono); }
+
+  /* Plays */
+  .plays { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .play {
+    border-top: 2px solid var(--teal);
+    background: var(--teal-wash);
+    padding: 10px 12px 12px;
+    display: grid;
+    gap: 5px;
+    align-content: start;
+  }
+  .play .who { font-family: var(--mono); font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal-ink); }
+  .play h3 { font-family: var(--serif); font-size: 14px; font-weight: 600; line-height: 1.2; }
+  .play p { font-size: 10.5px; color: var(--ink-2); line-height: 1.45; }
+  .play .out { font-size: 10px; color: var(--ink); border-top: 1px solid color-mix(in srgb, var(--teal) 25%, transparent); padding-top: 5px; margin-top: 2px; }
+  .play .out b { font-weight: 600; }
+
+  /* Bottom */
+  .bottom { display: grid; grid-template-columns: 1fr 1.08fr; gap: 28px; }
+  .standards { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .standards li { display: grid; grid-template-columns: 12px 1fr; gap: 8px; font-size: 10.5px; color: var(--ink-2); line-height: 1.45; }
+  .standards li::before { content: ""; width: 6px; height: 6px; margin-top: 5px; background: var(--lav); transform: rotate(45deg); }
+  .standards b { color: var(--ink); font-weight: 600; }
+
+  .pilot { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--rule); }
+  .phase { padding: 8px 10px 10px; display: grid; gap: 3px; align-content: start; }
+  .phase + .phase { border-left: 1px solid var(--rule); }
+  .phase .wk { font-family: var(--mono); font-size: 9px; color: var(--teal-ink); letter-spacing: .06em; }
+  .phase h3 { font-size: 11px; font-weight: 600; }
+  .phase p { font-size: 10px; color: var(--ink-2); line-height: 1.4; }
+  .pilot-note { font-size: 9.5px; color: var(--ink-3); margin-top: 6px; }
+
+  /* Footer */
+  .foot {
+    display: flex; flex-wrap: wrap; gap: 8px 24px;
+    justify-content: space-between; align-items: baseline;
+    border-top: 1.5px solid var(--ink);
+    padding-top: 10px;
+    font-size: 10.5px;
+  }
+  .foot .who b { font-weight: 600; }
+  .foot .who span, .foot .conf { color: var(--ink-3); }
+  .foot .mail { font-family: var(--mono); font-size: 10px; user-select: all; }
+
+  @media (max-width: 760px) {
+    body { padding-block: 16px; }
+    .sheet { padding: 24px 20px; gap: 20px; }
+    .hero, .body-grid, .bottom { grid-template-columns: 1fr; gap: 18px; }
+    .hero h1 { font-size: 30px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat, .stat + .stat { padding: 10px 10px 10px 0; border-left: 0; }
+    .stat:nth-child(even) { padding-left: 12px; border-left: 1px solid var(--rule-soft); }
+    .stat:nth-child(n+3) { border-top: 1px solid var(--rule-soft); }
+    .plays { grid-template-columns: 1fr; }
+    .pilot { grid-template-columns: 1fr; }
+    .phase + .phase { border-left: 0; border-top: 1px solid var(--rule); }
+    .prepared { text-align: left; }
+  }
+
+  @page { size: letter; margin: 0; }
+  @media print {
+    body { padding: 0; background: #fff; }
+    .sheet { box-shadow: none; max-width: none; width: calc(8.5in / .9); height: calc(11in / .9); zoom: .9; overflow: hidden; }
+  }
+</style>
+
+<article class="sheet">
+  <header class="mast">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+        <rect x="4" y="4" width="18" height="18" transform="rotate(45 13 13)" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="9" y="9" width="8" height="8" transform="rotate(45 13 13)" fill="var(--teal)"/>
+      </svg>
+      <div>
+        <div class="brand-name">Ambrosia Ventures</div>
+        <div class="brand-sub">Intelligence Platform</div>
+      </div>
+    </div>
+    <div class="prepared">
+      <span class="label">Prepared for</span>
+      <strong>Madison Square Garden Sports · New York Knicks</strong>
+      <span>Discussion draft · September 2026</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>We value <em>uncertain assets</em> for a living.</h1>
+    <p class="dek">Ambrosia runs a proprietary intelligence platform that prices biopharma deals: contracts whose worth depends on performance, health and time. It reads primary filings every day, verifies every figure, and returns a <b>risk-adjusted value range</b> in under 30 seconds. A front office faces the same problem each time it signs, trades or extends a player.</p>
+  </section>
+
+  <section class="stats" aria-label="Platform at a glance">
+    <div class="stat"><div class="v num">1,400<small>+</small></div><div class="k">source-verified licensing and M&amp;A transactions, 2017 to today</div></div>
+    <div class="stat"><div class="v num">24</div><div class="k">valuation and decision engines, each linked to cited data</div></div>
+    <div class="stat"><div class="v num">10,000</div><div class="k">correlated Monte Carlo paths behind every valuation</div></div>
+    <div class="stat"><div class="v num">83</div><div class="k">counterparty profiles that model each buyer's willingness to pay</div></div>
+    <div class="stat"><div class="v num">&lt;30<small>s</small></div><div class="k">from question to a sourced, board-ready memo</div></div>
+  </section>
+
+  <div class="body-grid">
+    <section>
+      <div class="sh"><h2>How the platform thinks</h2></div>
+      <ol class="pipe">
+        <li><div><h3>Ingest <span>· daily</span></h3><p>SEC EDGAR full text since 2017, Hong Kong exchange filings, press wires, FDA and ClinicalTrials.gov.</p></div></li>
+        <li><div><h3>Verify <span>· cite or exclude</span></h3><p>Every term is scored and linked to its filing. Anything below 75/100 confidence stays out of the models.</p></div></li>
+        <li><div><h3>Model <span>· 24 engines</span></h3><p>Risk-adjusted NPV, comparable scoring, buyer premiums and live macro rates, run under correlated uncertainty.</p></div></li>
+        <li><div><h3>Decide <span>· ranges, not points</span></h3><p>A memo with a value band, its comparables and the assumptions that move it most.</p></div></li>
+        <li><div><h3>Learn <span>· weekly backtest</span></h3><p>Estimates are scored against real outcomes, including 164 approved-drug trajectories, then recalibrated.</p></div></li>
+      </ol>
+    </section>
+
+    <section>
+      <div class="sh"><h2>Same problem, different roster</h2></div>
+      <div class="xlate-wrap">
+        <table class="xlate">
+          <thead><tr><th>What we price today</th><th></th><th>What it maps to at MSG</th></tr></thead>
+          <tbody>
+            <tr><td>Licensing terms: upfront, milestones, royalty tiers</td><td class="arrow">→</td><td>Guaranteed money, incentives, player and team options</td></tr>
+            <tr><td>Probability of success by phase, <code>PoS</code></td><td class="arrow">→</td><td>Availability and aging curves by position and role</td></tr>
+            <tr><td>Risk-adjusted asset value, <code>rNPV</code></td><td class="arrow">→</td><td>Risk-adjusted contract value across every season of the deal</td></tr>
+            <tr><td>Buyer-specific premiums across 83 pharma profiles</td><td class="arrow">→</td><td>Each rival team's cap room, needs and bidding behavior</td></tr>
+            <tr><td>Scored comparable transactions</td><td class="arrow">→</td><td>Scored comparable contracts and trades</td></tr>
+            <tr><td>Clinical pipeline and FDA surveillance</td><td class="arrow">→</td><td>Sports-medicine and recovery science radar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section>
+    <div class="sh"><h2>Where we would start</h2><span class="label">Three partnership tracks</span></div>
+    <div class="plays">
+      <div class="play">
+        <span class="who">Front office</span>
+        <h3>Contract and trade valuation</h3>
+        <p>Point our valuation engine at player contracts: a value range, the comparables behind it, and how rival teams are likely to bid.</p>
+        <p class="out"><b>Output:</b> a pre-negotiation memo for every major contract decision.</p>
+      </div>
+      <div class="play">
+        <span class="who">Medical &amp; performance</span>
+        <h3>Athlete health intelligence</h3>
+        <p>Our home domain. We track trials, FDA clearances and new therapies in orthopedics, concussion and recovery, and flag what reaches the clinic next.</p>
+        <p class="out"><b>Output:</b> a monthly evidence-graded brief for team physicians.</p>
+      </div>
+      <div class="play">
+        <span class="who">Business &amp; partnerships</span>
+        <h3>Health-sector partner strategy</h3>
+        <p>Map 700+ life-science companies by spend, launches and strategy to find the right pharma, health-system and medtech partners.</p>
+        <p class="out"><b>Output:</b> a ranked partner shortlist with deal-term guidance.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom">
+    <section>
+      <div class="sh"><h2>Standards we hold</h2></div>
+      <ul class="standards">
+        <li><div><b>Every number traces to a source.</b> Each deal term is stored with the filing or record it came from.</div></li>
+        <li><div><b>We publish our error.</b> Backtest accuracy is shown on a live page, including where the models miss.</div></li>
+        <li><div><b>Enterprise controls from day one.</b> Single sign-on, full audit logging and scoped API keys for every user.</div></li>
+      </ul>
+    </section>
+    <section>
+      <div class="sh"><h2>Proposed 90-day pilot</h2></div>
+      <div class="pilot">
+        <div class="phase"><span class="wk num">Weeks 1–3</span><h3>Scope</h3><p>Choose one live decision. Agree the data, the owners and the success test.</p></div>
+        <div class="phase"><span class="wk num">Weeks 4–8</span><h3>Build</h3><p>Stand up the models on MSG's question, with weekly working sessions.</p></div>
+        <div class="phase"><span class="wk num">Weeks 9–12</span><h3>Prove</h3><p>Backtest against past decisions, then present a readout and a go or no-go.</p></div>
+      </div>
+      <p class="pilot-note">Structure is a starting point for discussion and will be shaped with your team.</p>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <div class="who"><b>Issa Kildani</b> <span>· Ambrosia Ventures · New York &amp; Detroit</span></div>
+    <div class="mail">ikildani@ambrosiaventures.co</div>
+    <div class="conf">Confidential · prepared for discussion only</div>
+  </footer>
+</article>
