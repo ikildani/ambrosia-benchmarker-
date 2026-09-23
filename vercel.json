@@ -429,6 +429,22 @@
     {
       "path": "/api/cron/api-credit-check",
       "schedule": "20 * * * *"
+    },
+    {
+      "path": "/api/cron/edgar-fts-backfill",
+      "schedule": "15 2,8,14,20 * * *"
+    },
+    {
+      "path": "/api/cron/hkex-announcements",
+      "schedule": "30 1 * * *"
+    },
+    {
+      "path": "/api/cron/hkex-announcements?mode=backfill",
+      "schedule": "45 5,17 * * *"
+    },
+    {
+      "path": "/api/cron/deal-inflow-check",
+      "schedule": "0 13 * * *"
     }
   ]
 }

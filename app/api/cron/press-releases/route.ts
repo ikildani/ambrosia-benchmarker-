@@ -84,12 +84,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    await logCronRun(supabase, 'press_releases_cron', {
-      fetched: result.articles_found,
-      processed: result.potential_deals,
-      inserted: result.deals_inserted,
-      errors: result.errors,
-    });
+    // The library logs the run as 'press_releases' with its funnel; a second
+    // 'press_releases_cron' row for the same run double-counted every day.
+
 
     // Diagnostic log: if we processed many items but inserted none, log skip reasons
     if (result.deals_inserted === 0 && result.potential_deals > 10) {

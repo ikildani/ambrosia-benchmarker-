@@ -13,7 +13,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
-import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import {
   fetchFilingContent,
   extractDealFromFiling,
@@ -22,6 +21,7 @@ import {
 } from '@/lib/ingestion/sec-edgar';
 import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
 import { FunnelCounter } from '@/lib/ingestion/funnel';
+import { eftsSearch, hitToDocument, isLikelyPharmaDealHit } from '@/lib/ingestion/edgar-fts';
 import { insertCitedDeal } from '@/lib/ingestion/insert-deal';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
@@ -29,7 +29,6 @@ export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 const MAX_RUNTIME_MS = 250_000;
-const SEC_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 
 function getDateRange(): { dateStart: string; dateEnd: string } {
   const end = new Date();
@@ -100,25 +99,8 @@ export async function GET(request: NextRequest) {
   const search = DEAL_SEARCHES[searchIndex];
   const { dateStart, dateEnd } = getDateRange();
   // Search SEC EDGAR — rolling 30-day window to continuously find new filings
-  const params = new URLSearchParams({
-    q: search.query,
-    forms: '8-K,8-K/A,6-K',
-    dateRange: 'custom',
-    startdt: dateStart,
-    enddt: dateEnd,
-    from: String(page * 20),
-    size: '20',
-  });
-
-  const searchResponse = await fetchWithTimeout(`${SEC_SEARCH}?${params}`, {
-    headers: {
-      'User-Agent': 'Solidus research@ambrosiaventures.co',
-      'Accept': 'application/json',
-    },
-    timeoutMs: 20_000,
-    retries: 1,
-  });
-
+  const searchPage = await eftsSearch({ q: search.query, startdt: dateStart, enddt: dateEnd, from: page * 20, size: 20 });
+  const searchResponse = { ok: searchPage.status === 200 && !(searchPage.parseFailed && searchPage.hits.length === 0), status: searchPage.status };
   const result = {
     searchType: search.type,
     page,
@@ -142,9 +124,8 @@ export async function GET(request: NextRequest) {
     result.nextSearchIndex = searchIndex + 1;
     result.nextPage = 0;
   } else {
-    const data = await searchResponse.json();
-    const total = data.hits?.total?.value || 0;
-    const hits = data.hits?.hits || [];
+    const total = searchPage.total;
+    const hits = searchPage.hits;
     // Last page for this query: move to the next query rather than paging past the total.
     if (hits.length === 0 || (page + 1) * 20 >= total) {
       result.nextSearchIndex = searchIndex + 1;
@@ -154,19 +135,13 @@ export async function GET(request: NextRequest) {
     for (const hit of hits) {
       if (Date.now() - startTime > MAX_RUNTIME_MS) break;
 
-      const docId = hit._id || '';
-      const parts = docId.split(':');
-      const accession = parts[0] || '';
-      const fileName = parts[1] || '';
-      const cik = (hit._source?.ciks?.[0] || '').replace(/^0+/, '');
-      const accessionFormatted = accession.replace(/-/g, '');
-
-      const url = cik && accessionFormatted && fileName
-        ? `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionFormatted}/${fileName}`
-        : '';
-
-            funnel.count('fetched');
-      if (!url) { funnel.count('content_unavailable', 'unresolvable_hit'); continue; }
+      const doc = hitToDocument(hit);
+      const accession = doc?.accession ?? '';
+      const url = doc?.url ?? '';
+      funnel.count('fetched');
+      if (!doc || !url) { funnel.count('content_unavailable', 'unresolvable_hit'); continue; }
+      const pre = isLikelyPharmaDealHit(hit);
+      if (!pre.keep) { funnel.count('keyword_filtered', pre.reason); continue; }
       const { data: existing } = await supabase
         .from('deals')
         .select('id')
@@ -229,7 +204,7 @@ export async function GET(request: NextRequest) {
           royalty_low_pct: deal.royalty_low_pct,
           royalty_high_pct: deal.royalty_high_pct,
           total_deal_value_usd: deal.total_deal_value_usd,
-                    announced_date: hit._source?.file_date || new Date().toISOString().split('T')[0],
+                    announced_date: doc.filingDate || new Date().toISOString().split('T')[0],
           terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
           confidence_score: deal.confidence_score,
           extraction_notes: deal.extraction_notes,

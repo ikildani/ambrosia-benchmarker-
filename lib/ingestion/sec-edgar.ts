@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
+import { secThrottle, SEC_USER_AGENT, eftsSearch } from './edgar-fts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { validateExtractedDeal, extractAuditExcerpt, normalizeRoyaltyPct } from './deal-extraction-validator';
 
@@ -447,71 +448,39 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
 
   for (const term of DEAL_SEARCH_TERMS) {
     try {
-      const params = new URLSearchParams({
-        q: term,
-        dateRange: 'custom',
-        startdt: formatDate(startDate),
-        enddt: formatDate(endDate),
-        forms: '8-K,8-K/A,6-K',
-        from: '0',
-        size: '100',
-      });
-
-      const searchUrl = `${SEC_FULL_TEXT_SEARCH}?${params}`;
-      console.log(`[sec-edgar] Searching: ${searchUrl.substring(0, 200)}`);
-
-      const response = await fetchWithTimeout(searchUrl, {
-        headers: {
-          'User-Agent': 'Solidus research@ambrosiaventures.co',
-          'Accept': 'application/json',
-        },
-        timeoutMs: 20_000,
-        retries: 1,
-      });
-
-      if (!response.ok) {
-        const body = await response.text().catch(() => '');
-        console.error(`[sec-edgar] Search failed for "${term}": HTTP ${response.status} — ${body.substring(0, 300)}`);
+      // One EFTS request per form, merged by accession (a comma-separated
+      // `forms` list silently returns a small fraction of the hits).
+      const page = await eftsSearch({ q: term, startdt: formatDate(startDate), enddt: formatDate(endDate), from: 0, size: 100 });
+      if (page.status !== 200) {
+        console.warn(`[sec-edgar] EFTS ${page.status} for ${term}`);
         continue;
       }
-
-      const data = await response.json();
-      const hitCount = data.hits?.hits?.length ?? 0;
-      const totalHits = data.hits?.total?.value ?? data.hits?.total ?? 'unknown';
-      console.log(`[sec-edgar] "${term}": ${hitCount} hits returned (total: ${totalHits}), response keys: ${Object.keys(data).join(',')}`);
-
-      if (data.hits?.hits) {
-        for (const hit of data.hits.hits) {
-          const filing = parseEftsHit(hit);
-          if (!filing) {
-            console.warn(`[sec-edgar] unparseable EFTS hit id=${String((hit as { _id?: string })?._id ?? 'unknown')}`);
-            continue;
-          }
-          if (seenAccessions.has(filing.accessionNumber)) continue;
-          seenAccessions.add(filing.accessionNumber);
-          allFilings.push(filing);
+      for (const hit of page.hits) {
+        const filing = parseEftsHit(hit);
+        if (!filing) {
+          console.warn(`[sec-edgar] unparseable EFTS hit id=${String((hit as { _id?: string })?._id ?? 'unknown')}`);
+          continue;
         }
+        if (seenAccessions.has(filing.accessionNumber)) continue;
+        seenAccessions.add(filing.accessionNumber);
+        allFilings.push(filing);
       }
-
-      // Rate limiting - be respectful to SEC servers
-      await sleep(200);
     } catch (error) {
-      console.error(`SEC search error for "${term}":`, error);
+      console.error(`[sec-edgar] search failed for ${term}:`, error);
     }
   }
-
   return allFilings;
 }
 
 export async function fetchFilingContent(url: string): Promise<string> {
-  const response = await fetchWithTimeout(url, {
+  const response = await secThrottle(() => fetchWithTimeout(url, {
     headers: {
-      'User-Agent': 'Solidus research@ambrosiaventures.co',
+      'User-Agent': SEC_USER_AGENT,
       'Accept': 'text/html,application/xhtml+xml',
     },
     timeoutMs: 20_000,
     retries: 1,
-  });
+  }));
 
   if (!response.ok) {
     throw new Error(`Failed to fetch filing: ${response.status}`);
@@ -806,7 +775,8 @@ export async function runDailyIngestion(
         const content = await fetchFilingContent(filing.documentUrl);
         const deal = await extractDealFromFiling(content, anthropicApiKey);
 
-        if (deal && deal.confidence_score >= 85) {
+        // Primary-source filing text: 75 matches edgar-realtime and deal-backfill.
+        if (deal && deal.confidence_score >= 75) {
           // Phase 4 (2026-04-14): shared fabrication validator. Rejects
           // extractions with asset-modality mismatches, placeholder asset
           // codes, or licensor-modality inconsistencies BEFORE DB insert.

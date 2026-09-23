@@ -16,7 +16,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  */
 export const SOURCES_EXPECTING_RECORDS: ReadonlySet<string> = new Set([
   'edgar_realtime', 'press_releases', 'press_releases_cron', 'cron_deal_backfill', 'sec_edgar',
-  'edgar_fts_backfill', 'hkex_announcements', 'hkex_backfill', 'sec_10k_ingest',
+  'edgar_fts_backfill', 'hkex_announcements', 'hkex_backfill', 'sec_10k_ingest', 'deal_verification',
 ]);
 
 export async function logCronRun(

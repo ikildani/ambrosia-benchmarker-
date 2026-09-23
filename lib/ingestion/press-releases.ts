@@ -833,10 +833,23 @@ export async function runPressReleaseIngestion(
 
           // Extract deal using Claude
                     const deal = await extractDealFromArticle(item.title, content, source.name, anthropicApiKey);
+          // Confidence gate (Sep 2026). The old single threshold of 85 dropped
+          // real, article-backed deals at 60-84 on the floor (Orbis → Novo at
+          // 60, Chimagen → GSK at 72, Sironax → Novartis at 65 in one dry run)
+          // and inserted one row in two weeks. Three bands now:
+          //   >= INSERT_CONFIDENCE          insert as pending, verifier confirms
+          //   >= REVIEW_CONFIDENCE          insert as pending with a review note
+          //   below                         drop, counted
+          // Every row still carries the article URL as its citation, and the
+          // verification cron is the gate that promotes to verified.
+          const INSERT_CONFIDENCE = 75;
+          const REVIEW_CONFIDENCE = 60;
+          const gateFloor = articleFetched ? REVIEW_CONFIDENCE : INSERT_CONFIDENCE;
           if (!deal) funnel.count('not_a_deal', articleFetched ? 'article' : 'rss_only', item.title);
-          else if (deal.confidence_score < 85) funnel.count('confidence_gate', deal.confidence_score >= 75 ? '75-84' : 'below-75', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score} ${articleFetched ? 'article' : 'rss_only'}`);
+          else if (deal.confidence_score < gateFloor) funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score} ${articleFetched ? 'article' : 'rss_only'}`);
           else if (!deal.licensor || !deal.licensee) funnel.count('missing_parties', undefined, item.title);
-          if (deal && deal.confidence_score >= 85 && deal.licensor && deal.licensee) {
+          if (deal && deal.confidence_score >= gateFloor && deal.licensor && deal.licensee) {
+            const needsReview = deal.confidence_score < INSERT_CONFIDENCE;
             // Phase 4 (2026-04-14): shared fabrication validator.
             const validation = validateExtractedDeal({
               licensor: deal.licensor,
@@ -951,7 +964,7 @@ export async function runPressReleaseIngestion(
               announced_date: announcedDate,
                             terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
               confidence_score: deal.confidence_score,
-              extraction_notes: `Source: ${source.name}. ${deal.extraction_notes || ''}`.trim(),
+              extraction_notes: `Source: ${source.name}.${needsReview ? ` Confidence ${deal.confidence_score}: needs verifier review.` : ''} ${deal.extraction_notes || ''}`.trim(),
               therapeutic_area: therapeuticArea,
               raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
               },

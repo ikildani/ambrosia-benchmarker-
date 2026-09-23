@@ -431,6 +431,60 @@ export async function notifyIngestionRun(run: {
   );
 }
 
+/**
+ * Deal inflow alert (Sep 2026). Fires when the last 24h added no cited deal
+ * rows, or fewer than the trailing 7-day daily floor. Two weeks of silent
+ * zero-insert runs is what this exists to make impossible.
+ */
+export async function notifyDealInflow(report: {
+  last24h: number;
+  floor7d: number;
+  avg7d: number;
+  bySource24h: Record<string, number>;
+  zeroFetchSources: string[];
+  severity: 'ok' | 'low' | 'zero';
+}): Promise<void> {
+  if (report.severity === 'ok') return;
+  const sourceLines = Object.entries(report.bySource24h).sort((a, b) => b[1] - a[1]).map(([k, v]) => `• ${k}: ${v}`).join('\n') || '• none';
+  const zeroLines = report.zeroFetchSources.length ? report.zeroFetchSources.map(s => `• ${s}`).join('\n') : '• none';
+  await postToSlack(
+    [{
+      color: report.severity === 'zero' ? '#ef4444' : '#f59e0b',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: report.severity === 'zero' ? '🛑 Deal inflow: zero cited rows in 24h' : '⚠️ Deal inflow below 7-day floor', emoji: true } },
+        {
+          type: 'section',
+          fields: [
+            { type: 'mrkdwn', text: `*Last 24h:*\n${report.last24h}` },
+            { type: 'mrkdwn', text: `*7-day floor / avg:*\n${report.floor7d} / ${report.avg7d.toFixed(1)}` },
+          ],
+        },
+        { type: 'section', text: { type: 'mrkdwn', text: `*Inserted by source (24h):*\n${sourceLines}` } },
+        { type: 'section', text: { type: 'mrkdwn', text: `*Sources that fetched 0 (24h):*\n${zeroLines}` } },
+        { type: 'context', elements: [{ type: 'mrkdwn', text: `Check data_ingestion_log.parameters.funnel for the drop stage | ${formatTimestamp()}` }] },
+      ],
+    }],
+    `Deal inflow ${report.severity}: ${report.last24h} cited rows in 24h (floor ${report.floor7d})`,
+  );
+}
+
+/** Weekly coverage-by-year report so the 2017-2022 gap stays visible until it closes. */
+export async function notifyDealCoverage(rows: Array<{ year: number; total: number; cited: number; verified: number }>, deltas: Record<number, number>): Promise<void> {
+  const lines = rows.map(r => `• ${r.year}: ${r.total} rows, ${r.cited} cited, ${r.verified} verified${deltas[r.year] ? ` (+${deltas[r.year]} this week)` : ''}`).join('\n');
+  const gap = rows.filter(r => r.year >= 2017 && r.year <= 2022 && r.cited < 100).map(r => r.year);
+  await postToSlack(
+    [{
+      color: gap.length ? '#f59e0b' : '#14b8a6',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: '📚 Deal corpus coverage by year', emoji: true } },
+        { type: 'section', text: { type: 'mrkdwn', text: lines } },
+        { type: 'context', elements: [{ type: 'mrkdwn', text: gap.length ? `Under 100 cited rows: ${gap.join(', ')}. Historical backfill is working these. | ${formatTimestamp()}` : `Every year 2017+ has 100+ cited rows | ${formatTimestamp()}` }] },
+      ],
+    }],
+    `Deal coverage: ${rows.reduce((s, r) => s + r.cited, 0)} cited rows across ${rows.length} years`,
+  );
+}
+
 export async function notifyCronSkipped(details: {
   cronName: string;
   reason: string;
