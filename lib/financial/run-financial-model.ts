@@ -170,6 +170,11 @@ function buildRNPVInput(
       const baseRate = DEFAULT_DISCOUNT_RATES[inputs.therapeuticArea]?.[inputs.phase];
       return baseRate ? baseRate + (TERRITORY_RISK_PREMIUM[inputs.territory] || 0) : undefined;
     })(),
+    benchmarkUpfront: {
+      low: result.terms.upfront.low,
+      median: result.terms.upfront.median,
+      high: result.terms.upfront.high,
+    },
     benchmarkDealValue: {
       low: result.terms.totalDealValue.low,
       median: result.terms.totalDealValue.median,
@@ -342,7 +347,9 @@ export function runFinancialModel(
   const rnpv = calculateRNPV(rnpvInput);
 
   // Step 3: Monte Carlo simulation (10K iterations, seeded for reproducibility)
-  const monteCarlo = runMonteCarlo({ rnpvInput }, 42);
+  // Recentre the sampler's distribution on the engine's rNPV so both engines
+  // publish the same point estimate (see monte-carlo.ts, recentering).
+  const monteCarlo = runMonteCarlo({ rnpvInput, engineRNPV: rnpv.riskAdjustedNPV }, 42);
 
   // Step 4: FX sensitivity (use peak annual revenue, not lifetime sum)
   const baseRevenue = rnpv.cashFlows.length > 0
@@ -378,7 +385,27 @@ export function runFinancialModel(
   // Step 11: Ensemble Valuation (Tier 3 Item 7) — inverse-variance blend of
   // rNPV + comparable transactions + real options. Surfaces a single headline
   // number that is robust to method-specific bias.
-  const ensemble = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, rnpvInput, undefined, comparablesOverride);
+  // One set of comparable transactions per question. Unless the user curated
+  // a comp set, the ensemble's comparables method is the calculator's own
+  // calibrated deal-term range, so the blended headline and the published
+  // range rest on the same transactions. The static curated list is only a
+  // last resort when no benchmark exists.
+  const benchmarkComparables: ComparablesOverride | null = (() => {
+    const tdv = result.terms?.totalDealValue;
+    const up = result.terms?.upfront;
+    if (!tdv || !(tdv.median > 0) || !up) return null;
+    const n = result.drillDown?.totalDealValue?.baseline?.sampleSize;
+    return {
+      ids: [],
+      upfront: { p25: up.low, median: up.median, p75: up.high },
+      totalValue: { p25: tdv.low, median: tdv.median, p75: tdv.high },
+      // Static baselines carry no sample size; they are themselves built
+      // from many transactions, so they clear the minimum-n rule.
+      n: n != null && n > 0 ? n : 3,
+      source: 'benchmark',
+    };
+  })();
+  const ensemble = calculateEnsembleValuation(rnpv, monteCarlo, realOptions, rnpvInput, undefined, comparablesOverride ?? benchmarkComparables);
 
   // Layer 2: Cross-engine consistency checks — logs to Sentry, never throws.
   try {

@@ -235,6 +235,7 @@ function runTest(test: typeof TESTS[number]): TestResult {
         const mc = runMonteCarlo({
           rnpvInput: test.input,
           iterations: 2000,
+          engineRNPV: rnpv,
         });
         const mcP50 = mc.percentiles.p50;
         details.push(`mcP50=$${mcP50.toFixed(0)}M`);

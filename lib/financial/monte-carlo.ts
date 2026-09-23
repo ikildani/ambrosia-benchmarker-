@@ -531,6 +531,19 @@ function computeSkewness(
  * @returns A MonteCarloResult with percentiles, histogram, confidence
  *          intervals, and driver sensitivity correlations.
  */
+/**
+ * Map a value expressed in the sampler's own (pre-recentring) units onto the
+ * recentred distribution, so envelope and baseline figures stay comparable
+ * with the published percentiles.
+ */
+export function applyRecentering(
+  value: number,
+  recentering: MonteCarloResult['recentering'] | undefined,
+): number {
+  if (!recentering || recentering.method === 'none') return value;
+  return recentering.method === 'scale' ? value * recentering.factor : value + recentering.factor;
+}
+
 export function runMonteCarlo(
   input: MonteCarloInput,
   seed: number = DEFAULT_SEED,
@@ -710,6 +723,33 @@ export function runMonteCarlo(
     npvResults[i] = isFinite(iterResult) ? iterResult : 0;
   }
 
+  // ----- Recentre onto the main engine ----------------------------------
+  // The sampler is a reduced model (own phase durations, revenue curve and
+  // PoS tables) whose deterministic baseline sits 2-3x above the main engine
+  // at every phase. Left alone, its median disagrees with the published rNPV
+  // on every run. When the caller supplies the engine's rNPV, move the
+  // distribution so its median equals that value while keeping the sampler's
+  // dispersion. Scale when the signs agree and the factor is moderate (keeps
+  // the relative spread); otherwise shift additively (safe across zero).
+  const samplerBaselineRaw = computeIterationRNPV(rnpv, basePoS, basePeakSales, baseRate, 0, 1.0);
+  const samplerP50Raw = percentile(Array.from(npvResults).sort((a, b) => a - b), 50);
+  const engineRNPV = Number.isFinite(input.engineRNPV as number) ? (input.engineRNPV as number) : null;
+  let recentering: NonNullable<MonteCarloResult['recentering']> = {
+    method: 'none', factor: 1, samplerBaseline: samplerBaselineRaw, samplerP50: samplerP50Raw, engineRNPV,
+  };
+  if (engineRNPV !== null) {
+    const sameSign = engineRNPV * samplerP50Raw > 0;
+    const scaleFactor = sameSign ? engineRNPV / samplerP50Raw : NaN;
+    if (sameSign && Math.abs(samplerP50Raw) > 5 && scaleFactor >= 0.05 && scaleFactor <= 20) {
+      for (let i = 0; i < iterations; i++) npvResults[i] *= scaleFactor;
+      recentering = { ...recentering, method: 'scale', factor: scaleFactor };
+    } else {
+      const delta = engineRNPV - samplerP50Raw;
+      for (let i = 0; i < iterations; i++) npvResults[i] += delta;
+      recentering = { ...recentering, method: 'shift', factor: delta };
+    }
+  }
+
   // ----- Sort and compute statistics ------------------------------------
 
   const sorted = new Float64Array(npvResults);
@@ -850,6 +890,20 @@ export function runMonteCarlo(
 
   // ----- Assemble result ------------------------------------------------
 
+  // Deterministic scenario envelope of the sampler's own model. Each scenario
+  // is evaluated at its shifted inputs with no noise; the noisy mixture's P50
+  // must land between the bear and bull evaluations.
+  const samplerEnvelope = (): { bear: number; base: number; bull: number } => {
+    const evalScenario = (name: string): number => {
+      const sc = phaseConfigs.find(c => c.name === name) ?? phaseConfigs[0];
+      const pos = Math.max(0.001, Math.min(0.999, basePoS * (1 + sc.posShiftFraction)));
+      const peak = basePeakSales * (1 + sc.peakSalesMultiplier);
+      const rate = Math.max(0.01, baseRate + sc.discountRateShift);
+      return r1(computeIterationRNPV(rnpv, pos, peak, rate, sc.timelineShift, 1.0));
+    };
+    return { bear: evalScenario('bear'), base: evalScenario('base'), bull: evalScenario('bull') };
+  };
+
   const mcResult: MonteCarloResult = {
     iterations,
 
@@ -870,6 +924,17 @@ export function runMonteCarlo(
 
     confidenceInterval95: { low: p2_5, high: p97_5 },
     confidenceInterval80: { low: p10, high: p90 },
+    // Same reduced model at base inputs, no scenario shift, no noise: the
+    // reference the P50 consistency check is measured against.
+    samplerBaseline: r1(samplerBaselineRaw),
+    samplerEnvelope: samplerEnvelope(),
+    recentering: {
+      method: recentering.method,
+      factor: Math.round(recentering.factor * 10000) / 10000,
+      samplerBaseline: r1(recentering.samplerBaseline),
+      samplerP50: r1(recentering.samplerP50),
+      engineRNPV: recentering.engineRNPV == null ? null : r1(recentering.engineRNPV),
+    },
 
     probabilityOfPositiveNPV,
 

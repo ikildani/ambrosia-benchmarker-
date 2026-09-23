@@ -491,7 +491,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
 
       try {
         const rnpvResult = calculateRNPV(rnpvInput);
-        const mcResult = runMonteCarlo({ rnpvInput, iterations: 10_000 });
+        const mcResult = runMonteCarlo({ rnpvInput, iterations: 10_000, engineRNPV: rnpvResult.riskAdjustedNPV });
 
         return {
           content: [{
@@ -1320,7 +1320,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
 
       try {
         const baseResult = calculateRNPV(rnpvInput);
-        const mcResult = runMonteCarlo({ rnpvInput, iterations: 5_000 });
+        const mcResult = runMonteCarlo({ rnpvInput, iterations: 5_000, engineRNPV: baseResult.riskAdjustedNPV });
         const realOptions = calculateRealOptions(rnpvInput, baseResult, {
           percentiles: { p10: mcResult.percentiles.p10, p90: mcResult.percentiles.p90 },
         });

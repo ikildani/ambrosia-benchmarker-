@@ -205,6 +205,12 @@ export interface RNPVInput {
    * comparing the two methodologies and explaining any divergence.
    */
   benchmarkDealValue?: { low: number; median: number; high: number };
+  /**
+   * Comp-engine upfront range for the same program. Before Phase 2 the rNPV
+   * method returns near-zero or negative value by construction, so the engine
+   * floors its implied upfront at this observed market low.
+   */
+  benchmarkUpfront?: { low: number; median: number; high: number };
 
   /**
    * Additional years added to (or subtracted from) time-to-market.
@@ -887,6 +893,15 @@ export interface MonteCarloInput {
    * Default 0.15 means pricing sampled +/- 15% of base.
    */
   pricingVariation?: number;
+
+  /**
+   * Main engine risk-adjusted NPV ($M). When supplied, the sampled
+   * distribution is recentred so its median equals this value (scaled when
+   * signs agree and the factor is moderate, otherwise shifted additively).
+   * The sampler is a reduced model whose own baseline sits 2-3x above the
+   * main engine; without recentring the two disagree on every run.
+   */
+  engineRNPV?: number;
 }
 
 /**
@@ -933,6 +948,32 @@ export interface MonteCarloResult {
 
   /** 80% confidence interval [P10, P90] */
   confidenceInterval80: { low: number; high: number };
+  /**
+   * Deterministic run of the sampler's own simplified NPV at base inputs
+   * (no scenario shift, no noise). The consistency check compares P50 to
+   * this, not to the main engine, because the sampler is a reduced model.
+   */
+  samplerBaseline?: number;
+  /**
+   * Deterministic evaluation of the sampler's model at each scenario's
+   * shifted inputs (no noise). P50 of the noisy mixture must fall inside the
+   * bear..bull envelope; a P50 outside it indicates a sampling fault.
+   */
+  samplerEnvelope?: { bear: number; base: number; bull: number };
+  /**
+   * How the distribution was recentred onto the main engine. `samplerP50`
+   * is the sampler's own median before recentring; afterwards the published
+   * P50 equals `engineRNPV` to rounding. `method` is 'none' when no
+   * engineRNPV was supplied. `factor` is a multiplier for 'scale' and an
+   * additive delta ($M) for 'shift'.
+   */
+  recentering?: {
+    method: 'scale' | 'shift' | 'none';
+    factor: number;
+    samplerBaseline: number;
+    samplerP50: number;
+    engineRNPV: number | null;
+  };
 
   /** Fraction of iterations yielding a positive NPV (0-1) */
   probabilityOfPositiveNPV: number;
@@ -1560,6 +1601,13 @@ export interface EnsembleResult {
   agreement: 'tight' | 'moderate' | 'wide';
   /** True when at least one method had to fall back (sparse comps, etc.) */
   fallbackUsed: boolean;
+  /**
+   * True before Phase 2 when a comp set exists: the rNPV and real-options
+   * variances are floored at 4x the comparables variance so comparable
+   * transactions carry at least two thirds of the blend. See
+   * ensemble-valuation.ts, step 2b.
+   */
+  earlyPhasePrior?: boolean;
   /** Plain-English summary of the blend and any caveats */
   narrative: string;
 }

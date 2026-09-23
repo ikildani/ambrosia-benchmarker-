@@ -432,6 +432,17 @@ function phaseIndex(phase: string): number {
  * The model projects cash flows from current phase through patent expiry,
  * applies phase-specific PoS discounting, and calculates implied deal terms.
  */
+/** Raise every bound of a range to at least `floor`, preserving low ≤ median ≤ high. */
+function floorRange(
+  r: { low: number; median: number; high: number },
+  floor: number,
+): { low: number; median: number; high: number } {
+  const low = Math.max(r.low, floor);
+  const median = Math.max(r.median, low);
+  const high = Math.max(r.high, median);
+  return { low, median, high };
+}
+
 export function calculateRNPV(input: RNPVInput): RNPVResult {
   // --- Input guards ---
   const VALID_PHASES = ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'nda_filed', 'approved'];
@@ -455,6 +466,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     dataQuality,
     regulatoryDesignations,
     benchmarkDealValue,
+    benchmarkUpfront,
   } = input;
   const dealType = input.dealType || 'licensing';
   const phase = guardedPhase as typeof input.phase;
@@ -1128,15 +1140,17 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     // fails early, the cost-share benefit is only partially realized.
     const expectedSavings = sharedRDSavings * Math.max(cumulativePoS, 0.25);
 
-    // Codev totalDeal: use |rNPV| × phase ratio + expected cost-share savings.
-    // Using the absolute value preserves a sensible headline number for
-    // negative-rNPV early-stage assets (where the cost-share benefit itself
-    // can exceed the standalone rNPV).
+    // Codev totalDeal: max(rNPV, 0) × phase ratio + expected cost-share savings.
+    // Negative rNPV contributes nothing (not its absolute value): with |rNPV|
+    // a bear case with a more negative rNPV produced a LARGER headline than
+    // base and tripped scenario.bear_deal_above_base. The cost-share savings
+    // term alone carries the headline for negative-rNPV early-stage assets.
     // Use calibratedRNPV so TA/modality/phase×dealtype multipliers flow into
     // the codev headline (R42 engine migration — parity with licensing path).
-    const codevBaseLow = Math.abs(calibratedRNPV) * phaseTotalDealLow;
-    const codevBaseMedian = Math.abs(calibratedRNPV) * phaseTotalDealMedian;
-    const codevBaseHigh = Math.abs(calibratedRNPV) * phaseTotalDealHigh;
+    const codevBase = Math.max(calibratedRNPV, 0);
+    const codevBaseLow = codevBase * phaseTotalDealLow;
+    const codevBaseMedian = codevBase * phaseTotalDealMedian;
+    const codevBaseHigh = codevBase * phaseTotalDealHigh;
     impliedDealValue.totalDeal = {
       low: codevBaseLow + expectedSavings * 0.85,
       median: codevBaseMedian + expectedSavings,
@@ -1161,12 +1175,11 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     // Option deals pay a small upfront + a contingent exercise fee. We model
     // the exercise fee as a probability-weighted expected value.
     //
-    // Default fee: 10% of |rNPV| (approximates 1× the option upfront). The
-    // |·| keeps the fee non-zero even for early-stage assets with negative
-    // risk-adjusted NPV — the fee is a contractual obligation that doesn't
-    // depend on the licensor's balance sheet, so collapsing it to zero when
-    // rNPV is negative would understate the deal's headline value.
-    const defaultFee = Math.abs(calibratedRNPV) * 0.10;
+    // Default fee: 10% of max(rNPV, 0) with a $5M contractual minimum. The
+    // minimum keeps the fee non-zero for negative-rNPV early-stage assets
+    // without using |rNPV|, which made the fee grow as rNPV got worse.
+    const MIN_OPTION_FEE_M = 5;
+    const defaultFee = Math.max(Math.max(calibratedRNPV, 0) * 0.10, MIN_OPTION_FEE_M);
     const exerciseFee = input.optionExerciseFee != null && input.optionExerciseFee >= 0
       ? input.optionExerciseFee
       : defaultFee;
@@ -1336,6 +1349,53 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     impliedDealValue.upfront.high,
     impliedDealValue.totalDeal.high,
   );
+
+  // Early-phase market floor + non-negative clamp (Sep 2026 invariant review).
+  // Before Phase 2 the rNPV method returns near-zero or negative value by
+  // construction (cumulative PoS 2-9%, 9-14 years to market), while real deals
+  // at those stages price optionality: the comp engine showed a $382M median
+  // upfront for a Phase 1 gastric ADC against an rNPV-implied $5M, and a
+  // NEGATIVE implied upfront for a preclinical CNS small molecule. Mirror the
+  // Phase 2 option floor above: never publish an implied upfront below the
+  // observed comp low (or a conservative phase minimum when no comps are
+  // supplied), and never publish a negative deal value at any phase.
+  const EARLY_UPFRONT_FLOOR_M: Record<string, number> = {
+    discovery: 5,
+    preclinical: 10,
+    phase1: 25,
+    phase1_2: 40,
+  };
+  const earlyFloor = EARLY_UPFRONT_FLOOR_M[phase];
+  if (earlyFloor != null) {
+    const bench = benchmarkUpfront && benchmarkUpfront.low > 0 ? benchmarkUpfront : null;
+    const upFloor = Math.max(earlyFloor, bench?.low ?? 0);
+    if (impliedDealValue.upfront.median >= upFloor) {
+      // Floor binds on the low bound at most: keep the method's own shape.
+      impliedDealValue.upfront = floorRange(impliedDealValue.upfront, upFloor);
+      impliedDealValue.totalDeal = floorRange(impliedDealValue.totalDeal, upFloor);
+    } else if (bench && benchmarkDealValue && benchmarkDealValue.low > 0) {
+      // Floor binds on the median: the rNPV method has no signal at this
+      // phase, so defer to the comp engine's observed range for both upfront
+      // and total rather than publishing a flat "$182M to $182M".
+      impliedDealValue.upfront = { low: bench.low, median: bench.median, high: bench.high };
+      impliedDealValue.totalDeal = {
+        low: Math.max(benchmarkDealValue.low, bench.low),
+        median: Math.max(benchmarkDealValue.median, bench.median),
+        high: Math.max(benchmarkDealValue.high, bench.high),
+      };
+    } else {
+      // No comps supplied: conservative spread around the phase minimum.
+      impliedDealValue.upfront = { low: upFloor, median: upFloor * 1.5, high: upFloor * 2.2 };
+      impliedDealValue.totalDeal = floorRange(impliedDealValue.totalDeal, upFloor);
+      impliedDealValue.totalDeal = {
+        low: Math.max(impliedDealValue.totalDeal.low, impliedDealValue.upfront.low),
+        median: Math.max(impliedDealValue.totalDeal.median, impliedDealValue.upfront.median),
+        high: Math.max(impliedDealValue.totalDeal.high, impliedDealValue.upfront.high),
+      };
+    }
+  }
+  impliedDealValue.totalDeal = floorRange(impliedDealValue.totalDeal, 0);
+  impliedDealValue.upfront = floorRange(impliedDealValue.upfront, 0);
 
   // 10. Cross-validation with benchmark-based deal value
   // Use phase-dependent deal-to-rNPV ratio for more accurate comparison.
