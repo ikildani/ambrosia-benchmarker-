@@ -217,3 +217,69 @@ export function getTAColors(ta: string): { primary: string; light: string; label
       return { primary: COLORS.teal, light: COLORS.tealLight, label: ta };
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Brief v3 format helpers — every Brief page uses these so the document reads
+// as one system: same title, same section head, same source line, same empty
+// state. Do not hand-roll these in page files.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Report title printed in every page header. */
+export const BRIEF_TITLE = 'Deal Intelligence Brief';
+
+/** Large section head with the one-line question the page answers. */
+export function sectionHead(title: string, question: string): string {
+  return `
+    <div class="section-title-lg" style="margin-bottom: 6px;">${escapeHtml(title)}</div>
+    <div style="font-size: 10px; color: ${COLORS.gray500}; margin: 0 0 14px 16px; font-style: italic;">${escapeHtml(question)}</div>
+  `;
+}
+
+/** Source line under a chart or table: "Source · n · as of". */
+export function chartSource(note: { source: string; n: number; asOf: string; note?: string }): string {
+  const asOf = formatShortDate(new Date(note.asOf));
+  return `
+    <div style="font-size: 7.5px; color: ${COLORS.gray400}; margin-top: 6px; letter-spacing: 0.02em;">
+      Source: ${escapeHtml(note.source)} &middot; n = ${note.n.toLocaleString()} &middot; as of ${asOf}${note.note ? ` &middot; ${escapeHtml(note.note)}` : ''}
+    </div>
+  `;
+}
+
+/** Honest empty state when a section has no data. Never render placeholder numbers. */
+export function emptyState(title: string, message: string): string {
+  return `
+    <div class="card" style="text-align: center; padding: 28px 20px; border-style: dashed;">
+      <div style="font-size: 11px; font-weight: 700; color: ${COLORS.gray500}; margin-bottom: 4px;">${escapeHtml(title)}</div>
+      <div style="font-size: 9.5px; color: ${COLORS.gray400}; line-height: 1.5;">${escapeHtml(message)}</div>
+    </div>
+  `;
+}
+
+/** Compact $M formatter for chart labels: 12 → "$12M", 1400 → "$1.4B", null → "—". */
+export function fmtM(value: number | null | undefined, digits = 0): string {
+  if (value == null || !Number.isFinite(value)) return '—';
+  if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}B`;
+  return `$${value.toFixed(digits)}M`;
+}
+
+/** Percent formatter for shares: 0.42 → "42%". */
+export function fmtShare(share: number | null | undefined, digits = 0): string {
+  if (share == null || !Number.isFinite(share)) return '—';
+  return `${(share * 100).toFixed(digits)}%`;
+}
+
+/** Small uppercase label used above KPI values and table groups. */
+export function microLabel(text: string): string {
+  return `<div style="font-size: 7px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: ${COLORS.gray400}; margin-bottom: 3px;">${escapeHtml(text)}</div>`;
+}
+
+/** Phase label lookup tolerant of deals-table keys (phase_1) and calc keys (phase1). */
+export function phaseLabelAny(phase: string | null | undefined): string {
+  if (!phase) return 'Unknown';
+  const k = phase.replace(/_/g, '').toLowerCase();
+  const map: Record<string, string> = {
+    discovery: 'Discovery', preclinical: 'Preclinical', phase1: 'Phase 1', phase12: 'Phase 1/2',
+    phase2: 'Phase 2', phase23: 'Phase 2/3', phase3: 'Phase 3', approved: 'Approved', nda: 'NDA/BLA', unknown: 'Unknown',
+  };
+  return map[k] ?? phase;
+}
