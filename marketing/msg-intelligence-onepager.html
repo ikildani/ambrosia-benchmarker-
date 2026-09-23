@@ -1,4 +1,4 @@
-<title>Ambrosia Intelligence for MSG</title>
+<title>Ambrosia × MSG Partnerships</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -269,6 +269,43 @@
     body { padding: 0; background: #fff; }
     .sheet { box-shadow: none; max-width: none; width: calc(8.5in / .9); height: calc(11in / .9); zoom: .9; overflow: hidden; }
   }
+
+  /* Spend clock */
+  .clock { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+  .clock::before {
+    content: ""; position: absolute; left: 10%; right: 10%; top: 29px; height: 1.5px; background: var(--rule);
+  }
+  .tick { display: grid; align-content: start; justify-items: center; text-align: center; gap: 5px; padding: 0 8px; position: relative; }
+  .tick .when { font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); height: 12px; }
+  .tick .dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--teal); background: var(--sheet); position: relative; z-index: 1; margin-top: 2px; }
+  .tick h3 { font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+  .tick p { font-size: 10px; line-height: 1.4; color: var(--ink-2); }
+  .tick .src { font-family: var(--mono); font-size: 8.5px; color: var(--lav); letter-spacing: .02em; }
+  .tick.peak .dot { background: var(--teal); box-shadow: 0 0 0 4px var(--teal-wash); }
+  .tick.peak .when { color: var(--teal-ink); font-weight: 500; }
+  .clock-note { margin-top: 10px; font-size: 10.5px; color: var(--ink-2); text-align: center; }
+  .clock-note b { color: var(--ink); font-weight: 600; }
+  .options { display: grid; gap: 0; border: 1px solid var(--rule); }
+  .opt { display: grid; grid-template-columns: 48px 1fr; gap: 10px; padding: 8px 10px; }
+  .opt + .opt { border-top: 1px solid var(--rule); }
+  .opt .tag { font-family: var(--mono); font-size: 9px; color: var(--teal-ink); letter-spacing: .06em; padding-top: 1px; }
+  .opt h3 { font-size: 11px; font-weight: 600; }
+  .opt p { font-size: 10px; color: var(--ink-2); line-height: 1.4; }
+  .next { background: var(--lav-wash); padding: 9px 12px; font-size: 10.5px; color: var(--ink-2); margin-top: 8px; }
+  .next b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 760px) {
+    .clock { grid-template-columns: 1fr; gap: 12px; }
+    .clock::before { left: 6px; right: auto; top: 8px; bottom: 8px; width: 1.5px; height: auto; }
+    .tick { grid-template-columns: 14px 1fr; justify-items: start; text-align: left; column-gap: 12px; row-gap: 2px; padding: 0; }
+    .tick .dot { grid-row: 1 / span 4; grid-column: 1; margin-top: 0; }
+    .tick > :not(.dot) { grid-column: 2; }
+    .tick .when { height: auto; }
+    .clock-note { text-align: left; }
+    .opt { grid-template-columns: 1fr; gap: 2px; }
+    .stat:last-child { grid-column: 1 / -1; border-left: 0 !important; padding-left: 0 !important; }
+    .sh { flex-wrap: wrap; }
+    .sh .label { margin-left: 0; }
+  }
 </style>
 
 <article class="sheet">
@@ -280,102 +317,85 @@
       </svg>
       <div>
         <div class="brand-name">Ambrosia Ventures</div>
-        <div class="brand-sub">Intelligence Platform</div>
+        <div class="brand-sub">Life-Sciences Intelligence</div>
       </div>
     </div>
     <div class="prepared">
-      <span class="label">Prepared for</span>
-      <strong>Madison Square Garden Sports · New York Knicks</strong>
-      <span>Discussion draft · September 2026</span>
+      <span class="label">Partnership proposal for</span>
+      <strong>Princess Agra · VP, Global Partnerships</strong>
+      <span>Madison Square Garden Entertainment · September 2026</span>
     </div>
   </header>
 
   <section class="hero">
-    <h1>We value <em>uncertain assets</em> for a living.</h1>
-    <p class="dek">Ambrosia runs a proprietary intelligence platform that prices biopharma deals: contracts whose worth depends on performance, health and time. It reads primary filings every day, verifies every figure, and returns a <b>risk-adjusted value range</b> in under 30 seconds. A front office faces the same problem each time it signs, trades or extends a player.</p>
+    <h1>Know which healthcare brands are <em>about to spend.</em></h1>
+    <p class="dek">Pharma and biotech companies are some of the largest brand marketers in America, and their budgets move on a clock you can read in advance: a trial result, an FDA decision, a launch, a new deal. Ambrosia tracks that clock every day from primary sources. We propose putting it to work behind <b>MSG's healthcare and life-sciences partnership category</b>, so your team reaches the right brand in the months before the budget is set.</p>
   </section>
 
   <section class="stats" aria-label="Platform at a glance">
-    <div class="stat"><div class="v num">1,400<small>+</small></div><div class="k">source-verified licensing and M&amp;A transactions, 2017 to today</div></div>
-    <div class="stat"><div class="v num">24</div><div class="k">valuation and decision engines, each linked to cited data</div></div>
-    <div class="stat"><div class="v num">10,000</div><div class="k">correlated Monte Carlo paths behind every valuation</div></div>
-    <div class="stat"><div class="v num">83</div><div class="k">counterparty profiles that model each buyer's willingness to pay</div></div>
-    <div class="stat"><div class="v num">&lt;30<small>s</small></div><div class="k">from question to a sourced, board-ready memo</div></div>
+    <div class="stat"><div class="v num">700<small>+</small></div><div class="k">life-science companies profiled and tracked</div></div>
+    <div class="stat"><div class="v num">1,400<small>+</small></div><div class="k">source-verified licensing and M&amp;A deals since 2017</div></div>
+    <div class="stat"><div class="v num">562</div><div class="k">diseases and conditions mapped to their companies</div></div>
+    <div class="stat"><div class="v num">12</div><div class="k">therapeutic areas, from oncology to women's health</div></div>
+    <div class="stat"><div class="v">Daily</div><div class="k">refresh from SEC, FDA, ClinicalTrials.gov and wires</div></div>
   </section>
 
-  <div class="body-grid">
-    <section>
-      <div class="sh"><h2>How the platform thinks</h2></div>
-      <ol class="pipe">
-        <li><div><h3>Ingest <span>· daily</span></h3><p>SEC EDGAR full text since 2017, Hong Kong exchange filings, press wires, FDA and ClinicalTrials.gov.</p></div></li>
-        <li><div><h3>Verify <span>· cite or exclude</span></h3><p>Every term is scored and linked to its filing. Anything below 75/100 confidence stays out of the models.</p></div></li>
-        <li><div><h3>Model <span>· 24 engines</span></h3><p>Risk-adjusted NPV, comparable scoring, buyer premiums and live macro rates, run under correlated uncertainty.</p></div></li>
-        <li><div><h3>Decide <span>· ranges, not points</span></h3><p>A memo with a value band, its comparables and the assumptions that move it most.</p></div></li>
-        <li><div><h3>Learn <span>· weekly backtest</span></h3><p>Estimates are scored against real outcomes, including 164 approved-drug trajectories, then recalibrated.</p></div></li>
-      </ol>
-    </section>
-
-    <section>
-      <div class="sh"><h2>Same problem, different roster</h2></div>
-      <div class="xlate-wrap">
-        <table class="xlate">
-          <thead><tr><th>What we price today</th><th></th><th>What it maps to at MSG</th></tr></thead>
-          <tbody>
-            <tr><td>Licensing terms: upfront, milestones, royalty tiers</td><td class="arrow">→</td><td>Guaranteed money, incentives, player and team options</td></tr>
-            <tr><td>Probability of success by phase, <code>PoS</code></td><td class="arrow">→</td><td>Availability and aging curves by position and role</td></tr>
-            <tr><td>Risk-adjusted asset value, <code>rNPV</code></td><td class="arrow">→</td><td>Risk-adjusted contract value across every season of the deal</td></tr>
-            <tr><td>Buyer-specific premiums across 83 pharma profiles</td><td class="arrow">→</td><td>Each rival team's cap room, needs and bidding behavior</td></tr>
-            <tr><td>Scored comparable transactions</td><td class="arrow">→</td><td>Scored comparable contracts and trades</td></tr>
-            <tr><td>Clinical pipeline and FDA surveillance</td><td class="arrow">→</td><td>Sports-medicine and recovery science radar</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
+  <section>
+    <div class="sh"><h2>The healthcare spend clock</h2><span class="label">What we see, and when</span></div>
+    <div class="clock">
+      <div class="tick"><span class="when">Early signal</span><span class="dot"></span><h3>Trial readout</h3><p>Late-stage results show a drug is headed to market.</p><span class="src">ClinicalTrials.gov · wires</span></div>
+      <div class="tick"><span class="when">Date set</span><span class="dot"></span><h3>FDA decision date</h3><p>The approval date is known, so launch timing is too.</p><span class="src">PDUFA dates · FDA calendar</span></div>
+      <div class="tick"><span class="when">Cash in</span><span class="dot"></span><h3>Deal or financing</h3><p>A licensing upfront or raise puts new money on the books.</p><span class="src">SEC 8-K · press releases</span></div>
+      <div class="tick peak"><span class="when">Budget moves</span><span class="dot"></span><h3>Launch</h3><p>Brand building ramps up to reach patients and doctors.</p><span class="src">FDA approvals · forecasts</span></div>
+      <div class="tick"><span class="when">Watch</span><span class="dot"></span><h3>Shift or cliff</h3><p>Mergers, patent expiries and setbacks move budgets.</p><span class="src">SEC filings · deal database</span></div>
+    </div>
+    <p class="clock-note">Most partnership teams learn about a launch when the campaign breaks. <b>We see it at the first step.</b></p>
+  </section>
 
   <section>
-    <div class="sh"><h2>Where we would start</h2><span class="label">Three partnership tracks</span></div>
+    <div class="sh"><h2>What MSG's partnerships team gets</h2><span class="label">Find · Win · Keep</span></div>
     <div class="plays">
       <div class="play">
-        <span class="who">Front office</span>
-        <h3>Contract and trade valuation</h3>
-        <p>Point our valuation engine at player contracts: a value range, the comparables behind it, and how rival teams are likely to bid.</p>
-        <p class="out"><b>Output:</b> a pre-negotiation memo for every major contract decision.</p>
+        <span class="who">Find</span>
+        <h3>Category radar</h3>
+        <p>A monthly ranked list of pharma, biotech, medtech and health-system brands entering a spending window, with a focus on consumer-facing conditions that suit a New York audience.</p>
+        <p class="out"><b>Output:</b> ranked targets, the event behind each one, and who decides.</p>
       </div>
       <div class="play">
-        <span class="who">Medical &amp; performance</span>
-        <h3>Athlete health intelligence</h3>
-        <p>Our home domain. We track trials, FDA clearances and new therapies in orthopedics, concussion and recovery, and flag what reaches the clinic next.</p>
-        <p class="out"><b>Output:</b> a monthly evidence-graded brief for team physicians.</p>
+        <span class="who">Win</span>
+        <h3>Pitch intelligence</h3>
+        <p>Before each meeting, a brief on the brand: launch timing, competitors, forecast sales, the patients it wants to reach, and why an MSG partnership fits now.</p>
+        <p class="out"><b>Output:</b> a one-page brief in your seller's hands before the call.</p>
       </div>
       <div class="play">
-        <span class="who">Business &amp; partnerships</span>
-        <h3>Health-sector partner strategy</h3>
-        <p>Map 700+ life-science companies by spend, launches and strategy to find the right pharma, health-system and medtech partners.</p>
-        <p class="out"><b>Output:</b> a ranked partner shortlist with deal-term guidance.</p>
+        <span class="who">Keep</span>
+        <h3>Portfolio watch</h3>
+        <p>Alerts on current health and wellness partners when a merger, patent expiry, trial result or restructuring is likely to change their budget.</p>
+        <p class="out"><b>Output:</b> early warning on renewals and openings to upsell.</p>
       </div>
     </div>
   </section>
 
   <div class="bottom">
     <section>
-      <div class="sh"><h2>Standards we hold</h2></div>
+      <div class="sh"><h2>Why Ambrosia</h2></div>
       <ul class="standards">
-        <li><div><b>Every number traces to a source.</b> Each deal term is stored with the filing or record it came from.</div></li>
-        <li><div><b>We publish our error.</b> Backtest accuracy is shown on a live page, including where the models miss.</div></li>
-        <li><div><b>Enterprise controls from day one.</b> Single sign-on, full audit logging and scoped API keys for every user.</div></li>
+        <li><div><b>We read the primary sources.</b> SEC filings, FDA records and trial registries, verified and cited, rather than recycled news.</div></li>
+        <li><div><b>We know how pharma buys.</b> Our advisory practice works directly with business development teams at pharma and biotech companies.</div></li>
+        <li><div><b>We forecast, then check ourselves.</b> Launch and sales models are scored against real outcomes and recalibrated.</div></li>
       </ul>
     </section>
     <section>
-      <div class="sh"><h2>Proposed 90-day pilot</h2></div>
-      <div class="pilot">
-        <div class="phase"><span class="wk num">Weeks 1–3</span><h3>Scope</h3><p>Choose one live decision. Agree the data, the owners and the success test.</p></div>
-        <div class="phase"><span class="wk num">Weeks 4–8</span><h3>Build</h3><p>Stand up the models on MSG's question, with weekly working sessions.</p></div>
-        <div class="phase"><span class="wk num">Weeks 9–12</span><h3>Prove</h3><p>Backtest against past decisions, then present a readout and a go or no-go.</p></div>
+      <div class="sh"><h2>How we could work together</h2></div>
+      <div class="options">
+        <div class="opt"><span class="tag">Start</span><div><h3>90-day pilot</h3><p>One category radar and five target briefs, measured on meetings booked.</p></div></div>
+        <div class="opt"><span class="tag">Scale</span><div><h3>Intelligence partner</h3><p>Monthly radar, portfolio alerts and briefs on request for the full team.</p></div></div>
+        <div class="opt"><span class="tag">Grow</span><div><h3>Category builder</h3><p>Life-sciences executive events at MSG venues that bring new brands into the category.</p></div></div>
       </div>
-      <p class="pilot-note">Structure is a starting point for discussion and will be shaped with your team.</p>
     </section>
   </div>
+
+  <p class="next"><b>Proposed next step:</b> a 30-minute working session to pick the first category, agree on how we measure the pilot, and walk through a live radar.</p>
 
   <footer class="foot">
     <div class="who"><b>Issa Kildani</b> <span>· Ambrosia Ventures · New York &amp; Detroit</span></div>
