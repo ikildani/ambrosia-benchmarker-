@@ -127,6 +127,34 @@ const TA_DISCOVERY_QUERIES: Record<string, string[]> = {
   ],
 };
 
+/** Why a discovered candidate did not become a row. Logged per run so a
+ * zero-insert run can be read without console access. */
+export interface DiscoverySkips {
+  missing_fields: number;
+  low_confidence: number;
+  validation_rejected: number;
+  duplicate: number;
+  insert_error: number;
+}
+
+/**
+ * Rewrite a discovery query so it asks for recent deals instead of the fixed
+ * year ranges baked into TA_DISCOVERY_QUERIES. Those ranges ("2022-2025",
+ * "2024-2026") made Perplexity return the well-known deals of each era, all
+ * of which are already in the table, so every candidate died as a duplicate.
+ */
+export function withRecencyWindow(query: string, sinceIso: string, days: number): string {
+  const stripped = query
+    // "2022-2025", "2023 to 2026", "2024–2026"
+    .replace(/\b20\d{2}\s*(?:-|–|to)\s*20\d{2}\b/g, '')
+    // standalone years, including runs like "2024 2025 2026"
+    .replace(/\b20\d{2}\b/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.])/g, '$1')
+    .trim();
+  return `${stripped} Only include deals announced on or after ${sinceIso} (the last ${days} days). List the most recent first and skip anything announced earlier.`;
+}
+
 interface PerplexityAnswer {
   text: string;
   /** Citation URLs in the order Perplexity numbered them ([1], [2], ...). */
@@ -278,24 +306,30 @@ export async function runPerplexityDealDiscovery(
     therapeuticAreas?: string[];
     maxQueriesPerTA?: number;
     timeBudgetMs?: number;
+    /** Ask for deals announced within this many days. Default 45. */
+    recencyDays?: number;
   }
 ): Promise<{
   queries_run: number;
   deals_discovered: number;
   deals_inserted: number;
   by_ta: Record<string, number>;
+  skipped: DiscoverySkips;
   errors: string[];
 }> {
   const startTime = Date.now();
   const timeBudget = options?.timeBudgetMs || 240_000;
   const maxQueriesPerTA = options?.maxQueriesPerTA || 2;
   const tas = options?.therapeuticAreas || Object.keys(TA_DISCOVERY_QUERIES);
+  const recencyDays = options?.recencyDays ?? 45;
+  const sinceIso = new Date(Date.now() - recencyDays * 86400000).toISOString().split('T')[0];
 
   const result = {
     queries_run: 0,
     deals_discovered: 0,
     deals_inserted: 0,
     by_ta: {} as Record<string, number>,
+    skipped: { missing_fields: 0, low_confidence: 0, validation_rejected: 0, duplicate: 0, insert_error: 0 } as DiscoverySkips,
     errors: [] as string[],
   };
 
@@ -314,8 +348,8 @@ export async function runPerplexityDealDiscovery(
       console.log(`[perplexity] Mega-deal sweep: Discovered ${sweepDeals.length} deals`);
 
       for (const deal of sweepDeals) {
-        if (!deal.licensor || !deal.licensee || !deal.asset_name) continue;
-        if (deal.confidence < 85) continue; // Phase 4: raised from 70
+        if (!deal.licensor || !deal.licensee || !deal.asset_name) { result.skipped.missing_fields++; continue; }
+        if (deal.confidence < 85) { result.skipped.low_confidence++; continue; } // Phase 4: raised from 70
 
         // Phase 4: shared fabrication validator. Perplexity's LLM is especially
         // prone to inventing plausible-sounding but nonexistent deals, so this
@@ -339,6 +373,7 @@ export async function runPerplexityDealDiscovery(
           result.errors.push(
             `Validation-rejected (${validation.rejectCode}): ${deal.licensor}/${deal.licensee} — ${validation.rejectReason}`
           );
+          result.skipped.validation_rejected++;
           continue;
         }
 
@@ -382,10 +417,13 @@ export async function runPerplexityDealDiscovery(
               verification_status: 'pending', // Phase 4: explicit pending status
             });
 
-            // Skip duplicates silently (unique index catches them)
-            if (sweepInsertErr?.code === '23505') continue;
+            // Duplicates: the unique indexes catch rows already in the table
+            if (sweepInsertErr?.code === '23505') { result.skipped.duplicate++; continue; }
             if (!sweepInsertErr) result.deals_inserted++;
+            else result.skipped.insert_error++;
             result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;
+          } else {
+            result.skipped.duplicate++;
           }
         } catch (err) {
           result.errors.push(`Sweep insert: ${deal.licensor}/${deal.licensee}: ${String(err)}`);
@@ -409,7 +447,10 @@ export async function runPerplexityDealDiscovery(
         console.log(`[perplexity] Querying ${ta}: "${query.substring(0, 60)}..."`);
 
         // Step 1: Perplexity discovers deals from the web
-        const { text: perplexityText, citations } = await queryPerplexityForDeals(query, perplexityApiKey);
+        const { text: perplexityText, citations } = await queryPerplexityForDeals(
+          withRecencyWindow(query, sinceIso, recencyDays),
+          perplexityApiKey
+        );
         result.queries_run++;
 
         if (!perplexityText || perplexityText.length < 50) {
@@ -425,8 +466,8 @@ export async function runPerplexityDealDiscovery(
 
         // Step 3: Insert into database
         for (const deal of deals) {
-          if (!deal.licensor || !deal.licensee || !deal.asset_name) continue;
-          if (deal.confidence < 80) continue;
+          if (!deal.licensor || !deal.licensee || !deal.asset_name) { result.skipped.missing_fields++; continue; }
+          if (deal.confidence < 80) { result.skipped.low_confidence++; continue; }
 
           try {
             const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
@@ -476,11 +517,13 @@ export async function runPerplexityDealDiscovery(
               extraction_timestamp: new Date().toISOString(),
             });
 
-            // Skip duplicates silently (unique index catches them)
-            if (insertError?.code === '23505') continue;
+            // Duplicates: the unique indexes catch rows already in the table
+            if (insertError?.code === '23505') { result.skipped.duplicate++; continue; }
             if (!insertError) {
               result.deals_inserted++;
               result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;
+            } else {
+              result.skipped.insert_error++;
             }
           } catch (err) {
             result.errors.push(`${deal.licensor}/${deal.licensee}: ${err}`);

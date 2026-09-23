@@ -110,6 +110,7 @@ export async function GET(request: NextRequest) {
     therapeuticAreas: currentTAs,
     maxQueriesPerTA: 2,
     timeBudgetMs: 240_000,
+    recencyDays: 45,
   });
 
   // Post-processing
@@ -147,10 +148,11 @@ export async function GET(request: NextRequest) {
   await supabase.from('data_ingestion_log').insert({
     source: 'perplexity_discovery',
     run_type: 'cron',
-    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta, demandDriven },
+    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta, demandDriven, skipBreakdown: result.skipped },
     records_fetched: result.queries_run,
     records_processed: result.deals_discovered,
     records_inserted: result.deals_inserted,
+    records_skipped: Object.values(result.skipped).reduce((a, b) => a + b, 0),
     records_failed: result.errors.length,
     errors: result.errors.slice(0, 50),
     status: 'completed',
