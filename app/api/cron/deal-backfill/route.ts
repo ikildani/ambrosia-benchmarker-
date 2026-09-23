@@ -21,6 +21,8 @@ import {
   deriveTherapeuticArea,
 } from '@/lib/ingestion/sec-edgar';
 import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
+import { FunnelCounter } from '@/lib/ingestion/funnel';
+import { insertCitedDeal } from '@/lib/ingestion/insert-deal';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
@@ -32,7 +34,7 @@ const SEC_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 function getDateRange(): { dateStart: string; dateEnd: string } {
   const end = new Date();
   const start = new Date();
-  start.setDate(start.getDate() - 30);
+    start.setDate(start.getDate() - 90);
   return {
     dateStart: start.toISOString().split('T')[0],
     dateEnd: end.toISOString().split('T')[0],
@@ -130,15 +132,21 @@ export async function GET(request: NextRequest) {
     nextPage: page + 1,
   };
 
+    const funnel = new FunnelCounter();
+  let searchStatus: 'ok' | 'sec_error' = 'ok';
   if (!searchResponse.ok) {
-    result.errors.push(`SEC search failed: ${searchResponse.status}`);
+    // EFTS answers 500 when `from` runs past the last hit; advance the cursor
+    // instead of retrying the same dead page four times a day.
+    searchStatus = 'sec_error';
+    result.errors.push(`SEC search failed: ${searchResponse.status} (query=${search.type}, page=${page})`);
+    result.nextSearchIndex = searchIndex + 1;
+    result.nextPage = 0;
   } else {
     const data = await searchResponse.json();
     const total = data.hits?.total?.value || 0;
     const hits = data.hits?.hits || [];
-
-    // If no more results for this search type, move to next
-    if (hits.length === 0) {
+    // Last page for this query: move to the next query rather than paging past the total.
+    if (hits.length === 0 || (page + 1) * 20 >= total) {
       result.nextSearchIndex = searchIndex + 1;
       result.nextPage = 0;
     }
@@ -157,37 +165,33 @@ export async function GET(request: NextRequest) {
         ? `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionFormatted}/${fileName}`
         : '';
 
-      if (!url) continue;
-
-      // Check if already processed
+            funnel.count('fetched');
+      if (!url) { funnel.count('content_unavailable', 'unresolvable_hit'); continue; }
       const { data: existing } = await supabase
         .from('deals')
         .select('id')
         .eq('source_url', url)
         .limit(1)
-        .single();
-
+        .maybeSingle();
       if (existing) {
         result.skipped++;
+        funnel.count('already_in_table');
         continue;
       }
-
       try {
         const content = await fetchFilingContent(url);
         result.fetched++;
-
-        if (content.length < 500) continue;
-
+        if (content.length < 500) { funnel.count('content_too_short'); continue; }
         const deal = await extractDealFromFiling(content, anthropicApiKey);
-
-        if (!deal || deal.confidence_score < 75 || !deal.licensor || !deal.licensee) continue;
-
+        if (!deal) { funnel.count('not_a_deal'); continue; }
+        if (deal.confidence_score < 75) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60'); continue; }
+        if (!deal.licensor || !deal.licensee) { funnel.count('missing_parties'); continue; }
         const validation = validateExtractedDeal(deal);
         if (!validation.valid) {
           console.log(`[deal-backfill] Rejected deal (${validation.rejectCode}): ${deal.licensor} / ${deal.licensee}`);
+          funnel.count('validator_rejected', validation.rejectCode);
           continue;
         }
-
         result.extracted++;
 
         const licensorId = await findOrCreateCompany(supabase, deal.licensor, false);
@@ -197,7 +201,12 @@ export async function GET(request: NextRequest) {
         const { classifyAndEnrichDeal } = await import('@/lib/ingestion/company-geography');
         const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
 
-        const { error: insertError } = await supabase.from('deals').insert({
+                const insertResult = await insertCitedDeal(supabase, {
+          sourceType: 'sec_8k',
+          sourceUrl: url,
+          sourceFilingId: accession,
+          extractionModel: 'claude-opus-4-6',
+          row: {
           licensor_name: deal.licensor,
           licensor_id: licensorId,
           licensee_name: deal.licensee,
@@ -220,14 +229,10 @@ export async function GET(request: NextRequest) {
           royalty_low_pct: deal.royalty_low_pct,
           royalty_high_pct: deal.royalty_high_pct,
           total_deal_value_usd: deal.total_deal_value_usd,
-          announced_date: hit._source?.file_date || new Date().toISOString().split('T')[0],
-          source_type: 'sec_8k',
-          source_url: url,
+                    announced_date: hit._source?.file_date || new Date().toISOString().split('T')[0],
           terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
           confidence_score: deal.confidence_score,
           extraction_notes: deal.extraction_notes,
-          extraction_model: 'claude-opus-4-6',
-          extraction_timestamp: new Date().toISOString(),
           therapeutic_area: ta,
           milestone_details: deal.milestone_details,
           research_funding_usd: deal.research_funding_usd,
@@ -245,15 +250,19 @@ export async function GET(request: NextRequest) {
           licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
           licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
           licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
-          cross_border: geo.cross_border,
+                    cross_border: geo.cross_border,
           deal_corridor: geo.deal_corridor,
+          },
         });
-
-        if (insertError && insertError.code !== '23505') {
-          result.errors.push(insertError.message);
-        } else if (!insertError) {
+        if (insertResult.outcome === 'inserted') {
           result.inserted++;
           result.byTA[ta] = (result.byTA[ta] || 0) + 1;
+          funnel.count('inserted', undefined, `${deal.licensor} → ${deal.licensee}`);
+        } else if (insertResult.outcome === 'duplicate') {
+          funnel.count('insert_duplicate');
+        } else {
+          funnel.count('insert_error', insertResult.outcome, insertResult.error);
+          result.errors.push(insertResult.error || 'insert failed');
         }
 
         await new Promise(r => setTimeout(r, 1500));
@@ -267,18 +276,21 @@ export async function GET(request: NextRequest) {
   await supabase.from('data_ingestion_log').insert({
     source: 'cron_deal_backfill',
     run_type: 'cron',
-    parameters: {
+        parameters: {
       searchType: search.type,
       page,
       nextSearchIndex: result.nextSearchIndex,
       nextPage: result.nextPage,
+      funnel: funnel.toJSON(),
     },
     records_fetched: result.fetched,
     records_processed: result.extracted,
     records_inserted: result.inserted,
     records_failed: result.errors.length,
     errors: result.errors.slice(0, 50),
-    status: 'completed',
+    // A SEC error or a zero-fetch is a partial run, never a clean one.
+    status: searchStatus === 'sec_error' || result.fetched === 0 ? 'partial' : 'completed',
+    notes: searchStatus === 'sec_error' ? 'SEC full-text search error; cursor advanced' : result.fetched === 0 ? 'zero-fetch for this query/page; cursor advanced' : null,
     completed_at: new Date().toISOString(),
   });
 

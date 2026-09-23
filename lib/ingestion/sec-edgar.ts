@@ -401,6 +401,42 @@ export interface ExtractedDeal {
   therapeutic_area: string | null;
 }
 
+/**
+ * Parse one hit from SEC full-text search (efts.sec.gov/LATEST/search-index).
+ *
+ * The current response shape is `_id = "{adsh}:{filename}"` with
+ * `_source.ciks = ["0001234567"]`, `_source.adsh`, `_source.file_date`,
+ * `_source.form` and `_source.display_names`. The parser this replaced read
+ * `_source.cik` and `_source.accession_number`, which no longer exist, and
+ * threw on the first hit of every search, so the daily SEC source logged
+ * zero filings while the search itself was returning results.
+ */
+export function parseEftsHit(hit: unknown): SECFiling | null {
+  const h = hit as { _id?: string; _source?: Record<string, unknown> } | null;
+  const src = h?._source ?? {};
+  const id = typeof h?._id === 'string' ? h._id : '';
+  const [idAdsh, idFile] = id.includes(':') ? id.split(':') : [id, ''];
+  const accession = String(src.adsh ?? src.accession_number ?? idAdsh ?? '').trim();
+  const cikRaw = Array.isArray(src.ciks) ? src.ciks[0] : (src.cik ?? '');
+  const cik = String(cikRaw ?? '').replace(/^0+/, '');
+  const fileName = String(src.file_name ?? idFile ?? '').trim();
+  if (!accession || !cik || !fileName) return null;
+  const displayName = Array.isArray(src.display_names) ? String(src.display_names[0] ?? '') : '';
+  const companyName = displayName.replace(/\s*\([A-Z0-9.,\s-]*\)\s*\(CIK \d+\)\s*$/, '').trim() || 'Unknown';
+  const fileNum = Array.isArray(src.file_num) ? String(src.file_num[0] ?? '') : String(src.file_num ?? '');
+  const rootForms = Array.isArray(src.root_forms) ? String(src.root_forms[0] ?? '') : '';
+  return {
+    accessionNumber: accession,
+    cik,
+    companyName,
+    filingDate: String(src.file_date ?? ''),
+    form: String(src.form ?? rootForms),
+    description: displayName,
+    documentUrl: `https://www.sec.gov/Archives/edgar/data/${cik}/${accession.replace(/-/g, '')}/${fileName}`,
+    fileNumber: fileNum,
+  };
+}
+
 export async function searchRecentFilings(daysBack: number = 1): Promise<SECFiling[]> {
   const endDate = new Date();
   const startDate = new Date();
@@ -446,23 +482,14 @@ export async function searchRecentFilings(daysBack: number = 1): Promise<SECFili
 
       if (data.hits?.hits) {
         for (const hit of data.hits.hits) {
-          const accession = hit._source.accession_number;
-          if (seenAccessions.has(accession)) continue;
-          seenAccessions.add(accession);
-
-          const cik = hit._source.cik.toString().padStart(10, '0');
-          const accessionFormatted = accession.replace(/-/g, '');
-
-          allFilings.push({
-            accessionNumber: accession,
-            cik: hit._source.cik,
-            companyName: hit._source.display_names?.[0] || 'Unknown',
-            filingDate: hit._source.file_date,
-            form: hit._source.form,
-            description: hit._source.display_names?.[0] || '',
-            documentUrl: `https://www.sec.gov/Archives/edgar/data/${hit._source.cik}/${accessionFormatted}/${hit._source.file_name}`,
-            fileNumber: hit._source.file_num || '',
-          });
+          const filing = parseEftsHit(hit);
+          if (!filing) {
+            console.warn(`[sec-edgar] unparseable EFTS hit id=${String((hit as { _id?: string })?._id ?? 'unknown')}`);
+            continue;
+          }
+          if (seenAccessions.has(filing.accessionNumber)) continue;
+          seenAccessions.add(filing.accessionNumber);
+          allFilings.push(filing);
         }
       }
 
