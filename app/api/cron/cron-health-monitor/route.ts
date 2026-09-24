@@ -25,9 +25,14 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   // Data ingestion crons
   'edgar_realtime': { frequency: 'every-2h', expectedRunsPerWeek: 84 },
   'perplexity_discovery': { frequency: 'every-4h', expectedRunsPerWeek: 42 },
-  'press_releases_cron': { frequency: 'daily', expectedRunsPerWeek: 7 },
-  'deals-update': { frequency: 'daily', expectedRunsPerWeek: 7 },
-  'deal-backfill': { frequency: 'every-6h', expectedRunsPerWeek: 28 },
+  'press_releases': { frequency: 'daily', expectedRunsPerWeek: 7 },
+  // Sep 23 2026: deals-update (sec_edgar) and deal-backfill (cron_deal_backfill) removed from
+  // vercel.json — 0 inserts in 45 days, superseded by edgar_realtime + edgar_fts_backfill.
+  'edgar_fts_backfill': { frequency: '4x-daily', expectedRunsPerWeek: 28 },   // 15 2,8,14,20 * * *
+  'hkex_announcements': { frequency: '2x-daily', expectedRunsPerWeek: 14 },   // 45 5,17 * * * (mode=both)
+  'hkex_backfill': { frequency: '2x-daily', expectedRunsPerWeek: 14 },        // same run, second phase
+  'api_credit_check': { frequency: 'hourly', expectedRunsPerWeek: 168 },      // 20 * * * *
+  'deal_inflow_check': { frequency: 'daily', expectedRunsPerWeek: 7 },        // inside api_credit_check at 13:20 UTC
   'deal-enrichment': { frequency: '3x-daily', expectedRunsPerWeek: 21 },
   'deal_verification': { frequency: '2x-daily', expectedRunsPerWeek: 14 },
   'ftc-update': { frequency: 'daily', expectedRunsPerWeek: 7 },

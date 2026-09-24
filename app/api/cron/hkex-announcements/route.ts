@@ -1,7 +1,9 @@
 /**
  * Cron: HKEX announcements. `?mode=daily` (default) scans the last 14 days;
- * `?mode=backfill` advances the 2017→present cursor one 14-day window per run.
- * See lib/ingestion/exchanges/hkex.ts.
+ * `?mode=backfill` advances the 2017→present cursor one 14-day window per run;
+ * `?mode=both` runs the daily scan first, then backfill with the remaining
+ * budget. The schedule uses `both` twice a day: Vercel caps a project at 100
+ * cron entries, so the two modes share one. See lib/ingestion/exchanges/hkex.ts.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
@@ -25,27 +27,41 @@ export async function GET(request: NextRequest) {
   if (!anthropicApiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
 
   const supabase = createServiceClient();
-  const mode = request.nextUrl.searchParams.get('mode') === 'backfill' ? 'backfill' : 'daily';
+  const requested = request.nextUrl.searchParams.get('mode');
   const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
-  const source = mode === 'backfill' ? 'hkex_backfill' : 'hkex_announcements';
-  try {
-    const result = await runHkexIngestion(supabase, { anthropicApiKey, dryRun, mode, timeBudgetMs: 250_000 });
-    if (!dryRun) {
-      await logCronRun(supabase, source, {
-        fetched: result.announcements,
-        processed: result.extracted,
-        inserted: result.inserted,
-        errors: result.errors,
-        funnel: result.funnel,
-        parameters: { mode, window: result.window, dealTitles: result.dealTitles, next: result.next ?? null, throttled: result.throttled },
-        status: result.throttled ? 'partial' : undefined,
-        notes: result.throttled ? 'HKEX throttled; cursor held and backoff set' : undefined,
-      });
+  const TOTAL_BUDGET_MS = 250_000;
+  const DAILY_BUDGET_MS = 90_000;
+
+  // `both`: daily scan (bounded) then backfill with whatever budget is left.
+  const modes: Array<'daily' | 'backfill'> = requested === 'both' ? ['daily', 'backfill'] : requested === 'backfill' ? ['backfill'] : ['daily'];
+  const started = Date.now();
+  const results: Record<string, unknown> = {};
+  for (const mode of modes) {
+    const source = mode === 'backfill' ? 'hkex_backfill' : 'hkex_announcements';
+    const remaining = TOTAL_BUDGET_MS - (Date.now() - started);
+    const timeBudgetMs = modes.length > 1 && mode === 'daily' ? Math.min(DAILY_BUDGET_MS, remaining) : remaining;
+    if (timeBudgetMs < 20_000) { results[mode] = { skipped: 'no budget left' }; continue; }
+    try {
+      const result = await runHkexIngestion(supabase, { anthropicApiKey, dryRun, mode, timeBudgetMs });
+      if (!dryRun) {
+        await logCronRun(supabase, source, {
+          fetched: result.announcements,
+          processed: result.extracted,
+          inserted: result.inserted,
+          errors: result.errors,
+          funnel: result.funnel,
+          parameters: { mode, window: result.window, dealTitles: result.dealTitles, next: result.next ?? null, throttled: result.throttled },
+          status: result.throttled ? 'partial' : undefined,
+          notes: result.throttled ? 'HKEX throttled; cursor held and backoff set' : undefined,
+        });
+      }
+      results[mode] = result;
+    } catch (error) {
+      console.error(`[hkex] ${mode} failed:`, error);
+      try { await logCronRun(supabase, source, { fetched: 0, processed: 0, inserted: 0, errors: [String(error)], status: 'failed' }); } catch {}
+      results[mode] = { error: String(error).slice(0, 200) };
     }
-    return NextResponse.json({ success: true, dryRun, ...result });
-  } catch (error) {
-    console.error('[hkex] failed:', error);
-    try { await logCronRun(supabase, source, { fetched: 0, processed: 0, inserted: 0, errors: [String(error)], status: 'failed' }); } catch {}
-    return NextResponse.json({ error: 'hkex ingestion failed' }, { status: 500 });
   }
+  const failed = modes.every(m => (results[m] as { error?: string })?.error);
+  return NextResponse.json({ success: !failed, dryRun, modes, ...results }, { status: failed ? 500 : 200 });
 }

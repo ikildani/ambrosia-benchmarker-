@@ -39,14 +39,6 @@
       "schedule": "0 7 1 * *"
     },
     {
-      "path": "/api/cron/deal-backfill",
-      "schedule": "0 1,7,13,19 * * *"
-    },
-    {
-      "path": "/api/cron/deals-update",
-      "schedule": "0 3 * * *"
-    },
-    {
       "path": "/api/cron/trials-update",
       "schedule": "0 5 * * *"
     },
@@ -339,10 +331,6 @@
       "schedule": "0 9 * * 0"
     },
     {
-      "path": "/api/cron/historical-backfill",
-      "schedule": "30 */6 * * *"
-    },
-    {
       "path": "/api/cron/deal-qa",
       "schedule": "0 3 * * *"
     },
@@ -435,16 +423,8 @@
       "schedule": "15 2,8,14,20 * * *"
     },
     {
-      "path": "/api/cron/hkex-announcements",
-      "schedule": "30 1 * * *"
-    },
-    {
-      "path": "/api/cron/hkex-announcements?mode=backfill",
+      "path": "/api/cron/hkex-announcements?mode=both",
       "schedule": "45 5,17 * * *"
-    },
-    {
-      "path": "/api/cron/deal-inflow-check",
-      "schedule": "0 13 * * *"
     }
   ]
 }

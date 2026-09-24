@@ -11,6 +11,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { classifyCreditErrors, shouldAlert, buildCreditAlert, type AlertState, type Vendor } from '@/lib/ingestion/credit-sentinel';
+import { runDealInflowCheck, type InflowReport } from '@/lib/ingestion/inflow-check';
+
+/** UTC hour at which the hourly sentinel also runs the daily deal-inflow check. */
+const INFLOW_CHECK_UTC_HOUR = 13;
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -82,5 +86,17 @@ export async function GET(request: NextRequest) {
     notes: outages.length ? `${outages.map(o => o.vendor).join(', ')} out of credit` : 'ok',
   });
 
-  return NextResponse.json({ ok: true, outages, alerted, recovered, checkedRuns: rows?.length ?? 0 });
+  // Daily deal-inflow check rides on this hourly schedule (Vercel's 100-cron cap).
+  // Runs once a day at 13:20 UTC, or on demand with ?inflow=true.
+  let inflow: InflowReport | null = null;
+  const inflowRequested = request.nextUrl.searchParams.get('inflow') === 'true';
+  if (inflowRequested || now.getUTCHours() === INFLOW_CHECK_UTC_HOUR) {
+    try {
+      inflow = await runDealInflowCheck(supabase, now);
+    } catch (e) {
+      console.error('[api-credit-check] inflow check failed (non-fatal):', e);
+    }
+  }
+
+  return NextResponse.json({ ok: true, outages, alerted, recovered, checkedRuns: rows?.length ?? 0, inflow });
 }
