@@ -2,7 +2,7 @@
 // ICER threshold gauge, international pricing comparison, IRA timeline,
 // payer mix donut, access barriers list, and analyst narrative.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -258,7 +258,7 @@ export function renderPricingAccessPage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Pricing &amp; Reimbursement Analysis</div>
 

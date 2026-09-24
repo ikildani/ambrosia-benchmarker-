@@ -3,7 +3,7 @@
 // scalability gauge SVG, clinical hold probability bar, regulatory complexity
 // badge, and narrative.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -128,7 +128,7 @@ export function renderCMCRiskPage(data: PDFReportData, meta: ReportMeta): string
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">CMC / Manufacturing Risk</div>
 

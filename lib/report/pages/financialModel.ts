@@ -1,7 +1,7 @@
 // Page: Financial Modeling — rNPV & Monte Carlo
 // rNPV summary KPIs, cash flow table, Monte Carlo distribution, cross-validation
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { CashFlowYear } from '@/lib/financial/types';
 
@@ -99,7 +99,7 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Financial Modeling &mdash; rNPV &amp; Monte Carlo</div>
 

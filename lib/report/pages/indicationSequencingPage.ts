@@ -2,7 +2,7 @@
 // Gantt-style timeline of franchise expansion across indications,
 // expansion table, franchise value KPI, cannibalization note, and narrative.
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 interface ExpansionEntry {
@@ -121,7 +121,7 @@ export function renderIndicationSequencingPage(data: PDFReportData, meta: Report
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Indication Expansion Sequencing</div>
 

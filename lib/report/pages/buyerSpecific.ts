@@ -1,7 +1,7 @@
 // Page: Buyer-Specific Deal Valuation
 // Shows generic vs buyer-specific deal values for multiple partners
 
-import { pageHeader, pageFooter, COLORS, escapeHtml, formatUsd } from '../helpers';
+import { pageHeader, pageFooter, COLORS, escapeHtml, formatUsd, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 const BUYER_COLORS = [COLORS.teal, '#8B5CF6', '#F59E0B'];
@@ -17,7 +17,7 @@ export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Buyer-Specific Deal Valuation</div>
       <p style="font-size: 11px; color: ${COLORS.gray500}; margin-bottom: 20px; line-height: 1.5;">

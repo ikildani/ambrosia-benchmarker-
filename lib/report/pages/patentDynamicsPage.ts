@@ -2,7 +2,7 @@
 // Patent timeline SVG, effective LOE headline, generic erosion curve,
 // Paragraph IV risk indicator, authorized generic impact, and narrative.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // SVG: Patent Timeline — horizontal stacked bar with extension segments + LOE marker
@@ -114,7 +114,7 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Patent &amp; LOE Dynamics</div>
 

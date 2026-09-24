@@ -1,7 +1,7 @@
 // Page: Real Options + Competitive Dynamics + Lifecycle Extensions
 // Combined institutional-grade page for advanced rNPV upgrade analytics
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 /** Render a compact KPI box with accent top border. */
@@ -67,7 +67,7 @@ export function renderRealOptionsLifecyclePage(data: PDFReportData, meta: Report
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Advanced Analytics</div>
 

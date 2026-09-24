@@ -1,7 +1,7 @@
 // Page 2: Table of Contents
 // Clean dotted-leader TOC listing all report sections with page numbers
 
-import { pageHeader, pageFooter, COLORS } from '../helpers';
+import { pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): string {
@@ -29,7 +29,7 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Table of Contents</div>
 

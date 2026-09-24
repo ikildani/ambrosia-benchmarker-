@@ -1,7 +1,7 @@
-// Page 9: AI Strategic Analysis
-// AI-generated deal memo + negotiation playbook sections
+// Page 9: Strategic analysis
+// Deal memo + negotiation playbook sections
 
-import { pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string {
@@ -11,10 +11,10 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
   if (!memoData && !playbookData) {
     return `
       <div class="report-page">
-        ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+        ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <div class="section-title-lg" style="margin-bottom: 0;">AI Strategic Analysis</div>
-          <span class="ai-badge">AI-GENERATED</span>
+          <div class="section-title-lg" style="margin-bottom: 0;">Strategic analysis</div>
+          
         </div>
         <div class="card" style="text-align: center; padding: 40px;">
           <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">Deal analysis not yet generated for this report.</div>
@@ -101,11 +101,11 @@ export function renderAIMemoPage(data: PDFReportData, meta: ReportMeta): string 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <div class="section-title-lg" style="margin-bottom: 0;">AI Strategic Analysis</div>
-        <span class="ai-badge">AI-GENERATED</span>
+        <div class="section-title-lg" style="margin-bottom: 0;">Strategic analysis</div>
+        
       </div>
 
       ${memoSection}

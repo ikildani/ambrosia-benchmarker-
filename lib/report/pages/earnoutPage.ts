@@ -2,7 +2,7 @@
 // Tranche detail table, horizontal payout schedule bar chart, KPI boxes,
 // and narrative block for contingent value right structures.
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -126,7 +126,7 @@ export function renderEarnoutPage(data: PDFReportData, meta: ReportMeta): string
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Earnout / CVR Analysis</div>
 

@@ -2,7 +2,7 @@
 // How the model works, data sources, factors considered, legal disclaimer
 
 import { logoIconColor } from '../logo';
-import { pageHeader, pageFooter, COLORS, formatDate, escapeHtml } from '../helpers';
+import { pageHeader, pageFooter, COLORS, formatDate, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -11,7 +11,7 @@ export function renderMethodologyPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Methodology & Disclaimer</div>
 

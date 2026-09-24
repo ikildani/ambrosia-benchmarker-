@@ -2,7 +2,7 @@
 // Top value driver callout, tornado chart, parameter impact table, TA risk factors
 
 import { renderTornado } from '../svg-charts/tornado';
-import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 function impactBadge(level: string): string {
@@ -24,7 +24,7 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Sensitivity Analysis</div>
 

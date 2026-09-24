@@ -2,7 +2,7 @@
 // Gantt-style SVG timeline, milestone table, probability-weighted total callout,
 // payout schedule bar chart, and narrative block.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { MilestoneEntry, AnnualPayout } from '@/lib/financial/milestone-probability';
 
@@ -253,7 +253,7 @@ export function renderMilestonePage(data: PDFReportData, meta: ReportMeta): stri
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Milestone Probability Analysis</div>
 

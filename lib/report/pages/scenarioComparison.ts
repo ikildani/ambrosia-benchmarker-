@@ -1,7 +1,7 @@
 // Page: Scenario Comparison — Bear / Base / Bull
 // Three-column side-by-side with expected value callout and assumption details
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 /**
@@ -97,7 +97,7 @@ export function renderScenarioComparisonPage(data: PDFReportData, meta: ReportMe
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Scenario Comparison</div>
 

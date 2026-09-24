@@ -1,7 +1,7 @@
 // Page: Defensive Analysis & Walk-Away Thresholds
 // Worst/best case scenarios, defensive floor, walk-away threshold, risk/opportunity breakdown
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { ScenarioResult } from '@/lib/financial/types';
 
@@ -112,7 +112,7 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Defensive Analysis &amp; Walk-Away Thresholds</div>
 

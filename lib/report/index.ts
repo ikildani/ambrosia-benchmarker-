@@ -170,7 +170,7 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${indication} — Deal Valuation Report | ${brandConfig?.fundName || 'Ambrosia Ventures'}</title>
+      <title>${indication} — Deal Intelligence Brief | ${brandConfig?.fundName || 'Ambrosia Ventures'}</title>
       <style>${getEmbeddedFontStyles()}${getReportStyles(brandConfig)}</style>
     </head>
     <body>

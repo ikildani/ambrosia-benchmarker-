@@ -2,7 +2,7 @@
 // SVG waterfall chart showing step-down from unadjusted NPV to final deal value,
 // deal component allocation grid, narrative, and methodology note.
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { DealWaterfallStep } from '@/lib/financial/types';
 import { computeDifferentiationAdjustment, DIFFERENTIATION_FACTORS, type DifferentiationKey } from '@/lib/financial/differentiation-profiles';
@@ -168,7 +168,7 @@ export function renderDealWaterfallPage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Deal Valuation Waterfall</div>
 
