@@ -18,7 +18,7 @@ export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): s
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Timeline')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title">PROJECTED TIMELINE</div>
       <div class="section-title-lg">Deal Timeline & Milestone Schedule</div>
