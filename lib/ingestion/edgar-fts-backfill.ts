@@ -8,9 +8,10 @@
  * writes carries source_filing_id and source_url.
  *
  * Budget: EFTS returns ~250 pharma-scoped "license agreement" hits per
- * quarter in 2019. At the default cap of 30 extractions per run and four
- * runs a day, the 2017-2022 gap closes in a few weeks without touching the
- * SEC fair-access limit.
+ * quarter in 2019. Sep 24 2026: runs every 15 minutes with up to 80
+ * extractions per run, 4 in parallel, so 2017→present (~13,000 filings)
+ * drains in about a week. Every extracted accession is written to
+ * edgar_fts_processed so rejected filings are never paid for twice.
  *
  * Cursor lives in radar_sync_cursors under source 'edgar_fts_backfill'.
  * Delete the row to restart from 2017Q1.
@@ -19,8 +20,17 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { readSyncCursor, writeSyncCursor } from '../radar/sync-cursor';
 import { FunnelCounter } from './funnel';
-import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, EFTS_PAGE_SIZE } from './edgar-fts';
+import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
 import { processEftsDocument } from './edgar-realtime';
+import { mapWithConcurrency } from './concurrency';
+
+/**
+ * Ledger of accessions this backfill has already extracted (migration 119).
+ * Rejected filings are not in `deals`, so without this the next run would
+ * re-extract them and a page with more rejections than the cap would pin the
+ * cursor forever.
+ */
+export const PROCESSED_TABLE = 'edgar_fts_processed';
 
 export const BACKFILL_CURSOR_SOURCE = 'edgar_fts_backfill';
 export const BACKFILL_FROM_YEAR = 2017;
@@ -43,6 +53,8 @@ export interface BackfillOptions {
   cursorOverride?: Partial<BackfillCursorState>;
   /** Restrict to one query key for a local probe. */
   onlyQuery?: string;
+  /** Parallel extractions per run. Claude calls are I/O bound; 4 is safe under SEC's 10 req/s and Anthropic tier limits. */
+  concurrency?: number;
 }
 
 export interface BackfillResult {
@@ -50,6 +62,8 @@ export interface BackfillResult {
   query: string;
   candidates: number;
   prefiltered: number;
+  /** Pre-filtered hits skipped because the ledger already had them. */
+  alreadyProcessed: number;
   extracted: number;
   passed: number;
   inserted: number;
@@ -98,7 +112,8 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   const query = PHARMA_DEAL_QUERIES[queryIndex] ?? PHARMA_DEAL_QUERIES[0];
   const finished = quarter.key === quarters[quarters.length - 1].key && state.completedQuarters.includes(quarter.key);
 
-  let candidates = 0, prefiltered = 0, extracted = 0, passed = 0, inserted = 0;
+  const concurrency = Math.max(1, opts.concurrency ?? 1);
+  let candidates = 0, prefiltered = 0, alreadyProcessed = 0, extracted = 0, passed = 0, inserted = 0;
   let exhaustedPage = true;
 
   if (!finished) {
@@ -109,8 +124,9 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
     } else if (page.status !== 200 && !(page.status === 500 && state.from > 0)) {
       errors.push(`EFTS ${page.status} for ${query.key} ${quarter.key}`);
     } else {
+      // 1. Cheap pass over the page: resolve and pre-filter every hit.
+      const docs: EftsDocument[] = [];
       for (const hit of page.hits) {
-        if (Date.now() - start > budget) { funnel.count('time_budget', 'hits_remaining'); exhaustedPage = false; break; }
         candidates++;
         funnel.count('fetched');
         const doc = hitToDocument(hit);
@@ -118,20 +134,51 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
         const pre = isLikelyPharmaDealHit(hit);
         if (!pre.keep) { funnel.count('keyword_filtered', pre.reason, `${doc.companyName} ${doc.form} ${doc.fileType}`); continue; }
         prefiltered++;
-        if (extracted >= maxExtractions) { funnel.count('time_budget', 'extraction_cap'); exhaustedPage = false; break; }
-        try {
-          extracted++;
-          const outcome = await processEftsDocument(supabase, doc, {
-            anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel,
-            sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
-          });
-          if (outcome === 'inserted') { passed++; inserted++; }
-          if (outcome === 'error') errors.push(`insert error ${doc.accession}`);
-        } catch (e) {
-          funnel.count('extraction_error', undefined, String(e).slice(0, 120));
-          errors.push(`${doc.accession}: ${String(e).slice(0, 160)}`);
-        }
+        docs.push(doc);
       }
+
+      // 2. Drop accessions the ledger already has (extracted on an earlier run, any outcome).
+      let todo = docs;
+      if (docs.length > 0) {
+        const { data: seenRows, error: seenErr } = await supabase
+          .from(PROCESSED_TABLE).select('accession').in('accession', docs.map(d => d.accession));
+        if (seenErr) errors.push(`ledger read failed: ${seenErr.message}`);
+        const seen = new Set((seenRows ?? []).map(r => r.accession as string));
+        todo = docs.filter(d => !seen.has(d.accession));
+        alreadyProcessed = docs.length - todo.length;
+        for (let i = 0; i < alreadyProcessed; i++) funnel.count('already_in_table', 'edgar_fts_processed');
+      }
+
+      // 3. Extract up to the cap, `concurrency` at a time, within the time budget.
+      const batch = todo.slice(0, maxExtractions);
+      const capHit = todo.length > batch.length;
+      if (capHit) funnel.count('time_budget', 'extraction_cap');
+      const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
+        const outcome = await processEftsDocument(supabase, doc, {
+          anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel,
+          sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
+        });
+        if (outcome === 'inserted') { passed++; inserted++; }
+        if (outcome === 'error') errors.push(`insert error ${doc.accession}`);
+        // Record everything except insert errors, so those retry next run.
+        if (!dryRun && outcome !== 'error') {
+          const { error: ledgerErr } = await supabase.from(PROCESSED_TABLE).upsert({
+            accession: doc.accession, outcome, quarter: quarter.key, query_key: query.key,
+            form: doc.form || null, filing_date: doc.filingDate || null, company: doc.companyName || null,
+          }, { onConflict: 'accession' });
+          if (ledgerErr) errors.push(`ledger write failed ${doc.accession}: ${ledgerErr.message}`);
+        }
+        return outcome;
+      }, () => Date.now() - start < budget);
+      extracted = run.started;
+      for (const e of run.errors) {
+        funnel.count('extraction_error', undefined, String(e.error).slice(0, 120));
+        errors.push(`${batch[e.index]?.accession}: ${String(e.error).slice(0, 160)}`);
+      }
+      const budgetHit = run.started < batch.length;
+      if (budgetHit) funnel.count('time_budget', 'hits_remaining');
+      // The page is drained only when every unseen doc was started and none were left behind the cap.
+      exhaustedPage = !capHit && !budgetHit;
       if (exhaustedPage && state.from + EFTS_PAGE_SIZE < page.total) exhaustedPage = false;
     }
   }
@@ -142,5 +189,5 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   }
   const summary = funnel.summary();
   console.log(`[edgar-fts-backfill] ${quarter.key} ${query.key} from=${state.from} ${summary}${dryRun ? ' (dry run)' : ''}`);
-  return { quarterKey: quarter.key, query: query.key, candidates, prefiltered, extracted, passed, inserted, errors, funnel: funnel.toJSON(), summary, next, finished };
+  return { quarterKey: quarter.key, query: query.key, candidates, prefiltered, alreadyProcessed, extracted, passed, inserted, errors, funnel: funnel.toJSON(), summary, next, finished };
 }

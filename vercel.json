@@ -420,7 +420,7 @@
     },
     {
       "path": "/api/cron/edgar-fts-backfill",
-      "schedule": "15 2,8,14,20 * * *"
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/cron/hkex-announcements?mode=both",

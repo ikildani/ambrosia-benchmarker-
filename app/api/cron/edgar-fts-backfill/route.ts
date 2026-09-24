@@ -1,6 +1,8 @@
 /**
  * Cron: SEC full-text-search historical backfill, 2017 → present.
- * Four runs a day, ~30 extractions each, cursor in radar_sync_cursors.
+ * Every 15 minutes, up to 80 extractions per run (4 in parallel), cursor in
+ * radar_sync_cursors, processed-accession ledger in edgar_fts_processed.
+ * Manual overrides: ?max=N&concurrency=N&dryRun=true.
  * See lib/ingestion/edgar-fts-backfill.ts.
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -26,8 +28,10 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
   const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
+  const maxExtractions = Math.min(200, Number(request.nextUrl.searchParams.get('max')) || 80);
+  const concurrency = Math.min(8, Number(request.nextUrl.searchParams.get('concurrency')) || 4);
   try {
-    const result = await runEdgarFtsBackfill(supabase, { anthropicApiKey, dryRun, timeBudgetMs: 250_000, maxExtractions: 30 });
+    const result = await runEdgarFtsBackfill(supabase, { anthropicApiKey, dryRun, timeBudgetMs: 250_000, maxExtractions, concurrency });
     if (!dryRun) {
       await logCronRun(supabase, 'edgar_fts_backfill', {
         fetched: result.candidates,
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
         inserted: result.inserted,
         errors: result.errors,
         funnel: result.funnel,
-        parameters: { quarter: result.quarterKey, query: result.query, next: result.next, finished: result.finished, prefiltered: result.prefiltered },
+        parameters: { quarter: result.quarterKey, query: result.query, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency },
         // A quarter/query with no hits is a legitimate empty page once the walk is finished.
         expectRecords: !result.finished,
         notes: result.finished ? 'backfill walk complete; cursor at the current quarter' : undefined,
