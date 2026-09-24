@@ -429,18 +429,39 @@ export function checkScenarioInvariants(
   }
 
   // 1. bear rnpv <= base rnpv <= bull rnpv
+  //
+  //    The ordering is a law only while the base rNPV is positive. Before
+  //    Phase 2 the method can return a NEGATIVE base rNPV (cumulative PoS
+  //    2-9%, 9-14 years of probability-weighted spend before revenue). The
+  //    bear case then applies a lower PoS, a higher discount rate and a later
+  //    launch to that spend, which shrinks the expected cost stream and makes
+  //    the bear number LESS negative than base. That is the arithmetic of a
+  //    negative NPV, not an engine fault, and it produced the Sep 24 2026
+  //    `scenario.bear_above_base` Sentry criticals. For a non-positive base
+  //    the rNPV ordering is demoted to a warning; the implied-deal ordering
+  //    below (rule 2) still guards the number users actually see, because the
+  //    engine floors and clamps the implied deal at every phase.
+  const basePositive = scenarios.base.rnpv > 0;
   if (scenarios.bear.rnpv > scenarios.base.rnpv + 0.5) {
     out.push(
-      v('critical', 'scenario.bear_above_base',
-        `Bear rNPV $${scenarios.bear.rnpv.toFixed(0)}M > base rNPV $${scenarios.base.rnpv.toFixed(0)}M.`,
-        { bear: scenarios.bear.rnpv, base: scenarios.base.rnpv }),
+      basePositive
+        ? v('critical', 'scenario.bear_above_base',
+          `Bear rNPV $${scenarios.bear.rnpv.toFixed(0)}M > base rNPV $${scenarios.base.rnpv.toFixed(0)}M.`,
+          { bear: scenarios.bear.rnpv, base: scenarios.base.rnpv })
+        : v('warning', 'scenario.bear_above_base_negative_base',
+          `Bear rNPV $${scenarios.bear.rnpv.toFixed(0)}M > base rNPV $${scenarios.base.rnpv.toFixed(0)}M with a non-positive base (expected: bear shrinks the probability-weighted spend).`,
+          { bear: scenarios.bear.rnpv, base: scenarios.base.rnpv }),
     );
   }
   if (scenarios.base.rnpv > scenarios.bull.rnpv + 0.5) {
     out.push(
-      v('critical', 'scenario.base_above_bull',
-        `Base rNPV $${scenarios.base.rnpv.toFixed(0)}M > bull rNPV $${scenarios.bull.rnpv.toFixed(0)}M.`,
-        { base: scenarios.base.rnpv, bull: scenarios.bull.rnpv }),
+      basePositive
+        ? v('critical', 'scenario.base_above_bull',
+          `Base rNPV $${scenarios.base.rnpv.toFixed(0)}M > bull rNPV $${scenarios.bull.rnpv.toFixed(0)}M.`,
+          { base: scenarios.base.rnpv, bull: scenarios.bull.rnpv })
+        : v('warning', 'scenario.base_above_bull_negative_base',
+          `Base rNPV $${scenarios.base.rnpv.toFixed(0)}M > bull rNPV $${scenarios.bull.rnpv.toFixed(0)}M with a non-positive base.`,
+          { base: scenarios.base.rnpv, bull: scenarios.bull.rnpv }),
     );
   }
 

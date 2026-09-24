@@ -260,3 +260,41 @@ describe('7. the blended headline rests on the same comparables as the published
     expect(model.ensemble.customCompCount).toBe(4);
   });
 });
+
+describe('8. scenario ordering on negative-rNPV programs (Sep 24 2026 Sentry follow-up)', () => {
+  const scenarioCriticals = (input: RNPVInput) =>
+    checkScenarioInvariants(generateScenarioComparison(input, calculateRNPV(input), calculateRNPV))
+      .filter(x => x.severity === 'critical')
+      .map(x => x.rule);
+
+  it.each([
+    ['preclinical CNS licensing', preclinicalCNS],
+    ['phase 1 gastric ADC codev', phase1GastricADCCodev],
+    ['phase 2 NSCLC licensing', phase2NSCLC],
+  ])('%s raises no scenario critical', (_label, input) => {
+    expect(scenarioCriticals(input)).toEqual([]);
+  });
+
+  it('a bear case above a NON-positive base is a warning, not a critical', () => {
+    const base = calculateRNPV(phase2NSCLC);
+    const sc = generateScenarioComparison(phase2NSCLC, base, calculateRNPV);
+    const tampered = {
+      ...sc,
+      base: { ...sc.base, rnpv: -40 },
+      bear: { ...sc.bear, rnpv: -12 },
+    };
+    const out = checkScenarioInvariants(tampered);
+    expect(out.map(x => x.rule)).not.toContain('scenario.bear_above_base');
+    const warn = out.find(x => x.rule === 'scenario.bear_above_base_negative_base');
+    expect(warn?.severity).toBe('warning');
+  });
+
+  it('a bear case above a POSITIVE base is still a critical', () => {
+    const base = calculateRNPV(phase2NSCLC);
+    const sc = generateScenarioComparison(phase2NSCLC, base, calculateRNPV);
+    expect(sc.base.rnpv).toBeGreaterThan(0);
+    const tampered = { ...sc, bear: { ...sc.bear, rnpv: sc.base.rnpv * 2 } };
+    const crit = checkScenarioInvariants(tampered).find(x => x.rule === 'scenario.bear_above_base');
+    expect(crit?.severity).toBe('critical');
+  });
+});
