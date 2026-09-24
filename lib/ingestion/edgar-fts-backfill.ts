@@ -76,9 +76,21 @@ export interface BackfillResult {
   finished: boolean;
 }
 
-function advance(state: BackfillCursorState, quarters: ReturnType<typeof quartersSince>, exhaustedPage: boolean): BackfillCursorState {
+/** What the cursor does after a run. */
+export type CursorStep = 'stay' | 'next_page' | 'next_query';
+
+/**
+ * 'stay'       page not drained (cap or time budget hit); the ledger makes the
+ *              next run skip what was already extracted, so no filing is lost.
+ * 'next_page'  page drained and EFTS reports more hits for this query.
+ * 'next_query' page drained and no more hits; roll to the next query, then quarter.
+ * Before Sep 24 2026 a cap hit advanced the page and silently dropped the
+ * unextracted remainder.
+ */
+function advance(state: BackfillCursorState, quarters: ReturnType<typeof quartersSince>, step: CursorStep): BackfillCursorState {
   const next: BackfillCursorState = { ...state, completedQuarters: [...state.completedQuarters] };
-  if (!exhaustedPage) { next.from += EFTS_PAGE_SIZE; return next; }
+  if (step === 'stay') return next;
+  if (step === 'next_page') { next.from += EFTS_PAGE_SIZE; return next; }
   next.from = 0;
   next.queryIndex += 1;
   if (next.queryIndex >= PHARMA_DEAL_QUERIES.length) {
@@ -117,13 +129,13 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
 
   const concurrency = Math.max(1, opts.concurrency ?? 1);
   let candidates = 0, prefiltered = 0, alreadyProcessed = 0, extracted = 0, passed = 0, inserted = 0;
-  let exhaustedPage = true;
+  let step: CursorStep = 'next_query';
 
   if (!finished) {
     const page = await eftsSearch({ q: query.q, startdt: quarter.startdt, enddt: quarter.enddt, from: state.from });
     if (page.parseFailed && page.hits.length === 0) {
       errors.push(`EFTS non-JSON body for ${query.key} ${quarter.key} from=${state.from}; will retry next run`);
-      exhaustedPage = false; // stay on this page
+      step = 'stay'; // retry this page next run
     } else if (page.status !== 200 && !(page.status === 500 && state.from > 0)) {
       errors.push(`EFTS ${page.status} for ${query.key} ${quarter.key}`);
     } else {
@@ -156,21 +168,30 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
       const batch = todo.slice(0, maxExtractions);
       const capHit = todo.length > batch.length;
       if (capHit) funnel.count('time_budget', 'extraction_cap');
+      const record = async (doc: EftsDocument, outcome: string) => {
+        if (dryRun) return;
+        const { error: ledgerErr } = await supabase.from(PROCESSED_TABLE).upsert({
+          accession: doc.accession, outcome, quarter: quarter.key, query_key: query.key,
+          form: doc.form || null, filing_date: doc.filingDate || null, company: doc.companyName || null,
+        }, { onConflict: 'accession' });
+        if (ledgerErr) errors.push(`ledger write failed ${doc.accession}: ${ledgerErr.message}`);
+      };
       const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
-        const outcome = await processEftsDocument(supabase, doc, {
-          anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel,
-          sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
-        });
+        let outcome: string;
+        try {
+          outcome = await processEftsDocument(supabase, doc, {
+            anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel,
+            sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
+          });
+        } catch (e) {
+          // One attempt per filing. Recording the failure keeps a flaky filing from pinning the cursor;
+          // delete its ledger row to retry by hand.
+          await record(doc, 'extraction_error');
+          throw e;
+        }
         if (outcome === 'inserted') { passed++; inserted++; }
         if (outcome === 'error') errors.push(`insert error ${doc.accession}`);
-        // Record everything except insert errors, so those retry next run.
-        if (!dryRun && outcome !== 'error') {
-          const { error: ledgerErr } = await supabase.from(PROCESSED_TABLE).upsert({
-            accession: doc.accession, outcome, quarter: quarter.key, query_key: query.key,
-            form: doc.form || null, filing_date: doc.filingDate || null, company: doc.companyName || null,
-          }, { onConflict: 'accession' });
-          if (ledgerErr) errors.push(`ledger write failed ${doc.accession}: ${ledgerErr.message}`);
-        }
+        await record(doc, outcome === 'error' ? 'insert_error' : outcome);
         return outcome;
       }, () => Date.now() - start < budget);
       extracted = run.started;
@@ -180,13 +201,14 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
       }
       const budgetHit = run.started < batch.length;
       if (budgetHit) funnel.count('time_budget', 'hits_remaining');
-      // The page is drained only when every unseen doc was started and none were left behind the cap.
-      exhaustedPage = !capHit && !budgetHit;
-      if (exhaustedPage && state.from + EFTS_PAGE_SIZE < page.total) exhaustedPage = false;
+      // Drained only when every unseen doc was started and none were left behind the cap.
+      if (capHit || budgetHit) step = 'stay';
+      else if (state.from + EFTS_PAGE_SIZE < page.total) step = 'next_page';
+      else step = 'next_query';
     }
   }
 
-  const next = finished ? state : advance(state, quarters, exhaustedPage);
+  const next = finished ? state : advance(state, quarters, step);
   if (!dryRun && !opts.cursorOverride) {
     await writeSyncCursor(supabase, BACKFILL_CURSOR_SOURCE, `${next.quarterKey}:${next.queryIndex}:${next.from}`, next);
   }
