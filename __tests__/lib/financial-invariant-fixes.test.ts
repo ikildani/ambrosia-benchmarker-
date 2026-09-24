@@ -298,3 +298,45 @@ describe('8. scenario ordering on negative-rNPV programs (Sep 24 2026 Sentry fol
     expect(crit?.severity).toBe('critical');
   });
 });
+
+describe('9. the orchestrator check block is Sentry-quiet across the phase x TA x deal-type grid', () => {
+  // Mirrors run-financial-model.ts (Layer 2 cross-engine consistency): the
+  // four rules that reached Sentry on Sep 24 2026 all live in this block, and
+  // none of the property/fuzz suites exercised it before this test.
+  const grid: Array<{ phase: string; ta: string; modality: string; indication: string; dealType: string; peak: number }> = [];
+  for (const phase of ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase3']) {
+    for (const [ta, modality, indication] of [
+      ['neurology', 'smallMolecule', 'schizophrenia'],
+      ['oncology', 'adc', 'gastric'],
+      ['rareDisease', 'geneTherapy', 'dmd'],
+    ]) {
+      for (const dealType of ['licensing', 'codevelopment', 'option', 'acquisition']) {
+        grid.push({ phase, ta, modality, indication, dealType, peak: ta === 'rareDisease' ? 500 : 2000 });
+      }
+    }
+  }
+
+  it.each(grid.map(g => [`${g.phase} ${g.ta} ${g.dealType}`, g] as const))('%s', (_label, g) => {
+    const input: RNPVInput = {
+      phase: g.phase as never,
+      therapeuticArea: g.ta as never,
+      modality: g.modality as never,
+      indication: g.indication,
+      territory: 'global',
+      peakSalesEstimate: { low: g.peak * 0.5, median: g.peak, high: g.peak * 2 },
+      competitivePosition: 'racing',
+      dataQuality: 'promising',
+      regulatoryDesignations: designations,
+      dealType: g.dealType as never,
+    };
+    const rnpv = calculateRNPV(input);
+    const mc = runMonteCarlo({ rnpvInput: input, engineRNPV: rnpv.riskAdjustedNPV }, 42);
+    const wf = buildDealWaterfall(input, rnpv);
+    const sc = generateScenarioComparison(input, rnpv, calculateRNPV);
+    const criticals = [
+      ...checkScenarioInvariants(sc),
+      ...checkCrossEngineConsistency(rnpv, mc, undefined, sc, wf, undefined),
+    ].filter(x => x.severity === 'critical');
+    expect(criticals.map(x => `${x.rule}: ${x.message}`)).toEqual([]);
+  });
+});
