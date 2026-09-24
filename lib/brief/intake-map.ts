@@ -143,6 +143,19 @@ export interface ResolvedIntake {
   notes: string[];
 }
 
+/** Engine DataQuality bucket implied by phase when the client has not told us more. */
+export function dataQualityForPhase(phase: Phase): CalculationInput['dataQuality'] {
+  switch (phase) {
+    case 'discovery':
+    case 'preclinical': return 'limited';
+    case 'phase1':
+    case 'phase1_2': return 'promising';
+    case 'phase2':
+    case 'phase2_3': return 'strongPhase2';
+    default: return 'pivotalReady';
+  }
+}
+
 const PHASE_LABEL: Record<Phase, string> = {
   discovery: 'Discovery', preclinical: 'Preclinical', phase1: 'Phase 1', phase1_2: 'Phase 1/2',
   phase2: 'Phase 2', phase2_3: 'Phase 2/3', phase3: 'Phase 3', nda_filed: 'NDA/BLA filed', approved: 'Approved',
@@ -170,7 +183,7 @@ export function resolveIntake(req: BenchmarkRequestRow, modalityLabels: Record<s
     indication: ind.key,
     territory,
     competitivePosition: 'racing',
-    dataQuality: phase === 'preclinical' || phase === 'discovery' ? 'preclinical' : 'strongPhase2',
+    dataQuality: dataQualityForPhase(phase),
     biomarker: 'unselected',
     regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
   } as unknown as CalculationInput;

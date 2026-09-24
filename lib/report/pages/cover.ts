@@ -19,6 +19,9 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
   const totalMedian = formatUsd(result.terms.totalDealValue.median);
   const upfrontMedian = formatUsd(result.terms.upfront.median);
   const gaugeHtml = renderRiskGauge(riskScore, 90);
+  const asset = data.brief?.asset;
+  const assetLine = asset?.assetName ? `${escapeHtml(asset.assetName)} &middot; ` : '';
+  const preparedFor = asset?.company ? `<span style="margin-left: 10px; font-size: 8px; color: rgba(255,255,255,0.55); letter-spacing: 0.12em; text-transform: uppercase;">Prepared for ${escapeHtml(asset.company)}</span>` : '';
 
   return `
     <div class="report-page cover-page">
@@ -34,13 +37,13 @@ export function renderCoverPage(data: PDFReportData, meta: ReportMeta): string {
 
         <!-- Title -->
         <div style="margin-bottom: 6px; position: relative;">
-          <span style="background: rgba(13,148,136,0.15); border: 1px solid rgba(13,148,136,0.3); padding: 3px 14px; border-radius: 3px; font-size: 8px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #5eead4;">Confidential</span>
+          <span style="background: rgba(13,148,136,0.15); border: 1px solid rgba(13,148,136,0.3); padding: 3px 14px; border-radius: 3px; font-size: 8px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #5eead4;">Confidential</span>${preparedFor}
         </div>
         <h1 style="font-size: 32px; font-weight: 800; line-height: 1.1; margin-bottom: 5px; letter-spacing: -0.03em; position: relative;">
           Deal Intelligence Brief
         </h1>
         <p style="font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 28px; letter-spacing: 0.03em; position: relative; font-weight: 400;">
-          ${escapeHtml(phase)} &middot; ${escapeHtml(modality)} &middot; ${escapeHtml(indication)}
+          ${assetLine}${escapeHtml(phase)} &middot; ${escapeHtml(modality)} &middot; ${escapeHtml(indication)}
         </p>
 
         <!-- Key Metrics Row -->

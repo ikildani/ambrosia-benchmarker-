@@ -10,7 +10,7 @@ const TYPE_LABEL: Record<string, string> = {
   large_pharma: 'Large pharma', mid_pharma: 'Mid pharma', large_biotech: 'Large biotech', mid_biotech: 'Mid biotech', specialty: 'Specialty',
 };
 const REGION_LABEL: Record<string, string> = {
-  north_america: 'N. America', europe: 'Europe', japan: 'Japan', china: 'China', south_korea: 'Korea', latin_america: 'LatAm', asia_pacific: 'APAC', unknown: '—',
+  north_america: 'N America', europe: 'Europe', japan: 'Japan', china: 'China', south_korea: 'Korea', latin_america: 'LatAm', asia_pacific: 'APAC', unknown: '—',
 };
 
 const usdShort = (v: number | null | undefined): string => {
@@ -23,7 +23,7 @@ const usdShort = (v: number | null | undefined): string => {
 function phaseRange(c: BuyerCandidate): string {
   const lo = c.phasePreference.min ? phaseLabelAny(c.phasePreference.min) : null;
   const hi = c.phasePreference.max ? phaseLabelAny(c.phasePreference.max) : null;
-  if (lo && hi && lo !== 'Unknown' && hi !== 'Unknown') return lo === hi ? lo : `${lo}–${hi}`;
+  if (lo && hi && lo !== 'Unknown' && hi !== 'Unknown') return lo === hi ? lo : `${lo.replace('Phase ', 'Ph ')}–${hi.replace('Phase ', 'Ph ')}`;
   if (lo && lo !== 'Unknown') return `${lo}+`;
   if (hi && hi !== 'Unknown') return `to ${hi}`;
   return '—';
@@ -58,8 +58,8 @@ export function renderBuyerMapPage(data: PDFReportData, meta: ReportMeta): strin
   const toYear = asOfYear + 8;
   const cliffCount = rows.reduce((s, c) => s + c.patentCliffs.length, 0);
 
-  const th = (label: string, align = 'left') => `<th style="padding: 5px 7px; text-align: ${align}; font-size: 7px;">${escapeHtml(label)}</th>`;
-  const td = (html: string, align = 'left', extra = '') => `<td style="padding: 4px 7px; text-align: ${align}; font-size: 8.5px; ${extra}">${html}</td>`;
+  const th = (label: string, align = 'left') => `<th style="padding: 4px 5px; text-align: ${align}; font-size: 6.5px; line-height: 1.2; vertical-align: bottom;">${escapeHtml(label)}</th>`;
+  const td = (html: string, align = 'left', extra = '') => `<td style="padding: 3px 6px; text-align: ${align}; font-size: 8.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; ${extra}">${html}</td>`;
 
   const tableRows = rows.map(c => {
     const rar = (c.revenueAtRisk.y2026 ?? 0) + (c.revenueAtRisk.y2027 ?? 0);
@@ -86,27 +86,28 @@ export function renderBuyerMapPage(data: PDFReportData, meta: ReportMeta): strin
       ${head}
       ${title}
 
-      <div class="card" style="padding: 10px 12px 8px; margin-bottom: 10px;">
+      <div class="card" style="padding: 8px 12px 6px; margin-bottom: 8px;">
         ${microLabel(`Fit vs urgency · bubbles filled where the buyer has transacted at ${assetPhase}`)}
-        <div class="chart-container" style="margin: 2px 0 0;">${renderBuyerQuadrant(rows, 560, 250)}</div>
+        <div class="chart-container" style="margin: 2px 0 0;">${renderBuyerQuadrant(rows, 560, 236)}</div>
         ${chartSource({ source: map.source.source, n: rows.length, asOf: map.source.asOf, note: 'fit from partner matching; urgency = revenue at risk 40, deal cadence 25, intent 25, BD hiring 10' })}
       </div>
 
-      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 10px;">
-        <table class="data-table" style="font-size: 8.5px;">
+      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 8px;">
+        <table class="data-table" style="font-size: 8.5px; table-layout: fixed; width: 100%;">
+          <colgroup><col style="width: 21%"><col style="width: 11%"><col style="width: 9%"><col style="width: 6%"><col style="width: 8%"><col style="width: 7%"><col style="width: 11%"><col style="width: 12%"><col style="width: 8%"><col style="width: 7%"></colgroup>
           <thead>
             <tr>
-              ${th('Buyer')}${th('Type')}${th('Region')}${th('Fit', 'center')}${th('Urgency', 'center')}${th('Deals 12m', 'center')}${th('At risk 2026–27', 'right')}${th('Phase range', 'center')}${th(`Transacts at ${assetPhase}`, 'center')}${th('Implied upfront', 'right')}
+              ${th('Buyer')}${th('Type')}${th('Region')}${th('Fit', 'center')}${th('Urgency', 'center')}${th('Deals 12m', 'center')}${th('At risk 26–27', 'right')}${th('Phase range', 'center')}${th(`At ${assetPhase}`, 'center')}${th('Upfront', 'right')}
             </tr>
           </thead>
           <tbody>${tableRows}</tbody>
         </table>
-        <div style="padding: 0 10px 8px;">
+        <div style="padding: 0 10px 6px;">
           ${chartSource({ source: map.source.source, n: map.source.n, asOf: map.source.asOf, note: map.source.note })}
         </div>
       </div>
 
-      <div class="card" style="padding: 10px 12px 8px;">
+      <div class="card" style="padding: 8px 12px 6px;">
         ${microLabel(`Loss-of-exclusivity calendar ${fromYear}–${toYear} · marker size = revenue on the expiring product`)}
         <div class="chart-container" style="margin: 2px 0 0;">${renderLoeCalendar(rows, fromYear, toYear, 560)}</div>
         ${chartSource({ source: 'Company filings via Solidus company profiles', n: cliffCount, asOf: map.source.asOf, note: cliffCount === 0 ? 'no disclosed patent cliffs on these buyers' : 'disclosed cliffs only; undisclosed products are not shown' })}

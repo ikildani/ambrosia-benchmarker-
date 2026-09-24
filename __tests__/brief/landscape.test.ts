@@ -373,6 +373,16 @@ describe('buildCatalystCalendar (stubbed client)', () => {
     const db = stubDb({ company_trials: [], companies: [], indication_patent_cliffs: [] });
     expect(await buildCatalystCalendar(db, asset, { asOf: AS_OF })).toBeNull();
   });
+  it('collapses the same intervention/phase/date listed under a sponsor-name variant', async () => {
+    const twins = [
+      trial({ nct_id: 'NCT20', lead_sponsor_name: 'Bristol-Myers Squibb', intervention_name: 'KarXT', modality: 'small_molecule', phase: 'phase_3', primary_completion_date: '2026-10-05' }),
+      trial({ nct_id: 'NCT21', lead_sponsor_name: 'Karuna Therapeutics, Inc., a Bristol Myers Squibb company', intervention_name: 'KarXT', modality: 'small_molecule', phase: 'phase_3', primary_completion_date: '2026-10-05' }),
+      trial({ nct_id: 'NCT22', lead_sponsor_name: 'Other Co', intervention_name: 'KarXT', modality: 'small_molecule', phase: 'phase_3', primary_completion_date: '2027-04-05' }),
+    ];
+    const db = stubDb({ company_trials: twins, companies: [], indication_patent_cliffs: [] });
+    const cal = (await buildCatalystCalendar(db, asset, { asOf: AS_OF }))!;
+    expect(cal.events.filter(e => e.kind === 'readout').map(e => e.nctId)).toEqual(['NCT20', 'NCT22']);
+  });
 });
 
 describe('buildLandscape', () => {

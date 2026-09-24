@@ -371,11 +371,12 @@ describe('renderBuyerMapPage', () => {
     expect(html).toContain('Buyer map');
     expect(html).toContain('Who has the fit, the urgency, and the habit of transacting at this stage?');
     expect((html.match(/Source: /g) || []).length).toBe(3);
-    expect((html.match(/<svg /g) || []).length).toBe(2);
+    expect(html).toMatch(/id="bq-/);
+    expect(html).toMatch(/id="loe-/);
     expect(html).toContain('AbbVie &lt;Immunology&gt;');
     expect(html).not.toContain('<Immunology>');
     expect(html).toContain('$35M'); // implied upfront
-    expect(html).toContain('Transacts at Preclinical');
+    expect(html).toContain('At Preclinical');
     expect(html).not.toMatch(/Deal Valuation Report|illustrative|sample\b/i);
   });
   it('caps the capacity table at 10 rows', () => {
@@ -388,7 +389,7 @@ describe('renderBuyerMapPage', () => {
     expect(html).toContain('class="report-page"');
     expect(html).toContain('Buyer map');
     expect(html).toContain('No buyer map for this asset');
-    expect(html).not.toContain('<svg');
+    expect(html).not.toMatch(/id="(bq|loe)-/);
   });
 });
 

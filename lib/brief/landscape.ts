@@ -255,9 +255,9 @@ export function trialMatchesIndication(row: Pick<TrialRow, 'conditions' | 'indic
 export function normaliseTrialPhase(phase: string | null | undefined): DealPhase | null {
   const k = (phase ?? '').toLowerCase().replace(/[\s/]+/g, '_');
   switch (k) {
-    case 'early_phase_1': case 'early_phase1': case 'phase_1': case 'phase1': case 'phase_1_2': case 'phase1_phase2': case 'phase_1_phase_2':
+    case 'early_phase_1': case 'early_phase1': case 'phase_1': case 'phase1': case 'phase_1_2': case 'phase1_2': case 'phase1_phase2': case 'phase_1_phase_2':
       return 'phase_1';
-    case 'phase_2': case 'phase2': case 'phase_2_3': case 'phase2_phase3': case 'phase_2_phase_3':
+    case 'phase_2': case 'phase2': case 'phase_2_3': case 'phase2_3': case 'phase2_phase3': case 'phase_2_phase_3':
       return 'phase_2';
     case 'phase_3': case 'phase3':
       return 'phase_3';
@@ -608,23 +608,31 @@ export async function buildCatalystCalendar(
   const assetBucket = normaliseBucket(asset.modality, null, asset.assetName ?? null);
 
   // Readouts
-  const rows = await fetchIndicationTrials(db, asset, spec, { phases: READOUT_PHASES, completionFrom: asOf, completionTo: windowEnd });
+  const fetched = await fetchIndicationTrials(db, asset, spec, { phases: READOUT_PHASES, completionFrom: asOf, completionTo: windowEnd });
+  // Industry sponsors preferred (same rule as the pipeline map); academic/government included when thin.
+  const industryRows = fetched.filter(isIndustry);
+  const rows = industryRows.length >= 8 ? industryRows : fetched;
   const seen = new Map<string, CatalystEventInternal>();
   for (const r of rows) {
     const phase = normaliseTrialPhase(r.phase);
     if (!phase || !r.primary_completion_date) continue;
     const sponsor = sponsorOf(r);
     const intervention = (r.intervention_name || r.target || 'Undisclosed').trim();
+    const date = r.primary_completion_date.slice(0, 10);
+    // One event per (sponsor, intervention, phase); the same intervention at the same phase
+    // completing on the same date is one trial listed under a sponsor-name variant → collapse.
     const key = `${sponsor.toLowerCase()}|${intervention.toLowerCase().slice(0, 60)}|${phase}`;
+    const twinKey = `${intervention.toLowerCase().slice(0, 60)}|${phase}|${date}`;
     const prev = seen.get(key);
-    if (prev && prev.date <= r.primary_completion_date) continue;
+    if (prev && prev.date <= date) continue;
+    if (!prev && [...seen.values()].some(e => `${(e.title.split(' · ')[1] ?? '').toLowerCase().slice(0, 60)}|${e.phase}|${e.date}` === twinKey)) continue;
     const bucket = normaliseBucket(r.modality, r.intervention_type, r.intervention_name);
     const sameBucket = bucket === assetBucket;
     const isBuyer = matchesBuyer(sponsor, buyerNames);
     const { impact, direction } = readoutImpact({ phase, sameBucket, isBuyerCandidate: isBuyer, large: isLargeSponsor(sponsor) || isBuyer });
     const phaseLabel = r.phase?.toLowerCase().includes('2_3') ? 'Phase 2/3' : phase === 'phase_3' ? 'Phase 3' : 'Phase 2';
     seen.set(key, {
-      date: r.primary_completion_date.slice(0, 10),
+      date,
       kind: 'readout',
       title: `${sponsor} · ${intervention} · ${phaseLabel} primary completion`,
       sponsor, phase, nctId: r.nct_id, impact, direction, isBuyerCandidate: isBuyer, sameBucket,
@@ -694,7 +702,7 @@ export async function buildCatalystCalendar(
       source: 'ClinicalTrials.gov via Solidus; company filings for exclusivity',
       n: readouts.length + loe.length,
       asOf,
-      note: `${readouts.length} Phase 2/3 primary completions and ${loe.length} exclusivity events in the next ${windowMonths} months${readouts.length > keep ? `; ${keep} nearest readouts shown` : ''}`,
+      note: `${readouts.length} Phase 2/3 primary completions${rows.length === industryRows.length ? ' (industry sponsors)' : ''} and ${loe.length} exclusivity events in the next ${windowMonths} months${readouts.length > keep ? `; ${keep} nearest readouts shown` : ''}`,
     },
     windowMonths,
     events: kept.map(({ sameBucket: _sb, ...e }) => e),

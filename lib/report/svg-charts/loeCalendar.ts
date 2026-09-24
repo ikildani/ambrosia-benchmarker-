@@ -16,13 +16,13 @@ const usdShort = (v: number | null | undefined): string => {
 
 /** Height the calendar will occupy for `n` rows (so the page can budget space). */
 export function loeCalendarHeight(rows: number): number {
-  return 22 + Math.max(1, rows) * 24 + 6;
+  return 22 + Math.max(1, rows) * 21 + 6;
 }
 
 export function renderLoeCalendar(candidates: BuyerCandidate[], fromYear: number, toYear: number, width = 560): string {
   const w = Math.min(560, width);
   const rows = candidates.slice(0, 8);
-  const rowH = 24;
+  const rowH = 21;
   const top = 22;
   const labelW = 118;
   const totalW = 70;

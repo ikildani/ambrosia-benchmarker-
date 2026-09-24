@@ -23,6 +23,10 @@ import { getPlaybookGenerator } from '@/lib/ai/playbook-generator';
 import type { PDFReportData } from '@/lib/report/types';
 import { renderPDFBuffer } from '@/lib/report/server-renderer';
 import epiData from '@/data/epidemiology.json';
+import { resolveIntake } from '@/lib/brief/intake-map';
+import { buildBrief } from '@/lib/brief/build';
+import { modalityLabels } from '@/lib/report/helpers';
+import type { MPOpinion } from '@/lib/brief/types';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -63,31 +67,24 @@ export async function POST(request: NextRequest) {
     .eq('id', requestId);
 
   try {
-    // Step 1: Build base input (mAb/licensing baseline for financial model)
+    // Step 1: Resolve the intake into engine keys + asset profile (v3)
+    const resolved = resolveIntake(req, modalityLabels);
     const baseInput: CalculationInput = {
-      therapeuticArea: req.therapeutic_area as any,
-      phase: req.phase as any,
-      dealType: 'licensing' as any,
-      modality: 'mab' as any,
-      indication: req.indication as any,
-      territory: (req.territory || 'global') as any,
-      competitivePosition: 'racing',
-      dataQuality: 'strongPhase2',
-      biomarker: 'unselected',
-      regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
-      peakSalesOverrideM: 1500,
+      ...resolved.input,
+      peakSalesOverrideM: (resolved.input as { peakSalesOverrideM?: number }).peakSalesOverrideM,
     } as CalculationInput;
+    const genNotes: string[] = [...resolved.notes];
 
     const baseResult = calculateDealTerms(baseInput);
     const sensitivityData = computeSensitivityAnalysis(baseInput, baseResult);
     const riskScore = calculateRiskScore(baseInput);
     const comparableDeals = findComparableDeals({
-      therapeuticArea: req.therapeutic_area,
-      modality: 'mab',
-      indication: req.indication,
-      phase: req.phase,
-      dealType: 'licensing',
-      territory: req.territory || 'global',
+      therapeuticArea: baseInput.therapeuticArea,
+      modality: baseInput.modality,
+      indication: baseInput.indication,
+      phase: baseInput.phase,
+      dealType: baseInput.dealType,
+      territory: baseInput.territory,
     }, 8);
 
     // Step 2: Financial model
@@ -100,11 +97,7 @@ export async function POST(request: NextRequest) {
       memoData = await memoGen.generateMemo({
         inputs: baseInput,
         results: baseResult,
-        labels: {
-          phase: req.phase,
-          modality: 'Monoclonal Antibody',
-          indication: req.indication,
-        },
+        labels: resolved.labels,
       });
       if (!memoData.confidence_level) memoData.confidence_level = 'medium';
       if (!memoData.market_context) memoData.market_context = '';
@@ -119,11 +112,7 @@ export async function POST(request: NextRequest) {
       playbookData = await playbookGen.generatePlaybook({
         inputs: baseInput,
         results: baseResult,
-        labels: {
-          phase: req.phase,
-          modality: 'Monoclonal Antibody',
-          indication: req.indication,
-        },
+        labels: resolved.labels,
       });
     } catch (err) {
       console.error('[Benchmark Gen] AI playbook failed:', err);
@@ -136,11 +125,11 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          modality: 'mab',
-          development_phase: req.phase,
-          indication_category: req.indication,
-          territory_scope: req.territory || 'global',
-          therapeutic_area: req.therapeutic_area,
+          modality: baseInput.modality,
+          development_phase: baseInput.phase,
+          indication_category: baseInput.indication,
+          territory_scope: baseInput.territory,
+          therapeutic_area: baseInput.therapeuticArea,
           tier: 'pro',
         }),
       });
@@ -155,12 +144,40 @@ export async function POST(request: NextRequest) {
             hq_country: m.hq_country,
             strategic_context: m.strategic_context || null,
             pharma_intent: m.pharma_intent || null,
+            company_id: m.company_id ?? null,
+            company_type: m.company_type ?? null,
+            deals_last_24mo: m.deals_last_24mo ?? null,
+            last_deal_date: m.last_deal_date ?? null,
+            phase_preference_min: m.phase_preference_min ?? null,
+            phase_preference_max: m.phase_preference_max ?? null,
+            acquisition_appetite: m.acquisition_appetite ?? null,
+            median_upfront_usd: m.median_upfront_usd ?? null,
           }));
         }
       }
     } catch (err) {
       console.error('[Benchmark Gen] Partner match failed:', err);
     }
+
+    // Step 5b: Brief v3 intelligence layer (comps, buyers, landscape, bridge, decision…)
+    const mpOpinion: MPOpinion | null = req.mp_opinion
+      ? { text: req.mp_opinion, reviewer: req.mp_reviewer || 'Issa Kildani, Managing Partner', reviewedAt: req.mp_reviewed_at || new Date().toISOString() }
+      : null;
+    const built = await buildBrief({
+      supabase,
+      asset: resolved.asset,
+      inputs: baseInput,
+      result: baseResult,
+      fm,
+      partners: partnerMatches ?? [],
+      memo: memoData,
+      defensive: fm.defensiveAnalysis,
+      mpOpinion,
+      diligenceReady: req.diligence_ready ?? [],
+      diligenceGaps: req.diligence_gaps ?? [],
+      log: (m) => console.log(m),
+    });
+    genNotes.push(...built.notes);
 
     // Step 6: Assemble PDFReportData
     const pdfData: PDFReportData = {
@@ -183,8 +200,9 @@ export async function POST(request: NextRequest) {
       lifecycleExtensions: fm.lifecycleExtensions,
       competitiveDynamics: fm.competitiveDynamics,
       realOptions: fm.realOptions,
-      buyerSpecificValuation: undefined,
-      buyerSpecificValuations: undefined,
+      buyerSpecificValuation: built.buyerValuations[0],
+      buyerSpecificValuations: built.buyerValuations.length ? built.buyerValuations : undefined,
+      brief: built.brief,
       regulatoryRisk: fm.regulatoryRisk,
       milestoneProbabilities: fm.milestoneProbabilities,
       earnoutValuation: fm.earnoutValuation,
@@ -237,6 +255,7 @@ export async function POST(request: NextRequest) {
         pdf_url: pdfUrl,
         brief_token: briefToken,
         brief_page_count: Math.round(pdfBuffer.length / 25000),
+        admin_notes: genNotes.length ? `v3 build notes:\n${genNotes.join('\n')}` : req.admin_notes,
       })
       .eq('id', requestId);
 

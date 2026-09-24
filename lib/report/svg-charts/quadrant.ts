@@ -22,7 +22,7 @@ function sizeProxy(c: BuyerCandidate): number | null {
 export function renderBuyerQuadrant(candidates: BuyerCandidate[], width = 560, height = 300): string {
   const w = Math.min(560, width);
   const h = height;
-  const m = { left: 36, right: 14, top: 14, bottom: 30 };
+  const m = { left: 36, right: 14, top: 14, bottom: 40 };
   const pw = w - m.left - m.right;
   const ph = h - m.top - m.bottom;
   const uid = `bq-${Math.random().toString(36).slice(2, 8)}`;
@@ -103,7 +103,7 @@ export function renderBuyerQuadrant(candidates: BuyerCandidate[], width = 560, h
   const yTicks = ticks.map(t => `<text x="${(m.left - 6).toFixed(1)}" y="${(sy(t) + 2.5).toFixed(1)}" text-anchor="end" font-size="7" fill="${COLORS.gray400}" font-family="${FONT}">${t}</text>`).join('');
 
   const legend = `
-    <g transform="translate(${m.left + 4},${h - 8})" font-family="${FONT}" font-size="7" fill="${COLORS.gray500}">
+    <g transform="translate(${m.left + 4},${h - 3})" font-family="${FONT}" font-size="7" fill="${COLORS.gray500}">
       <circle cx="4" cy="-2.5" r="3.5" fill="${COLORS.navy}" /><text x="11" y="0">Transacts at this phase</text>
       <circle cx="120" cy="-2.5" r="3.5" fill="${COLORS.white}" stroke="${COLORS.navy}" stroke-width="1.2" stroke-dasharray="2,1.5" /><text x="127" y="0">Unknown</text>
       <circle cx="176" cy="-2.5" r="3.5" fill="${COLORS.roseLight}" stroke="${COLORS.rose}" stroke-width="1.2" /><text x="183" y="0">Does not</text>

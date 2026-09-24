@@ -19,7 +19,7 @@ function sourceHost(url: string | null): string {
 
 function priorDealsTable(deals: BuyerPriorDeal[]): string {
   const th = (t: string, align = 'left') => `<th style="padding: 3px 5px; font-size: 6.5px; text-align: ${align}; letter-spacing: 0.06em;">${escapeHtml(t)}</th>`;
-  const td = (html: string, align = 'left') => `<td style="padding: 3px 5px; font-size: 8px; text-align: ${align}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">${html}</td>`;
+  const td = (html: string, align = 'left') => `<td style="padding: 3px 4px; font-size: 7.5px; text-align: ${align}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${html}</td>`;
   if (deals.length === 0) {
     return `<div style="font-size: 8.5px; color: ${COLORS.gray400}; font-style: italic; padding: 6px 0 2px;">No disclosed prior deals in our data for this buyer.</div>`;
   }
@@ -37,7 +37,8 @@ function priorDealsTable(deals: BuyerPriorDeal[]): string {
       </tr>`;
   }).join('');
   return `
-    <table class="data-table" style="font-size: 8px; margin-top: 4px;">
+    <table class="data-table" style="font-size: 7.5px; margin-top: 4px; table-layout: fixed; width: 100%;">
+      <colgroup><col style="width: 11%"><col style="width: 29%"><col style="width: 13%"><col style="width: 15%"><col style="width: 11%"><col style="width: 10%"><col style="width: 11%"></colgroup>
       <thead><tr>${th('Year', 'center')}${th('Licensor')}${th('Phase', 'center')}${th('Structure', 'center')}${th('Upfront', 'right')}${th('Total', 'right')}${th('Source')}</tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
@@ -50,7 +51,7 @@ function buyerCard(c: BuyerCandidate, rank: number): string {
     ? `<span style="font-size: 7px; color: ${COLORS.gray500}; margin-left: 6px;">pays ${c.counterpartyPremium.multiplier.toFixed(2)}× market (n=${c.counterpartyPremium.n})</span>`
     : '';
   return `
-    <div class="card" style="padding: 8px 10px; border-top: 3px solid ${verdictColor}; page-break-inside: avoid;">
+    <div class="card" style="padding: 8px 10px; border-top: 3px solid ${verdictColor}; page-break-inside: avoid; min-width: 0; overflow: hidden;">
       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px;">
         <div style="font-size: 10px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.01em;">${rank}. ${escapeHtml(c.name)}${premium}</div>
         <div style="font-size: 6.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${verdictColor}; white-space: nowrap;">${verdictText}</div>
@@ -101,12 +102,12 @@ export function renderBuyerBehaviourPage(data: PDFReportData, meta: ReportMeta):
       ${head}
       ${title}
 
-      <div class="grid-2" style="gap: 8px; margin-bottom: 8px;">
+      <div class="grid-2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-bottom: 8px;">
         ${top.map((c, i) => buyerCard(c, i + 1)).join('')}
       </div>
       ${chartSource({ source: map.source.source, n: map.source.n, asOf: map.source.asOf, note: `up to three prior deals per buyer, same-area deals marked •; ${map.source.note ?? ''}`.trim() })}
 
-      <div class="grid-2" style="gap: 10px; margin-top: 8px;">
+      <div class="grid-2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 8px;">
         <div class="card" style="padding: 10px 12px; border-left: 4px solid ${COLORS.rose};">
           ${microLabel('Not on the list')}
           ${excludedHtml}

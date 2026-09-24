@@ -111,7 +111,7 @@ export const BENCHMARK_PRICING = {
   CALCULATION_COUNT: 52,
   INCLUDES: [
     '52 deal calculations (13 modalities × 4 structures)',
-    'AI-written strategic narrative & negotiation playbook',
+    'Strategic analysis & negotiation playbook',
     `Comparable transactions from ${formatDealCount(LIVE_DEAL_COUNT)} deal database`,
     'Partner matching with intent scoring (6-10 counterparties)',
     'Full financial model suite (rNPV, Monte Carlo, scenarios)',

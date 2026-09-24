@@ -371,7 +371,7 @@ describe('charts', () => {
     const p = buildInflectionPath({ inputs, result, rnpv, asOf: AS_OF })!;
     const svg = renderDecisionTree(p, 560, 230);
     expect(svg).toContain('Today');
-    expect((svg.match(/RECOMMENDED/g) || []).length).toBe(3); // one tspan per leaf, text only on the recommended one
+    expect((svg.match(/RECOMMENDED/g) || []).length).toBe(1); // only the recommended leaf is labelled
     expect(svg).toContain('Partner after Phase 2');
   });
 });
@@ -411,7 +411,7 @@ describe('pages', () => {
   it('valuation bridge page renders two football fields, the source line, and an empty state', () => {
     const html = renderValuationBridgePage(pdfData({ bridge }), meta());
     expect(html).toContain('Valuation bridge');
-    expect((html.match(/<svg /g) || []).length).toBe(2);
+    expect((html.match(/id="ff-/g) || []).length).toBe(2); // two football fields (header logo svg excluded)
     expect(html).toContain('Source:');
     expect(html).toContain('Reconciliation');
     expect(renderValuationBridgePage(pdfData({}), meta())).toContain('Valuation bridge not available');
