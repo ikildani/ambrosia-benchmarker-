@@ -57,7 +57,17 @@ export interface EdgarRealtimeResult {
 export async function processEftsDocument(
   supabase: SupabaseClient,
   doc: EftsDocument,
-  opts: { anthropicApiKey: string; dryRun: boolean; minConfidence: number; funnel: FunnelCounter; sourceType: 'sec_8k' | 'sec_6k'; onHighValue?: EdgarRealtimeOptions['onHighValue'] },
+  opts: {
+    anthropicApiKey: string; dryRun: boolean; minConfidence: number; funnel: FunnelCounter; sourceType: 'sec_8k' | 'sec_6k';
+    onHighValue?: EdgarRealtimeOptions['onHighValue'];
+    /**
+     * Sep 24 2026: filings scoring in [reviewConfidence, minConfidence) are inserted as
+     * pending with a review note instead of dropped. The first fast backfill run put
+     * Assembly → Allergan (c=72) and Nerviano → Trovagene (c=72), both real 2017 deals,
+     * on the floor. The verification cron is the gate that promotes to verified.
+     */
+    reviewConfidence?: number;
+  },
 ): Promise<'inserted' | 'skipped' | 'error'> {
   const { funnel, dryRun } = opts;
   const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', doc.accession).limit(1).maybeSingle();
@@ -69,10 +79,12 @@ export async function processEftsDocument(
 
   const deal = await extractDealFromFiling(fetched.text.substring(0, 24_000), opts.anthropicApiKey);
   if (!deal) { funnel.count('not_a_deal', doc.fileType || 'unknown', `${doc.companyName} ${doc.accession}`); return 'skipped'; }
-  if (deal.confidence_score < opts.minConfidence) {
+  const floor = opts.reviewConfidence != null ? Math.min(opts.reviewConfidence, opts.minConfidence) : opts.minConfidence;
+  if (deal.confidence_score < floor) {
     funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`);
     return 'skipped';
   }
+  const needsReview = deal.confidence_score < opts.minConfidence;
   if (!deal.licensor?.trim() || !deal.licensee?.trim()) { funnel.count('missing_parties'); return 'skipped'; }
   const validation = validateExtractedDeal(deal);
   if (!validation.valid) { funnel.count('validator_rejected', validation.rejectCode, `${deal.licensor} → ${deal.licensee}: ${validation.rejectReason}`); return 'skipped'; }
@@ -111,7 +123,8 @@ export async function processEftsDocument(
       opt_in_rights: deal.opt_in_rights, opt_in_stage: deal.opt_in_stage, regulatory_designations: deal.regulatory_designations || [],
       term_years: deal.term_years, sublicense_rights: deal.sublicense_rights, rights_retained: deal.rights_retained,
       indications_licensed: deal.indications_licensed, includes_diagnostics: deal.includes_diagnostics || false,
-      announced_date: announcedDate, confidence_score: deal.confidence_score, extraction_notes: deal.extraction_notes,
+      announced_date: announcedDate, confidence_score: deal.confidence_score,
+      extraction_notes: needsReview ? `Confidence ${deal.confidence_score}: needs verifier review. ${deal.extraction_notes || ''}`.trim() : deal.extraction_notes,
       therapeutic_area: therapeuticArea,
       licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
       licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,

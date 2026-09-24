@@ -287,12 +287,16 @@ export function validateExtractedDeal(deal: ValidatableDeal): ValidationResult {
   }
 
   // Royalties above 30% are extremely rare — likely a parsing error
-  const royaltyHigh = (deal as Record<string, unknown>).royalty_high_pct as number | undefined;
-  if (royaltyHigh != null && royaltyHigh > 0.30) {
+  // Royalties are whole percents (10 = 10%) everywhere: the extractor prompt, the
+  // columns, and normalizeRoyaltyPct. Until Sep 24 2026 this compared against 0.30,
+  // so every extraction with a royalty above 0.3% was rejected as "900%" — the first
+  // fast backfill run threw out Arbutus → Alexion and Kite → Fosun on that alone.
+  const royaltyHigh = normalizeRoyaltyPct((deal as Record<string, unknown>).royalty_high_pct as number | null | undefined);
+  if (royaltyHigh != null && royaltyHigh > 30) {
     return {
       valid: false,
       rejectCode: 'unrealistic_royalty',
-      rejectReason: `Royalty high ${(royaltyHigh * 100).toFixed(1)}% exceeds maximum plausible (30%)`,
+      rejectReason: `Royalty high ${royaltyHigh.toFixed(1)}% exceeds maximum plausible (30%)`,
     };
   }
 

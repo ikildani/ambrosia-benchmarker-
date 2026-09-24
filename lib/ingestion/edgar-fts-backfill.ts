@@ -49,6 +49,8 @@ export interface BackfillOptions {
   timeBudgetMs?: number;
   maxExtractions?: number;
   minConfidence?: number;
+  /** Insert [reviewConfidence, minConfidence) as pending with a review note. Default 60. */
+  reviewConfidence?: number;
   /** Override the cursor for a one-off local run, e.g. { quarterKey: '2019Q3' }. Not persisted when set. */
   cursorOverride?: Partial<BackfillCursorState>;
   /** Restrict to one query key for a local probe. */
@@ -93,6 +95,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   const budget = opts.timeBudgetMs ?? 250_000;
   const maxExtractions = opts.maxExtractions ?? 30;
   const minConfidence = opts.minConfidence ?? 75;
+  const reviewConfidence = opts.reviewConfidence ?? 60;
   const dryRun = !!opts.dryRun;
   const quarters = quartersSince(BACKFILL_FROM_YEAR);
   const funnel = new FunnelCounter();
@@ -155,7 +158,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
       if (capHit) funnel.count('time_budget', 'extraction_cap');
       const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
         const outcome = await processEftsDocument(supabase, doc, {
-          anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel,
+          anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel,
           sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
         });
         if (outcome === 'inserted') { passed++; inserted++; }
