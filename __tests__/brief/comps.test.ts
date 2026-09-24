@@ -295,7 +295,7 @@ describe('page renderers', () => {
     const thin = buildCompSetFromRows(RAW.slice(0, 2), asset, { asOf: '2026-09-23' });
     expect(renderCompScatterPage(reportData({ compSet: thin }), meta())).toContain('fewer than the three needed');
   });
-  it('appendix: 22 rows per page, outlier superscript, source host, page numbers increment', () => {
+  it('appendix: 16 rows per page, outlier superscript, source host, page numbers increment', () => {
     const many: RawDealRow[] = Array.from({ length: 45 }, (_, i) => raw({ id: `r${i}`, upfront_usd: (i + 1) * 1e6, total_deal_value_usd: (i + 1) * 10e6 }));
     const big = buildCompSetFromRows(many, asset, { maxRows: 45, asOf: '2026-09-23' });
     const d = reportData({ compSet: big });

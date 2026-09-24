@@ -21,6 +21,36 @@ function eventDate(e: CatalystEvent): string {
   return formatShortDate(new Date(e.date));
 }
 
+/**
+ * Cap the events table so the page never spills onto a second sheet. The
+ * timeline above already plots every event, so the table lists as many as
+ * fit (at most 14) and a note counts the rest. Row height is estimated from
+ * the wrapped line count of the two text columns; the budget is the A4
+ * content height minus the fixed blocks on the page (header, title, timeline
+ * card, recommended-window callout, table chrome), with a safety margin.
+ */
+export function fitEventRows(events: CatalystEvent[], rw: CatalystCalendar['recommendedWindow']): CatalystEvent[] {
+  const MAX_ROWS = 14;
+  const rowEst = (e: CatalystEvent): number => {
+    const impactLines = Math.ceil(e.impact.length / 42);
+    const titleLines = Math.ceil((e.title.length + (e.isBuyerCandidate ? 8 : 0)) / 62);
+    return 10 + 12.5 * Math.max(1, impactLines, titleLines);
+  };
+  const calloutEst = rw ? 10 + 32 + 15 * Math.ceil(rw.rationale.length / 120) : 0;
+  // 1031 content px − header 56 − title block 59 − timeline card 300 − callout − gap 10 − table chrome 75 − safety 20
+  const budget = 1031 - 56 - 59 - 300 - calloutEst - 10 - 75 - 20;
+  const out: CatalystEvent[] = [];
+  let used = 0;
+  for (const e of events) {
+    if (out.length >= MAX_ROWS) break;
+    const h = rowEst(e);
+    if (out.length > 0 && used + h > budget) break;
+    out.push(e);
+    used += h;
+  }
+  return out;
+}
+
 export function renderCatalystCalendarPage(data: PDFReportData, meta: ReportMeta): string {
   const cal: CatalystCalendar | null | undefined = data.brief?.landscape?.catalysts;
   const head = sectionHead('Catalyst calendar', 'What happens in the next 24 months that reprices this asset, and when should we go to market?');
@@ -35,8 +65,8 @@ export function renderCatalystCalendarPage(data: PDFReportData, meta: ReportMeta
     </div>`;
   }
 
-  const rows = cal.events.slice(0, 14);
   const rw = cal.recommendedWindow;
+  const rows = fitEventRows(cal.events, rw);
 
   return `
     <div class="report-page">
@@ -72,11 +102,11 @@ export function renderCatalystCalendarPage(data: PDFReportData, meta: ReportMeta
           <tbody>
             ${rows.map(e => `
             <tr>
-              <td style="white-space: nowrap; font-weight: 600; padding: 5px 8px;">${escapeHtml(eventDate(e))}</td>
-              <td style="padding: 5px 8px; font-weight: ${e.isBuyerCandidate ? 800 : 500}; color: ${e.isBuyerCandidate ? COLORS.navy : COLORS.gray700};">${escapeHtml(e.title)}${e.isBuyerCandidate ? ' <span class="badge badge-navy" style="font-size: 6.5px; padding: 1px 5px;">Buyer</span>' : ''}</td>
-              <td style="padding: 5px 8px;">${escapeHtml(KIND_LABEL[e.kind] ?? e.kind)}</td>
-              <td style="padding: 5px 8px;">${directionBadge(e.direction)}</td>
-              <td style="padding: 5px 8px; color: ${COLORS.gray600}; line-height: 1.35;">${escapeHtml(e.impact)}</td>
+              <td style="white-space: nowrap; font-weight: 600; padding: 4px 8px;">${escapeHtml(eventDate(e))}</td>
+              <td style="padding: 4px 8px; font-weight: ${e.isBuyerCandidate ? 800 : 500}; color: ${e.isBuyerCandidate ? COLORS.navy : COLORS.gray700};">${escapeHtml(e.title)}${e.isBuyerCandidate ? ' <span class="badge badge-navy" style="font-size: 6.5px; padding: 1px 5px;">Buyer</span>' : ''}</td>
+              <td style="padding: 4px 8px;">${escapeHtml(KIND_LABEL[e.kind] ?? e.kind)}</td>
+              <td style="padding: 4px 8px;">${directionBadge(e.direction)}</td>
+              <td style="padding: 4px 8px; color: ${COLORS.gray600}; line-height: 1.35;">${escapeHtml(e.impact)}</td>
             </tr>`).join('')}
           </tbody>
         </table>

@@ -6,38 +6,35 @@ Branch `feat/brief-worldclass`. Owner: Issa Kildani. Contract: `lib/brief/types.
 
 The v2 Brief is an indication landscape export: 34 auto-generated pages, four uncited comps, four upfront numbers that disagree, no buyer stage evidence, no decision. v3 turns it into a document a CEO argues in a room: one decision page, one reconciled valuation, cited comps, buyers ranked on evidence, a catalyst clock, and a written position.
 
-## Page order (v3)
+## Page order (v3) — as assembled by `buildPageSpecs()` in `lib/report/index.ts`
 
-| # | Page | Renderer | Data |
-|---|------|----------|------|
-| 1 | Cover | existing `cover.ts` (title → "Deal Intelligence Brief", asset name if present) | `brief.asset` |
-| 2 | Table of contents | existing | — |
-| 3 | **The Decision** | `decisionPage.ts` | `brief.decision`, `brief.mpOpinion` |
-| 4 | Executive dashboard | existing (numbers must equal `bridge.ask`) | — |
-| 5 | **Valuation bridge** (football field) | `valuationBridge.ts` | `brief.bridge` |
-| 6 | Deal structure | existing | — |
-| 7 | Deal terms | existing | — |
-| 8 | **Comparable set** (scatter + distribution strips) | `compScatter.ts` | `brief.compSet` |
-| 9 | **Regional deal strategy** | `regionalStrategy.ts` | `brief.regional` |
-| 10 | **Term-sheet precedent map** | `termSheetPrecedent.ts` | `brief.termSheet` |
-| 11 | Sensitivity | existing | — |
-| 12 | Financial model (rNPV, MC) | existing | — |
-| 13 | **Path to next inflection** (decision tree + financing alternative) | `inflectionPath.ts` | `brief.inflection` |
-| 14 | Scenario comparison / waterfall / advanced | existing | — |
-| 15 | **Buyer map** (2×2 + capacity + LOE calendar) | `buyerMap.ts` | `brief.buyerMap` |
-| 16 | **Buyer stage behaviour** (prior deals, excluded list, process) | `buyerBehaviour.ts` | `brief.buyerMap` |
-| 17 | Buyer-specific valuation / synergies | existing | `buyerSpecificValuations` |
-| 18 | **Pipeline map** | `pipelineMap.ts` | `brief.landscape.pipeline` |
-| 19 | **Catalyst calendar** | `catalystCalendar.ts` | `brief.landscape.catalysts` |
-| 20 | **Patient funnel** | `patientFunnel.ts` | `brief.landscape.funnel` |
-| 21 | Therapeutic intelligence / market context | existing | — |
-| 22 | Strategic analysis (memo) | existing `aiMemo.ts` (label "Strategic analysis", no AI badge) | — |
-| 23 | Negotiation playbook | existing | — |
-| 24 | **Positioning & objections** | `positioningObjections.ts` | `brief.positioning` |
-| 25 | **Diligence readiness** | `diligenceReadiness.ts` | `brief.diligence` |
-| 26 | Risk, timeline, regulatory, milestones, CVR, patent, CMC, pricing, sequencing, tax, royalty stacking | existing | — |
-| 27 | **Comparable appendix** (full cited table, multi-page) | `compAppendix.ts` | `brief.compSet` |
-| 28 | Methodology + **coverage & accuracy block** | existing + `brief.coverage` | — |
+Sections appear only when their data exists; the assembler is two-pass so empty legacy sections are dropped and page numbers stay exact. **Bold = new in v3.**
+
+1. Cover (asset name, prepared-for)
+2. Contents (two-column)
+3. **The Decision** — recommendation, counterparties, ask / floor / walk-away, levers, what would change the view, timeline, confidence, signed Managing Partner opinion
+4. Executive Dashboard
+5. **Valuation Bridge** — football field (total basis and upfront basis), reconciliation, method table
+6. Deal Structure · 7. Deal Terms
+8. **Comparable Set** — scatter (upfront vs total, bubble = royalty, colour = phase), distribution strips by phase, headline drivers, caveat (falls back to the legacy Comparable Deals page when < 3 rows)
+9. **Regional Deal Strategy** · 10. **Term-Sheet Precedent Map**
+11. M&A Acquisition Benchmarks · 12. Trispecific · 13. Delivery Route · 14. Molecular Target (when data) · 15. Sensitivity
+16. Financial Model · 17. **Patient Funnel** · 18. **Path to Next Inflection** (decision tree + financing alternative)
+19. Currency & Pricing · 20. Deal Flow & Market Context (when data) · 21. Defensive Analysis · 22. Scenario Comparison · 23. Deal Valuation Waterfall · 24. Advanced Analytics
+25. **Buyer Map** (fit × urgency quadrant, capacity table, LOE calendar) · 26. **Buyer Stage Behaviour** (prior deals per buyer, excluded list, process)
+27. Partner Matches · 28. Buyer-Specific Valuation
+29. **Pipeline Map** · 30. **Catalyst Calendar** (24-month readouts and exclusivity losses, go-to-market window)
+31. Therapeutic Intelligence · 32. Strategic Analysis · 33. Negotiation Strategy
+34. **Positioning & Objections** · 35. **Diligence Readiness**
+36. Risk Analysis · 37. Deal Timeline · 38–47. Regulatory Risk, Milestone Analysis, Earnout & CVR, Patent & LOE, Manufacturing Risk, Pricing & Access, Franchise Expansion, Tax Structure, Royalty Stacking, Buyer Synergies (each when data)
+48. **Comparable Appendix** (multi-page, every comp with date, structure, terms, verified flag, source host)
+49. Methodology — with the **coverage and accuracy block** (tracked, verified-with-citation, TA, same-indication, comps used, as-of)
+
+## Generating a brief
+
+- Production: `POST /api/benchmark/generate { requestId }` with the admin key. The route resolves the intake (`lib/brief/intake-map.ts`), runs the engine, memo, playbook and partner match, then `buildBrief()` (`lib/brief/build.ts`), renders and uploads. Build notes land in `benchmark_requests.admin_notes`.
+- Managing Partner opinion: set `mp_opinion`, `mp_reviewer`, `mp_reviewed_at` on the request before generating; it prints verbatim on page 3. Without it the page prints "Managing Partner review pending" — never a generated signature.
+- Local: `npx tsx scripts/generate-brief-v3.ts --out tmp/mine [--skip-ai] [--phase "Phase 2"] [--indication "…"] [--modality mAb]` renders HTML + PDF with local Chrome. `node tmp/measure.cjs tmp/mine/brief-v3.html` lists pages that overflow A4.
 
 ## Format rules (non-negotiable)
 

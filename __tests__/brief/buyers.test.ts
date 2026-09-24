@@ -14,6 +14,7 @@ import {
   splitProcess,
   buildWhyNow,
   buildHowToEngage,
+  groupLicensees,
 } from '@/lib/brief/buyer-map';
 import { computeBuyerValuations } from '@/lib/brief/buyer-valuations';
 import { renderBuyerQuadrant } from '@/lib/report/svg-charts/quadrant';
@@ -218,7 +219,7 @@ function stubSupabase(tables: Record<string, Row[]>) {
     calls.push(rec);
     const q: Record<string, unknown> = {};
     const chain = (op: string) => (...args: unknown[]) => { rec.ops.push(`${op}(${args.map(a => JSON.stringify(a)).join(',')})`); return q; };
-    for (const op of ['select', 'in', 'or', 'eq', 'is', 'not', 'ilike', 'order', 'limit']) q[op] = chain(op);
+    for (const op of ['select', 'in', 'or', 'eq', 'is', 'not', 'ilike', 'order', 'limit', 'range']) q[op] = chain(op);
     q.then = (resolve: (v: { data: Row[]; error: null }) => unknown) => Promise.resolve({ data: tables[table] ?? [], error: null }).then(resolve);
     return q;
   };
@@ -292,9 +293,110 @@ describe('buildBuyerMap (stubbed supabase)', () => {
     expect(map.candidates[0].impliedUpfront).toEqual({ low: 10, median: 30, high: 50 });
     expect(map.candidates[0].impliedTotal?.median).toBe(400);
 
-    const empty = await buildBuyerMap(client, ASSET, [], { asOf: '2026-09-24' });
+    // No partners and no TA/indication → nothing to supplement from → honest empty map.
+    const empty = await buildBuyerMap(client, { ...ASSET, therapeuticArea: '', indication: '' }, [], { asOf: '2026-09-24' });
     expect(empty.candidates).toEqual([]);
     expect(empty.source.n).toBe(0);
+    // No partners but a TA → the deal-history supplement still produces candidates.
+    const fromHistoryOnly = await buildBuyerMap(client, ASSET, [], { asOf: '2026-09-24' });
+    expect(fromHistoryOnly.candidates.length).toBeGreaterThan(0);
+    expect(fromHistoryOnly.candidates.every(c => c.source === 'deal_history')).toBe(true);
+  });
+});
+
+
+// ─── Deal-history supplement ────────────────────────────────────────────────
+
+const AD = (id: string, licensee: string, date: string, extra: Partial<Row> = {}): Row => ({
+  id, licensor_name: `Licensor ${id}`, licensee_name: licensee, asset_name: null, announced_date: date, phase_at_signing: 'phase_1', deal_type: 'license',
+  upfront_usd: 50e6, total_deal_value_usd: 900e6, therapeutic_area: 'neurology', indication_category: 'cns', indication_specific: 'alzheimers', source_url: 'https://www.biospace.com/x', verified: true, ...extra,
+});
+const SUPPLEMENT_DEALS: Row[] = [
+  ...DEALS,
+  AD('s1', 'Biogen Inc.', '2025-05-01'),                 // variant of Biogen → collapses
+  AD('s2', 'Biogen', '2024-02-01'),
+  AD('s3', 'Eli Lilly and Company', '2025-01-01'),       // variant of an existing partner → not added
+  AD('s4', 'AbbVie', '2025-06-01', { indication_specific: 'parkinsons' }),   // same TA only → fit 55
+  AD('s5', 'Novartis', '2023-03-01'),
+  AD('s6', 'Takeda', '2024-09-01'),
+  AD('s7', 'Sanofi', '2022-01-01'),
+  AD('s8', 'Merck', '2025-08-01'),
+  AD('s10', 'Bristol Myers Squibb', '2024-11-01'),
+  AD('s12', 'Bayer', '2020-01-01', { therapeutic_area: 'oncology', indication_category: 'solid_tumor', indication_specific: 'lung' }), // not TA → ignored
+];
+const SUPPLEMENT_COMPANIES: Row[] = [
+  ...COMPANIES,
+  { id: 'biogen', name: 'Biogen', name_variations: ['Biogen Inc.', 'Biogen Idec'], company_type: 'large_biotech', hq_region: 'north_america', hq_country: 'US', phase_preference_min: null, phase_preference_max: null, deals_last_12mo: 9, deals_last_24mo: 12, last_deal_date: '2026-06-01', total_annual_revenue: 2e9, revenue_at_risk_2025: null, revenue_at_risk_2026: null, revenue_at_risk_2027: null, patent_cliffs: [{ drug_name: 'Tysabri', expiry_year: 2027, revenue_usd: 1.5e9 }], hiring_bd_roles: true, acquisition_appetite: 'aggressive', data_quality_score: 70 },
+];
+
+describe('groupLicensees', () => {
+  it('collapses spellings through name_variations and ranks same-indication ×3 + same-TA, recency tie-break', () => {
+    const rows = [
+      { licensee_name: 'Biogen Inc.', announced_date: '2025-05-01', sameIndication: true },
+      { licensee_name: 'Biogen', announced_date: '2024-02-01', sameIndication: true },
+      { licensee_name: 'AbbVie', announced_date: '2025-06-01', sameIndication: false },
+      { licensee_name: 'abbvie', announced_date: '2025-07-01', sameIndication: false },
+      { licensee_name: 'Merck', announced_date: '2025-08-01', sameIndication: false },
+      { licensee_name: 'Novartis', announced_date: '2023-01-01', sameIndication: false },
+    ];
+    const g = groupLicensees(rows, [{ id: 'biogen', name: 'Biogen', name_variations: ['Biogen Inc.'] }]);
+    expect(g.map(x => x.name)).toEqual(['Biogen', 'AbbVie', 'Merck', 'Novartis']);
+    expect(g[0]).toMatchObject({ companyId: 'biogen', sameIndication: 2, sameTA: 0, score: 6 });
+    expect(g[1]).toMatchObject({ companyId: null, sameTA: 2, score: 2 });
+  });
+});
+
+describe('buildBuyerMap deal-history supplement', () => {
+  it('fills to 10 candidates from TA deal history, dedupes variants of existing partners, and tags the source', async () => {
+    const { client, calls } = stubSupabase({ companies: SUPPLEMENT_COMPANIES, deals: SUPPLEMENT_DEALS, counterparty_premiums: PREMIUMS });
+    const map = await buildBuyerMap(client, ASSET, PARTNERS, { asOf: '2026-09-24' });
+
+    expect(map.candidates.length).toBe(10);
+    const names = map.candidates.map(c => c.name);
+    expect(new Set(names.map(n => n.toLowerCase())).size).toBe(10);
+    expect(names).not.toContain('Eli Lilly and Company');
+    expect(names).not.toContain('Biogen Inc.');
+    expect(names).not.toContain('Bayer');
+    expect(names).toContain('Biogen');
+
+    const fromMatch = map.candidates.filter(c => c.source === 'partner_match');
+    const fromHistory = map.candidates.filter(c => c.source === 'deal_history');
+    expect(fromMatch.map(c => c.name).sort()).toEqual(['Eli Lilly', 'Roche', 'Unknown Biotech']);
+    expect(fromHistory.length).toBe(7);
+    for (const c of fromHistory) {
+      expect(c.intentScore).toBeNull();
+      expect([55, 70]).toContain(c.fit);
+      expect(c.whyNow).toMatch(/^Signed .+ in \d{4} at \$\d+M upfront/);
+    }
+    const biogen = fromHistory.find(c => c.name === 'Biogen')!;
+    expect(biogen.companyId).toBe('biogen');
+    expect(biogen.fit).toBe(70);                      // same-indication deals
+    expect(biogen.priorDeals.length).toBe(2);        // both spellings matched
+    expect(biogen.patentCliffs[0].drug).toBe('Tysabri');
+    expect(biogen.urgency).toBeGreaterThan(0);
+    expect(fromHistory.find(c => c.name === 'AbbVie')!.fit).toBe(55);   // same TA only
+    expect(fromHistory.map(c => c.name).sort()).toEqual(['AbbVie', 'Biogen', 'Bristol Myers Squibb', 'Merck', 'Novartis', 'Sanofi', 'Takeda']);
+
+    // Lilly picked up the extra deal via its variation without being duplicated.
+    const lilly = map.candidates.find(c => c.name === 'Eli Lilly')!;
+    expect(lilly.priorDeals.length).toBe(3);
+    expect(map.source.note).toContain('7 added from deal history');
+
+    // The supplement paged the deals table with the quality filter and never wrote.
+    const dealCalls = calls.filter(c => c.table === 'deals');
+    expect(dealCalls.length).toBeGreaterThanOrEqual(2);
+    expect(dealCalls[0].ops.some(op => op.startsWith('range('))).toBe(true);
+    expect(dealCalls[0].ops).toEqual(expect.arrayContaining([expect.stringContaining('"is_canonical","is",false'), expect.stringContaining('verification_status')]));
+    expect(calls.every(c => c.ops.every(op => !/insert|update|upsert|delete/.test(op)))).toBe(true);
+  });
+
+  it('does not run the supplement when 8 or more partners are supplied', async () => {
+    const { client, calls } = stubSupabase({ companies: SUPPLEMENT_COMPANIES, deals: SUPPLEMENT_DEALS, counterparty_premiums: [] });
+    const many: PartnerForPDF[] = Array.from({ length: 8 }, (_, i) => ({ company_name: `Partner ${i}`, match_score: 80 - i, match_reasons: [], deals_last_12mo: 1, hq_country: null }));
+    const map = await buildBuyerMap(client, ASSET, many, { asOf: '2026-09-24' });
+    expect(map.candidates.length).toBe(8);
+    expect(map.candidates.every(c => c.source === 'partner_match')).toBe(true);
+    expect(calls.filter(c => c.table === 'deals').length).toBe(1);
   });
 });
 

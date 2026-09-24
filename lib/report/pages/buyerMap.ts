@@ -61,6 +61,7 @@ export function renderBuyerMapPage(data: PDFReportData, meta: ReportMeta): strin
   const th = (label: string, align = 'left') => `<th style="padding: 4px 5px; text-align: ${align}; font-size: 6.5px; line-height: 1.2; vertical-align: bottom;">${escapeHtml(label)}</th>`;
   const td = (html: string, align = 'left', extra = '') => `<td style="padding: 3px 6px; text-align: ${align}; font-size: 8.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; ${extra}">${html}</td>`;
 
+  const tag = `<span style="font-size: 6.5px; font-weight: 600; color: ${COLORS.gray400}; letter-spacing: 0.04em; margin-left: 4px; white-space: nowrap;">from deal history</span>`;
   const tableRows = rows.map(c => {
     const rar = (c.revenueAtRisk.y2026 ?? 0) + (c.revenueAtRisk.y2027 ?? 0);
     const rarFromCliffs = c.patentCliffs.filter(p => p.expiryYear >= 2026 && p.expiryYear <= 2027).reduce((s, p) => s + (p.revenueUsd ?? 0), 0);
@@ -68,7 +69,7 @@ export function renderBuyerMapPage(data: PDFReportData, meta: ReportMeta): strin
     const muted = c.transactsAtPhase === 'no' ? `color: ${COLORS.gray400};` : '';
     return `
       <tr>
-        ${td(`<span style="font-weight: 700; color: ${c.transactsAtPhase === 'no' ? COLORS.gray400 : COLORS.navy};">${escapeHtml(c.name)}</span>`, 'left', muted)}
+        ${td(`<span style="font-weight: 700; color: ${c.transactsAtPhase === 'no' ? COLORS.gray400 : COLORS.navy};">${escapeHtml(c.name)}</span>${c.source === 'deal_history' ? `<br>${tag}` : ''}`, 'left', `${muted} white-space: normal; line-height: 1.15;`)}
         ${td(escapeHtml(c.companyType ? (TYPE_LABEL[c.companyType] ?? c.companyType) : '—'), 'left', muted)}
         ${td(escapeHtml(c.hqRegion ? (REGION_LABEL[c.hqRegion] ?? c.hqRegion) : (c.hqCountry ?? '—')), 'left', muted)}
         ${td(`<span style="font-weight: 700;">${Math.round(c.fit)}</span>`, 'center', muted)}

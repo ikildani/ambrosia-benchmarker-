@@ -53,7 +53,7 @@ function buyerCard(c: BuyerCandidate, rank: number): string {
   return `
     <div class="card" style="padding: 8px 10px; border-top: 3px solid ${verdictColor}; page-break-inside: avoid; min-width: 0; overflow: hidden;">
       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px;">
-        <div style="font-size: 10px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.01em;">${rank}. ${escapeHtml(c.name)}${premium}</div>
+        <div style="font-size: 10px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.01em;">${rank}. ${escapeHtml(c.name)}${premium}${c.source === 'deal_history' ? `<span style="font-size: 6.5px; font-weight: 600; color: ${COLORS.gray400}; letter-spacing: 0.04em; margin-left: 4px; white-space: nowrap;">from deal history</span>` : ''}</div>
         <div style="font-size: 6.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${verdictColor}; white-space: nowrap;">${verdictText}</div>
       </div>
       <div style="font-size: 8.5px; color: ${COLORS.gray700}; line-height: 1.4; margin-bottom: 2px;"><span style="font-weight: 700; color: ${COLORS.gray500};">Why now.</span> ${escapeHtml(c.whyNow)}</div>

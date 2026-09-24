@@ -33,18 +33,22 @@ export function renderDecisionPage(data: PDFReportData, meta: ReportMeta): strin
 
   const confidenceBadge = decision.confidence === 'high' ? 'badge-teal' : decision.confidence === 'medium' ? 'badge-amber' : 'badge-rose';
 
+  const trim = (t: string, n = 120) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
+  const featured = decision.counterparties.filter(c => c.role !== 'hold').slice(0, 5);
+  const held = decision.counterparties.filter(c => c.role === 'hold').map(c => c.name);
   const counterpartyRows = decision.counterparties.length > 0
-    ? decision.counterparties.map(c => {
+    ? featured.map(c => {
       const s = ROLE_STYLE[c.role];
       return `
-        <div style="display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid ${COLORS.gray100};">
+        <div style="display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; border-bottom: 1px solid ${COLORS.gray100};">
           <span style="flex-shrink: 0; display: inline-block; min-width: 46px; text-align: center; padding: 2px 6px; border-radius: 3px; font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: ${s.bg}; color: ${s.fg};">${s.label}</span>
           <div style="min-width: 0;">
             <div style="font-size: 9.5px; font-weight: 700; color: ${COLORS.navy};">${escapeHtml(c.name)}</div>
-            <div style="font-size: 8.5px; color: ${COLORS.gray500}; line-height: 1.4;">${escapeHtml(c.why)}</div>
+            <div style="font-size: 8.5px; color: ${COLORS.gray500}; line-height: 1.35;">${escapeHtml(trim(c.why))}</div>
           </div>
         </div>`;
-    }).join('')
+    }).join('') + (held.length ? `
+        <div style="font-size: 8.5px; color: ${COLORS.gray500}; padding: 5px 0 0; line-height: 1.4;"><span style="font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: ${COLORS.gray400}; margin-right: 6px;">Hold</span>${escapeHtml(held.join(' · '))}</div>` : '')
     : `<div style="font-size: 9px; color: ${COLORS.gray400}; padding: 6px 0;">No counterparties ranked; the buyer map was not available for this run.</div>`;
 
   const reviewedBy = opinion
@@ -69,17 +73,17 @@ export function renderDecisionPage(data: PDFReportData, meta: ReportMeta): strin
       ${head}
 
       <!-- Recommendation banner -->
-      <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-left: 6px solid ${COLORS.teal}; border-radius: 6px; padding: 16px 20px; color: white; margin-bottom: 14px;">
+      <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-left: 6px solid ${COLORS.teal}; border-radius: 6px; padding: 12px 18px; color: white; margin-bottom: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <span style="font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: ${COLORS.tealMid};">Recommendation</span>
           <span style="font-size: 7px; color: rgba(255,255,255,0.45); letter-spacing: 0.04em;">as of ${escapeHtml(formatShortDate(new Date(decision.asOf)))}</span>
         </div>
         <div style="font-size: 18px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 6px;">${escapeHtml(decision.recommendationLabel)}</div>
-        <div style="font-size: 10.5px; color: rgba(255,255,255,0.8); line-height: 1.55;">${escapeHtml(decision.headline)}</div>
+        <div style="font-size: 10px; color: rgba(255,255,255,0.8); line-height: 1.5;">${escapeHtml(decision.headline)}</div>
       </div>
 
       <!-- Ask / Floor / Walk-away -->
-      <div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+      <div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
         <div style="border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.teal}; border-radius: 6px; padding: 10px 14px;">
           ${microLabel('Ask')}
           <div style="font-size: 24px; font-weight: 800; color: ${COLORS.teal}; letter-spacing: -0.03em; line-height: 1;">${fmtM(decision.ask.totalM)}</div>
@@ -98,31 +102,31 @@ export function renderDecisionPage(data: PDFReportData, meta: ReportMeta): strin
       </div>
 
       <!-- Two columns: why + how (left), who + when (right) -->
-      <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; margin-bottom: 14px;">
+      <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; margin-bottom: 10px;">
         <div>
           ${microLabel('Why')}
-          <ul class="bullet-list" style="font-size: 9.5px; margin-bottom: 12px;">
-            ${decision.rationale.map(r => `<li>${escapeHtml(r)}</li>`).join('')}
+          <ul class="bullet-list" style="font-size: 9px; margin-bottom: 8px; line-height: 1.45;">
+            ${decision.rationale.slice(0, 4).map(r => `<li>${escapeHtml(r)}</li>`).join('')}
           </ul>
 
           ${microLabel('Negotiating levers')}
-          <ol style="padding-left: 16px; font-size: 9.5px; color: ${COLORS.gray800}; margin-bottom: 12px;">
-            ${decision.levers.map(l => `<li style="margin-bottom: 3px; line-height: 1.45;">${escapeHtml(l)}</li>`).join('')}
+          <ol style="padding-left: 16px; font-size: 9px; color: ${COLORS.gray800}; margin-bottom: 8px;">
+            ${decision.levers.slice(0, 3).map(l => `<li style="margin-bottom: 2px; line-height: 1.4;">${escapeHtml(l)}</li>`).join('')}
           </ol>
 
           ${microLabel('What would change our view')}
-          <ul class="bullet-list" style="font-size: 9px; color: ${COLORS.gray600};">
-            ${decision.wouldChangeView.map(w => `<li>${escapeHtml(w)}</li>`).join('')}
+          <ul class="bullet-list" style="font-size: 8.5px; color: ${COLORS.gray600}; line-height: 1.4;">
+            ${decision.wouldChangeView.slice(0, 3).map(w => `<li>${escapeHtml(w)}</li>`).join('')}
           </ul>
         </div>
 
         <div>
           ${microLabel('Counterparties')}
-          <div style="margin-bottom: 12px;">${counterpartyRows}</div>
+          <div style="margin-bottom: 8px;">${counterpartyRows}</div>
 
           ${microLabel('Timeline')}
-          <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; margin-bottom: 12px;">
-            ${decision.timeline.map(t => `
+          <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; margin-bottom: 8px;">
+            ${decision.timeline.slice(0, 6).map(t => `
               <tr>
                 <td style="padding: 3px 6px 3px 0; color: ${COLORS.teal}; font-weight: 700; white-space: nowrap; vertical-align: top; width: 62px;">${escapeHtml(t.week)}</td>
                 <td style="padding: 3px 0; color: ${COLORS.gray700}; border-bottom: 1px solid ${COLORS.gray100}; line-height: 1.4;">${escapeHtml(t.step)}</td>

@@ -1,11 +1,13 @@
-// Brief v3 — Comparable appendix: the full cited comp table, 22 rows per page.
+// Brief v3 — Comparable appendix: the full cited comp table, 16 rows per page.
+// 16 is the most that fits an A4 page with the footnote even when every row
+// wraps to four lines (rows measure 27–48px at 8px / 1.3 line-height).
 
 import { pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE, sectionHead, chartSource, emptyState, fmtM, phaseLabelAny } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { CompRow } from '@/lib/brief/types';
 import { structureLabel } from './compScatter';
 
-export const COMP_APPENDIX_ROWS_PER_PAGE = 22;
+export const COMP_APPENDIX_ROWS_PER_PAGE = 16;
 
 export function countCompAppendixPages(data: PDFReportData): number {
   const n = data.brief?.compSet?.rows.length ?? 0;
@@ -97,7 +99,7 @@ export function renderCompAppendixPages(data: PDFReportData, meta: ReportMeta): 
         ${pageHeader(meta.currentPage + p, meta.pageCount, BRIEF_TITLE)}
         ${p === 0 ? head : `<div class="section-title-lg" style="margin-bottom: 12px;">Comparable appendix <span style="font-size: 11px; font-weight: 600; color: ${COLORS.gray400};">(continued, ${p + 1} of ${pageCount})</span></div>`}
         <div class="card" style="padding: 0; overflow: hidden;">
-          <table class="data-table" style="font-size: 8px;">
+          <table class="data-table" style="font-size: 8px; line-height: 1.3;">
             <thead><tr>
               ${th('#', 'right')}${th('Licensor → Licensee')}${th('Asset')}${th('Date')}${th('Phase')}${th('Structure')}${th('Territory')}
               ${th('Upfront', 'right')}${th('Total', 'right')}${th('Royalty', 'right')}${th('Verified', 'center')}${th('Source')}

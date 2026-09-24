@@ -198,6 +198,8 @@ export interface BuyerCandidate {
   /** One line each. */
   whyNow: string;
   howToEngage: string;
+  /** Where the candidate came from: the partner-match API, or the deal-history supplement used when the match list is thin. */
+  source?: 'partner_match' | 'deal_history';
 }
 
 export interface BuyerMap {

@@ -1,5 +1,8 @@
 // Page: Buyer-Specific Deal Valuation
-// Shows generic vs buyer-specific deal values for multiple partners
+// Shows generic vs buyer-specific deal values for multiple partners.
+// One buyer fits a single page; two or more buyers take two physical pages
+// (page 1: comparison cards, comparison table, narratives; page 2: per-buyer
+// premium breakdowns and the factor-weight note).
 
 import { pageHeader, pageFooter, COLORS, escapeHtml, formatUsd, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
@@ -8,25 +11,22 @@ const BUYER_COLORS = [COLORS.teal, '#8B5CF6', '#F59E0B'];
 const BUYER_BG = ['#f0fdfa', '#f5f3ff', '#fffbeb'];
 const BUYER_BORDER = [COLORS.teal, '#8B5CF6', '#F59E0B'];
 
-export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): string {
-  const allValuations = data.buyerSpecificValuations ?? (data.buyerSpecificValuation ? [data.buyerSpecificValuation] : []);
-  if (allValuations.length === 0) return '';
+type Valuation = NonNullable<PDFReportData['buyerSpecificValuation']>;
 
+function valuations(data: PDFReportData): Valuation[] {
+  return data.buyerSpecificValuations ?? (data.buyerSpecificValuation ? [data.buyerSpecificValuation] : []);
+}
+
+/** 0 when there is nothing to show, 1 for a single buyer, 2 for two or more. */
+export function countBuyerSpecificPages(data: PDFReportData): number {
+  const n = valuations(data).length;
+  return n === 0 ? 0 : n >= 2 ? 2 : 1;
+}
+
+function renderComparisonCards(allValuations: Valuation[]): string {
   const colCount = 1 + allValuations.length; // generic + buyers
-  const colWidth = `${Math.floor(100 / colCount)}%`;
-
   return `
-    <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
-
-      <div class="section-title-lg">Buyer-Specific Deal Valuation</div>
-      <p style="font-size: 11px; color: ${COLORS.gray500}; margin-bottom: 20px; line-height: 1.5;">
-        Strategic premium analysis comparing ${allValuations.length} potential buyer${allValuations.length > 1 ? 's' : ''}
-        against generic market value, based on portfolio fit, deal urgency, patent cliff pressure, and competitive dynamics.
-      </p>
-
-      <!-- Multi-buyer comparison cards -->
-      <div style="display: grid; grid-template-columns: repeat(${colCount}, 1fr); gap: 10px; margin-bottom: 24px; align-items: stretch;">
+      <div style="display: grid; grid-template-columns: repeat(${colCount}, 1fr); gap: 10px; margin-bottom: 20px; align-items: stretch;">
         <!-- Generic -->
         <div style="background: #f8fafc; border: 1px solid ${COLORS.gray200}; border-radius: 8px; padding: 16px; text-align: center;">
           <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px;">Generic Buyer</div>
@@ -56,11 +56,15 @@ export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): 
           </div>
         </div>`;
         }).join('')}
-      </div>
+      </div>`;
+}
 
-      <!-- Comparison Table -->
+function renderComparisonTable(allValuations: Valuation[]): string {
+  const cell = (i: number, v: string, extra = '') =>
+    `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]}; ${extra}">${v}</td>`;
+  return `
       <div class="section-title">Buyer Comparison</div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 20px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 18px;">
         <thead>
           <tr style="border-bottom: 2px solid ${COLORS.gray200};">
             <th style="text-align: left; padding: 6px 8px; color: ${COLORS.gray400}; font-size: 8px; text-transform: uppercase; letter-spacing: 0.1em;">Metric</th>
@@ -74,32 +78,32 @@ export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): 
           <tr style="border-bottom: 1px solid ${COLORS.gray100};">
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Deal Value</td>
             <td style="padding: 5px 8px; text-align: center; color: ${COLORS.gray500};">${formatUsd(allValuations[0].genericDealValue.median)}</td>
-            ${allValuations.map((bsv, i) => `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]}; font-weight: 700;">${formatUsd(bsv.buyerSpecificDealValue.median)}</td>`).join('')}
+            ${allValuations.map((bsv, i) => cell(i, formatUsd(bsv.buyerSpecificDealValue.median), 'font-weight: 700;')).join('')}
           </tr>
           <tr style="border-bottom: 1px solid ${COLORS.gray100};">
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Upfront</td>
             <td style="padding: 5px 8px; text-align: center; color: ${COLORS.gray500};">${formatUsd(allValuations[0].genericUpfront.median)}</td>
-            ${allValuations.map((bsv, i) => `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]}; font-weight: 700;">${formatUsd(bsv.buyerUpfront.median)}</td>`).join('')}
+            ${allValuations.map((bsv, i) => cell(i, formatUsd(bsv.buyerUpfront.median), 'font-weight: 700;')).join('')}
           </tr>
           <tr style="border-bottom: 1px solid ${COLORS.gray100};">
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Premium</td>
             <td style="padding: 5px 8px; text-align: center; color: ${COLORS.gray400};">—</td>
-            ${allValuations.map((bsv, i) => `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]}; font-weight: 800;">+${bsv.strategicPremiumPercent.toFixed(0)}%</td>`).join('')}
+            ${allValuations.map((bsv, i) => cell(i, `+${bsv.strategicPremiumPercent.toFixed(0)}%`, 'font-weight: 800;')).join('')}
           </tr>
           <tr style="border-bottom: 1px solid ${COLORS.gray100};">
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Match Score</td>
             <td style="padding: 5px 8px; text-align: center; color: ${COLORS.gray400};">—</td>
-            ${allValuations.map((bsv, i) => `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]};">${bsv.buyer.matchScore}%</td>`).join('')}
+            ${allValuations.map((bsv, i) => cell(i, `${bsv.buyer.matchScore}%`)).join('')}
           </tr>
           <tr style="border-bottom: 1px solid ${COLORS.gray100};">
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Intent Score</td>
             <td style="padding: 5px 8px; text-align: center; color: ${COLORS.gray400};">—</td>
-            ${allValuations.map((bsv, i) => `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]};">${bsv.buyer.intentScore}</td>`).join('')}
+            ${allValuations.map((bsv, i) => cell(i, String(bsv.buyer.intentScore))).join('')}
           </tr>
           <tr style="border-bottom: 1px solid ${COLORS.gray100};">
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Timing</td>
             <td style="padding: 5px 8px; text-align: center; color: ${COLORS.gray400};">—</td>
-            ${allValuations.map((bsv, i) => `<td style="padding: 5px 8px; text-align: center; color: ${BUYER_COLORS[i % BUYER_COLORS.length]}; text-transform: capitalize;">${bsv.buyer.timing.replace('_', ' ')}</td>`).join('')}
+            ${allValuations.map((bsv, i) => cell(i, bsv.buyer.timing.replace('_', ' '), 'text-transform: capitalize;')).join('')}
           </tr>
           <tr>
             <td style="padding: 5px 8px; color: ${COLORS.navy}; font-weight: 600;">Leverage</td>
@@ -117,16 +121,18 @@ export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): 
             }).join('')}
           </tr>
         </tbody>
-      </table>
+      </table>`;
+}
 
-      <!-- Per-buyer premium breakdowns -->
-      ${allValuations.map((bsv, i) => {
-        const color = BUYER_COLORS[i % BUYER_COLORS.length];
-        const maxContribution = Math.max(...bsv.premiumBreakdown.map(f => f.contribution), 1);
-        return `
+function renderBreakdowns(allValuations: Valuation[]): string {
+  return allValuations.map((bsv, i) => {
+    const color = BUYER_COLORS[i % BUYER_COLORS.length];
+    const factors = [...bsv.premiumBreakdown].sort((a, b) => b.contribution - a.contribution);
+    const maxContribution = Math.max(...factors.map(f => f.contribution), 1);
+    return `
       <div style="margin-bottom: 16px;">
         <div style="font-size: 11px; font-weight: 700; color: ${color}; margin-bottom: 8px;">${escapeHtml(bsv.buyer.companyName)} — Premium Breakdown</div>
-        ${bsv.premiumBreakdown.sort((a, b) => b.contribution - a.contribution).map(factor => {
+        ${factors.map(factor => {
           const barWidth = Math.max(5, (factor.contribution / maxContribution) * 100);
           return `
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
@@ -141,24 +147,67 @@ export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): 
         </div>`;
         }).join('')}
       </div>`;
-      }).join('')}
+  }).join('');
+}
 
-      <!-- Narratives -->
-      ${allValuations.map((bsv, i) => {
-        const color = BUYER_COLORS[i % BUYER_COLORS.length];
-        return `
+function renderNarratives(allValuations: Valuation[]): string {
+  return allValuations.map((bsv, i) => {
+    const color = BUYER_COLORS[i % BUYER_COLORS.length];
+    return `
       <div style="background: ${BUYER_BG[i % BUYER_BG.length]}; border-left: 4px solid ${color}; padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 10px;">
         <div style="font-size: 9px; font-weight: 700; color: ${color}; margin-bottom: 3px;">${escapeHtml(bsv.buyer.companyName)}</div>
         <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.5;">${escapeHtml(bsv.narrative)}</div>
       </div>`;
-      }).join('')}
+  }).join('');
+}
 
-      <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; text-align: center;">
+const FOOTNOTE = (color: string) => `
+      <div style="margin-top: 10px; font-size: 8px; color: ${color}; text-align: center;">
         Premium capped at +75%. Confidence-adjusted based on data quality.
         Factor weights: Portfolio Fit 30%, Deal Urgency 25%, Patent Cliff 20%, Pipeline Gap 15%, Competitive Pressure 10%.
-      </div>
+      </div>`;
 
+/** Multi-page renderer: one `.report-page` per physical page, numbered from meta.currentPage. */
+export function renderBuyerSpecificPages(data: PDFReportData, meta: ReportMeta): string[] {
+  const allValuations = valuations(data);
+  if (allValuations.length === 0) return [];
+  const split = allValuations.length >= 2;
+
+  const intro = `
+      <div class="section-title-lg">Buyer-Specific Deal Valuation</div>
+      <p style="font-size: 11px; color: ${COLORS.gray500}; margin-bottom: 18px; line-height: 1.5;">
+        Strategic premium analysis comparing ${allValuations.length} potential buyer${allValuations.length > 1 ? 's' : ''}
+        against generic market value, based on portfolio fit, deal urgency, patent cliff pressure, and competitive dynamics.
+      </p>`;
+
+  const page1 = `
+    <div class="report-page">
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
+      ${intro}
+      ${renderComparisonCards(allValuations)}
+      ${renderComparisonTable(allValuations)}
+      ${split ? '' : renderBreakdowns(allValuations)}
+      ${renderNarratives(allValuations)}
+      ${split ? '' : FOOTNOTE(COLORS.gray400)}
       ${pageFooter(meta.reportId)}
     </div>
   `;
+  if (!split) return [page1];
+
+  const page2 = `
+    <div class="report-page">
+      ${pageHeader(meta.currentPage + 1, meta.pageCount, BRIEF_TITLE)}
+      <div class="section-title-lg" style="margin-bottom: 12px;">Buyer-Specific Deal Valuation <span style="font-size: 11px; font-weight: 600; color: ${COLORS.gray400};">(continued)</span></div>
+      <div class="section-title">Strategic Premium Breakdown by Buyer</div>
+      ${renderBreakdowns(allValuations)}
+      ${FOOTNOTE(COLORS.gray400)}
+      ${pageFooter(meta.reportId)}
+    </div>
+  `;
+  return [page1, page2];
+}
+
+/** Legacy single-string entry point — joins the physical pages. Prefer renderBuyerSpecificPages. */
+export function renderBuyerSpecificPage(data: PDFReportData, meta: ReportMeta): string {
+  return renderBuyerSpecificPages(data, meta).join('\n');
 }

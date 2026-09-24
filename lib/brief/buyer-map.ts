@@ -24,12 +24,21 @@
  *  - deals.licensee_name is not normalised ("Eli Lilly", "Eli Lilly and
  *    Company", "Lilly"; "Roche", "Genentech", "Roche/Genentech"), so prior
  *    deals are matched on the company name plus every name_variations entry.
+ *
+ * Deal-history supplement: when fewer than 8 partners are supplied, the
+ * builder groups quality-filtered deals in the asset's therapeutic area by
+ * licensee (variants collapsed through companies.name_variations), ranks
+ * licensees by same-indication deals ×3 + same-TA deals (recency tie-break)
+ * and adds up to 10 − partners.length of them as candidates tagged
+ * source = 'deal_history' (fit 70 with a same-indication deal, else 55;
+ * intent score null).
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AssetProfile, BuyerCandidate, BuyerMap, BuyerPriorDeal, DealPhase, DealStructure, Range3 } from './types';
 import type { PartnerForPDF } from '@/lib/report/types';
 import type { BuyerSpecificValuation } from '@/lib/financial/buyer-specific-valuation';
+import { isSameTA, isSameIndication } from './comp-set';
 
 // ─── Input types ────────────────────────────────────────────────────────────
 
@@ -47,7 +56,13 @@ export type PartnerInput = PartnerForPDF & {
   phase_preference_max?: string | null;
   acquisition_appetite?: string | null;
   median_upfront_usd?: number | null;
+  source?: 'partner_match' | 'deal_history';
 };
+
+/** Supplement kicks in below this many supplied partners. */
+export const SUPPLEMENT_THRESHOLD = 8;
+/** Total candidates the map fills up to. */
+export const CANDIDATE_TARGET = 10;
 
 export interface BuildBuyerMapOptions {
   /** ISO date printed in the source note; defaults to today. */
@@ -264,7 +279,16 @@ export function buildWhyNow(c: {
   dealsLast12mo: number;
   intentTier: string | null;
   fit: number;
+  source?: 'partner_match' | 'deal_history';
 }, nowYear: number, taLabel: string): string {
+  if (c.source === 'deal_history') {
+    const recent = [...c.priorDeals].filter(d => d.sameTA).sort((a, b) => (b.year ?? 0) - (a.year ?? 0))[0] ?? c.priorDeals[0];
+    if (recent) {
+      const up = recent.upfrontM != null ? `${recent.upfrontM >= 1000 ? `$${(recent.upfrontM / 1000).toFixed(1)}B` : `$${Math.round(recent.upfrontM)}M`} upfront` : 'undisclosed upfront';
+      const what = `${PHASE_TEXT[recent.phase]} ${STRUCTURE_TEXT[recent.structure]}${recent.indication ? ` in ${recent.indication}` : ''}`;
+      return `Signed ${recent.parties}${recent.year ? ` in ${recent.year}` : ''} at ${up} (${what}); they are on this list because of that deal, not a match score.`;
+    }
+  }
   const upcoming = c.patentCliffs.filter(p => p.expiryYear >= nowYear).sort((a, b) => (b.revenueUsd ?? 0) - (a.revenueUsd ?? 0));
   const cliff = upcoming.find(p => p.revenueUsd) ?? upcoming[0];
   if (cliff) {
@@ -402,6 +426,79 @@ function nameAliases(name: string, variations: string[] | null | undefined): str
   return [...set];
 }
 
+// ─── Deal-history supplement ────────────────────────────────────────────────
+
+/** All quality-filtered deals in the asset's TA (in-memory match via comp-set helpers), paged. */
+async function fetchTaDeals(supabase: SupabaseClient, asset: AssetProfile): Promise<Array<DealRow & { sameIndication: boolean }>> {
+  const out: Array<DealRow & { sameIndication: boolean }> = [];
+  const page = 1000;
+  for (let from = 0, pages = 0; pages < 4; from += page, pages++) {
+    const { data } = await supabase
+      .from('deals')
+      .select(DEAL_COLS)
+      .eq('is_synthetic', false)
+      .not('is_canonical', 'is', false)
+      .not('verification_status', 'in', '("rejected","flagged")')
+      .order('announced_date', { ascending: false })
+      .range(from, from + page - 1);
+    const batch = Array.isArray(data) ? (data as DealRow[]) : [];
+    for (const d of batch) {
+      if (!d.licensee_name) continue;
+      const ta = isSameTA(d, asset.therapeuticArea);
+      const ind = isSameIndication(d, asset.indication);
+      if (ta || ind) out.push({ ...d, sameIndication: ind });
+    }
+    if (batch.length < page) break;
+  }
+  return out;
+}
+
+export interface LicenseeGroup {
+  /** Display name: the most frequent spelling, or the companies.name when resolved. */
+  name: string;
+  companyId: string | null;
+  aliases: string[];
+  sameIndication: number;
+  sameTA: number;
+  latest: string | null;
+  score: number;
+}
+
+/**
+ * Group TA deals by licensee, collapsing name variants through the supplied
+ * company rows (name / name_variations). Pure; exported for tests.
+ */
+export function groupLicensees(rows: Array<{ licensee_name: string; announced_date: string | null; sameIndication: boolean }>, companies: Array<{ id: string; name: string; name_variations: string[] | null }>): LicenseeGroup[] {
+  const aliasToCompany = new Map<string, { id: string; name: string; name_variations: string[] | null }>();
+  for (const c of companies) {
+    for (const a of nameAliases(c.name, c.name_variations)) {
+      if (!aliasToCompany.has(norm(a))) aliasToCompany.set(norm(a), c);
+    }
+  }
+  const groups = new Map<string, LicenseeGroup & { spellings: Map<string, number> }>();
+  for (const r of rows) {
+    const n = norm(r.licensee_name);
+    if (!n) continue;
+    const co = aliasToCompany.get(n);
+    const key = co ? `id:${co.id}` : `name:${n}`;
+    let g = groups.get(key);
+    if (!g) {
+      g = { name: co?.name ?? r.licensee_name.trim(), companyId: co?.id ?? null, aliases: co ? nameAliases(co.name, co.name_variations) : [r.licensee_name.trim()], sameIndication: 0, sameTA: 0, latest: null, score: 0, spellings: new Map() };
+      groups.set(key, g);
+    }
+    if (!g.aliases.some(a => norm(a) === n)) g.aliases.push(r.licensee_name.trim());
+    g.spellings.set(r.licensee_name.trim(), (g.spellings.get(r.licensee_name.trim()) ?? 0) + 1);
+    if (r.sameIndication) g.sameIndication++; else g.sameTA++;
+    if (r.announced_date && (!g.latest || r.announced_date > g.latest)) g.latest = r.announced_date;
+  }
+  return [...groups.values()].map(g => {
+    if (!g.companyId) g.name = [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    const { spellings: _s, ...rest } = g;
+    void _s;
+    return { ...rest, score: rest.sameIndication * 3 + rest.sameTA };
+  }).sort((a, b) => (b.score - a.score) || ((b.latest ?? '').localeCompare(a.latest ?? '')));
+}
+
 // ─── Main builder ───────────────────────────────────────────────────────────
 
 export async function buildBuyerMap(
@@ -422,7 +519,7 @@ export async function buildBuyerMap(
     .sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0))
     .slice(0, 10);
 
-  if (top.length === 0) {
+  if (top.length === 0 && !asset.therapeuticArea && !asset.indication) {
     return {
       source: { source: 'Solidus deal database and company profiles', n: 0, asOf, note: 'no partner matches supplied' },
       candidates: [], excluded: [], process: { lead: [], tension: [], hold: [], rationale: 'No partner matches were supplied, so no process can be recommended.' },
@@ -463,7 +560,56 @@ export async function buildBuyerMap(
   const scoreRow = (r: CompanyRow): number =>
     (r.data_quality_score ?? 0) + (r.total_annual_revenue ? 50 : 0) + (r.deals_last_24mo ?? 0) + (parsePatentCliffs(r.patent_cliffs).length ? 10 : 0);
 
-  const resolved = top.map(p => ({ partner: p, company: companyFor(p) }));
+  const resolved = top.map(p => ({ partner: { ...p, source: p.source ?? 'partner_match' as const }, company: companyFor(p) }));
+
+  // 1b. Deal-history supplement when the match list is thin.
+  let supplementCount = 0;
+  if (resolved.length < SUPPLEMENT_THRESHOLD && (asset.therapeuticArea || asset.indication)) {
+    const taDeals = await fetchTaDeals(supabase, asset);
+    if (taDeals.length) {
+      // Resolve the most active licensee spellings to company rows so variants collapse.
+      const prelim = groupLicensees(taDeals, []).slice(0, 30);
+      const lookupNames = prelim.flatMap(g => g.aliases).filter(a => !companyRows.some(r => norm(r.name) === norm(a)));
+      if (lookupNames.length) {
+        const filters = lookupNames.flatMap(a => [`name.ilike.${orValue(a)}`, `name_variations.cs.{${orValue(a)}}`]);
+        const { data } = await supabase.from('companies').select(COMPANY_COLS).or(filters.join(',')).limit(300);
+        if (Array.isArray(data)) for (const r of data as CompanyRow[]) if (!companyRows.some(x => x.id === r.id)) companyRows.push(r);
+      }
+      const taken = new Set<string>();
+      const takenIds = new Set<string>();
+      for (const { partner, company } of resolved) {
+        nameAliases(partner.company_name, company?.name_variations).concat(company ? [company.name] : []).forEach(a => taken.add(norm(a)));
+        if (company) takenIds.add(company.id);
+        if (partner.company_id) takenIds.add(partner.company_id);
+      }
+      const groups = groupLicensees(taDeals, companyRows);
+      const room = Math.max(0, CANDIDATE_TARGET - resolved.length);
+      const cutoff = new Date(asOf); cutoff.setMonth(cutoff.getMonth() - 12);
+      const cutoffIso = cutoff.toISOString().slice(0, 10);
+      for (const g of groups) {
+        if (supplementCount >= room) break;
+        const dup = (g.companyId && takenIds.has(g.companyId)) || g.aliases.some(a => taken.has(norm(a)));
+        if (dup) continue;
+        const company = g.companyId ? companyRows.find(r => r.id === g.companyId) ?? null : null;
+        const recent = taDeals.filter(d => g.aliases.some(a => norm(a) === norm(d.licensee_name)) && (d.announced_date ?? '') >= cutoffIso).length;
+        const partner: PartnerInput = {
+          company_name: g.name,
+          company_id: g.companyId,
+          match_score: g.sameIndication > 0 ? 70 : 55,
+          match_reasons: [{ reason: g.sameIndication > 0 ? 'Prior same-indication deal' : 'Prior deal in this therapeutic area', strength: g.sameIndication > 0 ? 'strong' : 'moderate' }],
+          deals_last_12mo: recent,
+          hq_country: company?.hq_country ?? null,
+          pharma_intent: null,
+          strategic_context: null,
+          source: 'deal_history',
+        };
+        resolved.push({ partner, company });
+        g.aliases.forEach(a => taken.add(norm(a)));
+        if (g.companyId) takenIds.add(g.companyId);
+        supplementCount++;
+      }
+    }
+  }
 
   // 2. Prior deals — one batched query over every alias of every buyer.
   const aliasesByPartner = new Map<PartnerInput, string[]>();
@@ -480,8 +626,8 @@ export async function buildBuyerMap(
       .from('deals')
       .select(DEAL_COLS)
       .eq('is_synthetic', false)
-      .or('is_canonical.is.null,is_canonical.eq.true')
-      .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+      .not('is_canonical', 'is', false)
+      .not('verification_status', 'in', '("rejected","flagged")')
       .or(filter)
       .order('announced_date', { ascending: false })
       .limit(600);
@@ -495,7 +641,8 @@ export async function buildBuyerMap(
   // 3. Counterparty premiums — latest row per company (by id, then by name alias).
   const premiumRows: PremiumRow[] = [];
   {
-    const idFilter = ids.length ? [`company_id.in.(${ids.join(',')})`] : [];
+    const allIds = [...new Set(resolved.map(r => r.company?.id ?? r.partner.company_id).filter((x): x is string => !!x))];
+    const idFilter = allIds.length ? [`company_id.in.(${allIds.join(',')})`] : [];
     const nameFilter = [...allAliases].map(a => `company_name.ilike.${orValue(a)}`);
     const { data } = await supabase
       .from('counterparty_premiums')
@@ -620,6 +767,7 @@ export async function buildBuyerMap(
       counterpartyPremium: premiumFor(partner, company),
       impliedUpfront: toRange(valuation?.buyerUpfront),
       impliedTotal: toRange(valuation?.buyerSpecificDealValue),
+      source: partner.source ?? 'partner_match',
     };
 
     const candidate: BuyerCandidate = {
@@ -657,7 +805,7 @@ export async function buildBuyerMap(
       source: 'Solidus deal database and company profiles',
       n: totalPriorDeals,
       asOf,
-      note: `${candidates.length} buyers profiled; prior deals are non-synthetic, canonical rows, ${verifiedShare}% verified with citation`,
+      note: `${candidates.length} buyers profiled${supplementCount ? ` (${supplementCount} added from deal history in ${taLabel})` : ''}; prior deals are non-synthetic, canonical rows, ${verifiedShare}% verified with citation`,
     },
     candidates,
     excluded,
