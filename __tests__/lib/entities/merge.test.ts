@@ -264,7 +264,7 @@ describe('apply path refusals', () => {
     expect(() => assertApplyGuards({ apply: true, runId: 'merge-2026-09-26', env })).not.toThrow();
   });
 
-  it('refuses when migration 124 is absent (company_merges table or merged_into column missing)', async () => {
+  it('refuses when migration 127 is absent (company_merges table or merged_into column missing)', async () => {
     const missingTable = {
       from: (table: string) => ({
         select: () => ({
@@ -272,7 +272,7 @@ describe('apply path refusals', () => {
         }),
       }),
     };
-    await expect(assertMigrationPresent(missingTable)).rejects.toThrow(/migration 124 not applied \(company_merges/);
+    await expect(assertMigrationPresent(missingTable)).rejects.toThrow(/migration 127 not applied \(company_merges/);
 
     const missingColumn = {
       from: (table: string) => ({
