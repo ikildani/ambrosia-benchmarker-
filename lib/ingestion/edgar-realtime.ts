@@ -157,6 +157,7 @@ export async function persistExtractedDeal(
       indication_category: deal.indication_category, indication_specific: deal.indication_specific, target: deal.target,
       mechanism_of_action: deal.mechanism_of_action, phase_at_signing: deal.phase_at_signing, territory: deal.territory,
       territories_included: deal.territories_included || [], exclusivity: deal.exclusivity, deal_type: deal.deal_type,
+      deal_subtype: deal.deal_subtype ?? null, regulatory_pathway: deal.regulatory_pathway ?? null,
       upfront_usd: deal.upfront_usd, milestones_total_usd: deal.milestones_total_usd,
       milestones_development_usd: deal.milestones_development_usd, milestones_regulatory_usd: deal.milestones_regulatory_usd,
       milestones_commercial_usd: deal.milestones_commercial_usd, royalty_low_pct: deal.royalty_low_pct, royalty_high_pct: deal.royalty_high_pct,
