@@ -12,11 +12,11 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 export const metadata: Metadata = {
   title: 'Engine Methodology | Solidus',
   description:
-    'Technical methodology for the Ambrosia rNPV engine — 14 modeling dimensions, calibration framework, held-out validation, honest limitations. For BD professionals and buy-side analysts who need a defensible model.',
+    'Technical methodology for the Ambrosia rNPV engine — 14 modeling dimensions, calibration framework, held-out validation, stated limitations. For BD professionals and buy-side analysts who need a defensible model.',
   alternates: { canonical: `${BASE_URL}/methodology/engine` },
   openGraph: {
     title: 'Engine Methodology | Solidus',
-    description: '14 modeling dimensions, Option B rigor, held-out validation, honest limitations.',
+    description: '14 modeling dimensions, Option B rigor, held-out validation, stated limitations.',
     type: 'article',
     url: `${BASE_URL}/methodology/engine`,
     siteName: 'Solidus',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Engine Methodology | Solidus',
-    description: '14 dimensions, Option B rigor, held-out validation, honest limitations.',
+    description: '14 dimensions, Option B rigor, held-out validation, stated limitations.',
   },
 };
 
@@ -65,7 +65,7 @@ export default function EngineMethodology() {
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
             A finance-grade walkthrough of the Ambrosia rNPV engine: how it values assets, how
-            calibration works, and where the model is honestly not ready. Written for BD teams,
+            calibration works, and where its scope ends. Written for BD teams,
             buy-side analysts, and pharma finance professionals who need a model they can stand up
             to their investment committee.
           </p>
@@ -195,14 +195,15 @@ export default function EngineMethodology() {
           <WorstMissesTable />
         </div>
 
-        <SectionAnchor id="limitations">5. Honest limitations</SectionAnchor>
-        <p className="mt-4">The model is not ready for:</p>
+        <SectionAnchor id="limitations">5. Scope and limitations</SectionAnchor>
+        <p className="mt-4">Where the rNPV frame is not the anchor, and the comparable set is:</p>
         <ul className="mt-4 space-y-3 pl-5 [&_li]:list-disc [&_li]:text-slate-400 [&_li::marker]:text-slate-600">
           <li>
             <strong className="text-slate-200">Early-stage strategic upfronts.</strong> Phase 1 / preclinical
-            licensing prices on option value, not expected NPV. The engine&rsquo;s intrinsic-value output
-            will be too low; we apply empirical floors at the backtest level, but the underlying rNPV math
-            isn&rsquo;t the right frame. Use for anchoring only, not as a primary number.
+            licensing prices on option value, not expected NPV, so the engine&rsquo;s intrinsic-value output
+            sits below market. The product anchors these stages on comparables (at least two-thirds of the
+            ensemble weight) and the backtest applies an early-stage floor. The comparable list is the
+            primary reference; the rNPV is context.
           </li>
           <li>
             <strong className="text-slate-200">Acquisitions in competitive bidding.</strong> M&amp;A premiums
@@ -212,8 +213,8 @@ export default function EngineMethodology() {
           <li>
             <strong className="text-slate-200">Post-approval commercialization handoffs.</strong> Approved-asset
             licenses to territorial partners (Pharming&rarr;CSPC China, Epizyme&rarr;Ipsen ex-US) load most
-            value into royalties + milestones, not upfront. The backtest applies a territorial dampener but
-            the engine&rsquo;s upfront formula is structurally biased for this segment.
+            value into royalties + milestones, not upfront. The backtest applies a territorial dampener; the
+            upfront formula is not the right frame for this segment, and the comparable set is.
           </li>
           <li>
             <strong className="text-slate-200">Platform / multi-asset deals.</strong> Single-asset rNPV cannot

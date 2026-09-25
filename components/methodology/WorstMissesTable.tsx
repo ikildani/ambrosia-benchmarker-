@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { loadAccuracyData } from '@/lib/accuracy-dashboard-data';
 
 /**
- * Worst misses in core scope for the engine methodology page.
+ * Largest errors in core scope for the engine methodology page.
  *
  * Reads the versioned backtest report (__tests__/backtest/baseline-errors.json)
  * through the same loader the /accuracy page uses, so the rows shown here are
@@ -28,7 +28,7 @@ export function WorstMissesTable() {
   return (
     <div className="my-8">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
-        Worst misses in core scope (Phase 2/3 licensing), from the {runDate} backtest.
+        Largest errors in core scope (Phase 2/3 licensing), from the {runDate} backtest.
       </h3>
       <div className="overflow-x-auto rounded-lg border border-slate-800">
         <table className="w-full text-sm">
