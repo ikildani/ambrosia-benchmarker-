@@ -4,7 +4,7 @@
  * client islands. Everything the one-page deal brief renders is here.
  */
 
-import type { ClinicalAssetRow, ScoreFactorContribution, PartnershipEvidence } from '@/lib/radar/types';
+import type { ClinicalAssetRow, ScoreFactorContribution, PartnershipEvidence, PartnershipBasis, PartnershipSourcesChecked } from '@/lib/radar/types';
 
 export interface AssetOwner {
   company_id: string | null;
@@ -218,6 +218,9 @@ export interface AssetBrief {
     confidence: number;
     evidence: PartnershipEvidence[];
     rights_available: string[];
+    /** Evidence class behind the status (migration 125). */
+    basis: PartnershipBasis | null;
+    sources_checked: PartnershipSourcesChecked | null;
   };
   score: ScoreBreakdown;
   trend: ScoreTrend;

@@ -9,6 +9,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
 import { modalitiesMatch, phaseKey } from '@/lib/comparables/match-normalize';
 import { phaseRank as sharedPhaseRank } from '@/lib/comparable-scoring';
 import { radarPhaseToDb } from './deal-thesis';
@@ -215,6 +216,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
     .from('clinical_assets')
     .select(ASSET_SELECT)
     .gte('confidence_score', 15)
+    .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
     .gte('updated_at', cutoff.toISOString())
     .limit(FULL_POOL_CAP);
 
@@ -230,6 +232,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
       .from('clinical_assets')
       .select(ASSET_SELECT)
       .in('partnership_status', ['unpartnered', 'partially_partnered'])
+      .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
       .gte('confidence_score', 15)
       .order('licensing_intent_score', { ascending: false, nullsFirst: false })
       .limit(FULL_POOL_CAP);

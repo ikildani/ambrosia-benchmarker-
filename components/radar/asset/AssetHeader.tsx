@@ -10,6 +10,32 @@ const OWNER_TYPE_LABEL: Record<string, string> = {
   network: 'Network', cro: 'CRO', other: 'Other', unknown: 'Unknown owner type',
 };
 
+/** Hover text for the ownership pill: which rule fired and what it saw. */
+function ownershipTitle(status: string, evidence: AssetBrief['asset']['ownership_evidence'] | undefined): string {
+  const arms = evidence?.arms;
+  const armText = arms ? `arms: ${arms.experimental ?? 0} experimental, ${arms.comparator ?? 0} comparator, ${arms.unknown ?? 0} unknown` : 'no matched trial arms';
+  switch (status) {
+    case 'marketed_other': return `Another company's marketed drug; this sponsor is trialling it (${armText}).`;
+    case 'comparator_or_background': return `Used as a comparator or background therapy in this company's trials (${armText}).`;
+    case 'licensee': return 'In-licensed: a drug ownership record names this company as licensee.';
+    case 'co_developer': return 'Co-developed: a drug ownership record names this company as co-developer.';
+    default: return `Ownership not verified: ${evidence?.rule === 'originator_mismatch' ? 'the drug originated elsewhere but sits in an experimental arm here (possible licensee)' : armText}.`;
+  }
+}
+
+/** "No partner found · checked 1,512 deals, 3 trials, 41 press items". */
+function partnershipBasisText(p: AssetBrief['partnership']): string | null {
+  const s = p.sources_checked;
+  if (!p.basis) return null;
+  if (p.basis !== 'no_evidence') return label(p.basis);
+  const corpus = s?.corpus;
+  const parts: string[] = [];
+  if (corpus?.deals) parts.push(`${corpus.deals.toLocaleString('en-US')} deals`);
+  if (typeof s?.trial_collaborators === 'number') parts.push(`${s.trial_collaborators} trial collaborator${s.trial_collaborators === 1 ? '' : 's'}`);
+  if (corpus?.press) parts.push(`${corpus.press.toLocaleString('en-US')} press items`);
+  return parts.length ? `No deal, collaborator or press evidence · checked ${parts.join(', ')}` : 'No deal, collaborator or press evidence found';
+}
+
 function evidenceHref(e: AssetBrief['partnership']['evidence'][number]): string | null {
   if (e.url) return e.url;
   if (e.type === 'trial_collaborator' && /^NCT\d{8}$/.test(e.id)) return `https://clinicaltrials.gov/study/${e.id}`;
@@ -51,6 +77,14 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
             )}
             {asset.trial_status && <Pill>{asset.trial_status.replace(/_/g, ' ')}</Pill>}
             {designations.map(d => <Pill key={d} tone="sky">{d.replace(/_/g, ' ')}</Pill>)}
+            {asset.ownership_status && asset.ownership_status !== 'originator' && (
+              <Pill
+                tone={asset.ownership_status === 'comparator_or_background' || asset.ownership_status === 'marketed_other' ? 'rose' : 'amber'}
+                title={ownershipTitle(asset.ownership_status, asset.ownership_evidence)}
+              >
+                {label(asset.ownership_status)}
+              </Pill>
+            )}
           </div>
         </div>
 
@@ -76,6 +110,9 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
         <KV label="Partnership">
           <Pill tone={partnership.status === 'unpartnered' ? 'emerald' : partnership.status === 'partnered' ? 'rose' : 'amber'}>{label(partnership.status)}</Pill>
           {partnership.partner_name && <span className="ml-1.5">{partnership.partner_name}</span>}
+          {partnershipBasisText(partnership) && (
+            <span className="block text-xs text-neutral-600 dark:text-neutral-300">{partnershipBasisText(partnership)}</span>
+          )}
           <span className="block text-xs text-neutral-500 dark:text-neutral-400">
             {Math.round(partnership.confidence)}% confidence
             {partnership.evidence.length > 0 && (

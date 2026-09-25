@@ -14,6 +14,9 @@ import {
   RADAR_PHASE_OPTIONS,
   RADAR_PHASE_RANK,
   RADAR_PARTNERSHIP_OPTIONS,
+  RADAR_OWNERSHIP_OPTIONS,
+  RADAR_OWNERSHIP_DEFAULT_EXCLUDED,
+  RADAR_PHASE_DEFAULT_EXCLUDED,
   RADAR_REGION_OPTIONS,
   RADAR_COUNTRY_OPTIONS,
   isRadarValue,
@@ -73,6 +76,7 @@ export const MULTI_FACET_KEYS = [
   'modality',
   'phase',
   'partnership',
+  'ownership',
   'country',
   'region',
   'owner_type',
@@ -90,6 +94,8 @@ export interface RadarFilterState {
   modality: string[];
   phase: string[];
   partnership: string[];
+  /** clinical_assets.ownership_status; empty = the default view (comparator / marketed_other hidden). */
+  ownership: string[];
   country: string[];
   region: string[];
   owner_type: string[];
@@ -111,6 +117,7 @@ export const EMPTY_FILTERS: RadarFilterState = {
   modality: [],
   phase: [],
   partnership: [],
+  ownership: [],
   country: [],
   region: [],
   owner_type: [],
@@ -193,6 +200,7 @@ const FACET_VOCAB: Partial<Record<MultiFacetKey, VocabOption[]>> = {
   modality: RADAR_MODALITY_OPTIONS,
   phase: RADAR_PHASE_OPTIONS,
   partnership: RADAR_PARTNERSHIP_OPTIONS,
+  ownership: RADAR_OWNERSHIP_OPTIONS,
   country: RADAR_COUNTRY_OPTIONS,
   region: RADAR_REGION_OPTIONS,
   owner_type: RADAR_OWNER_TYPE_OPTIONS,
@@ -285,6 +293,24 @@ export function resolvePhaseList(filters: Pick<RadarFilterState, 'phase' | 'phas
   return out.length > 0 ? out : ['__none__'];
 }
 
+/**
+ * What the feed hides when the user has not asked otherwise. With no
+ * ownership selection, programs the company does not own (comparator arms,
+ * other companies' marketed drugs) are excluded; with no phase constraint,
+ * phase_4 is excluded. The facets RPC (migration 125) applies the same
+ * defaults and counts the phase and ownership buckets before them, so both
+ * groups stay visible in the rail with their counts.
+ */
+export function defaultExclusions(f: Pick<RadarFilterState, 'ownership' | 'phase' | 'phase_min' | 'phase_max'>): {
+  ownership: readonly string[] | null;
+  phase: readonly string[] | null;
+} {
+  return {
+    ownership: f.ownership.length ? null : RADAR_OWNERSHIP_DEFAULT_EXCLUDED,
+    phase: resolvePhaseList(f) ? null : RADAR_PHASE_DEFAULT_EXCLUDED,
+  };
+}
+
 export function isEmptyFilters(f: RadarFilterState): boolean {
   if (f.q) return false;
   if (f.phase_min || f.phase_max || f.min_score !== null) return false;
@@ -308,6 +334,7 @@ const URL_KEYS: Record<MultiFacetKey, string> = {
   modality: 'mod',
   phase: 'ph',
   partnership: 'ps',
+  ownership: 'ow',
   country: 'cc',
   region: 'rg',
   owner_type: 'ot',

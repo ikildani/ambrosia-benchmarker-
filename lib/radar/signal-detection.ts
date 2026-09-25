@@ -42,6 +42,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
 import { pgArrayLiteral } from '@/lib/radar/pg-array';
 import { createHash } from 'crypto';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
@@ -663,9 +664,22 @@ const MAJOR_CONFERENCES = [
   'aasld', 'acr', 'ean', 'ada', 'easl', 'eha', 'isth', 'aanem',
   'sitc', 'pegs', 'bio international', 'jpm', 'jpmorgan',
   'roth', 'cowen', 'goldman', 'needham', 'leerink', 'piper',
-  'world orphan drug congress', 'rare disease', 'pharm', 'dpharm',
+  'world orphan drug congress', 'rare disease', 'dpharm',
   'bio-europe', 'bioeurope', 'bio europe', 'chinabio', 'lsx',
 ];
+
+// Whole-word matches only: 'ash', 'acc', 'ada', 'ean' and 'acr' are ordinary
+// substrings ("cash", "accelerated", "adaptive", "European", "acrosome"), and
+// the old `includes()` test counted every such headline as a conference.
+const CONFERENCE_RE = new RegExp(`(^|[^a-z0-9])(?:${MAJOR_CONFERENCES.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![a-z0-9])`);
+
+/** True when the headline names a major conference as a whole word. Exported for tests. */
+export function mentionsConference(headline: string): boolean {
+  const h = headline.toLowerCase();
+  return CONFERENCE_RE.test(h) ||
+    /(^|[^a-z0-9])poster(?![a-z0-9])/.test(h) || h.includes('oral presentation') ||
+    h.includes('late-breaking') || /(^|[^a-z0-9])abstracts?(?![a-z0-9])/.test(h);
+}
 
 export function detectConferenceActivity(asset: AssetForScoring, ev: EvidenceBundle): SignalFactor {
   let score = 0;
@@ -674,10 +688,7 @@ export function detectConferenceActivity(asset: AssetForScoring, ev: EvidenceBun
 
   const conferencePRs = ev.company.pressReleases.filter(pr => {
     if (new Date(pr.published_at) < sixMonthsAgo) return false;
-    const h = pr.headline.toLowerCase();
-    return MAJOR_CONFERENCES.some(c => h.includes(c)) ||
-      h.includes('poster') || h.includes('oral presentation') ||
-      h.includes('late-breaking') || h.includes('abstract');
+    return mentionsConference(pr.headline);
   });
 
   const assetConferencePRs = conferencePRs.filter(pr => containsName(pr.headline, asset.asset_name));
@@ -1938,6 +1949,8 @@ export async function detectLicensingSignals(
     .from('clinical_assets')
     .select(ASSET_COLUMNS)
     .gte('confidence_score', 20)
+    // Programs the company does not own are never scored (migration 125).
+    .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
     .order('last_scored_at', { ascending: true, nullsFirst: true })
     .order('id', { ascending: true });
 

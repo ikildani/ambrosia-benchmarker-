@@ -26,6 +26,7 @@ import { ASSET_LIST_COLUMNS, type ClinicalAssetRow, type OwnerType } from '@/lib
 import {
   parseFilters,
   resolvePhaseList,
+  defaultExclusions,
   SORT_COLUMNS,
   SORT_KEYS,
   FEED_PAGE_SIZE,
@@ -75,14 +76,14 @@ function pgQuote(v: CursorValue): string {
 // ── Row shaping ───────────────────────────────────────────────────────────
 
 type SelectedRow = Pick<ClinicalAssetRow, keyof Omit<FeedRow, 'owner_type' | 'score_delta_30d' | 'score_spark' | 'next_catalyst_date'>> & {
-  companies: { owner_type: string | null } | { owner_type: string | null }[] | null;
+  /** Mirror column maintained by trigger (migration 125); no companies join needed. */
+  owner_type: string | null;
 };
 
 const OWNER_TYPES: OwnerType[] = ['industry', 'academic', 'government', 'hospital', 'network', 'cro', 'other', 'unknown'];
 
 function ownerTypeOf(row: SelectedRow): OwnerType {
-  const c = Array.isArray(row.companies) ? row.companies[0] : row.companies;
-  const v = c?.owner_type;
+  const v = row.owner_type;
   return v && (OWNER_TYPES as string[]).includes(v) ? (v as OwnerType) : 'unknown';
 }
 
@@ -97,8 +98,7 @@ function downsample(values: number[], max: number): number[] {
 
 // ── Query building ────────────────────────────────────────────────────────
 
-const SELECT = `${ASSET_LIST_COLUMNS}, companies(owner_type)`;
-const SELECT_WITH_OWNER_FILTER = `${ASSET_LIST_COLUMNS}, companies!inner(owner_type)`;
+const SELECT = ASSET_LIST_COLUMNS;
 
 function scoreBandRange(bands: string[]): { min: number; max: number | null }[] {
   return bands
@@ -123,9 +123,15 @@ function applyFilters(query: Builder, f: RadarFilterState): Builder {
   if (f.trial_status.length) q = q.in('trial_status', f.trial_status);
   if (f.indication.length) q = q.in('indication_category', f.indication);
   if (f.target.length) q = q.in('target', f.target);
-  if (f.owner_type.length) q = q.in('companies.owner_type', f.owner_type);
+  if (f.owner_type.length) q = q.in('owner_type', f.owner_type);
+  if (f.ownership.length) q = q.in('ownership_status', f.ownership);
   const phases = resolvePhaseList(f);
   if (phases) q = q.in('phase', phases);
+  // Default view: hide programs the company does not own and marketed
+  // products unless the user asked for them (same rule as radar_facet_counts).
+  const hidden = defaultExclusions(f);
+  if (hidden.ownership) q = q.not('ownership_status', 'in', `(${hidden.ownership.join(',')})`);
+  if (hidden.phase) q = q.not('phase', 'in', `(${hidden.phase.join(',')})`);
   if (f.min_score !== null) q = q.gte('licensing_intent_score', f.min_score);
   if (f.score_band.length) {
     const ranges = scoreBandRange(f.score_band);
@@ -185,7 +191,7 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient();
-  const select = filters.owner_type.length ? SELECT_WITH_OWNER_FILTER : SELECT;
+  const select = SELECT;
 
   // Count-only: one HEAD request with a planner estimate. Used by the live
   // match counter on the mandate form, so it must never do an exact count.
@@ -266,7 +272,7 @@ export async function GET(request: NextRequest) {
   }
 
   const rows: FeedRow[] = pageRows.map(r => {
-    const { companies: _companies, ...asset } = r; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const asset = r;
     const current = asset.licensing_intent_score === null ? null : Number(asset.licensing_intent_score);
     const history = sparkByAsset.get(r.id) ?? [];
     const spark = current === null ? history : [...history, current];
