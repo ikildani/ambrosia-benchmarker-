@@ -16,7 +16,7 @@ export default function RadarError({ error, reset }: { error: Error & { digest?:
         <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
           <ExclamationTriangleIcon className="h-5 w-5" aria-hidden />
         </div>
-        <h1 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Asset Radar hit an error</h1>
+        <h1 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Search & Evaluation hit an error</h1>
         <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
           The page could not render. Trying again usually works; if it keeps happening, the link in your address bar
           is enough for us to reproduce it.

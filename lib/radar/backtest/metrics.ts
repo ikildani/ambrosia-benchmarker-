@@ -1,5 +1,5 @@
 /**
- * Asset Radar scoring v3 — backtest metrics (pure).
+ * Search & Evaluation scoring v3 — backtest metrics (pure).
  *
  * Every function takes parallel arrays of predicted probabilities (0..1) and
  * binary labels (0/1), plus optional per-row importance weights, and returns

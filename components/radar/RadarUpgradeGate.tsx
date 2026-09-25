@@ -37,7 +37,7 @@ export function RadarUpgradeGate({ isAuthenticated, backtested = false, onSignUp
         <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">
           Pro and Portfolio
         </span>
-        <h1 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">Asset Radar</h1>
+        <h1 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">Search & Evaluation</h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
           A ranked list of clinical-stage programs that look likely to change hands. Built from trial registries in the
           US, Europe, China, Japan and Korea, resolved to the owning company, and scored on the evidence we can actually
@@ -99,7 +99,7 @@ export function RadarUpgradeGate({ isAuthenticated, backtested = false, onSignUp
         <div className="mt-8 flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900 sm:flex-row sm:items-center">
           <div className="flex-1">
             <p className="text-sm font-medium">
-              {isAuthenticated ? 'Asset Radar is included in Pro and Portfolio plans.' : 'Start a Pro trial to open the feed.'}
+              {isAuthenticated ? 'Search & Evaluation is included in Pro and Portfolio plans.' : 'Start a Pro trial to open the feed.'}
             </p>
             <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
               {isAuthenticated

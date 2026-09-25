@@ -1,5 +1,5 @@
 /**
- * GET /api/radar/qa — latest Asset Radar QA report (admin only).
+ * GET /api/radar/qa — latest Search & Evaluation QA report (admin only).
  *
  * Auth: lib/admin-auth.ts verifyAdminAuth (ADMIN_API_KEY bearer token, or an
  * authenticated ADMIN_EMAILS user) — the same gate as app/api/admin/*.

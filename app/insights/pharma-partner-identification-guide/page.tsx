@@ -456,7 +456,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
             <h2 id="intent-predicts">How Intent Scoring Predicts Deal Likelihood</h2>
 
             <p>
-              The Intent Score is a screening heuristic. We have not run a controlled backtest of score versus subsequent deal closure, so we do not publish a lift number. The Asset Radar signal model, which shares several inputs, has a temporal backtest published at <Link href="/radar/methodology" className="text-teal-600 font-medium hover:text-teal-700">/radar/methodology</Link>.
+              The Intent Score is a screening heuristic. We have not run a controlled backtest of score versus subsequent deal closure, so we do not publish a lift number. The Search & Evaluation signal model, which shares several inputs, has a temporal backtest published at <Link href="/radar/methodology" className="text-teal-600 font-medium hover:text-teal-700">/radar/methodology</Link>.
             </p>
           </div>
 

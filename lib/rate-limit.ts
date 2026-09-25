@@ -29,7 +29,7 @@ export const RATE_LIMIT_CONFIGS = {
   partnerMatch: { limit: 10, windowSeconds: 60 } as RateLimitConfig,
   events: { limit: 100, windowSeconds: 60 } as RateLimitConfig,
   aiGeneration: { limit: 5, windowSeconds: 60 } as RateLimitConfig,
-  // Asset Radar: plain reads (feed, facets, compare, signals) are cheap DB
+  // Search & Evaluation: plain reads (feed, facets, compare, signals) are cheap DB
   // calls; typeahead fires on every keystroke; the natural-language parser
   // calls a model. Team plans get double these at the route layer.
   radarRead: { limit: 120, windowSeconds: 60 } as RateLimitConfig,

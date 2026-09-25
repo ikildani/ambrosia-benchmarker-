@@ -1,5 +1,5 @@
 /**
- * Shared Asset Radar row types. Mirrors the production `clinical_assets`
+ * Shared Search & Evaluation row types. Mirrors the production `clinical_assets`
  * columns (migrations 090, 102, 103, 107, 109, 112, 125). Every Radar
  * component, API route, and cron imports from here instead of redeclaring
  * the shape.

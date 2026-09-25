@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 5: Competitive Intelligence
+ * Search & Evaluation — Layer 5: Competitive Intelligence
  *
  * Answers "who else is circling this asset?" by mining 6 signal types:
  *

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 4: Mandate Matching Engine
+ * Search & Evaluation — Layer 4: Mandate Matching Engine
  *
  * Matches clinical_assets against user search mandates (radar_user_mandates).
  * Creates radar_mandate_matches for new asset-mandate pairs.

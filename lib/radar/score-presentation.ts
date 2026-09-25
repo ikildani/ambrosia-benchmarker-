@@ -1,5 +1,5 @@
 /**
- * Asset Radar — score presentation helpers (pure).
+ * Search & Evaluation — score presentation helpers (pure).
  *
  * The v3 licensing-intent score is a calibrated 12-month probability × 100
  * × availability, so most of the universe scores under 15. These helpers

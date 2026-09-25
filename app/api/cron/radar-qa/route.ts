@@ -1,5 +1,5 @@
 /**
- * Cron: Asset Radar QA gate (docs/asset-radar-qa.md)
+ * Cron: Search & Evaluation QA gate (docs/asset-radar-qa.md)
  *
  * Schedule (vercel.json, owned by the orchestrator): weekly, e.g.
  * "0 6 * * 1" (Monday 06:00 UTC, after the overnight Radar crons), plus
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       });
       if (result.blockers > 0) {
         const lines = failed.filter(c => c.severity === 'blocker').map(c => `• ${c.check_name}: ${c.observed}`).slice(0, 10);
-        await notifyBlockers(`:rotating_light: Asset Radar QA: ${result.blockers} blocker(s), ${result.majors} major(s) — launch gate FAILED\n${lines.join('\n')}\nRun ${result.run_id ?? '(not persisted)'} · /api/radar/qa`);
+        await notifyBlockers(`:rotating_light: Search & Evaluation QA: ${result.blockers} blocker(s), ${result.majors} major(s) — launch gate FAILED\n${lines.join('\n')}\nRun ${result.run_id ?? '(not persisted)'} · /api/radar/qa`);
       }
       return NextResponse.json({
         success: result.errors.length === 0,

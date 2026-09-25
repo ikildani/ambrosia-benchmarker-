@@ -1,5 +1,5 @@
 /**
- * Asset Radar QA — the 200-asset golden set.
+ * Search & Evaluation QA — the 200-asset golden set.
  *
  *   selectGoldenSet        stratified, deterministic sample (md5(id || seed))
  *                          over owner group × phase bucket × region with
@@ -979,11 +979,11 @@ export async function exportHumanReviewSheet(supabase: SupabaseClient, opts: { b
 
   const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Asset Radar QA';
+  wb.creator = 'Search & Evaluation QA';
   const intro = wb.addWorksheet('Instructions');
   intro.getColumn(1).width = 110;
   [
-    'Asset Radar golden-set human review',
+    'Search & Evaluation golden-set human review',
     '',
     'One row per asset x field. For each row open asset_url (and the evidence links), then:',
     '  human_value  the value you believe is correct, using the same vocabulary as model_value (leave blank if you agree)',

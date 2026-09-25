@@ -1,5 +1,5 @@
 /**
- * Single source of truth for the Asset Radar filter vocabulary.
+ * Single source of truth for the Search & Evaluation filter vocabulary.
  *
  * Every value here is the exact string stored in `clinical_assets`
  * (written by lib/ingestion/clinical-trials.ts and lib/radar/asset-universe.ts).

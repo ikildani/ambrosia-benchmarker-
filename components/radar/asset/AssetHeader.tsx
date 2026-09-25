@@ -60,7 +60,7 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
     <header className="border-b border-neutral-200 pb-5 dark:border-neutral-800">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Asset Radar · Deal brief</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Search & Evaluation · Deal brief</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-3xl">{asset.asset_name}</h1>
           {aliases.length > 0 && (
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Also known as {aliases.join(', ')}</p>

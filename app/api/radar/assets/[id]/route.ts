@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Asset brief API
+ * Search & Evaluation — Asset brief API
  *
  * GET /api/radar/assets/:id
  *   The full one-page deal brief (components/radar/asset/brief-loader.ts):

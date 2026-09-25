@@ -1,5 +1,5 @@
 /**
- * Asset Radar — compare tray.
+ * Search & Evaluation — compare tray.
  *
  * GET /api/radar/compare?ids=UUID,UUID[,UUID,UUID,UUID]
  *   → { assets: CompareAsset[] } in the requested order (2 to 5 assets).

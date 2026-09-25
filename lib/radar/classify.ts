@@ -1,5 +1,5 @@
 /**
- * Asset classification pass for the Asset Radar (migration 112).
+ * Asset classification pass for the Search & Evaluation (migration 112).
  *
  * Fills therapeutic_area, indication_category, indication_specific, modality,
  * target, target_class, mechanism and moa_short on clinical_assets from the

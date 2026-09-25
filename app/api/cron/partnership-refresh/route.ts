@@ -1,5 +1,5 @@
 /**
- * Cron: Partnership Refresh (Asset Radar, Phase 2 item 7)
+ * Cron: Partnership Refresh (Search & Evaluation, Phase 2 item 7)
  *
  * Re-derives partnership_status / partner / territory split / evidence for
  * clinical_assets using lib/radar/partnership.ts (deals constrained to the

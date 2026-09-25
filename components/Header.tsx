@@ -214,7 +214,7 @@ export default function Header({
     // Every signed-in user sees the link once the module is enabled; the page
     // itself shows the upgrade gate to free accounts (that is the upsell).
     ...(RADAR_ENABLED && isAuthenticated ? [{
-      label: 'Asset Radar',
+      label: 'Search & Evaluation',
       href: '/radar',
       isActive: isRadarPage,
     }] : []),

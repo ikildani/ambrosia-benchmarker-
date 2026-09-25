@@ -1,5 +1,5 @@
 /**
- * Company financial pressure from primary SEC sources (Asset Radar, Phase 3
+ * Company financial pressure from primary SEC sources (Search & Evaluation, Phase 3
  * Workstream C). Writes `company_financials` (migration 114).
  *
  *   1. CIK resolution: SEC company_tickers.json matched by ticker, then by

@@ -1,5 +1,5 @@
 /**
- * Asset Radar QA — report assembly and markdown rendering.
+ * Search & Evaluation QA — report assembly and markdown rendering.
  *
  * buildQaReport(supabase, runId?) reads the latest (or the given) invariants
  * run, the latest golden_agreement run and the latest golden_human run from
@@ -289,7 +289,7 @@ function findingLines(list: QaReportFinding[]): string {
 
 export function renderQaReportMarkdown(report: QaReport): string {
   const parts: string[] = [];
-  parts.push(`# Asset Radar QA report`);
+  parts.push(`# Search & Evaluation QA report`);
   parts.push(`Generated ${report.generated_at} — launch gate: **${report.passed ? 'PASS' : 'FAIL'}**`);
   parts.push('');
   parts.push(mdTable(

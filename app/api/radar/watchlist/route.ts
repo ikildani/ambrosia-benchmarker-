@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Watchlist API (team-aware)
+ * Search & Evaluation — Watchlist API (team-aware)
  *
  * GET    /api/radar/watchlist?scope=mine|team&include=activity
  *          mine (default): the caller's rows. team: the caller's rows plus

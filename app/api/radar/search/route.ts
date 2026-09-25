@@ -1,5 +1,5 @@
 /**
- * Asset Radar — one search box, two modes.
+ * Search & Evaluation — one search box, two modes.
  *
  * GET  /api/radar/search?q=her      → typeahead: up to 8 suggestions over
  *      asset name, company, target and indication (prefix ILIKE on the

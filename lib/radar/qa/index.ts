@@ -1,5 +1,5 @@
 /**
- * Asset Radar QA harness — public surface.
+ * Search & Evaluation QA harness — public surface.
  *
  *   runInvariants        automated invariant checks over the universe
  *   selectGoldenSet      stratified 200-asset golden set with frozen snapshots

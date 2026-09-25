@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 6: Deal Creation Engine
+ * Search & Evaluation — Layer 6: Deal Creation Engine
  *
  * The capstone. Proposes transactions that don't exist yet by crossing:
  *   Pharma portfolio gaps × available unpartnered assets × deal economics

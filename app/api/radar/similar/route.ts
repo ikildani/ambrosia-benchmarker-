@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Similarity Search
+ * Search & Evaluation — Similarity Search
  *
  * GET /api/radar/similar?asset_id=UUID&limit=10
  *   Returns assets similar to the given one, scored by feature overlap:
@@ -26,7 +26,7 @@ function phaseBucket(phase: string | null): string {
 }
 
 export async function GET(request: NextRequest) {
-  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // Search & Evaluation intelligence is Pro-only: this endpoint returns scored data
   // from the asset universe, so anonymous and free-tier callers are rejected.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {

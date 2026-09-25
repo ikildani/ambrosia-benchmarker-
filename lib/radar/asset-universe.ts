@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 1: Asset Universe Engine
+ * Search & Evaluation — Layer 1: Asset Universe Engine
  *
  * Indexes ClinicalTrials.gov data into canonical `clinical_assets` entities.
  * Groups trials into assets — by is_primary_asset rows in trial_interventions

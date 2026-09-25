@@ -1,5 +1,5 @@
 /**
- * Asset Radar — ownership attribution.
+ * Search & Evaluation — ownership attribution.
  *
  * Does the company on a clinical_assets row actually own the program, or is
  * it running somebody else's drug (comparator arm, background therapy, a

@@ -1,5 +1,5 @@
 /**
- * Management-intent language classifier (Asset Radar, Phase 3 Workstream C).
+ * Management-intent language classifier (Search & Evaluation, Phase 3 Workstream C).
  * Writes `company_intent_signals` (migration 114).
  *
  * Inputs

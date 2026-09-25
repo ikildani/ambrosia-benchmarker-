@@ -1,5 +1,5 @@
 /**
- * Asset Radar QA — automated invariant checks over the whole universe.
+ * Search & Evaluation QA — automated invariant checks over the whole universe.
  *
  * The heavy lifting is set-based inside Postgres (migration 119 RPCs:
  * radar_qa_universe_stats, radar_qa_vocab_violations, radar_qa_thesis_stats,

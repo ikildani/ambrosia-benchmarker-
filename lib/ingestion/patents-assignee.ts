@@ -1,5 +1,5 @@
 /**
- * Patents by assignee for every originator (Asset Radar, Phase 3 Workstream C).
+ * Patents by assignee for every originator (Search & Evaluation, Phase 3 Workstream C).
  * Writes `company_patents` (migration 114); `radar_patent_velocity` is the
  * rolling 12-month view over it.
  *

@@ -1,5 +1,5 @@
 /**
- * Catalyst proximity (Asset Radar, Phase 3 Workstream C). Writes
+ * Catalyst proximity (Search & Evaluation, Phase 3 Workstream C). Writes
  * `asset_catalysts` (migration 114).
  *
  * Sources

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — shared route helpers (server-only).
+ * Search & Evaluation — shared route helpers (server-only).
  *
  * Lives under app/api/radar/_lib so it is colocated with the routes that use
  * it without becoming a route itself (Next.js ignores `_`-prefixed folders).

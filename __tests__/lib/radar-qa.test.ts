@@ -1,5 +1,5 @@
 /**
- * Unit tests for the Asset Radar QA harness (lib/radar/qa/*).
+ * Unit tests for the Search & Evaluation QA harness (lib/radar/qa/*).
  * No network: Supabase and the Anthropic SDK are stubbed.
  */
 
@@ -626,7 +626,7 @@ describe('report', () => {
     expect(report.freshness).toEqual({ active_trial_assets: 5000, fresh_400d: 4500, share_pct: 90 });
 
     const md = renderQaReportMarkdown(report);
-    expect(md).toContain('# Asset Radar QA report');
+    expect(md).toContain('# Search & Evaluation QA report');
     expect(md).toContain('launch gate: **FAIL**');
     expect(md).toContain('**asset_has_company**');
     expect(md).toContain('| Industry assets classified or skipped |');

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Competitive Intelligence API
+ * Search & Evaluation — Competitive Intelligence API
  *
  * GET /api/radar/intel?asset_id=X
  *   Full competitive landscape for one asset.
@@ -16,7 +16,7 @@ import { isUuid } from '@/app/api/radar/_lib/radar-api';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // Search & Evaluation intelligence is Pro-only: this endpoint returns scored data
   // from the asset universe, so anonymous and free-tier callers are rejected.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {

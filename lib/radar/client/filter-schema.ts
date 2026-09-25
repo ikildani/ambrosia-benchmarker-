@@ -1,5 +1,5 @@
 /**
- * Asset Radar feed — filter state, URL codec and API query builder.
+ * Search & Evaluation feed — filter state, URL codec and API query builder.
  *
  * Pure TypeScript (no React, no DOM) so the same module backs the feed and
  * facets routes on the server and the URL-synced reducer on the client.

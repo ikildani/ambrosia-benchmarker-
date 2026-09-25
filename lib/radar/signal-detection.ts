@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 2: Licensing Signal Detection (scoring v3 with v2 fallback)
+ * Search & Evaluation — Layer 2: Licensing Signal Detection (scoring v3 with v2 fallback)
  *
  * v3: the composite is a calibrated probability from the model in
  * radar_score_models (lib/radar/backtest/model.ts) applied to the versioned

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — ranked feed.
+ * Search & Evaluation — ranked feed.
  *
  * GET /api/radar/feed?ta=oncology&ta=neurology&mod=adc&ph=phase_2&ps=unpartnered
  *     &cc=US&rg=europe&ot=industry&ts=recruiting&ind=nsclc&tgt=HER2&sb=60-79

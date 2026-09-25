@@ -19,13 +19,13 @@ import { RadarPageFrame } from '@/components/radar/RadarPageFrame';
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
-  title: 'Licensing Intent Score Methodology | Asset Radar | Solidus',
+  title: 'Licensing Intent Score Methodology | Search & Evaluation | Solidus',
   description:
-    'What the Asset Radar licensing-intent score predicts, the features and data sources behind it, and its out-of-sample backtest: ROC-AUC, precision at 50 and 100, lift, Brier score and calibration.',
+    'What the Search & Evaluation licensing-intent score predicts, the features and data sources behind it, and its out-of-sample backtest: ROC-AUC, precision at 50 and 100, lift, Brier score and calibration.',
   alternates: { canonical: `${BASE_URL}/radar/methodology` },
   openGraph: {
     title: 'Licensing Intent Score Methodology | Solidus',
-    description: 'Features, label definition and out-of-sample backtest for the Asset Radar licensing-intent score.',
+    description: 'Features, label definition and out-of-sample backtest for the Search & Evaluation licensing-intent score.',
     type: 'article',
     url: `${BASE_URL}/radar/methodology`,
     siteName: 'Solidus',
@@ -95,7 +95,7 @@ function SignInNotice() {
         The methodology, feature list and backtest scorecard are available to signed-in users.
       </p>
       <Link href="/radar" className="inline-block mt-6 text-sm font-medium text-neutral-900 dark:text-neutral-100 underline underline-offset-4">
-        Go to Asset Radar to sign in
+        Go to Search & Evaluation to sign in
       </Link>
     </div>
   );
@@ -134,7 +134,7 @@ export default async function RadarMethodologyPage() {
       <div className="border-b border-neutral-200 dark:border-neutral-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-xs">
           <Link href="/radar" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100">
-            Asset Radar
+            Search & Evaluation
           </Link>
           <span className="text-neutral-400 dark:text-neutral-500">Methodology</span>
         </div>

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — partnership detection (Phase 2, item 7).
+ * Search & Evaluation — partnership detection (Phase 2, item 7).
  *
  * Standalone refresh that derives `partnership_status`, the partner, the
  * territory split and an evidence trail for every clinical asset, replacing

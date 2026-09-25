@@ -1,5 +1,5 @@
 /**
- * Asset Radar scoring v3 — backtest harness (Supabase side).
+ * Search & Evaluation scoring v3 — backtest harness (Supabase side).
  *
  * Driven by /api/cron/score-backtest through a cursor in radar_sync_cursors
  * (source 'score_backtest'). Phases:

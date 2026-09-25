@@ -1,5 +1,5 @@
 /**
- * Asset Radar — the words next to a score. Pure, shared by the feed, the
+ * Search & Evaluation — the words next to a score. Pure, shared by the feed, the
  * asset page, compare and export so every surface says the same thing.
  *
  * The score is a calibrated 12-month probability × 100 × availability, so

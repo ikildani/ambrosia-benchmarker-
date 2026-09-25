@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Timeline API
+ * Search & Evaluation — Timeline API
  *
  * GET /api/radar/timeline?asset_id=UUID
  *   Chronology for one asset: trial starts and primary completions (joined by
