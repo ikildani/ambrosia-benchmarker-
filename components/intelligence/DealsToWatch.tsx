@@ -115,7 +115,7 @@ export function DealsToWatch({ selectedTA, hasProAccess }: DealsToWatchProps) {
               <Lock className="w-5 h-5 mx-auto mb-2 text-slate-500" />
               <p className="text-sm text-slate-400 mb-2">{hiddenCount} more companies with active licensing signals</p>
               <Link
-                href="/pricing"
+                href="/pro"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-medium rounded-lg hover:from-teal-400 hover:to-cyan-400 transition-all"
               >
                 Upgrade to Pro

@@ -49,6 +49,10 @@ const TERRITORIES: { key: Territory; slug: string; label: string; titleLabel: st
 
 export interface ProgrammaticPageData {
   slug: string;
+  /** Slug this page canonicalises to. Equals `slug` for indexable pages. */
+  canonicalSlug: string;
+  /** False for thin territory variants that canonicalise to the global page. */
+  indexable: boolean;
   ta: { key: TherapeuticArea; slug: string; label: string; titleLabel: string };
   phase: { key: Phase; slug: string; label: string };
   territory: { key: Territory; slug: string; label: string; titleLabel: string };
@@ -64,6 +68,9 @@ export interface ProgrammaticPageData {
 }
 
 // ── Core Functions ───────────────────────────────────────────────────────────
+
+/** Minimum territory-specific comparable deals for a territory page to be indexable. */
+export const MIN_TERRITORY_COMPS = 5;
 
 function makeSlug(ta: string, phase: string, territory: string): string {
   return `${ta}-${phase}-deals-${territory}`;
@@ -138,6 +145,15 @@ function buildAllPages(): ProgrammaticPageData[] {
           const slug = makeSlug(ta.slug, phase.slug, territory.slug);
           const deals = getMatchingDeals(ta.key, territory.key);
 
+          // Territory variants with fewer than MIN_TERRITORY_COMPS comparable
+          // deals are near-duplicates of the global page (same engine output
+          // times a territory multiplier). They stay reachable for users but
+          // canonicalise to the global page and are kept out of the sitemap,
+          // so Google is not asked to index 300 pages that differ by a few
+          // numbers. GSC "Crawled - currently not indexed" audit, Sep 2026.
+          const indexable = territory.key === 'global' || deals.length >= MIN_TERRITORY_COMPS;
+          const canonicalSlug = indexable ? slug : makeSlug(ta.slug, phase.slug, 'global');
+
           const territoryLabel = territory.key === 'global' ? '' : ` ${territory.label}`;
           const territoryTitleSuffix = territory.key === 'global' ? '' : ` ${territory.titleLabel}`;
           const dealCount = formatDealCount(LIVE_DEAL_COUNT);
@@ -162,6 +178,8 @@ function buildAllPages(): ProgrammaticPageData[] {
 
           pages.push({
             slug,
+            canonicalSlug,
+            indexable,
             ta,
             phase,
             territory,
@@ -187,6 +205,11 @@ function buildAllPages(): ProgrammaticPageData[] {
 }
 
 // ── Exports ──────────────────────────────────────────────────────────────────
+
+/** Slugs that should appear in the sitemap and carry a self-canonical. */
+export function getIndexableProgrammaticSlugs(): string[] {
+  return buildAllPages().filter((p) => p.indexable).map((p) => p.slug);
+}
 
 export function getAllProgrammaticSlugs(): string[] {
   return buildAllPages().map(p => p.slug);

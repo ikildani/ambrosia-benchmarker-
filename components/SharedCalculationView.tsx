@@ -282,7 +282,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
         <p className="text-xs text-slate-400 mb-5">Comparable deals, sensitivity analysis, negotiation playbook, and board-ready PDF</p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
-            href="/report"
+            href="/pro"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20 text-sm"
           >
             Full Report — $499

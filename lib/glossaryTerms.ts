@@ -22,6 +22,12 @@ const rawTerms: Omit<GlossaryTerm, 'slug'>[] = [
     category: 'Valuation',
   },
   {
+    term: 'Total Deal Value',
+    definition: 'The headline figure of a licensing or M&A transaction: the upfront payment plus every contingent milestone payment the seller could receive if all development, regulatory, and commercial triggers are met. Total deal value (often called "biobucks") is a ceiling, not an expectation. Across biopharma licensing deals the upfront is typically 5-15% of the headline, so two deals with the same total can have very different day-one economics.',
+    relatedTerms: ['Upfront Payment', 'Milestone Payment', 'Biobucks', 'Development Milestones', 'Commercial Milestones'],
+    category: 'Financial Terms',
+  },
+  {
     term: 'Upfront Payment',
     definition: 'A non-refundable payment made by the licensee to the licensor at the signing of a licensing agreement. Upfront payments compensate the licensor for the value created to date and provide immediate capital.',
     relatedTerms: ['Option Payment', 'Signing Bonus'],

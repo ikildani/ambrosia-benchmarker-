@@ -5,7 +5,7 @@ import { getAllInsightSlugs } from '@/lib/insightPages';
 import { getAllTermSlugs } from '@/lib/glossaryTerms';
 import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 import { SEO_INSIGHT_SLUGS } from '@/lib/insights/seo-pages';
-import { getAllProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
+import { getIndexableProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
 import { getAllPseoSlugs } from '@/lib/pseoPages';
 import { listAllSlugs as listPlaybookSlugs } from '@/lib/playbook-data';
 
@@ -99,7 +99,8 @@ function getCorePages(): MetadataRoute.Sitemap {
     staticEntry('/insights', 'weekly', 0.8),
     staticEntry('/glossary', 'monthly', 0.7),
     staticEntry('/pulse', 'weekly', 0.8),
-    staticEntry('/radar', 'weekly', 0.7),
+    // /radar is a hard 404 (and noindex) until NEXT_PUBLIC_RADAR_ENABLED=true.
+    ...(process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ? [staticEntry('/radar', 'weekly', 0.7)] : []),
     staticEntry('/privacy', 'yearly', 0.3),
     staticEntry('/terms', 'yearly', 0.3),
     staticEntry('/security', 'yearly', 0.4),
@@ -334,7 +335,9 @@ async function getCompanyPages(): Promise<MetadataRoute.Sitemap> {
 // ---------------------------------------------------------------------------
 function getReferencePages(): MetadataRoute.Sitemap {
   const termSlugs = getAllTermSlugs();
-  const programmaticSlugs = getAllProgrammaticSlugs();
+  // Only self-canonical data pages; thin territory variants canonicalise to
+  // their global page and must not be submitted.
+  const programmaticSlugs = getIndexableProgrammaticSlugs();
 
   return [
     staticEntry('/data', 'weekly', 0.7),
