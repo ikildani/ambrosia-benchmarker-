@@ -218,8 +218,26 @@ export async function middleware(request: NextRequest) {
   // IMPORTANT: Do not run any Supabase methods between createServerClient
   // and supabase.auth.getUser(). Running queries may reset the auth state.
 
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser();
+  // Anonymous traffic (no Supabase auth cookie) has no session to refresh:
+  // skip the network round-trip entirely. Crawlers and most visitors land here.
+  const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token'));
+  if (!hasAuthCookie) return supabaseResponse;
+
+  // Refresh session if expired - required for Server Components.
+  // Sep 25 2026: Supabase stalled for ~25 minutes and every page returned
+  // 504 MIDDLEWARE_INVOCATION_TIMEOUT because this await had no bound.
+  // Cap it: on timeout the request proceeds without a refreshed session
+  // (server components re-check auth themselves), instead of taking the
+  // whole site down with the database.
+  const AUTH_REFRESH_TIMEOUT_MS = 4_000;
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('auth refresh timeout')), AUTH_REFRESH_TIMEOUT_MS)),
+    ]);
+  } catch (e) {
+    console.warn('[middleware] session refresh skipped:', e instanceof Error ? e.message : String(e));
+  }
 
   return supabaseResponse;
 }
