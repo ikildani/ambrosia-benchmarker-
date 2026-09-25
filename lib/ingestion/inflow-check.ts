@@ -22,6 +22,10 @@ import { SOURCES_EXPECTING_RECORDS, logCronRun } from '../cron-utils';
 
 const CITED = 'source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null';
 
+function addDaysIso(iso: string, days: number): string {
+  const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10);
+}
+
 export interface CoverageRow { year: number; total: number; cited: number; verified: number }
 
 export interface QualityReport {
@@ -42,9 +46,17 @@ export interface QualityReport {
   pendingRows: number;
 }
 
+export interface ForecastBlock {
+  due: string;
+  made: string;
+  isDueDay: boolean;
+  rows: Array<{ key: string; actual: number; lo: number; hi: number; baseline: number | null }>;
+}
+
 export interface InflowReport {
   severity: 'ok' | 'low' | 'zero';
   quality: QualityReport;
+  forecast: ForecastBlock | null;
   last24h: number;
   floor7d: number;
   avg7d: number;
@@ -108,7 +120,21 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
     quality.superseded = sup.count ?? 0; quality.realRows = real.count ?? 0; quality.verifiedRows = ver.count ?? 0; quality.citedRows = cited.count ?? 0; quality.pendingRows = pend.count ?? 0;
   } catch (e) { console.error('[inflow-check] quality block failed (non-fatal):', e); }
 
-  await notifyDealInflow({ last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, severity, quality });
+  // Forecast tracking (system_config.deal_forecast): actuals vs the targets Issa was given, every day until the due date.
+  let forecast: ForecastBlock | null = null;
+  try {
+    const { data: fc } = await supabase.from('system_config').select('value').eq('key', 'deal_forecast').maybeSingle();
+    const v = fc?.value as { due?: string; made?: string; targets?: Record<string, [number, number]>; baseline?: Record<string, number> } | null;
+    const today = now.toISOString().slice(0, 10);
+    if (v?.due && v.targets && today <= addDaysIso(v.due, 1)) {
+      const { data: cov } = await supabase.rpc('deal_coverage_stats');
+      const c = (cov ?? {}) as Record<string, number>;
+      const actual: Record<string, number> = { realRows: Number(c.total ?? quality.realRows), primary: Number(c.primary ?? 0), backlog: Number(c.backlog ?? 0), verified: quality.verifiedRows };
+      forecast = { due: v.due, made: v.made ?? '', isDueDay: today >= v.due, rows: Object.entries(v.targets).map(([k, [lo, hi]]) => ({ key: k, actual: actual[k] ?? 0, lo, hi, baseline: v.baseline?.[k] ?? null })) };
+    }
+  } catch (e) { console.error('[inflow-check] forecast block failed (non-fatal):', e); }
+
+  await notifyDealInflow({ last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, severity, quality, forecast });
 
   let coverage: CoverageRow[] | null = null;
   if (now.getUTCDay() === 0) {
@@ -133,9 +159,9 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
 
   await logCronRun(supabase, 'deal_inflow_check', {
     fetched: count24h, processed: 0, inserted: 0, expectRecords: false,
-    parameters: { severity, floor7d, avg7d, bySource24h, zeroFetchSources, coverage, quality },
+    parameters: { severity, floor7d, avg7d, bySource24h, zeroFetchSources, coverage, quality, forecast },
     notes: severity === 'ok' ? undefined : `inflow ${severity}: ${count24h} cited rows in 24h`,
   });
 
-  return { severity, quality, last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, coverage };
+  return { severity, quality, forecast, last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, coverage };
 }

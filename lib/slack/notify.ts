@@ -445,6 +445,8 @@ export async function notifyDealInflow(report: {
   severity: 'ok' | 'low' | 'zero';
   /** Sep 25 2026: verification / dedupe numbers so the daily post answers "is the data trustworthy" without anyone asking. */
   quality?: { verified: number; flagged: number; reverified: number; regressions: number; rolesSwapped: number; duplicatesBlocked: number; superseded: number; realRows: number; verifiedRows: number; citedRows: number; pendingRows: number };
+  /** Actuals vs the forecast Issa was given (system_config.deal_forecast), shown daily until the due date. */
+  forecast?: { due: string; made: string; isDueDay: boolean; rows: Array<{ key: string; actual: number; lo: number; hi: number; baseline: number | null }> } | null;
 }): Promise<void> {
   // Posts every day: green when healthy, amber/red when inflow is low or zero.
   const sourceLines = Object.entries(report.bySource24h).sort((a, b) => b[1] - a[1]).map(([k, v]) => `• ${k}: ${v}`).join('\n') || '• none';
@@ -457,6 +459,16 @@ export async function notifyDealInflow(report: {
       { type: 'mrkdwn', text: `*Backtest (24h):*\n${q.regressions === 0 ? '0 regressions ✅' : `${q.regressions} regression(s) ⚠️ — previously verified rows no longer hold`}` },
       { type: 'mrkdwn', text: `*Duplicates (24h):*\n${q.duplicatesBlocked} blocked at insert · ${q.superseded} superseded` },
     ] },
+  ] : [];
+  const f = report.forecast;
+  const LABELS: Record<string, string> = { realRows: 'Real rows', primary: 'Primary-sourced (headline)', backlog: 'Backlog awaiting citation', verified: 'Verified' };
+  const forecastBlocks = f ? [
+    { type: 'section', text: { type: 'mrkdwn', text: `${f.isDueDay ? '📅 *Forecast day — actuals vs the ' + f.made + ' forecast*' : `📈 *Toward the ${f.due} forecast* (made ${f.made})`}\n` + f.rows.map(r => {
+      const inRange = r.actual >= r.lo && r.actual <= r.hi; const above = r.actual > r.hi;
+      const mark = f.isDueDay ? (inRange || above ? '✅' : '❌') : (r.actual >= r.lo ? '✅' : '·');
+      const delta = r.baseline != null ? ` (${r.actual - r.baseline >= 0 ? '+' : ''}${(r.actual - r.baseline).toLocaleString()} since ${f.made})` : '';
+      return `${mark} ${LABELS[r.key] ?? r.key}: *${r.actual.toLocaleString()}* vs ${r.lo.toLocaleString()}–${r.hi.toLocaleString()}${delta}`;
+    }).join('\n') } },
   ] : [];
   const header = report.severity === 'zero' ? '🛑 Deal inflow: zero cited rows in 24h' : report.severity === 'low' ? '⚠️ Deal inflow below 7-day floor' : '✅ Solidus daily: inflow and data quality';
   await postToSlack(
@@ -474,6 +486,7 @@ export async function notifyDealInflow(report: {
         { type: 'section', text: { type: 'mrkdwn', text: `*Inserted by source (24h):*\n${sourceLines}` } },
         { type: 'section', text: { type: 'mrkdwn', text: `*Sources that fetched 0 (24h):*\n${zeroLines}` } },
         ...qualityBlocks,
+        ...forecastBlocks,
         { type: 'context', elements: [{ type: 'mrkdwn', text: `Check data_ingestion_log.parameters.funnel for the drop stage | ${formatTimestamp()}` }] },
       ],
     }],
