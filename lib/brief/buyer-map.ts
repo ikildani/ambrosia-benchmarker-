@@ -560,7 +560,12 @@ export async function buildBuyerMap(
   const scoreRow = (r: CompanyRow): number =>
     (r.data_quality_score ?? 0) + (r.total_annual_revenue ? 50 : 0) + (r.deals_last_24mo ?? 0) + (parsePatentCliffs(r.patent_cliffs).length ? 10 : 0);
 
-  const resolved = top.map(p => ({ partner: { ...p, source: p.source ?? 'partner_match' as const }, company: companyFor(p) }));
+  // Explicit element type: the deal-history supplement below pushes PartnerInput
+  // objects, so the array must not narrow to the literal shape of the first map.
+  const resolved: Array<{ partner: PartnerInput; company: CompanyRow | null }> = top.map(p => ({
+    partner: { ...p, source: p.source ?? ('partner_match' as const) } as PartnerInput,
+    company: companyFor(p),
+  }));
 
   // 1b. Deal-history supplement when the match list is thin.
   let supplementCount = 0;
