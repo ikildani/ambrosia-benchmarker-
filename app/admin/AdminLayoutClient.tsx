@@ -9,6 +9,7 @@ import {
   FileText,
   Sparkles,
   Bell,
+  ClipboardCheck,
   Settings,
   LogOut,
   Menu,
@@ -65,6 +66,7 @@ export default function AdminLayoutClient({
     { href: '/admin/content', icon: FileText, label: 'Content' },
     { href: '/admin/updates', icon: Bell, label: 'Updates' },
     { href: '/admin/generate', icon: Sparkles, label: 'Generate' },
+    { href: '/admin/outcomes', icon: ClipboardCheck, label: 'Outcomes' },
   ];
 
   return (
