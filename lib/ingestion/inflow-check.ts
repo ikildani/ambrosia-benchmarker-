@@ -41,6 +41,10 @@ export interface QualityReport {
   superseded: number;
   /** Corpus totals right now. */
   realRows: number;
+  /** Rows with a primary citation (the public headline). */
+  primaryRows: number;
+  /** Real rows added in the last 24h (any citation state). */
+  added24h: number;
   verifiedRows: number;
   citedRows: number;
   pendingRows: number;
@@ -94,7 +98,7 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
   const severity: 'ok' | 'low' | 'zero' = count24h === 0 ? 'zero' : count24h < floor7d ? 'low' : 'ok';
 
   // Quality, last 24h: verifier counters and duplicate refusals from the run log, plus corpus totals.
-  const quality: QualityReport = { verified: 0, flagged: 0, reverified: 0, regressions: 0, rolesSwapped: 0, duplicatesBlocked: 0, superseded: 0, realRows: 0, verifiedRows: 0, citedRows: 0, pendingRows: 0 };
+  const quality: QualityReport = { verified: 0, flagged: 0, reverified: 0, regressions: 0, rolesSwapped: 0, duplicatesBlocked: 0, superseded: 0, realRows: 0, primaryRows: 0, added24h: 0, verifiedRows: 0, citedRows: 0, pendingRows: 0 };
   try {
     const { data: vruns } = await supabase.from('data_ingestion_log').select('records_inserted, records_processed, parameters').eq('source', 'deal_verification').gte('started_at', dayAgo);
     for (const r of vruns ?? []) {
@@ -110,14 +114,17 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
       const stages = ((r.parameters as Record<string, unknown>)?.funnel as { stages?: Record<string, number> } | undefined)?.stages ?? {};
       quality.duplicatesBlocked += (stages.insert_duplicate ?? 0) + (stages.duplicate_same_day ?? 0);
     }
-    const [sup, real, ver, cited, pend] = await Promise.all([
+    const [sup, real, ver, cited, pend, added, cov] = await Promise.all([
       supabase.from('deals').select('*', { count: 'exact', head: true }).not('duplicate_of', 'is', null).gte('updated_at', dayAgo),
       supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false),
       supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'verified'),
       supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or(CITED),
       supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'pending'),
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).gte('created_at', dayAgo),
+      supabase.rpc('deal_coverage_stats'),
     ]);
     quality.superseded = sup.count ?? 0; quality.realRows = real.count ?? 0; quality.verifiedRows = ver.count ?? 0; quality.citedRows = cited.count ?? 0; quality.pendingRows = pend.count ?? 0;
+    quality.added24h = added.count ?? 0; quality.primaryRows = Number((cov.data as Record<string, unknown> | null)?.primary ?? 0);
   } catch (e) { console.error('[inflow-check] quality block failed (non-fatal):', e); }
 
   // Forecast tracking (system_config.deal_forecast): actuals vs the targets Issa was given, every day until the due date.

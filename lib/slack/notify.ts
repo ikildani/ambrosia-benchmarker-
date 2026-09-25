@@ -444,7 +444,7 @@ export async function notifyDealInflow(report: {
   zeroFetchSources: string[];
   severity: 'ok' | 'low' | 'zero';
   /** Sep 25 2026: verification / dedupe numbers so the daily post answers "is the data trustworthy" without anyone asking. */
-  quality?: { verified: number; flagged: number; reverified: number; regressions: number; rolesSwapped: number; duplicatesBlocked: number; superseded: number; realRows: number; verifiedRows: number; citedRows: number; pendingRows: number };
+  quality?: { verified: number; flagged: number; reverified: number; regressions: number; rolesSwapped: number; duplicatesBlocked: number; superseded: number; realRows: number; primaryRows: number; added24h: number; verifiedRows: number; citedRows: number; pendingRows: number };
   /** Actuals vs the forecast Issa was given (system_config.deal_forecast), shown daily until the due date. */
   forecast?: { due: string; made: string; isDueDay: boolean; rows: Array<{ key: string; actual: number; lo: number; hi: number; baseline: number | null }> } | null;
 }): Promise<void> {
@@ -470,7 +470,9 @@ export async function notifyDealInflow(report: {
       return `${mark} ${LABELS[r.key] ?? r.key}: *${r.actual.toLocaleString()}* vs ${r.lo.toLocaleString()}–${r.hi.toLocaleString()}${delta}`;
     }).join('\n') } },
   ] : [];
-  const header = report.severity === 'zero' ? '🛑 Deal inflow: zero cited rows in 24h' : report.severity === 'low' ? '⚠️ Deal inflow below 7-day floor' : '✅ Solidus daily: inflow and data quality';
+  // First line = the number Issa asked for: deals in the database, primary-sourced, added in 24h.
+  const countLine = q ? `${q.realRows.toLocaleString()} deals in the database · ${q.primaryRows.toLocaleString()} primary-sourced · +${q.added24h.toLocaleString()} in 24h` : '';
+  const header = report.severity === 'zero' ? `🛑 Zero cited rows in 24h${countLine ? ' — ' + countLine : ''}` : report.severity === 'low' ? `⚠️ Inflow below 7-day floor${countLine ? ' — ' + countLine : ''}` : `✅ Solidus daily${countLine ? ' — ' + countLine : ''}`;
   await postToSlack(
     [{
       color: report.severity === 'zero' ? '#ef4444' : report.severity === 'low' ? '#f59e0b' : '#14b8a6',
@@ -490,7 +492,7 @@ export async function notifyDealInflow(report: {
         { type: 'context', elements: [{ type: 'mrkdwn', text: `Check data_ingestion_log.parameters.funnel for the drop stage | ${formatTimestamp()}` }] },
       ],
     }],
-    `Deal inflow ${report.severity}: ${report.last24h} cited rows in 24h (floor ${report.floor7d})`,
+    countLine ? `Solidus daily — ${countLine} (inflow ${report.severity})` : `Deal inflow ${report.severity}: ${report.last24h} cited rows in 24h (floor ${report.floor7d})`,
   );
 }
 
