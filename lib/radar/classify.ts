@@ -63,6 +63,13 @@ import {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════
 
+/** Error text for the run log: never a response body (a Cloudflare 522 page is 4 KB of HTML), only the first line. */
+function shortError(err: unknown): string {
+  const m = err instanceof Error ? err.message : String(err);
+  const firstLine = m.split('\n')[0].trim();
+  return (firstLine.startsWith('<') ? 'upstream returned an HTML error page (gateway timeout)' : firstLine).slice(0, 300);
+}
+
 export const DEFAULT_MODEL = 'claude-sonnet-5';
 export const VALIDATION_MODEL = 'claude-opus-4-6';
 export const DEFAULT_LIMIT = 400;
@@ -1099,7 +1106,7 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
   try {
     queue = await fetchClassificationQueue(supabase, limit, opts.onlyStatuses, now, opts.scope ?? 'core');
   } catch (err) {
-    errors.push(err instanceof Error ? err.message : String(err));
+    errors.push(shortError(err));
     return finish('failed', 'queue read failed');
   }
   result.fetched = queue.length;
@@ -1124,7 +1131,7 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
   try {
     inputs = await gatherClassificationInputs(supabase, toModel);
   } catch (err) {
-    errors.push(err instanceof Error ? err.message : String(err));
+    errors.push(shortError(err));
     result.failed = toModel.length;
     return finish('failed', 'evidence gathering failed');
   }
@@ -1382,7 +1389,7 @@ export async function validateClassificationSample(supabase: SupabaseClient, opt
   try {
     inputs = await gatherClassificationInputs(supabase, assets);
   } catch (err) {
-    errors.push(err instanceof Error ? err.message : String(err));
+    errors.push(shortError(err));
     return log('failed');
   }
 
