@@ -1,8 +1,8 @@
 /**
  * Cron: HKEX announcements. `?mode=daily` (default) scans the last 14 days;
  * `?mode=backfill` advances the 2017→present cursor one 14-day window per run;
- * `?mode=both` runs the HKEX daily scan, then the TDnet (Japan) daily scan, then
- * HKEX backfill with the remaining budget. The schedule uses `both` twice a day:
+ * `?mode=both` runs the HKEX daily scan, then the TDnet (Japan) and ASX
+ * (Australia) daily scans, then HKEX backfill with the remaining budget. The schedule uses `both` twice a day:
  * Vercel caps a project at 100 cron entries, so the exchange adapters share one.
  * See lib/ingestion/exchanges/hkex.ts and tdnet.ts.
  */
@@ -11,6 +11,7 @@ import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runHkexIngestion } from '@/lib/ingestion/exchanges/hkex';
 import { runTdnetIngestion } from '@/lib/ingestion/exchanges/tdnet';
+import { runAsxIngestion } from '@/lib/ingestion/exchanges/asx';
 import { logCronRun } from '@/lib/cron-utils';
 
 export const maxDuration = 300;
@@ -32,13 +33,13 @@ export async function GET(request: NextRequest) {
   const requested = request.nextUrl.searchParams.get('mode');
   const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
   const TOTAL_BUDGET_MS = 250_000;
-  const DAILY_BUDGET_MS = 90_000;
+  const DAILY_BUDGET_MS = 60_000;
 
   // `both`: daily scan (bounded) then backfill with whatever budget is left.
-  const modes: Array<'daily' | 'backfill'> = requested === 'both' ? ['daily', 'backfill'] : requested === 'backfill' ? ['backfill'] : requested === 'tdnet' ? [] : ['daily'];
+  const modes: Array<'daily' | 'backfill'> = requested === 'both' ? ['daily', 'backfill'] : requested === 'backfill' ? ['backfill'] : (requested === 'tdnet' || requested === 'asx') ? [] : ['daily'];
   const started = Date.now();
   const results: Record<string, unknown> = {};
-  const TDNET_BUDGET_MS = 70_000;
+  const TDNET_BUDGET_MS = 50_000;
 
   // TDnet (Japan) daily phase, between the HKEX daily scan and the HKEX backfill.
   const runTdnet = async () => {
@@ -60,8 +61,27 @@ export async function GET(request: NextRequest) {
     }
   };
 
+  const ASX_BUDGET_MS = 60_000;
+  const runAsx = async () => {
+    try {
+      const r = await runAsxIngestion(supabase, { anthropicApiKey, dryRun, timeBudgetMs: ASX_BUDGET_MS });
+      if (!dryRun) {
+        await logCronRun(supabase, 'asx_announcements', {
+          fetched: r.announcements, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel,
+          parameters: { codesScanned: r.codesScanned, deepCode: r.deepCode, dealHeadlines: r.dealHeadlines },
+          expectRecords: r.codesScanned > 0,
+        });
+      }
+      results.asx = r;
+    } catch (error) {
+      console.error('[asx] failed:', error);
+      try { await logCronRun(supabase, 'asx_announcements', { fetched: 0, processed: 0, inserted: 0, errors: [String(error)], status: 'failed' }); } catch {}
+      results.asx = { error: String(error).slice(0, 200) };
+    }
+  };
+
   for (const mode of modes) {
-    if (mode === 'backfill' && requested === 'both') await runTdnet();
+    if (mode === 'backfill' && requested === 'both') { await runTdnet(); await runAsx(); }
     const source = mode === 'backfill' ? 'hkex_backfill' : 'hkex_announcements';
     const remaining = TOTAL_BUDGET_MS - (Date.now() - started);
     const timeBudgetMs = modes.length > 1 && mode === 'daily' ? Math.min(DAILY_BUDGET_MS, remaining) : remaining;
@@ -88,7 +108,8 @@ export async function GET(request: NextRequest) {
     }
   }
   if (requested === 'tdnet') await runTdnet();
-  const phases = [...modes, ...(results.tdnet ? ['tdnet'] : [])];
+  if (requested === 'asx') await runAsx();
+  const phases = [...modes, ...(results.tdnet ? ['tdnet'] : []), ...(results.asx ? ['asx'] : [])];
   const failed = phases.length > 0 && phases.every(m => (results[m] as { error?: string })?.error);
   return NextResponse.json({ success: !failed, dryRun, modes: phases, ...results }, { status: failed ? 500 : 200 });
 }

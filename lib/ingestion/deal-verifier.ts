@@ -362,10 +362,12 @@ Respond with JSON: { "status": "verified" | "flagged" | "rejected", "confidence"
 
 Rules:
 - "verified": The deal exists and key facts (companies, approximate value, date) match.
-- "flagged": The deal likely exists but has significant discrepancies (value off by >30%, wrong date, wrong companies).
+- "flagged": The deal likely exists but has significant discrepancies (value off by >30%, date off by more than 7 days, wrong companies).
 - "rejected": No evidence this deal exists or it appears fabricated.
+- A date difference of 7 days or less is NOT a discrepancy: SEC and exchange filings post a day or more after the press announcement. Return "verified" and put the announcement date in corrected_date.
+- Missing or differently-worded indication text is NOT a discrepancy when companies, asset and value match.
 - corrected_value: If the total deal value in the DB is wrong, provide the correct value in USD. Otherwise null.
-- corrected_date: If the announced date is wrong, provide correct date as YYYY-MM-DD. Otherwise null.`,
+- corrected_date: If the announced date is wrong (including a small filing-lag difference), provide the correct date as YYYY-MM-DD. Otherwise null.`,
         }],
       });
 
