@@ -1,6 +1,9 @@
 /**
  * Cron: SEC full-text-search historical backfill, 2017 → present.
  * Every 15 minutes, up to 80 extractions per run (4 in parallel), cursor in
+ * sync_cursors. Sep 25 2026: filings pass a cheap gate (EXTRACTION_GATE) before
+ * the extractor and are extracted through Message Batches at 50% price
+ * (BACKFILL_EXTRACTION_MODE=batch); a run drains the previous batch first.
  * radar_sync_cursors, processed-accession ledger in edgar_fts_processed.
  * Manual overrides: ?max=N&concurrency=N&dryRun=true.
  * See lib/ingestion/edgar-fts-backfill.ts.
@@ -36,10 +39,10 @@ export async function GET(request: NextRequest) {
       await logCronRun(supabase, 'edgar_fts_backfill', {
         fetched: result.candidates,
         processed: result.extracted,
-        inserted: result.inserted,
+        inserted: result.inserted + (result.drained?.inserted ?? 0),
         errors: result.errors,
         funnel: result.funnel,
-        parameters: { quarter: result.quarterKey, query: result.query, pages: result.pages, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency },
+        parameters: { quarter: result.quarterKey, query: result.query, pages: result.pages, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency, extractionMode: process.env.BACKFILL_EXTRACTION_MODE || 'batch', gate: process.env.EXTRACTION_GATE || 'haiku', batchId: result.batchId ?? null, drained: result.drained ?? null },
         // A quarter/query with no hits is a legitimate empty page once the walk is finished.
         expectRecords: !result.finished,
         notes: result.finished ? 'backfill walk complete; cursor at the current quarter' : undefined,
