@@ -1,0 +1,3 @@
+-- Migration 130 — deal_coverage_stats(): adds by_company_type (distinct counterparties on primary-sourced deals,
+-- by companies.company_type incl. academic/government/nonprofit/cro_cdmo) and companies (distinct count).
+-- Applied to prod 2026-09-25; body as in 128 plus the two keys.

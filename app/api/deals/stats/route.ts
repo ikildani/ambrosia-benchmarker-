@@ -31,6 +31,9 @@ export interface DealCoverageStats {
   byType: Record<string, number>;
   byYear: Record<string, number>;
   byRegion: Record<string, number>;
+  /** Distinct counterparties on primary-sourced deals, by companies.company_type ('unclassified' when null). */
+  byCompanyType: Record<string, number>;
+  companies: number;
   sourceTypes: number;
   countries: number;
   lastAddedAt: string | null;
@@ -57,6 +60,8 @@ export async function GET() {
       byType: obj('by_type'),
       byYear: obj('by_year'),
       byRegion: obj('by_region'),
+      byCompanyType: obj('by_company_type'),
+      companies: Number(d.companies ?? 0),
       sourceTypes: Number(d.source_types ?? 0),
       countries: Number(d.countries ?? 0),
       lastAddedAt: (d.last_added_at as string | null) ?? null,
@@ -65,6 +70,6 @@ export async function GET() {
       headers: { 'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=3600' },
     });
   } catch {
-    return NextResponse.json({ total: 0, primary: 0, primaryVerified: 0, backlog: 0, verified: 0, cited: 0, byTAAll: {}, byTA: {}, byTAVerified: {}, byPhase: {}, byType: {}, byYear: {}, byRegion: {}, sourceTypes: 0, countries: 0, lastAddedAt: null }, { status: 500 });
+    return NextResponse.json({ total: 0, primary: 0, primaryVerified: 0, backlog: 0, verified: 0, cited: 0, byTAAll: {}, byTA: {}, byTAVerified: {}, byPhase: {}, byType: {}, byYear: {}, byRegion: {}, byCompanyType: {}, companies: 0, sourceTypes: 0, countries: 0, lastAddedAt: null }, { status: 500 });
   }
 }

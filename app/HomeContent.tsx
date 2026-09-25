@@ -45,6 +45,12 @@ const TA_DISPLAY_NAMES: Record<string, string> = {
   gastroenterology: 'Gastroenterology', hematology: 'Hematology',
 };
 
+const COMPANY_TYPE_DISPLAY: Array<{ key: string; label: string }> = [
+  { key: 'large_pharma', label: 'Large pharma' }, { key: 'mid_pharma', label: 'Mid-sized pharma' }, { key: 'large_biotech', label: 'Large biotech' },
+  { key: 'mid_biotech', label: 'Mid-sized biotech' }, { key: 'specialty', label: 'Specialty' }, { key: 'academic', label: 'Academic' },
+  { key: 'government', label: 'Government' }, { key: 'nonprofit', label: 'Non-profit' }, { key: 'cro_cdmo', label: 'CRO / CDMO' },
+];
+
 const PHASE_DISPLAY: Array<{ key: string; label: string }> = [
   { key: 'discovery', label: 'Discovery' }, { key: 'preclinical', label: 'Preclinical' }, { key: 'phase_1', label: 'Phase 1' },
   { key: 'phase_2', label: 'Phase 2' }, { key: 'phase_3', label: 'Phase 3' }, { key: 'approved', label: 'Approved' },
@@ -54,6 +60,7 @@ interface CoverageStats {
   total: number; primary: number; primaryVerified: number; backlog: number; verified: number; cited: number;
   byTA: Record<string, number>; byTAVerified: Record<string, number>; byPhase: Record<string, number>;
   byType: Record<string, number>; byYear: Record<string, number>; sourceTypes: number; countries: number;
+  byCompanyType: Record<string, number>; companies: number;
 }
 
 function CoverageBars({ items, max }: { items: Array<{ key: string; label: string; value: number; sub?: string }>; max: number }) {
@@ -98,6 +105,10 @@ function DatabaseCoverageSection() {
   const phaseMax = Math.max(...phaseItems.map(p => p.value), 1);
   const unstaged = stats.byPhase.unknown ?? 0;
 
+  const typeItems = COMPANY_TYPE_DISPLAY.map(t => ({ key: t.key, label: t.label, value: stats.byCompanyType?.[t.key] ?? 0 })).filter(t => t.value > 0);
+  const typeMax = Math.max(...typeItems.map(t => t.value), 1);
+  const unclassified = stats.byCompanyType?.unclassified ?? 0;
+
   const years = Object.keys(stats.byYear).map(Number).filter(Number.isFinite).sort();
   const yearSpan = years.length ? `${years[0]}–${years[years.length - 1]}` : '2017–2026';
   const dealTypes = Object.keys(stats.byType).filter(t => t !== 'other' && t !== 'unknown').length;
@@ -131,12 +142,22 @@ function DatabaseCoverageSection() {
         </div>
         <CoverageBars items={phaseItems} max={phaseMax} />
 
+        {typeItems.length > 0 ? (
+          <>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-2">
+              Counterparties by type · {stats.companies.toLocaleString()} organisations{unclassified > 0 ? <span className="normal-case font-normal tracking-normal"> · {unclassified.toLocaleString()} not yet classified</span> : null}
+            </div>
+            <CoverageBars items={typeItems} max={typeMax} />
+          </>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
           {[
             { label: 'Primary-Sourced Deals', value: headline },
             { label: 'Years', value: yearSpan },
             { label: 'Deal Types', value: String(dealTypes) },
             { label: 'Primary Sources', value: String(stats.sourceTypes) },
+            { label: 'Organisations', value: stats.companies.toLocaleString() },
             { label: 'Countries', value: String(stats.countries) },
             { label: 'Updated', value: 'Daily' },
           ].map(s => (
