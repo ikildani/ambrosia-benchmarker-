@@ -113,6 +113,7 @@ function getCorePages(): MetadataRoute.Sitemap {
     staticEntry('/intelligence', 'daily', 0.7),
     staticEntry('/methodology', 'monthly', 0.7),
     staticEntry('/methodology/engine', 'monthly', 0.7),
+    staticEntry('/methodology/preclinical', 'monthly', 0.7),
     staticEntry('/therapeutic-areas', 'weekly', 0.8),
     ...TA_SLUGS.map((ta) => staticEntry(`/therapeutic-areas/${ta}`, 'weekly', 0.8)),
     staticEntry('/benchmark', 'weekly', 0.9),

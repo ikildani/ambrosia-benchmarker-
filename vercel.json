@@ -164,7 +164,7 @@
     },
     {
       "path": "/api/cron/deal-verification",
-      "schedule": "0 */2 * * *"
+      "schedule": "*/20 * * * *"
     },
     {
       "path": "/api/cron/re-extract-pending",

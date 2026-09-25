@@ -19,6 +19,7 @@ import type { CalculationHistoryItem } from '@/lib/history';
 // Dynamic imports for heavy below-fold components
 import { ChartSkeleton, TableSkeleton, AnalysisPanelSkeleton } from './skeletons/SectionSkeleton';
 import PartnerMatchesSkeleton from './skeletons/PartnerMatchesSkeleton';
+import OutcomeAccuracyLine from './OutcomeAccuracyLine';
 const SensitivityAnalysis = dynamic(() => import('./sensitivity').then(m => ({ default: m.SensitivityAnalysis })), { ssr: false, loading: () => <TableSkeleton /> });
 const ChartSection = dynamic(() => import('./charts/ChartSection'), { ssr: false, loading: () => <ChartSkeleton /> });
 const ScenarioComparison = dynamic(() => import('./ScenarioComparison'), { ssr: false });
@@ -1825,6 +1826,13 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             )}
           </div>
           )}
+
+          {/* Resolved-outcome accuracy for this TA × phase — renders nothing below n = 10 */}
+          <OutcomeAccuracyLine
+            className="col-span-full -mt-1"
+            therapeuticArea={fullInputs?.therapeuticArea}
+            phase={fullInputs?.phase ?? inputs?.phase}
+          />
         </div>
 
         {/* Deal Intelligence Brief CTA — primary conversion for non-Pro users */}

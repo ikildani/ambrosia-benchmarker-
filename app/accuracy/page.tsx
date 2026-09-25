@@ -250,7 +250,7 @@ export default function AccuracyDashboard() {
                 {pct(data.coreScope.hit50)}
               </div>
               <div className="mt-1 text-[11px] text-slate-400">
-                raw {kOverN(data.coreScope.raw, 'hit50')} of core-scope deals within half to double of actual
+                raw {kOverN(data.coreScope.raw, 'hit50')} of core-scope deals within &plusmn;50% of the disclosed upfront
               </div>
             </div>
           </div>
@@ -307,11 +307,11 @@ export default function AccuracyDashboard() {
                 Held-out validation — does it generalize?
               </h2>
               <p className="mt-2 max-w-3xl text-sm text-slate-400">
-                The calibration rounds tune against the full corpus. That risks overfitting.
-                We split core scope 80/20 (deterministic hash on deal id) and measure hit rates
-                separately on the test set the engine never saw during tuning.{' '}
-                <span className="text-slate-300">Small train/test gap = the model generalizes.</span>{' '}
-                Big gap = we&rsquo;re memorizing deals.
+                Rounds 1-12 were tuned on the full corpus. From Round 13 (April 2026) we split
+                core scope 80/20 by a deterministic hash on deal id and report the 20% separately.
+                Because the test deals were in the corpus when the earlier floors and dampeners
+                were set, this is a partial generalization check, not a clean out-of-sample
+                validation; a temporal split is the next step.
               </p>
             </div>
 
@@ -327,7 +327,7 @@ export default function AccuracyDashboard() {
               </div>
 
               <div className="rounded-lg border border-teal-500/30 bg-teal-500/5 p-5">
-                <div className="mb-2 text-xs uppercase tracking-wider text-teal-400">Test (20%, never seen) — weighted</div>
+                <div className="mb-2 text-xs uppercase tracking-wider text-teal-400">Test (20%, held out since R13) — weighted</div>
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between"><span className="text-slate-500">±25%</span><span className="font-mono text-slate-100">{pct(data.holdout.test.hit25)}</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">±35%</span><span className="font-mono text-slate-100">{pct(data.holdout.test.hit35)}</span></div>
@@ -365,7 +365,7 @@ export default function AccuracyDashboard() {
                 <div className="grid gap-8 lg:grid-cols-2">
                   <div>
                     <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-teal-400">
-                      Test set (20%, never seen)
+                      Test set (20%, held out since R13)
                     </h4>
                     <SliceTable rows={data.holdout.testByTA} dimension="TA" />
                   </div>
@@ -563,12 +563,14 @@ export default function AccuracyDashboard() {
           <h2 className="mb-6 text-2xl font-semibold text-slate-100">Methodology</h2>
           <div className="space-y-4 text-sm leading-relaxed text-slate-400">
             <p>
-              Every deal in the corpus has publicly disclosed upfront and total-deal-value
-              figures sourced from SEC 8-K filings, FTC premerger filings, and company press
-              releases. For each deal, the engine is fed the asset profile as it was known at
-              deal date (stage, modality, therapeutic area, indication, competitive position)
-              and computes an implied upfront via rNPV. The predicted value is compared to
-              the actual disclosed upfront.
+              The corpus is {data.fullScope.n.toLocaleString()} deals with a disclosed upfront.{' '}
+              {data.corpus.curated.toLocaleString()} are hand-curated cases with terms checked
+              against the 8-K, HSR filing or press release; {data.corpus.fromDatabase.toLocaleString()} are
+              rows pulled from the production deals table, each with a source URL but not all
+              individually re-verified. The engine is fed the deal&rsquo;s tagged stage, modality,
+              therapeutic area, indication and territory, and computes an implied upfront with
+              the current benchmark and calibration tables, not the tables as they stood at
+              deal date.
             </p>
             <p>
               <span className="text-slate-200">Hit rate</span> is the recency-weighted share

@@ -17,6 +17,7 @@
  *   8. diligence       [asset, intake ready/gaps]
  *   9. positioning     [decision, comps, buyer map]  (Anthropic call, optional)
  *  10. coverage        [raw rows, comps]
+ *  11. coverage.accuracy [accuracy_rollups for the TA; null below n = 10]
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -38,13 +39,15 @@ import { buildRegionalStrategy } from './regional';
 import { buildTermSheetPrecedent } from './term-sheet';
 import { computeBuyerValuations, type PremiumEntry } from './buyer-valuations';
 import { buildBuyerMap } from './buyer-map';
-import { buildLandscape } from './landscape';
+import { buildLandscape, landscapeUsesTerrain } from './landscape';
+import { fetchDemandProfile } from './terrain-demand';
 import { buildValuationBridge } from './valuation-bridge';
 import { buildInflectionPath } from './inflection';
 import { buildDecisionSummary } from './decision';
 import { buildDiligenceChecklist } from './diligence-checklist';
 import { generatePositioningObjections } from '@/lib/ai/objection-generator';
 import { fmtM } from '@/lib/report/helpers';
+import { loadBriefAccuracyStatement } from '@/lib/outcomes/statements';
 
 export interface BuildBriefInput {
   supabase: SupabaseClient;
@@ -142,7 +145,7 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
       return map;
     });
     buyerValuations = (await step('buyers.valuations', notes, log, () =>
-      computeBuyerValuations(partners, fm.dealWaterfall!, fm.rnpv!, premiums ?? undefined),
+      computeBuyerValuations(partners, fm.dealWaterfall!, fm.rnpv!, premiums ?? undefined, 4),
     )) ?? [];
   }
 
@@ -153,11 +156,20 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
     );
   }
 
-  // 4. Landscape
+  // 4. Landscape. Terrain's demand profile (patient funnel, key programs,
+  // crowding) is read here and passed through; it never throws, and the local
+  // epidemiology / registry paths remain the fallback. Only the slug and the
+  // profile's asOf are recorded (build notes), never Terrain's numbers.
   const buyerNames = brief.buyerMap?.candidates.map(c => c.name) ?? partners.map(p => p.company_name);
-  brief.landscape = await step('landscape', notes, log, () =>
-    buildLandscape(supabase, asset, fm.marketSize ?? null, { asOf, buyerNames }),
-  );
+  brief.landscape = await step('landscape', notes, log, async () => {
+    const demand = await fetchDemandProfile(asset.indication, { territory: asset.territory });
+    const landscape = await buildLandscape(supabase, asset, fm.marketSize ?? null, { asOf, buyerNames, terrain: demand?.profile ?? null });
+    if (demand && landscapeUsesTerrain(landscape)) {
+      notes.push(`terrainAsOf ${demand.asOf} (indication ${asset.indication}${demand.profile.identity.match === 'proxy' ? ', proxy match' : ''})`);
+      log(`[Brief] landscape used Terrain demand layer (indication ${asset.indication}, asOf ${demand.asOf})`);
+    }
+    return landscape;
+  });
 
   // 5. Valuation bridge — single source of truth for ask / floor / walk-away
   brief.bridge = await step('bridge', notes, log, () =>
@@ -214,6 +226,12 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
 
   // 10. Coverage (honesty block)
   brief.coverage = coverageFromRows(raw, asset, brief, asOf);
+
+  // 11. Resolved-brief accuracy for this TA (outcome ledger). The loader never
+  // throws and returns null below the n ≥ 10 threshold, so the methodology
+  // page keeps its "omitted rather than estimated" line.
+  const accuracy = await step('coverage.accuracy', notes, log, () => loadBriefAccuracyStatement(supabase, asset.therapeuticArea));
+  if (accuracy) brief.coverage.accuracy = accuracy;
 
   return { brief, buyerValuations, notes };
 }

@@ -13,6 +13,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { findLikelyDuplicate } from './dedupe';
 
 /** Values accepted by deals_source_type_check (migrations 113, 114, 120, 121). */
 export const DEAL_SOURCE_TYPES = [
@@ -119,7 +120,7 @@ export function buildCitedDealRow(input: CitedDealInsert, opts: { legacyConstrai
 export async function insertCitedDeal(
   supabase: SupabaseClient,
   input: CitedDealInsert,
-  opts: { dryRun?: boolean; legacyConstraint?: boolean } = {},
+  opts: { dryRun?: boolean; legacyConstraint?: boolean; dedupe?: boolean } = {},
 ): Promise<CitedDealInsertResult> {
   let row: Record<string, unknown>;
   try {
@@ -129,6 +130,20 @@ export async function insertCitedDeal(
     throw e;
   }
   if (opts.dryRun) return { ok: true, outcome: 'inserted' };
+
+  // Sep 25 2026: the unique indexes only catch exact strings in one direction. Normalised
+  // party keys, either orientation, same asset within 400 days or same parties within 60.
+  if (opts.dedupe !== false) {
+    try {
+      const dup = await findLikelyDuplicate(supabase, {
+        licensor: String(row.licensor_name ?? ''), licensee: String(row.licensee_name ?? ''),
+        asset: (row.asset_name as string | null | undefined) ?? null, announcedDate: String(row.announced_date ?? new Date().toISOString().slice(0, 10)),
+      });
+      if (dup) return { ok: false, outcome: 'duplicate', error: `likely duplicate of ${dup.id} (${dup.reason}${dup.reversed ? ', roles reversed' : ''})` };
+    } catch (e) {
+      console.warn('[insert-deal] duplicate check failed, inserting anyway:', e);
+    }
+  }
 
   const { data, error } = await supabase.from('deals').insert(row).select('id').single();
   if (error) {

@@ -20,11 +20,13 @@ import { runFinancialModel } from '@/lib/financial/run-financial-model';
 import { generateReportHTML } from '@/lib/report';
 import { getDealMemoGenerator } from '@/lib/ai/deal-memo-generator';
 import { getPlaybookGenerator } from '@/lib/ai/playbook-generator';
-import type { PDFReportData } from '@/lib/report/types';
+import type { PDFReportData, PartnerForPDF } from '@/lib/report/types';
 import { renderPDFBuffer } from '@/lib/report/server-renderer';
 import epiData from '@/data/epidemiology.json';
 import { resolveIntake } from '@/lib/brief/intake-map';
 import { buildBrief } from '@/lib/brief/build';
+import { recordBriefPrediction } from '@/lib/outcomes/writers';
+import { fetchBriefPartners } from '@/lib/brief/partners';
 import { modalityLabels } from '@/lib/report/helpers';
 import type { MPOpinion } from '@/lib/brief/types';
 
@@ -118,43 +120,22 @@ export async function POST(request: NextRequest) {
       console.error('[Benchmark Gen] AI playbook failed:', err);
     }
 
-    // Step 5: Partner matches
-    let partnerMatches;
+    // Step 5: Partner matches — direct library call with the service client.
+    // The HTTP endpoint resolves tier from the session (none here) and served
+    // the free tier (3 locked matches); see lib/brief/partners.ts. Pool size
+    // BRIEF_PARTNER_POOL feeds the buyer-mix rule; the legacy Partner Matches
+    // page still shows its own top 8.
+    let partnerMatches: PartnerForPDF[] | undefined;
     try {
-      const response = await fetch('https://solidus.ambrosiaventures.co/api/partners/match', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          modality: baseInput.modality,
-          development_phase: baseInput.phase,
-          indication_category: baseInput.indication,
-          territory_scope: baseInput.territory,
-          therapeutic_area: baseInput.therapeuticArea,
-          tier: 'pro',
-        }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data?.matches?.length > 0) {
-          partnerMatches = data.matches.map((m: any) => ({
-            company_name: m.company_name,
-            match_score: m.match_score,
-            match_reasons: m.match_reasons || [],
-            deals_last_12mo: m.deals_last_12mo || 0,
-            hq_country: m.hq_country,
-            strategic_context: m.strategic_context || null,
-            pharma_intent: m.pharma_intent || null,
-            company_id: m.company_id ?? null,
-            company_type: m.company_type ?? null,
-            deals_last_24mo: m.deals_last_24mo ?? null,
-            last_deal_date: m.last_deal_date ?? null,
-            phase_preference_min: m.phase_preference_min ?? null,
-            phase_preference_max: m.phase_preference_max ?? null,
-            acquisition_appetite: m.acquisition_appetite ?? null,
-            median_upfront_usd: m.median_upfront_usd ?? null,
-          }));
-        }
-      }
+      const pool = await fetchBriefPartners(supabase, {
+        modality: baseInput.modality,
+        phase: baseInput.phase,
+        indication: baseInput.indication,
+        territory: baseInput.territory,
+        therapeuticArea: baseInput.therapeuticArea,
+        dealType: baseInput.dealType,
+      }, { log: (m) => console.log(`[Benchmark Gen] ${m}`) });
+      if (pool.length > 0) partnerMatches = pool;
     } catch (err) {
       console.error('[Benchmark Gen] Partner match failed:', err);
     }
@@ -178,6 +159,16 @@ export async function POST(request: NextRequest) {
       log: (m) => console.log(m),
     });
     genNotes.push(...built.notes);
+
+    // Step 5c: Outcome ledger — commit the brief's ask/floor, buyers and window
+    // as a prediction (Alaric WS1). Fire-and-forget; never breaks generation.
+    try {
+      void recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null }).catch((e: unknown) => {
+        console.warn('[Outcomes] brief prediction rejected:', e instanceof Error ? e.message : e);
+      });
+    } catch (e) {
+      console.warn('[Outcomes] brief prediction threw:', e instanceof Error ? e.message : e);
+    }
 
     // Step 6: Assemble PDFReportData
     const pdfData: PDFReportData = {

@@ -6,10 +6,11 @@
  * product, the headline is a range with comparable-deal percentiles,
  * not a point estimate.
  *
- * Why: the engine's point estimate lands within ±25% of real deals only
- * ~15% of the time. The p25-p75 range of comparable disclosed deals
- * contains the actual outcome ~72% of the time. The range is the honest
- * directional signal; the point is a supporting data point.
+ * Why: the engine's point estimate lands within ±25% of real deals ~17%
+ * of the time (full scope, Sep 2026 backtest). Coverage of the comparable
+ * p25-p75 band is not yet measured; /accuracy makes no claim for it. The
+ * range is the honest directional signal; the point is a supporting data
+ * point.
  *
  * Population: ONE comp pool. The band is the recency-weighted p10..p90 of
  * the same live Supabase pool the Comparables tab renders, delivered via

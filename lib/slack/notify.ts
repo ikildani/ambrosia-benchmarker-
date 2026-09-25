@@ -443,15 +443,27 @@ export async function notifyDealInflow(report: {
   bySource24h: Record<string, number>;
   zeroFetchSources: string[];
   severity: 'ok' | 'low' | 'zero';
+  /** Sep 25 2026: verification / dedupe numbers so the daily post answers "is the data trustworthy" without anyone asking. */
+  quality?: { verified: number; flagged: number; reverified: number; regressions: number; rolesSwapped: number; duplicatesBlocked: number; superseded: number; realRows: number; verifiedRows: number; citedRows: number; pendingRows: number };
 }): Promise<void> {
-  if (report.severity === 'ok') return;
+  // Posts every day: green when healthy, amber/red when inflow is low or zero.
   const sourceLines = Object.entries(report.bySource24h).sort((a, b) => b[1] - a[1]).map(([k, v]) => `• ${k}: ${v}`).join('\n') || '• none';
   const zeroLines = report.zeroFetchSources.length ? report.zeroFetchSources.map(s => `• ${s}`).join('\n') : '• none';
+  const q = report.quality;
+  const qualityBlocks = q ? [
+    { type: 'section', fields: [
+      { type: 'mrkdwn', text: `*Corpus:*\n${q.realRows.toLocaleString()} real · ${q.verifiedRows.toLocaleString()} verified · ${q.citedRows.toLocaleString()} cited · ${q.pendingRows} pending` },
+      { type: 'mrkdwn', text: `*Verifier (24h):*\n${q.verified} verified · ${q.flagged} flagged · ${q.reverified} re-adjudicated · ${q.rolesSwapped} roles fixed` },
+      { type: 'mrkdwn', text: `*Backtest (24h):*\n${q.regressions === 0 ? '0 regressions ✅' : `${q.regressions} regression(s) ⚠️ — previously verified rows no longer hold`}` },
+      { type: 'mrkdwn', text: `*Duplicates (24h):*\n${q.duplicatesBlocked} blocked at insert · ${q.superseded} superseded` },
+    ] },
+  ] : [];
+  const header = report.severity === 'zero' ? '🛑 Deal inflow: zero cited rows in 24h' : report.severity === 'low' ? '⚠️ Deal inflow below 7-day floor' : '✅ Solidus daily: inflow and data quality';
   await postToSlack(
     [{
-      color: report.severity === 'zero' ? '#ef4444' : '#f59e0b',
+      color: report.severity === 'zero' ? '#ef4444' : report.severity === 'low' ? '#f59e0b' : '#14b8a6',
       blocks: [
-        { type: 'header', text: { type: 'plain_text', text: report.severity === 'zero' ? '🛑 Deal inflow: zero cited rows in 24h' : '⚠️ Deal inflow below 7-day floor', emoji: true } },
+        { type: 'header', text: { type: 'plain_text', text: header, emoji: true } },
         {
           type: 'section',
           fields: [
@@ -461,6 +473,7 @@ export async function notifyDealInflow(report: {
         },
         { type: 'section', text: { type: 'mrkdwn', text: `*Inserted by source (24h):*\n${sourceLines}` } },
         { type: 'section', text: { type: 'mrkdwn', text: `*Sources that fetched 0 (24h):*\n${zeroLines}` } },
+        ...qualityBlocks,
         { type: 'context', elements: [{ type: 'mrkdwn', text: `Check data_ingestion_log.parameters.funnel for the drop stage | ${formatTimestamp()}` }] },
       ],
     }],

@@ -144,7 +144,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
         name: 'What is a Pharma Intent Score?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The Pharma Intent Score is an 8-factor predictive model that forecasts which companies are most likely to do a deal in a specific therapeutic area. It analyzes pipeline gaps, patent cliff timing, competitive pressure, deal velocity (deals per year), M&A history, therapeutic area commitment, financial capacity, and public statements. A score above 80 indicates high deal likelihood within 12 months. Backtested against 378 deals with demonstrated predictive accuracy.',
+          text: 'The Pharma Intent Score is a 10-factor weighted model that ranks which companies are most likely to do a deal in a specific modality, indication and phase within 12-18 months. It scores patent cliff pressure, deal velocity, pipeline gaps, modality and phase alignment, competitive pressure, strategic signals, research investment, deal persistence, self-saturation and portfolio balance. A score of 80 or above is the top tier. Weights are set by hand from observed deal behaviour and are published in the score breakdown; the score is a ranking heuristic, not a fitted model.',
         },
       },
       {
@@ -240,7 +240,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
 
           <KeyTakeaways takeaways={[
             'The right partner is defined by pipeline urgency, not company size. A mid-cap pharma with a critical patent cliff in your TA will pay more and close faster than a mega-cap with no strategic pressure.',
-            'Companies with Pharma Intent Scores above 80 (top quintile) close deals 2.3x faster and pay 15-20% higher upfronts than companies in the 40-60 range.',
+            'The Pharma Intent Score is a 10-factor ranking heuristic with hand-set, published weights. It has not been backtested for lift, so treat it as a screen, not a forecast.',
             'Starting partner identification 4-6 months before JPM or BIO results in 40% faster deal timelines compared to beginning at the conference.',
             `The Partner Matching engine screens ${DEAL_STATS.TOTAL_COMPANIES} companies across 8 scoring dimensions to identify your highest-probability partners.`,
           ]} />
@@ -258,7 +258,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
           <div className="border-l-4 border-teal-500 pl-5 py-3 my-8">
             <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Key Insight</p>
             <p className="text-slate-700 leading-relaxed">
-              Companies that use data-driven partner identification close deals 40% faster and achieve 15-20% higher upfronts than those relying on relationship-based outreach alone. The difference is not better relationships — it is better targeting.
+              Data-driven partner identification starts from urgency signals, not company size. The difference between a fast close and a stalled process is not better relationships — it is better targeting.
             </p>
           </div>
 
@@ -270,7 +270,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
               {[
                 { step: '1', title: 'Map Asset', desc: 'Competitive position' },
                 { step: '2', title: 'Find Gaps', desc: 'Pipeline gap analysis' },
-                { step: '3', title: 'Score Intent', desc: '8-factor model' },
+                { step: '3', title: 'Score Intent', desc: '10-factor model' },
                 { step: '4', title: 'Assess Fit', desc: 'Strategic + financial' },
                 { step: '5', title: 'Prioritize', desc: 'Tier & sequence' },
               ].map((item, i) => (
@@ -329,30 +329,32 @@ export default function PharmaPartnerIdentificationGuidePage() {
           <div className="prose prose-slate prose-lg max-w-none">
             <h3>Step 3: Score Intent Signals</h3>
             <p>
-              Pipeline gaps tell you who needs an asset. Intent signals tell you who is ready to act. The Pharma Intent Score synthesizes 8 factors into a single predictive metric, backtested against 378 completed transactions with demonstrated accuracy.
+              Pipeline gaps tell you who needs an asset. Intent signals tell you who is ready to act. The Pharma Intent Score synthesizes 10 factors into a single ranking metric.
             </p>
           </div>
 
           <div className="my-8">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 1C</p>
-            <h3 className="text-base font-bold text-slate-900 mb-1">The 8 Pharma Intent Score Factors</h3>
-            <p className="text-xs text-slate-400 mb-4">Weighted scoring model backtested against 378 completed transactions. Pipeline Gap Severity and Patent Cliff Proximity together account for 35% of the total score.</p>
+            <h3 className="text-base font-bold text-slate-900 mb-1">The 10 Pharma Intent Score Factors</h3>
+            <p className="text-xs text-slate-400 mb-4">Weighted scoring model; weights are hand-set and shown below. Patent Cliff Pressure and Pipeline Gap together account for 30% of the total score.</p>
           </div>
 
           <GatedBenchmarkTable
             headers={['Factor', 'Weight', 'What It Measures']}
             rows={[
-              ['Pipeline Gap Severity', '20%', 'Missing assets in TA relative to revenue exposure'],
-              ['Patent Cliff Proximity', '15%', 'Years until LOE on key revenue products'],
-              ['Deal Velocity', '15%', 'Number of deals closed in past 24 months'],
-              ['Competitive Pressure', '12%', 'Peer acquisitions and licensing in same space'],
-              ['Financial Capacity', '12%', 'Cash reserves, debt capacity, and BD budget signals'],
-              ['Therapeutic Area Commitment', '10%', 'R&D spend and headcount in target TA'],
-              ['Leadership Signals', '8%', 'Public statements, board changes, strategic reviews'],
-              ['Geographic Fit', '8%', 'Rights alignment and regional commercial infrastructure'],
+              ['Patent Cliff Pressure', '16%', 'TA-specific loss-of-exclusivity urgency'],
+              ['Deal Velocity', '14%', 'In-licensing deals, recency-decayed and saturation-aware'],
+              ['Pipeline Gap', '14%', 'Trial-based gap; distinguishes "exited" from "never entered"'],
+              ['Modality × Phase Alignment', '12%', 'Company size × preferred deal type interaction'],
+              ['Competitive Pressure', '10%', 'Non-linear compounding by number of unique rivals'],
+              ['Strategic Signals', '8%', 'Press statements, stated priorities, BD hiring'],
+              ['Research Investment', '6%', 'Publications, grants, patents in the target space'],
+              ['Deal Persistence', '6%', 'Serial-acquirer pattern'],
+              ['Self-Saturation Penalty', '7%', 'Recent deal in the same modality suppresses intent'],
+              ['Portfolio Balance', '7%', 'Concentration risk and diversification urgency'],
             ]}
-            freeRows={8}
-            footnote="Source: Ambrosia Ventures Pharma Intent Score methodology. Weights derived from logistic regression on 378 completed transactions (2020-2026)."
+            freeRows={10}
+            footnote="Source: Solidus Pharma Intent Score weights, as implemented. Not a fitted regression."
           />
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
@@ -375,10 +377,9 @@ export default function PharmaPartnerIdentificationGuidePage() {
             <p className="text-xs text-slate-400 mt-3">Deal velocity = licensing, acquisition, co-development, and option deals. Source: Solidus.</p>
           </div>
 
-          <div className="my-8 grid sm:grid-cols-3 gap-4">
-            <StatCard value="2.3x" label="Faster Close" sub="Intent Score > 80 vs. 40-60" />
-            <StatCard value="15-20%" label="Higher Upfronts" sub="High-intent buyers" />
-            <StatCard value="378" label="Deals Backtested" sub="Model validation" />
+          <div className="my-8 grid sm:grid-cols-2 gap-4">
+            <StatCard value={DEAL_STATS.TOTAL_COMPANIES} label="Companies Profiled" sub="Scored on every run" />
+            <StatCard value="10" label="Score Factors" sub="Hand-set weights, published above" />
           </div>
 
           <div className="prose prose-slate prose-lg max-w-none">
@@ -455,7 +456,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
             <h2 id="intent-predicts">How Intent Scoring Predicts Deal Likelihood</h2>
 
             <p>
-              The Pharma Intent Score is not theoretical — it is backtested against 378 completed transactions with measurable predictive accuracy. Companies scoring above 80 (top quintile) closed deals at 2.3x the rate of companies scoring 40-60, and paid 15-20% higher upfronts when they did close.
+              The Intent Score is a screening heuristic. We have not run a controlled backtest of score versus subsequent deal closure, so we do not publish a lift number. The Asset Radar signal model, which shares several inputs, has a temporal backtest published at <Link href="/radar/methodology" className="text-teal-600 font-medium hover:text-teal-700">/radar/methodology</Link>.
             </p>
           </div>
 
@@ -477,16 +478,6 @@ export default function PharmaPartnerIdentificationGuidePage() {
               A mid-cap pharma company (Intent Score: 94) had a $3.2B oncology product losing exclusivity in 2027 with no Phase 2+ replacement. When a biotech with a Phase 2 ADC in the same indication entered the partnering process, the pharma company moved from first meeting to signed term sheet in 87 days — paying a 35% premium over median benchmarks. The urgency was driven by patent cliff timing, not by extraordinary clinical data. The biotech identified this partner through pipeline gap analysis, not through an existing relationship.
             </p>
           </div>
-
-          {/* ── PULL QUOTE 2 ── */}
-          <section className="bg-slate-900 rounded-xl my-12 text-white">
-            <div className="max-w-2xl mx-auto px-6 py-14 text-center">
-              <blockquote className="text-2xl sm:text-3xl font-bold leading-snug tracking-tight">
-                &ldquo;Intent-informed outreach converts at 6x the rate of cold approaches — 18% versus 3%.&rdquo;
-              </blockquote>
-              <p className="mt-4 text-sm text-slate-400">Pharma Intent Score backtested against 378 completed transactions</p>
-            </div>
-          </section>
 
           {/* ── SECTION 4: CONFERENCE PREP ── */}
           <div className="prose prose-slate prose-lg max-w-none">
@@ -550,7 +541,7 @@ export default function PharmaPartnerIdentificationGuidePage() {
 
             <h3>What is a Pharma Intent Score?</h3>
             <p>
-              An 8-factor predictive model that forecasts which companies are most likely to do a deal in a specific therapeutic area. Factors include pipeline gaps, patent cliff timing, deal velocity, competitive pressure, and financial capacity. Backtested against 378 deals. Companies scoring above 80 close 2.3x faster and pay 15-20% higher upfronts.
+              A 10-factor weighted model that ranks which companies are most likely to do a deal in a specific modality, indication and phase within 12-18 months. Factors include patent cliff pressure, deal velocity, pipeline gaps, modality and phase alignment, competitive pressure and strategic signals. Weights are set by hand from observed deal behaviour and are published in the score breakdown; the score is a ranking heuristic, not a fitted model.
             </p>
 
             <h3>How many companies should I approach?</h3>

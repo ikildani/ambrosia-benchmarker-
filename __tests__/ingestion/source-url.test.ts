@@ -127,7 +127,7 @@ describe('verifyPendingDeals persists citations without overwriting', () => {
     const chain = (data: unknown) => {
       const q: Record<string, unknown> = {};
       const self = () => q;
-      for (const m of ['select', 'eq', 'in', 'is', 'or', 'order', 'limit']) q[m] = self;
+      for (const m of ['select', 'eq', 'in', 'is', 'or', 'order', 'limit', 'lt', 'gt', 'gte', 'lte', 'not', 'maybeSingle']) q[m] = self;
       (q as { then: unknown }).then = (resolve: (v: unknown) => void) => resolve({ data, error: null });
       return q;
     };

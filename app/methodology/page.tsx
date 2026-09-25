@@ -9,6 +9,10 @@ import { COMP_MATCH_WEIGHTS, COMP_MAX_SCORE, MIN_POOL_BEFORE_RELAX } from '@/lib
 import { runMonteCarlo } from '@/lib/financial/monte-carlo';
 import type { RNPVInput } from '@/lib/financial/types';
 import { loadAccuracyData } from '@/lib/accuracy-dashboard-data';
+import { createServiceClient } from '@/lib/supabase/server';
+import { getAccuracySummary } from '@/lib/outcomes/statements';
+import type { AccuracySummary } from '@/lib/outcomes/statements';
+import { ResolvedOutcomesSection } from '@/components/methodology/ResolvedOutcomesSection';
 
 // Server component: every number below is read from the engine or its data
 // files at render time, so this page cannot drift from the code.
@@ -43,6 +47,20 @@ const SCENARIO_STAGES: { label: string; phases: string; phase: RNPVInput['phase'
 ];
 
 const pctLabel = (x: number) => `${Math.round(x * 100)}%`;
+const signedPctLabel = (x: number) => {
+  const v = Math.round(x * 100);
+  return `${v > 0 ? '+' : ''}${v}%`;
+};
+
+/** Live ledger summary; an empty summary when the service client or table is unavailable. */
+async function loadResolvedOutcomes(): Promise<AccuracySummary> {
+  try {
+    return await getAccuracySummary(createServiceClient());
+  } catch (e) {
+    console.warn('[Outcomes] methodology summary unavailable:', e instanceof Error ? e.message : e);
+    return { computedAt: null, minN: 10, sources: [] };
+  }
+}
 
 export default async function MethodologyPage() {
   const stats = await getLiveDealStats();
@@ -50,6 +68,7 @@ export default async function MethodologyPage() {
   const w24 = recencyWeight(2024, 2026); // weight of a deal signed 24 months before the reference year
   const w60 = recencyWeight(2021, 2026);
   const accuracy = loadAccuracyData();
+  const resolved = await loadResolvedOutcomes();
   const backtestRunAt = accuracy?.runAt ? accuracy.runAt.slice(0, 10) : null;
   const { version: benchmarksVersion, lastUpdated: benchmarksUpdated } = staticBenchmarks.metadata;
 
@@ -82,7 +101,7 @@ export default async function MethodologyPage() {
             Methodology
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl">
-            Our benchmarks are calibrated against {stats.totalDealsDisplay} verified biopharma transactions sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
+            Our benchmarks are built on {stats.totalDealsDisplay} disclosed biopharma transactions{stats.fallback ? '' : `, ${stats.verifiedDeals.toLocaleString()} of them verifier-confirmed against a primary source,`} sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
           </p>
           <div className="mt-5 inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300">
             <span>Engine <span className="font-mono text-slate-900 dark:text-white">v{ENGINE_VERSION}</span></span>
@@ -120,7 +139,7 @@ export default async function MethodologyPage() {
             </p>
             <div className="grid sm:grid-cols-2 gap-4 not-prose mt-6">
               {[
-                { label: 'Verified Transactions', value: stats.totalDealsDisplay, sub: stats.fallback ? 'Licensing, acquisitions, collaborations, options, co-development' : `${stats.verifiedDeals.toLocaleString()} verifier-confirmed · ${stats.citedDeals.toLocaleString()} with a primary-source citation` },
+                { label: 'Disclosed Transactions', value: stats.totalDealsDisplay, sub: stats.fallback ? 'Licensing, acquisitions, collaborations, options, co-development' : `${stats.verifiedDeals.toLocaleString()} verifier-confirmed · ${stats.citedDeals.toLocaleString()} with a primary-source citation` },
                 { label: 'Company Profiles', value: DEAL_STATS.TOTAL_COMPANIES, sub: 'Pharma, biotech, and specialty companies tracked' },
                 { label: 'Therapeutic Areas', value: String(stats.therapeuticAreas), sub: 'Oncology through rare disease and women\'s health' },
                 { label: 'Primary Sources', value: `${stats.sourceTypes}`, sub: 'SEC EDGAR, HKEX, TDnet, ASX, SSE/SZSE, MFN, press wires, agency databases' },
@@ -192,6 +211,9 @@ export default async function MethodologyPage() {
               </table>
             </div>
             <p className="text-slate-600 dark:text-slate-300">
+              A legacy vector-similarity search exists on the Pro API but is not part of the calculator&apos;s comparable selection.
+            </p>
+            <p className="text-slate-600 dark:text-slate-300">
               A deal must share your therapeutic area and at least one of phase, adjacent phase, or indication to qualify. If fewer than {MIN_POOL_BEFORE_RELAX} deals qualify, the filter relaxes to therapeutic area + modality, then therapeutic area alone, so you always see the closest available comparables and the panel tells you which rung was used.
             </p>
             <p className="text-slate-600 dark:text-slate-300">
@@ -235,27 +257,6 @@ export default async function MethodologyPage() {
             </p>
           </section>
 
-          {/* Comparable Deal Matching */}
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white !mt-0 !mb-0">Semantic Deal Matching</h2>
-            </div>
-            <p className="text-slate-600 dark:text-slate-300">
-              Traditional deal databases match on keywords — &quot;oncology&quot; finds oncology deals. Our platform goes further with semantic matching technology that understands the full context of each transaction.
-            </p>
-            <p className="text-slate-600 dark:text-slate-300">
-              Every deal in our database is represented as a high-dimensional vector encoding its complete profile — companies, asset characteristics, modality, indication, development phase, territory, deal economics, and strategic context. When you run a calculation, your inputs are similarly encoded and compared against every transaction using cosine similarity.
-            </p>
-            <p className="text-slate-600 dark:text-slate-300">
-              This means an &quot;oral GLP-1 receptor agonist for obesity at Phase 2&quot; query will surface deals like Zealand/Roche (petrelintide), Carmot/Roche (CT-388), and Structure/Roche (GSBR-1290) — even if the exact keywords don&apos;t overlap. The system finds deals that are structurally and strategically similar, not just categorically related.
-            </p>
-          </section>
-
           {/* Data Quality */}
           <section>
             <div className="flex items-center gap-3 mb-4">
@@ -271,7 +272,7 @@ export default async function MethodologyPage() {
             </p>
             <div className="not-prose mt-6 space-y-3">
               {[
-                { label: 'Confidence Threshold', desc: 'Every transaction is scored for extraction confidence. Deals below 75/100 are excluded from benchmarks — we prioritize accuracy over volume.' },
+                { label: 'Confidence Threshold', desc: 'Every transaction is scored for extraction confidence. Deals below 75/100 are excluded from the live calibration tables that feed the phase baselines. The comparable panel shows every disclosed, non-rejected deal, including pending ones, and labels each deal\'s verification status.' },
                 { label: 'Source Verification', desc: 'Deals are cross-referenced against original source documents. Financial terms are only marked as disclosed when explicitly stated in filings or press releases.' },
                 { label: 'Continuous Updates', desc: 'Our pipeline ingests from SEC filings, FTC premerger databases, press releases, and regulatory databases on automated schedules — some daily, some weekly — depending on source update frequency.' },
                 { label: 'Deduplication', desc: 'Multi-key conflict resolution prevents the same deal from appearing twice, even when announced via different sources or amended in subsequent filings.' },
@@ -287,6 +288,55 @@ export default async function MethodologyPage() {
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* Accuracy: backtest (historical) and resolved outcomes (live) */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-700 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white !mt-0 !mb-0">Measured Accuracy</h2>
+            </div>
+            <p className="text-slate-600 dark:text-slate-300">
+              Two measurements, kept separate because they answer different questions. The backtest asks how the current engine would have priced deals that already closed. The resolved-outcomes ledger asks how the ranges we actually issued compared with what was later signed.
+            </p>
+
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Backtest (historical, verified cohort)</h3>
+            {accuracy ? (
+              <>
+                <p className="text-slate-600 dark:text-slate-300">
+                  The engine is re-run against verifier-confirmed deals with disclosed upfronts, using only the information available at signing. Core scope is Phase 2/3 licensing ({accuracy.coreScope.n.toLocaleString()} deals); hit rates are recency-weighted with the same {accuracy.recencyHalfLifeYears}-year half-life as the benchmarks. Last run {backtestRunAt}.
+                </p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 not-prose mt-4">
+                  {[
+                    { label: 'Core, within ±25%', value: pctLabel(accuracy.coreScope.hit25), sub: 'Point estimate vs disclosed upfront' },
+                    { label: 'Core, within ±50%', value: pctLabel(accuracy.coreScope.hit50), sub: `Phase 2/3 licensing · n=${accuracy.coreScope.n}` },
+                    { label: 'Median signed error', value: signedPctLabel(accuracy.coreScope.medianSignedErrorPct), sub: 'Negative = engine undershoots' },
+                    accuracy.holdout
+                      ? { label: 'Held-out test, within ±50%', value: pctLabel(accuracy.holdout.test.hit50), sub: `20% never seen in tuning · n=${accuracy.holdout.test.n}` }
+                      : { label: 'Full scope', value: accuracy.fullScope.n.toLocaleString(), sub: 'All segments, deals' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-400 tabular-nums">{s.value}</div>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{s.label}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{s.sub}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Full breakdown by therapeutic area, phase and modality, with the worst misses named, on the <Link href="/accuracy" className="underline">accuracy page</Link>.
+                </p>
+              </>
+            ) : (
+              <p className="text-slate-600 dark:text-slate-300">
+                The backtest report has not been generated for this build. Published figures are on the <Link href="/accuracy" className="underline">accuracy page</Link>.
+              </p>
+            )}
+
+            <ResolvedOutcomesSection summary={resolved} />
           </section>
 
           {/* Understanding Benchmark Ranges */}
