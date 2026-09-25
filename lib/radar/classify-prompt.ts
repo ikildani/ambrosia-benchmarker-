@@ -85,6 +85,7 @@ export type EvidenceSource = (typeof EVIDENCE_SOURCES)[number];
 export const INDICATION_SPECIFIC_MAX = 60;
 export const MOA_SHORT_MAX = 80;
 export const TARGET_MAX = 40;
+export const RATIONALE_MAX = 160;
 export const PROMPT_VERSION = 'classify-v1';
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -136,11 +137,15 @@ export interface ClassificationInput {
 // OUTPUT SCHEMA (zod = the gate; JSON schema = the API format)
 // ═══════════════════════════════════════════════════════════════════════
 
+// Length caps clip rather than reject: the structured-output schema cannot
+// carry maxLength, so the model never sees the limit, and in the first live
+// run 160 of 382 answers were thrown away for a rationale a few characters
+// over 160 or a mechanism phrase over 80.
 const nullableTrimmed = (max: number) =>
   z
     .string()
     .trim()
-    .max(max)
+    .transform(v => v.slice(0, max))
     .nullable()
     .transform(v => (v === '' ? null : v));
 
@@ -156,7 +161,7 @@ export const ClassificationItemSchema = z.object({
   confidence: z.number().int().min(0).max(100),
   evidence: z.enum(EVIDENCE_SOURCES),
   /** One short clause the reviewer can read ("summary names anti-PD-1 antibody"). */
-  rationale: z.string().trim().max(160),
+  rationale: z.string().trim().transform(s => s.slice(0, RATIONALE_MAX)),
 });
 
 export const ClassificationResponseSchema = z.object({

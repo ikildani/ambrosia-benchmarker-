@@ -395,6 +395,9 @@ export async function fetchClassificationQueue(
       .in('partnership_status', [...CORE_UNIVERSE_PARTNERSHIP])
       .in('phase', [...CORE_UNIVERSE_PHASES])
       .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
+      // Drug first so an asset and its same-drug siblings land in the same run and
+      // share one model call; staleness breaks ties.
+      .order('drug_master_id', { ascending: true, nullsFirst: false })
       .order('updated_at', { ascending: true })
       .limit(remaining());
     if (e0) throw new Error(`classification queue (core universe) read failed: ${e0.message}`);

@@ -387,7 +387,7 @@
       "schedule": "30 11 * * *"
     },
     {
-      "path": "/api/cron/asset-classify?limit=1200",
+      "path": "/api/cron/asset-classify?limit=1200&concurrency=5",
       "schedule": "*/10 * * * *"
     },
     {
