@@ -58,7 +58,7 @@ export function LiveAccuracyDashboard() {
     },
     {
       label: test ? 'Held-out test, within ±50%' : 'Full scope deals',
-      sublabel: test ? `20% never seen in tuning · n=${test.n}` : `All segments · n=${data.fullScope.n}`,
+      sublabel: test ? `20% held out since R13 · n=${test.n}` : `All segments · n=${data.fullScope.n}`,
       value: test ? pct(test.hit50) : String(data.fullScope.n),
       accent: 'text-slate-200',
       border: 'border-slate-700',

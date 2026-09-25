@@ -101,7 +101,7 @@ export default async function MethodologyPage() {
             Methodology
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl">
-            Our benchmarks are calibrated against {stats.totalDealsDisplay} verified biopharma transactions sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
+            Our benchmarks are built on {stats.totalDealsDisplay} disclosed biopharma transactions{stats.fallback ? '' : `, ${stats.verifiedDeals.toLocaleString()} of them verifier-confirmed against a primary source,`} sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
           </p>
           <div className="mt-5 inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300">
             <span>Engine <span className="font-mono text-slate-900 dark:text-white">v{ENGINE_VERSION}</span></span>
@@ -139,7 +139,7 @@ export default async function MethodologyPage() {
             </p>
             <div className="grid sm:grid-cols-2 gap-4 not-prose mt-6">
               {[
-                { label: 'Verified Transactions', value: stats.totalDealsDisplay, sub: stats.fallback ? 'Licensing, acquisitions, collaborations, options, co-development' : `${stats.verifiedDeals.toLocaleString()} verifier-confirmed · ${stats.citedDeals.toLocaleString()} with a primary-source citation` },
+                { label: 'Disclosed Transactions', value: stats.totalDealsDisplay, sub: stats.fallback ? 'Licensing, acquisitions, collaborations, options, co-development' : `${stats.verifiedDeals.toLocaleString()} verifier-confirmed · ${stats.citedDeals.toLocaleString()} with a primary-source citation` },
                 { label: 'Company Profiles', value: DEAL_STATS.TOTAL_COMPANIES, sub: 'Pharma, biotech, and specialty companies tracked' },
                 { label: 'Therapeutic Areas', value: String(stats.therapeuticAreas), sub: 'Oncology through rare disease and women\'s health' },
                 { label: 'Primary Sources', value: `${stats.sourceTypes}`, sub: 'SEC EDGAR, HKEX, TDnet, ASX, SSE/SZSE, MFN, press wires, agency databases' },
@@ -211,6 +211,9 @@ export default async function MethodologyPage() {
               </table>
             </div>
             <p className="text-slate-600 dark:text-slate-300">
+              A legacy vector-similarity search exists on the Pro API but is not part of the calculator&apos;s comparable selection.
+            </p>
+            <p className="text-slate-600 dark:text-slate-300">
               A deal must share your therapeutic area and at least one of phase, adjacent phase, or indication to qualify. If fewer than {MIN_POOL_BEFORE_RELAX} deals qualify, the filter relaxes to therapeutic area + modality, then therapeutic area alone, so you always see the closest available comparables and the panel tells you which rung was used.
             </p>
             <p className="text-slate-600 dark:text-slate-300">
@@ -254,27 +257,6 @@ export default async function MethodologyPage() {
             </p>
           </section>
 
-          {/* Comparable Deal Matching */}
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white !mt-0 !mb-0">Semantic Deal Matching</h2>
-            </div>
-            <p className="text-slate-600 dark:text-slate-300">
-              Traditional deal databases match on keywords — &quot;oncology&quot; finds oncology deals. Our platform goes further with semantic matching technology that understands the full context of each transaction.
-            </p>
-            <p className="text-slate-600 dark:text-slate-300">
-              Every deal in our database is represented as a high-dimensional vector encoding its complete profile — companies, asset characteristics, modality, indication, development phase, territory, deal economics, and strategic context. When you run a calculation, your inputs are similarly encoded and compared against every transaction using cosine similarity.
-            </p>
-            <p className="text-slate-600 dark:text-slate-300">
-              This means an &quot;oral GLP-1 receptor agonist for obesity at Phase 2&quot; query will surface deals like Zealand/Roche (petrelintide), Carmot/Roche (CT-388), and Structure/Roche (GSBR-1290) — even if the exact keywords don&apos;t overlap. The system finds deals that are structurally and strategically similar, not just categorically related.
-            </p>
-          </section>
-
           {/* Data Quality */}
           <section>
             <div className="flex items-center gap-3 mb-4">
@@ -290,7 +272,7 @@ export default async function MethodologyPage() {
             </p>
             <div className="not-prose mt-6 space-y-3">
               {[
-                { label: 'Confidence Threshold', desc: 'Every transaction is scored for extraction confidence. Deals below 75/100 are excluded from benchmarks — we prioritize accuracy over volume.' },
+                { label: 'Confidence Threshold', desc: 'Every transaction is scored for extraction confidence. Deals below 75/100 are excluded from the live calibration tables that feed the phase baselines. The comparable panel shows every disclosed, non-rejected deal, including pending ones, and labels each deal\'s verification status.' },
                 { label: 'Source Verification', desc: 'Deals are cross-referenced against original source documents. Financial terms are only marked as disclosed when explicitly stated in filings or press releases.' },
                 { label: 'Continuous Updates', desc: 'Our pipeline ingests from SEC filings, FTC premerger databases, press releases, and regulatory databases on automated schedules — some daily, some weekly — depending on source update frequency.' },
                 { label: 'Deduplication', desc: 'Multi-key conflict resolution prevents the same deal from appearing twice, even when announced via different sources or amended in subsequent filings.' },
