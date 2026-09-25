@@ -9,8 +9,8 @@
  *
  * Budget: EFTS returns ~250 pharma-scoped "license agreement" hits per
  * quarter in 2019. Sep 24 2026: runs every 15 minutes with up to 80
- * extractions per run, 4 in parallel, so 2017→present (~13,000 filings)
- * drains in about a week. Every extracted accession is written to
+ * extractions per run, 4 in parallel; Sep 25: a run walks as many pages as
+ * its budget allows, so 2017→present drains in days, not weeks. Every extracted accession is written to
  * edgar_fts_processed so rejected filings are never paid for twice.
  *
  * Cursor lives in radar_sync_cursors under source 'edgar_fts_backfill'.
@@ -41,6 +41,8 @@ export interface BackfillCursorState extends Record<string, unknown> {
   from: number;
   /** Quarters fully walked, for the coverage report. */
   completedQuarters: string[];
+  /** Consecutive retries of the current page after a partial EFTS parse failure. */
+  retries?: number;
 }
 
 export interface BackfillOptions {
@@ -60,8 +62,11 @@ export interface BackfillOptions {
 }
 
 export interface BackfillResult {
+  /** Quarter/query the run started on. */
   quarterKey: string;
   query: string;
+  /** Pages walked this run (a run keeps going until its time budget or cap is used). */
+  pages: number;
   candidates: number;
   prefiltered: number;
   /** Pre-filtered hits skipped because the ledger already had them. */
@@ -88,8 +93,8 @@ export type CursorStep = 'stay' | 'next_page' | 'next_query';
  * unextracted remainder.
  */
 function advance(state: BackfillCursorState, quarters: ReturnType<typeof quartersSince>, step: CursorStep): BackfillCursorState {
-  const next: BackfillCursorState = { ...state, completedQuarters: [...state.completedQuarters] };
-  if (step === 'stay') return next;
+  const next: BackfillCursorState = { ...state, completedQuarters: [...state.completedQuarters], retries: 0 };
+  if (step === 'stay') { next.retries = (state.retries ?? 0) + 1; return next; }
   if (step === 'next_page') { next.from += EFTS_PAGE_SIZE; return next; }
   next.from = 0;
   next.queryIndex += 1;
@@ -122,21 +127,41 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
     ...(stored?.state ?? {}),
     ...(opts.cursorOverride ?? {}),
   };
-  const quarter = quarters.find(q => q.key === state.quarterKey) ?? quarters[0];
-  const queryIndex = opts.onlyQuery ? Math.max(0, PHARMA_DEAL_QUERIES.findIndex(q => q.key === opts.onlyQuery)) : state.queryIndex;
-  const query = PHARMA_DEAL_QUERIES[queryIndex] ?? PHARMA_DEAL_QUERIES[0];
-  const finished = quarter.key === quarters[quarters.length - 1].key && state.completedQuarters.includes(quarter.key);
-
   const concurrency = Math.max(1, opts.concurrency ?? 1);
-  let candidates = 0, prefiltered = 0, alreadyProcessed = 0, extracted = 0, passed = 0, inserted = 0;
-  let step: CursorStep = 'next_query';
+  const MAX_PAGE_RETRIES = 2;
+  const MIN_PAGE_BUDGET_MS = 40_000; // do not open a new page with less than this left
 
-  if (!finished) {
-    const page = await eftsSearch({ q: query.q, startdt: quarter.startdt, enddt: quarter.enddt, from: state.from });
+  const isFinished = (st: BackfillCursorState) =>
+    st.quarterKey === quarters[quarters.length - 1].key && st.completedQuarters.includes(st.quarterKey);
+
+  let cur: BackfillCursorState = { ...state };
+  const startKey = { quarterKey: cur.quarterKey, queryIndex: cur.queryIndex };
+  let pages = 0, candidates = 0, prefiltered = 0, alreadyProcessed = 0, extracted = 0, passed = 0, inserted = 0;
+
+  const record = async (doc: EftsDocument, outcome: string, quarterKey: string, queryKey: string) => {
+    if (dryRun) return;
+    const { error: ledgerErr } = await supabase.from(PROCESSED_TABLE).upsert({
+      accession: doc.accession, outcome, quarter: quarterKey, query_key: queryKey,
+      form: doc.form || null, filing_date: doc.filingDate || null, company: doc.companyName || null,
+    }, { onConflict: 'accession' });
+    if (ledgerErr) errors.push(`ledger write failed ${doc.accession}: ${ledgerErr.message}`);
+  };
+
+  // A run walks page after page until the time budget or the extraction cap is used.
+  // Before Sep 25 2026 one run meant one page of one query; once the ledger made later
+  // queries mostly "seen", runs finished in seconds and 75% of the schedule was idle.
+  while (!isFinished(cur) && Date.now() - start < budget - MIN_PAGE_BUDGET_MS && extracted < maxExtractions) {
+    const quarter = quarters.find(q => q.key === cur.quarterKey) ?? quarters[0];
+    const queryIndex = opts.onlyQuery ? Math.max(0, PHARMA_DEAL_QUERIES.findIndex(q => q.key === opts.onlyQuery)) : cur.queryIndex;
+    const query = PHARMA_DEAL_QUERIES[queryIndex] ?? PHARMA_DEAL_QUERIES[0];
+    pages++;
+    let step: CursorStep = 'next_query';
+
+    const page = await eftsSearch({ q: query.q, startdt: quarter.startdt, enddt: quarter.enddt, from: cur.from });
     if (page.parseFailed && page.hits.length === 0) {
-      errors.push(`EFTS non-JSON body for ${query.key} ${quarter.key} from=${state.from}; will retry next run`);
-      step = 'stay'; // retry this page next run
-    } else if (page.status !== 200 && !(page.status === 500 && state.from > 0)) {
+      errors.push(`EFTS non-JSON body for ${query.key} ${quarter.key} from=${cur.from}`);
+      step = (cur.retries ?? 0) < MAX_PAGE_RETRIES ? 'stay' : 'next_query';
+    } else if (page.status !== 200 && !(page.status === 500 && cur.from > 0)) {
       errors.push(`EFTS ${page.status} for ${query.key} ${quarter.key}`);
     } else {
       // 1. Cheap pass over the page: resolve and pre-filter every hit.
@@ -160,22 +185,15 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
         if (seenErr) errors.push(`ledger read failed: ${seenErr.message}`);
         const seen = new Set((seenRows ?? []).map(r => r.accession as string));
         todo = docs.filter(d => !seen.has(d.accession));
-        alreadyProcessed = docs.length - todo.length;
-        for (let i = 0; i < alreadyProcessed; i++) funnel.count('already_in_table', 'edgar_fts_processed');
+        const seenHere = docs.length - todo.length;
+        alreadyProcessed += seenHere;
+        for (let i = 0; i < seenHere; i++) funnel.count('already_in_table', 'edgar_fts_processed');
       }
 
       // 3. Extract up to the cap, `concurrency` at a time, within the time budget.
-      const batch = todo.slice(0, maxExtractions);
+      const batch = todo.slice(0, Math.max(0, maxExtractions - extracted));
       const capHit = todo.length > batch.length;
       if (capHit) funnel.count('time_budget', 'extraction_cap');
-      const record = async (doc: EftsDocument, outcome: string) => {
-        if (dryRun) return;
-        const { error: ledgerErr } = await supabase.from(PROCESSED_TABLE).upsert({
-          accession: doc.accession, outcome, quarter: quarter.key, query_key: query.key,
-          form: doc.form || null, filing_date: doc.filingDate || null, company: doc.companyName || null,
-        }, { onConflict: 'accession' });
-        if (ledgerErr) errors.push(`ledger write failed ${doc.accession}: ${ledgerErr.message}`);
-      };
       const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
         let outcome: string;
         try {
@@ -184,35 +202,46 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
             sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
           });
         } catch (e) {
-          // One attempt per filing. Recording the failure keeps a flaky filing from pinning the cursor;
-          // delete its ledger row to retry by hand.
-          await record(doc, 'extraction_error');
+          // One attempt per filing: recording the failure keeps a flaky filing from pinning the cursor.
+          await record(doc, 'extraction_error', quarter.key, query.key);
           throw e;
         }
         if (outcome === 'inserted') { passed++; inserted++; }
         if (outcome === 'error') errors.push(`insert error ${doc.accession}`);
-        await record(doc, outcome === 'error' ? 'insert_error' : outcome);
+        await record(doc, outcome === 'error' ? 'insert_error' : outcome, quarter.key, query.key);
         return outcome;
       }, () => Date.now() - start < budget);
-      extracted = run.started;
+      extracted += run.started;
       for (const e of run.errors) {
         funnel.count('extraction_error', undefined, String(e.error).slice(0, 120));
         errors.push(`${batch[e.index]?.accession}: ${String(e.error).slice(0, 160)}`);
       }
       const budgetHit = run.started < batch.length;
       if (budgetHit) funnel.count('time_budget', 'hits_remaining');
-      // Drained only when every unseen doc was started and none were left behind the cap.
-      if (capHit || budgetHit) step = 'stay';
-      else if (state.from + EFTS_PAGE_SIZE < page.total) step = 'next_page';
+
+      // A form that failed to parse means part of this page was never seen: re-request it next
+      // time (bounded), the ledger skips what was already extracted.
+      const partialParse = page.parseFailed && (cur.retries ?? 0) < MAX_PAGE_RETRIES;
+      if (partialParse) errors.push(`EFTS partial parse failure for ${query.key} ${quarter.key} from=${cur.from}; page will be retried`);
+
+      if (capHit || budgetHit || partialParse) step = 'stay';
+      else if (cur.from + EFTS_PAGE_SIZE < page.total) step = 'next_page';
       else step = 'next_query';
     }
+
+    const next = advance(cur, quarters, step);
+    if (!dryRun && !opts.cursorOverride) {
+      await writeSyncCursor(supabase, BACKFILL_CURSOR_SOURCE, `${next.quarterKey}:${next.queryIndex}:${next.from}`, next);
+    }
+    if (step === 'stay') { cur = next; break; } // cap/budget/parse: nothing more to do this run
+    cur = next;
   }
 
-  const next = finished ? state : advance(state, quarters, step);
-  if (!dryRun && !opts.cursorOverride) {
-    await writeSyncCursor(supabase, BACKFILL_CURSOR_SOURCE, `${next.quarterKey}:${next.queryIndex}:${next.from}`, next);
-  }
+  const finished = isFinished(cur);
   const summary = funnel.summary();
-  console.log(`[edgar-fts-backfill] ${quarter.key} ${query.key} from=${state.from} ${summary}${dryRun ? ' (dry run)' : ''}`);
-  return { quarterKey: quarter.key, query: query.key, candidates, prefiltered, alreadyProcessed, extracted, passed, inserted, errors, funnel: funnel.toJSON(), summary, next, finished };
+  console.log(`[edgar-fts-backfill] ${startKey.quarterKey} q${startKey.queryIndex} → ${cur.quarterKey}:${cur.queryIndex}:${cur.from} pages=${pages} ${summary}${dryRun ? ' (dry run)' : ''}`);
+  return {
+    quarterKey: startKey.quarterKey, query: PHARMA_DEAL_QUERIES[startKey.queryIndex]?.key ?? PHARMA_DEAL_QUERIES[0].key, pages,
+    candidates, prefiltered, alreadyProcessed, extracted, passed, inserted, errors, funnel: funnel.toJSON(), summary, next: cur, finished,
+  };
 }

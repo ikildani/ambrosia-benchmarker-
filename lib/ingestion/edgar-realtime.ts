@@ -86,7 +86,7 @@ export async function processEftsDocument(
   }
   const needsReview = deal.confidence_score < opts.minConfidence;
   if (!deal.licensor?.trim() || !deal.licensee?.trim()) { funnel.count('missing_parties'); return 'skipped'; }
-  const validation = validateExtractedDeal(deal);
+  const validation = validateExtractedDeal(deal, { minConfidence: floor });
   if (!validation.valid) { funnel.count('validator_rejected', validation.rejectCode, `${deal.licensor} → ${deal.licensee}: ${validation.rejectReason}`); return 'skipped'; }
 
   const announcedDate = doc.filingDate || new Date().toISOString().slice(0, 10);

@@ -180,7 +180,13 @@ const PLACEHOLDER_ASSET_PATTERN = /^(Anti-)?[A-Z][A-Za-z0-9/]*(\s?[A-Za-z][0-9]+
  * insert. Rejected extractions can either be dropped entirely or inserted
  * with `verification_status='rejected'` so the audit trail is preserved.
  */
-export function validateExtractedDeal(deal: ValidatableDeal): ValidationResult {
+export interface ValidateOptions {
+  /** Confidence floor. Default 75. Pipelines that insert a review band from primary sources pass their floor (e.g. 60). */
+  minConfidence?: number;
+}
+
+export function validateExtractedDeal(deal: ValidatableDeal, opts: ValidateOptions = {}): ValidationResult {
+  const minConfidence = opts.minConfidence ?? 75;
   // ── 1. Missing critical fields ──
   if (!deal.licensor?.trim() || !deal.licensee?.trim()) {
     return {
@@ -198,11 +204,11 @@ export function validateExtractedDeal(deal: ValidatableDeal): ValidationResult {
   }
 
   // ── 2. Confidence threshold ──
-  if (deal.confidence_score != null && deal.confidence_score < 75) {
+  if (deal.confidence_score != null && deal.confidence_score < minConfidence) {
     return {
       valid: false,
       rejectCode: 'confidence_below_threshold',
-      rejectReason: `Confidence ${deal.confidence_score} below minimum 75`,
+      rejectReason: `Confidence ${deal.confidence_score} below minimum ${minConfidence}`,
     };
   }
 

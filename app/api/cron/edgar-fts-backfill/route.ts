@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         inserted: result.inserted,
         errors: result.errors,
         funnel: result.funnel,
-        parameters: { quarter: result.quarterKey, query: result.query, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency },
+        parameters: { quarter: result.quarterKey, query: result.query, pages: result.pages, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency },
         // A quarter/query with no hits is a legitimate empty page once the walk is finished.
         expectRecords: !result.finished,
         notes: result.finished ? 'backfill walk complete; cursor at the current quarter' : undefined,
