@@ -29,10 +29,14 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   // Sep 23 2026: deals-update (sec_edgar) and deal-backfill (cron_deal_backfill) removed from
   // vercel.json — 0 inserts in 45 days, superseded by edgar_realtime + edgar_fts_backfill.
   'edgar_fts_backfill': { frequency: 'every-15m', expectedRunsPerWeek: 672 },  // */15 * * * *
-  'hkex_announcements': { frequency: '2x-daily', expectedRunsPerWeek: 14 },   // 45 5,17 * * * (mode=both)
-  'hkex_backfill': { frequency: '2x-daily', expectedRunsPerWeek: 14 },        // same run, second phase
-  'tdnet_announcements': { frequency: '2x-daily', expectedRunsPerWeek: 14 },  // same run, TDnet phase (Japan)
-  'asx_announcements': { frequency: '2x-daily', expectedRunsPerWeek: 14 },    // same run, ASX phase (Australia)
+  // Sep 25 2026: exchange adapters rotate inside /api/cron/exchanges (*/30); each runs several times a day.
+  'hkex_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'hkex_backfill': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'tdnet_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'asx_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'dart_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'cninfo_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'mfn_announcements': { frequency: 'every-30m', expectedRunsPerWeek: 336 },
   'api_credit_check': { frequency: 'hourly', expectedRunsPerWeek: 168 },      // 20 * * * *
   'deal_inflow_check': { frequency: 'daily', expectedRunsPerWeek: 7 },        // inside api_credit_check at 13:20 UTC
   'deal-enrichment': { frequency: '3x-daily', expectedRunsPerWeek: 21 },

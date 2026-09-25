@@ -423,8 +423,8 @@
       "schedule": "*/15 * * * *"
     },
     {
-      "path": "/api/cron/hkex-announcements?mode=both",
-      "schedule": "45 5,17 * * *"
+      "path": "/api/cron/exchanges",
+      "schedule": "*/30 * * * *"
     }
   ]
 }
