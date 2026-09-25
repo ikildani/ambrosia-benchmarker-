@@ -9,6 +9,10 @@ import { COMP_MATCH_WEIGHTS, COMP_MAX_SCORE, MIN_POOL_BEFORE_RELAX } from '@/lib
 import { runMonteCarlo } from '@/lib/financial/monte-carlo';
 import type { RNPVInput } from '@/lib/financial/types';
 import { loadAccuracyData } from '@/lib/accuracy-dashboard-data';
+import { createServiceClient } from '@/lib/supabase/server';
+import { getAccuracySummary } from '@/lib/outcomes/statements';
+import type { AccuracySummary } from '@/lib/outcomes/statements';
+import { ResolvedOutcomesSection } from '@/components/methodology/ResolvedOutcomesSection';
 
 // Server component: every number below is read from the engine or its data
 // files at render time, so this page cannot drift from the code.
@@ -43,6 +47,20 @@ const SCENARIO_STAGES: { label: string; phases: string; phase: RNPVInput['phase'
 ];
 
 const pctLabel = (x: number) => `${Math.round(x * 100)}%`;
+const signedPctLabel = (x: number) => {
+  const v = Math.round(x * 100);
+  return `${v > 0 ? '+' : ''}${v}%`;
+};
+
+/** Live ledger summary; an empty summary when the service client or table is unavailable. */
+async function loadResolvedOutcomes(): Promise<AccuracySummary> {
+  try {
+    return await getAccuracySummary(createServiceClient());
+  } catch (e) {
+    console.warn('[Outcomes] methodology summary unavailable:', e instanceof Error ? e.message : e);
+    return { computedAt: null, minN: 10, sources: [] };
+  }
+}
 
 export default async function MethodologyPage() {
   const stats = await getLiveDealStats();
@@ -50,6 +68,7 @@ export default async function MethodologyPage() {
   const w24 = recencyWeight(2024, 2026); // weight of a deal signed 24 months before the reference year
   const w60 = recencyWeight(2021, 2026);
   const accuracy = loadAccuracyData();
+  const resolved = await loadResolvedOutcomes();
   const backtestRunAt = accuracy?.runAt ? accuracy.runAt.slice(0, 10) : null;
   const { version: benchmarksVersion, lastUpdated: benchmarksUpdated } = staticBenchmarks.metadata;
 
@@ -287,6 +306,55 @@ export default async function MethodologyPage() {
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* Accuracy: backtest (historical) and resolved outcomes (live) */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-700 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white !mt-0 !mb-0">Measured Accuracy</h2>
+            </div>
+            <p className="text-slate-600 dark:text-slate-300">
+              Two measurements, kept separate because they answer different questions. The backtest asks how the current engine would have priced deals that already closed. The resolved-outcomes ledger asks how the ranges we actually issued compared with what was later signed.
+            </p>
+
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Backtest (historical, verified cohort)</h3>
+            {accuracy ? (
+              <>
+                <p className="text-slate-600 dark:text-slate-300">
+                  The engine is re-run against verifier-confirmed deals with disclosed upfronts, using only the information available at signing. Core scope is Phase 2/3 licensing ({accuracy.coreScope.n.toLocaleString()} deals); hit rates are recency-weighted with the same {accuracy.recencyHalfLifeYears}-year half-life as the benchmarks. Last run {backtestRunAt}.
+                </p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 not-prose mt-4">
+                  {[
+                    { label: 'Core, within ±25%', value: pctLabel(accuracy.coreScope.hit25), sub: 'Point estimate vs disclosed upfront' },
+                    { label: 'Core, within ±50%', value: pctLabel(accuracy.coreScope.hit50), sub: `Phase 2/3 licensing · n=${accuracy.coreScope.n}` },
+                    { label: 'Median signed error', value: signedPctLabel(accuracy.coreScope.medianSignedErrorPct), sub: 'Negative = engine undershoots' },
+                    accuracy.holdout
+                      ? { label: 'Held-out test, within ±50%', value: pctLabel(accuracy.holdout.test.hit50), sub: `20% never seen in tuning · n=${accuracy.holdout.test.n}` }
+                      : { label: 'Full scope', value: accuracy.fullScope.n.toLocaleString(), sub: 'All segments, deals' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-400 tabular-nums">{s.value}</div>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{s.label}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{s.sub}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Full breakdown by therapeutic area, phase and modality, with the worst misses named, on the <Link href="/accuracy" className="underline">accuracy page</Link>.
+                </p>
+              </>
+            ) : (
+              <p className="text-slate-600 dark:text-slate-300">
+                The backtest report has not been generated for this build. Published figures are on the <Link href="/accuracy" className="underline">accuracy page</Link>.
+              </p>
+            )}
+
+            <ResolvedOutcomesSection summary={resolved} />
           </section>
 
           {/* Understanding Benchmark Ranges */}
