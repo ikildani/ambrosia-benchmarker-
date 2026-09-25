@@ -493,7 +493,7 @@ describe('fetchClassificationQueue', () => {
 
   it('returns the core universe first, then industry, other owners, orphans, then stale needs_review', async () => {
     const { client, ops } = stubSupabase(handler);
-    const queue = await fetchClassificationQueue(client, 10, undefined, () => NOW_MS);
+    const queue = await fetchClassificationQueue(client, 10, undefined, () => NOW_MS, 'all');
     expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'ind1', 'ind2', 'acad1', 'hosp1', 'orphan1', 'review1']);
     expect(queue[0].owner_type).toBe('industry');
     expect(queue[4].owner_type).toBe('academic');
@@ -516,13 +516,22 @@ describe('fetchClassificationQueue', () => {
 
   it('stops issuing queries once the limit is reached', async () => {
     const { client, ops } = stubSupabase(handler);
-    const queue = await fetchClassificationQueue(client, 4, undefined, () => NOW_MS);
+    const queue = await fetchClassificationQueue(client, 4, undefined, () => NOW_MS, 'all');
     // core1 comes back again from the industry tier and is dropped, so that tier
     // fills one slot from its two; the next tier is asked for exactly one row.
     expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'ind1', 'acad1']);
     expect(ops.length).toBe(3);
     expect(has(ops[1].calls, 'limit', 2)).toBe(true);
     expect(has(ops[2].calls, 'limit', 1)).toBe(true);
+  });
+
+  it('core scope (the default) reads only the core universe and stale needs_review', async () => {
+    const { client, ops } = stubSupabase(handler);
+    const queue = await fetchClassificationQueue(client, 10, undefined, () => NOW_MS);
+    expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'review1']);
+    expect(ops.length).toBe(2);
+    // programs the company does not own are never sent to the model
+    expect(has(ops[0].calls, 'not', 'ownership_status', 'in', '(comparator_or_background,marketed_other)')).toBe(true);
   });
 
   it('honours onlyStatuses', async () => {
@@ -654,6 +663,40 @@ describe('classifyAssetsBatch', () => {
       counts: { classified: 1, needs_review: 1, skipped: 1, failed: 0, from_drug_master: 0 },
       tokens: { input: 500, output: 200, cacheRead: 1200, cacheWrite: 0 },
     });
+  });
+
+  it('sends one representative per resolved drug and copies the drug-level answer to its siblings', async () => {
+    const queue = [
+      asset({ id: 'a1', drug_master_id: 'd1', drug_resolution_status: 'resolved', nct_ids: ['NCT00000001', 'NCT00000002'] }),
+      asset({ id: 'a2', asset_name: 'ACM-101', company_name: 'Beta Bio', drug_master_id: 'd1', drug_resolution_status: 'resolved', nct_ids: ['NCT00000003'], therapeutic_area: 'neurology' }),
+      asset({ id: 'a3', asset_name: 'ACM-303', asset_aliases: [] }),
+    ];
+    const { client: supabase, ops } = stubSupabase(e2eHandler(queue));
+    const client = stubClient([message([item({ asset_id: 'a1', confidence: 90 }), item({ asset_id: 'a3' })])]);
+
+    const result = await classifyAssetsBatch(supabase, { client, limit: 10, batchSize: 20, now: () => NOW_MS, sleep: async () => {} });
+
+    // the model saw the representative (most trials) and the unresolved asset, not the sibling
+    const sent = client.create.mock.calls[0][0] as Anthropic.MessageCreateParamsNonStreaming;
+    const userText = sent.messages[0].content as string;
+    expect(userText).toContain('"asset_id":"a1"');
+    expect(userText).toContain('"asset_id":"a3"');
+    expect(userText).not.toContain('"asset_id":"a2"');
+    expect(client.create).toHaveBeenCalledTimes(1);
+
+    expect(result.classified).toBe(2);
+    expect(result.fromSibling).toBe(1);
+    expect(result.processed).toBe(3);
+
+    const rows = ops.filter(o => o.table === 'clinical_assets' && has(o.calls, 'upsert')).flatMap(o => (o.calls.find(c => c.method === 'upsert')!.args[0] as AssetPatch[]));
+    const sib = rows.find(r => r.id === 'a2')!;
+    expect(sib.classification_status).toBe('classified');
+    expect(sib.classification_model).toBe('claude-sonnet-5:sibling');
+    expect(sib.target).toBe('PD-1');                 // drug-level: copied from the representative
+    expect(sib.therapeutic_area).toBeUndefined();     // asset-level: the sibling keeps its own area (nothing to rewrite)
+    expect(sib.classification_evidence.fields.therapeutic_area).toMatchObject({ value: 'neurology', action: 'confirmed' });
+    expect(sib.classification_confidence).toBe(75);  // capped
+    expect(sib.classification_evidence.sibling_of).toBe('a1');
   });
 
   it('stops at the request cap and leaves the remainder for the next run', async () => {

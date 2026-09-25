@@ -16,6 +16,8 @@
  *   ?concurrency=3      concurrent model requests
  *   ?maxRequests=40     hard cap on model requests per run (cost cap)
  *   ?model=claude-sonnet-5
+ *   ?scope=core|all      core (default) = the feed universe minus non-owned programs; all = long tail too
+ *   ?dedupe=0           disable one-call-per-drug (siblings copied from a representative)
  *   ?only=unclassified,needs_review
  *   ?dry=1              plan and log without writing to clinical_assets
  *   ?validate=200       validation mode: re-run N classified assets through
@@ -100,6 +102,8 @@ export async function GET(request: NextRequest) {
       maxRequests: parsePositiveInt(params.get('maxRequests'), undefined),
       model: parseModel(params.get('model'), DEFAULT_MODEL),
       onlyStatuses: parseStatuses(params.get('only')),
+      scope: params.get('scope') === 'all' ? 'all' : 'core',
+      dedupeByDrug: params.get('dedupe') !== '0',
       dryRun: params.get('dry') === '1',
       timeBudgetMs,
       runType: params.get('dry') === '1' ? 'manual' : 'scheduled',
@@ -113,6 +117,7 @@ export async function GET(request: NextRequest) {
       processed: result.processed,
       classified: result.classified,
       from_drug_master: result.fromDrugMaster,
+      from_sibling: result.fromSibling,
       needs_review: result.needsReview,
       skipped: result.skipped,
       failed: result.failed,
