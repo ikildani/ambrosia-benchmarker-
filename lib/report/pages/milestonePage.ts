@@ -409,7 +409,7 @@ function renderPage(mp: MilestoneProbabilityResult, layout: MilestoneLayout, pag
       ${page.methodology ? `
       <!-- Methodology note -->
       <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.6;">
-        <strong>Methodology:</strong> Milestone probabilities derived from BIO/QLS phase transition tables (2021-2024) with cascading conditional logic. Commercial milestones conditional on FDA approval. Timing calibrated to DealForma pharmaceutical licensing database (n=1,200+). Value allocations benchmarked to EvaluatePharma deal structure analysis (2020-2026). Bar opacity reflects probability of achievement.
+        <strong>Methodology:</strong> Milestone probabilities derived from BIO/QLS phase transition tables (2021-2024) with cascading conditional logic. Commercial milestones conditional on FDA approval. Timing and value allocations by milestone are Solidus assumptions calibrated on disclosed milestone schedules in the Solidus deal database. Bar opacity reflects probability of achievement.
       </div>` : ''}
 
       ${pageFooter(meta.reportId)}

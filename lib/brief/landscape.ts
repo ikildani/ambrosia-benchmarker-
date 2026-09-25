@@ -38,8 +38,9 @@ import type {
   PatientFunnel,
   PipelineCell,
   PipelineMap,
+  Range3,
 } from './types';
-import type { MarketSizeEstimate } from '@/lib/financial/types';
+import type { MarketSizeEstimate, RNPVResult } from '@/lib/financial/types';
 
 // ─── Minimal client shape (lets tests stub the client) ─────────────────────
 
@@ -326,8 +327,22 @@ export function crowdingScore(atOrAhead: number, total: number): number | null {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
+/**
+ * One display name per sponsor across registry spellings: "F. Hoffmann-La
+ * Roche AG", "Hoffmann-La Roche Limited" and "Hoffmann-La Roche" collapse to
+ * one row so program and sponsor counts are not inflated by legal suffixes.
+ */
+export function canonicalSponsor(name: string): string {
+  let n = name.trim().replace(/\s+/g, ' ');
+  n = n.replace(/^F\.\s+/i, '');
+  for (let i = 0; i < 3; i++) {
+    n = n.replace(/[,\s]+(AG|A\.G\.|Ltd\.?|Limited|Inc\.?|Incorporated|LLC|L\.L\.C\.|Corp\.?|Corporation|GmbH|S\.?A\.?|S\.?p\.?A\.?|plc|PLC|N\.?V\.?|B\.?V\.?|Pty|K\.?K\.?)\s*$/i, '').trim();
+  }
+  return n || name.trim();
+}
+
 function sponsorOf(r: TrialRow): string {
-  return (r.lead_sponsor_name || r.company_name || 'Undisclosed sponsor').trim();
+  return canonicalSponsor(r.lead_sponsor_name || r.company_name || 'Undisclosed sponsor');
 }
 
 function isIndustry(r: TrialRow): boolean {
@@ -721,7 +736,11 @@ const FUNNEL_STEPS: Array<{ key: keyof MarketSizeEstimate['patientFunnel']; labe
   { key: 'addressablePatients', label: 'Addressable' },
 ];
 
-export function buildPatientFunnel(market: MarketSizeEstimate | undefined | null, asOf: string): PatientFunnel | null {
+export function buildPatientFunnel(
+  market: MarketSizeEstimate | undefined | null,
+  asOf: string,
+  rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null,
+): PatientFunnel | null {
   if (!market || !market.patientFunnel || !market.peakSales) return null;
   const pf = market.patientFunnel;
   const steps = FUNNEL_STEPS
@@ -736,10 +755,25 @@ export function buildPatientFunnel(market: MarketSizeEstimate | undefined | null
     pricePerYearUsd = Math.round((market.totalAddressableMarket * 1e6) / pf.prevalentPatients);
   }
 
+  // One peak-sales number for the whole brief: the figure the financial
+  // model actually ran with (after the TAM ceiling and modifiers). The share
+  // of addressable patients is then derived from it, so the funnel and the
+  // rNPV page can never disagree. Without a model result, the market
+  // estimate and its share assumption are used as-is.
+  const applied = rnpv?.peakSalesApplied;
+  const useModel = !!applied && [applied.low, applied.median, applied.high].every(v => Number.isFinite(v) && v > 0);
+  const peakSalesM = useModel
+    ? { low: applied!.low, median: applied!.median, high: applied!.high }
+    : { low: market.peakSales.low, median: market.peakSales.median, high: market.peakSales.high };
+  const addressable = steps[steps.length - 1].value;
   const share = market.marketShareAssumption;
-  const peakShare = share && [share.low, share.median, share.high].every(v => Number.isFinite(v))
-    ? { low: share.low, median: share.median, high: share.high }
-    : null;
+  let peakShare: Range3 | null = null;
+  if (useModel && pricePerYearUsd && addressable > 0) {
+    const toShare = (peakM: number) => Math.max(0, Math.min(1, (peakM * 1e6) / (addressable * pricePerYearUsd)));
+    peakShare = { low: toShare(peakSalesM.low), median: toShare(peakSalesM.median), high: toShare(peakSalesM.high) };
+  } else if (share && [share.low, share.median, share.high].every(v => Number.isFinite(v))) {
+    peakShare = { low: share.low, median: share.median, high: share.high };
+  }
 
   const fallback = market.usedFallback
     ? ` · defaults used: ${(market.fallbackReasons ?? ['territory or epidemiology']).slice(0, 2).join(', ')}`
@@ -756,7 +790,8 @@ export function buildPatientFunnel(market: MarketSizeEstimate | undefined | null
     steps,
     pricePerYearUsd,
     peakShare,
-    peakSalesM: { low: market.peakSales.low, median: market.peakSales.median, high: market.peakSales.high },
+    peakSalesM,
+    peakSalesBasis: useModel ? 'model' : 'market',
   };
 }
 
@@ -766,13 +801,13 @@ export async function buildLandscape(
   db: LandscapeDb,
   asset: AssetProfile,
   market: MarketSizeEstimate | undefined | null,
-  opts: { asOf?: string; windowMonths?: number; buyerNames?: string[] } = {},
+  opts: { asOf?: string; windowMonths?: number; buyerNames?: string[]; rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null } = {},
 ): Promise<Landscape> {
   const asOf = opts.asOf ?? todayIso();
   const [pipeline, catalysts, funnel] = await Promise.allSettled([
     buildPipelineMap(db, asset, { asOf, buyerNames: opts.buyerNames }),
     buildCatalystCalendar(db, asset, { asOf, windowMonths: opts.windowMonths, buyerNames: opts.buyerNames }),
-    Promise.resolve().then(() => buildPatientFunnel(market, asOf)),
+    Promise.resolve().then(() => buildPatientFunnel(market, asOf, opts.rnpv)),
   ]);
   const settle = <T>(r: PromiseSettledResult<T | null>, label: string): T | null => {
     if (r.status === 'fulfilled') return r.value;

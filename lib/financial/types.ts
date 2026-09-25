@@ -566,6 +566,13 @@ export interface RNPVResult {
   /** Calendar year when peak revenue is projected */
   peakSalesYear: number;
 
+  /**
+   * Peak sales ($M) actually used in the cash-flow build, after the TAM
+   * ceiling and every modifier. Pages print this figure, never the raw
+   * estimate, so one peak-sales number appears throughout a document.
+   */
+  peakSalesApplied: { low: number; median: number; high: number };
+
   /** Years from now until projected market launch */
   yearsToMarket: number;
 

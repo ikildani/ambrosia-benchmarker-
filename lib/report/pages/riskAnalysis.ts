@@ -90,7 +90,10 @@ function getTherapeuticAreaRiskFactor(inputs: PDFReportData['inputs']): RiskFact
 
   if (ta === 'neurology') {
     const isDiseaseModifying = inputs.treatmentApproach === 'diseaseModifying';
-    const isBBBChallenge = ['geneTherapy', 'aso', 'bbbPlatform', 'antibody'].includes(inputs.modality);
+    // Engine modality keys, not display names: every large-molecule and
+    // nucleic-acid modality faces the blood-brain-barrier question.
+    const isBBBChallenge = ['geneTherapy', 'aso', 'siRna', 'sirna', 'bbbPlatform', 'mab', 'antibody', 'bispecific', 'trispecific', 'adc', 'peptide', 'cellTherapy', 'carT', 'proteinDegrader'].includes(inputs.modality)
+      || /antibod|mab|bispecific|adc|gene|aso|sirna|cell/i.test(String(inputs.modality));
     const weight = (isDiseaseModifying ? 45 : 15) + (isBBBChallenge ? 20 : 0);
     return {
       name: 'CNS Delivery & Endpoint Risk',
@@ -98,7 +101,9 @@ function getTherapeuticAreaRiskFactor(inputs: PDFReportData['inputs']): RiskFact
       weight,
       description: isDiseaseModifying
         ? 'Disease-modifying CNS endpoints require 18-36+ month trials with validated biomarkers. Blood-brain barrier delivery adds manufacturing complexity. Historically high failure rate (>99% in Alzheimer\'s) demands premium risk pricing.'
-        : 'Symptomatic CNS endpoints are well-established with shorter trial timelines. Reduced BBB delivery concerns for small molecules. More predictable development path supports milestone-weighted deal structures.',
+        : isBBBChallenge
+        ? 'Symptomatic CNS endpoints are well-established with shorter trial timelines, but a large-molecule or nucleic-acid modality still has to demonstrate brain exposure; expect the buyer to gate milestones on target engagement in CSF or imaging.'
+        : 'Symptomatic CNS endpoints are well-established with shorter trial timelines. Small molecules carry lower blood-brain-barrier delivery risk. More predictable development path supports milestone-weighted deal structures.',
     };
   }
 

@@ -221,7 +221,9 @@ describe('generateReportHTML', () => {
     it('renders the core pages and the page count in the header matches the physical count', () => {
       const html = generateReportHTML(buildOncologyData());
       const n = countPages(html);
-      expect(n).toBeGreaterThanOrEqual(13);
+      // Legacy template sections were retired on 2026-09-25 (see RETIRED_SECTIONS);
+      // a report without the v3 intelligence layer is the calculator export.
+      expect(n).toBeGreaterThanOrEqual(10);
       expect(html).toContain(`${n} / ${n}`);
     });
 
@@ -231,10 +233,14 @@ describe('generateReportHTML', () => {
       expect(withMemo).toBeGreaterThanOrEqual(base);
     });
 
-    it('adds the negotiation strategy page(s) when playbookData is provided', () => {
+    it('playbook and memo data no longer add legacy narrative pages (retired sections)', () => {
       const withMemo = countPages(generateReportHTML(buildOncologyData({ memoData: fakeMemo })));
       const withBoth = countPages(generateReportHTML(buildOncologyData({ memoData: fakeMemo, playbookData: fakePlaybook })));
-      expect(withBoth).toBeGreaterThan(withMemo);
+      expect(withBoth).toBe(withMemo);
+      const html = generateReportHTML(buildOncologyData({ memoData: fakeMemo, playbookData: fakePlaybook }));
+      for (const title of ['Trispecific Antibody Analysis', 'Delivery Route & Administration', 'Tax Structure', 'Royalty Stacking', 'Buyer Synergies', 'Therapeutic Intelligence', 'Negotiation Strategy']) {
+        expect(html).not.toContain(`>${title}<`);
+      }
     });
   });
 
@@ -278,8 +284,8 @@ describe('generateReportHTML', () => {
       expect(html).toContain('Sensitivity Analysis');
     });
 
-    it('includes the Therapeutic Intelligence section', () => {
-      expect(html).toContain('Therapeutic Intelligence');
+    it('does not include the retired Therapeutic Intelligence template section', () => {
+      expect(html).not.toContain('Therapeutic Intelligence');
     });
 
     it('includes the Methodology section', () => {

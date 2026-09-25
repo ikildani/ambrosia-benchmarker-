@@ -1439,7 +1439,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
   // institutional standard: every number should be traceable. BD users
   // need to explain these to counterparties in a negotiation room.
   const modelAssumptions = [
-    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} WACC${mfgPremium > 0 ? ` + ${(mfgPremium * 100).toFixed(1)}pp CMC premium` : ''}${territory ? `, ${territory}` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType}` : ''}) [Source: Damodaran 2024 biotech WACC + EvaluatePharma phase-risk premium]`,
+    `Discount rate: ${(discountRate * 100).toFixed(1)}% (${therapeuticArea} ${phase} WACC${mfgPremium > 0 ? ` + ${(mfgPremium * 100).toFixed(1)}pp CMC premium` : ''}${territory ? `, ${territory}` : ''}${input.companyType ? `, ${input.companyType}` : ''}${dealType !== 'licensing' ? `, ${dealType}` : ''}) [Source: published biotech cost-of-capital estimates with a phase-risk premium]`,
     `Cumulative PoS from ${phase}: ${(cumulativePoS * 100).toFixed(1)}%${posModifierNote} [Source: BIO Industry Analysis 2024, Wong-Siah-Lo 2019 Nature Biotech, FDA CDER approval statistics]`,
     `Years to market: ${yearsToMarket.toFixed(1)} years${accessDelay > 0 ? ` (incl. ${accessDelay}mo market access lag)` : ''}${timelineMultiplier !== 1.0 ? ` (data quality: ${dataQuality} → ${timelineMultiplier > 1 ? '+' : ''}${((timelineMultiplier - 1) * 100).toFixed(0)}% P3 duration)` : ''}`,
     `Peak sales estimate: $${adjustedPeakSales.median.toFixed(0)}M${genericMultiplier < 1.0 ? ` (×${genericMultiplier.toFixed(2)} generic entrenchment penalty)` : ''}`,
@@ -1536,6 +1536,15 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     phaseTransitions,
     cashFlows,
     peakSalesYear,
+    // Peak sales actually used in the cash flows: after the TAM ceiling,
+    // data-quality, generic-entrenchment, subpopulation, patent-cliff,
+    // target and route adjustments. Every page that prints a peak-sales
+    // figure reads this; the raw estimate is an input, not a result.
+    peakSalesApplied: {
+      low: Math.round(adjustedPeakSales.low),
+      median: Math.round(adjustedPeakSales.median),
+      high: Math.round(adjustedPeakSales.high),
+    },
     yearsToMarket: Math.round(yearsToMarket * 10) / 10,
     calculationFingerprint: computeCalculationFingerprint(input as unknown as Record<string, unknown>),
     impliedDealValue: {

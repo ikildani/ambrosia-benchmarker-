@@ -144,7 +144,7 @@ export function renderCMCRiskPage(data: PDFReportData, meta: ReportMeta): string
         <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${costColor}; border-radius: 6px; padding: 14px 12px; background: white; text-align: center;">
           <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">Cost Multiplier</div>
           <div style="font-size: 28px; font-weight: 800; color: ${costColor}; letter-spacing: -0.03em; line-height: 1;">${cmc.manufacturingCostMultiplier.toFixed(1)}x</div>
-          <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 4px;">vs. small molecule baseline</div>
+          <div style="font-size: 8px; color: ${COLORS.gray500}; margin-top: 4px;">${/small|oral|sm\b/i.test(String(data.inputs.modality)) ? 'vs. oral small-molecule baseline' : 'vs. small-molecule cost of goods'}</div>
         </div>
         <!-- Supply Chain Risk -->
         <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${supply.color}; border-radius: 6px; padding: 14px 12px; background: white; text-align: center;">
@@ -213,7 +213,7 @@ export function renderCMCRiskPage(data: PDFReportData, meta: ReportMeta): string
 
       <!-- Methodology -->
       <div class="disclaimer-box">
-        <strong>Methodology:</strong> CMC risk parameters derived from FDA CDER/CBER manufacturing supplement review timelines 2015-2024 by modality class. Scalability scores calibrated against commercial-stage CDMO capacity surveys (BioPlan Annual Report). Clinical hold probabilities based on FDA clinical hold database for CMC-related actions (21 CFR 312.42(b)(1)). Cost multipliers benchmarked to published COGS analyses by modality (Kelley, Nat Biotechnol 2024).
+        <strong>Methodology:</strong> CMC risk parameters follow FDA CDER/CBER manufacturing supplement review timelines (2015-2024) by modality class. Clinical hold probabilities reflect FDA clinical-hold actions for CMC reasons (21 CFR 312.42(b)(1)). Scalability scores and cost multipliers are Solidus modality-class assumptions drawn from published cost-of-goods literature; they are directional and should be replaced by the asset's own CMC plan in diligence.
       </div>
 
       ${pageFooter(meta.reportId)}

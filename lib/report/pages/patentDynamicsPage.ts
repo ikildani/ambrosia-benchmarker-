@@ -204,7 +204,7 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
 
       <!-- Methodology note -->
       <div style="margin-top: 8px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.55;">
-        <strong>Methodology:</strong> Patent term calculations follow USPTO/Hatch-Waxman statutory frameworks. Generic erosion curves calibrated to IMS Health/IQVIA post-LOE market share data (2015-2025, n=200+ small molecule LOE events). Paragraph IV risk modeled from historical ANDA filing rates by therapeutic area and patent portfolio complexity.
+        <strong>Methodology:</strong> Patent term calculations follow USPTO/Hatch-Waxman statutory frameworks. Erosion curves are modality-specific (small-molecule generic entry versus biosimilar entry for biologics) and follow published post-LOE market-share studies; Paragraph IV risk follows historical ANDA filing rates by therapeutic area and patent portfolio complexity. Biologics carry BPCIA reference-product exclusivity (12 years) in place of NCE exclusivity.
       </div>
 
       ${pageFooter(meta.reportId)}
