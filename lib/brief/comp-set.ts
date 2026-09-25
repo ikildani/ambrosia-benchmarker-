@@ -17,12 +17,32 @@
  *
  * Quality filter (spec): is_synthetic = false, is_canonical is not false,
  * verification_status not in ('rejected','flagged').
+ *
+ * Selection (2026-09-25):
+ *  - Phase window. Candidates are taken within one phase step of the asset
+ *    first; the window widens to two steps, then to any phase, only when
+ *    fewer than MIN_ROWS_BEFORE_RELAX rows qualify. The window used is printed
+ *    in the source note, so "N comparable preclinical deals" is true.
+ *  - Commercial-stage acquisitions (approved asset, acquisition structure) are
+ *    excluded for assets before Phase 3; they price a product, not a program.
+ *  - Verified rows rank first: relevance + VERIFIED_BONUS.
+ *  - Three tiers: same indication, same mechanism (target / mechanism text),
+ *    same therapeutic area.
+ *  - Indication matching uses the engine key, its registry label and a
+ *    synonym table with word boundaries, so 'lung_nsclc' matches
+ *    "non-small cell lung cancer" and 'renal' never matches "adrenal".
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AssetProfile, CompRow, CompSet, CompStats, DealPhase, DealStructure } from './types';
 import type { DealRowForClauses } from './term-sheet';
 import { mapTerritory } from './regional';
+import { INDICATION_REGISTRY } from '@/lib/benchmarkPagesIndication';
+
+export const MIN_ROWS_BEFORE_RELAX = 8;
+export const VERIFIED_BONUS = 8;
+/** Phase-window relaxation ladder: one step, two steps, any phase. */
+export const PHASE_WINDOW_LADDER = [1, 2, 99] as const;
 
 // ─── Raw row shape (the columns we select) ─────────────────────────────────
 
@@ -49,6 +69,8 @@ export interface RawDealRow {
   source_type: string | null;
   source_url: string | null;
   press_release_url: string | null;
+  target: string | null;
+  mechanism_of_action: string | null;
   // clause columns (term-sheet precedent map)
   includes_co_development: boolean | null;
   includes_co_promotion: boolean | null;
@@ -68,7 +90,7 @@ export const DEAL_SELECT_COLUMNS = [
   'deal_type', 'modality', 'indication_category', 'indication_specific', 'therapeutic_area',
   'territory', 'upfront_usd', 'total_deal_value_usd', 'milestones_total_usd', 'royalty_low_pct',
   'royalty_high_pct', 'equity_investment_usd', 'verified', 'source_type', 'source_url',
-  'press_release_url', 'includes_co_development', 'includes_co_promotion', 'sublicense_rights',
+  'press_release_url', 'target', 'mechanism_of_action', 'includes_co_development', 'includes_co_promotion', 'sublicense_rights',
   'rights_retained', 'opt_in_rights', 'opt_in_stage', 'research_funding_usd', 'profit_share_pct',
   'cost_share_ratio', 'option_exercise_fee', 'term_years',
 ].join(',');
@@ -216,36 +238,150 @@ export function isSameTA(row: Pick<RawDealRow, 'therapeutic_area' | 'indication_
   return pat.test(`${row.indication_category ?? ''} ${row.indication_specific ?? ''}`);
 }
 
+/**
+ * Hand-written stems for keys whose registry label is not enough on its own
+ * (abbreviations, possessives, alternative spellings). Stems are matched at a
+ * word boundary; stems of four characters or fewer must be whole words.
+ */
 const INDICATION_SYNONYMS: Record<string, string[]> = {
-  nsclc: ['nonsmallcelllung', 'nsclc'],
+  lung_nsclc: ['nsclc', 'non small cell lung', 'nonsmall cell lung', 'non small cell'],
+  lung_sclc: ['sclc', 'small cell lung'],
+  breast_her2: ['her2', 'her 2', 'erbb2'],
+  breast_tnbc: ['tnbc', 'triple negative'],
+  breast_hr: ['hr positive', 'hormone receptor', 'er positive', 'er+/her2'],
+  prostate: ['prostate', 'mcrpc', 'crpc'],
+  liver: ['hepatocellular', 'hcc'],
+  renal: ['renal cell', 'rcc', 'kidney cancer'],
+  gastric: ['gastric', 'gastroesophageal', 'gej', 'stomach'],
   alzheimers: ['alzheimer'],
   parkinsons: ['parkinson'],
   huntingtons: ['huntington'],
-  t2d: ['type2diabet', 't2d', 't2dm'],
-  hbv: ['hepatitisb', 'hbv'],
-  ra: ['rheumatoidarthritis'],
+  ms: ['multiple sclerosis'],
+  ra: ['rheumatoid'],
   ad: ['alzheimer'],
-  mdd: ['majordepress', 'mdd'],
+  mdd: ['major depress', 'mdd', 'depressive'],
+  t2d: ['type 2 diabet', 'type ii diabet', 't2d', 't2dm'],
+  hbv: ['hepatitis b', 'hbv'],
+  hiv: ['hiv'],
+  als: ['amyotrophic', 'als'],
+  ibd: ['inflammatory bowel', 'ibd', 'crohn', 'ulcerative colitis'],
+  uc: ['ulcerative colitis'],
+  crohns: ['crohn'],
+  nash: ['nash', 'mash', 'steatohepatitis'],
+  mash: ['nash', 'mash', 'steatohepatitis'],
+  copd: ['copd', 'chronic obstructive'],
+  ipf: ['ipf', 'idiopathic pulmonary'],
+  sma: ['spinal muscular', 'sma'],
+  dmd: ['duchenne', 'dmd'],
+  pnh: ['paroxysmal nocturnal', 'pnh'],
+  itp: ['immune thrombocytopenia', 'itp'],
+  mpn: ['myeloproliferative', 'myelofibrosis', 'polycythemia'],
+  aml: ['acute myeloid', 'aml'],
+  cll: ['chronic lymphocytic', 'cll'],
+  dlbcl: ['diffuse large b', 'dlbcl'],
+  mm: ['multiple myeloma', 'myeloma'],
+  myeloma: ['multiple myeloma', 'myeloma'],
+  amd: ['macular degeneration', 'amd'],
+  dme: ['diabetic macular', 'dme'],
+  ocd: ['obsessive', 'ocd'],
+  ptsd: ['post traumatic', 'ptsd'],
+  gad: ['generalized anxiety', 'generalised anxiety', 'gad'],
 };
+
+/** Words that carry no indication meaning on their own. */
+const GENERIC_INDICATION_WORDS = new Set(['cancer', 'disease', 'disorder', 'disorders', 'syndrome', 'other', 'general', 'and', 'the', 'of', 'in', 'with', 'type', 'acute', 'chronic', 'solid', 'tumor', 'tumour', 'tumors', 'tumours', 'cns', 'rare', 'adult', 'pediatric']);
+
+const REGISTRY_LABEL = new Map<string, string>(INDICATION_REGISTRY.map(d => [d.value, d.label]));
+
+/** Lower-case, non-alphanumerics to single spaces, trimmed. Keeps word boundaries (unlike normText). */
+function words(s: string | null | undefined): string {
+  return (s ?? '').toLowerCase().replace(/[^a-z0-9+]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
 function normText(s: string | null | undefined): string {
   return (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-/** Same indication: normalised asset indication (or a synonym stem) appears in the row's indication text, or vice versa. */
-export function isSameIndication(row: Pick<RawDealRow, 'indication_category' | 'indication_specific'>, assetIndication: string): boolean {
-  const a = normText(assetIndication);
-  if (a.length < 3) return false;
-  const rowText = normText(`${row.indication_category ?? ''} ${row.indication_specific ?? ''}`);
-  if (!rowText) return false;
-  const stems = new Set<string>([a, a.replace(/(disease|disorder|s)$/, '')]);
-  (INDICATION_SYNONYMS[a] ?? []).forEach((s) => stems.add(s));
-  for (const stem of stems) {
-    if (stem.length < 3) continue;
-    if (rowText.includes(stem)) return true;
+/**
+ * Stems that identify an asset indication: the engine key, the registry
+ * label (main phrase and any parenthesised abbreviation), and the synonym
+ * table. Computed once per key.
+ */
+const STEM_CACHE = new Map<string, string[]>();
+export function indicationStems(assetIndication: string): string[] {
+  const key = (assetIndication ?? '').trim().toLowerCase();
+  const hit = STEM_CACHE.get(key);
+  if (hit) return hit;
+  const out = new Set<string>();
+  const add = (v: string | null | undefined) => { const w = words(v); if (w && w.length >= 3) out.add(w); };
+  // Key itself (rows may carry the engine key) and its non-generic tokens of 5+ letters.
+  add(key.replace(/_/g, ' '));
+  for (const tok of key.split(/[_\s]+/)) if (tok.length >= 5 && !GENERIC_INDICATION_WORDS.has(tok)) add(tok);
+  // Registry label: "Lung Cancer (NSCLC)" → "lung cancer", "nsclc"; "Alzheimer's Disease" → "alzheimer s disease", "alzheimer".
+  const label = REGISTRY_LABEL.get(key);
+  if (label) {
+    const m = /^([^(]+?)\s*(?:\(([^)]+)\))?\s*$/.exec(label);
+    const main = m?.[1] ?? label;
+    const paren = m?.[2];
+    add(main);
+    const mainTokens = words(main).split(' ').filter(t => t.length >= 5 && !GENERIC_INDICATION_WORDS.has(t));
+    if (mainTokens.length === 1) add(mainTokens[0]);
+    if (paren) for (const part of paren.split(/[\/,]/)) add(part);
+    // Possessive singular: "alzheimer s" → "alzheimer"
+    const poss = /^([a-z]+) s\b/.exec(words(main));
+    if (poss) add(poss[1]);
   }
-  const rowCat = normText(row.indication_category);
-  return rowCat.length >= 4 && a.includes(rowCat) && rowCat !== 'other' && rowCat !== 'cns';
+  (INDICATION_SYNONYMS[key] ?? []).forEach(add);
+  const stems = [...out];
+  STEM_CACHE.set(key, stems);
+  return stems;
+}
+
+function stemMatches(text: string, stem: string): boolean {
+  const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+');
+  // Short stems (abbreviations) must be whole words: "rcc" must not match "rccx"; "als" must not match "also".
+  const re = stem.length <= 4 ? new RegExp(`(^|\\s)${esc}(\\s|$)`) : new RegExp(`(^|\\s)${esc}`);
+  return re.test(text);
+}
+
+/** Same indication: an asset-indication stem (key, registry label, synonym) appears in the row's indication text at a word boundary. */
+export function isSameIndication(row: Pick<RawDealRow, 'indication_category' | 'indication_specific'>, assetIndication: string): boolean {
+  const key = (assetIndication ?? '').trim().toLowerCase();
+  if (key.length < 2) return false;
+  const cat = normText(row.indication_category);
+  if (cat && cat === normText(key)) return true;
+  const text = words(`${row.indication_category ?? ''} ${row.indication_specific ?? ''}`);
+  if (!text) return false;
+  for (const stem of indicationStems(key)) if (stemMatches(text, stem)) return true;
+  return false;
+}
+
+/** Words in target / mechanism strings that do not identify a mechanism. */
+const GENERIC_MECHANISM_WORDS = new Set(['antibody', 'antibodies', 'monoclonal', 'inhibitor', 'inhibitors', 'agonist', 'antagonist', 'modulator', 'small', 'molecule', 'targeting', 'targeted', 'with', 'and', 'the', 'for', 'oral', 'novel', 'first', 'class', 'therapy', 'therapeutic', 'platform', 'program', 'programme', 'candidate', 'selective', 'potent', 'dual', 'bispecific', 'trispecific', 'humanised', 'humanized', 'fully', 'human', 'anti', 'shuttle', 'delivery', 'conjugate', 'drug', 'receptor', 'protein', 'gene', 'cell', 'based', 'next', 'generation', 'lead']);
+
+/** Tokens that identify the asset's mechanism from intake target / mechanism text. */
+export function mechanismTokens(asset: Pick<AssetProfile, 'target' | 'mechanism'>): string[] {
+  const out = new Set<string>();
+  for (const src of [asset.target, asset.mechanism]) {
+    for (const raw of words(src).split(' ')) {
+      const tok = raw.replace(/^anti/, '');
+      if (tok.length < 3 || GENERIC_MECHANISM_WORDS.has(tok) || /^\d+$/.test(tok)) continue;
+      out.add(tok);
+      // ptau217 / p-tau → tau; abeta42 → abeta
+      const core = /^p?(tau)\d*$/.exec(tok) ?? /^(abeta|amyloid)\w*$/.exec(tok);
+      if (core) out.add(core[1]);
+    }
+  }
+  return [...out];
+}
+
+/** Same mechanism: an asset mechanism token appears in the row's target, mechanism or asset name. */
+export function isSameMechanism(row: Pick<RawDealRow, 'target' | 'mechanism_of_action' | 'asset_name'>, asset: Pick<AssetProfile, 'target' | 'mechanism'>): boolean {
+  const toks = mechanismTokens(asset);
+  if (!toks.length) return false;
+  const text = words(`${row.target ?? ''} ${row.mechanism_of_action ?? ''} ${row.asset_name ?? ''}`);
+  if (!text) return false;
+  return toks.some(t => stemMatches(text, t));
 }
 
 function recencyScore(year: number | null): number {
@@ -263,7 +399,7 @@ const usdToM = (v: number | null | undefined): number | null =>
 
 // ─── Scoring ───────────────────────────────────────────────────────────────
 
-export function scoreRow(raw: RawDealRow, asset: AssetProfile): { relevance: number; reasons: string[]; sameIndication: boolean; sameTA: boolean } {
+export function scoreRow(raw: RawDealRow, asset: AssetProfile): { relevance: number; reasons: string[]; sameIndication: boolean; sameMechanism: boolean; sameTA: boolean } {
   const reasons: string[] = [];
   let score = 0;
 
@@ -280,6 +416,10 @@ export function scoreRow(raw: RawDealRow, asset: AssetProfile): { relevance: num
   // Indication (20)
   const sameIndication = isSameIndication(raw, asset.indication);
   if (sameIndication) { score += 20; reasons.push('Same indication'); }
+
+  // Mechanism (bonus 10, capped with the rest at 100)
+  const sameMechanism = isSameMechanism(raw, asset);
+  if (sameMechanism) { score += 10; reasons.push('Same mechanism'); }
 
   // Modality (20)
   const am = normalizeModality(asset.modality);
@@ -303,11 +443,11 @@ export function scoreRow(raw: RawDealRow, asset: AssetProfile): { relevance: num
   score += rs;
   if (rs >= 8) reasons.push('Recent');
 
-  return { relevance: Math.max(0, Math.min(100, Math.round(score))), reasons, sameIndication, sameTA };
+  return { relevance: Math.max(0, Math.min(100, Math.round(score))), reasons, sameIndication, sameMechanism, sameTA };
 }
 
 export function toCompRow(raw: RawDealRow, asset: AssetProfile): CompRow {
-  const { relevance, reasons, sameIndication } = scoreRow(raw, asset);
+  const { relevance, reasons, sameIndication, sameMechanism } = scoreRow(raw, asset);
   const year = raw.announced_date ? Number(raw.announced_date.slice(0, 4)) : null;
   return {
     id: String(raw.id),
@@ -334,6 +474,7 @@ export function toCompRow(raw: RawDealRow, asset: AssetProfile): CompRow {
     reasons,
     outlier: false,
     sameIndication,
+    sameMechanism,
   };
 }
 
@@ -350,16 +491,38 @@ export function buildCompSetFromRows(
   const maxRows = opts.maxRows ?? 30;
   const asOf = opts.asOf ?? new Date().toISOString().slice(0, 10);
 
-  // Candidates: same TA or same indication, with at least one economic term disclosed.
-  const candidates = rawRows
+  // Candidates: same TA, indication or mechanism, with at least one economic term disclosed.
+  const assetPhase = normalizePhase(asset.phase);
+  const assetRank = PHASE_RANK[assetPhase];
+  const all = rawRows
     .filter((r) => r.upfront_usd != null || r.total_deal_value_usd != null)
-    .filter((r) => isSameTA(r, asset.therapeuticArea) || isSameIndication(r, asset.indication))
-    .map((r) => toCompRow(r, asset));
+    .filter((r) => isSameTA(r, asset.therapeuticArea) || isSameIndication(r, asset.indication) || isSameMechanism(r, asset))
+    .map((r) => toCompRow(r, asset))
+    // Commercial-stage acquisitions price a marketed product; they are not a
+    // comparable for a program before Phase 3.
+    .filter((r) => !(assetRank >= 0 && assetRank < PHASE_RANK.phase_3 && r.phase === 'approved' && r.structure === 'acquisition'));
 
-  const byRel = (a: CompRow, b: CompRow) => b.relevance - a.relevance || (b.year ?? 0) - (a.year ?? 0);
+  // Phase window: widen only when the tighter window is too thin.
+  const phaseDist = (r: CompRow): number => (assetRank < 0 || r.phase === 'unknown') ? 99 : Math.abs(PHASE_RANK[r.phase] - assetRank);
+  let windowSteps: number = PHASE_WINDOW_LADDER[PHASE_WINDOW_LADDER.length - 1];
+  let candidates: CompRow[] = all;
+  for (const steps of PHASE_WINDOW_LADDER) {
+    const pool = all.filter((r) => phaseDist(r) <= steps);
+    if (pool.length >= MIN_ROWS_BEFORE_RELAX || steps === PHASE_WINDOW_LADDER[PHASE_WINDOW_LADDER.length - 1]) {
+      windowSteps = steps;
+      candidates = pool;
+      break;
+    }
+  }
+  const windowLabel = assetRank < 0 ? 'any phase' : windowSteps >= 99 ? 'any phase' : windowSteps === 1 ? 'within one phase step' : `within ${windowSteps} phase steps`;
+
+  // Verified rows first, then relevance, then recency.
+  const sortKey = (r: CompRow) => r.relevance + (r.verified ? VERIFIED_BONUS : 0);
+  const byRel = (a: CompRow, b: CompRow) => sortKey(b) - sortKey(a) || (b.year ?? 0) - (a.year ?? 0);
   const same = candidates.filter((r) => r.sameIndication).sort(byRel);
-  const taOnly = candidates.filter((r) => !r.sameIndication).sort(byRel);
-  const rows = [...same, ...taOnly].slice(0, maxRows);
+  const mech = candidates.filter((r) => !r.sameIndication && r.sameMechanism).sort(byRel);
+  const taOnly = candidates.filter((r) => !r.sameIndication && !r.sameMechanism).sort(byRel);
+  const rows = [...same, ...mech, ...taOnly].slice(0, maxRows);
 
   // Outliers on total: > p75 + 1.5·IQR of the selected set.
   const fence = outlierThreshold(rows.map((r) => r.totalM));
@@ -375,21 +538,29 @@ export function buildCompSetFromRows(
 
   const headlineDriverIds = [...exOutliers].sort(byRel).slice(0, 8).map((r) => r.id);
   const verifiedCount = rows.filter((r) => r.verified).length;
+  const linkedCount = rows.filter((r) => r.verified && r.sourceUrl).length;
   const sameN = rows.filter((r) => r.sameIndication).length;
+  const mechN = rows.filter((r) => !r.sameIndication && r.sameMechanism).length;
 
-  let caveat: string | undefined;
+  const parts: string[] = [];
   if (sameN < 8) {
-    caveat = sameN === 0
-      ? `No same-indication comps passed the quality filter; the set is ${rows.length} therapeutic-area deals, so treat the medians as a class-level anchor rather than an indication price.`
-      : `Only ${sameN} same-indication comp${sameN === 1 ? '' : 's'}; the set is filled to ${rows.length} with therapeutic-area deals, so the medians lean on class-level pricing.`;
+    parts.push(sameN === 0
+      ? `No same-indication comps passed the quality filter; the set is ${rows.length} ${mechN ? 'mechanism and ' : ''}therapeutic-area deals, so treat the medians as a class-level anchor rather than an indication price.`
+      : `Only ${sameN} same-indication comp${sameN === 1 ? '' : 's'}; the set is filled to ${rows.length} with ${mechN ? `${mechN} same-mechanism and ` : ''}therapeutic-area deals, so the medians lean on class-level pricing.`);
   }
+  if (assetRank >= 0 && windowSteps > 1) {
+    parts.push(windowSteps >= 99
+      ? `Fewer than ${MIN_ROWS_BEFORE_RELAX} deals within two phase steps of ${assetPhase.replace('_', ' ')}, so the set spans every phase; read the by-phase strips before quoting a median.`
+      : `Fewer than ${MIN_ROWS_BEFORE_RELAX} deals within one phase step of ${assetPhase.replace('_', ' ')}, so the window is two steps.`);
+  }
+  const caveat = parts.length ? parts.join(' ') : undefined;
 
   return {
     source: {
       source: 'Solidus deal database',
       n: rows.length,
       asOf,
-      note: `verified ${verifiedCount} of ${rows.length}; non-synthetic, canonical rows only`,
+      note: `${windowLabel}; verified ${verifiedCount} of ${rows.length} (${linkedCount} with a linked citation); non-synthetic, canonical rows only`,
     },
     rows,
     stats: { all: computeStats(rows), exOutliers: computeStats(exOutliers) },
@@ -397,13 +568,14 @@ export function buildCompSetFromRows(
     byStructure,
     headlineDriverIds,
     caveat,
+    phaseWindow: { steps: windowSteps >= 99 ? null : windowSteps, label: windowLabel },
   };
 }
 
 /** Rows for the term-sheet clause map: the same TA / indication candidate set, without the economic-terms requirement. */
 export function selectClauseRows(rawRows: RawDealRow[], asset: AssetProfile): DealRowForClauses[] {
   return rawRows
-    .filter((r) => isSameTA(r, asset.therapeuticArea) || isSameIndication(r, asset.indication))
+    .filter((r) => isSameTA(r, asset.therapeuticArea) || isSameIndication(r, asset.indication) || isSameMechanism(r, asset))
     .map((r) => ({
       id: String(r.id),
       phase_at_signing: r.phase_at_signing,

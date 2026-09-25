@@ -14,6 +14,21 @@ export function countCompAppendixPages(data: PDFReportData): number {
   return Math.max(1, Math.ceil(n / COMP_APPENDIX_ROWS_PER_PAGE));
 }
 
+/**
+ * What to print in the Source column: the citation host when a link is on
+ * file; otherwise the source type with an explicit "unlinked" so a verified
+ * row never reads as undisclosed. Verification is done against filings and
+ * press releases; the link is not always stored (116 of 301 verified rows
+ * on 2026-09-25).
+ */
+export function sourceLabel(r: { sourceUrl: string | null; sourceType: string | null; verified: boolean }): string {
+  const host = sourceHost(r.sourceUrl);
+  if (host !== 'undisclosed') return host;
+  const type = (r.sourceType ?? '').replace(/_/g, ' ').trim();
+  if (r.verified) return `${type || 'primary source'}, unlinked`;
+  return type ? `${type}, unverified` : 'undisclosed';
+}
+
 /** Short host name from a URL ("sec.gov"), or "undisclosed". */
 export function sourceHost(url: string | null | undefined): string {
   if (!url) return 'undisclosed';
@@ -90,7 +105,7 @@ export function renderCompAppendixPages(data: PDFReportData, meta: ReportMeta): 
           ${td(`${fmtM(r.totalM)}${sup}`, 'right', `font-weight: 700; color: ${COLORS.navy};`)}
           ${td(escapeHtml(fmtRoyalty(r)), 'right')}
           ${td(r.verified ? `<span style="color: ${COLORS.teal}; font-weight: 700;">✓</span>` : `<span style="color: ${COLORS.gray400};">–</span>`, 'center')}
-          ${td(escapeHtml(sourceHost(r.sourceUrl)), 'left', `color: ${COLORS.gray500};`)}
+          ${td(escapeHtml(sourceLabel(r)), 'left', `color: ${COLORS.gray500};`)}
         </tr>`;
     }).join('');
 
@@ -110,7 +125,7 @@ export function renderCompAppendixPages(data: PDFReportData, meta: ReportMeta): 
         ${chartSource({ ...compSet.source, note: `${compSet.source.note ?? ''}${compSet.source.note ? '; ' : ''}rows ${p * COMP_APPENDIX_ROWS_PER_PAGE + 1}–${p * COMP_APPENDIX_ROWS_PER_PAGE + slice.length} of ${rows.length}` })}
         ${isLast ? `
           <div style="font-size: 7.5px; color: ${COLORS.gray500}; margin-top: 10px; line-height: 1.5;">
-            <div><b>Quality filter.</b> Rows are drawn from the Solidus deal database where the record is not synthetic, is the canonical copy of the transaction, and has not been rejected or flagged in verification. Shaded rows share the asset's indication; the rest are same-therapeutic-area fill. "Verified" means the terms were checked against a primary source (filing or press release). Source shows the host of the citation on file.</div>
+            <div><b>Quality filter.</b> Rows are drawn from the Solidus deal database where the record is not synthetic, is the canonical copy of the transaction, and has not been rejected or flagged in verification. Shaded rows share the asset's indication; rows marked with a mechanism badge share its target or mechanism; the rest are same-therapeutic-area fill within the phase window stated in the source line. "Verified" means the terms were checked against a primary source (filing or press release); "unlinked" means that check was recorded without a stored link. Source shows the host of the citation on file.</div>
             <div style="margin-top: 3px;"><b><sup>†</sup> Outlier.</b> Total deal value above the 75th percentile plus 1.5 × the interquartile range of this set. Outliers are listed for completeness but excluded from the ex-outlier medians and from the headline drivers.</div>
           </div>` : ''}
         ${pageFooter(meta.reportId)}

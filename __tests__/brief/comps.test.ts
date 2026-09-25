@@ -37,7 +37,7 @@ function raw(over: Partial<RawDealRow> & { id: string }): RawDealRow {
     phase_at_signing: 'preclinical', deal_type: 'license', modality: 'small_molecule', indication_category: 'cns',
     indication_specific: "Alzheimer's disease", therapeutic_area: 'neurology', territory: 'global',
     upfront_usd: 50e6, total_deal_value_usd: 500e6, milestones_total_usd: 450e6, royalty_low_pct: 5, royalty_high_pct: 10,
-    equity_investment_usd: null, verified: true, source_type: 'press_release', source_url: 'https://www.sec.gov/x', press_release_url: null,
+    equity_investment_usd: null, verified: true, source_type: 'press_release', source_url: 'https://www.sec.gov/x', press_release_url: null, target: null, mechanism_of_action: null,
     includes_co_development: false, includes_co_promotion: null, sublicense_rights: null, rights_retained: null,
     opt_in_rights: null, opt_in_stage: null, research_funding_usd: null, profit_share_pct: null, cost_share_ratio: null,
     option_exercise_fee: null, term_years: null,
@@ -278,7 +278,7 @@ describe('page renderers', () => {
   const set = buildCompSetFromRows(RAW, asset, { asOf: '2026-09-23' });
   const regional = buildRegionalStrategy(set.rows, asset, '2026-09-23');
   const termSheet = buildTermSheetPrecedent(selectClauseRows(RAW, asset), asset, '2026-09-23');
-  const data = reportData({ compSet: set, regional, termSheet, bridge: { asOf: '2026-09-23', bars: [], ask: { totalM: 450, upfrontM: 35 }, floor: { totalM: 300, upfrontM: 20 }, walkAway: { upfrontM: 15 }, reconciliation: '' } });
+  const data = reportData({ compSet: set, regional, termSheet, bridge: { asOf: '2026-09-23', bars: [], ask: { totalM: 450, upfrontM: 35 }, floor: { totalM: 300, upfrontM: 20 }, walkAway: { upfrontM: 15 }, askBasis: { total: 'headline', upfront: 'headline' }, policy: '', rnpvInformative: true, rnpvNote: null, reconciliation: '' } });
 
   it('comp scatter page: one report-page, section title, source line, KPIs, drivers', () => {
     const html = renderCompScatterPage(data, meta());
@@ -309,7 +309,7 @@ describe('page renderers', () => {
     expect(pages[0]).toContain('sec.gov');
     const withOutlier = renderCompAppendixPages(data, meta());
     expect(withOutlier[0]).toContain('†');
-    expect(withOutlier[0]).toContain('undisclosed');
+    expect(withOutlier[0]).toMatch(/unlinked|unverified|undisclosed/);
     expect(countCompAppendixPages(reportData(null))).toBe(1);
     expect(renderCompAppendixPages(reportData(null), meta())[0]).toContain('No comparable deals to list');
   });
