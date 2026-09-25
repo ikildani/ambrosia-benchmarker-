@@ -16,7 +16,7 @@ dotenv.config({ path: '.env.local' });
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import puppeteer from 'puppeteer-core';
 import { calculateDealTerms, calculateRiskScore, type CalculationInput } from '../lib/calculations';
 import { computeSensitivityAnalysis } from '../lib/sensitivity';
@@ -29,6 +29,7 @@ import { getPlaybookGenerator } from '../lib/ai/playbook-generator';
 import type { PDFReportData, PartnerForPDF } from '../lib/report/types';
 import { resolveIntake, type BenchmarkRequestRow } from '../lib/brief/intake-map';
 import { buildBrief } from '../lib/brief/build';
+import { fetchBriefPartners } from '../lib/brief/partners';
 import epiData from '../data/epidemiology.json';
 
 const args = process.argv.slice(2);
@@ -57,44 +58,13 @@ const REQUEST: BenchmarkRequestRow = {
   data_package_stage: 'IND-enabling studies underway',
 };
 
-async function fetchPartners(input: CalculationInput): Promise<PartnerForPDF[]> {
-  try {
-    const res = await fetch('https://solidus.ambrosiaventures.co/api/partners/match', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        modality: input.modality,
-        development_phase: input.phase,
-        indication_category: input.indication,
-        territory_scope: input.territory,
-        therapeutic_area: input.therapeuticArea,
-        tier: 'pro',
-      }),
-      signal: AbortSignal.timeout(30_000),
-    });
-    if (!res.ok) { console.warn('[partners] HTTP', res.status); return []; }
-    const data = await res.json();
-    return (data?.matches ?? []).map((m: Record<string, unknown>) => ({
-      company_name: m.company_name,
-      company_id: m.company_id,
-      match_score: m.match_score,
-      match_reasons: m.match_reasons || [],
-      deals_last_12mo: m.deals_last_12mo || 0,
-      hq_country: m.hq_country ?? null,
-      strategic_context: m.strategic_context ?? null,
-      pharma_intent: m.pharma_intent ?? null,
-      company_type: m.company_type ?? null,
-      deals_last_24mo: m.deals_last_24mo ?? null,
-      last_deal_date: m.last_deal_date ?? null,
-      phase_preference_min: m.phase_preference_min ?? null,
-      phase_preference_max: m.phase_preference_max ?? null,
-      acquisition_appetite: m.acquisition_appetite ?? null,
-      median_upfront_usd: m.median_upfront_usd ?? null,
-    })) as PartnerForPDF[];
-  } catch (err) {
-    console.warn('[partners] failed:', (err as Error).message);
-    return [];
-  }
+// Partner supply: direct library call (service role), not the public endpoint,
+// which serves the free tier to cookie-less callers. See lib/brief/partners.ts.
+async function fetchPartners(supabase: SupabaseClient, input: CalculationInput): Promise<PartnerForPDF[]> {
+  return fetchBriefPartners(supabase, {
+    modality: input.modality, phase: input.phase, indication: input.indication,
+    territory: input.territory, therapeuticArea: input.therapeuticArea, dealType: input.dealType,
+  }, { log: (m) => console.log(m) });
 }
 
 async function main() {
@@ -124,7 +94,7 @@ async function main() {
     catch (e) { console.warn('[playbook] failed', (e as Error).message); }
   }
 
-  const partners = await fetchPartners(input);
+  const partners = await fetchPartners(supabase, input);
   console.log('[partners]', partners.length, partners.slice(0, 5).map(p => p.company_name).join(', '));
 
   const built = await buildBrief({

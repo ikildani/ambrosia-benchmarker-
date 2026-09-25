@@ -165,10 +165,18 @@ export interface BuyerPriorDeal {
   sourceUrl: string | null;
 }
 
+/**
+ * Size class used by the buyer-mix rule. From companies.company_type when set;
+ * otherwise inferred from total_annual_revenue (>= $10B large_pharma,
+ * $1–10B mid_pharma, < $1B mid_biotech); 'unknown' when neither is known.
+ */
+export type BuyerSizeBucket = 'large_pharma' | 'mid_pharma' | 'large_biotech' | 'mid_biotech' | 'specialty' | 'unknown';
+
 export interface BuyerCandidate {
   companyId: string | null;
   name: string;
   companyType: string | null;    // large_pharma | mid_pharma | large_biotech | mid_biotech | specialty
+  sizeBucket: BuyerSizeBucket;
   hqRegion: string | null;
   hqCountry: string | null;
   /** 0–100 from partner matching. */
@@ -204,11 +212,17 @@ export interface BuyerCandidate {
 
 export interface BuyerMap {
   source: SourceNote;
-  candidates: BuyerCandidate[];          // ranked, top 8–10
+  candidates: BuyerCandidate[];          // ranked, up to 12 after the mix rule
   /** Explicitly excluded names with the reason, e.g. "does not transact preclinical". */
   excluded: Array<{ name: string; reason: string }>;
   /** Suggested process: who first, who as tension, who to hold. */
   process: { lead: string[]; tension: string[]; hold: string[]; rationale: string };
+  /**
+   * Composition of `candidates`: large = large_pharma + large_biotech,
+   * mid = mid_pharma + mid_biotech + specialty, unknown = no size evidence.
+   * regions = HQ regions represented (north_america | europe | japan | china_apac | other).
+   */
+  mix: { large: number; mid: number; unknown: number; regions: string[] };
 }
 
 // ─── Landscape: pipeline map + catalyst calendar + patient funnel ──────────

@@ -15,11 +15,19 @@ import {
   buildWhyNow,
   buildHowToEngage,
   groupLicensees,
+  sizeBucketOf,
+  regionOf,
+  selectMix,
+  mixOf,
+  CANDIDATE_TARGET,
+  MIN_MID,
+  MIN_LARGE,
+  type PartnerInput,
 } from '@/lib/brief/buyer-map';
 import { computeBuyerValuations } from '@/lib/brief/buyer-valuations';
 import { renderBuyerQuadrant } from '@/lib/report/svg-charts/quadrant';
 import { renderLoeCalendar } from '@/lib/report/svg-charts/loeCalendar';
-import { renderBuyerMapPage } from '@/lib/report/pages/buyerMap';
+import { renderBuyerMapPage, renderBuyerMixStrip } from '@/lib/report/pages/buyerMap';
 import { renderBuyerBehaviourPage } from '@/lib/report/pages/buyerBehaviour';
 import type { AssetProfile, BuyerCandidate, BuyerMap } from '@/lib/brief/types';
 import type { PDFReportData, ReportMeta, PartnerForPDF } from '@/lib/report/types';
@@ -36,7 +44,7 @@ const ASSET: AssetProfile = {
 
 function candidate(over: Partial<BuyerCandidate> = {}): BuyerCandidate {
   return {
-    companyId: 'c1', name: 'Eli Lilly', companyType: 'large_pharma', hqRegion: 'north_america', hqCountry: 'US',
+    companyId: 'c1', name: 'Eli Lilly', companyType: 'large_pharma', sizeBucket: 'large_pharma', hqRegion: 'north_america', hqCountry: 'US',
     fit: 82, urgency: 61, intentScore: 70, intentTier: 'high', preferredDealType: 'license',
     dealsLast12mo: 8, dealsLast24mo: 14, lastDealDate: '2026-06-01',
     phasePreference: { min: 'preclinical', max: 'phase_3' }, transactsAtPhase: 'yes',
@@ -62,6 +70,7 @@ function buyerMap(over: Partial<BuyerMap> = {}): BuyerMap {
     candidates: cands,
     excluded: [{ name: 'Roche', reason: '4 disclosed deals since 2021, none at preclinical or earlier' }],
     process: { lead: ['Eli Lilly', 'AbbVie <Immunology>'], tension: [], hold: [], rationale: 'Open with Eli Lilly and AbbVie.' },
+    mix: { large: 3, mid: 0, unknown: 0, regions: ['north_america'] },
     ...over,
   };
 }
@@ -183,6 +192,131 @@ describe('splitProcess', () => {
     const p = splitProcess([mk('X', 90, 90, 'no')], 'preclinical');
     expect(p.lead).toEqual([]);
     expect(p.rationale).toMatch(/No candidate/);
+  });
+  const sized = (name: string, score: number, sizeBucket: BuyerCandidate['sizeBucket'], t: BuyerCandidate['transactsAtPhase'] = 'yes') => ({ name, fit: score, urgency: score, transactsAtPhase: t, sizeBucket });
+  it('promotes a mid-sized buyer within 10 points of the third lead when all three leads are large', () => {
+    const p = splitProcess([
+      sized('BigA', 90, 'large_pharma'), sized('BigB', 85, 'large_pharma'), sized('BigC', 80, 'large_biotech'),
+      sized('MidD', 72, 'mid_biotech'), sized('BigE', 70, 'large_pharma'), sized('MidF', 60, 'specialty'),
+    ], 'preclinical');
+    expect(p.lead).toEqual(['BigA', 'BigB', 'MidD']);
+    expect(p.tension[0]).toBe('BigC');                       // demoted large goes to the front of tension
+    expect(p.tension).toEqual(['BigC', 'BigE', 'MidF']);
+    expect(p.rationale).toContain('MidD takes the third lead slot ahead of BigC');
+    expect(p.rationale).toContain('mid-sized buyers move faster at this stage');
+    expect(p.rationale).toContain('8 points apart');
+  });
+  it('does not promote when the gap exceeds 10 points, when a lead is already mid-sized, or when the mid candidate is excluded on stage', () => {
+    const far = splitProcess([sized('BigA', 90, 'large_pharma'), sized('BigB', 85, 'large_pharma'), sized('BigC', 80, 'large_pharma'), sized('MidD', 69, 'mid_pharma')], 'phase_2');
+    expect(far.lead).toEqual(['BigA', 'BigB', 'BigC']);
+    expect(far.rationale).not.toContain('move faster');
+    const already = splitProcess([sized('BigA', 90, 'large_pharma'), sized('MidB', 85, 'mid_pharma'), sized('BigC', 80, 'large_pharma'), sized('MidD', 79, 'mid_biotech')], 'phase_2');
+    expect(already.lead).toEqual(['BigA', 'MidB', 'BigC']);
+    const excluded = splitProcess([sized('BigA', 90, 'large_pharma'), sized('BigB', 85, 'large_pharma'), sized('BigC', 80, 'large_pharma'), sized('MidD', 79, 'mid_biotech', 'no')], 'phase_2');
+    expect(excluded.lead).toEqual(['BigA', 'BigB', 'BigC']);
+    // Candidates without a bucket (legacy callers) never trigger a promotion.
+    const legacy = splitProcess([mk('A', 90, 90), mk('B', 80, 80), mk('C', 70, 70), mk('D', 65, 65)], 'phase_2');
+    expect(legacy.lead).toEqual(['A', 'B', 'C']);
+  });
+});
+
+// ─── Size bucket, region and the mix rule ───────────────────────────────────
+
+describe('sizeBucketOf / regionOf', () => {
+  it('uses company_type when it is one of the five buckets', () => {
+    expect(sizeBucketOf('large_pharma', 5e8)).toBe('large_pharma');
+    expect(sizeBucketOf('mid_biotech', 50e9)).toBe('mid_biotech');
+    expect(sizeBucketOf('Specialty', null)).toBe('specialty');
+    expect(sizeBucketOf('large-biotech', null)).toBe('large_biotech');
+  });
+  it('infers from revenue when the type is missing: >= $10B large_pharma, $1–10B mid_pharma, < $1B mid_biotech', () => {
+    expect(sizeBucketOf(null, 34e9)).toBe('large_pharma');
+    expect(sizeBucketOf(null, 10e9)).toBe('large_pharma');
+    expect(sizeBucketOf(undefined, 4.4e9)).toBe('mid_pharma');
+    expect(sizeBucketOf('', 1e9)).toBe('mid_pharma');
+    expect(sizeBucketOf(null, 8e8)).toBe('mid_biotech');
+    expect(sizeBucketOf('conglomerate', 8e8)).toBe('mid_biotech');
+  });
+  it('is unknown without type or revenue', () => {
+    expect(sizeBucketOf(null, null)).toBe('unknown');
+    expect(sizeBucketOf(null, 0)).toBe('unknown');
+    expect(sizeBucketOf('other', undefined)).toBe('unknown');
+  });
+  it('maps hq_region first, then country codes and names', () => {
+    expect(regionOf('europe', 'US')).toBe('europe');
+    expect(regionOf('south_korea', null)).toBe('china_apac');
+    expect(regionOf('latin_america', null)).toBe('other');
+    expect(regionOf(null, 'US')).toBe('north_america');
+    expect(regionOf(null, 'United States')).toBe('north_america');
+    expect(regionOf(null, 'Switzerland')).toBe('europe');
+    expect(regionOf(null, 'GB')).toBe('europe');
+    expect(regionOf(null, 'UK')).toBe('europe');
+    expect(regionOf(null, 'Japan')).toBe('japan');
+    expect(regionOf(null, 'JP')).toBe('japan');
+    expect(regionOf(null, 'China')).toBe('china_apac');
+    expect(regionOf(null, 'South Korea')).toBe('china_apac');
+    expect(regionOf(null, 'Israel')).toBe('other');
+    expect(regionOf(null, null)).toBe('unknown');
+    expect(regionOf('', '')).toBe('unknown');
+  });
+});
+
+describe('selectMix', () => {
+  type B = BuyerCandidate['sizeBucket'];
+  const mkc = (name: string, score: number, sizeBucket: B, country: string | null = 'US', t: BuyerCandidate['transactsAtPhase'] = 'yes') =>
+    ({ name, fit: score, urgency: score, transactsAtPhase: t, sizeBucket, hqRegion: null, hqCountry: country });
+
+  it('fills at least 4 mid-sized and 4 large when available, the rest by score, and ranks by score', () => {
+    const pool = [
+      ...Array.from({ length: 12 }, (_, i) => mkc(`Big${i}`, 90 - i, 'large_pharma')),       // 90..79
+      mkc('MidA', 60, 'mid_pharma'), mkc('MidB', 58, 'mid_biotech'), mkc('MidC', 55, 'specialty'), mkc('MidD', 50, 'mid_biotech'), mkc('MidE', 45, 'mid_biotech'),
+    ];
+    const { selected, mix } = selectMix(pool);
+    expect(selected.length).toBe(CANDIDATE_TARGET);
+    expect(mix.mid).toBe(MIN_MID);
+    expect(mix.large).toBe(8);
+    expect(mix.unknown).toBe(0);
+    expect(selected.slice(0, 8).map(c => c.name)).toEqual(['Big0', 'Big1', 'Big2', 'Big3', 'Big4', 'Big5', 'Big6', 'Big7']);
+    expect(selected.slice(8).map(c => c.name)).toEqual(['MidA', 'MidB', 'MidC', 'MidD']);
+    expect(mix.regions).toEqual(['north_america']);
+  });
+  it('falls back gracefully when no mid-sized candidate exists or when the pool is short', () => {
+    const allBig = Array.from({ length: 15 }, (_, i) => mkc(`Big${i}`, 90 - i, i % 2 ? 'large_pharma' : 'large_biotech'));
+    const a = selectMix(allBig);
+    expect(a.selected.length).toBe(12);
+    expect(a.mix).toEqual({ large: 12, mid: 0, unknown: 0, regions: ['north_america'] });
+    const short = selectMix([mkc('A', 80, 'large_pharma'), mkc('B', 70, 'unknown', null)]);
+    expect(short.selected.map(c => c.name)).toEqual(['A', 'B']);
+    expect(short.mix).toEqual({ large: 1, mid: 0, unknown: 1, regions: ['north_america'] });
+    expect(selectMix([]).selected).toEqual([]);
+  });
+  it('reserves the mid quota for buyers that may transact at the phase and uses stage-excluded buyers only to fill empty slots, last', () => {
+    const pool = [
+      mkc('Big0', 90, 'large_pharma'), mkc('Big1', 88, 'large_pharma'),
+      mkc('MidNo', 85, 'mid_pharma', 'US', 'no'), mkc('MidYes', 40, 'mid_biotech'),
+      mkc('BigNo', 95, 'large_pharma', 'US', 'no'),
+    ];
+    const { selected, mix } = selectMix(pool, 4);
+    expect(selected.map(c => c.name)).toEqual(['Big0', 'Big1', 'MidYes', 'BigNo']);
+    expect(mix.mid).toBe(1);
+    const { selected: s3 } = selectMix(pool, 3);
+    expect(s3.map(c => c.name)).toEqual(['Big0', 'Big1', 'MidYes']);
+  });
+  it('prefers an unrepresented region within 5 points, but never beyond', () => {
+    const pool = [
+      mkc('US1', 90, 'large_pharma', 'US'), mkc('US2', 89, 'large_pharma', 'US'), mkc('US3', 88, 'large_pharma', 'US'),
+      mkc('CH', 85, 'large_pharma', 'Switzerland'),   // within 5 of US3 → taken before US3? no: US1 first; CH within 5 of US2 → wins slot 2
+      mkc('JP', 70, 'large_pharma', 'Japan'),         // 18 below → stays in score order
+      mkc('US4', 84, 'large_pharma', 'US'),
+    ];
+    const { selected, mix } = selectMix(pool, 3);
+    expect(selected.map(c => c.name)).toEqual(['US1', 'US2', 'CH']);
+    expect(mix.regions).toEqual(['north_america', 'europe']);
+    const wide = selectMix([mkc('US1', 90, 'large_pharma', 'US'), mkc('US2', 89, 'large_pharma', 'US'), mkc('JP', 80, 'large_pharma', 'Japan')], 2);
+    expect(wide.selected.map(c => c.name)).toEqual(['US1', 'US2']);
+  });
+  it('mixOf summarises an existing list', () => {
+    expect(mixOf([mkc('A', 1, 'mid_pharma', 'Japan'), mkc('B', 1, 'large_biotech', 'CN'), mkc('C', 1, 'unknown', null)])).toEqual({ large: 1, mid: 1, unknown: 1, regions: ['japan', 'china_apac'] });
   });
 });
 
@@ -347,11 +481,18 @@ describe('groupLicensees', () => {
 });
 
 describe('buildBuyerMap deal-history supplement', () => {
-  it('fills to 10 candidates from TA deal history, dedupes variants of existing partners, and tags the source', async () => {
+  it('fills from TA deal history, dedupes variants of existing partners, tags the source and buckets every candidate', async () => {
     const { client, calls } = stubSupabase({ companies: SUPPLEMENT_COMPANIES, deals: SUPPLEMENT_DEALS, counterparty_premiums: PREMIUMS });
     const map = await buildBuyerMap(client, ASSET, PARTNERS, { asOf: '2026-09-24' });
 
-    expect(map.candidates.length).toBe(10);
+    expect(map.candidates.length).toBe(10);                  // 3 partners + 7 licensees < target of 12
+    expect(map.candidates.find(c => c.name === 'Eli Lilly')!.sizeBucket).toBe('large_pharma');
+    expect(map.candidates.find(c => c.name === 'Biogen')!.sizeBucket).toBe('large_biotech');
+    expect(map.candidates.find(c => c.name === 'Unknown Biotech')!.sizeBucket).toBe('unknown');
+    expect(map.mix.large).toBe(3);
+    expect(map.mix.unknown).toBe(7);
+    expect(map.mix.regions).toEqual(expect.arrayContaining(['north_america', 'europe']));
+    expect(map.source.note).toContain('10 buyers selected from 10 profiled');
     const names = map.candidates.map(c => c.name);
     expect(new Set(names.map(n => n.toLowerCase())).size).toBe(10);
     expect(names).not.toContain('Eli Lilly and Company');
@@ -390,13 +531,38 @@ describe('buildBuyerMap deal-history supplement', () => {
     expect(calls.every(c => c.ops.every(op => !/insert|update|upsert|delete/.test(op)))).toBe(true);
   });
 
-  it('does not run the supplement when 8 or more partners are supplied', async () => {
+  it('always runs the supplement and applies the mix rule to the pooled list', async () => {
     const { client, calls } = stubSupabase({ companies: SUPPLEMENT_COMPANIES, deals: SUPPLEMENT_DEALS, counterparty_premiums: [] });
-    const many: PartnerForPDF[] = Array.from({ length: 8 }, (_, i) => ({ company_name: `Partner ${i}`, match_score: 80 - i, match_reasons: [], deals_last_12mo: 1, hq_country: null }));
+    // 14 large partners outrank every mid-sized name; the rule still seats 4 mid-sized buyers.
+    const many: PartnerInput[] = [
+      ...Array.from({ length: 14 }, (_, i) => ({ company_name: `Partner ${i}`, match_score: 95 - i, match_reasons: [], deals_last_12mo: 1, hq_country: 'US', company_type: 'large_pharma' })),
+      ...['Acadia', 'Supernus', 'Alkermes', 'Jazz', 'Harmony'].map((n, i) => ({ company_name: n, match_score: 40 - i, match_reasons: [], deals_last_12mo: 0, hq_country: i === 0 ? 'Ireland' : 'US', company_type: i === 4 ? 'specialty' : 'mid_biotech' })),
+    ];
     const map = await buildBuyerMap(client, ASSET, many, { asOf: '2026-09-24' });
-    expect(map.candidates.length).toBe(8);
-    expect(map.candidates.every(c => c.source === 'partner_match')).toBe(true);
-    expect(calls.filter(c => c.table === 'deals').length).toBe(1);
+    expect(map.candidates.length).toBe(CANDIDATE_TARGET);
+    expect(map.mix.mid).toBe(MIN_MID);
+    expect(map.mix.large).toBeGreaterThanOrEqual(MIN_LARGE);
+    expect(map.candidates.filter(c => c.sizeBucket === 'mid_biotech' || c.sizeBucket === 'specialty').map(c => c.name)).toEqual(['Acadia', 'Supernus', 'Alkermes', 'Jazz']);
+    expect(map.candidates.some(c => c.source === 'deal_history')).toBe(true);   // Biogen etc. entered the pool
+    expect(map.mix.regions).toEqual(expect.arrayContaining(['north_america', 'europe']));
+    expect(calls.filter(c => c.table === 'deals').length).toBeGreaterThanOrEqual(2);
+    // Stage exclusions come from the whole pool: Roche (min phase_2) is named even though it did not make the list.
+    expect(map.excluded.map(e => e.name)).toContain('Roche');
+    expect(map.candidates.map(c => c.name)).not.toContain('Roche');
+  });
+
+  it('lets a promoted mid-sized buyer into the lead group', async () => {
+    const { client } = stubSupabase({ companies: SUPPLEMENT_COMPANIES, deals: DEALS, counterparty_premiums: [] });
+    const partners: PartnerInput[] = [
+      { company_name: 'Big A', match_score: 90, match_reasons: [], deals_last_12mo: 0, hq_country: 'US', company_type: 'large_pharma' },
+      { company_name: 'Big B', match_score: 88, match_reasons: [], deals_last_12mo: 0, hq_country: 'US', company_type: 'large_pharma' },
+      { company_name: 'Big C', match_score: 86, match_reasons: [], deals_last_12mo: 0, hq_country: 'US', company_type: 'large_biotech' },
+      { company_name: 'Mid D', match_score: 80, match_reasons: [], deals_last_12mo: 0, hq_country: 'US', company_type: 'mid_biotech' },
+    ];
+    const map = await buildBuyerMap(client, { ...ASSET, therapeuticArea: 'dermatology', indication: 'psoriasis' }, partners, { asOf: '2026-09-24' });
+    expect(map.process.lead).toEqual(['Big A', 'Big B', 'Mid D']);
+    expect(map.process.tension[0]).toBe('Big C');
+    expect(map.process.rationale).toContain('mid-sized buyers move faster at this stage');
   });
 });
 
@@ -473,6 +639,12 @@ describe('renderBuyerMapPage', () => {
     expect(html).toContain('Buyer map');
     expect(html).toContain('Who has the fit, the urgency, and the habit of transacting at this stage?');
     expect((html.match(/Source: /g) || []).length).toBe(3);
+    expect(html).toContain('Buyer mix');
+    expect(html).toContain('3 large');
+    expect(html).toContain('0 mid-sized');
+    expect(html).toContain('Regions: N America');
+    expect(html).toContain('No mid-sized buyer with a disclosed deal');
+    expect(html).toContain('<th style="padding: 4px 5px; text-align: center; font-size: 6.5px; line-height: 1.2; vertical-align: bottom;">Size</th>');
     expect(html).toMatch(/id="bq-/);
     expect(html).toMatch(/id="loe-/);
     expect(html).toContain('AbbVie &lt;Immunology&gt;');
@@ -481,10 +653,28 @@ describe('renderBuyerMapPage', () => {
     expect(html).toContain('At Preclinical');
     expect(html).not.toMatch(/Deal Valuation Report|illustrative|sample\b/i);
   });
-  it('caps the capacity table at 10 rows', () => {
-    const many = buyerMap({ candidates: Array.from({ length: 14 }, (_, i) => candidate({ name: `Buyer ${i}` })) });
+  it('caps the capacity table at 12 rows and prints the size bucket per row', () => {
+    const many = buyerMap({ candidates: Array.from({ length: 14 }, (_, i) => candidate({ name: `Buyer ${i}`, sizeBucket: i % 3 === 0 ? 'mid_biotech' : i % 3 === 1 ? 'large_pharma' : 'unknown' })) });
     const html = renderBuyerMapPage(pdf(many), META);
-    expect((html.match(/<tr>\s*<td/g) || []).length).toBe(10);
+    expect((html.match(/<tr>\s*<td/g) || []).length).toBe(12);
+    expect((html.match(/>Mid<\/span>/g) || []).length).toBe(4);
+    expect((html.match(/>Large<\/span>/g) || []).length).toBe(4);
+  });
+  it('mix strip: counts, regions and a rationale for each composition; falls back when the map carries no mix', () => {
+    const both = renderBuyerMixStrip({ large: 6, mid: 4, unknown: 2, regions: ['north_america', 'europe', 'japan'] }, 'Preclinical');
+    expect(both).toContain('6 large');
+    expect(both).toContain('4 mid-sized');
+    expect(both).toContain('2 size undisclosed');
+    expect(both).toContain('Regions: N America, Europe, Japan');
+    expect(both).toContain('Large pharma sets the price ceiling');
+    const midOnly = renderBuyerMixStrip({ large: 0, mid: 5, unknown: 0, regions: [] }, 'Phase 1');
+    expect(midOnly).toContain('Only mid-sized buyers reached the list');
+    expect(midOnly).toContain('HQ region not disclosed');
+    expect(midOnly).not.toContain('size undisclosed');
+    const legacy = { ...buyerMap(), mix: undefined } as unknown as BuyerMap;
+    const html = renderBuyerMapPage(pdf(legacy), META);
+    expect(html).toContain('3 large');
+    expect(html).not.toMatch(/illustrative|sample\b|\bAI\b/);
   });
   it('shows an empty state when the buyer map is null', () => {
     const html = renderBuyerMapPage(pdf(null), META);
@@ -509,7 +699,19 @@ describe('renderBuyerBehaviourPage', () => {
     expect(html).toContain('Open with Eli Lilly and AbbVie.');
     expect(html).toContain('fiercebiotech.com');
     expect(html).toContain('Source: ');
+    expect(html).toContain('Large pharma · large-cap');
     expect(html).not.toMatch(/Deal Valuation Report|illustrative|\bAI\b/);
+  });
+  it('shows the size bucket next to the type on each card', () => {
+    const map = buyerMap({ candidates: [
+      candidate({ name: 'Mid Co', companyType: 'mid_biotech', sizeBucket: 'mid_biotech' }),
+      candidate({ name: 'Rev Co', companyType: null, sizeBucket: 'mid_pharma' }),
+      candidate({ name: 'Blank Co', companyType: null, sizeBucket: 'unknown' }),
+    ] });
+    const html = renderBuyerBehaviourPage(pdf(map), META);
+    expect(html).toContain('Mid biotech · mid-sized');
+    expect(html).toContain('Mid-sized (by revenue)');
+    expect(html).toContain('Size undisclosed');
   });
   it('escapes names and says so when nobody is excluded', () => {
     const html = renderBuyerBehaviourPage(pdf(buyerMap({ excluded: [] })), META);
