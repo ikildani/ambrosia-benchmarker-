@@ -85,10 +85,35 @@ export interface CompanyRow {
   data_quality_score: number | null;
   total_annual_revenue: number | null;
   deals_last_24mo: number | null;
+  /** Migration 124: canonical row this duplicate was folded into. Not in COMPANY_COLS until the column exists everywhere. */
+  merged_into?: string | null;
 }
 
 export const COMPANY_COLS =
   'id,name,name_variations,company_type,owner_type,hq_country,hq_region,ticker,cik,sec_cik,website_url,data_quality_score,total_annual_revenue,deals_last_24mo';
+
+/** Follow merged_into at most this many hops (a chain should never exist; the check is cheap). */
+const MERGE_HOPS = 4;
+
+/**
+ * If `row` was folded into another row (companies.merged_into, migration 124)
+ * return the canonical row, else null. Before the migration is applied the
+ * column does not exist; that error is treated as "not merged" so the
+ * resolver keeps working on either schema.
+ */
+export async function followMergedInto(supabase: EntityClient, row: CompanyRow): Promise<CompanyRow | null> {
+  let current = row;
+  for (let hop = 0; hop < MERGE_HOPS; hop++) {
+    const { data, error } = await supabase.from('companies').select('merged_into').eq('id', current.id).maybeSingle();
+    if (error || !data) return hop === 0 ? null : current;
+    const target = (data as { merged_into?: string | null }).merged_into;
+    if (!target || target === current.id) return hop === 0 ? null : current;
+    const { data: next, error: nextErr } = await supabase.from('companies').select(COMPANY_COLS).eq('id', target).maybeSingle();
+    if (nextErr || !next) return hop === 0 ? null : current;
+    current = next as CompanyRow;
+  }
+  return current;
+}
 
 /**
  * How populated a companies row is; the highest wins among duplicates.
@@ -107,10 +132,15 @@ export function companyPopulationScore(r: Pick<CompanyRow, 'data_quality_score' 
   );
 }
 
-/** Pick the best-populated row; the rest are duplicates. Pure; exported for tests. */
+/**
+ * Pick the best-populated row; the rest are duplicates. Rows already folded
+ * (merged_into set, when the column was selected) never win. Pure; exported for tests.
+ */
 export function pickBestCompany<T extends CompanyRow>(rows: readonly T[]): { best: T; duplicates: T[] } | null {
   if (!rows.length) return null;
-  const sorted = [...rows].sort((a, b) => companyPopulationScore(b) - companyPopulationScore(a) || a.id.localeCompare(b.id));
+  const sorted = [...rows].sort(
+    (a, b) => Number(!!a.merged_into) - Number(!!b.merged_into) || companyPopulationScore(b) - companyPopulationScore(a) || a.id.localeCompare(b.id),
+  );
   return { best: sorted[0], duplicates: sorted.slice(1) };
 }
 
@@ -213,6 +243,12 @@ export async function resolveCompany(supabase: EntityClient, q: CompanyQuery): P
     if (error) throw new Error(`companies id lookup failed: ${error.message}`);
     if (!data) return { match: null, candidates: [] };
     const row = data as CompanyRow;
+    // A folded duplicate keeps resolving: report the canonical row, matchedOn 'merged'.
+    const canonical = await followMergedInto(supabase, row);
+    if (canonical) {
+      const dups = await duplicatesOf(supabase, canonical);
+      return { match: companyRef(canonical, dups, 'merged', CONFIDENCE_ID), candidates: [] };
+    }
     const dups = await duplicatesOf(supabase, row);
     return { match: companyRef(row, dups, 'id', CONFIDENCE_ID), candidates: [] };
   }

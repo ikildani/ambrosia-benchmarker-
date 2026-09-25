@@ -12,7 +12,8 @@
 
 export type EntityKind = 'company' | 'asset' | 'deal';
 
-export type MatchedOn = 'id' | 'exact' | 'alias' | 'fuzzy';
+/** 'merged': the id given was a duplicate row folded into the canonical one returned (companies.merged_into). */
+export type MatchedOn = 'id' | 'exact' | 'alias' | 'fuzzy' | 'merged';
 
 export interface CompanyMeta {
   companyType: string | null;
