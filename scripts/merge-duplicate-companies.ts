@@ -149,7 +149,7 @@ async function countReferences(supabase: Client, ids: readonly string[]): Promis
       for (let attempt = 1; attempt <= 4; attempt++) {
         const res = await qb.range(from, from + PAGE - 1);
         data = res.data as unknown[] | null; error = res.error;
-        if (!error || !/timeout|canceling statement/i.test(error.message) || attempt === 4) break;
+        if (!error || attempt === 4) break; // retry any transient failure (timeouts, gateway 52x pages, network)
         await new Promise(r => setTimeout(r, 1500 * attempt));
       }
       if (error) throw Object.assign(new Error(`${columnKey(col)} count failed: ${error.message}`), { timeout: /timeout|canceling statement/i.test(error.message) });

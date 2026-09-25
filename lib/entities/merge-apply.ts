@@ -154,7 +154,7 @@ export async function repointColumn(client: EntityClient, col: ReferencingColumn
         if (!res.error) { lastError = null; break; }
         lastError = res.error;
         if (isUniqueViolation(res.error)) break;
-        if (!/timeout|canceling statement|fetch failed|ECONNRESET|ETIMEDOUT|socket hang up|network/i.test(res.error.message)) throw new Error(`${columnKey(col)} update failed: ${res.error.message}`);
+        if (!/timeout|canceling statement|fetch failed|ECONNRESET|ETIMEDOUT|socket hang up|network|Unexpected token|<!DOCTYPE|JSON|52[0-9]/i.test(res.error.message)) throw new Error(`${columnKey(col)} update failed: ${res.error.message}`);
         attempt++;
         await new Promise(r => setTimeout(r, 1500 * attempt));
       }
