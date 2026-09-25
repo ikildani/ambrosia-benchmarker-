@@ -25,13 +25,27 @@ export const EFTS_PAGE_SIZE = 100;
  * Ordered by yield on a Q1 2019 probe (264 / 114 / 111 filings).
  */
 export const PHARMA_DEAL_QUERIES: ReadonlyArray<{ key: string; q: string }> = [
+  // Licensing (any stage)
   { key: 'license_terms', q: '"license agreement" (pharmaceutical OR biotechnology OR therapeutic) (upfront OR milestone OR royalt*)' },
   { key: 'exclusive_license', q: '"exclusive license" (pharmaceutical OR therapeutic OR clinical) (upfront OR milestone)' },
+  { key: 'collaboration_license', q: '"collaboration and license agreement" (upfront OR milestone OR royalt*)' },
+  // Research collaboration (discovery / preclinical)
   { key: 'collaboration_upfront', q: '"collaboration" "upfront" (pharmaceutical OR therapeutic OR biotechnology)' },
+  { key: 'research_collaboration', q: '"research collaboration" (upfront OR milestone OR "research funding") (pharmaceutical OR therapeutic OR biotechnology OR antibod* OR "drug candidate")' },
+  { key: 'discovery_collaboration', q: '("discovery collaboration" OR "research and development collaboration" OR "platform collaboration") (upfront OR milestone) (therapeutic OR pharmaceutical OR target*)' },
+  // Option agreements
   { key: 'option_agreement', q: '"option agreement" (pharmaceutical OR therapeutic OR biotechnology) (exercise OR milestone)' },
+  { key: 'option_to_license', q: '("option to license" OR "exclusive option" OR "option fee") (pharmaceutical OR therapeutic OR biotechnology OR clinical) (upfront OR milestone OR exercise)' },
+  // Co-development / co-promotion
   { key: 'co_development', q: '"co-development" (pharmaceutical OR therapeutic) (upfront OR "cost sharing" OR "profit share")' },
+  { key: 'profit_share', q: '("profit share" OR "profit sharing" OR "co-promotion agreement" OR "co-commercialization") (pharmaceutical OR therapeutic OR clinical) (upfront OR milestone OR royalt*)' },
+  // Acquisitions (asset and company)
   { key: 'asset_purchase', q: '"asset purchase agreement" (pharmaceutical OR therapeutic OR clinical) (upfront OR milestone)' },
+  { key: 'merger_biopharma', q: '("merger agreement" OR "agreement and plan of merger" OR "share purchase agreement") (biopharmaceutical OR biotechnology OR "clinical-stage" OR "drug candidate") ("per share" OR "contingent value right" OR milestone OR "purchase price")' },
+  // Approved-stage: commercialization, distribution, supply, reformulation / 505(b)(2)
   { key: 'commercialization', q: '"commercialization agreement" (pharmaceutical OR therapeutic) (royalt* OR milestone)' },
+  { key: 'distribution_supply', q: '("distribution agreement" OR "supply agreement" OR "supply and distribution agreement") (pharmaceutical OR "drug product" OR therapeutic) (royalt* OR milestone OR "minimum purchase" OR upfront)' },
+  { key: 'reformulation_505b2', q: '("505(b)(2)" OR reformulat* OR "extended-release formulation" OR "new formulation") (license OR agreement OR acqui*) (upfront OR milestone OR royalt*)' },
 ];
 
 export interface EftsHit {

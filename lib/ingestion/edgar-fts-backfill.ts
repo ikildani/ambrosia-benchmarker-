@@ -35,7 +35,12 @@ import { mapWithConcurrency } from './concurrency';
 export const PROCESSED_TABLE = 'edgar_fts_processed';
 
 export const BACKFILL_CURSOR_SOURCE = 'edgar_fts_backfill';
-export const BACKFILL_FROM_YEAR = 2017;
+/**
+ * Sep 25 2026: 2010, was 2017. The cursor keeps walking forward from wherever it
+ * is; when it passes the current quarter it wraps to the earliest quarter not
+ * yet in completedQuarters, so the 2010–2016 range is walked after 2017→present.
+ */
+export const BACKFILL_FROM_YEAR = 2010;
 
 export interface BackfillCursorState extends Record<string, unknown> {
   quarterKey: string;
@@ -100,7 +105,7 @@ export type CursorStep = 'stay' | 'next_page' | 'next_query';
  * Before Sep 24 2026 a cap hit advanced the page and silently dropped the
  * unextracted remainder.
  */
-function advance(state: BackfillCursorState, quarters: ReturnType<typeof quartersSince>, step: CursorStep): BackfillCursorState {
+export function advance(state: BackfillCursorState, quarters: ReturnType<typeof quartersSince>, step: CursorStep): BackfillCursorState {
   const next: BackfillCursorState = { ...state, completedQuarters: [...state.completedQuarters], retries: 0 };
   if (step === 'stay') { next.retries = (state.retries ?? 0) + 1; return next; }
   if (step === 'next_page') { next.from += EFTS_PAGE_SIZE; return next; }
@@ -109,10 +114,18 @@ function advance(state: BackfillCursorState, quarters: ReturnType<typeof quarter
   if (next.queryIndex >= PHARMA_DEAL_QUERIES.length) {
     next.queryIndex = 0;
     if (!next.completedQuarters.includes(state.quarterKey)) next.completedQuarters.push(state.quarterKey);
+    // Forward to the next quarter; past the present, wrap to the earliest quarter still open.
     const idx = quarters.findIndex(q => q.key === state.quarterKey);
-    next.quarterKey = idx >= 0 && idx + 1 < quarters.length ? quarters[idx + 1].key : state.quarterKey;
+    const forward = idx >= 0 ? quarters.slice(idx + 1).find(q => !next.completedQuarters.includes(q.key)) : undefined;
+    const wrapped = forward ?? quarters.find(q => !next.completedQuarters.includes(q.key));
+    next.quarterKey = wrapped ? wrapped.key : state.quarterKey;
   }
   return next;
+}
+
+/** Every quarter in range has been fully walked. */
+export function allQuartersDone(state: BackfillCursorState, quarters: ReturnType<typeof quartersSince>): boolean {
+  return quarters.every(q => state.completedQuarters.includes(q.key));
 }
 
 export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: BackfillOptions): Promise<BackfillResult> {
@@ -158,8 +171,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   const MAX_PAGE_RETRIES = 2;
   const MIN_PAGE_BUDGET_MS = 40_000; // do not open a new page with less than this left
 
-  const isFinished = (st: BackfillCursorState) =>
-    st.quarterKey === quarters[quarters.length - 1].key && st.completedQuarters.includes(st.quarterKey);
+  const isFinished = (st: BackfillCursorState) => allQuartersDone(st, quarters);
 
   let cur: BackfillCursorState = { ...state };
   const startKey = { quarterKey: cur.quarterKey, queryIndex: cur.queryIndex };
