@@ -2,7 +2,7 @@
 
 The QA gate answers one question with numbers: *is this data trustworthy enough to show a pharma deal committee?* It runs before every launch and weekly afterwards, and it has two halves:
 
-1. **Automated invariants** over the whole universe (`lib/radar/qa/invariants.ts`, RPCs in migration 119).
+1. **Automated invariants** over the whole universe (`lib/radar/qa/invariants.ts`, RPCs in migration 124).
 2. **A stratified 200-asset golden set** with a model-vs-model agreement check now (`claude-opus-4-6`) and a human review sheet for later (`lib/radar/qa/golden-set.ts`).
 
 Every run writes a `radar_qa_runs` row (`kind` = `invariants` | `golden_agreement` | `golden_human`) and one `radar_qa_findings` row per failed check or disagreement. `GET /api/radar/qa` (admin) and `npx tsx scripts/radar-qa-report.ts` render the latest report.
@@ -66,7 +66,7 @@ All thresholds live in `QA_THRESHOLDS` (`lib/radar/qa/invariants.ts`). Counts co
 Schedule: **weekly** (proposed `vercel.json` entry `{"path": "/api/cron/radar-qa", "schedule": "0 6 * * 1"}`, Monday 06:00 UTC after the overnight Radar crons) plus **on demand** before every launch. Blockers post to Slack (`SLACK_WEBHOOK_URL`).
 
 ```
-# 1. Apply migration 119, then the invariants (writes a run + findings; Slack on blockers)
+# 1. Apply migration 124, then the invariants (writes a run + findings; Slack on blockers)
 curl -H "Authorization: Bearer $CRON_SECRET" "$HOST/api/cron/radar-qa?mode=invariants"
 npx tsx scripts/radar-qa-report.ts --invariants          # same from a terminal, --dry to skip writes
 

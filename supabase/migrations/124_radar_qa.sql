@@ -1,4 +1,4 @@
--- 119_radar_qa.sql
+-- 124_radar_qa.sql (was 119; renumbered after main took 119-123)
 --
 -- Asset Radar golden-set QA harness (docs/asset-radar-qa.md).
 --
