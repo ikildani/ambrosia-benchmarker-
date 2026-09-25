@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { getLiveDealStats } from '@/lib/deal-stats';
 import { ENGINE_VERSION } from '@/lib/financial/calculation-version';
 import { staticBenchmarks } from '@/lib/benchmarks';
 import { recencyWeight } from '@/lib/financial/calibration';
@@ -43,7 +44,8 @@ const SCENARIO_STAGES: { label: string; phases: string; phase: RNPVInput['phase'
 
 const pctLabel = (x: number) => `${Math.round(x * 100)}%`;
 
-export default function MethodologyPage() {
+export default async function MethodologyPage() {
+  const stats = await getLiveDealStats();
   const scenarioTable = SCENARIO_STAGES.map(s => ({ ...s, weights: scenarioWeightsForPhase(s.phase) }));
   const w24 = recencyWeight(2024, 2026); // weight of a deal signed 24 months before the reference year
   const w60 = recencyWeight(2021, 2026);
@@ -80,7 +82,7 @@ export default function MethodologyPage() {
             Methodology
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl">
-            Our benchmarks are calibrated against {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
+            Our benchmarks are calibrated against {stats.totalDealsDisplay} verified biopharma transactions sourced from regulatory filings, public disclosures, and proprietary intelligence. Here&apos;s how we turn raw data into actionable deal intelligence.
           </p>
           <div className="mt-5 inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300">
             <span>Engine <span className="font-mono text-slate-900 dark:text-white">v{ENGINE_VERSION}</span></span>
@@ -114,14 +116,14 @@ export default function MethodologyPage() {
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white !mt-0 !mb-0">Data Foundation</h2>
             </div>
             <p className="text-slate-600 dark:text-slate-300">
-              Every benchmark in our platform is grounded in real, publicly disclosed transactions. Our database encompasses {DEAL_STATS.TOTAL_DEALS} biopharma deals spanning 2017 through 2026, covering 12 therapeutic areas, 5 deal structures, and 15+ modalities.
+              Every benchmark in our platform is grounded in real, publicly disclosed transactions. Our database encompasses {stats.totalDealsDisplay} biopharma deals spanning {stats.earliestYear} through {stats.latestYear}, covering {stats.therapeuticAreas} therapeutic areas, licensors in {stats.licensorCountries} countries, 5 deal structures, and 15+ modalities. Counts refresh from the live corpus every 15 minutes.
             </p>
             <div className="grid sm:grid-cols-2 gap-4 not-prose mt-6">
               {[
-                { label: 'Verified Transactions', value: DEAL_STATS.TOTAL_DEALS, sub: 'Licensing, acquisitions, collaborations, options, co-development' },
+                { label: 'Verified Transactions', value: stats.totalDealsDisplay, sub: stats.fallback ? 'Licensing, acquisitions, collaborations, options, co-development' : `${stats.verifiedDeals.toLocaleString()} verifier-confirmed · ${stats.citedDeals.toLocaleString()} with a primary-source citation` },
                 { label: 'Company Profiles', value: DEAL_STATS.TOTAL_COMPANIES, sub: 'Pharma, biotech, and specialty companies tracked' },
-                { label: 'Therapeutic Areas', value: '12', sub: 'Oncology through rare disease and women\'s health' },
-                { label: 'Data Sources', value: '10+', sub: 'Regulatory filings, press wires, agency databases' },
+                { label: 'Therapeutic Areas', value: String(stats.therapeuticAreas), sub: 'Oncology through rare disease and women\'s health' },
+                { label: 'Primary Sources', value: `${stats.sourceTypes}`, sub: 'SEC EDGAR, HKEX, TDnet, ASX, SSE/SZSE, MFN, press wires, agency databases' },
               ].map(s => (
                 <div key={s.label} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
                   <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{s.value}</div>

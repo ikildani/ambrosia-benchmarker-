@@ -22,12 +22,13 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
+import { getLiveDealStats } from '@/lib/deal-stats';
 
 export const maxDuration = 60;
 
 // ── Deals table schema for Claude's SQL generation ──────────────────────
-const DEALS_SCHEMA = `
-Table: deals (${formatDealCount(LIVE_DEAL_COUNT)} verified biopharma deals)
+const dealsSchema = (countDisplay: string) => `
+Table: deals (${countDisplay} verified biopharma deals)
 
 Columns:
   id                        UUID PRIMARY KEY
@@ -83,11 +84,11 @@ IMPORTANT NOTES:
 `;
 
 // ── SQL parsing prompt ──────────────────────────────────────────────────
-function buildSQLPrompt(question: string): string {
+function buildSQLPrompt(question: string, countDisplay: string = formatDealCount(LIVE_DEAL_COUNT)): string {
   return `You are a senior biopharma BD analyst at Ambrosia Ventures with 15+ years of deal experience. You have access to one of the most comprehensive proprietary databases of biopharma licensing, acquisition, and collaboration deals in the industry.
 
 SCHEMA:
-${DEALS_SCHEMA}
+${dealsSchema(countDisplay)}
 
 USER QUESTION: "${question}"
 
@@ -184,12 +185,12 @@ Respond with ONLY a JSON object (no markdown, no backticks):
 }
 
 // ── Answer synthesis prompt ─────────────────────────────────────────────
-function buildAnswerPrompt(question: string, data: Record<string, unknown>[], queryType: string, contextData?: Record<string, unknown>[]): string {
+function buildAnswerPrompt(question: string, data: Record<string, unknown>[], queryType: string, contextData?: Record<string, unknown>[], countDisplay: string = formatDealCount(LIVE_DEAL_COUNT)): string {
   const dataStr = JSON.stringify(data.slice(0, 30), null, 2);
   const totalResults = data.length;
   const contextStr = contextData && contextData.length > 0 ? JSON.stringify(contextData.slice(0, 15), null, 2) : null;
 
-  return `You are a senior biopharma BD analyst at Ambrosia Ventures — an elite life sciences advisory firm. You have just queried a proprietary database of ${formatDealCount(LIVE_DEAL_COUNT)} verified deals. Provide an answer that demonstrates deep market intelligence.
+  return `You are a senior biopharma BD analyst at Ambrosia Ventures — an elite life sciences advisory firm. You have just queried a proprietary database of ${countDisplay} verified deals. Provide an answer that demonstrates deep market intelligence.
 
 USER QUESTION: "${question}"
 
@@ -386,6 +387,7 @@ function generateFollowUps(question: string, queryType: string, resultCount: num
 
 // ── Main handler ────────────────────────────────────────────────────────
 export async function POST(request: NextRequest): Promise<Response> {
+  const liveCount = (await getLiveDealStats()).totalDealsDisplay;
   const startTime = Date.now();
 
   try {
@@ -459,7 +461,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const sqlResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
-      messages: [{ role: 'user', content: buildSQLPrompt(question) }],
+      messages: [{ role: 'user', content: buildSQLPrompt(question, liveCount) }],
     });
 
     const sqlText = sqlResponse.content[0].type === 'text' ? sqlResponse.content[0].text : '';
@@ -515,7 +517,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const answerResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2048,
-      messages: [{ role: 'user', content: buildAnswerPrompt(question, queryData, parsedSQL.query_type, contextData) }],
+      messages: [{ role: 'user', content: buildAnswerPrompt(question, queryData, parsedSQL.query_type, contextData, liveCount) }],
     });
 
     const answer = answerResponse.content[0].type === 'text' ? answerResponse.content[0].text : '';

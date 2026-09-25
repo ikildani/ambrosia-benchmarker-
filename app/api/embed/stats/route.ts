@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LIVE_DEAL_COUNT } from '@/lib/config/constants';
+import { getLiveDealStats } from '@/lib/deal-stats';
 
 // Embeddable stats widget - generates backlinks when sites embed it
 export async function GET(request: NextRequest) {
@@ -7,17 +7,18 @@ export async function GET(request: NextRequest) {
   const format = searchParams.get('format') || 'json';
   const theme = searchParams.get('theme') || 'light';
 
-  // Live stats from benchmark data
+  // Live stats from the corpus (cached 15 minutes)
+  const live = await getLiveDealStats();
   const stats = {
-    total_deals: LIVE_DEAL_COUNT,
-    therapeutic_areas: 12,
+    total_deals: live.totalDeals,
+    therapeutic_areas: live.therapeuticAreas,
     company_profiles: 850,
     avg_upfront_oncology_phase2: 95,
     avg_upfront_immunology_phase2: 120,
     avg_upfront_metabolic_phase2: 150,
     adc_premium: '1.50x',
     modalities_covered: 25,
-    last_updated: '2026-03',
+    last_updated: (live.lastAddedAt ?? new Date().toISOString()).slice(0, 10),
     source: 'Ambrosia Ventures',
     source_url: 'https://solidus.ambrosiaventures.co',
   };

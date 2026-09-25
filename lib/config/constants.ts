@@ -78,7 +78,10 @@ export function formatDealCount(count: number): string {
 // Updated daily by /api/cron/daily-stats via GitHub API
 // 2026-06-29: Full cleanup — deleted rejected/synthetic/pre-2017/dupes, added landmark deals
 // Deal count reflects only verified + pending real deals with disclosed terms.
-export const LIVE_DEAL_COUNT = 1490;
+// 2026-09-25: set by hand to the cron's own definition (1,667) — the GITHUB_TOKEN behind the
+// auto-updater died on 2026-09-16, so the site showed 1,400+ against 1,900+ real rows. Server
+// pages now read lib/deal-stats.ts; this constant is the fallback and the client-side copy.
+export const LIVE_DEAL_COUNT = 1667;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
