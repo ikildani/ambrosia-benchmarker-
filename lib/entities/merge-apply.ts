@@ -103,6 +103,9 @@ async function pageRows(client: EntityClient, table: string, select: string, fil
  * unique-index violation fall back to one UPDATE per row so the movable rows
  * move and the colliding ones are counted, never deleted.
  */
+/** Rows per UPDATE statement when re-pointing a column. */
+export const REPOINT_CHUNK = 150;
+
 export async function repointColumn(client: EntityClient, col: ReferencingColumn, mergedId: string, canonicalId: string): Promise<ColumnRepointResult> {
   const select = col.pk.join(',');
   if (col.kind === 'uuid[]') {
@@ -124,19 +127,41 @@ export async function repointColumn(client: EntityClient, col: ReferencingColumn
   if (!rows.length) return { count: 0, ids: [], idsTruncated: false, conflicts: 0 };
   const allIds = rows.map(r => pkOf(r, col.pk));
 
-  const batch = await client.from(col.table).update({ [col.column]: canonicalId }).eq(col.column, mergedId);
-  if (!batch.error) return { count: rows.length, ids: allIds.slice(0, REPOINTED_IDS_CAP), idsTruncated: allIds.length > REPOINTED_IDS_CAP, conflicts: 0 };
-  if (!isUniqueViolation(batch.error)) throw new Error(`${columnKey(col)} update failed: ${batch.error.message}`);
-
+  // Update in chunks keyed by primary key. One statement over thousands of rows
+  // on a table with per-row triggers (clinical_assets history, updated_at)
+  // exceeds the statement timeout while the ingestion crons hold locks; ~150
+  // rows per statement finishes well inside it. A chunk that hits a unique
+  // violation falls back to per-row updates so conflicts are counted, not fatal.
   const moved: string[] = [];
   let conflicts = 0;
-  for (const r of rows) {
+  const singlePk = col.pk.length === 1 ? col.pk[0] : null;
+  const perRow = async (r: Record<string, unknown>) => {
     let qb = client.from(col.table).update({ [col.column]: canonicalId });
     for (const k of col.pk) qb = qb.eq(k, r[k]);
     const { error } = await qb;
     if (!error) moved.push(pkOf(r, col.pk));
     else if (isUniqueViolation(error)) conflicts++;
     else throw new Error(`${columnKey(col)} row update failed: ${error.message}`);
+  };
+  for (let i = 0; i < rows.length; i += REPOINT_CHUNK) {
+    const chunk = rows.slice(i, i + REPOINT_CHUNK);
+    if (singlePk) {
+      const keys = chunk.map(r => r[singlePk] as string);
+      let attempt = 0;
+      let lastError: { message: string } | null = null;
+      while (attempt < 3) {
+        const res = await client.from(col.table).update({ [col.column]: canonicalId }).eq(col.column, mergedId).in(singlePk, keys);
+        if (!res.error) { lastError = null; break; }
+        lastError = res.error;
+        if (isUniqueViolation(res.error)) break;
+        if (!/timeout|canceling statement/i.test(res.error.message)) throw new Error(`${columnKey(col)} update failed: ${res.error.message}`);
+        attempt++;
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+      }
+      if (!lastError) { moved.push(...chunk.map(r => pkOf(r, col.pk))); continue; }
+      if (!isUniqueViolation(lastError)) throw new Error(`${columnKey(col)} update failed after retries: ${lastError.message}`);
+    }
+    for (const r of chunk) await perRow(r);
   }
   return { count: moved.length, ids: moved.slice(0, REPOINTED_IDS_CAP), idsTruncated: moved.length > REPOINTED_IDS_CAP, conflicts };
 }
