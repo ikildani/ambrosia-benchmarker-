@@ -174,7 +174,11 @@ interface VerificationResult {
   reason: string;
   corrected_value?: number;
   corrected_date?: string;
+  /** True when the web evidence shows the database has licensor and licensee swapped. */
+  roles_reversed?: boolean;
 }
+
+const BACKTEST_SAMPLE = 3;
 
 export async function verifyPendingDeals(
   supabase: SupabaseClient,
@@ -197,16 +201,21 @@ export async function verifyPendingDeals(
   flagged: number;
   unchanged: number;
   sourceUrlsAdded: number;
+  /** Previously flagged rows promoted to verified on re-adjudication. */
+  reverified: number;
+  /** Backtest sample rows whose verified verdict no longer held. */
+  regressions: number;
+  rolesSwapped: number;
   errors: string[];
 }> {
-  const maxDeals = options?.maxDeals ?? 20;
+  const maxDeals = options?.maxDeals ?? 30;
   const timeBudgetMs = options?.timeBudgetMs ?? 250_000;
   const startTime = Date.now();
   const priorityTAs = options?.priorityTAs || [];
   const sourceBackfillSlots = options?.sourceBackfillSlots ?? 0;
 
-  const result = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, errors: [] as string[] };
-  const DEAL_COLUMNS = 'id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, press_release_url, raw_text_excerpt, verification_notes, confidence_score';
+  const result = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, reverified: 0, regressions: 0, rolesSwapped: 0, errors: [] as string[] };
+  const DEAL_COLUMNS = 'id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, press_release_url, raw_text_excerpt, verification_notes, confidence_score, verification_status';
 
   // 1. Query pending deals — prioritize discovery-stage deals (only 9%
   // verified vs 29% for preclinical) then highest value. The two-pass
@@ -233,6 +242,39 @@ export async function verifyPendingDeals(
     ...(discoveryDeals || []),
     ...(remainingDeals || []).filter(d => !discoveryIds.has(d.id)),
   ].slice(0, maxDeals);
+
+  // Sep 25 2026 — two more queues behind pending:
+  //  (a) re-adjudication: 'flagged' rows not touched in 7 days. 1,162 of 1,904 rows were flagged,
+  //      mostly for one-day date gaps under the old strict rule; they never got a second look.
+  //  (b) backtest: a few 'verified' rows older than 30 days are re-checked every run. A verdict
+  //      that no longer holds is downgraded to 'flagged' with a BACKTEST note and counted as a
+  //      regression, so verifier drift shows up in the log instead of in the product.
+  const reverifySlots = Math.max(0, maxDeals - deals.length);
+  const backtestIds = new Set<string>();
+  if (reverifySlots > 0) {
+    const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const { data: flaggedDeals } = await supabase
+      .from('deals')
+      .select(DEAL_COLUMNS)
+      .eq('verification_status', 'flagged')
+      .or('is_synthetic.is.null,is_synthetic.eq.false')
+      .lt('updated_at', weekAgo)
+      .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
+      .limit(reverifySlots);
+    for (const d of flaggedDeals || []) if (!deals.some(x => x.id === d.id)) deals.push(d);
+  }
+  {
+    const monthAgo = new Date(Date.now() - 30 * 86_400_000).toISOString();
+    const { data: sample } = await supabase
+      .from('deals')
+      .select(DEAL_COLUMNS)
+      .eq('verification_status', 'verified')
+      .or('is_synthetic.is.null,is_synthetic.eq.false')
+      .lt('updated_at', monthAgo)
+      .order('updated_at', { ascending: true })
+      .limit(BACKTEST_SAMPLE);
+    for (const d of sample || []) if (!deals.some(x => x.id === d.id)) { backtestIds.add(d.id); deals.push(d); }
+  }
 
   // Source-URL backfill pass: already-verified deals with no link. They are
   // appended after the pending queue so they only consume leftover budget,
@@ -358,7 +400,7 @@ Database record: ${JSON.stringify(dealRecord)}
 
 Web search results: ${perplexityText.substring(0, 4000)}
 
-Respond with JSON: { "status": "verified" | "flagged" | "rejected", "confidence": number (0-100), "reason": string, "corrected_value": number | null, "corrected_date": string | null }
+Respond with JSON: { "status": "verified" | "flagged" | "rejected", "confidence": number (0-100), "reason": string, "corrected_value": number | null, "corrected_date": string | null, "roles_reversed": boolean }
 
 Rules:
 - "verified": The deal exists and key facts (companies, approximate value, date) match.
@@ -366,6 +408,7 @@ Rules:
 - "rejected": No evidence this deal exists or it appears fabricated.
 - A date difference of 7 days or less is NOT a discrepancy: SEC and exchange filings post a day or more after the press announcement. Return "verified" and put the announcement date in corrected_date.
 - Missing or differently-worded indication text is NOT a discrepancy when companies, asset and value match.
+- roles_reversed: true ONLY if the web evidence clearly shows the database has the parties backwards (the DB licensor is actually the buyer/licensee). The licensor is the party granting rights or being acquired; the licensee is the party paying. In that case the deal still exists: return "verified" (or "flagged" if other facts are off) with roles_reversed true.
 - corrected_value: If the total deal value in the DB is wrong, provide the correct value in USD. Otherwise null.
 - corrected_date: If the announced date is wrong (including a small filing-lag difference), provide the correct date as YYYY-MM-DD. Otherwise null.`,
         }],
@@ -446,8 +489,37 @@ Rules:
       };
       if (sourcePatch.source_url) result.sourceUrlsAdded++;
 
+      const isBacktest = backtestIds.has(deal.id);
+      const wasFlagged = deal.verification_status === 'flagged';
+
+      // Role swap: only on a confident verdict, and swap every party-bound column together.
+      if (verification.roles_reversed === true && (verification.confidence ?? 0) >= 80 && verification.status !== 'rejected') {
+        const { data: full } = await supabase.from('deals')
+          .select('licensor_name, licensee_name, licensor_id, licensee_id, licensor_country, licensee_country, licensor_region, licensee_region')
+          .eq('id', deal.id).maybeSingle();
+        if (full) {
+          Object.assign(updates, {
+            licensor_name: full.licensee_name, licensee_name: full.licensor_name,
+            licensor_id: full.licensee_id, licensee_id: full.licensor_id,
+            licensor_country: full.licensee_country, licensee_country: full.licensor_country,
+            licensor_region: full.licensee_region, licensee_region: full.licensor_region,
+            verification_notes: appendVerificationNote(String(updates.verification_notes ?? ''), 'ROLES SWAPPED by verifier: parties were reversed'),
+          });
+          result.rolesSwapped++;
+        }
+      }
+
+      if (isBacktest && verification.status !== 'verified') {
+        // A verified verdict that no longer holds: downgrade to flagged, never straight to rejected.
+        updates.verification_status = 'flagged';
+        updates.verified = false;
+        updates.verification_notes = appendVerificationNote(String(updates.verification_notes ?? ''), `BACKTEST ${new Date().toISOString().slice(0, 10)}: previously verified, now ${verification.status}`);
+        result.regressions++;
+      }
+
       if (verification.status === 'verified') {
         updates.verified = true;
+        if (wasFlagged) result.reverified++;
 
         // 2h. Apply corrections if verified with corrected values
         if (verification.corrected_value && verification.corrected_value > 0) {

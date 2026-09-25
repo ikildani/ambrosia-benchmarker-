@@ -24,8 +24,27 @@ const CITED = 'source_url.not.is.null,press_release_url.not.is.null,source_filin
 
 export interface CoverageRow { year: number; total: number; cited: number; verified: number }
 
+export interface QualityReport {
+  /** Verifier, last 24h. */
+  verified: number;
+  flagged: number;
+  reverified: number;
+  regressions: number;
+  rolesSwapped: number;
+  /** Inserts refused as likely duplicates across every pipeline, last 24h (funnel insert_duplicate + duplicate_same_day). */
+  duplicatesBlocked: number;
+  /** Rows superseded by the dedupe pass, last 24h. */
+  superseded: number;
+  /** Corpus totals right now. */
+  realRows: number;
+  verifiedRows: number;
+  citedRows: number;
+  pendingRows: number;
+}
+
 export interface InflowReport {
   severity: 'ok' | 'low' | 'zero';
+  quality: QualityReport;
   last24h: number;
   floor7d: number;
   avg7d: number;
@@ -61,7 +80,35 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
   const zeroFetchSources = [...SOURCES_EXPECTING_RECORDS].filter(s => s in fetchedBySource && fetchedBySource[s] === 0);
 
   const severity: 'ok' | 'low' | 'zero' = count24h === 0 ? 'zero' : count24h < floor7d ? 'low' : 'ok';
-  await notifyDealInflow({ last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, severity });
+
+  // Quality, last 24h: verifier counters and duplicate refusals from the run log, plus corpus totals.
+  const quality: QualityReport = { verified: 0, flagged: 0, reverified: 0, regressions: 0, rolesSwapped: 0, duplicatesBlocked: 0, superseded: 0, realRows: 0, verifiedRows: 0, citedRows: 0, pendingRows: 0 };
+  try {
+    const { data: vruns } = await supabase.from('data_ingestion_log').select('records_inserted, records_processed, parameters').eq('source', 'deal_verification').gte('started_at', dayAgo);
+    for (const r of vruns ?? []) {
+      const p = (r.parameters ?? {}) as Record<string, number>;
+      quality.verified += r.records_inserted ?? 0;
+      quality.flagged += Math.max(0, (r.records_processed ?? 0) - (r.records_inserted ?? 0));
+      quality.reverified += p.reverified ?? 0;
+      quality.regressions += p.regressions ?? 0;
+      quality.rolesSwapped += p.rolesSwapped ?? 0;
+    }
+    const { data: allRuns } = await supabase.from('data_ingestion_log').select('parameters').gte('started_at', dayAgo).not('parameters->funnel', 'is', null);
+    for (const r of allRuns ?? []) {
+      const stages = ((r.parameters as Record<string, unknown>)?.funnel as { stages?: Record<string, number> } | undefined)?.stages ?? {};
+      quality.duplicatesBlocked += (stages.insert_duplicate ?? 0) + (stages.duplicate_same_day ?? 0);
+    }
+    const [sup, real, ver, cited, pend] = await Promise.all([
+      supabase.from('deals').select('*', { count: 'exact', head: true }).not('duplicate_of', 'is', null).gte('updated_at', dayAgo),
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false),
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'verified'),
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or(CITED),
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'pending'),
+    ]);
+    quality.superseded = sup.count ?? 0; quality.realRows = real.count ?? 0; quality.verifiedRows = ver.count ?? 0; quality.citedRows = cited.count ?? 0; quality.pendingRows = pend.count ?? 0;
+  } catch (e) { console.error('[inflow-check] quality block failed (non-fatal):', e); }
+
+  await notifyDealInflow({ last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, severity, quality });
 
   let coverage: CoverageRow[] | null = null;
   if (now.getUTCDay() === 0) {
@@ -86,9 +133,9 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
 
   await logCronRun(supabase, 'deal_inflow_check', {
     fetched: count24h, processed: 0, inserted: 0, expectRecords: false,
-    parameters: { severity, floor7d, avg7d, bySource24h, zeroFetchSources, coverage },
+    parameters: { severity, floor7d, avg7d, bySource24h, zeroFetchSources, coverage, quality },
     notes: severity === 'ok' ? undefined : `inflow ${severity}: ${count24h} cited rows in 24h`,
   });
 
-  return { severity, last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, coverage };
+  return { severity, quality, last24h: count24h, floor7d, avg7d, bySource24h, zeroFetchSources, coverage };
 }

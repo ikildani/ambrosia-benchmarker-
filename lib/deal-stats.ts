@@ -8,9 +8,10 @@
  * now read this; LIVE_DEAL_COUNT stays only as the fallback and for client
  * components that cannot query.
  *
- * The count definition matches /api/cron/daily-stats and /api/deals/stats:
- * real rows (is_synthetic = false), therapeutic_area not 'other' and not an
- * internal rotation label ('_mega_deals' etc.).
+ * Count definition (Issa, Sep 25 2026): every real row (is_synthetic = false).
+ * The old rule also dropped rows whose therapeutic area is 'other'; that predated
+ * the cleanup that quarantined fabricated rows and hid ~140 real, cited deals.
+ * Verified and cited counts are shown alongside so the headline stays honest.
  */
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -51,7 +52,7 @@ async function queryLiveDealStats(): Promise<LiveDealStats> {
   const supabase = createServiceClient();
   const real = supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false);
   const [total, verified, cited, tas, sources, countries, years, newest] = await Promise.all([
-    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).not('therapeutic_area', 'eq', 'other').not('therapeutic_area', 'like', '\\__%'),
+    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false),
     supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'verified'),
     supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or('source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null'),
     supabase.rpc('count_distinct_deal_column', { p_column: 'therapeutic_area' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
