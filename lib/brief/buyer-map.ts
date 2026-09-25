@@ -84,6 +84,13 @@ export const REGION_TIEBREAK_POINTS = 5;
 export const LEAD_PROMOTION_POINTS = 10;
 /** Partner matches considered (top by match_score) before the mix rule. */
 export const PARTNER_POOL = 40;
+/** A buyer leads only when partner-match fit is at least this, unless it has a recent same-indication deal. */
+export const LEAD_MIN_FIT = 60;
+/** Score bonus for a disclosed deal in the asset's own indication in the last three years. */
+export const INDICATION_DEAL_BONUS = 10;
+export const INDICATION_DEAL_WINDOW_YEARS = 3;
+/** Prior deals needed before "all at later stages" counts as evidence that a buyer does not transact here. */
+export const MIN_DEALS_FOR_STAGE_NO = 5;
 /** Deal-history licensees added to the pool. */
 export const HISTORY_POOL = 12;
 /** Regions the tiebreak tries to get onto the list. */
@@ -201,11 +208,32 @@ export interface UrgencyInputs {
  *   10  hiring BD roles (binary).
  * Weights are fixed so the same buyer scores identically on every page.
  */
+/**
+ * companies.total_annual_revenue is not a reliable denominator: rows mix
+ * annual USD, thousands and quarterly figures (Incyte reads $1.0M against a
+ * $2.5B Jakafi cliff; Biogen and Novartis read a quarter's revenue). A
+ * denominator is trusted only when it is at least as large as the product
+ * revenue it is dividing; otherwise the share is not computed and urgency
+ * falls back to the absolute scale.
+ */
+export function plausibleDenominator(partUsd: number | null | undefined, totalUsd: number | null | undefined): boolean {
+  return totalUsd != null && Number.isFinite(totalUsd) && totalUsd > 0
+    && partUsd != null && Number.isFinite(partUsd) && partUsd >= 0
+    && partUsd <= totalUsd;
+}
+
+/** Whole-percent share of total revenue, or null when the denominator cannot be trusted or the share rounds to 0. */
+export function revenueShare(partUsd: number | null | undefined, totalUsd: number | null | undefined): number | null {
+  if (!plausibleDenominator(partUsd, totalUsd)) return null;
+  const share = Math.round((partUsd! / totalUsd!) * 100);
+  return share > 0 ? Math.min(100, share) : null;
+}
+
 export function computeUrgency(i: UrgencyInputs): number {
   let risk = 0;
   if (i.revenueAtRiskUsd != null && i.revenueAtRiskUsd > 0) {
-    if (i.totalRevenueUsd != null && i.totalRevenueUsd > 0) {
-      risk = Math.min(1, (i.revenueAtRiskUsd / i.totalRevenueUsd) / 0.25);
+    if (plausibleDenominator(i.revenueAtRiskUsd, i.totalRevenueUsd)) {
+      risk = Math.min(1, (i.revenueAtRiskUsd / i.totalRevenueUsd!) / 0.25);
     } else {
       risk = Math.min(1, i.revenueAtRiskUsd / 5e9);
     }
@@ -224,8 +252,10 @@ export function computeUrgency(i: UrgencyInputs): number {
  *             phase_preference_min at or below it.
  * 'no'      — a valid stated phase_preference_min strictly above the asset
  *             phase with no prior deal at or below it; or (stated preference
- *             unusable) at least three prior deals in our data, all strictly
- *             above the asset phase.
+ *             unusable) at least MIN_DEALS_FOR_STAGE_NO prior deals in our
+ *             data, all strictly above the asset phase. Three deals were too
+ *             few: the obvious buyer in an indication was being excluded on a
+ *             thin sample.
  * 'unknown' — everything else.
  * A stated preference is "valid" only when both ends map to a phase and
  * min <= max in phase order (see file header on the alphabetical artefact).
@@ -245,7 +275,7 @@ export function transactsAtPhase(
   const validPref = minR != null && maxR != null && minR <= maxR;
   if (validPref && minR <= asset) return 'yes';
   if (validPref && minR > asset) return 'no';
-  if (ranks.length >= 3 && ranks.every(r => r > asset)) return 'no';
+  if (ranks.length >= MIN_DEALS_FOR_STAGE_NO && ranks.every(r => r > asset)) return 'no';
   return 'unknown';
 }
 
@@ -298,7 +328,8 @@ export function regionOf(hqRegion: string | null | undefined, hqCountry: string 
 
 type MixInput = Pick<BuyerCandidate, 'name' | 'fit' | 'urgency' | 'transactsAtPhase' | 'sizeBucket' | 'hqRegion' | 'hqCountry'>;
 
-const combinedScore = (c: Pick<BuyerCandidate, 'fit' | 'urgency'>): number => c.fit * 0.5 + c.urgency * 0.5;
+const combinedScore = (c: Pick<BuyerCandidate, 'fit' | 'urgency'> & { recentIndicationDeal?: BuyerCandidate['recentIndicationDeal'] }): number =>
+  c.fit * 0.5 + c.urgency * 0.5 + (c.recentIndicationDeal ? INDICATION_DEAL_BONUS : 0);
 
 /**
  * Pick `target` candidates from the pool. Order of filling: MIN_MID mid-sized,
@@ -353,13 +384,22 @@ export function mixOf(candidates: Array<Pick<BuyerCandidate, 'sizeBucket' | 'hqR
 // ─── Process split ──────────────────────────────────────────────────────────
 
 export function splitProcess(
-  candidates: Array<Pick<BuyerCandidate, 'name' | 'fit' | 'urgency' | 'transactsAtPhase'> & { sizeBucket?: BuyerSizeBucket }>,
+  candidates: Array<Pick<BuyerCandidate, 'name' | 'fit' | 'urgency' | 'transactsAtPhase'> & { sizeBucket?: BuyerSizeBucket; recentIndicationDeal?: BuyerCandidate['recentIndicationDeal'] }>,
   assetPhaseLabel: string,
 ): BuyerMap['process'] {
-  const eligible = candidates
+  const scored = candidates
     .filter(c => c.transactsAtPhase !== 'no')
     .map(c => ({ ...c, score: combinedScore(c) }))
     .sort((a, b) => b.score - a.score);
+
+  // Fit gate: urgency alone must not make a buyer a lead. A lead needs a
+  // strategic fit of LEAD_MIN_FIT or a disclosed deal in this indication;
+  // when fewer than two candidates clear the gate, the gate is dropped so a
+  // thin list still produces a process, and the rationale says so.
+  const fitsLead = (c: { fit: number; recentIndicationDeal?: BuyerCandidate['recentIndicationDeal'] }) => c.fit >= LEAD_MIN_FIT || !!c.recentIndicationDeal;
+  const gated = scored.filter(fitsLead);
+  const gateApplied = gated.length >= 2;
+  const eligible = gateApplied ? [...gated, ...scored.filter(c => !fitsLead(c))] : scored;
 
   // Lead promotion: an all-large lead group gives way to a mid-sized buyer
   // that ranks within LEAD_PROMOTION_POINTS of the third lead; the weakest
@@ -386,7 +426,7 @@ export function splitProcess(
   } else {
     const leadTxt = joinNames(lead);
     const evidence = eligible.slice(0, 3).filter(c => c.transactsAtPhase === 'yes').length;
-    rationale = `Open with ${leadTxt}: highest combined fit and urgency` +
+    rationale = `Open with ${leadTxt}: ${gateApplied ? `highest combined fit and urgency among buyers with a fit of ${LEAD_MIN_FIT} or more or a recent deal in this indication` : 'highest combined fit and urgency (no candidate clears the fit gate, so urgency carries the ranking)'}` +
       (evidence === lead.length ? `, and each has signed at ${assetPhaseLabel} before.` : evidence > 0 ? `; ${evidence} of ${lead.length} has signed at ${assetPhaseLabel} before.` : `, though none has a disclosed deal at ${assetPhaseLabel} yet.`);
     if (promotion) {
       rationale += ` ${promotion.promoted} takes the third lead slot ahead of ${promotion.demoted}${promotion.gap > 0 ? ` (${promotion.gap} points apart)` : ' (level on score)'}: mid-sized buyers move faster at this stage, and an all-large lead group would let the three set the pace together.`;
@@ -442,8 +482,8 @@ export function buildWhyNow(c: {
   const cliff = upcoming.find(p => p.revenueUsd) ?? upcoming[0];
   if (cliff) {
     const rev = usdShort(cliff.revenueUsd);
-    const share = cliff.revenueUsd && c.totalRevenueUsd ? Math.round((cliff.revenueUsd / c.totalRevenueUsd) * 100) : null;
-    return `${cliff.drug} loses exclusivity in ${cliff.expiryYear}${rev ? ` (${rev} of revenue${share != null && share > 0 ? `, ${share}% of the total` : ''})` : ''}; the replacement has to be signed before then.`;
+    const share = revenueShare(cliff.revenueUsd, c.totalRevenueUsd);
+    return `${cliff.drug} loses exclusivity in ${cliff.expiryYear}${rev ? ` (${rev} of revenue${share != null ? `, ${share}% of the total` : ''})` : ''}; the replacement has to be signed before then.`;
   }
   const rar = (c.revenueAtRisk.y2026 ?? 0) + (c.revenueAtRisk.y2027 ?? 0);
   if (rar > 0) {
@@ -452,7 +492,8 @@ export function buildWhyNow(c: {
   const recent = c.priorDeals[0];
   if (recent && recent.year) {
     const money = recent.upfrontM != null ? ` with ${recent.upfrontM >= 1000 ? `$${(recent.upfrontM / 1000).toFixed(1)}B` : `$${Math.round(recent.upfrontM)}M`} upfront` : '';
-    return `Signed a ${PHASE_TEXT[recent.phase]} ${STRUCTURE_TEXT[recent.structure]} with ${recent.parties.split(' → ')[0]} in ${recent.year}${money}${recent.sameTA ? ` in ${taLabel}` : ''}; the team that did it is still buying.`;
+    const what = `${PHASE_TEXT[recent.phase]} ${STRUCTURE_TEXT[recent.structure]}`;
+    return `Signed ${/^[aeiou]/i.test(what) ? 'an' : 'a'} ${what} with ${recent.parties.split(' → ')[0]} in ${recent.year}${money}${recent.sameTA ? ` in ${taLabel}` : ''}; the team that did it is still buying.`;
   }
   if (c.dealsLast12mo > 0) {
     return `${c.dealsLast12mo} deal${c.dealsLast12mo === 1 ? '' : 's'} signed in the last 12 months; the business-development budget is open this year.`;
@@ -576,6 +617,21 @@ function nameAliases(name: string, variations: string[] | null | undefined): str
 
 // ─── Deal-history supplement ────────────────────────────────────────────────
 
+/**
+ * Rows where the "licensee" is the licensor's own vehicle or a placeholder
+ * ("Annovis Bio → Annovis (Proprietary)", "undisclosed", "internal program")
+ * are not buyers and must never reach the buyer map.
+ */
+export function isInternalCounterparty(licensee: string | null | undefined, licensor: string | null | undefined): boolean {
+  const lic = (licensee ?? '').trim();
+  if (!lic) return true;
+  if (/\((proprietary|internal|in-house|own)\)|^(undisclosed|internal|n\/a|none|proprietary|self)\b/i.test(lic)) return true;
+  const a = norm(lic).replace(/proprietary|internal|inc|ltd|llc|corp|co|plc|ag|sa|nv|bio|biosciences|pharma|pharmaceuticals|therapeutics/g, '');
+  const b = norm(licensor ?? '').replace(/inc|ltd|llc|corp|co|plc|ag|sa|nv|bio|biosciences|pharma|pharmaceuticals|therapeutics/g, '');
+  if (a && b && (a === b || (a.length >= 5 && b.startsWith(a)) || (b.length >= 5 && a.startsWith(b)))) return true;
+  return false;
+}
+
 /** All quality-filtered deals in the asset's TA (in-memory match via comp-set helpers), paged. */
 async function fetchTaDeals(supabase: SupabaseClient, asset: AssetProfile): Promise<Array<DealRow & { sameIndication: boolean }>> {
   const out: Array<DealRow & { sameIndication: boolean }> = [];
@@ -591,7 +647,7 @@ async function fetchTaDeals(supabase: SupabaseClient, asset: AssetProfile): Prom
       .range(from, from + page - 1);
     const batch = Array.isArray(data) ? (data as DealRow[]) : [];
     for (const d of batch) {
-      if (!d.licensee_name) continue;
+      if (!d.licensee_name || isInternalCounterparty(d.licensee_name, d.licensor_name)) continue;
       const ta = isSameTA(d, asset.therapeuticArea);
       const ind = isSameIndication(d, asset.indication);
       if (ta || ind) out.push({ ...d, sameIndication: ind });
@@ -833,6 +889,11 @@ export async function buildBuyerMap(
       const ind = norm(asset.indication);
       return !!ind && (norm(d.indication_category).includes(ind) || norm(d.indication_specific).includes(ind));
     };
+    const recentIndication = deals
+      .filter(d => isSameIndication(d, asset.indication))
+      .map(d => ({ parties: `${d.licensor_name} → ${d.licensee_name}`, year: d.announced_date ? parseInt(d.announced_date.slice(0, 4), 10) || null : null }))
+      .filter(d => d.year != null && d.year >= nowYear - INDICATION_DEAL_WINDOW_YEARS)
+      .sort((a, b) => (b.year ?? 0) - (a.year ?? 0))[0] ?? null;
     const priorDeals: BuyerPriorDeal[] = deals
       .map(d => ({
         parties: `${d.licensor_name} → ${d.licensee_name}`,
@@ -927,6 +988,7 @@ export async function buildBuyerMap(
       impliedUpfront: toRange(valuation?.buyerUpfront),
       impliedTotal: toRange(valuation?.buyerSpecificDealValue),
       source: partner.source ?? 'partner_match',
+      recentIndicationDeal: recentIndication,
     };
 
     const candidate: BuyerCandidate = {
@@ -941,7 +1003,7 @@ export async function buildBuyerMap(
       const stated = phaseRank(prefMin) != null && phaseRank(prefMax) != null && phaseRank(prefMin)! <= phaseRank(prefMax)!;
       excludedRaw.push({
         name: candidate.name,
-        score: fit * 0.5 + urgency * 0.5,
+        score: combinedScore({ fit, urgency, recentIndicationDeal: recentIndication }),
         reason: stated
           ? `stated stage range starts at ${PHASE_TEXT[normalisePhase(prefMin)]}; no ${assetPhaseText} deal in our data`
           : `${deals.length} disclosed deals${yrs.length ? ` since ${yrs[0]}` : ''}, none at ${assetPhaseText} or earlier`,

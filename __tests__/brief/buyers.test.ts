@@ -135,7 +135,9 @@ describe('transactsAtPhase', () => {
   });
   it('ignores the alphabetical "approved / unknown" artefact and falls back to deals', () => {
     expect(transactsAtPhase('preclinical', ['phase_2'], 'approved', 'unknown')).toBe('unknown');
-    expect(transactsAtPhase('preclinical', ['phase_2', 'phase_3', 'approved'], 'approved', 'unknown')).toBe('no');
+    // Three later-stage deals are too thin to exclude a buyer; five are not.
+    expect(transactsAtPhase('preclinical', ['phase_2', 'phase_3', 'approved'], 'approved', 'unknown')).toBe('unknown');
+    expect(transactsAtPhase('preclinical', ['phase_2', 'phase_3', 'approved', 'phase_3', 'phase_2'], 'approved', 'unknown')).toBe('no');
     expect(transactsAtPhase('preclinical', ['preclinical'], 'approved', 'unknown')).toBe('yes');
   });
   it('is unknown without evidence', () => {
@@ -183,10 +185,22 @@ describe('splitProcess', () => {
     expect(p.rationale).toContain('A, B and C');
     expect(p.rationale).toContain('signed at preclinical');
   });
-  it('ranks by the combined score, not by fit alone', () => {
+  it('ranks by the combined score among buyers that clear the fit gate; urgency alone does not make a lead', () => {
     const p = splitProcess([mk('LowFitHot', 40, 100), mk('HighFitCold', 90, 10), mk('Mid', 60, 60), mk('Z', 10, 10)], 'phase_2');
-    expect(p.lead).toEqual(['LowFitHot', 'Mid', 'HighFitCold']);
+    // Gate (fit >= 60): Mid, HighFitCold clear it and lead by score; LowFitHot follows despite the higher combined score.
+    expect(p.lead).toEqual(['Mid', 'HighFitCold', 'LowFitHot']);
     expect(p.tension).toEqual(['Z']);
+    expect(p.rationale).toMatch(/fit of 60 or more/);
+  });
+  it('drops the fit gate when fewer than two buyers clear it, and a recent same-indication deal counts as clearing it', () => {
+    const p = splitProcess([mk('LowFitHot', 40, 100), mk('B', 30, 80), mk('C', 20, 70)], 'phase_2');
+    expect(p.lead).toEqual(['LowFitHot', 'B', 'C']);
+    expect(p.rationale).toMatch(/no candidate clears the fit gate/);
+    const q = splitProcess([
+      { ...mk('LowFitHot', 40, 100), recentIndicationDeal: { parties: 'X → LowFitHot', year: 2026 } },
+      mk('HighFitCold', 90, 10), mk('Mid', 60, 60), mk('Z', 10, 10),
+    ], 'phase_2');
+    expect(q.lead).toEqual(['LowFitHot', 'Mid', 'HighFitCold']); // 70 + 10 bonus beats Mid's 60
   });
   it('handles an empty eligible list honestly', () => {
     const p = splitProcess([mk('X', 90, 90, 'no')], 'preclinical');
