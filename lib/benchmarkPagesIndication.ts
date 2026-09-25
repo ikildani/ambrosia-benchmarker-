@@ -13,7 +13,7 @@ import type { BenchmarkPageData } from './benchmarkPages';
 // Each entry maps an indication value to its display label, parent TA,
 // default modality, and default phase for benchmarking.
 
-interface IndicationDef {
+export interface IndicationDef {
   value: string;
   label: string;
   ta: TherapeuticArea;
@@ -21,7 +21,7 @@ interface IndicationDef {
   phase: Phase;
 }
 
-const INDICATION_REGISTRY: IndicationDef[] = [
+export const INDICATION_REGISTRY: IndicationDef[] = [
   // ── Oncology — Solid Tumors ──────────────────────────────────────────────
   { value: 'lung_nsclc', label: 'Lung Cancer (NSCLC)', ta: 'oncology', modality: 'smallMolecule', phase: 'phase2' },
   { value: 'lung_sclc', label: 'Lung Cancer (SCLC)', ta: 'oncology', modality: 'adc', phase: 'phase2' },

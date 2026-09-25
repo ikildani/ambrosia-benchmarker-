@@ -3,7 +3,7 @@
 // KPI cards (total acquisition value, upfront, earnouts, CVR),
 // milestone earnout schedule table, CVR structure cards, and M&A vs Licensing callout.
 
-import { pageHeader, pageFooter, COLORS } from '../helpers';
+import { pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ const milestoneSchedule: MilestoneRow[] = [
 export function renderMAAcquisitionPage(data: PDFReportData, meta: ReportMeta): string {
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">M&amp;A Acquisition Benchmarks</div>
 

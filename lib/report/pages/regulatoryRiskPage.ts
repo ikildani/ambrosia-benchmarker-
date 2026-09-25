@@ -2,7 +2,7 @@
 // Semicircle CRL gauge, PDUFA timing distribution, AdComm assessment,
 // PRV callout, accelerated approval risk, timeline impact, and narrative.
 
-import { formatPercent, formatUsd, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, formatUsd, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -163,7 +163,7 @@ export function renderRegulatoryRiskPage(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">FDA Regulatory Risk Analysis</div>
 

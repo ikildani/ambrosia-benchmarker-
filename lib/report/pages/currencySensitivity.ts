@@ -1,7 +1,7 @@
 // Page: Currency & Pricing Sensitivity
 // FX scenario impact table, regulatory pricing pressure, pricing narrative
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderCurrencySensitivityPage(data: PDFReportData, meta: ReportMeta): string {
@@ -18,7 +18,7 @@ export function renderCurrencySensitivityPage(data: PDFReportData, meta: ReportM
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Currency &amp; Pricing Sensitivity</div>
 

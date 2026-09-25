@@ -6,7 +6,7 @@ import BenchmarkIntakeWizard from '@/components/benchmark/BenchmarkIntakeWizard'
 export const metadata: Metadata = {
   title: 'Deal Intelligence Brief — Biopharma Licensing Deal Landscape Report | $2,500',
   description:
-    `Comprehensive deal landscape report for any biopharma indication. 52 deal calculations across 13 modalities and 4 structures, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, AI strategic narrative, partner matching with intent scoring, and negotiation playbook. White-label branding included. Delivered in 24 hours.`,
+    `Comprehensive deal landscape report for any biopharma indication. 52 deal calculations across 13 modalities and 4 structures, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, strategic analysis and a written recommendation, partner matching with intent scoring, and negotiation playbook. White-label branding included. Delivered in 24 hours.`,
   keywords: [
     'biopharma deal landscape report', 'pharma licensing benchmarks', 'drug licensing deal terms',
     'biotech out-licensing advisory', 'pharma deal intelligence', 'indication deal benchmarks',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Deal Intelligence Brief — Full Indication Deal Landscape',
     description:
-      `The complete deal landscape for any biopharma indication. 52 deal calculations, AI narrative, partner matching, rNPV + Monte Carlo valuation. Calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions. $2,500 all-inclusive with white-label branding.`,
+      `The complete deal landscape for any biopharma indication. 52 deal calculations, strategic analysis, partner matching, rNPV + Monte Carlo valuation. Calibrated against ${DEAL_STATS.TOTAL_DEALS} real transactions. $2,500 all-inclusive with white-label branding.`,
     url: 'https://solidus.ambrosiaventures.co/benchmark',
     type: 'website',
     images: [{
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Deal Intelligence Brief — $2,500',
-    description: `Full deal landscape for any biopharma indication. 52 calculations, AI narrative, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, partner matching, white-label branding. 24hr delivery.`,
+    description: `Full deal landscape for any biopharma indication. 52 calculations, strategic analysis, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, partner matching, white-label branding. 24hr delivery.`,
     images: ['/api/og?title=Deal%20Intelligence%20Brief&subtitle=52%20Deal%20Calculations%20%C2%B7%20AI%20Narrative%20%C2%B7%2024hr%20Delivery'],
   },
   alternates: {
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 const PROOF_POINTS = [
   '52 deal combinations',
-  'AI strategic narrative',
+  'strategic analysis and a written recommendation',
   'Delivered in 24 hours',
 ] as const;
 
@@ -50,7 +50,7 @@ const briefProductSchema = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: 'Deal Intelligence Brief',
-  description: 'Comprehensive biopharma deal landscape report covering 52 deal calculations across 13 modalities and 4 deal structures for any indication. Includes AI strategic narrative, comparable transactions, partner matching, rNPV valuation, Monte Carlo simulation, and negotiation playbook. White-label branding and walkthrough included.',
+  description: 'Comprehensive biopharma deal landscape report covering 52 deal calculations across 13 modalities and 4 deal structures for any indication. Includes strategic analysis and a written recommendation, comparable transactions, partner matching, rNPV valuation, Monte Carlo simulation, and negotiation playbook. White-label branding and walkthrough included.',
   url: 'https://solidus.ambrosiaventures.co/benchmark',
   brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
   offers: {
@@ -76,7 +76,7 @@ const briefFaqSchema = {
     {
       '@type': 'Question',
       name: 'What is a Deal Intelligence Brief?',
-      acceptedAnswer: { '@type': 'Answer', text: `A comprehensive deal landscape report covering 52 deal calculations (13 modalities x 4 deal structures) for any biopharma indication. It includes AI-written strategic narrative and negotiation playbook, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, partner matching with intent scoring, full financial model suite (rNPV, Monte Carlo, scenarios), M&A structures with CVR valuation, and white-label branding.` },
+      acceptedAnswer: { '@type': 'Answer', text: `A comprehensive deal landscape report covering 52 deal calculations (13 modalities x 4 deal structures) for any biopharma indication. It includes written strategic analysis with positioning, objection handling and a negotiation playbook, comparable transactions from ${DEAL_STATS.TOTAL_DEALS} deals, partner matching with intent scoring, full financial model suite (rNPV, Monte Carlo, scenarios), M&A structures with CVR valuation, and white-label branding.` },
     },
     {
       '@type': 'Question',
@@ -96,7 +96,7 @@ const briefFaqSchema = {
     {
       '@type': 'Question',
       name: 'How is the Brief different from Pro?',
-      acceptedAnswer: { '@type': 'Answer', text: 'Pro ($299/mo) gives you unlimited access to run calculations yourself across all 14 engines. The $2,500 Brief is a done-for-you deliverable — 52 deal calculations across 13 modalities and 4 deal structures for your specific indication, with a custom AI narrative, comparable transactions, partner matching with intent scoring, white-label branding for IC/board presentations, and a complimentary walkthrough call. Most BD teams start with a Brief and then subscribe to Pro for ongoing access.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'Pro ($299/mo) gives you unlimited access to run calculations yourself across all 14 engines. The $2,500 Brief is a done-for-you deliverable — 52 deal calculations across 13 modalities and 4 deal structures for your specific indication, with a custom strategic analysis, comparable transactions, partner matching with intent scoring, white-label branding for IC/board presentations, and a complimentary walkthrough call. Most BD teams start with a Brief and then subscribe to Pro for ongoing access.' },
     },
   ],
 };

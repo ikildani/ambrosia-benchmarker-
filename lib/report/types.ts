@@ -16,6 +16,7 @@ import type { TaxStructureResult } from '@/lib/financial/cross-border-tax';
 import type { PatentDynamicsResult } from '@/lib/financial/patent-loe-dynamics';
 import type { EarnoutResult } from '@/lib/financial/earnout-cvr';
 import type { IndicationSequenceResult } from '@/lib/financial/indication-sequencing';
+import type { BriefIntelligence } from '@/lib/brief/types';
 
 export interface PartnerForPDF {
   company_name: string;
@@ -85,6 +86,9 @@ export interface PDFReportData {
   patentDynamics?: PatentDynamicsResult;
   earnoutValuation?: EarnoutResult;
   indicationSequence?: IndicationSequenceResult;
+
+  /** Brief v3 intelligence layer (decision page, comps, buyers, landscape, bridge…). */
+  brief?: BriefIntelligence;
 }
 
 export interface TocEntry {

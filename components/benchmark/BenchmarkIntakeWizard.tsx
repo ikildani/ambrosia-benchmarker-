@@ -51,6 +51,15 @@ const MODALITIES: ModalityOption[] = [
 ];
 
 const DEAL_TYPES = ['Licensing', 'Option', 'Co-Development', 'M&A / Acquisition'] as const;
+const DATA_PACKAGE_STAGES = [
+  'Discovery / hit-to-lead',
+  'In vivo efficacy in hand',
+  'IND-enabling studies underway',
+  'IND-enabling complete / IND filed',
+  'Phase 1 data in hand',
+  'Phase 2 data in hand',
+  'Phase 3 data in hand',
+] as const;
 
 const ANALYSES: AnalysisOption[] = [
   { id: 'trispecific', label: 'Trispecific antibody deep-dive' },
@@ -142,6 +151,14 @@ export default function BenchmarkIntakeWizard(): JSX.Element {
   const [brandName, setBrandName] = useState('');
   const [customNotes, setCustomNotes] = useState('');
 
+  // Your asset (v3) — makes the Brief asset-specific rather than indication-generic
+  const [assetName, setAssetName] = useState('');
+  const [primaryModality, setPrimaryModality] = useState('');
+  const [mechanism, setMechanism] = useState('');
+  const [targetDealType, setTargetDealType] = useState<string>('Licensing');
+  const [dataPackageStage, setDataPackageStage] = useState('');
+  const [differentiationNotes, setDifferentiationNotes] = useState('');
+
   /* Step 3 */
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -172,7 +189,7 @@ export default function BenchmarkIntakeWizard(): JSX.Element {
     Math.round(calculationCount * 0.6 + analyses.length * 4 + (whiteLabel ? 2 : 0)),
   );
 
-  const step1Valid = therapeuticArea !== '' && indication.trim() !== '' && phase !== '';
+  const step1Valid = (therapeuticArea !== '' && indication.trim() !== '' && phase !== '') && primaryModality !== '';
   const step2Valid = modalities.length > 0 && dealTypes.length > 0;
   const step3Valid = name.trim() !== '' && email.trim() !== '';
 
@@ -204,6 +221,12 @@ export default function BenchmarkIntakeWizard(): JSX.Element {
             whiteLabel,
             brandName: whiteLabel ? brandName : undefined,
             customNotes: customNotes || undefined,
+            assetName: assetName || undefined,
+            modality: primaryModality,
+            mechanism: mechanism || undefined,
+            targetDealType,
+            dataPackageStage: dataPackageStage || undefined,
+            differentiationNotes: differentiationNotes || undefined,
           }),
         });
 
@@ -226,6 +249,7 @@ export default function BenchmarkIntakeWizard(): JSX.Element {
       therapeuticArea, indication, phase,
       modalities, dealTypes, analyses,
       whiteLabel, brandName, customNotes,
+      assetName, primaryModality, mechanism, targetDealType, dataPackageStage, differentiationNotes,
     ],
   );
 
@@ -343,6 +367,90 @@ export default function BenchmarkIntakeWizard(): JSX.Element {
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                   />
                 </div>
+
+                {/* ── Your asset (v3) ─────────────────────────────── */}
+                <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Your asset</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                    The Brief values your program, not the indication in general. Three fields are enough; the rest sharpen the buyer map and the objections page.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="primaryModality" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Modality</label>
+                      <select
+                        id="primaryModality"
+                        value={primaryModality}
+                        onChange={(e) => setPrimaryModality(e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                      >
+                        <option value="">Select modality...</option>
+                        {MODALITIES.map((m) => (
+                          <option key={m.abbr} value={m.abbr}>{m.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="targetDealType" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Deal you are preparing for</label>
+                      <select
+                        id="targetDealType"
+                        value={targetDealType}
+                        onChange={(e) => setTargetDealType(e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                      >
+                        {DEAL_TYPES.map((dt) => (
+                          <option key={dt} value={dt}>{dt}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="assetName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Asset name <span className="text-slate-400 font-normal">(optional)</span></label>
+                      <input
+                        id="assetName"
+                        type="text"
+                        value={assetName}
+                        onChange={(e) => setAssetName(e.target.value)}
+                        placeholder="e.g. AV-101"
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="mechanism" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Mechanism / target <span className="text-slate-400 font-normal">(optional)</span></label>
+                      <input
+                        id="mechanism"
+                        type="text"
+                        value={mechanism}
+                        onChange={(e) => setMechanism(e.target.value)}
+                        placeholder="e.g. anti-pTau217 antibody"
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="dataPackageStage" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Data package today <span className="text-slate-400 font-normal">(optional)</span></label>
+                      <select
+                        id="dataPackageStage"
+                        value={dataPackageStage}
+                        onChange={(e) => setDataPackageStage(e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                      >
+                        <option value="">Select...</option>
+                        {DATA_PACKAGE_STAGES.map((st) => (
+                          <option key={st} value={st}>{st}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="differentiationNotes" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">What makes it different <span className="text-slate-400 font-normal">(optional)</span></label>
+                      <textarea
+                        id="differentiationNotes"
+                        rows={3}
+                        value={differentiationNotes}
+                        onChange={(e) => setDifferentiationNotes(e.target.value)}
+                        placeholder="Mechanism novelty, biomarker selection, delivery, data you have that competitors do not..."
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Preview card */}
@@ -368,6 +476,12 @@ export default function BenchmarkIntakeWizard(): JSX.Element {
                       <span className="text-slate-400 dark:text-slate-500">Indication:</span>{' '}
                       <span className="text-slate-900 dark:text-white font-medium">
                         {indication || '---'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 dark:text-slate-500">Modality:</span>{' '}
+                      <span className="text-slate-900 dark:text-white font-medium">
+                        {MODALITIES.find((m) => m.abbr === primaryModality)?.label || '---'}
                       </span>
                     </div>
                     <hr className="border-slate-200 dark:border-slate-600" />

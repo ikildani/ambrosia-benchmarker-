@@ -1,8 +1,9 @@
 // Page: Patent / LOE Dynamics
-// Patent timeline SVG, effective LOE headline, generic erosion curve,
-// Paragraph IV risk indicator, authorized generic impact, and narrative.
+// Patent timeline SVG, effective LOE headline, exclusivity breakdown table,
+// generic erosion curve beside the generic-entry risk cards, and narrative.
+// Erosion chart and risk cards share one row so the page fits a single sheet.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // SVG: Patent Timeline — horizontal stacked bar with extension segments + LOE marker
@@ -10,7 +11,7 @@ function renderPatentTimelineSVG(
   base: number, pta: number, pte: number, pediatric: number,
   orphan: number, nce: number, biologic: number, effectiveLOE: number,
 ): string {
-  const w = 520, h = 110, padL = 40, padR = 20, barY = 36, barH = 28;
+  const w = 520, h = 92, padL = 40, padR = 20, barY = 34, barH = 26;
   const chartW = w - padL - padR;
   const totalSpan = Math.max(effectiveLOE * 1.15, base + pta + pte + pediatric + orphan + nce + biologic + 2, 22);
   const scaleX = (yr: number) => (yr / totalSpan) * chartW;
@@ -49,8 +50,8 @@ function renderPatentTimelineSVG(
 }
 
 // SVG: Generic Erosion — 4-bar chart (year1, year2, year3, steady-state)
-function renderErosionBarsSVG(y1: number, y2: number, y3: number, ss: number): string {
-  const w = 520, h = 150, padL = 50, padR = 20, padTop = 20, padBot = 30;
+function renderErosionBarsSVG(y1: number, y2: number, y3: number, ss: number, w = 320, h = 150): string {
+  const padL = 40, padR = 12, padTop = 20, padBot = 30;
   const chartH = h - padTop - padBot, chartW = w - padL - padR;
   const uid = `ge-${Math.random().toString(36).slice(2, 8)}`;
   const values = [
@@ -60,7 +61,7 @@ function renderErosionBarsSVG(y1: number, y2: number, y3: number, ss: number): s
     { label: 'Steady State', value: ss * 100, color: COLORS.navy },
   ];
   const maxVal = Math.max(...values.map(v => v.value), 100) * 1.1;
-  const barGap = 24, barW = Math.min(72, (chartW - barGap * 3) / 4);
+  const barGap = 16, barW = Math.min(64, (chartW - barGap * 3) / 4);
   const totalBarsW = 4 * barW + 3 * barGap;
   const offsetX = padL + (chartW - totalBarsW) / 2;
   const scaleY = (v: number) => padTop + ((maxVal - v) / maxVal) * chartH;
@@ -76,7 +77,7 @@ function renderErosionBarsSVG(y1: number, y2: number, y3: number, ss: number): s
     const topY = scaleY(v.value), bh = Math.max(baseY - topY, 2);
     elems.push(`<rect x="${bx}" y="${topY}" width="${barW}" height="${bh}" rx="3" fill="${v.color}" filter="url(#${uid}-shadow)" />`);
     elems.push(`<text x="${cx}" y="${topY - 5}" text-anchor="middle" font-size="9" font-weight="700" fill="${v.color}">${v.value.toFixed(0)}%</text>`);
-    elems.push(`<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="8" font-weight="600" fill="${COLORS.gray600}">${v.label}</text>`);
+    elems.push(`<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="7.5" font-weight="600" fill="${COLORS.gray600}">${v.label}</text>`);
   });
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
     <defs><filter id="${uid}-shadow" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08" /></filter></defs>
@@ -114,22 +115,22 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Patent &amp; LOE Dynamics</div>
+      <div class="section-title-lg" style="margin-bottom: 12px;">Patent &amp; LOE Dynamics</div>
 
       <!-- Effective LOE Headline KPI -->
       <div class="section-title">Effective Loss of Exclusivity</div>
-      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.navy}; border-radius: 6px; padding: 14px 16px; background: white;">
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.navy}; border-radius: 6px; padding: 10px 14px; background: white;">
           <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Effective LOE</div>
-          <div style="font-size: 32px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.03em; line-height: 1;">${pd.effectiveLOE_yearsFromApproval.toFixed(1)}<span style="font-size: 14px; font-weight: 600; color: ${COLORS.gray400}; margin-left: 4px;">years from approval</span></div>
+          <div style="font-size: 28px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.03em; line-height: 1;">${pd.effectiveLOE_yearsFromApproval.toFixed(1)}<span style="font-size: 12px; font-weight: 600; color: ${COLORS.gray400}; margin-left: 4px;">years from approval</span></div>
         </div>
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.teal}; border-radius: 6px; padding: 14px 16px; background: white;">
+        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.teal}; border-radius: 6px; padding: 10px 14px; background: white;">
           <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Base Patent Life</div>
           <div style="font-size: 22px; font-weight: 800; color: ${COLORS.teal}; letter-spacing: -0.02em; line-height: 1;">${pd.basePatentLife_years}<span style="font-size: 12px; font-weight: 600; color: ${COLORS.gray400}; margin-left: 4px;">years</span></div>
         </div>
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.purple}; border-radius: 6px; padding: 14px 16px; background: white;">
+        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.purple}; border-radius: 6px; padding: 10px 14px; background: white;">
           <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Total Extensions</div>
           <div style="font-size: 22px; font-weight: 800; color: ${COLORS.purple}; letter-spacing: -0.02em; line-height: 1;">+${totalExt.toFixed(1)}<span style="font-size: 12px; font-weight: 600; color: ${COLORS.gray400}; margin-left: 4px;">years</span></div>
         </div>
@@ -137,11 +138,11 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
 
       <!-- Patent Timeline SVG -->
       <div class="section-title">Patent &amp; Exclusivity Timeline</div>
-      <div class="card" style="padding: 14px 16px; margin-bottom: 16px; border-top: 3px solid ${COLORS.navy};">
-        <div class="chart-container">
+      <div class="card" style="padding: 10px 14px; margin-bottom: 12px; border-top: 3px solid ${COLORS.navy};">
+        <div class="chart-container" style="margin: 2px 0;">
           ${renderPatentTimelineSVG(pd.basePatentLife_years, pd.ptaAdjustment_years, pd.pteAdjustment_years, pd.pediatricExclusivity_years, pd.orphanExclusivity_years, pd.nceExclusivity_years, pd.biologicExclusivity_years, pd.effectiveLOE_yearsFromApproval)}
         </div>
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 6px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 4px;">
           ${legendItems.filter((_, i) => yearValues[i] > 0).map(s => `<div style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: ${s.color};"></span><span style="font-size: 7px; color: ${COLORS.gray400}; font-weight: 600;">${s.label}</span></div>`).join('')}
           <div style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 2px; background: ${COLORS.rose}; border-radius: 1px;"></span><span style="font-size: 7px; color: ${COLORS.gray400}; font-weight: 600;">Effective LOE</span></div>
         </div>
@@ -149,8 +150,8 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
 
       <!-- Extension Breakdown Table -->
       <div class="section-title">Exclusivity Breakdown</div>
-      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
-        <table class="data-table">
+      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 12px;">
+        <table class="data-table compact">
           <thead><tr><th>Component</th><th style="text-align: right;">Duration (years)</th><th>Description</th></tr></thead>
           <tbody>
             <tr><td style="font-weight: 600;">Base Patent</td><td style="text-align: right; font-weight: 700; color: ${COLORS.navy};">${pd.basePatentLife_years}</td><td style="font-size: 9px; color: ${COLORS.gray500};">Standard 20-year utility patent from filing date</td></tr>
@@ -165,40 +166,44 @@ export function renderPatentDynamicsPage(data: PDFReportData, meta: ReportMeta):
         </table>
       </div>
 
-      <!-- Generic Erosion Curve -->
-      <div class="section-title">Post-LOE Generic Erosion Profile</div>
-      <div class="card" style="padding: 14px 16px; margin-bottom: 16px; border-top: 3px solid ${COLORS.navy};">
-        <div class="chart-container">
-          ${renderErosionBarsSVG(gp.year1erosion, gp.year2erosion, gp.year3erosion, gp.steadyStateGenericShare)}
-        </div>
-      </div>
-
-      <!-- Paragraph IV Risk + Authorized Generic -->
-      <div class="section-title">Generic Entry Risk</div>
-      <div style="display: flex; gap: 10px; margin-bottom: 14px;">
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${pivColor}; border-radius: 6px; padding: 14px 16px; background: white;">
-          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Paragraph IV Challenge Risk</div>
-          <div style="display: flex; align-items: baseline; gap: 8px;">
-            <span style="font-size: 26px; font-weight: 800; color: ${pivColor}; letter-spacing: -0.03em; line-height: 1;">${formatPercent(piv.probability * 100, 0)}</span>
-            <span style="font-size: 10px; font-weight: 700; color: ${pivColor}; background: ${pivBg}; padding: 2px 8px; border-radius: 3px;">${pivLabel}</span>
-          </div>
-          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${COLORS.gray200};">
-            <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;">Expected Entry Timing</div>
-            <div style="font-size: 14px; font-weight: 800; color: ${COLORS.navy};">${piv.expectedEntryTiming_years.toFixed(1)} <span style="font-size: 10px; font-weight: 600; color: ${COLORS.gray400};">years before LOE</span></div>
+      <!-- Generic Erosion Curve | Paragraph IV Risk + Authorized Generic -->
+      <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 10px; margin-bottom: 12px; align-items: start;">
+        <div>
+          <div class="section-title">Post-LOE Generic Erosion Profile</div>
+          <div class="card" style="padding: 10px 12px; border-top: 3px solid ${COLORS.navy};">
+            <div class="chart-container" style="margin: 2px 0;">
+              ${renderErosionBarsSVG(gp.year1erosion, gp.year2erosion, gp.year3erosion, gp.steadyStateGenericShare)}
+            </div>
           </div>
         </div>
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.cyan}; border-radius: 6px; padding: 14px 16px; background: white;">
-          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Authorized Generic</div>
-          <div style="font-size: 26px; font-weight: 800; color: ${pd.authorizedGenericImpact ? COLORS.rose : COLORS.teal}; letter-spacing: -0.03em; line-height: 1;">${pd.authorizedGenericImpact ? 'Likely' : 'Unlikely'}</div>
-          <div style="font-size: 9px; color: ${COLORS.gray500}; margin-top: 6px; line-height: 1.5;">${pd.authorizedGenericImpact ? 'Authorized generic launch expected — accelerates post-LOE erosion.' : 'Authorized generic launch unlikely — standard LOE erosion profile.'}</div>
+        <div>
+          <div class="section-title">Generic Entry Risk</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${pivColor}; border-radius: 6px; padding: 10px 14px; background: white;">
+              <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Paragraph IV Challenge Risk</div>
+              <div style="display: flex; align-items: baseline; gap: 8px;">
+                <span style="font-size: 24px; font-weight: 800; color: ${pivColor}; letter-spacing: -0.03em; line-height: 1;">${formatPercent(piv.probability * 100, 0)}</span>
+                <span style="font-size: 10px; font-weight: 700; color: ${pivColor}; background: ${pivBg}; padding: 2px 8px; border-radius: 3px;">${pivLabel}</span>
+              </div>
+              <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid ${COLORS.gray200};">
+                <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;">Expected Entry Timing</div>
+                <div style="font-size: 14px; font-weight: 800; color: ${COLORS.navy};">${piv.expectedEntryTiming_years.toFixed(1)} <span style="font-size: 10px; font-weight: 600; color: ${COLORS.gray400};">years before LOE</span></div>
+              </div>
+            </div>
+            <div style="border: 1px solid ${COLORS.gray200}; border-top: 4px solid ${COLORS.cyan}; border-radius: 6px; padding: 10px 14px; background: white;">
+              <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Authorized Generic</div>
+              <div style="font-size: 24px; font-weight: 800; color: ${pd.authorizedGenericImpact ? COLORS.rose : COLORS.teal}; letter-spacing: -0.03em; line-height: 1;">${pd.authorizedGenericImpact ? 'Likely' : 'Unlikely'}</div>
+              <div style="font-size: 9px; color: ${COLORS.gray500}; margin-top: 5px; line-height: 1.45;">${pd.authorizedGenericImpact ? 'Authorized generic launch expected — accelerates post-LOE erosion.' : 'Authorized generic launch unlikely — standard LOE erosion profile.'}</div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Narrative -->
-      <div class="callout">${escapeHtml(pd.narrative)}</div>
+      <div class="callout" style="padding: 10px 14px;">${escapeHtml(pd.narrative)}</div>
 
       <!-- Methodology note -->
-      <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.6;">
+      <div style="margin-top: 8px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.55;">
         <strong>Methodology:</strong> Patent term calculations follow USPTO/Hatch-Waxman statutory frameworks. Generic erosion curves calibrated to IMS Health/IQVIA post-LOE market share data (2015-2025, n=200+ small molecule LOE events). Paragraph IV risk modeled from historical ANDA filing rates by therapeutic area and patent portfolio complexity.
       </div>
 

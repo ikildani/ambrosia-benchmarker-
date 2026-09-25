@@ -3,7 +3,7 @@
 // Route comparison table, SC lifecycle KPI cards, deal structure impact table,
 // and device exclusivity insight callout.
 
-import { pageHeader, pageFooter, COLORS } from '../helpers';
+import { pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ export function renderDeliveryRoutePage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Delivery Route &amp; Administration Analysis</div>
 

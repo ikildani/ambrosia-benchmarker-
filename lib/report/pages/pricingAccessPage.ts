@@ -1,8 +1,9 @@
 // Page: Pricing & Reimbursement Analysis
-// ICER threshold gauge, international pricing comparison, IRA timeline,
-// payer mix donut, access barriers list, and analyst narrative.
+// ICER threshold gauge, international pricing comparison beside the IRA
+// timeline (when eligible), payer mix donut, access barriers list, and
+// analyst narrative — laid out to fit one A4 sheet.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -11,9 +12,9 @@ import type { PDFReportData, ReportMeta } from '../types';
 
 function renderIcerGauge(icerRisk: string, thresholdPerQALY: number): string {
   const w = 200;
-  const h = 120;
+  const h = 112;
   const cx = w / 2;
-  const cy = 100;
+  const cy = 96;
   const r = 72;
   const uid = `icer-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -72,13 +73,12 @@ function renderIcerGauge(icerRisk: string, thresholdPerQALY: number): string {
 // SVG: International Pricing Comparison (horizontal bar chart)
 // ---------------------------------------------------------------------------
 
-function renderInternationalPricingBars(territories: { territory: string; pricePctOfUS: number }[]): string {
+function renderInternationalPricingBars(territories: { territory: string; pricePctOfUS: number }[], w = 520): string {
   const sorted = [...territories].sort((a, b) => b.pricePctOfUS - a.pricePctOfUS);
-  const w = 520;
-  const barH = 16;
-  const gap = 6;
-  const labelW = 80;
-  const valueW = 50;
+  const barH = 12;
+  const gap = 4;
+  const labelW = 72;
+  const valueW = 40;
   const chartX = labelW;
   const chartW = w - labelW - valueW - 10;
   const h = sorted.length * (barH + gap) + 20;
@@ -116,11 +116,10 @@ function renderInternationalPricingBars(territories: { territory: string; priceP
 // SVG: IRA Exposure Timeline
 // ---------------------------------------------------------------------------
 
-function renderIraTimeline(negotiationYear: number | null, reductionPct: number): string {
+function renderIraTimeline(negotiationYear: number | null, reductionPct: number, w = 520): string {
   if (!negotiationYear) return '';
-  const w = 520;
   const h = 60;
-  const padX = 30;
+  const padX = 26;
   const currentYear = new Date().getFullYear();
   const startYear = currentYear;
   const endYear = Math.max(negotiationYear + 3, currentYear + 10);
@@ -148,7 +147,7 @@ function renderIraTimeline(negotiationYear: number | null, reductionPct: number)
       <text x="${xPos(negotiationYear)}" y="${lineY - 12}" text-anchor="middle" font-size="8" font-weight="700" fill="${COLORS.rose}">${negotiationYear}</text>
       <text x="${xPos(negotiationYear)}" y="${lineY + 18}" text-anchor="middle" font-size="7" font-weight="600" fill="${COLORS.gray500}">Negotiation Start</text>
       <!-- Reduction label -->
-      <text x="${xPos(negotiationYear) + 40}" y="${lineY + 18}" text-anchor="start" font-size="7" font-weight="700" fill="${COLORS.rose}">-${formatPercent(reductionPct * 100, 0)} price impact</text>
+      <text x="${w - padX}" y="${lineY - 12}" text-anchor="end" font-size="7" font-weight="700" fill="${COLORS.rose}">-${formatPercent(reductionPct * 100, 0)} price impact</text>
       <!-- Year labels -->
       <text x="${padX}" y="${h - 4}" font-size="7" fill="${COLORS.gray400}">${startYear}</text>
       <text x="${w - padX}" y="${h - 4}" text-anchor="end" font-size="7" fill="${COLORS.gray400}">${endYear}</text>
@@ -161,12 +160,12 @@ function renderIraTimeline(negotiationYear: number | null, reductionPct: number)
 // ---------------------------------------------------------------------------
 
 function renderPayerMixDonut(commercial: number, medicare: number, medicaid: number, managedCare: number): string {
-  const w = 180;
-  const h = 180;
+  const w = 140;
+  const h = 140;
   const cx = w / 2;
   const cy = h / 2;
-  const r = 60;
-  const innerR = 36;
+  const r = 52;
+  const innerR = 31;
   const uid = `pm-${Math.random().toString(36).slice(2, 8)}`;
 
   const segments = [
@@ -258,16 +257,16 @@ export function renderPricingAccessPage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Pricing &amp; Reimbursement Analysis</div>
+      <div class="section-title-lg" style="margin-bottom: 12px;">Pricing &amp; Reimbursement Analysis</div>
 
       <!-- Top row: ICER Gauge + NICE + Formulary + Peak Sales Impact -->
-      <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
         <!-- ICER Gauge -->
-        <div style="flex: 1.2; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.navy}; border-radius: 6px; padding: 12px 14px; background: white; text-align: center;">
-          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">ICER Cost-Effectiveness</div>
-          <div class="chart-container">
+        <div style="flex: 1.2; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.navy}; border-radius: 6px; padding: 10px 14px; background: white; text-align: center;">
+          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">ICER Cost-Effectiveness</div>
+          <div class="chart-container" style="margin: 2px 0;">
             ${renderIcerGauge(pc.icerRisk, pc.icerThreshold)}
           </div>
         </div>
@@ -290,45 +289,50 @@ export function renderPricingAccessPage(data: PDFReportData, meta: ReportMeta): 
         </div>
       </div>
 
-      <!-- International Reference Pricing -->
-      <div class="section-title">International Reference Pricing</div>
-      <div class="card" style="padding: 12px 16px; margin-bottom: 14px; border-top: 3px solid ${COLORS.navy};">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 8px; font-weight: 600; color: ${COLORS.gray500};">Territory Prices as % of US WAC</span>
-          <span style="font-size: 9px; font-weight: 800; color: ${COLORS.navy};">Avg: ${formatPercent(pc.internationalReferencePricing.avgPriceVsUS * 100, 0)} of US</span>
-        </div>
-        <div class="chart-container">
-          ${renderInternationalPricingBars(pc.internationalReferencePricing.territories)}
-        </div>
-      </div>
-
-      <!-- IRA Exposure Timeline (if eligible) -->
-      ${pc.iraExposure.eligible ? `
-      <div class="section-title">IRA Medicare Negotiation Exposure</div>
-      <div class="card" style="padding: 12px 16px; margin-bottom: 14px; border-top: 3px solid ${COLORS.rose};">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div>
-            <span style="font-size: 9px; font-weight: 800; color: ${COLORS.rose}; background: ${COLORS.roseLight}; padding: 3px 12px; border-radius: 4px;">IRA Eligible</span>
-          </div>
-          <div style="font-size: 8px; color: ${COLORS.gray500};">
-            Negotiation: <strong style="color: ${COLORS.navy};">${pc.iraExposure.negotiationYear ?? 'TBD'}</strong>
-            &nbsp;&bull;&nbsp;
-            Expected Reduction: <strong style="color: ${COLORS.rose};">-${formatPercent(pc.iraExposure.expectedPriceReduction_pct * 100, 0)}</strong>
-          </div>
-        </div>
-        <div class="chart-container">
-          ${renderIraTimeline(pc.iraExposure.negotiationYear, pc.iraExposure.expectedPriceReduction_pct)}
-        </div>
-      </div>
-      ` : ''}
+      <!-- International Reference Pricing (beside the IRA timeline when eligible) -->
+      ${(() => {
+        const ira = pc.iraExposure.eligible;
+        const barsW = ira ? 336 : 520;
+        const intl = `
+          <div class="section-title">International Reference Pricing</div>
+          <div class="card" style="padding: 10px 14px; border-top: 3px solid ${COLORS.navy};">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 8px; font-weight: 600; color: ${COLORS.gray500};">Territory prices as % of US WAC</span>
+              <span style="font-size: 9px; font-weight: 800; color: ${COLORS.navy};">Avg: ${formatPercent(pc.internationalReferencePricing.avgPriceVsUS * 100, 0)} of US</span>
+            </div>
+            <div class="chart-container" style="margin: 2px 0;">
+              ${renderInternationalPricingBars(pc.internationalReferencePricing.territories, barsW)}
+            </div>
+          </div>`;
+        if (!ira) return `<div style="margin-bottom: 12px;">${intl}</div>`;
+        return `
+          <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 10px; margin-bottom: 12px; align-items: start;">
+            <div>${intl}</div>
+            <div>
+              <div class="section-title">IRA Medicare Negotiation Exposure</div>
+              <div class="card" style="padding: 10px 14px; border-top: 3px solid ${COLORS.rose};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px;">
+                  <span style="font-size: 9px; font-weight: 800; color: ${COLORS.rose}; background: ${COLORS.roseLight}; padding: 3px 10px; border-radius: 4px; white-space: nowrap;">IRA Eligible</span>
+                  <div style="font-size: 8px; color: ${COLORS.gray500}; text-align: right; line-height: 1.4;">
+                    Negotiation: <strong style="color: ${COLORS.navy};">${pc.iraExposure.negotiationYear ?? 'TBD'}</strong><br>
+                    Expected reduction: <strong style="color: ${COLORS.rose};">-${formatPercent(pc.iraExposure.expectedPriceReduction_pct * 100, 0)}</strong>
+                  </div>
+                </div>
+                <div class="chart-container" style="margin: 2px 0;">
+                  ${renderIraTimeline(pc.iraExposure.negotiationYear, pc.iraExposure.expectedPriceReduction_pct, 288)}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      })()}
 
       <!-- Payer Mix + Access Barriers row -->
-      <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
         <!-- Payer Mix Donut -->
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.navy}; border-radius: 6px; padding: 14px; background: white;">
-          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px;">Payer Mix Distribution</div>
+        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.navy}; border-radius: 6px; padding: 10px 14px; background: white;">
+          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">Payer Mix Distribution</div>
           <div style="display: flex; align-items: center; gap: 14px;">
-            <div class="chart-container">
+            <div class="chart-container" style="margin: 0; width: auto;">
               ${renderPayerMixDonut(pc.payerMixImpact.commercialPct, pc.payerMixImpact.medicarePct, pc.payerMixImpact.medicaidPct, pc.payerMixImpact.managedCarePct)}
             </div>
             <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -348,8 +352,8 @@ export function renderPricingAccessPage(data: PDFReportData, meta: ReportMeta): 
           </div>
         </div>
         <!-- Access Barriers -->
-        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.rose}; border-radius: 6px; padding: 14px; background: white;">
-          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px;">Patient Access Barriers</div>
+        <div style="flex: 1; border: 1px solid ${COLORS.gray200}; border-top: 3px solid ${COLORS.rose}; border-radius: 6px; padding: 10px 14px; background: white;">
+          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">Patient Access Barriers</div>
           ${pc.patientAccessBarriers.length > 0 ? `
             <div style="display: flex; flex-direction: column; gap: 5px;">
               ${pc.patientAccessBarriers.map(b => `
@@ -366,12 +370,12 @@ export function renderPricingAccessPage(data: PDFReportData, meta: ReportMeta): 
       </div>
 
       <!-- Narrative -->
-      <div class="callout" style="margin-bottom: 10px;">
+      <div class="callout" style="margin-bottom: 8px; padding: 10px 14px; line-height: 1.5;">
         ${escapeHtml(pc.narrative)}
       </div>
 
       <!-- Methodology -->
-      <div class="disclaimer-box">
+      <div class="disclaimer-box" style="padding: 10px 14px; line-height: 1.55;">
         <strong>Methodology:</strong> ICER thresholds calibrated to Value Assessment Framework 2020-2024 evidence reports and US payer WTP surveys. NICE recommendations modeled against Single Technology Appraisal outcomes (2018-2024, n=300+). IRA exposure per CMS Final Rule implementation timeline and CBO scoring. International reference pricing indices from IQVIA MIDAS database. Payer mix distributions derived from IQVIA National Sales Perspectives and CMS enrollment data.
       </div>
 

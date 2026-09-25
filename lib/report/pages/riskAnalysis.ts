@@ -213,7 +213,7 @@ export function renderRiskAnalysisPage(data: PDFReportData, meta: ReportMeta): s
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Risk Analysis')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Risk Analysis & Probability-Weighted Value</div>
 

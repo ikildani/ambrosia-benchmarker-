@@ -4,7 +4,7 @@
 // precedent deals table, AD target combination table, CMC risk comparison,
 // and manufacturing risk insight callout.
 
-import { pageHeader, pageFooter, COLORS } from '../helpers';
+import { pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -89,7 +89,7 @@ const cmcComparison: CMCRow[] = [
 export function renderTrispecificPage(data: PDFReportData, meta: ReportMeta): string {
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Trispecific Antibody Deep Dive</div>
 

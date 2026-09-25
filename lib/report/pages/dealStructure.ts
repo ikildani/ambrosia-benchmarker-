@@ -3,7 +3,7 @@
 
 import { renderWaterfall } from '../svg-charts/waterfall';
 import { renderRangeBar } from '../svg-charts/rangeBar';
-import { formatUsd, escapeHtml, pageHeader, pageFooter, COLORS } from '../helpers';
+import { formatUsd, escapeHtml, pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): string {
@@ -27,7 +27,7 @@ export function renderDealStructurePage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Deal Structure & Valuation</div>
 

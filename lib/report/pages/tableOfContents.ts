@@ -1,65 +1,59 @@
 // Page 2: Table of Contents
-// Clean dotted-leader TOC listing all report sections with page numbers
+// Two-column compact contents so a 50-section brief fits one page.
 
-import { pageHeader, pageFooter, COLORS } from '../helpers';
-import type { PDFReportData, ReportMeta } from '../types';
+import { pageHeader, pageFooter, COLORS, BRIEF_TITLE, escapeHtml } from '../helpers';
+import type { PDFReportData, ReportMeta, TocEntry } from '../types';
+
+const HIGHLIGHT = new Set(['The Decision', 'Valuation Bridge', 'Comparable Set', 'Buyer Map', 'Catalyst Calendar', 'Executive Dashboard']);
+
+function tocRow(entry: TocEntry, first: boolean): string {
+  const hi = HIGHLIGHT.has(entry.title);
+  return `
+    <div style="display: flex; align-items: center; padding: 4px 6px; margin-bottom: 1px; border-radius: 3px; ${hi ? `background: ${COLORS.tealLight};` : ''}">
+      <div style="width: 20px; height: 20px; border-radius: 3px; background: ${first ? COLORS.navy : hi ? COLORS.teal : COLORS.gray100}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 8px;">
+        <span style="font-size: 8px; font-weight: 800; color: ${first || hi ? '#fff' : COLORS.teal};">${entry.page}</span>
+      </div>
+      <div style="flex: 1; min-width: 0; font-size: 9.2px; font-weight: ${hi ? 800 : 600}; color: ${COLORS.navy}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(entry.title)}</div>
+      <div style="flex: 0 0 14px; border-bottom: 1px dotted ${COLORS.gray300}; margin: 0 6px;"></div>
+      <div style="font-size: 9px; font-weight: 800; color: ${COLORS.teal}; flex-shrink: 0; font-variant-numeric: tabular-nums;">${entry.page}</div>
+    </div>`;
+}
 
 export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): string {
   const indication = data.result.labels.indication || data.inputs.indication;
+  const asset = data.brief?.asset;
   const entries = meta.tocEntries;
-
-  // Highlight key analytical sections
-  const highlightTitles = new Set(['Executive Dashboard', 'Sensitivity Analysis', 'Risk Analysis', 'Deal Timeline']);
-
-  const tocRows = entries.map((entry, i) => {
-    const isHighlight = highlightTitles.has(entry.title);
-    return `
-    <div style="display: flex; align-items: center; margin-bottom: 3px; padding: 7px 12px; border-radius: 4px; ${isHighlight ? `background: ${COLORS.gray50};` : ''}">
-      <div style="width: 28px; height: 28px; border-radius: 4px; background: ${i === 0 ? COLORS.navy : COLORS.gray100}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">
-        <span style="font-size: 10px; font-weight: 800; color: ${i === 0 ? '#fff' : COLORS.teal};">${entry.page}</span>
-      </div>
-      <div style="flex: 1; min-width: 0;">
-        <div style="font-size: 11px; font-weight: 700; color: ${COLORS.navy}; margin-bottom: 1px;">${entry.title}</div>
-        <div style="font-size: 9px; color: ${COLORS.gray400}; line-height: 1.4;">${entry.description}</div>
-      </div>
-      <div style="flex: 1; border-bottom: 1px dotted ${COLORS.gray200}; margin: 0 12px; min-width: 20px;"></div>
-      <div style="font-size: 11px; font-weight: 800; color: ${COLORS.teal}; flex-shrink: 0;">p. ${entry.page}</div>
-    </div>`;
-  }).join('');
+  const half = Math.ceil(entries.length / 2);
+  const left = entries.slice(0, half);
+  const right = entries.slice(half);
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Table of Contents</div>
-
-      <p style="font-size: 11px; color: ${COLORS.gray500}; line-height: 1.6; margin-bottom: 28px;">
-        This report provides a comprehensive deal valuation analysis for
-        <strong style="color: ${COLORS.navy};">${indication}</strong>,
-        including quantitative benchmarks, sensitivity modeling, comparable transactions,
-        partner intelligence, and strategic insights. Each section is designed
-        to support data-driven licensing negotiations.
+      <div class="section-title-lg">Contents</div>
+      <p style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.55; margin-bottom: 14px;">
+        ${asset?.assetName ? `<strong style="color: ${COLORS.navy};">${escapeHtml(asset.assetName)}</strong> in ` : ''}<strong style="color: ${COLORS.navy};">${escapeHtml(indication)}</strong>.
+        Start with <strong>The Decision</strong> (recommendation, counterparties, ask and floor), then the <strong>Valuation Bridge</strong> and the <strong>Comparable Set</strong> that support it.
+        Everything after that is evidence: buyers, landscape, negotiation, risk, and the cited appendix.
       </p>
+      <hr class="divider-thick" style="margin-bottom: 10px;">
 
-      <hr class="divider-thick" style="margin-bottom: 24px;">
-
-      <div style="padding: 0 8px;">
-        ${tocRows}
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px;">
+        <div>${left.map((e, i) => tocRow(e, i === 0)).join('')}</div>
+        <div>${right.map(e => tocRow(e, false)).join('')}</div>
       </div>
 
       <hr class="divider-thick" style="margin-top: 10px;">
 
-      <!-- Report metadata callout -->
-      <div class="card" style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="card" style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;">
         <div>
-          <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px;">Report Details</div>
-          <div style="font-size: 11px; color: ${COLORS.gray700};">
-            ${meta.pageCount} pages &middot; Version ${meta.version} &middot; Generated ${meta.generatedAt}
-          </div>
+          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 2px;">Brief details</div>
+          <div style="font-size: 9.5px; color: ${COLORS.gray700};">${meta.pageCount} pages &middot; Version ${meta.version} &middot; Generated ${meta.generatedAt}${data.brief?.asOf ? ` &middot; Data as of ${escapeHtml(data.brief.asOf)}` : ''}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px;">Report ID</div>
-          <div style="font-size: 11px; font-weight: 600; color: ${COLORS.teal};">${meta.reportId}</div>
+          <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 2px;">Brief ID</div>
+          <div style="font-size: 9.5px; font-weight: 600; color: ${COLORS.teal};">${meta.reportId}</div>
         </div>
       </div>
 

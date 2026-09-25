@@ -2,7 +2,7 @@
 // Deal comparison bar chart + enhanced deal cards
 
 import { renderDealComparison } from '../svg-charts/dealComparison';
-import { pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): string {
@@ -12,7 +12,7 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
   if (!comparableDeals || comparableDeals.length === 0) {
     return `
       <div class="report-page">
-        ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+        ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
         <div class="section-title-lg">Comparable Transactions</div>
         <div class="card" style="text-align: center; padding: 40px;">
           <div style="font-size: 12px; color: ${COLORS.gray400};">No comparable deals available for this asset profile.</div>
@@ -26,7 +26,7 @@ export function renderComparablesPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Comparable Transactions</div>
 
