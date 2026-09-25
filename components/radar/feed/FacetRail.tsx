@@ -30,12 +30,13 @@ const RAIL_ORDER: MultiFacetKey[] = [
   'phase',
   'target',
   'partnership',
+  'ownership',
   'owner_type',
   'score_band',
   'trial_status',
 ];
 
-const OPEN_BY_DEFAULT = new Set<MultiFacetKey>(['region', 'ta', 'modality', 'phase', 'partnership', 'score_band']);
+const OPEN_BY_DEFAULT = new Set<MultiFacetKey>(['region', 'ta', 'modality', 'phase', 'partnership', 'ownership', 'score_band']);
 const COLLAPSED_ROWS = 7;
 
 export interface FacetRailProps {

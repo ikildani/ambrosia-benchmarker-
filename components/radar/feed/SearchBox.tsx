@@ -47,7 +47,7 @@ function looksLikeSentence(text: string): boolean {
 export function SearchBox({ value, onApplyText, onToggleTarget, onParsed }: Props) {
   const router = useRouter();
   const [text, setText] = useState(value);
-  const { suggestions, loading } = useTypeahead(text);
+  const { suggestions, loading, paused } = useTypeahead(text);
   const { parse, parsing, error } = useNaturalSearch();
 
   useEffect(() => {
@@ -120,6 +120,11 @@ export function SearchBox({ value, onApplyText, onToggleTarget, onParsed }: Prop
             )}
           />
           {(loading || parsing) && <Spinner className="absolute right-3 top-1/2 -translate-y-1/2" />}
+          {paused && !loading && !parsing && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 dark:text-neutral-400" role="status">
+              Suggestions paused for a moment
+            </span>
+          )}
         </div>
         {items.length > 0 && (
           <ComboboxOptions

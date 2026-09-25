@@ -1,5 +1,5 @@
 /**
- * Cron: ex-ClinicalTrials.gov registry sweep (Asset Radar Phase 2 item 5).
+ * Cron: ex-ClinicalTrials.gov registry sweep (Search & Evaluation Phase 2 item 5).
  *
  * Round-robins through the registry adapters that can run from Vercel
  * (capability api/bulk with their env present), least-recently-run first,

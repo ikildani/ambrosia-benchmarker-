@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Alert rules API
+ * Search & Evaluation — Alert rules API
  *
  * GET    /api/radar/alerts?asset_id=UUID        rules for the caller (optionally those pinned to one asset)
  * GET    /api/radar/alerts?events=true&limit=30 recent alert events for the caller (in-app inbox)

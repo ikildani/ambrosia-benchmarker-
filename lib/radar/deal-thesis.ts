@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 3: Deal Thesis Generator (full industry pool)
+ * Search & Evaluation — Layer 3: Deal Thesis Generator (full industry pool)
  *
  * Every industry-owned, unpartnered / partially-partnered clinical asset
  * (early phase 1 .. phase 3; phase 4 only when unpartnered; confidence >= 20)

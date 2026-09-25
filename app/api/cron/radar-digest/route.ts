@@ -1,5 +1,5 @@
 /**
- * Cron: Asset Radar digest and alerts (Workstream G2)
+ * Cron: Search & Evaluation digest and alerts (Workstream G2)
  *
  * Runs lib/radar/notifications.ts once: mandate digests (email / in-app /
  * Slack, per radar_user_mandates.notify_* and radar_alert_rules), score

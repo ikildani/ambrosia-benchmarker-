@@ -205,16 +205,18 @@ export default function Header({
       href: '/companies',
       isActive: isCompaniesPage,
     },
-    ...(RADAR_ENABLED ? [{
-      label: 'Asset Radar',
-      href: '/radar',
-      isActive: isRadarPage,
-    }] : []),
     {
       label: 'Intelligence',
       href: '/playbook',
       isActive: isIntelligencePage,
       isDropdown: true,
+    }] : []),
+    // Every signed-in user sees the link once the module is enabled; the page
+    // itself shows the upgrade gate to free accounts (that is the upsell).
+    ...(RADAR_ENABLED && isAuthenticated ? [{
+      label: 'Search & Evaluation',
+      href: '/radar',
+      isActive: isRadarPage,
     }] : []),
     ...(tier === 'portfolio' && isPortfolioAdmin ? [{
       label: 'Portfolio',

@@ -1,5 +1,5 @@
 /**
- * Company financial pressure from primary SEC sources (Asset Radar, Phase 3
+ * Company financial pressure from primary SEC sources (Search & Evaluation, Phase 3
  * Workstream C). Writes `company_financials` (migration 114).
  *
  *   1. CIK resolution: SEC company_tickers.json matched by ticker, then by
@@ -35,7 +35,10 @@ export const SEC_FULL_TEXT_SEARCH_URL = 'https://efts.sec.gov/LATEST/search-inde
 const SYNC_SOURCE = 'company_financials';
 const MIN_REQUEST_GAP_MS = 120; // < 10 req/s
 const DEFAULT_TIME_BUDGET_MS = 240_000;
-const DEFAULT_LIMIT = 40;
+// 120 companies × 3 SEC calls at a 120 ms gap is ~45 s of a 240 s budget; at
+// 6-hourly runs that covers ~500 filers a day, so a full pass over the listed
+// biotechs takes two days instead of two weeks.
+const DEFAULT_LIMIT = 120;
 const MAX_PERIODS_PER_COMPANY = 12;
 
 const CASH_TAGS = ['CashAndCashEquivalentsAtCarryingValue', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents'];
@@ -157,9 +160,24 @@ export function stripCik(cik: string | number): string {
 const CORPORATE_SUFFIX_RE =
   /\b(incorporated|inc|corporation|corp|company|co|limited|ltd|plc|llc|lp|ag|sa|nv|bv|se|holdings?|group|pharmaceuticals?|pharma|therapeutics|biosciences?|biotherapeutics|biotechnology|biotech|biopharma|biopharmaceuticals?|bio|sciences?|medical|medicines?|international|global|the)\b/g;
 
+/**
+ * SEC registrant titles carry state-of-incorporation and share-class noise:
+ * "ACME THERAPEUTICS INC /DE/", "BETA BIO INC/NEW", "GAMMA PLC /ADR/",
+ * "DELTA CORP (DE)". Before Sep 2026 that noise leaked into the name keys and
+ * only 29 of 3,464 US industry companies ever resolved a CIK.
+ */
+export function stripSecTitleNoise(title: string): string {
+  return (title ?? '')
+    .replace(/\s*\/\s*[A-Za-z]{2,4}\s*\/?\s*$/g, ' ')   // trailing /DE/, /NEW, /ADR/
+    .replace(/\s*\/\s*(new|old|adr|de|fi|ma|nj|ny|pa|ca|ga|wa|tx|ut|mn|nv|ct|va|md|oh)\b\s*\/?/gi, ' ')
+    .replace(/\s*\((?:de|new|old|adr)\)\s*/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /** Aggressive name key for SEC title matching: lowercase, strip punctuation and corporate suffixes. */
 export function normalizeCompanyKey(name: string): string {
-  return (name ?? '')
+  return stripSecTitleNoise(name ?? '')
     .normalize('NFKC')
     .toLowerCase()
     .replace(/&/g, ' and ')
@@ -171,7 +189,7 @@ export function normalizeCompanyKey(name: string): string {
 
 /** Loose key that keeps sector words (Acme Therapeutics vs Acme Biosciences stay distinct). */
 export function looseCompanyKey(name: string): string {
-  return (name ?? '')
+  return stripSecTitleNoise(name ?? '')
     .normalize('NFKC')
     .toLowerCase()
     .replace(/&/g, ' and ')
@@ -629,18 +647,28 @@ export async function resolveCiks(
     .limit(2000);
   if (tErr) errors.push(`companies ticker read: ${tErr.message}`);
 
-  // Then industry names (bounded).
-  const { data: nameRows, error: nErr } = await supabase
-    .from('companies')
-    .select('id, name, ticker, cik, name_variations')
-    .is('cik', null)
-    .is('ticker', null)
-    .eq('owner_type', 'industry')
-    .order('pipeline_assets_count', { ascending: false, nullsFirst: false })
-    .limit(opts.maxNameCandidates ?? 4000);
-  if (nErr) errors.push(`companies name read: ${nErr.message}`);
+  // Then every industry company without a CIK. Matching is an in-memory map
+  // lookup, so there is no reason to cap this: the old 4,000-row cap ordered
+  // by pipeline_assets_count (null for the ~23k sponsor-created companies)
+  // never reached the US biotechs the CT.gov sweep had added.
+  const nameRows: CompanyLite[] = [];
+  const maxNames = opts.maxNameCandidates ?? 30_000;
+  const PAGE = 1000;
+  for (let from = 0; from < maxNames; from += PAGE) {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('id, name, ticker, cik, name_variations')
+      .is('cik', null)
+      .is('ticker', null)
+      .eq('owner_type', 'industry')
+      .order('id', { ascending: true })
+      .range(from, Math.min(from + PAGE, maxNames) - 1);
+    if (error) { errors.push(`companies name read: ${error.message}`); break; }
+    nameRows.push(...((data ?? []) as CompanyLite[]));
+    if ((data ?? []).length < PAGE) break;
+  }
 
-  const candidates = [...((tickerRows ?? []) as CompanyLite[]), ...((nameRows ?? []) as CompanyLite[])];
+  const candidates = [...((tickerRows ?? []) as CompanyLite[]), ...nameRows];
   const claimed = new Set<string>();
   for (const c of candidates) {
     const hit = matchCikEntry(c, index);

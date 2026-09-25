@@ -6,6 +6,7 @@ import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import type { ScoreBreakdown, ScoreTrend } from './types';
 import { SectionCard, ExternalLink, btnGhost } from './ui';
 import { fmtDate, signedPts } from './format';
+import { LOW_POWER_NOTE, SCORE_LEGEND } from '@/lib/radar/client/score-copy';
 import { TrendSparkline } from './TrendSparkline';
 
 /**
@@ -42,6 +43,15 @@ export function ScoreWaterfall({ score, trend }: { score: ScoreBreakdown; trend:
               <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Composite</p>
               <p className="text-3xl font-semibold tabular-nums text-neutral-900 dark:text-neutral-50">{score.score}<span className="text-sm font-normal text-neutral-400"> /100</span></p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">Evidence completeness {score.confidence}% — confidence is how much was checked, not how right the score is.</p>
+              <p className="mt-1 max-w-md text-xs text-neutral-500 dark:text-neutral-400">{SCORE_LEGEND}</p>
+              {score.presentation?.low_power && (
+                <p className="mt-1 max-w-md text-xs text-amber-700 dark:text-amber-400">{LOW_POWER_NOTE}</p>
+              )}
+              {score.presentation?.interval && (
+                <p className="mt-1 max-w-md text-xs text-neutral-500 dark:text-neutral-400">
+                  In the backtest, programs scored like this one were licensed within 12 months {(100 * score.presentation.interval.lo).toFixed(1)}–{(100 * score.presentation.interval.hi).toFixed(1)}% of the time (n={score.presentation.interval.n.toLocaleString('en-US')}).
+                </p>
+              )}
             </div>
             {score.legacy_shape && (
               <p className="max-w-xs text-xs text-neutral-500 dark:text-neutral-400">Decomposition reconstructed from the v2 snapshot map and active signals; per-factor evidence links appear once the v3 scorer writes contributions.</p>

@@ -4,7 +4,7 @@
  * client hooks (to type what they receive) so the two cannot drift.
  */
 
-import type { ClinicalAssetRow, OwnerType, PartnershipStatus } from '@/lib/radar/types';
+import type { ClinicalAssetRow, OwnerType, PartnershipStatus, ScoreDriver } from '@/lib/radar/types';
 import type { MultiFacetKey, RadarFilterState, SortKey } from './filter-schema';
 
 /** Columns from ASSET_LIST_COLUMNS, plus what the feed route joins or derives. */
@@ -25,6 +25,17 @@ export type FeedRow = Pick<
   | 'trial_count'
   | 'enrollment_total'
   | 'partnership_status'
+  | 'ownership_status'
+  | 'partnership_basis'
+  | 'partnership_sources_checked'
+  | 'score_probability'
+  | 'score_pct_peer'
+  | 'score_peer_n'
+  | 'score_peer_key'
+  | 'score_pct_universe'
+  | 'score_base_rate'
+  | 'score_top_drivers'
+  | 'score_low_power'
   | 'partner_company_name'
   | 'territory_rights_available'
   | 'licensing_intent_score'
@@ -186,6 +197,13 @@ export interface CompareAsset {
   deal_readiness_score: number | null;
   competitive_heat: number | null;
   last_update_date: string | null;
+  /** Migration 126 presentation fields. */
+  score_probability?: number | null;
+  score_pct_peer?: number | null;
+  score_peer_n?: number | null;
+  score_peer_key?: string | null;
+  score_base_rate?: number | null;
+  score_top_drivers?: ScoreDriver[] | null;
   /** Top three active factors by score. */
   factors: CompareFactor[];
   terms: CompareTerms | null;

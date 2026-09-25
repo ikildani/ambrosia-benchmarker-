@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Deal Opportunities API
+ * Search & Evaluation — Deal Opportunities API
  *
  * GET /api/radar/opportunities?top=20
  *   Top N proposed deals by opportunity score.
@@ -22,7 +22,7 @@ import { isUuid, sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // Search & Evaluation intelligence is Pro-only: this endpoint returns scored data
   // from the asset universe, so anonymous and free-tier callers are rejected.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {

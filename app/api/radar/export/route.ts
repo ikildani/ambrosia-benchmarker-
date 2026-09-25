@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Export API
+ * Search & Evaluation — Export API
  *
  * GET  /api/radar/export?asset_id=UUID&format=json   full brief as JSON
  * GET  /api/radar/export?asset_id=UUID&format=pdf    one/two-page committee brief (A4 PDF)
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
   if (format === 'json') {
     audit(supabase, auth.userId, auth.tier, { asset_id: assetId, format: 'json' });
     return NextResponse.json({
-      meta: { generated_at: brief.generated_at, generated_by: 'Solidus Asset Radar', version: '2.0', model_version: brief.score.model_version, share_url: `${SITE_URL}/radar/${assetId}` },
+      meta: { generated_at: brief.generated_at, generated_by: 'Solidus Search & Evaluation', version: '2.0', model_version: brief.score.model_version, share_url: `${SITE_URL}/radar/${assetId}` },
       brief,
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   }

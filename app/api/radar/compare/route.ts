@@ -1,5 +1,5 @@
 /**
- * Asset Radar — compare tray.
+ * Search & Evaluation — compare tray.
  *
  * GET /api/radar/compare?ids=UUID,UUID[,UUID,UUID,UUID]
  *   → { assets: CompareAsset[] } in the requested order (2 to 5 assets).
@@ -20,7 +20,7 @@ import type { CompareAsset, CompareFactor, CompareResponse, CompareTerms } from 
 export const dynamic = 'force-dynamic';
 
 const ASSET_SELECT =
-  'id, asset_name, company_name, company_id, originator_country, originator_region, phase, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, partnership_status, partner_company_name, territory_rights_available, regulatory_designations, trial_count, enrollment_total, licensing_intent_score, score_confidence, deal_readiness_score, competitive_heat, last_update_date, companies(owner_type)';
+  'id, asset_name, company_name, company_id, originator_country, originator_region, phase, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, partnership_status, partner_company_name, territory_rights_available, regulatory_designations, trial_count, enrollment_total, licensing_intent_score, score_confidence, deal_readiness_score, competitive_heat, last_update_date, score_probability, score_pct_peer, score_peer_n, score_peer_key, score_base_rate, score_top_drivers, companies(owner_type)';
 
 interface AssetRow {
   id: string;
@@ -47,6 +47,13 @@ interface AssetRow {
   deal_readiness_score: number | null;
   competitive_heat: number | null;
   last_update_date: string | null;
+  /** Migration 126; numerics arrive as strings from PostgREST. */
+  score_probability?: number | string | null;
+  score_pct_peer?: number | string | null;
+  score_peer_n?: number | string | null;
+  score_peer_key?: string | null;
+  score_base_rate?: number | string | null;
+  score_top_drivers?: unknown;
   companies: { owner_type: string | null } | { owner_type: string | null }[] | null;
 }
 
@@ -177,6 +184,12 @@ export async function GET(request: NextRequest) {
     assets.push({
       ...rest,
       licensing_intent_score: num(r.licensing_intent_score),
+      score_probability: num(r.score_probability),
+      score_pct_peer: num(r.score_pct_peer),
+      score_peer_n: num(r.score_peer_n),
+      score_peer_key: (r.score_peer_key as string | null) ?? null,
+      score_base_rate: num(r.score_base_rate),
+      score_top_drivers: Array.isArray(r.score_top_drivers) ? (r.score_top_drivers as CompareAsset['score_top_drivers']) : [],
       score_confidence: num(r.score_confidence),
       deal_readiness_score: num(r.deal_readiness_score),
       competitive_heat: num(r.competitive_heat),

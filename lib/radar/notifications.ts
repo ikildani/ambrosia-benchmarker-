@@ -1,5 +1,5 @@
 /**
- * Asset Radar — alerts and digests.
+ * Search & Evaluation — alerts and digests.
  *
  * Pure builders (no I/O) at the top: rule validation, dedupe keys, threshold
  * crossing detection, the mandate digest builder, and the email / Slack
@@ -339,7 +339,7 @@ const EMAIL_SHELL = (title: string, subtitle: string, body: string, footer: stri
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.5;color:#e2e8f0;max-width:700px;margin:0 auto;padding:20px;background-color:#0f172a;">
   <div style="background:#0b1220;padding:28px 32px;border:1px solid #1e293b;border-bottom:none;border-radius:12px 12px 0 0;">
-    <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Solidus Asset Radar</p>
+    <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Solidus Search & Evaluation</p>
     <h1 style="color:#f8fafc;margin:0;font-size:20px;font-weight:600;">${escapeHtml(title)}</h1>
     <p style="color:#94a3b8;margin:6px 0 0;font-size:13px;">${escapeHtml(subtitle)}</p>
   </div>
@@ -358,7 +358,7 @@ function scoreChip(score: number): string {
 
 export function renderDigestEmail(digest: MandateDigest): { subject: string; html: string; text: string } {
   const n = digest.total_new;
-  const subject = `Asset Radar: ${n} new match${n === 1 ? '' : 'es'} for “${digest.mandate_name}”`;
+  const subject = `Search & Evaluation: ${n} new match${n === 1 ? '' : 'es'} for “${digest.mandate_name}”`;
   const rows = digest.items.map(it => `
     <tr>
       <td style="padding:12px 10px;border-bottom:1px solid #1e293b;vertical-align:top;width:44px;">${scoreChip(it.score)}</td>
@@ -370,7 +370,7 @@ export function renderDigestEmail(digest: MandateDigest): { subject: string; htm
     </tr>`).join('');
   const more = n > digest.items.length ? `<p style="color:#94a3b8;font-size:12px;margin:12px 0 0;">${n - digest.items.length} more in the feed.</p>` : '';
   const body = `<table style="width:100%;border-collapse:collapse;">${rows}</table>${more}
-    <div style="text-align:center;margin:24px 0 8px;"><a href="${SITE_URL}/radar" style="display:inline-block;background:#f59e0b;color:#0f172a;padding:10px 22px;text-decoration:none;border-radius:999px;font-weight:600;font-size:13px;">Open Asset Radar</a></div>`;
+    <div style="text-align:center;margin:24px 0 8px;"><a href="${SITE_URL}/radar" style="display:inline-block;background:#f59e0b;color:#0f172a;padding:10px 22px;text-decoration:none;border-radius:999px;font-weight:600;font-size:13px;">Open Search & Evaluation</a></div>`;
   const footer = `Daily mandate digest · new matches since ${escapeHtml(digest.since.slice(0, 10))}<br><a href="${SITE_URL}/radar" style="color:#f59e0b;">Manage mandates and alerts</a>`;
   const text = [subject, '', ...digest.items.map(it => `${it.score}  ${it.asset_name} — ${it.company_name} (${radarLabel(it.phase)}) — ${it.why_now} — ${it.url}`)].join('\n');
   return { subject, html: EMAIL_SHELL(subject, `${n} new match${n === 1 ? '' : 'es'} since ${digest.since.slice(0, 10)}`, body, footer), text };
@@ -378,14 +378,14 @@ export function renderDigestEmail(digest: MandateDigest): { subject: string; htm
 
 export function renderDigestSlack(digest: MandateDigest): { text: string; blocks: unknown[] } {
   const n = digest.total_new;
-  const text = `Asset Radar: ${n} new match${n === 1 ? '' : 'es'} for "${digest.mandate_name}"`;
+  const text = `Search & Evaluation: ${n} new match${n === 1 ? '' : 'es'} for "${digest.mandate_name}"`;
   const lines = digest.items.map(it => `*${it.score}*  <${it.url}|${it.asset_name}> — ${it.company_name} · ${radarLabel(it.phase)} · ${radarLabel(it.partnership_status)}\n      _${it.why_now}_`);
   return {
     text,
     blocks: [
       { type: 'header', text: { type: 'plain_text', text } },
       { type: 'section', text: { type: 'mrkdwn', text: lines.join('\n') || '_No items_' } },
-      { type: 'context', elements: [{ type: 'mrkdwn', text: `Since ${digest.since.slice(0, 10)} · <${SITE_URL}/radar|Open Asset Radar>` }] },
+      { type: 'context', elements: [{ type: 'mrkdwn', text: `Since ${digest.since.slice(0, 10)} · <${SITE_URL}/radar|Open Search & Evaluation>` }] },
     ],
   };
 }
@@ -402,7 +402,7 @@ export interface AlertEventPayload {
 }
 
 export function renderAlertEmail(p: AlertEventPayload): { subject: string; html: string } {
-  const subject = `Asset Radar: ${p.title}`;
+  const subject = `Search & Evaluation: ${p.title}`;
   const body = `<p style="margin:0 0 10px;font-size:15px;color:#f8fafc;font-weight:600;">${escapeHtml(p.asset_name || p.title)}${p.company_name ? ` <span style="color:#94a3b8;font-weight:400;">· ${escapeHtml(p.company_name)}</span>` : ''}</p>
     <p style="margin:0;font-size:13px;color:#cbd5e1;">${escapeHtml(p.detail)}</p>
     ${p.url ? `<div style="margin:20px 0 4px;"><a href="${escapeHtml(p.url)}" style="display:inline-block;background:#f59e0b;color:#0f172a;padding:9px 20px;text-decoration:none;border-radius:999px;font-weight:600;font-size:13px;">Open asset brief</a></div>` : ''}`;
@@ -410,7 +410,7 @@ export function renderAlertEmail(p: AlertEventPayload): { subject: string; html:
 }
 
 export function renderAlertSlack(p: AlertEventPayload): { text: string; blocks: unknown[] } {
-  const text = `Asset Radar: ${p.title}`;
+  const text = `Search & Evaluation: ${p.title}`;
   const link = p.url && p.asset_name ? `<${p.url}|${p.asset_name}>` : (p.asset_name || '');
   return {
     text,
@@ -581,6 +581,8 @@ export async function runRadarNotifications(
       .from('radar_mandate_matches')
       .select('asset_id, match_score, match_reasons, matched_at, is_dismissed')
       .eq('mandate_id', mandate.id)
+      // Stale matches (partnered since, re-attributed, below the floor) never reach a digest.
+      .eq('is_stale', false)
       .gt('matched_at', since.toISOString())
       .order('matched_at', { ascending: false })
       .limit(200);

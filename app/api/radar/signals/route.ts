@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Signals API
+ * Search & Evaluation — Signals API
  *
  * GET /api/radar/signals?asset_id=X
  *   Score decomposition for one asset: all nine factor contributions
@@ -24,7 +24,7 @@ import { buildScoreBreakdown, deltaOverDays, type SignalEvidenceRow, type Snapsh
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // Search & Evaluation intelligence is Pro-only: this endpoint returns scored data
   // from the asset universe, so anonymous and free-tier callers are rejected.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — partnership detection (Phase 2, item 7).
+ * Search & Evaluation — partnership detection (Phase 2, item 7).
  *
  * Standalone refresh that derives `partnership_status`, the partner, the
  * territory split and an evidence trail for every clinical asset, replacing
@@ -46,6 +46,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { pgArrayLiteral } from '@/lib/radar/pg-array';
 import { readSyncCursor, writeSyncCursor } from '@/lib/radar/sync-cursor';
+import type { PartnershipBasis, PartnershipSourcesChecked } from '@/lib/radar/types';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -87,6 +88,10 @@ export interface PartnershipResult {
   confidence: number;
   /** Active deals that matched; written to clinical_assets.deal_ids. */
   dealIds: string[];
+  /** Evidence class behind the status (migration 125). 'no_evidence' is what "unpartnered" means. */
+  basis: PartnershipBasis;
+  /** What was searched for this asset, so the UI can say "checked N deals, M press items". */
+  sourcesChecked: PartnershipSourcesChecked;
 }
 
 export interface PartnershipAsset {
@@ -786,6 +791,16 @@ export function derivePartnership(input: DerivePartnershipInput): PartnershipRes
     evidence,
     confidence: Math.max(0, Math.min(100, Math.round(confidence))),
     dealIds: activeDealIds,
+    basis: dealConfirmed ? 'deal_confirmed'
+      : pressHitCount > 0 ? 'press'
+      : collaboratorTrials.size > 0 ? 'trial_collaborator'
+      : 'no_evidence',
+    sourcesChecked: {
+      deals: input.deals.length,
+      trial_collaborators: input.trialCollaborators.length,
+      press: input.pressHits.length,
+      drug_owners: 0,
+    },
   };
 }
 
@@ -906,6 +921,7 @@ interface AssetRow {
   partnership_confidence: number | null;
   deal_ids: string[] | null;
   partnership_checked_at: string | null;
+  partnership_basis?: string | null;
 }
 
 interface CompanyRow { id: string; name: string; name_variations: string[] | null }
@@ -919,7 +935,7 @@ interface TrialRow {
 }
 
 const ASSET_COLUMNS =
-  'id, company_id, company_name, asset_name, asset_aliases, nct_ids, partnership_status, partner_company_name, partner_company_id, territory_rights_available, partnership_evidence, partnership_confidence, deal_ids, partnership_checked_at';
+  'id, company_id, company_name, asset_name, asset_aliases, nct_ids, partnership_status, partner_company_name, partner_company_id, territory_rights_available, partnership_evidence, partnership_confidence, deal_ids, partnership_checked_at, partnership_basis';
 
 const DEAL_COLUMNS =
   'id, licensor_id, licensor_name, licensee_id, licensee_name, asset_name, territory, territories_included, deal_type, deal_status, exclusivity, announced_date, source_url, verification_status, is_synthetic, is_canonical';
@@ -1082,6 +1098,8 @@ interface ApplyRow {
   deal_ids: string[];
   evidence: PartnershipEvidence[];
   confidence: number;
+  basis: PartnershipBasis;
+  sources_checked: PartnershipSourcesChecked;
 }
 
 /** radar_apply_partnership per 1,000 changed rows; per-row fallback when the function is missing. */
@@ -1110,6 +1128,8 @@ async function applyChanged(supabase: SupabaseClient, rows: ApplyRow[], nowIso: 
         deal_ids: r.deal_ids,
         partnership_evidence: r.evidence,
         partnership_confidence: r.confidence,
+        partnership_basis: r.basis,
+        partnership_sources_checked: { ...r.sources_checked, checked_at: nowIso },
         partnership_checked_at: nowIso,
       }).eq('id', r.id);
       if (error) { out.failed++; errors.push(`update failed for ${r.id}: ${error.message}`); }
@@ -1371,6 +1391,7 @@ async function processSlice(
       !sameStringArray(asset.territory_rights_available, result.territoriesAvailable) ||
       !sameStringArray(asset.deal_ids, result.dealIds) ||
       (asset.partnership_confidence ?? -1) !== result.confidence ||
+      (asset.partnership_basis ?? null) !== result.basis ||
       JSON.stringify(asset.partnership_evidence ?? []) !== JSON.stringify(result.evidence);
     outcomes.set(asset.id, { from, to, changed });
     if (changed) {
@@ -1384,6 +1405,8 @@ async function processSlice(
         deal_ids: result.dealIds,
         evidence: result.evidence,
         confidence: result.confidence,
+        basis: result.basis,
+        sources_checked: result.sourcesChecked,
       });
     } else {
       unchangedIds.push(asset.id);

@@ -1,5 +1,5 @@
 /**
- * Cron: sponsor-agnostic ClinicalTrials.gov sweep (Asset Radar Phase 2.1)
+ * Cron: sponsor-agnostic ClinicalTrials.gov sweep (Search & Evaluation Phase 2.1)
  *
  * Walks every interventional drug/biologic/genetic/combination-product study
  * on CT.gov in LastUpdatePostDate order, creates sponsor companies as needed,

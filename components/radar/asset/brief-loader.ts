@@ -267,6 +267,18 @@ export async function loadAssetBrief(supabase: SupabaseClient, assetId: string, 
     snapshot: latestSnapshot,
     signals,
   });
+  // Migration 126 presentation fields ride on the asset row.
+  score.presentation = {
+    score: score.score,
+    probability: num(asset.score_probability),
+    pct_peer: num(asset.score_pct_peer),
+    peer_n: num(asset.score_peer_n),
+    peer_key: asset.score_peer_key ?? null,
+    pct_universe: num(asset.score_pct_universe),
+    base_rate: num(asset.score_base_rate),
+    low_power: asset.score_low_power ?? false,
+    interval: asset.score_interval ?? null,
+  };
 
   const points: TrendPoint[] = snapshots.map(s => ({
     date: String(s.snapshot_date),
@@ -371,6 +383,8 @@ export async function loadAssetBrief(supabase: SupabaseClient, assetId: string, 
       confidence: num(asset.partnership_confidence) ?? 0,
       evidence,
       rights_available: arr(asset.territory_rights_available),
+      basis: asset.partnership_basis ?? null,
+      sources_checked: asset.partnership_sources_checked ?? null,
     },
     score,
     trend,

@@ -1,6 +1,6 @@
 /**
  * Registry map + shared mapper for non-ClinicalTrials.gov registries
- * (Asset Radar Phase 2 item 5).
+ * (Search & Evaluation Phase 2 item 5).
  *
  * `ingestRegistryRecords` takes normalized RegistryRecords from any adapter and
  *   (a) bridges them to an existing company_trials row when a secondary id is
