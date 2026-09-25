@@ -43,8 +43,11 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
           ${rnpvResult && monteCarloResult ? `
           <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
             <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 3px;">rNPV &middot; 80% CI</div>
+            ${rnpvResult.riskAdjustedNPV > 0 ? `
             <div style="font-size: 13px; font-weight: 700; color: white; font-variant-numeric: tabular-nums;">${formatUsd(rnpvResult.riskAdjustedNPV)}</div>
-            <div style="font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 2px; font-variant-numeric: tabular-nums;">${formatUsd(monteCarloResult.confidenceInterval80.low)} &ndash; ${formatUsd(monteCarloResult.confidenceInterval80.high)}</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 2px; font-variant-numeric: tabular-nums;">${formatUsd(monteCarloResult.confidenceInterval80.low)} &ndash; ${formatUsd(monteCarloResult.confidenceInterval80.high)}</div>` : `
+            <div style="font-size: 11px; font-weight: 700; color: white;">Not informative</div>
+            <div style="font-size: 8px; color: rgba(255,255,255,0.45); margin-top: 2px;">At or below zero at ${(rnpvResult.cumulativePoS * 100).toFixed(rnpvResult.cumulativePoS < 0.1 ? 1 : 0)}% cumulative PoS; see the valuation bridge</div>`}
           </div>
           ` : ''}
         </div>

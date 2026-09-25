@@ -33,7 +33,7 @@ export function renderDecisionPage(data: PDFReportData, meta: ReportMeta): strin
 
   const confidenceBadge = decision.confidence === 'high' ? 'badge-teal' : decision.confidence === 'medium' ? 'badge-amber' : 'badge-rose';
 
-  const trim = (t: string, n = 120) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
+  const trim = (t: string, n = 200) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
   const featured = decision.counterparties.filter(c => c.role !== 'hold').slice(0, 5);
   const held = decision.counterparties.filter(c => c.role === 'hold').map(c => c.name);
   const counterpartyRows = decision.counterparties.length > 0

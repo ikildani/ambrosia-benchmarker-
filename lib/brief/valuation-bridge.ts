@@ -5,25 +5,43 @@
  * scenarios, buyer-specific) and reconciles them to one ask, one floor and one
  * walk-away number. Every other page reads these; nothing recomputes them.
  *
+ * Anchoring policy (seller-side brief; printed on the page as `policy`):
+ *  - Ask   = the greater of the calibrated headline mid and the comparable-set
+ *            median (outliers removed), on each basis (total, upfront).
+ *  - Floor = the greater of the headline low and the comps 25th percentile,
+ *            never above the ask.
+ *  - Walk-away upfront = WALK_AWAY_SHARE_OF_FLOOR × floor upfront.
+ *  Nothing else in the brief prints a different floor or walk-away.
+ *
  * Bases: bars carry `basis` so the page never mixes upfront and total values
  * on one axis. `rnpv`-basis bars (rNPV, Monte Carlo) are whole-asset values in
  * $M and are drawn on the total-value panel, visually distinguished by colour.
  *
+ * Non-informative methods: when the risk-adjusted NPV is at or below zero the
+ * rNPV, Monte Carlo and scenario bars carry `informative: false`. They stay in
+ * the method table with a note, but are not drawn, ranked or used for the ask.
+ * A negative rNPV at a 1% cumulative PoS is a statement about the phase, not
+ * a value a buyer will pay.
+ *
  * Constants (list on the methodology page):
  *  - RNPV_FALLBACK_BAND = 0.25 — when no Monte Carlo run exists the rNPV bar
  *    spans ±25% of the point estimate.
- *  - WALK_AWAY_SHARE_OF_FLOOR = 0.80 — walk-away upfront is 80% of the floor
- *    unless the engine's defensive walk-away threshold is lower.
+ *  - WALK_AWAY_SHARE_OF_FLOOR = 0.80 — walk-away upfront is 80% of the floor.
  */
 
 import type { CalculationResult } from '@/lib/calculations';
 import type { RNPVResult, MonteCarloResult, ScenarioResult } from '@/lib/financial/types';
 import type { BuyerSpecificValuation } from '@/lib/financial/buyer-specific-valuation';
-import type { PDFReportData } from '@/lib/report/types';
 import type { ValuationBridge, BridgeBar, CompSet, CompStats } from './types';
 
 export const RNPV_FALLBACK_BAND = 0.25;
 export const WALK_AWAY_SHARE_OF_FLOOR = 0.8;
+
+export const BRIDGE_POLICY =
+  'Ask = the greater of the calibrated headline mid and the comparable-set median (outliers removed); ' +
+  'floor = the greater of the headline low and the comps 25th percentile; ' +
+  `walk-away = ${Math.round(WALK_AWAY_SHARE_OF_FLOOR * 100)}% of the floor upfront. ` +
+  'Methods that do not produce a value at this stage are listed but not used.';
 
 export interface ValuationBridgeInput {
   result: CalculationResult;
@@ -32,7 +50,6 @@ export interface ValuationBridgeInput {
   scenarios?: ScenarioResult[];
   buyerValuations?: BuyerSpecificValuation[];
   compSet?: CompSet | null;
-  defensive?: PDFReportData['defensiveAnalysis'];
   asOf: string;
 }
 
@@ -77,7 +94,7 @@ const METHOD_REASON: Record<BridgeBar['key'], string> = {
 };
 
 export function buildValuationBridge(input: ValuationBridgeInput): ValuationBridge {
-  const { result, rnpv, monteCarlo, scenarios, buyerValuations, compSet, defensive, asOf } = input;
+  const { result, rnpv, monteCarlo, scenarios, buyerValuations, compSet, asOf } = input;
   const terms = result.terms;
   const bars: BridgeBar[] = [];
 
@@ -85,6 +102,7 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
   let compsTotalP25: number | null = null;
   let compsUpfrontP25: number | null = null;
   let compsTotalP50: number | null = null;
+  let compsUpfrontP50: number | null = null;
   let compsN = 0;
   if (compSet && compSet.stats) {
     const stats = pickStats(compSet);
@@ -106,6 +124,7 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
     }
     if (stats.upfront && stats.n > 0) {
       compsUpfrontP25 = stats.upfront.p25;
+      compsUpfrontP50 = stats.upfront.p50;
       bars.push({
         key: 'comps_upfront',
         label: 'Comparable deals (upfront)',
@@ -119,24 +138,36 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
     }
   }
 
-  // rNPV
-  if (rnpv && Number.isFinite(rnpv.riskAdjustedNPV)) {
-    const mid = rnpv.riskAdjustedNPV;
+  // rNPV — informative only when the point estimate is positive.
+  const rnpvValue = rnpv && Number.isFinite(rnpv.riskAdjustedNPV) ? rnpv.riskAdjustedNPV : null;
+  const rnpvInformative = rnpvValue != null && rnpvValue > 0;
+  const posPct = rnpv ? `${(rnpv.cumulativePoS * 100).toFixed(rnpv.cumulativePoS < 0.1 ? 1 : 0)}%` : null;
+  const rnpvNote = rnpvValue == null
+    ? null
+    : rnpvInformative
+      ? null
+      : `The risk-adjusted NPV is ${fmt(rnpvValue)} at a cumulative probability of success of ${posPct}: at this stage the model discounts the asset below zero, so it cannot anchor a value. The ask rests on the comparable set and the calibrated headline range.`;
+
+  if (rnpvValue != null) {
+    const mid = rnpvValue;
     const hasMc = !!monteCarlo && Number.isFinite(monteCarlo.percentiles?.p10) && Number.isFinite(monteCarlo.percentiles?.p90);
     bars.push({
       key: 'rnpv',
       label: 'Risk-adjusted NPV',
       basis: 'rnpv',
-      low: hasMc ? Math.min(monteCarlo!.percentiles.p10, mid) : mid * (1 - RNPV_FALLBACK_BAND),
+      low: hasMc ? Math.min(monteCarlo!.percentiles.p10, mid) : Math.min(mid * (1 - RNPV_FALLBACK_BAND), mid * (1 + RNPV_FALLBACK_BAND)),
       mid,
-      high: hasMc ? Math.max(monteCarlo!.percentiles.p90, mid) : mid * (1 + RNPV_FALLBACK_BAND),
-      note: hasMc
-        ? `Point estimate with the simulated 10th–90th percentile band; cumulative PoS ${(rnpv.cumulativePoS * 100).toFixed(0)}%`
-        : `Point estimate ±${RNPV_FALLBACK_BAND * 100}%; cumulative PoS ${(rnpv.cumulativePoS * 100).toFixed(0)}%`,
+      high: hasMc ? Math.max(monteCarlo!.percentiles.p90, mid) : Math.max(mid * (1 - RNPV_FALLBACK_BAND), mid * (1 + RNPV_FALLBACK_BAND)),
+      informative: rnpvInformative,
+      note: rnpvInformative
+        ? (hasMc
+          ? `Point estimate with the simulated 10th–90th percentile band; cumulative PoS ${posPct}`
+          : `Point estimate ±${RNPV_FALLBACK_BAND * 100}%; cumulative PoS ${posPct}`)
+        : `Not used: at or below zero at cumulative PoS ${posPct}`,
     });
   }
 
-  // Monte Carlo
+  // Monte Carlo — shares the rNPV verdict.
   if (monteCarlo && monteCarlo.percentiles) {
     const p = monteCarlo.percentiles;
     bars.push({
@@ -147,24 +178,33 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
       mid: p.p50,
       high: p.p90,
       n: monteCarlo.iterations,
-      note: `10th–90th percentile of ${monteCarlo.iterations.toLocaleString()} simulated outcomes`,
+      informative: rnpvInformative && Number.isFinite(p.p50) && p.p50 > 0,
+      note: rnpvInformative && p.p50 > 0
+        ? `10th–90th percentile of ${monteCarlo.iterations.toLocaleString()} simulated outcomes`
+        : `Not used: median of ${monteCarlo.iterations.toLocaleString()} simulations at or below zero`,
     });
   }
 
-  // Scenarios
+  // Scenarios — implied deal values are derived from the rNPV, so they share its verdict.
   if (scenarios && scenarios.length > 0) {
     const lows = scenarios.map(s => s.adjustedDealValue?.low).filter(Number.isFinite) as number[];
     const highs = scenarios.map(s => s.adjustedDealValue?.high).filter(Number.isFinite) as number[];
     if (lows.length && highs.length) {
+      const low = Math.min(...lows);
+      const high = Math.max(...highs);
+      const ok = rnpvInformative && low > 0 && high >= low;
       bars.push({
         key: 'scenarios',
         label: 'Scenario envelope',
         basis: 'total',
-        low: Math.min(...lows),
+        low: Math.min(low, high),
         mid: terms.totalDealValue.median,
-        high: Math.max(...highs),
+        high: Math.max(low, high),
         n: scenarios.length,
-        note: 'Bear-case low to bull-case high across the scenario set; base case at the mid',
+        informative: ok,
+        note: ok
+          ? 'Bear-case low to bull-case high across the scenario set; base case at the mid'
+          : 'Not used: the scenario envelope is derived from the risk-adjusted NPV, which does not produce a value at this stage',
       });
     }
   }
@@ -189,30 +229,37 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
   // Headline (always)
   bars.push({
     key: 'headline',
-    label: 'Headline (this brief)',
+    label: 'Headline (calibrated range)',
     basis: 'total',
     low: terms.totalDealValue.low,
     mid: terms.totalDealValue.median,
     high: terms.totalDealValue.high,
-    note: 'Calibrated engine range for this profile; the ask is the mid',
+    note: 'Calibrated engine range for this profile',
   });
 
   // Ask, floor, walk-away — the single source of truth
-  const ask = { totalM: terms.totalDealValue.median, upfrontM: terms.upfront.median };
+  const askTotalFromComps = compsTotalP50 != null && compsTotalP50 > terms.totalDealValue.median;
+  const askUpfrontFromComps = compsUpfrontP50 != null && compsUpfrontP50 > terms.upfront.median;
+  const ask = {
+    totalM: askTotalFromComps ? roundSensible(compsTotalP50!) : terms.totalDealValue.median,
+    upfrontM: askUpfrontFromComps ? roundSensible(compsUpfrontP50!) : terms.upfront.median,
+  };
   const floor = {
-    totalM: compsTotalP25 != null ? Math.max(terms.totalDealValue.low, compsTotalP25) : terms.totalDealValue.low,
-    upfrontM: compsUpfrontP25 != null ? Math.max(terms.upfront.low, compsUpfrontP25) : terms.upfront.low,
+    totalM: compsTotalP25 != null ? Math.max(terms.totalDealValue.low, roundSensible(compsTotalP25)) : terms.totalDealValue.low,
+    upfrontM: compsUpfrontP25 != null ? Math.max(terms.upfront.low, roundSensible(compsUpfrontP25)) : terms.upfront.low,
   };
   // Floor can never exceed the ask.
   floor.totalM = Math.min(floor.totalM, ask.totalM);
   floor.upfrontM = Math.min(floor.upfrontM, ask.upfrontM);
 
-  const defensiveWalk = defensive?.walkAwayThreshold;
-  const walkAwayUpfront = defensiveWalk != null && Number.isFinite(defensiveWalk) && defensiveWalk > 0 && defensiveWalk < floor.upfrontM
-    ? defensiveWalk
-    : roundSensible(floor.upfrontM * WALK_AWAY_SHARE_OF_FLOOR);
+  const walkAwayUpfront = roundSensible(floor.upfrontM * WALK_AWAY_SHARE_OF_FLOOR);
 
-  const reconciliation = buildReconciliation(bars, ask, floor, compsTotalP50, compsN);
+  const askBasis = {
+    total: askTotalFromComps ? 'comps' as const : 'headline' as const,
+    upfront: askUpfrontFromComps ? 'comps' as const : 'headline' as const,
+  };
+
+  const reconciliation = buildReconciliation(bars, ask, floor, askBasis, compsTotalP50, compsN, rnpvNote);
 
   return {
     asOf,
@@ -220,37 +267,44 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
     ask,
     floor,
     walkAway: { upfrontM: walkAwayUpfront },
+    askBasis,
+    policy: BRIDGE_POLICY,
+    rnpvInformative,
+    rnpvNote,
     reconciliation,
   };
 }
 
 function fmt(v: number): string {
-  if (Math.abs(v) >= 1000) return `$${(v / 1000).toFixed(1)}B`;
-  return `$${Math.round(v)}M`;
+  if (Math.abs(v) >= 1000) return `${v < 0 ? '−' : ''}$${(Math.abs(v) / 1000).toFixed(1)}B`;
+  return `${v < 0 ? '−' : ''}$${Math.round(Math.abs(v))}M`;
 }
 
 function buildReconciliation(
   bars: BridgeBar[],
   ask: { totalM: number; upfrontM: number },
   floor: { totalM: number; upfrontM: number },
+  askBasis: ValuationBridge['askBasis'],
   compsTotalP50: number | null,
   compsN: number,
+  rnpvNote: string | null,
 ): string {
   const sentences: string[] = [];
-  const askTotal = ask.totalM;
+  const headline = bars.find(b => b.key === 'headline');
+  const headlineMid = headline?.mid ?? ask.totalM;
 
-  if (compsTotalP50 != null && askTotal > 0) {
-    const spread = (compsTotalP50 - askTotal) / askTotal;
+  if (compsTotalP50 != null && headlineMid > 0) {
+    const spread = (compsTotalP50 - headlineMid) / headlineMid;
     const dir = spread >= 0 ? 'above' : 'below';
     sentences.push(
-      `Comparable deals put the median total at ${fmt(compsTotalP50)} (n = ${compsN}), ${Math.abs(spread * 100).toFixed(0)}% ${dir} the headline ask of ${fmt(askTotal)}.`,
+      `Comparable deals put the median total at ${fmt(compsTotalP50)} (n = ${compsN}), ${Math.abs(spread * 100).toFixed(0)}% ${dir} the calibrated headline of ${fmt(headlineMid)}.`,
     );
   } else {
-    sentences.push(`No comparable set was available for this profile, so the ask rests on the engine headline of ${fmt(askTotal)} and the risk-adjusted value.`);
+    sentences.push(`No comparable set was available for this profile, so the ask rests on the calibrated headline of ${fmt(headlineMid)}.`);
   }
 
   const ranked = bars
-    .filter(b => b.basis !== 'upfront' && b.key !== 'headline')
+    .filter(b => b.basis !== 'upfront' && b.key !== 'headline' && b.informative !== false)
     .map(b => ({ bar: b, mid: barMid(b) }))
     .sort((a, b) => b.mid - a.mid);
   if (ranked.length >= 2) {
@@ -263,8 +317,13 @@ function buildReconciliation(
     sentences.push(`The only independent method available is ${ranked[0].bar.label.toLowerCase()} at ${fmt(ranked[0].mid)}; ${METHOD_REASON[ranked[0].bar.key]}.`);
   }
 
+  if (rnpvNote) sentences.push(rnpvNote);
+
+  const totalSrc = askBasis.total === 'comps' ? 'the comparable-set median' : 'the calibrated headline mid';
+  const upfrontSrc = askBasis.upfront === 'comps' ? 'the comparable-set median' : 'the calibrated headline mid';
+  const askSrc = totalSrc === upfrontSrc ? totalSrc : `${totalSrc} on total value and ${upfrontSrc} on upfront`;
   sentences.push(
-    `The ask is set at the headline mid, ${fmt(askTotal)} total and ${fmt(ask.upfrontM)} upfront, with the floor at ${fmt(floor.totalM)} total and ${fmt(floor.upfrontM)} upfront (the greater of the headline low and the comps 25th percentile).`,
+    `The ask is set at ${askSrc}: ${fmt(ask.totalM)} total and ${fmt(ask.upfrontM)} upfront, with the floor at ${fmt(floor.totalM)} total and ${fmt(floor.upfrontM)} upfront (the greater of the headline low and the comps 25th percentile).`,
   );
 
   return sentences.join(' ');

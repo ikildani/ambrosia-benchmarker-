@@ -1,6 +1,6 @@
 // Decision tree: a "Today" root with one branch per inflection option.
 // Edge labels carry months, cost and P(reach); leaf boxes carry the expected
-// upfront today and the implied dilution. Recommended branch in teal.
+// value today and the implied dilution. Recommended branch in teal.
 
 import { COLORS, fmtM, fmtShare, escapeHtml } from '../helpers';
 import { recommendedOptionKey } from '@/lib/brief/inflection';
@@ -45,7 +45,7 @@ export function renderDecisionTree(path: InflectionPath, width = 560, height = 2
         <text x="${midX.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="7.5" font-weight="600" fill="${textColor}" font-family="${FONT}">${escapeHtml(edgeLabel)}</text>
         <rect x="${leafX}" y="${(cy - leafH / 2).toFixed(1)}" width="${leafW}" height="${leafH}" rx="5" fill="${fill}" stroke="${stroke}" stroke-width="${isRec ? 1.5 : 1}" />
         <text x="${leafX + 10}" y="${(cy - leafH / 2 + 15).toFixed(1)}" font-size="8.5" font-weight="700" fill="${isRec ? COLORS.navy : COLORS.gray700}" font-family="${FONT}">${escapeHtml(o.label)}${isRec ? ' ·' : ''}<tspan fill="${COLORS.teal}" font-size="7"> ${isRec ? 'RECOMMENDED' : ''}</tspan></text>
-        <text x="${leafX + 10}" y="${(cy - leafH / 2 + 31).toFixed(1)}" font-size="12" font-weight="800" fill="${isRec ? COLORS.teal : COLORS.navy}" font-family="${FONT}">${fmtM(o.expectedUpfrontM)}<tspan font-size="7" font-weight="600" fill="${COLORS.gray400}"> expected upfront today</tspan></text>
+        <text x="${leafX + 10}" y="${(cy - leafH / 2 + 31).toFixed(1)}" font-size="12" font-weight="800" fill="${isRec ? COLORS.teal : COLORS.navy}" font-family="${FONT}">${fmtM(o.expectedValueM)}<tspan font-size="7" font-weight="600" fill="${COLORS.gray400}"> expected value today</tspan></text>
         <text x="${leafX + 10}" y="${(cy - leafH / 2 + 44).toFixed(1)}" font-size="7.5" fill="${COLORS.gray500}" font-family="${FONT}">${fmtM(o.upfrontIfReached.median)} upfront if reached · ${escapeHtml(dil)}</text>
       </g>`;
   });

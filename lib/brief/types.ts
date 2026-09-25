@@ -42,7 +42,10 @@ export interface AssetProfile {
   target?: string | null;
   modality: string;
   phase: string;
+  /** Engine indication key (e.g. lung_nsclc). */
   indication: string;
+  /** Human label for the indication (e.g. "Lung Cancer (NSCLC)"); pages and prose print this, never the key. */
+  indicationLabel?: string | null;
   therapeuticArea: string;
   territory: string;
   /** Deal structure the client is preparing for. */
@@ -85,6 +88,8 @@ export interface CompRow {
   outlier: boolean;
   /** Same indication as the asset (vs. same TA only). */
   sameIndication: boolean;
+  /** Same mechanism or target as the asset, from the row's target / mechanism / asset-name text. */
+  sameMechanism?: boolean;
 }
 
 export interface CompStats {
@@ -107,6 +112,8 @@ export interface CompSet {
   headlineDriverIds: string[];
   /** Plain-language note when the set is thin, e.g. "Only 6 same-indication comps; TA-level set used." */
   caveat?: string;
+  /** Phase window the rows were taken from: steps from the asset phase (null = any phase) and the printed label. */
+  phaseWindow?: { steps: number | null; label: string };
 }
 
 // ─── Regional deal strategy ────────────────────────────────────────────────
@@ -208,6 +215,8 @@ export interface BuyerCandidate {
   howToEngage: string;
   /** Where the candidate came from: the partner-match API, or the deal-history supplement used when the match list is thin. */
   source?: 'partner_match' | 'deal_history';
+  /** Most recent disclosed deal by this buyer in the asset's own indication within the last three years, when one exists. */
+  recentIndicationDeal?: { parties: string; year: number | null } | null;
 }
 
 export interface BuyerMap {
@@ -271,6 +280,8 @@ export interface PatientFunnel {
   pricePerYearUsd: number | null;
   peakShare: Range3 | null;                          // share of addressable
   peakSalesM: Range3;
+  /** Where peakSalesM comes from: the financial model's applied figure, or the market estimate when no model ran. */
+  peakSalesBasis: 'model' | 'market';
 }
 
 export interface Landscape {
@@ -291,6 +302,13 @@ export interface BridgeBar {
   high: number;
   n?: number;
   note?: string;
+  /**
+   * False when the method produced a number that should not be read as a
+   * value (e.g. a negative risk-adjusted NPV at a very low cumulative PoS).
+   * Such bars are listed in the method table with their note but are not
+   * drawn on the chart, ranked in the reconciliation, or used for the ask.
+   */
+  informative?: boolean;
 }
 
 export interface ValuationBridge {
@@ -300,6 +318,14 @@ export interface ValuationBridge {
   ask: { totalM: number; upfrontM: number };
   floor: { totalM: number; upfrontM: number };
   walkAway: { upfrontM: number };
+  /** Which method set the ask on each basis: the calibrated headline or the comparable-set median. */
+  askBasis: { total: 'headline' | 'comps'; upfront: 'headline' | 'comps' };
+  /** The anchoring rule, printed on the bridge page so the reader can check it. */
+  policy: string;
+  /** False when the risk-adjusted NPV is at or below zero and cannot anchor a value. */
+  rnpvInformative: boolean;
+  /** Printed wherever a page would otherwise show the rNPV as a value; null when informative. */
+  rnpvNote: string | null;
   /** Why the methods diverge, 2–4 sentences, deterministic. */
   reconciliation: string;
 }
@@ -317,8 +343,15 @@ export interface InflectionOption {
   /** Expected upfront / total at that point if reached, $M. */
   upfrontIfReached: Range3;
   totalIfReached: Range3;
-  /** Probability-weighted, cost-adjusted expected upfront today, $M. */
+  /** Probability-weighted, cost-adjusted expected upfront today, $M (upfront only; shown for reference). */
   expectedUpfrontM: number;
+  /**
+   * Probability-weighted expected value today, $M: P(reach) × (1 − dilution)
+   * × (upfront + PV of milestones) discounted back over the months to reach
+   * the point, less the development cost. This is the number the options are
+   * compared on; upfront-only comparison always favours dealing now.
+   */
+  expectedValueM: number;
   /** Dilution implied if the cost is equity-financed at an assumed pre-money, 0–1. */
   dilution: number | null;
   verdict: string;                 // one line
@@ -326,6 +359,8 @@ export interface InflectionOption {
 
 export interface InflectionPath {
   asOf: string;
+  /** Annual discount rate used to bring deferred proceeds back to today. */
+  discountRate: number;
   options: InflectionOption[];
   financing: {
     /** Assumed pre-money used for the dilution math ($M) and where it came from. */

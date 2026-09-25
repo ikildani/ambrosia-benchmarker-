@@ -56,7 +56,8 @@ export function renderFootballField(
   const maxV = Math.max(...vals);
   const span = Math.max(maxV - minV, Math.abs(maxV) * 0.1, 1);
   const step = niceStep(span / 4);
-  const domainLo = Math.floor((minV - span * 0.08) / step) * step;
+  // Never open the axis below zero when nothing on it is negative.
+  const domainLo = Math.max(minV >= 0 ? 0 : -Infinity, Math.floor((minV - span * 0.08) / step) * step);
   const domainHi = Math.ceil((maxV + span * 0.08) / step) * step;
   const x = (v: number) => chartX + ((v - domainLo) / (domainHi - domainLo)) * chartW;
 

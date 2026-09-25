@@ -101,9 +101,10 @@ export function countFinancialModelPages(data: PDFReportData): number {
 type Rnpv = NonNullable<PDFReportData['rnpvResult']>;
 type MonteCarlo = NonNullable<PDFReportData['monteCarloResult']>;
 
-function renderKpis(rnpv: Rnpv, mc: MonteCarlo | undefined): string {
+function renderKpis(rnpv: Rnpv, mc: MonteCarlo | undefined, note?: string | null): string {
   return `
       <div class="section-title">Risk-Adjusted NPV Summary</div>
+      ${note ? `<div class="callout" style="margin-bottom: 10px; font-size: 9px; border-left-color: ${COLORS.rose};"><strong>Read this page as a statement about the stage, not a value.</strong> ${escapeHtml(note)}</div>` : ''}
       <div class="grid-4" style="margin-bottom: 14px;">
         <div class="kpi-card">
           <div class="kpi-value">${formatUsd(rnpv.riskAdjustedNPV)}</div>
@@ -296,9 +297,9 @@ export function renderFinancialModelPages(data: PDFReportData, meta: ReportMeta)
 
       <div class="section-title-lg">Financial Modeling &mdash; rNPV &amp; Monte Carlo</div>
 
-      ${renderKpis(rnpv, mc)}
+      ${renderKpis(rnpv, mc, data.brief?.bridge?.rnpvNote)}
       ${renderCashFlowTable(rnpv)}
-      ${renderCrossValidation(rnpv)}
+      ${data.brief?.bridge?.rnpvInformative === false ? '' : renderCrossValidation(rnpv)}
       ${mc ? '' : renderAssumptions(rnpv)}
 
       ${pageFooter(meta.reportId)}

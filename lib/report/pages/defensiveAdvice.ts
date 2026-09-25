@@ -109,6 +109,9 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
     .slice(0, 3);
 
   const baseRNPV = da.worstCase.baseRNPV;
+  // One walk-away for the whole brief: the bridge's upfront walk-away. The
+  // engine's own threshold is a total-value figure and is not printed.
+  const walkAwayUpfront = data.brief?.bridge?.walkAway.upfrontM ?? da.walkAwayThreshold;
 
   return `
     <div class="report-page">
@@ -143,8 +146,8 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
           <div class="kpi-label">Defensive Floor</div>
         </div>
         <div class="kpi-card" style="border-top-color: ${COLORS.rose}; padding: 12px 10px;">
-          <div class="kpi-value" style="color: ${COLORS.rose};">${formatUsd(da.walkAwayThreshold)}</div>
-          <div class="kpi-label">Walk-Away Threshold</div>
+          <div class="kpi-value" style="color: ${COLORS.rose};">${formatUsd(walkAwayUpfront)}</div>
+          <div class="kpi-label">Walk-Away (upfront)</div>
         </div>
         <div class="kpi-card" style="padding: 12px 10px;">
           <div class="kpi-value" style="color: ${COLORS.navy};">${formatUsd(da.bestCase.adjustedRNPV - da.worstCase.adjustedRNPV)}</div>

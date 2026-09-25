@@ -172,19 +172,24 @@ describe('buildValuationBridge', () => {
     expect(bb.low).toBe(400); expect(bb.high).toBe(800); expect(bb.mid).toBe(590); expect(bb.n).toBe(2);
   });
 
-  it('ask is the headline; floor is max(headline low, comps p25); walk-away is 80% of the floor when no defensive threshold', () => {
+  it('ask is the greater of the headline mid and the comps median on each basis; floor is max(headline low, comps p25); walk-away is 80% of the floor', () => {
     const b = buildValuationBridge({ result, compSet: makeCompSet(), asOf: AS_OF });
-    expect(b.ask).toEqual({ totalM: 500, upfrontM: 60 });
+    // comps p50 total 520 > headline 500 → comps; comps p50 upfront 55 < headline 60 → headline
+    expect(b.ask).toEqual({ totalM: 520, upfrontM: 60 });
+    expect(b.askBasis).toEqual({ total: 'comps', upfront: 'headline' });
+    expect(b.policy).toMatch(/greater of the calibrated headline mid and the comparable-set median/);
     expect(b.floor.totalM).toBe(380);   // comps p25 380 > headline low 340
     expect(b.floor.upfrontM).toBe(45);  // comps p25 45 > headline low 40
     expect(b.walkAway.upfrontM).toBe(roundSensible(45 * WALK_AWAY_SHARE_OF_FLOOR));
   });
 
-  it('uses the defensive walk-away when it is below the floor, and degrades without optional inputs', () => {
-    const b = buildValuationBridge({ result, asOf: AS_OF, defensive: { walkAwayThreshold: 30, defensiveFloor: 50, worstCase: {} as never, bestCase: {} as never, narrative: '' } });
+  it('degrades without optional inputs: headline only, floor at the headline low, walk-away 80% of it', () => {
+    const b = buildValuationBridge({ result, asOf: AS_OF });
     expect(b.bars.map(x => x.key)).toEqual(['headline']);
+    expect(b.ask).toEqual({ totalM: 500, upfrontM: 60 });
     expect(b.floor).toEqual({ totalM: 340, upfrontM: 40 });
-    expect(b.walkAway.upfrontM).toBe(30);
+    expect(b.walkAway.upfrontM).toBe(roundSensible(40 * WALK_AWAY_SHARE_OF_FLOOR));
+    expect(b.rnpvInformative).toBe(false); expect(b.rnpvNote).toBeNull();
     expect(b.reconciliation).toContain('No comparable set');
   });
 
@@ -192,7 +197,23 @@ describe('buildValuationBridge', () => {
     const b = buildValuationBridge({ result, rnpv, compSet: makeCompSet(), asOf: AS_OF });
     const rb = b.bars.find(x => x.key === 'rnpv')!;
     expect(rb.low).toBeCloseTo(315); expect(rb.high).toBeCloseTo(525);
-    expect(b.reconciliation).toMatch(/4% above the headline ask/);
+    expect(b.reconciliation).toMatch(/4% above the calibrated headline/);
+    expect(b.rnpvInformative).toBe(true);
+  });
+
+  it('a non-positive rNPV is listed but not used: bars flagged, note printed, ask still from comps and headline', () => {
+    const negRnpv = { ...rnpv, riskAdjustedNPV: -70, cumulativePoS: 0.009 } as RNPVResult;
+    const negMc = { ...monteCarlo, percentiles: { ...monteCarlo.percentiles, p10: -207, p50: -70, p90: 11140 } } as MonteCarloResult;
+    const negScen = [{ ...scenarios[0], adjustedDealValue: r3(-30, 20, -45) }] as unknown as ScenarioResult[];
+    const b = buildValuationBridge({ result, rnpv: negRnpv, monteCarlo: negMc, scenarios: negScen, compSet: makeCompSet(), asOf: AS_OF });
+    expect(b.rnpvInformative).toBe(false);
+    expect(b.rnpvNote).toMatch(/cannot anchor a value/);
+    for (const k of ['rnpv', 'monte_carlo', 'scenarios'] as const) expect(b.bars.find(x => x.key === k)!.informative).toBe(false);
+    const scen = b.bars.find(x => x.key === 'scenarios')!;
+    expect(scen.low).toBeLessThanOrEqual(scen.high);
+    expect(b.ask).toEqual({ totalM: 520, upfrontM: 60 });
+    expect(b.reconciliation).toMatch(/cannot anchor a value/);
+    expect(b.reconciliation).not.toMatch(/Monte Carlo is the lowest/);
     expect(b.reconciliation.split('. ').length).toBeGreaterThanOrEqual(2);
   });
 });
@@ -220,6 +241,10 @@ describe('buildInflectionPath', () => {
     expect(p.financing!.retainedValueIfLicenseM).toBeCloseTo(60 + 0.45 * 440, 1);
     expect(recommendedOptionKey(p.options)).toBe('deal_now');
     expect(p.recommendation).toMatch(/^Partner now/);
+    // Expected value counts milestones, dilution and time: deal now = upfront + 45% of milestone face value.
+    expect(now.expectedValueM).toBeCloseTo(60 + 0.45 * 440, 1);
+    const df = 1 / Math.pow(1 + p.discountRate, next.months / 12);
+    expect(next.expectedValueM).toBeCloseTo(0.32 * (1 - next.dilution!) * (next.upfrontIfReached.median + 0.45 * (next.totalIfReached.median - next.upfrontIfReached.median)) * df - 70, 0);
   });
 
   it('recommends the deferred option only when it clears the hurdle', () => {
@@ -232,7 +257,7 @@ describe('buildInflectionPath', () => {
 
     // Just under the hurdle → deal now
     const opts = p.options.map(o => ({ ...o }));
-    opts[1].expectedUpfrontM = 60 * 1.1; opts[2].expectedUpfrontM = 10;
+    opts[1].expectedValueM = opts[0].expectedValueM * 1.1; opts[2].expectedValueM = 10;
     expect(recommendedOptionKey(opts)).toBe('deal_now');
   });
 
@@ -339,7 +364,7 @@ describe('generatePositioningObjections', () => {
       expect(out.positioning.length).toBe(2);
       expect(out.objections.length).toBe(5);
       out.objections.forEach(o => { expect(o.objection.length).toBeGreaterThan(10); expect(o.answer.length).toBeGreaterThan(10); expect(o.evidenceToPrepare.length).toBeGreaterThan(10); });
-      expect(out.positioning[1]).toContain('$500M');
+      expect(out.positioning[1]).toContain('$520M');
       expect(JSON.stringify(out)).not.toMatch(/\bAI\b|illustrative|sample|leverage|synerg/i);
     } finally {
       global.fetch = original;
@@ -395,7 +420,7 @@ describe('pages', () => {
     expect(html).toContain('The decision');
     expect(html).toContain('Deal Intelligence Brief');
     expect(html).toContain('Partner now');
-    expect(html).toContain('$500M');
+    expect(html).toContain('$520M');
     expect(html).toContain('Managing Partner review pending');
     expect(html).not.toMatch(/\bAI\b|illustrative|sample/);
   });
