@@ -255,3 +255,10 @@ export function quartersSince(fromYear: number, now: Date = new Date()): Array<{
   }
   return out;
 }
+
+/** Every quarter from `fromYear`Q1 through `toYear`Q4, oldest first. */
+export function quartersBetween(fromYear: number, toYear: number): Array<{ key: string; startdt: string; enddt: string }> {
+  const out: Array<{ key: string; startdt: string; enddt: string }> = [];
+  for (let y = fromYear; y <= toYear; y++) for (const q of [1, 2, 3, 4] as const) out.push(quarterRange(y, q));
+  return out;
+}

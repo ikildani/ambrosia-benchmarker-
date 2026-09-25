@@ -630,7 +630,7 @@ Rules:
         if (correctedUpfront || correctedMilestones || correctedTotal) updates.terms_disclosed = true;
         if (verification.corrected_date && /^\d{4}-\d{2}-\d{2}$/.test(verification.corrected_date)) {
           const today = new Date().toISOString().split('T')[0];
-          if (verification.corrected_date <= today && verification.corrected_date >= '2017-01-01') {
+          if (verification.corrected_date <= today && verification.corrected_date >= '2010-01-01') {
             updates.announced_date = verification.corrected_date;
           }
         }

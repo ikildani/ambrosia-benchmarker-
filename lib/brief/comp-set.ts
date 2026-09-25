@@ -16,7 +16,7 @@
  *   recency     10  2025+ 10 · 2024 8 · 2023 6 · 2022 4 · 2021 3 · earlier 1
  *
  * Quality filter (spec): is_synthetic = false, is_canonical is not false,
- * verification_status not in ('rejected','flagged').
+ * verification_status not in ('rejected','flagged'), and (verified or confidence >= 75).
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -439,6 +439,8 @@ export async function fetchQualityDealRows(supabase: SupabaseClient): Promise<Ra
       .eq('is_synthetic', false)
       .not('is_canonical', 'is', false)
       .not('verification_status', 'in', '("rejected","flagged")')
+      // Sep 25 2026: rows awaiting verifier review (confidence < 75) stay out of the comp set until verified.
+      .or('verification_status.eq.verified,confidence_score.is.null,confidence_score.gte.75')
       .order('announced_date', { ascending: false, nullsFirst: false })
       .order('id', { ascending: true })
       .range(from, from + page - 1);

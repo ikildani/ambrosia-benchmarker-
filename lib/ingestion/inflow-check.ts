@@ -139,7 +139,7 @@ export async function runDealInflowCheck(supabase: SupabaseClient, now: Date = n
   let coverage: CoverageRow[] | null = null;
   if (now.getUTCDay() === 0) {
     const { data: rows } = await supabase.from('deals').select('announced_date, source_url, press_release_url, source_filing_id, verified, created_at')
-      .eq('is_synthetic', false).gte('announced_date', '2017-01-01');
+      .eq('is_synthetic', false).gte('announced_date', '2010-01-01');
     const byYear = new Map<number, CoverageRow>();
     const deltas: Record<number, number> = {};
     for (const r of rows ?? []) {
