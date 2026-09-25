@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Acquirer Perspective View
+ * Search & Evaluation — Acquirer Perspective View
  *
  * GET /api/radar/acquirer-view?company=Pfizer
  *   "I am Pfizer — show me every asset I should license."
@@ -17,7 +17,7 @@ import { sanitizeSearchTerm } from '@/app/api/radar/_lib/radar-api';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  // Asset Radar intelligence is Pro-only: this endpoint returns scored data
+  // Search & Evaluation intelligence is Pro-only: this endpoint returns scored data
   // from the asset universe, so anonymous and free-tier callers are rejected.
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {

@@ -1,5 +1,5 @@
 /**
- * Cron: Asset Catalysts (Asset Radar, Phase 3 Workstream C)
+ * Cron: Asset Catalysts (Search & Evaluation, Phase 3 Workstream C)
  *
  * Derives dated catalysts per clinical asset from company_trials (primary /
  * study completion), clinical_assets.phase_history (phase transitions) and

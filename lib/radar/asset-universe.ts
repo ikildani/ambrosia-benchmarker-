@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 1: Asset Universe Engine
+ * Search & Evaluation — Layer 1: Asset Universe Engine
  *
  * Indexes ClinicalTrials.gov data into canonical `clinical_assets` entities.
  * Groups trials into assets — by is_primary_asset rows in trial_interventions
@@ -48,6 +48,7 @@ interface CompanyTrialRow {
   enrollment_count: number | null;
   start_date: string | null;
   last_update_posted: string | null;
+  first_posted_date: string | null;
   primary_completion_date: string | null;
 }
 
@@ -471,7 +472,7 @@ function computeConfidence(group: AssetGroup): number {
 // DATA ACCESS HELPERS
 // ═══════════════════════════════════════════════════════════════════════
 
-const TRIAL_COLUMNS = 'company_id, company_name, nct_id, trial_title, intervention_name, intervention_type, modality, indication_category, indication_specific, conditions, phase, status, is_collaboration, collaborator_names, enrollment_count, start_date, last_update_posted, primary_completion_date';
+const TRIAL_COLUMNS = 'company_id, company_name, nct_id, trial_title, intervention_name, intervention_type, modality, indication_category, indication_specific, conditions, phase, status, is_collaboration, collaborator_names, enrollment_count, start_date, first_posted_date, last_update_posted, primary_completion_date';
 
 /** PostgREST caps a single response at max-rows (1,000 by default); page explicitly. */
 const PAGE_SIZE = 1000;
@@ -801,6 +802,8 @@ export async function indexAssetUniverse(
         const confidence = computeConfidence(group);
 
         const startDates = group.trials.map(t => t.start_date).filter(Boolean).sort();
+        // Registry first-post date is the honest "first seen" (start_date is often planned, not actual).
+        const firstPosted = group.trials.map(t => t.first_posted_date).filter(Boolean).sort();
         const updateDates = group.trials.map(t => t.last_update_posted).filter(Boolean).sort().reverse();
 
         const statuses = group.trials.map(t => t.status).filter(Boolean);
@@ -836,13 +839,12 @@ export async function indexAssetUniverse(
           enrollment_total: totalEnrollment,
           originator_country: geo.country,
           originator_region: geo.region,
-          // TODO(migration): surface the owner type on the asset. clinical_assets
-          // (migration 090) has no lead_sponsor_type column; when one is added,
-          // write ownerTypeById.get(group.companyId) ?? 'unknown' here so the
-          // UI can facet industry vs academic / hospital / government owners.
+          // Mirror of companies.owner_type (migration 125); the trigger keeps it
+          // right when a company is re-classified, this keeps new rows right now.
+          owner_type: ownerTypeById.get(group.companyId) ?? 'unknown',
           confidence_score: confidence,
           data_sources: ['clinicaltrials'],
-          first_posted_date: startDates[0] || null,
+          first_posted_date: firstPosted[0] || startDates[0] || null,
           last_update_date: updateDates[0] || null,
           last_enriched_at: nowIso,
           updated_at: nowIso,

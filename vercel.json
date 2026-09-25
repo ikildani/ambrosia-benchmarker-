@@ -355,8 +355,8 @@
       "schedule": "5 */2 * * *"
     },
     {
-      "path": "/api/cron/press-releases?backfill=true&months=24",
-      "schedule": "35 4 * * *"
+      "path": "/api/cron/radar-qa",
+      "schedule": "0 6 * * 1"
     },
     {
       "path": "/api/cron/asset-universe",

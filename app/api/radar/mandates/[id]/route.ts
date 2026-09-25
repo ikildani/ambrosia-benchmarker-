@@ -37,7 +37,7 @@ export async function GET(
   const { data: matches } = await supabase
     .from('radar_mandate_matches')
     .select(`
-      id, match_score, match_reasons, is_read, is_saved, is_dismissed, matched_at,
+      id, match_score, match_reasons, is_read, is_saved, is_dismissed, is_stale, stale_reason, matched_at,
       clinical_assets (
         id, company_name, asset_name, modality, therapeutic_area, phase,
         partnership_status, licensing_intent_score, deal_readiness_score,

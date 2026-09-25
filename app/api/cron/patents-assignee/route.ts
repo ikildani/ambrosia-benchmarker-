@@ -1,5 +1,5 @@
 /**
- * Cron: Patents by Assignee (Asset Radar, Phase 3 Workstream C)
+ * Cron: Patents by Assignee (Search & Evaluation, Phase 3 Workstream C)
  *
  * PatentsView v1 search by assignee organization for every industry-owned
  * company with a Phase 1+ asset; writes company_patents and links patents to

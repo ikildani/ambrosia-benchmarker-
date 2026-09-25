@@ -201,7 +201,10 @@ export function buildOutputJsonSchema(): Record<string, unknown> {
             target: nullableString,
             target_class: nullableEnum(TARGET_CLASSES),
             moa_short: nullableString,
-            confidence: { type: 'integer', minimum: 0, maximum: 100 },
+            // No minimum/maximum: the structured-output validator rejects range
+            // keywords on integers ("For 'integer' type, properties maximum,
+            // minimum are not supported"); zod enforces 0-100 after the call.
+            confidence: { type: 'integer' },
             evidence: { type: 'string', enum: [...EVIDENCE_SOURCES] },
             rationale: { type: 'string' },
           },
@@ -209,6 +212,34 @@ export function buildOutputJsonSchema(): Record<string, unknown> {
       },
     },
   };
+}
+
+/**
+ * JSON Schema keywords the structured-output validator refuses. Every one of
+ * these has, at some point, turned a whole classification run into 400s with
+ * zero tokens spent, so the test suite asserts the emitted schema has none.
+ * Constraints they would express are enforced by zod on the response instead.
+ */
+export const UNSUPPORTED_OUTPUT_SCHEMA_KEYWORDS: readonly string[] = [
+  'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf',
+  'minLength', 'maxLength', 'pattern', 'format',
+  'minItems', 'maxItems', 'uniqueItems', 'minProperties', 'maxProperties',
+];
+
+/** Paths (dot-joined) of every unsupported keyword found anywhere in `schema`. */
+export function findUnsupportedKeywords(schema: unknown, path: string[] = []): string[] {
+  if (Array.isArray(schema)) {
+    return schema.flatMap((v, i) => findUnsupportedKeywords(v, [...path, String(i)]));
+  }
+  if (!schema || typeof schema !== 'object') return [];
+  const out: string[] = [];
+  for (const [key, value] of Object.entries(schema as Record<string, unknown>)) {
+    // Property names live under `properties` and are not keywords.
+    const isPropertyName = path[path.length - 1] === 'properties';
+    if (!isPropertyName && UNSUPPORTED_OUTPUT_SCHEMA_KEYWORDS.includes(key)) out.push([...path, key].join('.'));
+    out.push(...findUnsupportedKeywords(value, [...path, key]));
+  }
+  return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════

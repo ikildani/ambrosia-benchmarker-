@@ -1,5 +1,5 @@
 /**
- * Asset Radar scoring v3 — backtest harness (Supabase side).
+ * Search & Evaluation scoring v3 — backtest harness (Supabase side).
  *
  * Driven by /api/cron/score-backtest through a cursor in radar_sync_cursors
  * (source 'score_backtest'). Phases:
@@ -79,6 +79,63 @@ export interface BacktestCursorState {
   last_model_version: string | null;
   last_backtest_id: string | null;
   last_error: string | null;
+  /** When the last train phase finished; drives the age-based rebuild. */
+  trained_at?: string | null;
+  /** Source-table row counts at the last train; drives the density-based rebuild. */
+  source_counts_at_train?: SourceCounts | null;
+}
+
+/** Row counts of the tables that feed the feature vector and the labels. */
+export type SourceCounts = Record<'financials' | 'intent' | 'patents' | 'labels' | 'press', number>;
+
+/** A source growing by this share since the last train triggers a rebuild. */
+export const REBUILD_GROWTH_SHARE = 0.25;
+/** A model older than this is rebuilt regardless. */
+export const REBUILD_MAX_AGE_DAYS = 30;
+
+/**
+ * Should the finished backtest be rebuilt from labels? The feature vector is
+ * as-of-dated, so denser financial, intent, patent or press data changes the
+ * historical snapshots too; only a rebuild lets the model see it. Pure, so it
+ * is tested without a database.
+ */
+export function rebuildDecision(args: {
+  countsNow: SourceCounts;
+  countsThen: SourceCounts | null | undefined;
+  trainedAt: string | null | undefined;
+  now: Date;
+}): { rebuild: boolean; reason: string | null } {
+  const { countsNow, countsThen, trainedAt, now } = args;
+  if (!trainedAt) return { rebuild: false, reason: null }; // nothing recorded yet: the next train stamps it
+  const ageDays = (now.getTime() - Date.parse(trainedAt)) / 86_400_000;
+  if (Number.isFinite(ageDays) && ageDays >= REBUILD_MAX_AGE_DAYS) {
+    return { rebuild: true, reason: `model is ${Math.floor(ageDays)} days old` };
+  }
+  if (!countsThen) return { rebuild: false, reason: null };
+  for (const key of Object.keys(countsNow) as (keyof SourceCounts)[]) {
+    const then = countsThen[key] ?? 0;
+    const nowN = countsNow[key] ?? 0;
+    // From nothing to something counts once it is material (100 rows), not on the first row.
+    const grew = then === 0 ? nowN >= 100 : (nowN - then) / then >= REBUILD_GROWTH_SHARE;
+    if (grew) return { rebuild: true, reason: `${key} rows ${then} → ${nowN}` };
+  }
+  return { rebuild: false, reason: null };
+}
+
+async function sourceCounts(supabase: SupabaseClient): Promise<SourceCounts> {
+  const count = async (table: string): Promise<number> => {
+    const { count: n, error } = await supabase.from(table).select('id', { count: 'exact', head: true });
+    if (error) throw new Error(`${table} count: ${error.message}`);
+    return n ?? 0;
+  };
+  const [financials, intent, patents, labels, press] = await Promise.all([
+    count('company_financials'),
+    count('company_intent_signals'),
+    count('company_patents'),
+    count('radar_score_label_events'),
+    count('press_releases'),
+  ]);
+  return { financials, intent, patents, labels, press };
 }
 
 export interface BacktestRunResult {
@@ -580,8 +637,21 @@ async function runTrainPhase(
       const test = rows.filter(r => r.as_of >= TEST_FROM);
       const incPreds = predictBatch(test.map(r => r.row), active);
       const inc = computeMetrics(incPreds, test.map(r => r.label), test.map(r => r.weight));
-      const better = outcome.summary.roc_auc > inc.roc_auc && outcome.summary.precision_at_50 > inc.precision_at_50;
-      incumbentNote = `incumbent ${active.version}: auc ${inc.roc_auc.toFixed(4)} p@50 ${inc.precision_at_50.toFixed(4)}; candidate auc ${outcome.summary.roc_auc.toFixed(4)} p@50 ${outcome.summary.precision_at_50.toFixed(4)} → ${better ? 'replaces' : 'kept incumbent'}`;
+      // precision@50 is 0 for both models while positives are scarce, so it
+      // cannot break ties; PR-AUC can. A low-power candidate never displaces
+      // an incumbent that was validated with enough positives.
+      const candidateLowPower = outcome.summary.positives_test < MIN_POSITIVES_FOR_POWER;
+      const incumbentLowPower = inc.positives < MIN_POSITIVES_FOR_POWER;
+      let better: boolean;
+      let why: string;
+      if (candidateLowPower && !incumbentLowPower) {
+        better = false;
+        why = 'candidate is low-power, incumbent is not';
+      } else {
+        better = outcome.summary.roc_auc > inc.roc_auc && outcome.summary.pr_auc > inc.pr_auc;
+        why = better ? 'better AUC and PR-AUC' : 'not better on both AUC and PR-AUC';
+      }
+      incumbentNote = `incumbent ${active.version}: auc ${inc.roc_auc.toFixed(4)} pr-auc ${inc.pr_auc.toFixed(4)} p@50 ${inc.precision_at_50.toFixed(4)}; candidate auc ${outcome.summary.roc_auc.toFixed(4)} pr-auc ${outcome.summary.pr_auc.toFixed(4)} p@50 ${outcome.summary.precision_at_50.toFixed(4)} → ${better ? 'replaces' : 'kept incumbent'} (${why})`;
       activated = better;
     } else if (active) {
       incumbentNote = `incumbent ${active.version} uses feature version ${active.feature_version}; candidate activates on feature version ${state.feature_version}`;
@@ -689,6 +759,30 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
     state = { ...defaultState(), last_model_version: state.last_model_version };
   }
   if (options.phase) state.phase = options.phase;
+
+  // Finished backtests retrain themselves when the sources got materially
+  // denser or the model is a month old (feature vectors are as-of-dated, so
+  // only a rebuild from labels lets the model see new history).
+  let rebuildReason: string | null = null;
+  let countsNow: SourceCounts | null = null;
+  if (state.phase === 'done' && !options.phase && !options.reset) {
+    try {
+      countsNow = await sourceCounts(supabase);
+      const decision = rebuildDecision({ countsNow, countsThen: state.source_counts_at_train, trainedAt: state.trained_at, now });
+      if (decision.rebuild) {
+        rebuildReason = decision.reason;
+        const wipe = await supabase.from('radar_score_snapshots').delete().eq('feature_version', FEATURE_VERSION);
+        if (wipe.error) errors.push(`snapshots wipe: ${wipe.error.message}`);
+        state = { ...defaultState(), last_model_version: state.last_model_version, trained_at: state.trained_at, source_counts_at_train: state.source_counts_at_train };
+      } else if (!state.trained_at) {
+        // First run after this code shipped: stamp the baseline so growth is measured from here.
+        state.trained_at = now.toISOString();
+        state.source_counts_at_train = countsNow;
+      }
+    } catch (e) {
+      errors.push(`rebuild check: ${errMsg(e)}`);
+    }
+  }
   const phaseBefore = state.phase;
 
   try {
@@ -704,6 +798,12 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
       extra = { model_version: r.modelVersion, backtest_id: r.backtestId, activated: r.activated, metrics: r.metrics };
       processed = r.metrics.n_train as number;
       written = 1;
+      state.trained_at = now.toISOString();
+      try {
+        state.source_counts_at_train = await sourceCounts(supabase);
+      } catch (e) {
+        errors.push(`source counts: ${errMsg(e)}`);
+      }
     }
     state.last_error = errors.length ? errors[0] : null;
   } catch (e) {
@@ -739,9 +839,15 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
       companies_done: state.companies_done,
       snapshots_written: state.snapshots_written,
       timed_out: timedOut,
+      ...(countsNow ? { source_counts: countsNow } : {}),
+      ...(rebuildReason ? { rebuild_reason: rebuildReason } : {}),
       ...(extra.model_version ? { model_version: extra.model_version, activated: extra.activated, metrics: extra.metrics } : {}),
     },
-    notes: phaseBefore === 'done' && state.phase === 'done' ? 'idle (backtest complete; pass ?phase=train to retrain or ?reset=1 to rebuild)' : undefined,
+    notes: rebuildReason
+      ? `rebuilding from labels: ${rebuildReason}`
+      : phaseBefore === 'done' && state.phase === 'done'
+        ? 'idle (backtest complete; rebuilds itself when sources grow 25% or the model is 30 days old; ?phase=train or ?reset=1 to force)'
+        : undefined,
   });
 
   return {

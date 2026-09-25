@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Team Notes API
+ * Search & Evaluation — Team Notes API
  *
  * GET  /api/radar/notes?asset_id=UUID — notes on an asset visible to the caller
  *        (their own, plus notes by active members of their team)

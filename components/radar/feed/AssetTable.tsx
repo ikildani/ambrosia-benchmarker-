@@ -247,7 +247,13 @@ export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, o
                 />
               </div>
               <div role="gridcell">
-                <ScoreCell score={row.licensing_intent_score} confidence={row.score_confidence} delta30d={row.score_delta_30d} spark={row.score_spark} />
+                <ScoreCell
+                  score={row.licensing_intent_score}
+                  confidence={row.score_confidence}
+                  delta30d={row.score_delta_30d}
+                  spark={row.score_spark}
+                  presentation={{ probability: row.score_probability, pct_peer: row.score_pct_peer, peer_n: row.score_peer_n, peer_key: row.score_peer_key, base_rate: row.score_base_rate }}
+                />
               </div>
               <div role="gridcell" className="min-w-0">
                 <Link

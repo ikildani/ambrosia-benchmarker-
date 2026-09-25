@@ -8,6 +8,7 @@
  */
 
 import { Fragment, useState } from 'react';
+import { percentileLabel, probabilityLabel, unrankedReason } from '@/lib/radar/client/score-copy';
 import Link from 'next/link';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
@@ -141,6 +142,30 @@ const ROWS: RowDef[] = [
       ) : (
         <span className="text-xs text-neutral-500">No active factors</span>
       ),
+  },
+  {
+    label: 'Peer percentile',
+    render: a => {
+      const p = { score: a.licensing_intent_score, probability: a.score_probability, pct_peer: a.score_pct_peer, peer_n: a.score_peer_n, peer_key: a.score_peer_key, base_rate: a.score_base_rate };
+      const pct = percentileLabel(p, { withN: true });
+      return pct ? <span title={probabilityLabel(p) ?? undefined}>{pct}</span> : <span className="text-neutral-500">{unrankedReason(p)}</span>;
+    },
+  },
+  {
+    label: 'Why now',
+    render: a => {
+      const drivers = (a.score_top_drivers ?? []).slice(0, 2);
+      if (!drivers.length) return <span className="text-neutral-500">No drivers recorded</span>;
+      return (
+        <ul className="space-y-0.5">
+          {drivers.map(d => (
+            <li key={d.factor} className="truncate" title={d.evidence ?? undefined}>
+              <span className="font-mono tabular-nums">{d.points > 0 ? '+' : ''}{d.points}</span> {d.factor.replace(/_/g, ' ')}
+            </li>
+          ))}
+        </ul>
+      );
+    },
   },
   { label: 'Deal readiness', render: a => <span className="font-mono tabular-nums">{fmtScore(a.deal_readiness_score)}</span> },
   { label: 'Competitive heat', render: a => <span className="font-mono tabular-nums">{fmtScore(a.competitive_heat)}</span> },

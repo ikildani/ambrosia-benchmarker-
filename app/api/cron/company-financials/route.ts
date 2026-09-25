@@ -1,5 +1,5 @@
 /**
- * Cron: Company Financials (Asset Radar, Phase 3 Workstream C)
+ * Cron: Company Financials (Search & Evaluation, Phase 3 Workstream C)
  *
  * SEC XBRL cash / burn / runway, going-concern language and ATM/shelf filings
  * for every company with a CIK (lib/ingestion/company-financials.ts). Resolves

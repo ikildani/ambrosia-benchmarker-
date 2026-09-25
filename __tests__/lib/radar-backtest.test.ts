@@ -19,7 +19,7 @@ import {
 import {
   rocAuc, prAuc, precisionAtK, liftTopDecile, brier, calibrationBins, computeMetrics, factorImportance, toBacktestSummary,
 } from '@/lib/radar/backtest/metrics';
-import { trainAndEvaluate, type LoadedSnapshot } from '@/lib/radar/backtest/run';
+import { trainAndEvaluate, type LoadedSnapshot, rebuildDecision } from '@/lib/radar/backtest/run';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────
 
@@ -552,5 +552,33 @@ describe('trainAndEvaluate — temporal split on synthetic snapshots', () => {
       void name;
     });
     expect(out.notes.join(' ')).toMatch(/calibration/);
+  });
+});
+
+describe('rebuildDecision (auto-retrain when sources get denser or the model ages)', () => {
+  const base = { financials: 1000, intent: 300, patents: 0, labels: 90, press: 10000 };
+  const now = new Date('2026-10-01T00:00:00Z');
+
+  test('no baseline yet: never rebuilds (the next run stamps one)', () => {
+    expect(rebuildDecision({ countsNow: base, countsThen: null, trainedAt: null, now })).toEqual({ rebuild: false, reason: null });
+  });
+
+  test('a month-old model rebuilds regardless of counts', () => {
+    const r = rebuildDecision({ countsNow: base, countsThen: base, trainedAt: '2026-08-30T00:00:00Z', now });
+    expect(r.rebuild).toBe(true);
+    expect(r.reason).toMatch(/days old/);
+  });
+
+  test('25% growth in any source rebuilds; less does not', () => {
+    const fresh = '2026-09-25T00:00:00Z';
+    expect(rebuildDecision({ countsNow: { ...base, financials: 1240 }, countsThen: base, trainedAt: fresh, now }).rebuild).toBe(false);
+    const r = rebuildDecision({ countsNow: { ...base, financials: 1250 }, countsThen: base, trainedAt: fresh, now });
+    expect(r).toEqual({ rebuild: true, reason: 'financials rows 1000 → 1250' });
+  });
+
+  test('a source going from empty to material (100 rows) rebuilds; a handful of rows does not', () => {
+    const fresh = '2026-09-25T00:00:00Z';
+    expect(rebuildDecision({ countsNow: { ...base, patents: 40 }, countsThen: base, trainedAt: fresh, now }).rebuild).toBe(false);
+    expect(rebuildDecision({ countsNow: { ...base, patents: 100 }, countsThen: base, trainedAt: fresh, now }).rebuild).toBe(true);
   });
 });

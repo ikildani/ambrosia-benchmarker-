@@ -19,6 +19,8 @@ import { isUuid } from '@/app/api/radar/_lib/radar-api';
 import { loadAssetBrief } from '@/components/radar/asset/brief-loader';
 import { AssetBriefPage } from '@/components/radar/asset/AssetBriefPage';
 import { RadarUpgradeGate } from '@/components/radar/RadarUpgradeGate';
+import { RadarPageFrame } from '@/components/radar/RadarPageFrame';
+import { radarBacktested } from '@/lib/radar/backtested';
 import type { BriefViewer } from '@/components/radar/asset/types';
 
 export const dynamic = 'force-dynamic';
@@ -30,15 +32,15 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const base: Metadata = { robots: { index: false, follow: false } };
-  if (!isUuid(id)) return { ...base, title: 'Asset brief | Solidus Asset Radar' };
+  if (!isUuid(id)) return { ...base, title: 'Asset brief | Solidus Search & Evaluation' };
   const auth = await resolveUserTier();
-  if (!auth.hasProAccess) return { ...base, title: 'Asset brief | Solidus Asset Radar' };
+  if (!auth.hasProAccess) return { ...base, title: 'Asset brief | Solidus Search & Evaluation' };
   const supabase = createServiceClient();
   const { data } = await supabase.from('clinical_assets').select('asset_name, company_name').eq('id', id).maybeSingle();
-  if (!data) return { ...base, title: 'Asset brief | Solidus Asset Radar' };
+  if (!data) return { ...base, title: 'Asset brief | Solidus Search & Evaluation' };
   return {
     ...base,
-    title: `${data.asset_name} (${data.company_name}) — Asset Radar | Solidus`,
+    title: `${data.asset_name} (${data.company_name}) — Search & Evaluation | Solidus`,
     description: `Licensing intent, predicted terms with comparables, trials, acquirers and analyst brief for ${data.asset_name} by ${data.company_name}.`,
   };
 }
@@ -49,7 +51,12 @@ export default async function AssetBriefRoute({ params }: Props) {
 
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {
-    return <RadarUpgradeGate isAuthenticated={auth.isAuthenticated} />;
+    const backtested = await radarBacktested();
+    return (
+      <RadarPageFrame>
+        <RadarUpgradeGate isAuthenticated={auth.isAuthenticated} backtested={backtested} />
+      </RadarPageFrame>
+    );
   }
 
   const supabase = createServiceClient();

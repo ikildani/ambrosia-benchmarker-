@@ -1,5 +1,5 @@
 /**
- * Asset Radar scoring v3 — labels (pure).
+ * Search & Evaluation scoring v3 — labels (pure).
  *
  * Positive: a canonical, non-rejected, non-synthetic deal in `deals` where
  *   (a) the licensor resolves to the asset's company — licensor_id equals

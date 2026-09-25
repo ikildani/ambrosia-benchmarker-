@@ -1,5 +1,5 @@
 /**
- * Cron: Partnership Refresh (Asset Radar, Phase 2 item 7)
+ * Cron: Partnership Refresh (Search & Evaluation, Phase 2 item 7)
  *
  * Re-derives partnership_status / partner / territory split / evidence for
  * clinical_assets using lib/radar/partnership.ts (deals constrained to the
@@ -67,6 +67,17 @@ export async function GET(request: NextRequest) {
   try {
     const result = await refreshPartnershipBatch(supabase, { limit, mode, timeBudgetMs });
 
+    // Ownership attribution rides on the same cadence: rows whose drug
+    // resolution or enrichment moved since their last check get re-derived
+    // (radar_apply_ownership, migration 125). Cheap and set-based, so a
+    // failure is reported but never fails the partnership run.
+    let ownership: Record<string, unknown> | null = null;
+    if (Date.now() - startedAt < timeBudgetMs) {
+      const { data, error } = await supabase.rpc('radar_apply_ownership', { p_limit: 5000, p_recheck_days: 30 });
+      if (error) result.errors.push(`radar_apply_ownership failed (is migration 125 applied?): ${error.message}`);
+      else ownership = (data ?? null) as Record<string, unknown> | null;
+    }
+
     const status = deriveRunStatus({
       errors: result.errors.length,
       timedOut: result.timedOut,
@@ -106,6 +117,7 @@ export async function GET(request: NextRequest) {
           estimated_runs_remaining: result.backlog.estimatedRunsRemaining,
         },
         timed_out: result.timedOut,
+        ownership,
       },
       notes: [
         `${result.mode}: ${result.processed} derived, ${result.stampedUnpartnered} bulk-stamped unpartnered`,
@@ -132,6 +144,7 @@ export async function GET(request: NextRequest) {
       collaborator_rows_fetched: result.collaboratorRowsFetched,
       press_hits_fetched: result.pressHitsFetched,
       backlog: result.backlog,
+      ownership,
       errors: result.errors.slice(0, 10),
       error_count: result.errors.length,
       timed_out: result.timedOut,

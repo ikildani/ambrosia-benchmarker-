@@ -1,5 +1,5 @@
 /**
- * Ex-CT.gov registry adapters + shared mapper (Asset Radar Phase 2 item 5).
+ * Ex-CT.gov registry adapters + shared mapper (Search & Evaluation Phase 2 item 5).
  * No network: every adapter's mapRecord runs on a hand-written fixture and
  * the mapper runs against an in-memory Supabase stand-in.
  */

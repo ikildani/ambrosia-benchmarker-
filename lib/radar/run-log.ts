@@ -1,5 +1,5 @@
 /**
- * Shared run logger for every Asset Radar cron (asset universe, licensing
+ * Shared run logger for every Search & Evaluation cron (asset universe, licensing
  * signals, deal thesis, mandate matcher, competitive intel, deal creator).
  *
  * Every Radar module used to insert into `data_ingestion_log` with columns

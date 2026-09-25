@@ -1,5 +1,5 @@
 /**
- * Drug master resolver for the Asset Radar (migration 107).
+ * Drug master resolver for the Search & Evaluation (migration 107).
  *
  * Turns a trial intervention string into one drug_master node so that
  * "MK-3475 (pembrolizumab)", "Pembrolizumab (MK-3475)", "KEYTRUDA" and

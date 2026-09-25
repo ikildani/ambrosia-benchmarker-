@@ -18,6 +18,7 @@ import {
   buildOutputJsonSchema,
   buildSystemPrompt,
   buildUserMessage,
+  findUnsupportedKeywords,
   type ClassificationInput,
   type ClassificationItem,
 } from '@/lib/radar/classify-prompt';
@@ -239,6 +240,20 @@ describe('classify-prompt: vocabularies', () => {
     expect(enumOf(props.indication_category)).toEqual([...INDICATION_CATEGORIES]);
     expect(enumOf(props.target_class)).toEqual([...TARGET_CLASSES]);
     expect(schema.properties.results.items.required).toEqual(Object.keys(props));
+  });
+
+  it('JSON schema uses no keywords the structured-output validator rejects', () => {
+    // Sep 2026: `confidence: { type: 'integer', minimum: 0, maximum: 100 }` made the
+    // API answer 400 on every batch for a week (1,007 runs, nothing classified).
+    expect(findUnsupportedKeywords(buildOutputJsonSchema())).toEqual([]);
+    // The detector itself sees nested keywords and ignores property names.
+    expect(findUnsupportedKeywords({
+      type: 'object',
+      properties: { minimum: { type: 'integer', minimum: 0 }, list: { type: 'array', maxItems: 3 } },
+    })).toEqual(['properties.minimum.minimum', 'properties.list.maxItems']);
+    // Enums stay either plain string enums or anyOf pairs; the range lives in zod.
+    expect(ClassificationItemSchema.shape.confidence.safeParse(101).success).toBe(false);
+    expect(ClassificationItemSchema.shape.confidence.safeParse(100).success).toBe(true);
   });
 
   it('user message is deterministic and clips long text', () => {
@@ -465,36 +480,58 @@ describe('fetchClassificationQueue', () => {
     if (table !== 'clinical_assets') return {};
     const limit = (calls.find(c => c.method === 'limit')?.args[0] as number | undefined) ?? 1000;
     const page = (rows: unknown[]) => ({ data: rows.slice(0, limit) });
-    if (has(calls, 'eq', 'companies.owner_type', 'industry')) return page([row('ind1', 'industry'), row('ind2', 'industry')]);
+    const isCore = calls.some(c => c.method === 'in' && c.args[0] === 'partnership_status');
+    // Tier 0 (core universe) and tier 1 (all industry) share the owner filter; the
+    // core rows come back again in tier 1 and must be de-duplicated.
+    if (isCore) return page([row('core1', 'industry'), row('core2', 'industry')]);
+    if (has(calls, 'eq', 'companies.owner_type', 'industry')) return page([row('core1', 'industry'), row('ind1', 'industry'), row('ind2', 'industry')]);
     if (has(calls, 'neq', 'companies.owner_type', 'industry')) return page([row('acad1', 'academic'), row('hosp1', 'hospital')]);
     if (has(calls, 'is', 'company_id', null)) return page([row('orphan1', null)]);
     if (has(calls, 'eq', 'classification_status', 'needs_review')) return page([row('review1', 'industry')]);
     return { data: [] };
   };
 
-  it('returns industry first, then other owners, then orphans, then stale needs_review', async () => {
+  it('returns the core universe first, then industry, other owners, orphans, then stale needs_review', async () => {
     const { client, ops } = stubSupabase(handler);
-    const queue = await fetchClassificationQueue(client, 10, undefined, () => NOW_MS);
-    expect(queue.map(a => a.id)).toEqual(['ind1', 'ind2', 'acad1', 'hosp1', 'orphan1', 'review1']);
+    const queue = await fetchClassificationQueue(client, 10, undefined, () => NOW_MS, 'all');
+    expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'ind1', 'ind2', 'acad1', 'hosp1', 'orphan1', 'review1']);
     expect(queue[0].owner_type).toBe('industry');
-    expect(queue[2].owner_type).toBe('academic');
-    expect(queue[4].owner_type).toBeNull();
+    expect(queue[4].owner_type).toBe('academic');
+    expect(queue[6].owner_type).toBeNull();
 
-    const industryQuery = ops[0].calls;
-    expect(String(industryQuery[0].args[0])).toContain('companies!clinical_assets_company_id_fkey!inner(owner_type)');
-    expect(has(industryQuery, 'order', 'updated_at', { ascending: true })).toBe(true);
-    expect(has(industryQuery, 'limit', 10)).toBe(true);
+    const coreQuery = ops[0].calls;
+    expect(String(coreQuery[0].args[0])).toContain('companies!clinical_assets_company_id_fkey!inner(owner_type)');
+    expect(has(coreQuery, 'eq', 'companies.owner_type', 'industry')).toBe(true);
+    expect(has(coreQuery, 'in', 'partnership_status', ['unpartnered', 'partially_partnered'])).toBe(true);
+    // Core = the phases a buyer can license before approval; phase_4 is never in it.
+    const phases = coreQuery.find(c => c.method === 'in' && c.args[0] === 'phase')?.args[1] as string[];
+    expect(phases).toContain('phase_2');
+    expect(phases).not.toContain('phase_4');
+    expect(has(coreQuery, 'order', 'updated_at', { ascending: true })).toBe(true);
+    expect(has(coreQuery, 'limit', 10)).toBe(true);
     // the needs_review query only takes rows older than 30 days
-    const review = ops[3].calls;
+    const review = ops[4].calls;
     expect(has(review, 'lt', 'classified_at', '2026-08-16T12:00:00.000Z')).toBe(true);
   });
 
   it('stops issuing queries once the limit is reached', async () => {
     const { client, ops } = stubSupabase(handler);
-    const queue = await fetchClassificationQueue(client, 3, undefined, () => NOW_MS);
-    expect(queue.map(a => a.id)).toEqual(['ind1', 'ind2', 'acad1']);
+    const queue = await fetchClassificationQueue(client, 4, undefined, () => NOW_MS, 'all');
+    // core1 comes back again from the industry tier and is dropped, so that tier
+    // fills one slot from its two; the next tier is asked for exactly one row.
+    expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'ind1', 'acad1']);
+    expect(ops.length).toBe(3);
+    expect(has(ops[1].calls, 'limit', 2)).toBe(true);
+    expect(has(ops[2].calls, 'limit', 1)).toBe(true);
+  });
+
+  it('core scope (the default) reads only the core universe and stale needs_review', async () => {
+    const { client, ops } = stubSupabase(handler);
+    const queue = await fetchClassificationQueue(client, 10, undefined, () => NOW_MS);
+    expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'review1']);
     expect(ops.length).toBe(2);
-    expect(has(ops[1].calls, 'limit', 1)).toBe(true);
+    // programs the company does not own are never sent to the model
+    expect(has(ops[0].calls, 'not', 'ownership_status', 'in', '(comparator_or_background,marketed_other)')).toBe(true);
   });
 
   it('honours onlyStatuses', async () => {
@@ -626,6 +663,40 @@ describe('classifyAssetsBatch', () => {
       counts: { classified: 1, needs_review: 1, skipped: 1, failed: 0, from_drug_master: 0 },
       tokens: { input: 500, output: 200, cacheRead: 1200, cacheWrite: 0 },
     });
+  });
+
+  it('sends one representative per resolved drug and copies the drug-level answer to its siblings', async () => {
+    const queue = [
+      asset({ id: 'a1', drug_master_id: 'd1', drug_resolution_status: 'resolved', nct_ids: ['NCT00000001', 'NCT00000002'] }),
+      asset({ id: 'a2', asset_name: 'ACM-101', company_name: 'Beta Bio', drug_master_id: 'd1', drug_resolution_status: 'resolved', nct_ids: ['NCT00000003'], therapeutic_area: 'neurology' }),
+      asset({ id: 'a3', asset_name: 'ACM-303', asset_aliases: [] }),
+    ];
+    const { client: supabase, ops } = stubSupabase(e2eHandler(queue));
+    const client = stubClient([message([item({ asset_id: 'a1', confidence: 90 }), item({ asset_id: 'a3' })])]);
+
+    const result = await classifyAssetsBatch(supabase, { client, limit: 10, batchSize: 20, now: () => NOW_MS, sleep: async () => {} });
+
+    // the model saw the representative (most trials) and the unresolved asset, not the sibling
+    const sent = client.create.mock.calls[0][0] as Anthropic.MessageCreateParamsNonStreaming;
+    const userText = sent.messages[0].content as string;
+    expect(userText).toContain('"asset_id":"a1"');
+    expect(userText).toContain('"asset_id":"a3"');
+    expect(userText).not.toContain('"asset_id":"a2"');
+    expect(client.create).toHaveBeenCalledTimes(1);
+
+    expect(result.classified).toBe(2);
+    expect(result.fromSibling).toBe(1);
+    expect(result.processed).toBe(3);
+
+    const rows = ops.filter(o => o.table === 'clinical_assets' && has(o.calls, 'upsert')).flatMap(o => (o.calls.find(c => c.method === 'upsert')!.args[0] as AssetPatch[]));
+    const sib = rows.find(r => r.id === 'a2')!;
+    expect(sib.classification_status).toBe('classified');
+    expect(sib.classification_model).toBe('claude-sonnet-5:sibling');
+    expect(sib.target).toBe('PD-1');                 // drug-level: copied from the representative
+    expect(sib.therapeutic_area).toBeUndefined();     // asset-level: the sibling keeps its own area (nothing to rewrite)
+    expect(sib.classification_evidence.fields.therapeutic_area).toMatchObject({ value: 'neurology', action: 'confirmed' });
+    expect(sib.classification_confidence).toBe(75);  // capped
+    expect(sib.classification_evidence.sibling_of).toBe('a1');
   });
 
   it('stops at the request cap and leaves the remainder for the next run', async () => {

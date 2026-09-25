@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Cross-Layer Validation
+ * Search & Evaluation — Cross-Layer Validation
  *
  * Validates data at every insertion point to maintain institutional-grade
  * data quality. Rejects invalid, implausible, or fabricated data.

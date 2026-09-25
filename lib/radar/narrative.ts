@@ -1,5 +1,5 @@
 /**
- * Asset Radar — AI Narrative Synthesis
+ * Search & Evaluation — AI Narrative Synthesis
  *
  * Generates a one-paragraph institutional-grade analyst brief per asset
  * by synthesizing all 6 layers of intelligence into a single coherent

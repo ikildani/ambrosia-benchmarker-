@@ -1,5 +1,5 @@
 /**
- * Single source of truth for the Asset Radar filter vocabulary.
+ * Single source of truth for the Search & Evaluation filter vocabulary.
  *
  * Every value here is the exact string stored in `clinical_assets`
  * (written by lib/ingestion/clinical-trials.ts and lib/radar/asset-universe.ts).
@@ -63,10 +63,44 @@ export const RADAR_PHASE_RANK: Record<string, number> = Object.fromEntries(
   RADAR_PHASE_OPTIONS.map((o, i) => [o.value, i + 1]),
 );
 
+/**
+ * Phases the feed hides unless the user picks a phase explicitly. Marketed
+ * products change hands in a divestiture market the licensing-intent model
+ * was never trained on; they stay reachable through the phase facet, which
+ * counts them before this default is applied (migration 125).
+ */
+export const RADAR_PHASE_DEFAULT_EXCLUDED: readonly string[] = ['phase_4'];
+
 export const RADAR_PARTNERSHIP_OPTIONS: VocabOption[] = [
-  { value: 'unpartnered', label: 'Unpartnered' },
+  { value: 'unpartnered', label: 'Unpartnered', longLabel: 'Unpartnered (no evidence found)' },
   { value: 'partially_partnered', label: 'Partial', longLabel: 'Partially Partnered' },
   { value: 'partnered', label: 'Partnered' },
+];
+
+/**
+ * clinical_assets.ownership_status (migration 125): does the owning company
+ * actually own the program, or is it running somebody else's drug? Set by
+ * radar_apply_ownership(); rules mirrored in lib/radar/ownership.ts.
+ */
+export const RADAR_OWNERSHIP_OPTIONS: VocabOption[] = [
+  { value: 'originator', label: 'Originator', longLabel: 'Originator (owns the program)' },
+  { value: 'licensee', label: 'Licensee', longLabel: 'Licensee (in-licensed rights)' },
+  { value: 'co_developer', label: 'Co-developer' },
+  { value: 'unknown', label: 'Unverified', longLabel: 'Ownership not verified' },
+  { value: 'comparator_or_background', label: 'Comparator', longLabel: 'Comparator or background therapy' },
+  { value: 'marketed_other', label: "Other's marketed drug", longLabel: "Another company's marketed drug" },
+];
+
+/** Ownership states the feed hides unless the ownership facet selects them. */
+export const RADAR_OWNERSHIP_DEFAULT_EXCLUDED: readonly string[] = ['comparator_or_background', 'marketed_other'];
+
+/** clinical_assets.partnership_basis (migration 125): the evidence class behind partnership_status. */
+export const RADAR_PARTNERSHIP_BASIS_OPTIONS: VocabOption[] = [
+  { value: 'deal_confirmed', label: 'Deal on record' },
+  { value: 'press', label: 'Press release' },
+  { value: 'trial_collaborator', label: 'Trial collaborator' },
+  { value: 'drug_owner', label: 'Drug ownership record' },
+  { value: 'no_evidence', label: 'No evidence found' },
 ];
 
 /** Region slugs match lib/ingestion/company-geography.ts deriveRegion(). */
@@ -119,6 +153,8 @@ const LABEL_INDEX: Record<string, string> = Object.fromEntries(
     ...RADAR_MODALITY_OPTIONS,
     ...RADAR_PHASE_OPTIONS,
     ...RADAR_PARTNERSHIP_OPTIONS,
+    ...RADAR_OWNERSHIP_OPTIONS,
+    ...RADAR_PARTNERSHIP_BASIS_OPTIONS,
     ...RADAR_REGION_OPTIONS,
     ...RADAR_COUNTRY_OPTIONS,
   ].map(o => [o.value, o.longLabel ?? o.label]),
