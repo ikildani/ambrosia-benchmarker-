@@ -6,6 +6,8 @@
 
 import ExcelJS from 'exceljs';
 import { label, fmtDate } from './format';
+import { peerGroupLabel } from '@/lib/radar/client/score-copy';
+import type { ScoreDriver } from '@/lib/radar/types';
 
 export interface ExportAssetRow {
   id: string;
@@ -27,6 +29,11 @@ export interface ExportAssetRow {
   partner_company_name?: string | null;
   territory_rights_available?: string[] | null;
   licensing_intent_score?: number | string | null;
+  score_probability?: number | string | null;
+  score_pct_peer?: number | string | null;
+  score_peer_key?: string | null;
+  score_base_rate?: number | string | null;
+  score_top_drivers?: ScoreDriver[] | null;
   score_confidence?: number | string | null;
   deal_readiness_score?: number | string | null;
   competitive_heat?: number | string | null;
@@ -73,6 +80,12 @@ export const ASSET_COLUMNS: Array<{ header: string; key: string; width: number }
   { header: 'Partner', key: 'partner', width: 22 },
   { header: 'Rights available', key: 'rights', width: 20 },
   { header: 'Licensing intent (0-100)', key: 'intent', width: 14 },
+  { header: 'Peer percentile', key: 'pct_peer', width: 14 },
+  { header: 'Peer group', key: 'peer_group', width: 22 },
+  { header: '12-month licensing probability', key: 'probability', width: 16 },
+  { header: 'Peer base rate', key: 'base_rate', width: 14 },
+  { header: 'Top driver', key: 'driver_1', width: 36 },
+  { header: 'Second driver', key: 'driver_2', width: 36 },
   { header: 'Score confidence (0-100)', key: 'confidence', width: 14 },
   { header: 'Deal readiness', key: 'readiness', width: 12 },
   { header: 'Competitive heat', key: 'heat', width: 12 },
@@ -89,6 +102,13 @@ export const WATCHLIST_COLUMNS: Array<{ header: string; key: string; width: numb
   { header: 'Watched by', key: 'watch_owner', width: 14 },
   { header: 'Added', key: 'added_at', width: 12 },
 ];
+
+/** "runway_under_12 (+1.2): Runway 9 months per 10-Q" for the driver columns. */
+function driverText(d: ScoreDriver | undefined): string | null {
+  if (!d) return null;
+  const pts = ``;
+  return d.evidence ? ` (): ` : ` ()`;
+}
 
 function n(v: number | string | null | undefined): number | null {
   if (v == null) return null;
@@ -115,6 +135,12 @@ export function assetToExportRow(a: ExportAssetRow, baseUrl: string): Record<str
     partner: a.partner_company_name ?? null,
     rights: (a.territory_rights_available || []).join(', ') || null,
     intent: n(a.licensing_intent_score),
+    pct_peer: n(a.score_pct_peer),
+    peer_group: peerGroupLabel(a.score_peer_key),
+    probability: n(a.score_probability),
+    base_rate: n(a.score_base_rate),
+    driver_1: driverText(a.score_top_drivers?.[0]),
+    driver_2: driverText(a.score_top_drivers?.[1]),
     confidence: n(a.score_confidence),
     readiness: n(a.deal_readiness_score),
     heat: n(a.competitive_heat),

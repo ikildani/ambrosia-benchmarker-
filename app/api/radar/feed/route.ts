@@ -282,9 +282,15 @@ export async function GET(request: NextRequest) {
       const d = completionByNct.get(nct);
       if (d && (!nextCatalyst || d < nextCatalyst)) nextCatalyst = d;
     }
+    // numeric columns arrive as strings from PostgREST
+    const asNumber = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number.isFinite(Number(v)) ? Number(v) : null);
     return {
       ...asset,
       licensing_intent_score: current,
+      score_probability: asNumber(asset.score_probability),
+      score_base_rate: asNumber(asset.score_base_rate),
+      score_pct_peer: asNumber(asset.score_pct_peer),
+      score_peer_n: asNumber(asset.score_peer_n),
       owner_type: ownerTypeOf(r),
       score_delta_30d: delta,
       score_spark: downsample(spark, 10),

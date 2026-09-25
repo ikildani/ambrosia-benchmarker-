@@ -46,7 +46,8 @@ import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
 import { pgArrayLiteral } from '@/lib/radar/pg-array';
 import { createHash } from 'crypto';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
-import type { ScoreFactorContribution } from '@/lib/radar/types';
+import type { ScoreFactorContribution, ScoreDriver, ScoreInterval } from '@/lib/radar/types';
+import { intervalFromBins, topDrivers, type CalibrationBin } from '@/lib/radar/score-presentation';
 import {
   FEATURE_SPECS,
   buildFeatureVector,
@@ -172,6 +173,12 @@ export interface ScoringResult {
   modelVersion: string;
   /** Calibrated probability (0-1) before the availability multiplier; null on the v2 path. */
   probability: number | null;
+  /** Pre-calibration logit (Σ contributions + intercept); null on the v2 path. */
+  logit: number | null;
+  /** Top three contributions with evidence (clinical_assets.score_top_drivers, migration 126). */
+  topDrivers: ScoreDriver[];
+  /** 80% interval of the observed rate in the asset's calibration bin; null without a backtest. */
+  interval: ScoreInterval | null;
   /** Persisted to asset_signal_snapshots.factor_scores (contract: lib/radar/types.ts). */
   contributions: ScoreFactorContribution[];
   /** Feature vector behind the model score (undefined on the v2 path). */
@@ -1348,6 +1355,8 @@ export function computeTrend(currentScore: number, priorSnapshots: SnapshotPoint
 export interface ModelScoringInput {
   params: ModelParams;
   bundle: FeatureBundle;
+  /** Calibration bins of the active backtest, for the observed-rate interval. */
+  calibrationBins?: CalibrationBin[] | null;
 }
 
 // Built lazily: features.ts imports this module, so FEATURE_SPECS is not yet
@@ -1438,6 +1447,8 @@ export function scoreAssetPure(
   let scoreConfidence = composite.confidence;
   let modelVersion = V2_MODEL_VERSION;
   let probability: number | null = null;
+  let logitValue: number | null = null;
+  let interval: ScoreInterval | null = null;
   let contributions = contributionsFromFactors(factors, composite);
   let featureVector: FeatureVector | undefined;
 
@@ -1445,10 +1456,12 @@ export function scoreAssetPure(
     featureVector = buildFeatureVector(model.bundle, ev.now);
     const out = scoreFromFeatures(featureVector.values, model.params);
     probability = out.probability;
+    logitValue = out.logit;
     score = Math.max(0, Math.min(100, Math.round(100 * out.probability * composite.availabilityFactor)));
     scoreConfidence = Math.max(0, Math.min(100, Math.round(featureVector.completeness * 100)));
     modelVersion = model.params.version;
     contributions = contributionsFromModel(featureVector, out);
+    interval = intervalFromBins(out.probability, model.calibrationBins);
   }
 
   const trend = computeTrend(score, priorSnapshots, ev.now);
@@ -1468,6 +1481,9 @@ export function scoreAssetPure(
     signalsInserted: 0,
     modelVersion,
     probability,
+    logit: logitValue,
+    topDrivers: topDrivers(contributions),
+    interval,
     contributions,
     featureVector,
   };
@@ -1779,6 +1795,9 @@ async function persistWave(
     trend: result.trend,
     snapshot_date: today,
     model_version: result.modelVersion,
+    // Migration 126: exact decomposition check (Σ contributions + intercept = logit).
+    probability_raw: result.probability,
+    logit: result.logit,
   }));
 
   // Migration 115 adds model_version / score_model_version. If it has not
@@ -1789,8 +1808,15 @@ async function persistWave(
   const without = <T extends Record<string, unknown>>(rows: T[], column: string) =>
     rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => k !== column)));
 
+  const without2 = <T extends Record<string, unknown>>(rows: T[], columns: string[]) =>
+    rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => !columns.includes(k))));
+
   for (const rows of chunk(snapshotRows, 500)) {
     let { error } = await supabase.from('asset_signal_snapshots').upsert(rows, { onConflict: 'asset_id,snapshot_date' });
+    if (error && (isMissingColumn(error.message, 'probability_raw') || isMissingColumn(error.message, 'logit'))) {
+      outcome.errors.push('asset_signal_snapshots.probability_raw/logit missing (apply migration 126); wrote snapshots without them');
+      ({ error } = await supabase.from('asset_signal_snapshots').upsert(without2(rows, ['probability_raw', 'logit']), { onConflict: 'asset_id,snapshot_date' }));
+    }
     if (error && isMissingColumn(error.message, 'model_version')) {
       outcome.errors.push('asset_signal_snapshots.model_version missing (apply migration 115); wrote snapshots without it');
       ({ error } = await supabase.from('asset_signal_snapshots').upsert(without(rows, 'model_version'), { onConflict: 'asset_id,snapshot_date' }));
@@ -1809,11 +1835,19 @@ async function persistWave(
     deal_readiness_score: result.dealReadinessScore,
     score_confidence: result.scoreConfidence,
     score_model_version: result.modelVersion,
+    // Migration 126 presentation fields; percentiles are set-based after the run.
+    score_probability: result.probability,
+    score_top_drivers: result.topDrivers,
+    score_interval: result.interval,
     last_scored_at: nowIso,
   }));
 
   for (const rows of chunk(assetRows, 200)) {
     let { error } = await supabase.from('clinical_assets').upsert(rows, { onConflict: 'id' });
+    if (error && ['score_probability', 'score_top_drivers', 'score_interval'].some(c => isMissingColumn(error!.message, c))) {
+      outcome.errors.push('clinical_assets score presentation columns missing (apply migration 126); wrote scores without them');
+      ({ error } = await supabase.from('clinical_assets').upsert(without2(rows, ['score_probability', 'score_top_drivers', 'score_interval']), { onConflict: 'id' }));
+    }
     if (error && isMissingColumn(error.message, 'score_model_version')) {
       outcome.errors.push('clinical_assets.score_model_version missing (apply migration 115); wrote scores without it');
       ({ error } = await supabase.from('clinical_assets').upsert(without(rows, 'score_model_version'), { onConflict: 'id' }));
@@ -1937,6 +1971,22 @@ export async function detectLicensingSignals(
     if (modelParams) modelVersion = modelParams.version;
   } catch (err) {
     errors.push(`active model load failed, using v2 composite: ${errMsg(err)}`);
+  }
+
+  // Calibration bins of the active model's backtest give each asset an
+  // observed-rate interval ("assets scored like this were licensed X–Y% of
+  // the time"). Missing bins only drop the interval, never the score.
+  let calibrationBins: CalibrationBin[] | null = null;
+  if (modelParams) {
+    const { data: bt, error: btErr } = await supabase
+      .from('radar_score_backtests')
+      .select('calibration_bins')
+      .eq('model_version', modelParams.version)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (btErr) errors.push(`backtest calibration bins unavailable: ${btErr.message}`);
+    else if (Array.isArray(bt?.calibration_bins)) calibrationBins = bt.calibration_bins as CalibrationBin[];
   }
 
   // ── Expire stale signals ──
@@ -2080,7 +2130,7 @@ export async function detectLicensingSignals(
               // Reuse the publications already fetched for the v2 detectors.
               fb.publications = pubs.pubs.map(p => ({ id: p.id, title: p.title, published_date: p.published_date, source_url: p.source_url }));
               if (pubs.error) fb.sourceErrors.research_signals = pubs.error;
-              modelInput = { params: modelParams, bundle: fb };
+              modelInput = { params: modelParams, bundle: fb, calibrationBins };
             }
           }
           const result = scoreAssetPure(asset, bundle, snapshots.byAsset.get(asset.id) ?? [], modelInput);
@@ -2116,5 +2166,19 @@ export async function detectLicensingSignals(
     }
   }
 
-  return finish(assets.length);
+  // Peer percentiles, base rates and the low-power flag are a property of the
+  // whole distribution, so they are refreshed once per run, set-based
+  // (radar_refresh_score_percentiles, migration 126). A missing function is
+  // reported, not fatal: the score itself is already written.
+  let percentileNote: string | undefined;
+  if (assetsScored > 0) {
+    const { data, error } = await supabase.rpc('radar_refresh_score_percentiles');
+    if (error) errors.push(`radar_refresh_score_percentiles failed (is migration 126 applied?): ${error.message}`);
+    else if (data && typeof data === 'object') {
+      const d = data as { ranked_changed?: number; cleared?: number; low_power?: boolean };
+      percentileNote = `percentiles: ${d.ranked_changed ?? 0} changed, ${d.cleared ?? 0} cleared${d.low_power ? ', low-power model' : ''}`;
+    }
+  }
+
+  return finish(assets.length, percentileNote);
 }

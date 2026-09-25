@@ -4,6 +4,14 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import type { AssetBrief } from './types';
 import { Pill, KV, ExternalLink, scoreTone } from './ui';
 import { label, fmtAge, fmtDate, territoryLabel, signedPts } from './format';
+import {
+  LOW_POWER_NOTE,
+  baseRateMultiple,
+  percentileLabel,
+  probabilityLabel,
+  unrankedReason,
+  type ScorePresentation,
+} from '@/lib/radar/client/score-copy';
 
 const OWNER_TYPE_LABEL: Record<string, string> = {
   industry: 'Industry', academic: 'Academic', government: 'Government', hospital: 'Hospital',
@@ -97,6 +105,27 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
               confidence {score.confidence} · 30d {signedPts(trend.delta_30d, 0)} · 90d {signedPts(trend.delta_90d, 0)}
             </p>
+            {(() => {
+              const p: ScorePresentation = {
+                score: score.score,
+                probability: asset.score_probability ?? null,
+                pct_peer: asset.score_pct_peer ?? null,
+                peer_n: asset.score_peer_n ?? null,
+                peer_key: asset.score_peer_key ?? null,
+                base_rate: asset.score_base_rate ?? null,
+                low_power: asset.score_low_power ?? null,
+              };
+              const pct = percentileLabel(p, { withN: true });
+              const prob = probabilityLabel(p);
+              const mult = baseRateMultiple(p);
+              return (
+                <div className="mt-1.5 space-y-0.5 text-xs">
+                  <p className="font-medium text-neutral-800 dark:text-neutral-200">{pct ?? unrankedReason(p)}</p>
+                  {prob && <p className="text-neutral-500 dark:text-neutral-400">{prob}{mult ? ` · ${mult}` : ''}</p>}
+                  {p.low_power && <p className="text-amber-700 dark:text-amber-400">{LOW_POWER_NOTE}</p>}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
