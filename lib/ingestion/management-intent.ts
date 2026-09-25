@@ -42,7 +42,9 @@ export const INTENT_BATCH_SIZE = 10;
 const SYNC_SOURCE = 'management_intent';
 const DEFAULT_TIME_BUDGET_MS = 240_000;
 const DEFAULT_PRESS_LIMIT = 60;
-const DEFAULT_FILING_LIMIT = 8;
+// 30 filings per 4-hourly run (180/day) walks ~800 SEC filers in five days; the
+// dollar cap (INTENT_COST_CAP_USD) still bounds each run.
+const DEFAULT_FILING_LIMIT = 30;
 const MAX_PARAGRAPHS_PER_PRESS = 6;
 const MAX_PARAGRAPHS_PER_FILING = 40;
 const MAX_PARAGRAPH_CHARS = 1200;
