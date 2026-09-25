@@ -27,12 +27,13 @@ import { resolveIntake } from '@/lib/brief/intake-map';
 import { buildBrief } from '@/lib/brief/build';
 import { recordBriefPrediction } from '@/lib/outcomes/writers';
 import { fetchBriefPartners } from '@/lib/brief/partners';
+import { buildExcelWorkbook } from '@/lib/generateExcel';
+import { sendEmail } from '@/lib/email/client';
+import { buildDeliveryEmail, dataRoomUrl, mintBriefLinks, DELIVERY_COLUMNS, SIGNED_URL_TTL_SECONDS, type BriefDeliveryRow } from '@/lib/brief/delivery';
 import { modalityLabels } from '@/lib/report/helpers';
 import type { MPOpinion } from '@/lib/brief/types';
 
 export const maxDuration = 300;
-/** Signed PDF links live 30 days; a new one is minted on request from pdf_storage_path. */
-export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const dynamic = 'force-dynamic';
 
 function isAdminAuth(request: NextRequest): boolean {
@@ -252,14 +253,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'PDF upload failed' }, { status: 502 });
     }
 
-    // The brief is confidential: a signed, expiring link rather than a public
-    // object URL. The storage path is kept on the row so a fresh link can be
-    // minted for the data room at any time.
-    const { data: signed, error: signErr } = await supabase.storage
-      .from('reports')
-      .createSignedUrl(pdfPath, SIGNED_URL_TTL_SECONDS);
-    const pdfUrl = signErr || !signed ? '' : signed.signedUrl;
-    if (signErr) genNotes.push(`signed URL failed: ${signErr.message}`);
+    // Excel data export beside the PDF. Non-fatal: the brief is the product,
+    // the workbook is the working file behind it.
+    let excelPath: string | null = null;
+    try {
+      const wb = buildExcelWorkbook(
+        baseResult,
+        { modality: baseInput.modality, phase: baseInput.phase, indication: baseInput.indication, territory: baseInput.territory },
+        (partnerMatches ?? []).map(p => ({ company_name: p.company_name, match_score: p.match_score, match_reasons: p.match_reasons, deals_last_12mo: p.deals_last_12mo, hq_country: p.hq_country })),
+        baseInput.therapeuticArea,
+        undefined,
+        sensitivityData,
+      );
+      const xlsx = Buffer.from(await wb.xlsx.writeBuffer());
+      const candidate = `briefs/${briefToken}/data.xlsx`;
+      const { error: xlsxErr } = await supabase.storage.from('reports').upload(candidate, xlsx, {
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        upsert: true,
+      });
+      if (xlsxErr) genNotes.push(`excel upload failed: ${xlsxErr.message}`);
+      else excelPath = candidate;
+    } catch (e) {
+      genNotes.push(`excel build failed: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    // The brief is confidential: signed, expiring links rather than public
+    // object URLs. Storage paths are kept on the row so the data room can
+    // mint fresh links at any time.
+    const links = await mintBriefLinks(supabase, { pdf_storage_path: pdfPath, excel_storage_path: excelPath }, SIGNED_URL_TTL_SECONDS);
+    const pdfUrl = links.pdfUrl ?? '';
+    if (!links.pdfUrl) genNotes.push('signed PDF URL could not be minted');
 
     // Human gate: without a Managing Partner opinion the brief is a draft. It
     // is stored and the operator is told, but the row is never marked
@@ -279,11 +302,30 @@ export async function POST(request: NextRequest) {
         delivered_at: reviewed ? now : null,
         pdf_url: pdfUrl,
         pdf_storage_path: pdfPath,
+        excel_url: links.excelUrl ?? null,
+        excel_storage_path: excelPath,
         brief_token: briefToken,
         brief_page_count: pageCount,
         admin_notes: noteLines.join('\n'),
       })
       .eq('id', requestId);
+
+    // Client delivery email — only for a reviewed brief, only once per token.
+    let emailSent = false;
+    if (reviewed && req.email) {
+      const { data: fresh } = await supabase.from('benchmark_requests').select(DELIVERY_COLUMNS).eq('id', requestId).maybeSingle();
+      const row = (fresh ?? null) as unknown as BriefDeliveryRow | null;
+      if (row) {
+        const mail = buildDeliveryEmail(row, links);
+        const sent = await sendEmail({ to: row.email, subject: mail.subject, html: mail.html, replyTo: 'ikildani@ambrosiaventures.co' });
+        emailSent = !!sent.success;
+        if (sent.success) {
+          await supabase.from('benchmark_requests').update({ delivery_email_sent_at: new Date().toISOString() }).eq('id', requestId);
+        } else {
+          genNotes.push(`delivery email not sent: ${sent.error ?? 'unknown'}`);
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -291,8 +333,11 @@ export async function POST(request: NextRequest) {
       reason: reviewed ? undefined : 'Managing Partner opinion missing; brief stored as a draft',
       briefToken,
       pdfUrl,
+      excelUrl: links.excelUrl,
       pageCount,
       storagePath: pdfPath,
+      dataRoomUrl: reviewed ? dataRoomUrl(briefToken) : null,
+      emailSent,
       notes: genNotes,
     });
   } catch (error) {

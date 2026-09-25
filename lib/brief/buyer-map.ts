@@ -407,7 +407,8 @@ export function splitProcess(
   let promotion: { promoted: string; demoted: string; gap: number } | null = null;
   if (eligible.length > 3 && eligible.slice(0, 3).every(c => isLargeBucket(c.sizeBucket))) {
     const third = eligible[2];
-    const midIdx = eligible.findIndex((c, i) => i >= 3 && isMidBucket(c.sizeBucket) && third.score - c.score <= LEAD_PROMOTION_POINTS);
+    // A promoted mid-sized buyer must clear the same fit gate as any other lead.
+    const midIdx = eligible.findIndex((c, i) => i >= 3 && isMidBucket(c.sizeBucket) && (!gateApplied || fitsLead(c)) && third.score - c.score <= LEAD_PROMOTION_POINTS);
     if (midIdx >= 0) {
       const mid = eligible[midIdx];
       eligible.splice(midIdx, 1);

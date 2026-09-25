@@ -157,13 +157,14 @@ export async function POST(request: NextRequest) {
             </ol>
             <p>Your Brief will include:</p>
             <ul style="line-height: 1.8; color: #64748b;">
-              <li>${body.modalities.length * body.dealTypes.length} deal term calculations</li>
-              <li>Strategic analysis, positioning and objection handling, negotiation playbook</li>
-              <li>Comparable transactions with a source citation on every deal</li>
-              <li>Partner matching with intent scoring</li>
-              <li>Full financial model suite (rNPV, Monte Carlo, scenarios)</li>
+              <li>A signed recommendation on page three: the ask, the floor, the walk-away, and who to open with</li>
+              <li>A valuation bridge reconciling cited comparables, the calibrated range, risk-adjusted NPV and buyer-specific value to one ask</li>
+              <li>A comparable set with a source on every row, phase-matched to your asset</li>
+              <li>Buyers ranked on fit, urgency and what each has paid at your stage, with a 24-month catalyst calendar</li>
+              <li>Positioning, the objections you will hear with the evidence to answer them, and a diligence readiness list</li>
               ${body.whiteLabel ? `<li>White-label branding under ${body.brandName || 'your firm name'}</li>` : ''}
             </ul>
+            <p style="color: #64748b;">The fee is credited in full against any advisory mandate that follows.</p>
             <p>If you have any questions in the meantime, reply directly to this email.</p>
             <p style="margin-top: 24px;">Best,<br><strong>Issa Kildani</strong><br>Ambrosia Ventures<br>solidus.ambrosiaventures.co</p>
           </div>
