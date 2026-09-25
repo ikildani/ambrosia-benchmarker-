@@ -144,7 +144,7 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
       return map;
     });
     buyerValuations = (await step('buyers.valuations', notes, log, () =>
-      computeBuyerValuations(partners, fm.dealWaterfall!, fm.rnpv!, premiums ?? undefined),
+      computeBuyerValuations(partners, fm.dealWaterfall!, fm.rnpv!, premiums ?? undefined, 4),
     )) ?? [];
   }
 

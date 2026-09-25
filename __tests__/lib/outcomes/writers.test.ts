@@ -138,6 +138,7 @@ const briefFixture: BriefIntelligence = {
     candidates: [],
     excluded: [],
     process: { lead: ['Eli Lilly', 'Biogen'], tension: ['Eisai', 'Biogen'], hold: ['Roche'], rationale: 'x' },
+    mix: { large: 3, mid: 1, unknown: 0, regions: ['north_america', 'europe'] },
   },
   landscape: {
     pipeline: null,

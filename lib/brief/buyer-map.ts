@@ -25,17 +25,30 @@
  *    Company", "Lilly"; "Roche", "Genentech", "Roche/Genentech"), so prior
  *    deals are matched on the company name plus every name_variations entry.
  *
- * Deal-history supplement: when fewer than 8 partners are supplied, the
- * builder groups quality-filtered deals in the asset's therapeutic area by
- * licensee (variants collapsed through companies.name_variations), ranks
- * licensees by same-indication deals ×3 + same-TA deals (recency tie-break)
- * and adds up to 10 − partners.length of them as candidates tagged
- * source = 'deal_history' (fit 70 with a same-indication deal, else 55;
- * intent score null).
+ * Deal-history supplement: always runs. The builder groups quality-filtered
+ * deals in the asset's therapeutic area by licensee (variants collapsed
+ * through companies.name_variations), ranks licensees by same-indication
+ * deals ×3 + same-TA deals (recency tie-break) and adds up to HISTORY_POOL of
+ * them to the pool as candidates tagged source = 'deal_history' (fit 70 with a
+ * same-indication deal, else 55; intent score null).
+ *
+ * Composition rule (Sep 2026, Managing Partner ask: "mid-sized as well as
+ * large, a good mix of pharma buyers"): every pool entry gets a size bucket
+ * (companies.company_type; when null, total_annual_revenue >= $10B →
+ * large_pharma, $1–10B → mid_pharma, < $1B → mid_biotech; else unknown) and a
+ * region (hq_region, else hq_country). selectMix() then fills
+ * CANDIDATE_TARGET (12) slots: at least MIN_MID (4) mid-sized (mid_pharma,
+ * mid_biotech, specialty) and at least MIN_LARGE (4) large (large_pharma,
+ * large_biotech) when such candidates exist with transactsAtPhase != 'no';
+ * the rest by score (fit × 0.5 + urgency × 0.5). Whenever the next pick has
+ * a same-score alternative (within REGION_TIEBREAK_POINTS = 5) from a region
+ * not yet on the list (europe, japan, china_apac), that alternative wins.
+ * Buyers with transactsAtPhase = 'no' only fill slots that would otherwise
+ * stay empty and always rank last.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { AssetProfile, BuyerCandidate, BuyerMap, BuyerPriorDeal, DealPhase, DealStructure, Range3 } from './types';
+import type { AssetProfile, BuyerCandidate, BuyerMap, BuyerPriorDeal, BuyerSizeBucket, DealPhase, DealStructure, Range3 } from './types';
 import type { PartnerForPDF } from '@/lib/report/types';
 import type { BuyerSpecificValuation } from '@/lib/financial/buyer-specific-valuation';
 import { isSameTA, isSameIndication } from './comp-set';
@@ -59,10 +72,24 @@ export type PartnerInput = PartnerForPDF & {
   source?: 'partner_match' | 'deal_history';
 };
 
-/** Supplement kicks in below this many supplied partners. */
-export const SUPPLEMENT_THRESHOLD = 8;
-/** Total candidates the map fills up to. */
-export const CANDIDATE_TARGET = 10;
+/** Final list size after the mix rule. */
+export const CANDIDATE_TARGET = 12;
+/** Minimum mid-sized (mid_pharma | mid_biotech | specialty) in the final list when available. */
+export const MIN_MID = 4;
+/** Minimum large (large_pharma | large_biotech) in the final list when available. */
+export const MIN_LARGE = 4;
+/** A candidate from an unrepresented region wins the slot when within this many points of the best remaining score. */
+export const REGION_TIEBREAK_POINTS = 5;
+/** A mid-sized candidate within this many points of the third lead is promoted into the lead group. */
+export const LEAD_PROMOTION_POINTS = 10;
+/** Partner matches considered (top by match_score) before the mix rule. */
+export const PARTNER_POOL = 40;
+/** Deal-history licensees added to the pool. */
+export const HISTORY_POOL = 12;
+/** Regions the tiebreak tries to get onto the list. */
+export const DIVERSITY_REGIONS: BuyerRegion[] = ['europe', 'japan', 'china_apac'];
+
+export type BuyerRegion = 'north_america' | 'europe' | 'japan' | 'china_apac' | 'other' | 'unknown';
 
 export interface BuildBuyerMapOptions {
   /** ISO date printed in the source note; defaults to today. */
@@ -70,6 +97,8 @@ export interface BuildBuyerMapOptions {
   /** Buyer-specific valuations (from computeBuyerValuations) to attach as impliedUpfront/impliedTotal. */
   valuations?: BuyerSpecificValuation[];
 }
+
+const norm = (s: string | null | undefined): string => (s ?? '').trim().toLowerCase();
 
 // ─── Phase helpers ──────────────────────────────────────────────────────────
 
@@ -220,16 +249,133 @@ export function transactsAtPhase(
   return 'unknown';
 }
 
+// ─── Size bucket and region ─────────────────────────────────────────────────
+
+const SIZE_BUCKETS: BuyerSizeBucket[] = ['large_pharma', 'mid_pharma', 'large_biotech', 'mid_biotech', 'specialty'];
+
+/**
+ * companies.company_type when it is one of the five known values; otherwise
+ * inferred from total_annual_revenue (USD): >= $10B large_pharma, $1–10B
+ * mid_pharma, < $1B mid_biotech. 'unknown' without either.
+ */
+export function sizeBucketOf(companyType: string | null | undefined, totalRevenueUsd: number | null | undefined): BuyerSizeBucket {
+  const t = norm(companyType).replace(/[\s-]+/g, '_') as BuyerSizeBucket;
+  if ((SIZE_BUCKETS as string[]).includes(t)) return t;
+  const rev = totalRevenueUsd != null && Number.isFinite(Number(totalRevenueUsd)) ? Number(totalRevenueUsd) : null;
+  if (rev != null && rev > 0) {
+    if (rev >= 10e9) return 'large_pharma';
+    if (rev >= 1e9) return 'mid_pharma';
+    return 'mid_biotech';
+  }
+  return 'unknown';
+}
+
+export const isLargeBucket = (b: BuyerSizeBucket | null | undefined): boolean => b === 'large_pharma' || b === 'large_biotech';
+export const isMidBucket = (b: BuyerSizeBucket | null | undefined): boolean => b === 'mid_pharma' || b === 'mid_biotech' || b === 'specialty';
+
+const COUNTRY_REGION: Array<[RegExp, BuyerRegion]> = [
+  [/^(us|usa|united states( of america)?|canada|ca|mexico|mx)$/, 'north_america'],
+  [/^(japan|jp)$/, 'japan'],
+  [/^(china|cn|prc|hong kong|hk|taiwan|tw|south korea|korea|kr|singapore|sg|australia|au|india|in|new zealand|nz|asia|apac)$/, 'china_apac'],
+  [/^(gb|uk|united kingdom|england|scotland|switzerland|ch|germany|de|france|fr|denmark|dk|belgium|be|netherlands|nl|the netherlands|ireland|ie|sweden|se|italy|it|spain|es|austria|at|norway|no|finland|fi|portugal|pt|poland|pl|czech republic|czechia|cz|hungary|hu|luxembourg|lu|iceland|is|eu|europe)$/, 'europe'],
+];
+
+/** HQ region from companies.hq_region when set, else from hq_country (codes or names). */
+export function regionOf(hqRegion: string | null | undefined, hqCountry: string | null | undefined): BuyerRegion {
+  const r = norm(hqRegion).replace(/[\s-]+/g, '_');
+  if (r === 'north_america') return 'north_america';
+  if (r === 'europe') return 'europe';
+  if (r === 'japan') return 'japan';
+  if (r === 'china' || r === 'south_korea' || r === 'asia_pacific' || r === 'china_apac' || r === 'asia') return 'china_apac';
+  if (r === 'latin_america' || r === 'middle_east' || r === 'africa' || r === 'other') return 'other';
+  const c = norm(hqCountry).replace(/\./g, '');
+  if (!c) return 'unknown';
+  for (const [re, region] of COUNTRY_REGION) if (re.test(c)) return region;
+  return 'other';
+}
+
+// ─── Mix selection ──────────────────────────────────────────────────────────
+
+type MixInput = Pick<BuyerCandidate, 'name' | 'fit' | 'urgency' | 'transactsAtPhase' | 'sizeBucket' | 'hqRegion' | 'hqCountry'>;
+
+const combinedScore = (c: Pick<BuyerCandidate, 'fit' | 'urgency'>): number => c.fit * 0.5 + c.urgency * 0.5;
+
+/**
+ * Pick `target` candidates from the pool. Order of filling: MIN_MID mid-sized,
+ * MIN_LARGE large, then the rest by score; every pick prefers an equally
+ * strong (within REGION_TIEBREAK_POINTS) candidate from a diversity region
+ * not yet represented. Only transactsAtPhase != 'no' candidates count toward
+ * the quotas; 'no' candidates fill leftover slots and rank last. Returns the
+ * selection ordered by score (eligible first) plus the mix summary.
+ */
+export function selectMix<T extends MixInput>(pool: T[], target: number = CANDIDATE_TARGET): { selected: T[]; mix: BuyerMap['mix'] } {
+  const eligible = pool.filter(c => c.transactsAtPhase !== 'no').sort((a, b) => combinedScore(b) - combinedScore(a));
+  const ineligible = pool.filter(c => c.transactsAtPhase === 'no').sort((a, b) => combinedScore(b) - combinedScore(a));
+  const picked = new Set<T>();
+  const regionsSeen = new Set<BuyerRegion>();
+  const regionFor = (c: T): BuyerRegion => regionOf(c.hqRegion, c.hqCountry);
+
+  const pickNext = (accept: (c: T) => boolean): boolean => {
+    const remaining = eligible.filter(c => !picked.has(c) && accept(c));
+    if (!remaining.length) return false;
+    const best = remaining[0];
+    const alt = remaining.find(c =>
+      combinedScore(best) - combinedScore(c) <= REGION_TIEBREAK_POINTS &&
+      DIVERSITY_REGIONS.includes(regionFor(c)) && !regionsSeen.has(regionFor(c)));
+    const chosen = alt ?? best;
+    picked.add(chosen);
+    regionsSeen.add(regionFor(chosen));
+    return true;
+  };
+
+  for (let i = 0; i < MIN_MID && picked.size < target; i++) if (!pickNext(c => isMidBucket(c.sizeBucket))) break;
+  for (let i = 0; i < MIN_LARGE && picked.size < target; i++) if (!pickNext(c => isLargeBucket(c.sizeBucket))) break;
+  while (picked.size < target) if (!pickNext(() => true)) break;
+
+  const selected = eligible.filter(c => picked.has(c));
+  for (const c of ineligible) { if (selected.length >= target) break; selected.push(c); }
+
+  return { selected, mix: mixOf(selected) };
+}
+
+/** Large / mid / unknown counts and the regions represented, in list order. */
+export function mixOf(candidates: Array<Pick<BuyerCandidate, 'sizeBucket' | 'hqRegion' | 'hqCountry'>>): BuyerMap['mix'] {
+  const regions: string[] = [];
+  for (const c of candidates) { const r = regionOf(c.hqRegion, c.hqCountry); if (r !== 'unknown' && !regions.includes(r)) regions.push(r); }
+  return {
+    large: candidates.filter(c => isLargeBucket(c.sizeBucket)).length,
+    mid: candidates.filter(c => isMidBucket(c.sizeBucket)).length,
+    unknown: candidates.filter(c => !isLargeBucket(c.sizeBucket) && !isMidBucket(c.sizeBucket)).length,
+    regions,
+  };
+}
+
 // ─── Process split ──────────────────────────────────────────────────────────
 
 export function splitProcess(
-  candidates: Array<Pick<BuyerCandidate, 'name' | 'fit' | 'urgency' | 'transactsAtPhase'>>,
+  candidates: Array<Pick<BuyerCandidate, 'name' | 'fit' | 'urgency' | 'transactsAtPhase'> & { sizeBucket?: BuyerSizeBucket }>,
   assetPhaseLabel: string,
 ): BuyerMap['process'] {
   const eligible = candidates
     .filter(c => c.transactsAtPhase !== 'no')
-    .map(c => ({ ...c, score: c.fit * 0.5 + c.urgency * 0.5 }))
+    .map(c => ({ ...c, score: combinedScore(c) }))
     .sort((a, b) => b.score - a.score);
+
+  // Lead promotion: an all-large lead group gives way to a mid-sized buyer
+  // that ranks within LEAD_PROMOTION_POINTS of the third lead; the weakest
+  // large lead moves to the front of the tension group.
+  let promotion: { promoted: string; demoted: string; gap: number } | null = null;
+  if (eligible.length > 3 && eligible.slice(0, 3).every(c => isLargeBucket(c.sizeBucket))) {
+    const third = eligible[2];
+    const midIdx = eligible.findIndex((c, i) => i >= 3 && isMidBucket(c.sizeBucket) && third.score - c.score <= LEAD_PROMOTION_POINTS);
+    if (midIdx >= 0) {
+      const mid = eligible[midIdx];
+      eligible.splice(midIdx, 1);
+      eligible.splice(2, 1, mid, third);
+      promotion = { promoted: mid.name, demoted: third.name, gap: Math.round(third.score - mid.score) };
+    }
+  }
+
   const lead = eligible.slice(0, 3).map(c => c.name);
   const tensionCount = Math.min(3, Math.max(2, eligible.length - 3));
   const tension = eligible.slice(3, 3 + tensionCount).map(c => c.name);
@@ -242,6 +388,9 @@ export function splitProcess(
     const evidence = eligible.slice(0, 3).filter(c => c.transactsAtPhase === 'yes').length;
     rationale = `Open with ${leadTxt}: highest combined fit and urgency` +
       (evidence === lead.length ? `, and each has signed at ${assetPhaseLabel} before.` : evidence > 0 ? `; ${evidence} of ${lead.length} has signed at ${assetPhaseLabel} before.` : `, though none has a disclosed deal at ${assetPhaseLabel} yet.`);
+    if (promotion) {
+      rationale += ` ${promotion.promoted} takes the third lead slot ahead of ${promotion.demoted}${promotion.gap > 0 ? ` (${promotion.gap} points apart)` : ' (level on score)'}: mid-sized buyers move faster at this stage, and an all-large lead group would let the three set the pace together.`;
+    }
     if (tension.length) rationale += ` Keep ${joinNames(tension)} warm from week one so the leads price against real competition.`;
     if (hold.length) rationale += ` Hold ${hold.length === 1 ? hold[0] : `the remaining ${hold.length}`} until the next data package.`;
   }
@@ -273,7 +422,7 @@ const STRUCTURE_TEXT: Record<DealStructure, string> = {
 export function buildWhyNow(c: {
   name: string;
   patentCliffs: PatentCliff[];
-  revenueAtRisk: { y2026: number | null; y2027: number | null };
+  revenueAtRisk: { y2025?: number | null; y2026: number | null; y2027: number | null };
   totalRevenueUsd: number | null;
   priorDeals: BuyerPriorDeal[];
   dealsLast12mo: number;
@@ -415,7 +564,6 @@ function orValue(v: string): string {
   return `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
-const norm = (s: string | null | undefined): string => (s ?? '').trim().toLowerCase();
 
 /** Company-name aliases that reliably mean the same buyer in deals.licensee_name. */
 function nameAliases(name: string, variations: string[] | null | undefined): string[] {
@@ -517,12 +665,13 @@ export async function buildBuyerMap(
   const top = [...(partners as PartnerInput[])]
     .filter(p => p && p.company_name)
     .sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0))
-    .slice(0, 10);
+    .slice(0, PARTNER_POOL);
 
   if (top.length === 0 && !asset.therapeuticArea && !asset.indication) {
     return {
       source: { source: 'Solidus deal database and company profiles', n: 0, asOf, note: 'no partner matches supplied' },
       candidates: [], excluded: [], process: { lead: [], tension: [], hold: [], rationale: 'No partner matches were supplied, so no process can be recommended.' },
+      mix: { large: 0, mid: 0, unknown: 0, regions: [] },
     };
   }
 
@@ -560,11 +709,17 @@ export async function buildBuyerMap(
   const scoreRow = (r: CompanyRow): number =>
     (r.data_quality_score ?? 0) + (r.total_annual_revenue ? 50 : 0) + (r.deals_last_24mo ?? 0) + (parsePatentCliffs(r.patent_cliffs).length ? 10 : 0);
 
-  const resolved = top.map(p => ({ partner: { ...p, source: p.source ?? 'partner_match' as const }, company: companyFor(p) }));
+  // Explicit element type: the deal-history supplement below pushes PartnerInput
+  // objects, so the array must not narrow to the literal shape of the first map.
+  const resolved: Array<{ partner: PartnerInput; company: CompanyRow | null }> = top.map(p => ({
+    partner: { ...p, source: p.source ?? ('partner_match' as const) } as PartnerInput,
+    company: companyFor(p),
+  }));
 
-  // 1b. Deal-history supplement when the match list is thin.
-  let supplementCount = 0;
-  if (resolved.length < SUPPLEMENT_THRESHOLD && (asset.therapeuticArea || asset.indication)) {
+  // 1b. Deal-history supplement — always adds up to HISTORY_POOL licensees so
+  // the mix rule can choose from buyers with a signed deal in this area, not
+  // only from the match ranking.
+  if (asset.therapeuticArea || asset.indication) {
     const taDeals = await fetchTaDeals(supabase, asset);
     if (taDeals.length) {
       // Resolve the most active licensee spellings to company rows so variants collapse.
@@ -583,11 +738,11 @@ export async function buildBuyerMap(
         if (partner.company_id) takenIds.add(partner.company_id);
       }
       const groups = groupLicensees(taDeals, companyRows);
-      const room = Math.max(0, CANDIDATE_TARGET - resolved.length);
       const cutoff = new Date(asOf); cutoff.setMonth(cutoff.getMonth() - 12);
       const cutoffIso = cutoff.toISOString().slice(0, 10);
+      let added = 0;
       for (const g of groups) {
-        if (supplementCount >= room) break;
+        if (added >= HISTORY_POOL) break;
         const dup = (g.companyId && takenIds.has(g.companyId)) || g.aliases.some(a => taken.has(norm(a)));
         if (dup) continue;
         const company = g.companyId ? companyRows.find(r => r.id === g.companyId) ?? null : null;
@@ -606,7 +761,7 @@ export async function buildBuyerMap(
         resolved.push({ partner: { ...partner, source: 'deal_history' as const }, company });
         g.aliases.forEach(a => taken.add(norm(a)));
         if (g.companyId) takenIds.add(g.companyId);
-        supplementCount++;
+        added++;
       }
     }
   }
@@ -630,7 +785,7 @@ export async function buildBuyerMap(
       .not('verification_status', 'in', '("rejected","flagged")')
       .or(filter)
       .order('announced_date', { ascending: false })
-      .limit(600);
+      .limit(1000);
     if (Array.isArray(data)) dealRows = data as DealRow[];
   }
   const dealsFor = (p: PartnerInput): DealRow[] => {
@@ -662,8 +817,8 @@ export async function buildBuyerMap(
 
   // 4. Assemble candidates.
   const valuations = opts.valuations ?? [];
-  const candidates: BuyerCandidate[] = [];
-  const excluded: BuyerMap['excluded'] = [];
+  const pool: BuyerCandidate[] = [];
+  const excludedRaw: Array<{ name: string; reason: string; score: number }> = [];
   let totalPriorDeals = 0;
   let verifiedPriorDeals = 0;
 
@@ -742,12 +897,16 @@ export async function buildBuyerMap(
     const toRange = (r: { low: number; median: number; high: number } | undefined): Range3 | null =>
       r && Number.isFinite(r.median) ? { low: r.low, median: r.median, high: r.high } : null;
 
+    const companyType = company?.company_type ?? partner.company_type ?? null;
+    const hqCountry = company?.hq_country ?? partner.hq_country ?? null;
+    const derivedRegion = regionOf(company?.hq_region, hqCountry);
     const base = {
       companyId: company?.id ?? partner.company_id ?? null,
       name: partner.company_name.trim(),
-      companyType: company?.company_type ?? partner.company_type ?? null,
-      hqRegion: company?.hq_region ?? null,
-      hqCountry: company?.hq_country ?? partner.hq_country ?? null,
+      companyType,
+      sizeBucket: sizeBucketOf(companyType, company?.total_annual_revenue),
+      hqRegion: company?.hq_region ?? (derivedRegion !== 'unknown' ? derivedRegion : null),
+      hqCountry,
       fit,
       urgency,
       intentScore,
@@ -775,13 +934,14 @@ export async function buildBuyerMap(
       whyNow: buildWhyNow({ ...base, name: base.name }, nowYear, taLabel),
       howToEngage: buildHowToEngage({ ...base }, assetPhase, taLabel, nowYear),
     };
-    candidates.push(candidate);
+    pool.push(candidate);
 
     if (verdict === 'no') {
       const yrs = deals.map(d => d.announced_date?.slice(0, 4)).filter(Boolean).sort();
       const stated = phaseRank(prefMin) != null && phaseRank(prefMax) != null && phaseRank(prefMin)! <= phaseRank(prefMax)!;
-      excluded.push({
+      excludedRaw.push({
         name: candidate.name,
+        score: fit * 0.5 + urgency * 0.5,
         reason: stated
           ? `stated stage range starts at ${PHASE_TEXT[normalisePhase(prefMin)]}; no ${assetPhaseText} deal in our data`
           : `${deals.length} disclosed deals${yrs.length ? ` since ${yrs[0]}` : ''}, none at ${assetPhaseText} or earlier`,
@@ -789,13 +949,16 @@ export async function buildBuyerMap(
     }
   }
 
-  // Rank: eligible first, then combined fit/urgency.
-  candidates.sort((a, b) => {
-    const ea = a.transactsAtPhase === 'no' ? 1 : 0;
-    const eb = b.transactsAtPhase === 'no' ? 1 : 0;
-    if (ea !== eb) return ea - eb;
-    return (b.fit * 0.5 + b.urgency * 0.5) - (a.fit * 0.5 + a.urgency * 0.5);
-  });
+  // 5. Mix rule: 12 from the pool, >= 4 mid-sized and >= 4 large when
+  // available, rest by score, regional tiebreak; 'no' verdicts last.
+  const { selected: candidates, mix } = selectMix(pool, CANDIDATE_TARGET);
+  const supplementCount = candidates.filter(c => c.source === 'deal_history').length;
+  // Stage exclusions from the whole pool (strongest first) so a high-fit buyer
+  // that does not transact here is named even when it did not make the list.
+  const excluded: BuyerMap['excluded'] = excludedRaw
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8)
+    .map(({ name, reason }) => ({ name, reason }));
 
   const process = splitProcess(candidates, assetPhaseText);
   const verifiedShare = totalPriorDeals ? Math.round((verifiedPriorDeals / totalPriorDeals) * 100) : 0;
@@ -805,10 +968,11 @@ export async function buildBuyerMap(
       source: 'Solidus deal database and company profiles',
       n: totalPriorDeals,
       asOf,
-      note: `${candidates.length} buyers profiled${supplementCount ? ` (${supplementCount} added from deal history in ${taLabel})` : ''}; prior deals are non-synthetic, canonical rows, ${verifiedShare}% verified with citation`,
+      note: `${candidates.length} buyers selected from ${pool.length} profiled${supplementCount ? ` (${supplementCount} added from deal history in ${taLabel})` : ''}; prior deals are non-synthetic, canonical rows, ${verifiedShare}% verified with citation`,
     },
     candidates,
     excluded,
     process,
+    mix,
   };
 }
