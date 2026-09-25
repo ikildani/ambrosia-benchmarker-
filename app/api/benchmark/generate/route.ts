@@ -3,7 +3,7 @@
  * a Deal Intelligence Brief for a given benchmark_request ID.
  *
  * Triggered manually by admin after the intake call.
- * Runs the full pipeline: 52 calculations + financial model + AI memo +
+ * Runs the full pipeline: engine + financial model + strategic memo +
  * AI playbook + partner matches + Puppeteer PDF rendering.
  *
  * POST /api/benchmark/generate { requestId: string }
@@ -30,7 +30,9 @@ import { fetchBriefPartners } from '@/lib/brief/partners';
 import { modalityLabels } from '@/lib/report/helpers';
 import type { MPOpinion } from '@/lib/brief/types';
 
-export const maxDuration = 120;
+export const maxDuration = 300;
+/** Signed PDF links live 30 days; a new one is minted on request from pdf_storage_path. */
+export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const dynamic = 'force-dynamic';
 
 function isAdminAuth(request: NextRequest): boolean {
@@ -152,13 +154,25 @@ export async function POST(request: NextRequest) {
       fm,
       partners: partnerMatches ?? [],
       memo: memoData,
-      defensive: fm.defensiveAnalysis,
       mpOpinion,
       diligenceReady: req.diligence_ready ?? [],
       diligenceGaps: req.diligence_gaps ?? [],
       log: (m) => console.log(m),
     });
     genNotes.push(...built.notes);
+
+    // A brief whose load-bearing evidence failed to load (comparable deals,
+    // buyer map) must not go out: its decision page would say "Hold" because
+    // the database timed out, not because of the evidence. Return the request
+    // to intake with the reason so the operator re-runs it.
+    if (built.fatal.length) {
+      const reason = `GENERATION ABORTED (${new Date().toISOString()}): ${built.fatal.join(', ')} failed after retries. Re-run generate.\n${genNotes.join('\n')}`;
+      await supabase
+        .from('benchmark_requests')
+        .update({ status: 'intake', admin_notes: reason })
+        .eq('id', requestId);
+      return NextResponse.json({ error: 'Generation aborted: evidence unavailable', fatal: built.fatal, notes: genNotes }, { status: 502 });
+    }
 
     // Step 5c: Outcome ledger — commit the brief's ask/floor, buyers and window
     // as a prediction (Alaric WS1). Fire-and-forget; never breaks generation.
@@ -216,6 +230,7 @@ export async function POST(request: NextRequest) {
     // Step 8: Generate HTML + PDF
     const html = generateReportHTML(pdfData, brandConfig);
     const pdfBuffer = await renderPDFBuffer(html);
+    const pageCount = (html.match(/class="report-page"/g) || []).length;
 
     // Step 9: Upload to Supabase Storage
     const briefToken = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
@@ -228,40 +243,63 @@ export async function POST(request: NextRequest) {
         upsert: true,
       });
 
-    let pdfUrl = '';
-    if (!uploadErr) {
-      const { data: urlData } = supabase.storage
-        .from('reports')
-        .getPublicUrl(pdfPath);
-      pdfUrl = urlData.publicUrl;
+    if (uploadErr) {
+      const reason = `GENERATION ABORTED (${new Date().toISOString()}): PDF upload failed: ${uploadErr.message}\n${genNotes.join('\n')}`;
+      await supabase
+        .from('benchmark_requests')
+        .update({ status: 'intake', admin_notes: reason })
+        .eq('id', requestId);
+      return NextResponse.json({ error: 'PDF upload failed' }, { status: 502 });
     }
 
-    // Step 10: Update record
+    // The brief is confidential: a signed, expiring link rather than a public
+    // object URL. The storage path is kept on the row so a fresh link can be
+    // minted for the data room at any time.
+    const { data: signed, error: signErr } = await supabase.storage
+      .from('reports')
+      .createSignedUrl(pdfPath, SIGNED_URL_TTL_SECONDS);
+    const pdfUrl = signErr || !signed ? '' : signed.signedUrl;
+    if (signErr) genNotes.push(`signed URL failed: ${signErr.message}`);
+
+    // Human gate: without a Managing Partner opinion the brief is a draft. It
+    // is stored and the operator is told, but the row is never marked
+    // delivered and no client-facing link is issued.
+    const reviewed = !!mpOpinion;
+    const now = new Date().toISOString();
+    const noteLines = [
+      reviewed ? `v3 build ${now}` : `v3 DRAFT ${now}: awaiting Managing Partner opinion (set mp_opinion, mp_reviewer, mp_reviewed_at and re-run generate)`,
+      `pages ${pageCount}; storage ${pdfPath}`,
+      ...genNotes,
+    ];
     await supabase
       .from('benchmark_requests')
       .update({
-        status: 'delivered',
-        generation_completed_at: new Date().toISOString(),
-        delivered_at: new Date().toISOString(),
+        status: reviewed ? 'delivered' : 'call_complete',
+        generation_completed_at: now,
+        delivered_at: reviewed ? now : null,
         pdf_url: pdfUrl,
+        pdf_storage_path: pdfPath,
         brief_token: briefToken,
-        brief_page_count: Math.round(pdfBuffer.length / 25000),
-        admin_notes: genNotes.length ? `v3 build notes:\n${genNotes.join('\n')}` : req.admin_notes,
+        brief_page_count: pageCount,
+        admin_notes: noteLines.join('\n'),
       })
       .eq('id', requestId);
 
     return NextResponse.json({
       success: true,
+      delivered: reviewed,
+      reason: reviewed ? undefined : 'Managing Partner opinion missing; brief stored as a draft',
       briefToken,
       pdfUrl,
-      pageCount: Math.round(pdfBuffer.length / 25000),
-      dataRoomUrl: `https://solidus.ambrosiaventures.co/brief/${briefToken}`,
+      pageCount,
+      storagePath: pdfPath,
+      notes: genNotes,
     });
   } catch (error) {
     console.error('[Benchmark Gen] Fatal error:', error);
     await supabase
       .from('benchmark_requests')
-      .update({ status: 'intake', admin_notes: `Generation failed: ${(error as Error).message}` })
+      .update({ status: 'intake', admin_notes: `GENERATION FAILED (${new Date().toISOString()}): ${(error as Error).message}` })
       .eq('id', requestId);
     return NextResponse.json({ error: 'Generation failed' }, { status: 500 });
   }

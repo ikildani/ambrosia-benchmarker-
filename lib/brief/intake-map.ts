@@ -164,11 +164,16 @@ const PHASE_LABEL: Record<Phase, string> = {
 /** Build the engine input and the asset profile from a benchmark_requests row. */
 export function resolveIntake(req: BenchmarkRequestRow, modalityLabels: Record<string, string>): ResolvedIntake {
   const notes: string[] = [];
+  // Silent defaults are not allowed: every fallback is written to the build
+  // notes so the operator sees it in admin_notes before the brief goes out.
   const ta = resolveTherapeuticArea(req.therapeutic_area);
+  if (!TA_KEYS[norm(req.therapeutic_area)]) notes.push(`Therapeutic area "${req.therapeutic_area}" not recognised; defaulted to oncology. Confirm before delivery.`);
   const phase = resolvePhase(req.phase);
+  if (!PHASE_KEYS[norm(req.phase)]) notes.push(`Phase "${req.phase}" not recognised; defaulted to Phase 2. Confirm before delivery.`);
   const modalitySource = req.modality || req.modalities?.[0] || null;
   const modality = resolveModality(modalitySource);
-  if (!modalitySource) notes.push('No modality on the request; defaulted to monoclonal antibody.');
+  if (!modalitySource) notes.push('No modality on the request; defaulted to monoclonal antibody. Confirm before delivery.');
+  else if (!MODALITY_KEYS[norm(modalitySource)] && !new Set(Object.values(MODALITY_KEYS)).has(modalitySource as Modality)) notes.push(`Modality "${modalitySource}" not recognised; defaulted to monoclonal antibody. Confirm before delivery.`);
   const dealType = resolveDealType(req.target_deal_type || req.deal_types?.[0]);
   const ind = resolveIndication(req.indication, ta);
   if (ind.how === 'default') notes.push(`Indication "${req.indication}" not resolved; defaulted to ${ind.label}.`);
@@ -196,6 +201,7 @@ export function resolveIntake(req: BenchmarkRequestRow, modalityLabels: Record<s
     modality,
     phase,
     indication: ind.key,
+    indicationLabel: ind.label,
     therapeuticArea: ta,
     territory,
     targetDealType: dealType,

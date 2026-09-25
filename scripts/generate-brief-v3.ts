@@ -99,7 +99,7 @@ async function main() {
 
   const built = await buildBrief({
     supabase, asset: resolved.asset, inputs: input, result, fm, partners,
-    memo: memoData, defensive: fm.defensiveAnalysis,
+    memo: memoData,
     mpOpinion: {
       text: 'This asset should go to market after the IND-enabling package lands, with two named buyers approached in parallel rather than a broad process. The comparable set is thin at the preclinical stage, so the ask should be anchored on the ex-outlier median and defended with the biomarker data, not the mechanism story. I would not accept an option structure below the floor on this page.',
       reviewer: 'Issa Kildani, Managing Partner',
