@@ -13,7 +13,7 @@
  *
  * Nothing here runs unless the caller passes every guard in
  * assertApplyGuards() and the schema probe in assertMigrationPresent()
- * finds migration 124. scripts/merge-duplicate-companies.ts is the only
+ * finds migration 127. scripts/merge-duplicate-companies.ts is the only
  * caller; it defaults to a dry run that never imports a writing path.
  */
 
@@ -42,16 +42,16 @@ export function assertApplyGuards(input: ApplyGuardInput): void {
 }
 
 /**
- * Refuse to run when migration 124 is not applied: company_merges must exist
+ * Refuse to run when migration 127 is not applied: company_merges must exist
  * and companies.merged_into must be selectable. PostgREST cannot read
  * information_schema, so both are probed with a zero-row select; an
  * undefined table (42P01 / PGRST205) or column (42703) means "not applied".
  */
 export async function assertMigrationPresent(client: EntityClient): Promise<void> {
   const ledger = await client.from('company_merges').select('id').limit(0);
-  if (ledger.error) throw new Error(`apply refused: migration 124 not applied (company_merges: ${ledger.error.message})`);
+  if (ledger.error) throw new Error(`apply refused: migration 127 not applied (company_merges: ${ledger.error.message})`);
   const col = await client.from('companies').select('merged_into').limit(0);
-  if (col.error) throw new Error(`apply refused: migration 124 not applied (companies.merged_into: ${col.error.message})`);
+  if (col.error) throw new Error(`apply refused: migration 127 not applied (companies.merged_into: ${col.error.message})`);
 }
 
 export interface ColumnRepointResult {

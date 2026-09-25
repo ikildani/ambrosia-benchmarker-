@@ -85,7 +85,7 @@ export interface CompanyRow {
   data_quality_score: number | null;
   total_annual_revenue: number | null;
   deals_last_24mo: number | null;
-  /** Migration 124: canonical row this duplicate was folded into. Not in COMPANY_COLS until the column exists everywhere. */
+  /** Migration 127: canonical row this duplicate was folded into. Not in COMPANY_COLS until the column exists everywhere. */
   merged_into?: string | null;
 }
 
@@ -96,7 +96,7 @@ export const COMPANY_COLS =
 const MERGE_HOPS = 4;
 
 /**
- * If `row` was folded into another row (companies.merged_into, migration 124)
+ * If `row` was folded into another row (companies.merged_into, migration 127)
  * return the canonical row, else null. Before the migration is applied the
  * column does not exist; that error is treated as "not merged" so the
  * resolver keeps working on either schema.

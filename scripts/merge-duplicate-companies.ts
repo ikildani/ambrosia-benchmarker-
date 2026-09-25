@@ -15,7 +15,7 @@
  * APPLY (three guards, all required):
  *   MERGE_APPLY=yes npx tsx scripts/merge-duplicate-companies.ts --apply --run-id merge-2026-09-26
  *   Re-plans from the live table (never from a stale JSON), refuses unless
- *   migration 124 is present (company_merges + companies.merged_into), then
+ *   migration 127 is present (company_merges + companies.merged_into), then
  *   per plan: audit row → re-point each referencing table → alias union on
  *   the canonical → merged_into/merged_at on the surplus row. Never deletes.
  *   --limit N        apply only the first N plans (ordered by reference count)
@@ -96,7 +96,7 @@ const READ_COLS = `${COMPANY_COLS},source_registry,created_at`;
 type Client = ReturnType<typeof createClient<any, any, any>>;
 
 async function loadCompanies(supabase: Client): Promise<MergeCompanyRow[]> {
-  // merged_into exists only after migration 124; select it when it does.
+  // merged_into exists only after migration 127; select it when it does.
   let cols = `${READ_COLS},merged_into`;
   const probe = await supabase.from('companies').select('merged_into').limit(0);
   if (probe.error) cols = READ_COLS;

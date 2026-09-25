@@ -1,4 +1,4 @@
--- Migration 124 — Duplicate-company merges (entity graph, docs/entity-graph.md "Merge job").
+-- Migration 127 — Duplicate-company merges (entity graph, docs/entity-graph.md "Merge job").
 --
 -- Why: companies holds ~684 groups of rows that are the same organisation under
 -- a different legal-form spelling (Janssen-Cilag ×10, Kyowa Kirin ×3, …), most

@@ -110,7 +110,7 @@ Two hazards found on the way, both for the merge job:
 
 ## Merge job
 
-`scripts/merge-duplicate-companies.ts` folds each duplicate group into its best-populated row. Planning is pure (`lib/entities/merge.ts`), execution is `lib/entities/merge-apply.ts`, the schema is migration `124_company_merges.sql`. **Nothing is ever deleted**: a folded row stays in `companies` with `merged_into = <canonical id>` and `merged_at`, the resolver follows the pointer (`matchedOn: 'merged'`, confidence 1) and `GET /api/entities/company/:id` on an old id returns the canonical record, so every `companies.id` Terrain or Augur has stored keeps working.
+`scripts/merge-duplicate-companies.ts` folds each duplicate group into its best-populated row. Planning is pure (`lib/entities/merge.ts`), execution is `lib/entities/merge-apply.ts`, the schema is migration `127_company_merges.sql`. **Nothing is ever deleted**: a folded row stays in `companies` with `merged_into = <canonical id>` and `merged_at`, the resolver follows the pointer (`matchedOn: 'merged'`, confidence 1) and `GET /api/entities/company/:id` on an old id returns the canonical record, so every `companies.id` Terrain or Augur has stored keeps working.
 
 ### What one merge does
 
@@ -184,7 +184,7 @@ The console prints the same summary. Both files are gitignored (`tmp/`).
 
 ### Apply (Issa only)
 
-Apply migration 124 first (Supabase SQL editor or `supabase db push`); the script refuses to run when `company_merges` or `companies.merged_into` is missing. Then, from the repo root:
+Apply migration 127 first (Supabase SQL editor or `supabase db push`); the script refuses to run when `company_merges` or `companies.merged_into` is missing. Then, from the repo root:
 
 ```
 MERGE_APPLY=yes npx tsx scripts/merge-duplicate-companies.ts --apply --run-id merge-2026-09-26
@@ -192,7 +192,7 @@ MERGE_APPLY=yes npx tsx scripts/merge-duplicate-companies.ts --apply --run-id me
 
 Three guards must all be present: `--apply`, `--run-id <id>` (3–64 chars, becomes `company_merges.run_id`) and the environment variable `MERGE_APPLY=yes`. The apply re-plans from the live table (never from a stale JSON), applies the plans in reference-count order, then the singleton alias strips. Staged rollout: `--limit 20` (top 20 groups), `--only <key>` (one group by its compact key, e.g. `janssencilag`), `--skip-strips`. Re-running is idempotent: rows already carrying `merged_into` are skipped. A hard error stops the run; audit rows written so far stay and describe exactly what moved.
 
-Deploy order: migration 124 can go in before the code (it is additive); the resolver tolerates either schema. After the migration is live, `merged_into` can be added to `COMPANY_COLS` so name-pool queries skip folded rows outright (today `pickBestCompany` only demotes them).
+Deploy order: migration 127 can go in before the code (it is additive); the resolver tolerates either schema. After the migration is live, `merged_into` can be added to `COMPANY_COLS` so name-pool queries skip folded rows outright (today `pickBestCompany` only demotes them).
 
 ### Rollback
 
@@ -213,7 +213,7 @@ UPDATE deals SET licensor_id = '<merged_id>' WHERE id = ANY(ARRAY[...]::uuid[]);
 
 ## Follow-ups
 
-- **Merge job**: run the dry run, read the review list, apply migration 124, then apply in stages (top 20 by references first). After the apply, re-resolve the deals listed under "mis-routed" in the report and add `merged_into` to `COMPANY_COLS`.
+- **Merge job**: run the dry run, read the review list, apply migration 127, then apply in stages (top 20 by references first). After the apply, re-resolve the deals listed under "mis-routed" in the report and add `merged_into` to `COMPANY_COLS`.
 - **Terrain**: replace `company_name` / `asset_name` text keys on indication competitive-density and pipeline rows with `company_id` / `asset_id` (`companies.id` / `drug_master.id`) filled through `/api/entities/resolve`; keep the raw strings as `*_raw`. Expose the demand-layer API keyed on those ids (Sequencing §4).
 - **Augur**: portfolio companies and rounds store `companies.id`; exits that are licensing deals store `deals.id`. NAV marks vs later rounds join on the id, not the name.
 - **Deal coverage**: only 312 of 2,072 deals pass the quality filter today (1,496 are rejected / flagged, 913 non-canonical), so deal resolution covers the verified core only; the outcome resolver (Workstream 1) should expect nulls for older or unverified deals until the backfill validator has been re-run.
