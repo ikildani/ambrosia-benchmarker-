@@ -82,12 +82,18 @@ const ADAPTERS: Adapter[] = [
     run: async (sb, c) => { const r = await runGeoEnrichment(sb, { anthropicApiKey: c.anthropicApiKey, dryRun: c.dryRun, timeBudgetMs: c.budgetMs });
       return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: r.parameters, expectRecords: false }; },
   },
-  {
+];
+
+/**
+ * Sep 25 2026: the 2017→present HKEX walk ran three times in a week under the
+ * rotation, so it now runs on every pass right after MFN with a fixed budget,
+ * and the rotation gets what is left. Remove this once the walk reports done.
+ */
+const HKEX_BACKFILL: Adapter = {
     key: 'hkex_backfill', source: 'hkex_backfill', budgetMs: 120_000,
     run: async (sb, c) => { const r = await runHkexIngestion(sb, { anthropicApiKey: c.anthropicApiKey, dryRun: c.dryRun, mode: 'backfill', timeBudgetMs: c.budgetMs });
       return { fetched: r.announcements, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { mode: 'backfill', window: r.window, dealTitles: r.dealTitles, next: r.next ?? null, throttled: r.throttled }, status: r.throttled ? 'partial' : undefined, expectRecords: !r.throttled }; },
-  },
-];
+  };
 
 const MFN: Adapter = {
   key: 'mfn', source: 'mfn_announcements', budgetMs: 40_000,
@@ -133,14 +139,17 @@ export async function GET(request: NextRequest) {
   const ran: Record<string, unknown>[] = [];
 
   if (only) {
-    const a = [MFN, ...ADAPTERS].find(x => x.key === only);
-    if (!a) return NextResponse.json({ error: `unknown adapter ${only}`, adapters: [MFN, ...ADAPTERS].map(x => x.key) }, { status: 400 });
+    const a = [MFN, HKEX_BACKFILL, ...ADAPTERS].find(x => x.key === only);
+    if (!a) return NextResponse.json({ error: `unknown adapter ${only}`, adapters: [MFN, HKEX_BACKFILL, ...ADAPTERS].map(x => x.key) }, { status: 400 });
     ran.push(await runOne(supabase, a, { anthropicApiKey, dryRun, budgetMs: Math.min(a.budgetMs * 2, TOTAL_BUDGET_MS) }));
     return NextResponse.json({ success: true, dryRun, ran });
   }
 
   // 1. MFN on every run.
   ran.push(await runOne(supabase, MFN, { anthropicApiKey, dryRun, budgetMs: MFN.budgetMs }));
+
+  // 1b. HKEX 2017→present backfill on every run until it finishes (see HKEX_BACKFILL).
+  ran.push(await runOne(supabase, HKEX_BACKFILL, { anthropicApiKey, dryRun, budgetMs: 100_000 }));
 
   // 2. Rotation.
   const cur = await readSyncCursor<{ index?: number }>(supabase, ROTATION_CURSOR);
