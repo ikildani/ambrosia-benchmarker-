@@ -173,7 +173,10 @@ export async function runEdgarRealtime(supabase: SupabaseClient, opts: EdgarReal
     let from = 0;
     while (true) {
       if (Date.now() - start > budget) { funnel.count('time_budget', 'queries_remaining'); break queries; }
-      const page = await eftsSearch({ q: query.q, startdt: date, enddt: date, from });
+      // Two-day window: filings posted after the last run of the day (6–8 pm ET) only
+      // surface under the next date, and a one-day window skipped them. Overlap is
+      // harmless: processEftsDocument dedupes on source_filing_id.
+      const page = await eftsSearch({ q: query.q, startdt: shiftDays(date, -1), enddt: date, from });
       if (page.parseFailed && page.hits.length === 0) { errors.push(`SEC search ${query.key}: non-JSON body after retry (page ${from})`); break; }
       if (page.status === 500 && from > 0) break; // EFTS: past the last hit
       if (page.status !== 200) { errors.push(`SEC search ${query.key} failed: ${page.status}`); break; }

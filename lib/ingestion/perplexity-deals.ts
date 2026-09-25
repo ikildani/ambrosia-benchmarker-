@@ -420,7 +420,10 @@ export async function runPerplexityDealDiscovery(
             // Duplicates: the unique indexes catch rows already in the table
             if (sweepInsertErr?.code === '23505') { result.skipped.duplicate++; continue; }
             if (!sweepInsertErr) result.deals_inserted++;
-            else result.skipped.insert_error++;
+            else {
+              result.skipped.insert_error++;
+              if (result.errors.length < 10) result.errors.push(`sweep insert ${deal.licensor}/${deal.licensee}: ${sweepInsertErr?.code ?? ''} ${sweepInsertErr?.message ?? ''}`.trim());
+            }
             result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;
           } else {
             result.skipped.duplicate++;
@@ -524,6 +527,9 @@ export async function runPerplexityDealDiscovery(
               result.by_ta[ta] = (result.by_ta[ta] || 0) + 1;
             } else {
               result.skipped.insert_error++;
+              // Surface the reason in the run log. A check-constraint failure on source_type
+              // hid behind a bare insert_error count for weeks (Sep 2026).
+              if (result.errors.length < 10) result.errors.push(`insert ${deal.licensor}/${deal.licensee}: ${insertError.code ?? ''} ${insertError.message}`.trim());
             }
           } catch (err) {
             result.errors.push(`${deal.licensor}/${deal.licensee}: ${err}`);
