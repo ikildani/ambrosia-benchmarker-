@@ -79,5 +79,12 @@ Every roadmap item on every platform is tagged with the tests it advances. Items
 - Rollups: medians, within-band, buyer hit, window hit, value captured.
 - Writers: dedupe, brief prediction from a v3 `BriefIntelligence` fixture.
 
+## Workstream 2: money metric and accuracy surfaces (built 2026-09-25)
+
+- **Statements** (`lib/outcomes/statements.ts`): `accuracyStatementFromRollups` fills `DataCoverage.accuracy` for the brief's TA (brief cell, then all-source cell; n ≥ 10 or null); `calculatorAccuracyLine` is the results-view sentence; `getAccuracySummary` returns accuracy by source × window for the public methodology page (wire it in once that branch merges — this branch does not add the page).
+- **Brief coverage block**: `lib/brief/build.ts` step 11 loads the statement after coverage; the methodology page prints it or keeps its "omitted rather than estimated" line.
+- **Calculator line**: `components/OutcomeAccuracyLine.tsx` under the headline cards in `Results.tsx`; fetches `GET /api/outcomes/accuracy` for (calculator | all) × TA × phase × all-time; renders nothing under n = 10.
+- **Client follow-up**: signed, expiring link tokens (`lib/outcomes/report-token.ts`, `OUTCOME_TOKEN_SECRET` with `CRON_SECRET` fallback, 180-day life); `POST /api/outcomes/report` accepts `?token=` / `body.token` as owner auth; the form lives at `/outcomes/report/<token>`. Day-45 and day-120 emails (`lib/outcomes/followups.ts`, plain, from Issa) go out from the 02:00 UTC outcome phase of `deal-verification`, idempotent through `outcome_followups` (migration 123); briefs with a client-reported outcome are skipped; briefs delivered more than 200 days ago are never contacted.
+
 ## Definition of done for workstream 1
 A brief delivered today produces a prediction row; a deal ingested next quarter for that licensor resolves it without human action; the methodology page shows the resolved accuracy; the admin can record first offer vs signed and see value captured.

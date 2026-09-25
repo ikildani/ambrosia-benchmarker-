@@ -1,8 +1,11 @@
 /**
  * POST /api/outcomes/report — client-reported outcome for a prediction.
  *
- * Auth: the signed-in owner of the prediction (predictions.user_id), or the
- * admin key / admin email (lib/admin-auth). Body is zod-validated; money in $M.
+ * Auth: the signed-in owner of the prediction (predictions.user_id), the
+ * admin key / admin email (lib/admin-auth), or a signed link token
+ * (lib/outcomes/report-token — `?token=` or body.token) issued by the brief
+ * follow-up email; a valid token for this prediction counts as the owner.
+ * Body is zod-validated; money in $M.
  * Writes an `outcomes` row with matched_by = 'client', status = 'accepted',
  * fills actuals from the linked deal when `deal_id` is given and the body
  * leaves them blank, computes the derived metrics, and marks the prediction
@@ -18,6 +21,7 @@ import { verifyAdminAuth } from '@/lib/admin-auth';
 import { captureApiError } from '@/lib/sentry-api';
 import { computeOutcomeMetrics, dealToActuals } from '@/lib/outcomes/matcher';
 import { applyDealQualityFilter } from '@/lib/outcomes/resolver';
+import { verifyOutcomeReportToken } from '@/lib/outcomes/report-token';
 import { DEAL_CANDIDATE_COLUMNS, type CompanyAlias, type DealCandidateRow, type OutcomeActuals, type OutcomeInsert, type PredictionForMatch } from '@/lib/outcomes/types';
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +44,8 @@ const bodySchema = z.object({
   our_ask_upfront_m: money,
   our_ask_total_m: money,
   notes: z.string().trim().max(2000).nullable().optional(),
+  /** Signed link token (alternative to owner auth); also accepted as ?token=. */
+  token: z.string().max(512).optional(),
 }).strict();
 
 export type OutcomeReportBody = z.infer<typeof bodySchema>;
@@ -70,12 +76,20 @@ export async function POST(request: NextRequest) {
     const prediction = predData as unknown as (PredictionForMatch & { user_id: string | null; status: string }) | null;
     if (!prediction) return NextResponse.json({ error: 'prediction not found' }, { status: 404 });
 
-    // Owner or admin.
-    const user = await getAuthenticatedUser(request);
-    const isOwner = !!user && !!prediction.user_id && user.id === prediction.user_id;
-    const isAdmin = (await verifyAdminAuth(request)) === null;
+    // Signed link token, owner, or admin.
+    const token = request.nextUrl.searchParams.get('token') ?? body.token ?? null;
+    const verified = token ? verifyOutcomeReportToken(token) : null;
+    const isTokenOwner = !!verified && verified.ok && verified.payload.predictionId === prediction.id;
+    if (token && !isTokenOwner) {
+      const reason = verified && !verified.ok ? verified.reason : 'mismatch';
+      console.warn(`[Outcomes] report token rejected for prediction ${prediction.id}: ${reason}`);
+      return NextResponse.json({ error: reason === 'expired' ? 'This link has expired' : 'Unauthorized' }, { status: 401 });
+    }
+    const user = isTokenOwner ? null : await getAuthenticatedUser(request);
+    const isOwner = isTokenOwner || (!!user && !!prediction.user_id && user.id === prediction.user_id);
+    const isAdmin = !isOwner && (await verifyAdminAuth(request)) === null;
     if (!isOwner && !isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const reviewedBy = isAdmin && !isOwner ? (user?.email ?? 'admin') : (user?.email ?? 'client');
+    const reviewedBy = isAdmin ? (user?.email ?? 'admin') : (user?.email ?? 'client');
 
     // Optional linked deal: fills any actual the client left blank.
     let deal: DealCandidateRow | null = null;
@@ -124,7 +138,7 @@ export async function POST(request: NextRequest) {
       matched_by: 'client',
       status: 'accepted',
       match_confidence: deal ? 1 : null,
-      match_evidence: { reported_by: isOwner ? 'owner' : 'admin', deal_linked: !!deal },
+      match_evidence: { reported_by: isTokenOwner ? 'link' : isOwner ? 'owner' : 'admin', deal_linked: !!deal },
       ...actuals,
       first_offer_upfront_m: actuals.first_offer_upfront_m ?? null,
       first_offer_total_m: actuals.first_offer_total_m ?? null,

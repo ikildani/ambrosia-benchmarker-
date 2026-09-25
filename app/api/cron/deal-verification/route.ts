@@ -163,12 +163,13 @@ export async function GET(request: NextRequest) {
 
   // Outcome ledger phase (Alaric WS1). Lives here because vercel.json is at the
   // 100-cron cap: resolves open predictions against deals ingested since the
-  // last run; at 02:00 UTC also runs the Radar writer + accuracy rollups.
+  // last run; at 02:00 UTC also runs the Radar writer + accuracy rollups and
+  // sends the day-45 / day-120 brief outcome follow-up emails (WS2).
   // Isolated — a failure here never fails verification.
-  let outcomes: { autoResolved: number; queued: number; expired: number; errors: number } | null = null;
+  let outcomes: { autoResolved: number; queued: number; expired: number; followupsSent: number | null; errors: number } | null = null;
   try {
     const phase = await runOutcomePhase(supabase, { rollupHour: 2 });
-    outcomes = { autoResolved: phase.resolver.autoResolved, queued: phase.resolver.queued, expired: phase.resolver.expired, errors: phase.errors.length };
+    outcomes = { autoResolved: phase.resolver.autoResolved, queued: phase.resolver.queued, expired: phase.resolver.expired, followupsSent: phase.followups?.sent ?? null, errors: phase.errors.length };
   } catch (error) {
     console.error('[Outcomes] phase failed inside deal-verification:', error instanceof Error ? error.message : error);
   }

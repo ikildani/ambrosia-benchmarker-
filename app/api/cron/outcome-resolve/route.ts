@@ -19,6 +19,10 @@ export const dynamic = 'force-dynamic';
 //   GET /api/cron/outcome-resolve?radar=true      force the Radar writer even when
 //                                                 OUTCOMES_RADAR_WRITER is unset
 //   GET /api/cron/outcome-resolve?cursor=<iso>    re-scan deals created after <iso>
+//   GET /api/cron/outcome-resolve?rollups=true&followups=true
+//                                                 also send the day-45 / day-120 brief
+//                                                 outcome follow-ups (off by default here;
+//                                                 the scheduled 02:00 UTC run sends them)
 // ---------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
@@ -41,6 +45,7 @@ export async function GET(request: NextRequest) {
       rollupHour: 3,
       forceRollups: params.get('rollups') === 'true',
       forceRadar: params.get('radar') === 'true',
+      skipFollowups: params.get('followups') !== 'true',
       cursorOverride: cursor && Number.isFinite(Date.parse(cursor)) ? new Date(cursor).toISOString() : undefined,
     });
 
