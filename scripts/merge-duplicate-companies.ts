@@ -101,12 +101,23 @@ async function loadCompanies(supabase: Client): Promise<MergeCompanyRow[]> {
   const probe = await supabase.from('companies').select('merged_into').limit(0);
   if (probe.error) cols = READ_COLS;
   const out: MergeCompanyRow[] = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase.from('companies').select(cols).order('id').range(from, from + PAGE - 1);
-    if (error) throw new Error(`companies page ${from} failed: ${error.message}`);
-    const rows = (data ?? []) as MergeCompanyRow[];
+  // Smaller pages with retry + backoff: the table is wide (jsonb, arrays) and the
+  // database is often busy with ingestion crons, so a 1,000-row page can hit the
+  // statement timeout even on an index-ordered scan.
+  const LOAD_PAGE = 250;
+  for (let from = 0; ; from += LOAD_PAGE) {
+    let rows: MergeCompanyRow[] | null = null;
+    for (let attempt = 1; attempt <= 6 && rows === null; attempt++) {
+      const { data, error } = await supabase.from('companies').select(cols).order('id').range(from, from + LOAD_PAGE - 1);
+      if (!error) { rows = (data ?? []) as MergeCompanyRow[]; break; }
+      if (attempt === 6) throw new Error(`companies page ${from} failed after ${attempt} attempts: ${error.message}`);
+      const wait = 2000 * attempt;
+      log.warn(`companies page ${from} failed (${error.message}); retrying in ${wait / 1000}s`);
+      await new Promise(r => setTimeout(r, wait));
+    }
+    if (rows === null) break;
     out.push(...rows);
-    if (rows.length < PAGE) break;
+    if (rows.length < LOAD_PAGE) break;
   }
   return out;
 }
@@ -322,12 +333,17 @@ async function main() {
   // Pass 1: groups without reference counts, to know which ids to count.
   const first = planCompanyMerges(companies, { skipAliasStrips: true });
   const groupIds = new Set<string>();
-  for (const p of first.plans) {
+  // With --only, count references for that group alone: the full 27-column walk
+  // over ~1,500 ids is what times out on a busy database, and a single-group
+  // apply does not need the global ordering.
+  const scopedPlans = args.only ? first.plans.filter(p => p.key === args.only) : first.plans;
+  if (args.only && scopedPlans.length === 0) throw new Error(`--only ${args.only}: no plan with that key`);
+  for (const p of scopedPlans) {
     groupIds.add(p.canonicalId);
     for (const m of p.merged) groupIds.add(m.id);
   }
-  for (const r of first.review) for (const row of r.rows) groupIds.add(row.id);
-  log.info(`Counting references for ${groupIds.size} rows in ${first.stats.groups} groups across ${COMPANY_REFERENCING_COLUMNS.length} columns…`);
+  if (!args.only) for (const r of first.review) for (const row of r.rows) groupIds.add(row.id);
+  log.info(`Counting references for ${groupIds.size} rows in ${args.only ? 1 : first.stats.groups} groups across ${COMPANY_REFERENCING_COLUMNS.length} columns…`);
   const refs = await countReferences(supabase, [...groupIds]);
 
   // Pass 2: the real plan, with counts as tie-break and for the report.
