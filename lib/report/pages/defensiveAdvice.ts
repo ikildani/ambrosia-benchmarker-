@@ -1,7 +1,7 @@
 // Page: Defensive Analysis & Walk-Away Thresholds
 // Worst/best case scenarios, defensive floor, walk-away threshold, risk/opportunity breakdown
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { ScenarioResult } from '@/lib/financial/types';
 
@@ -77,7 +77,7 @@ function renderScenarioCard(scenario: ScenarioResult, type: 'risk' | 'opportunit
   const deltaPrefix = scenario.impactDelta >= 0 ? '+' : '';
 
   return `
-    <div class="card-sm" style="border-left: 3px solid ${borderColor};">
+    <div class="card-sm" style="border-left: 3px solid ${borderColor}; padding: 8px 12px;">
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
         <div style="font-size: 10px; font-weight: 700; color: ${COLORS.navy}; line-height: 1.3;">${escapeHtml(scenario.scenario.name)}</div>
         <span class="badge ${badgeClass}" style="flex-shrink: 0; margin-left: 6px;">${escapeHtml(scenario.scenario.category)}</span>
@@ -86,7 +86,7 @@ function renderScenarioCard(scenario: ScenarioResult, type: 'risk' | 'opportunit
         <span style="font-size: 14px; font-weight: 800; color: ${deltaColor};">${deltaPrefix}${formatUsd(scenario.impactDelta)}</span>
         <span style="font-size: 9px; color: ${COLORS.gray400};">(${deltaPrefix}${formatPercent(scenario.impactPercent, 1)})</span>
       </div>
-      <div style="font-size: 9px; color: ${COLORS.gray500}; line-height: 1.5;">${escapeHtml(scenario.narrative)}</div>
+      <div style="font-size: 8.5px; color: ${COLORS.gray500}; line-height: 1.4;">${escapeHtml(scenario.narrative)}</div>
     </div>
   `;
 }
@@ -112,19 +112,19 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Defensive Analysis &amp; Walk-Away Thresholds</div>
+      <div class="section-title-lg" style="margin-bottom: 12px;">Defensive Analysis &amp; Walk-Away Thresholds</div>
 
       <!-- Worst/Best Case Hero -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
-        <div style="background: linear-gradient(145deg, #4c1d2e 0%, #6b2040 100%); border-radius: 6px; padding: 18px; color: white;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
+        <div style="background: linear-gradient(145deg, #4c1d2e 0%, #6b2040 100%); border-radius: 6px; padding: 14px 16px; color: white;">
           <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Worst Case Scenario</div>
           <div style="font-size: 12px; font-weight: 700; color: #fecdd3; margin-bottom: 4px;">${escapeHtml(da.worstCase.scenario.name)}</div>
           <div style="font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 6px;">${formatUsd(da.worstCase.adjustedRNPV)}</div>
           <div style="font-size: 9px; color: rgba(255,255,255,0.55); line-height: 1.5;">${escapeHtml(da.worstCase.narrative)}</div>
         </div>
-        <div style="background: linear-gradient(145deg, #14532d 0%, #166534 100%); border-radius: 6px; padding: 18px; color: white;">
+        <div style="background: linear-gradient(145deg, #14532d 0%, #166534 100%); border-radius: 6px; padding: 14px 16px; color: white;">
           <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Best Case Scenario</div>
           <div style="font-size: 12px; font-weight: 700; color: #bbf7d0; margin-bottom: 4px;">${escapeHtml(da.bestCase.scenario.name)}</div>
           <div style="font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 6px;">${formatUsd(da.bestCase.adjustedRNPV)}</div>
@@ -133,20 +133,20 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
       </div>
 
       <!-- Thresholds KPIs -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px;">
-        <div class="kpi-card">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+        <div class="kpi-card" style="padding: 12px 10px;">
           <div class="kpi-value">${formatUsd(baseRNPV)}</div>
           <div class="kpi-label">Base rNPV</div>
         </div>
-        <div class="kpi-card" style="border-top-color: ${COLORS.amber};">
+        <div class="kpi-card" style="border-top-color: ${COLORS.amber}; padding: 12px 10px;">
           <div class="kpi-value" style="color: ${COLORS.amber};">${formatUsd(da.defensiveFloor)}</div>
           <div class="kpi-label">Defensive Floor</div>
         </div>
-        <div class="kpi-card" style="border-top-color: ${COLORS.rose};">
+        <div class="kpi-card" style="border-top-color: ${COLORS.rose}; padding: 12px 10px;">
           <div class="kpi-value" style="color: ${COLORS.rose};">${formatUsd(da.walkAwayThreshold)}</div>
           <div class="kpi-label">Walk-Away Threshold</div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" style="padding: 12px 10px;">
           <div class="kpi-value" style="color: ${COLORS.navy};">${formatUsd(da.bestCase.adjustedRNPV - da.worstCase.adjustedRNPV)}</div>
           <div class="kpi-label">Total Range</div>
         </div>
@@ -154,7 +154,7 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
 
       <!-- Range Visualization -->
       <div class="section-title">Valuation Range</div>
-      <div class="card" style="padding: 14px; margin-bottom: 18px;">
+      <div class="card" style="padding: 10px 14px; margin-bottom: 12px;">
         <div class="chart-container">
           ${renderRangeVisualization(
             da.worstCase.adjustedRNPV,
@@ -164,7 +164,7 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
             baseRNPV,
           )}
         </div>
-        <div style="display: flex; justify-content: center; gap: 16px; margin-top: 8px;">
+        <div style="display: flex; justify-content: center; gap: 16px; margin-top: 4px;">
           <div style="display: flex; align-items: center; gap: 4px;">
             <div style="width: 10px; height: 6px; background: ${COLORS.roseLight}; border: 1px solid ${COLORS.rose}; border-radius: 1px;"></div>
             <span style="font-size: 7px; color: ${COLORS.gray400};">Below Walk-Away</span>
@@ -181,27 +181,27 @@ export function renderDefensiveAdvicePage(data: PDFReportData, meta: ReportMeta)
       </div>
 
       <!-- Key Risks & Opportunities -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 10px;">
         <div>
           <div class="section-title">Key Risks</div>
           ${risks.length > 0
-            ? risks.map(s => renderScenarioCard(s, 'risk')).join('<div style="height: 8px;"></div>')
+            ? risks.map(s => renderScenarioCard(s, 'risk')).join('<div style="height: 6px;"></div>')
             : `<div class="card-sm" style="text-align: center; color: ${COLORS.gray400}; font-size: 10px;">No downside scenarios identified.</div>`
           }
         </div>
         <div>
           <div class="section-title">Key Opportunities</div>
           ${opportunities.length > 0
-            ? opportunities.map(s => renderScenarioCard(s, 'opportunity')).join('<div style="height: 8px;"></div>')
+            ? opportunities.map(s => renderScenarioCard(s, 'opportunity')).join('<div style="height: 6px;"></div>')
             : `<div class="card-sm" style="text-align: center; color: ${COLORS.gray400}; font-size: 10px;">No upside scenarios identified.</div>`
           }
         </div>
       </div>
 
       <!-- Deal Advice Narrative -->
-      <div class="callout" style="margin-top: 4px;">
+      <div class="callout" style="margin-top: 0; padding: 10px 14px;">
         <div style="font-size: 8px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Deal Advice</div>
-        <div style="font-size: 10px; color: #134e4a; line-height: 1.65;">${escapeHtml(da.narrative)}</div>
+        <div style="font-size: 10px; color: #134e4a; line-height: 1.5;">${escapeHtml(da.narrative)}</div>
       </div>
 
       ${pageFooter(meta.reportId)}

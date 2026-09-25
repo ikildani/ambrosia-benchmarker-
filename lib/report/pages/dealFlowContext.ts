@@ -1,7 +1,7 @@
 // Page: Deal Flow & Market Context
 // Historical deal flow, forecast, competitive landscape, market sentiment, market sizing
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 function sentimentBadge(sentiment: string): string {
@@ -37,7 +37,7 @@ export function renderDealFlowContextPage(data: PDFReportData, meta: ReportMeta)
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Deal Flow &amp; Market Context</div>
 

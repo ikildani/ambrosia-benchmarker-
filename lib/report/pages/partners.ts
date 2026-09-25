@@ -1,7 +1,7 @@
 // Page 8: Partner Landscape
 // Partner cards with match score bars, evaluation matrix
 
-import { pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): string {
@@ -10,7 +10,7 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
   if (!partners || partners.length === 0) {
     return `
       <div class="report-page">
-        ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+        ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
         <div class="section-title-lg">Partner Landscape</div>
         <div class="card" style="text-align: center; padding: 40px;">
           <div style="font-size: 12px; color: ${COLORS.gray400}; margin-bottom: 6px;">Partner matching not available for this report.</div>
@@ -25,7 +25,7 @@ export function renderPartnersPage(data: PDFReportData, meta: ReportMeta): strin
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Partner Landscape</div>
       <p style="font-size: 11px; color: ${COLORS.gray500}; margin-bottom: 18px; line-height: 1.5;">

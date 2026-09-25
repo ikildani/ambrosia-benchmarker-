@@ -184,7 +184,7 @@ describe('generateReportHTML', () => {
     it('includes the indication name in the document title', () => {
       const html = generateReportHTML(buildOncologyData());
       expect(html).toContain('<title>Lung (NSCLC)');
-      expect(html).toContain('Deal Valuation Report | Ambrosia Ventures</title>');
+      expect(html).toContain('Deal Intelligence Brief | Ambrosia Ventures</title>');
     });
 
     it('embeds styles in a <style> tag', () => {
@@ -211,30 +211,30 @@ describe('generateReportHTML', () => {
 
     it('includes page number markers (p. N) for TOC entries', () => {
       const html = generateReportHTML(buildOncologyData());
-      // The TOC renders "p. 1", "p. 2", etc.
-      expect(html).toMatch(/p\.\s*1/);
-      expect(html).toMatch(/p\.\s*2/);
-      expect(html).toMatch(/p\.\s*3/);
+      // v3 contents page prints bare page numbers; page headers print "N / total".
+      expect(html).toMatch(/2 \/ \d+/);
+      expect(html).toMatch(/3 \/ \d+/);
     });
   });
 
   describe('Page count', () => {
-    it('renders 13 core pages (AI memo page always included as fallback)', () => {
+    it('renders the core pages and the page count in the header matches the physical count', () => {
       const html = generateReportHTML(buildOncologyData());
-      expect(countPages(html)).toBe(13);
+      const n = countPages(html);
+      expect(n).toBeGreaterThanOrEqual(13);
+      expect(html).toContain(`${n} / ${n}`);
     });
 
-    it('renders 13 pages when memoData is provided (AI Deal Memo with content)', () => {
-      const html = generateReportHTML(buildOncologyData({ memoData: fakeMemo }));
-      expect(countPages(html)).toBe(13);
+    it('memo data never reduces the page count', () => {
+      const base = countPages(generateReportHTML(buildOncologyData()));
+      const withMemo = countPages(generateReportHTML(buildOncologyData({ memoData: fakeMemo })));
+      expect(withMemo).toBeGreaterThanOrEqual(base);
     });
 
-    it('renders 14 pages when both memoData and playbookData are provided', () => {
-      const html = generateReportHTML(buildOncologyData({
-        memoData: fakeMemo,
-        playbookData: fakePlaybook,
-      }));
-      expect(countPages(html)).toBe(14);
+    it('adds the negotiation strategy page(s) when playbookData is provided', () => {
+      const withMemo = countPages(generateReportHTML(buildOncologyData({ memoData: fakeMemo })));
+      const withBoth = countPages(generateReportHTML(buildOncologyData({ memoData: fakeMemo, playbookData: fakePlaybook })));
+      expect(withBoth).toBeGreaterThan(withMemo);
     });
   });
 
@@ -306,13 +306,13 @@ describe('generateReportHTML', () => {
 
     it('includes the version number in the TOC metadata area', () => {
       const html = generateReportHTML(buildOncologyData());
-      expect(html).toContain('Version 2.0');
+      expect(html).toContain('Version 3.0');
     });
 
     it('includes total page count in the TOC metadata area', () => {
       const html = generateReportHTML(buildOncologyData());
-      // TOC renders "13 pages" (AI memo page always included, even as fallback)
-      expect(html).toContain('13 pages');
+      const n = countPages(html);
+      expect(html).toContain(`${n} pages`);
     });
   });
 });

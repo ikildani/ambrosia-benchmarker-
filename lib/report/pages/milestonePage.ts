@@ -1,10 +1,12 @@
 // Page: Milestone Probability Analysis
-// Gantt-style SVG timeline, milestone table, probability-weighted total callout,
-// payout schedule bar chart, and narrative block.
+// Gantt-style SVG timeline, milestone tables, probability-weighted total callout,
+// payout schedule bar chart, and narrative block. The section is packed across
+// as many physical A4 pages as the milestone count needs (typically 2–3): a
+// deal with ~30 milestones produces a ~2,600px column that cannot fit one page.
 
-import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
-import type { MilestoneEntry, AnnualPayout } from '@/lib/financial/milestone-probability';
+import type { MilestoneEntry, AnnualPayout, MilestoneProbabilityResult } from '@/lib/financial/milestone-probability';
 
 // ---------------------------------------------------------------------------
 // Category colors
@@ -29,7 +31,10 @@ interface TimelineRow {
   category: Category;
 }
 
-function renderGanttTimeline(rows: TimelineRow[]): string {
+const GANTT_PAD_TOP = 28;
+const GANTT_PAD_BOTTOM = 32;
+
+function renderGanttTimeline(rows: TimelineRow[], rowH: number): string {
   if (rows.length === 0) {
     return `<svg width="520" height="60" viewBox="0 0 520 60" xmlns="http://www.w3.org/2000/svg">
       <text x="260" y="30" text-anchor="middle" font-size="11" fill="${COLORS.gray400}">No milestone data</text>
@@ -37,12 +42,11 @@ function renderGanttTimeline(rows: TimelineRow[]): string {
   }
 
   const w = 520;
-  const rowH = 22;
   const labelW = 140;
   const padR = 16;
-  const padTop = 28;
+  const padTop = GANTT_PAD_TOP;
   const chartW = w - labelW - padR;
-  const h = padTop + rows.length * rowH + 32;
+  const h = padTop + rows.length * rowH + GANTT_PAD_BOTTOM;
 
   const maxTiming = Math.max(...rows.map(r => r.timing), 1) * 1.15;
   const scaleX = (t: number) => labelW + (t / maxTiming) * chartW;
@@ -65,8 +69,8 @@ function renderGanttTimeline(rows: TimelineRow[]): string {
   // Bars
   const barSvg = rows.map((row, i) => {
     const y = padTop + i * rowH;
-    const barY = y + 4;
-    const barH = rowH - 8;
+    const barY = y + 3;
+    const barH = rowH - 6;
     const barW = Math.max(scaleX(row.timing) - labelW, 4);
     const color = CAT_COLORS[row.category].fill;
     const opacity = Math.max(0.25, Math.min(row.probability, 1));
@@ -170,19 +174,23 @@ function renderPayoutChart(schedule: AnnualPayout[]): string {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Milestone table
+// 3. Milestone table (one chunk of a category; a category split across pages
+//    carries its subtotal only on its last chunk)
 // ---------------------------------------------------------------------------
 
-function renderMilestoneTable(
-  milestones: MilestoneEntry[],
-  category: Category,
-  totalDealValue_pct: number,
-): string {
-  if (milestones.length === 0) return '';
+interface TableChunk {
+  category: Category;
+  rows: MilestoneEntry[];
+  /** All milestones of the category — the subtotal sums the whole category. */
+  all: MilestoneEntry[];
+  continued: boolean;
+  withSubtotal: boolean;
+}
 
-  const { fill, label } = CAT_COLORS[category];
+function renderMilestoneTableChunk(chunk: TableChunk): string {
+  const { fill, label } = CAT_COLORS[chunk.category];
 
-  const rows = milestones.map(m => {
+  const rows = chunk.rows.map(m => {
     const expectedValue = m.probability * m.typicalValue_pct;
     const probColor = m.probability >= 0.7 ? COLORS.green : m.probability >= 0.4 ? COLORS.amber : COLORS.rose;
     return `
@@ -196,12 +204,13 @@ function renderMilestoneTable(
     `;
   }).join('');
 
-  const categoryExpected = milestones.reduce((sum, m) => sum + m.probability * m.typicalValue_pct, 0);
+  const categoryExpected = chunk.all.reduce((sum, m) => sum + m.probability * m.typicalValue_pct, 0);
+  const categoryNominal = chunk.all.reduce((s, m) => s + m.typicalValue_pct, 0);
 
   return `
     <div style="margin-bottom: 10px;">
-      <div style="font-size: 8px; font-weight: 800; color: ${fill}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; padding-left: 2px;">${label} Milestones</div>
-      <table class="data-table">
+      <div style="font-size: 8px; font-weight: 800; color: ${fill}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; padding-left: 2px;">${label} Milestones${chunk.continued ? ' (continued)' : ''}</div>
+      <table class="data-table compact">
         <thead>
           <tr>
             <th>Event</th>
@@ -213,13 +222,14 @@ function renderMilestoneTable(
         </thead>
         <tbody>
           ${rows}
+          ${chunk.withSubtotal ? `
           <tr style="background: ${COLORS.gray50}; border-top: 2px solid ${COLORS.navy};">
             <td style="font-weight: 700;">Subtotal</td>
             <td></td>
             <td></td>
-            <td style="text-align: right; font-weight: 700; color: ${COLORS.gray600};">${formatPercent(milestones.reduce((s, m) => s + m.typicalValue_pct, 0), 1)}</td>
+            <td style="text-align: right; font-weight: 700; color: ${COLORS.gray600};">${formatPercent(categoryNominal, 1)}</td>
             <td style="text-align: right; font-weight: 700; color: ${fill};">${formatPercent(categoryExpected, 1)}</td>
-          </tr>
+          </tr>` : ''}
         </tbody>
       </table>
     </div>
@@ -227,41 +237,125 @@ function renderMilestoneTable(
 }
 
 // ---------------------------------------------------------------------------
-// Main export
+// 4. Page layout — pack blocks into physical A4 pages by estimated height
 // ---------------------------------------------------------------------------
 
-export function renderMilestonePage(data: PDFReportData, meta: ReportMeta): string {
-  if (!data.milestoneProbabilities) return '';
+/** Usable px below the page title (A4 content 1031 − header 56 − title 39 ≈ 936), kept conservative. */
+const PAGE_BUDGET = 900;
+const SECTION_TITLE_H = 32;                       // .section-title 22 + 10 margin
+const ROW_H = 26;                                 // .data-table.compact row
+const SUBTOTAL_H = 26;
+const TABLE_CHUNK_OVERHEAD = 20 + 30 + 10;        // category label + thead + margin
+const TABLE_CARD_OVERHEAD = SECTION_TITLE_H + 20 + 14; // section title + card padding + margin
+const CALLOUT_H = 84 + 14;
+const PAYOUT_H = SECTION_TITLE_H + 24 + 120 + 12 + 14;
+const METHODOLOGY_H = 10 + 40;
+const GANTT_ROW_H = 18;
 
-  const mp = data.milestoneProbabilities;
+interface PageLayout {
+  gantt: boolean;
+  callout: boolean;
+  tables: TableChunk[];
+  payout: boolean;
+  narrative: boolean;
+  methodology: boolean;
+  used: number;
+}
 
-  // Build Gantt rows sorted by timing
+interface MilestoneLayout {
+  pages: PageLayout[];
+  ganttRowH: number;
+  timelineRows: TimelineRow[];
+}
+
+const newPage = (): PageLayout => ({ gantt: false, callout: false, tables: [], payout: false, narrative: false, methodology: false, used: 0 });
+const isEmpty = (p: PageLayout) => !p.gantt && !p.callout && p.tables.length === 0 && !p.payout && !p.narrative && !p.methodology;
+
+export function layoutMilestonePages(mp: MilestoneProbabilityResult): MilestoneLayout {
   const toRows = (entries: MilestoneEntry[], cat: Category): TimelineRow[] =>
     entries.map(e => ({ event: e.event, timing: e.typicalTiming_years, probability: e.probability, category: cat }));
-
   const timelineRows: TimelineRow[] = [
     ...toRows(mp.developmentMilestones, 'dev'),
     ...toRows(mp.commercialMilestones, 'comm'),
     ...toRows(mp.regulatoryMilestones, 'reg'),
   ].sort((a, b) => a.timing - b.timing);
 
-  const totalNominal = [
-    ...mp.developmentMilestones,
-    ...mp.commercialMilestones,
-    ...mp.regulatoryMilestones,
-  ].reduce((s, m) => s + m.typicalValue_pct, 0);
+  // Gantt: shrink the row pitch only if the chart alone would not fit a page.
+  const ganttFixed = SECTION_TITLE_H + 24 + 12 + 20 + 14 + GANTT_PAD_TOP + GANTT_PAD_BOTTOM;
+  let ganttRowH = GANTT_ROW_H;
+  if (timelineRows.length > 0 && ganttFixed + timelineRows.length * ganttRowH > PAGE_BUDGET) {
+    ganttRowH = Math.max(10, Math.floor((PAGE_BUDGET - ganttFixed) / timelineRows.length));
+  }
+  const ganttEst = ganttFixed + Math.max(timelineRows.length * ganttRowH, 60);
+
+  const pages: PageLayout[] = [];
+  let cur = newPage();
+  const ensure = (h: number) => {
+    if (!isEmpty(cur) && cur.used + h > PAGE_BUDGET) { pages.push(cur); cur = newPage(); }
+  };
+
+  ensure(ganttEst); cur.gantt = true; cur.used += ganttEst;
+  ensure(CALLOUT_H); cur.callout = true; cur.used += CALLOUT_H;
+
+  const categories: Array<[Category, MilestoneEntry[]]> = [
+    ['dev', mp.developmentMilestones],
+    ['comm', mp.commercialMilestones],
+    ['reg', mp.regulatoryMilestones],
+  ];
+  for (const [category, all] of categories) {
+    let i = 0;
+    let first = true;
+    while (i < all.length) {
+      const remaining = all.length - i;
+      const cardOverhead = cur.tables.length ? 0 : TABLE_CARD_OVERHEAD;
+      const avail = PAGE_BUDGET - cur.used - cardOverhead - TABLE_CHUNK_OVERHEAD - SUBTOTAL_H;
+      const fit = Math.floor(avail / ROW_H);
+      if (fit < Math.min(3, remaining) && !isEmpty(cur)) { pages.push(cur); cur = newPage(); continue; }
+      const take = Math.max(1, Math.min(fit, remaining));
+      const withSubtotal = i + take === all.length;
+      cur.tables.push({ category, rows: all.slice(i, i + take), all, continued: !first, withSubtotal });
+      cur.used += cardOverhead + TABLE_CHUNK_OVERHEAD + take * ROW_H + (withSubtotal ? SUBTOTAL_H : 0);
+      i += take;
+      first = false;
+    }
+  }
+
+  ensure(PAYOUT_H); cur.payout = true; cur.used += PAYOUT_H;
+  const narrativeH = 24 + 16 * Math.max(1, Math.ceil(mp.narrative.length / 110));
+  ensure(narrativeH); cur.narrative = true; cur.used += narrativeH;
+  ensure(METHODOLOGY_H); cur.methodology = true; cur.used += METHODOLOGY_H;
+  pages.push(cur);
+
+  return { pages, ganttRowH, timelineRows };
+}
+
+/** Number of physical pages the milestone section produces (0 when the engine did not run). */
+export function countMilestonePages(data: PDFReportData): number {
+  if (!data.milestoneProbabilities) return 0;
+  return layoutMilestonePages(data.milestoneProbabilities).pages.length;
+}
+
+// ---------------------------------------------------------------------------
+// 5. Render
+// ---------------------------------------------------------------------------
+
+function renderPage(mp: MilestoneProbabilityResult, layout: MilestoneLayout, page: PageLayout, index: number, meta: ReportMeta): string {
+  const continued = index > 0;
+  const title = `Milestone Probability Analysis${continued ? ` <span style="font-size: 11px; font-weight: 600; color: ${COLORS.gray400};">(continued)</span>` : ''}`;
+  const tablesContinued = page.tables.length > 0 && page.tables[0].continued;
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage + index, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Milestone Probability Analysis</div>
+      <div class="section-title-lg">${title}</div>
 
+      ${page.gantt ? `
       <!-- Gantt Timeline -->
       <div class="section-title">Milestone Timeline</div>
       <div class="card" style="padding: 12px 16px; margin-bottom: 14px; border-top: 3px solid ${COLORS.navy};">
         <div class="chart-container">
-          ${renderGanttTimeline(timelineRows)}
+          ${renderGanttTimeline(layout.timelineRows, layout.ganttRowH)}
         </div>
         <div style="display: flex; justify-content: center; gap: 20px; margin-top: 4px;">
           ${Object.values(CAT_COLORS).map(c => `
@@ -271,23 +365,16 @@ export function renderMilestonePage(data: PDFReportData, meta: ReportMeta): stri
             </div>
           `).join('')}
         </div>
-      </div>
+      </div>` : ''}
 
-      <!-- Milestone Tables -->
-      <div class="section-title">Milestone Detail</div>
-      <div class="card" style="padding: 10px 14px; margin-bottom: 14px; border-top: 3px solid ${COLORS.navy};">
-        ${renderMilestoneTable(mp.developmentMilestones, 'dev', totalNominal)}
-        ${renderMilestoneTable(mp.commercialMilestones, 'comm', totalNominal)}
-        ${renderMilestoneTable(mp.regulatoryMilestones, 'reg', totalNominal)}
-      </div>
-
+      ${page.callout ? `
       <!-- Probability-Weighted Total Value Callout -->
       <div style="background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 18px 24px; color: white; margin-bottom: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 4px;">Probability-Weighted Total Value</div>
             <div style="font-size: 9px; color: rgba(255,255,255,0.55); line-height: 1.5;">
-              Sum of (milestone probability &times; milestone value as % TDV) across all ${timelineRows.length} milestones
+              Sum of (milestone probability &times; milestone value as % TDV) across all ${layout.timelineRows.length} milestones
             </div>
           </div>
           <div style="text-align: right; flex-shrink: 0;">
@@ -295,27 +382,50 @@ export function renderMilestonePage(data: PDFReportData, meta: ReportMeta): stri
             <div style="font-size: 8px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">of Total Deal Value</div>
           </div>
         </div>
-      </div>
+      </div>` : ''}
 
+      ${page.tables.length > 0 ? `
+      <!-- Milestone Tables -->
+      <div class="section-title">Milestone Detail${tablesContinued ? ' (continued)' : ''}</div>
+      <div class="card" style="padding: 10px 14px; margin-bottom: 14px; border-top: 3px solid ${COLORS.navy};">
+        ${page.tables.map(renderMilestoneTableChunk).join('')}
+      </div>` : ''}
+
+      ${page.payout ? `
       <!-- Payout Schedule -->
       <div class="section-title">Expected Payout Schedule</div>
       <div class="card" style="padding: 12px 16px; margin-bottom: 14px; border-top: 3px solid ${COLORS.navy};">
         <div class="chart-container">
           ${renderPayoutChart(mp.expectedPayoutSchedule)}
         </div>
-      </div>
+      </div>` : ''}
 
+      ${page.narrative ? `
       <!-- Narrative -->
       <div class="callout">
         ${escapeHtml(mp.narrative)}
-      </div>
+      </div>` : ''}
 
+      ${page.methodology ? `
       <!-- Methodology note -->
       <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.6;">
         <strong>Methodology:</strong> Milestone probabilities derived from BIO/QLS phase transition tables (2021-2024) with cascading conditional logic. Commercial milestones conditional on FDA approval. Timing calibrated to DealForma pharmaceutical licensing database (n=1,200+). Value allocations benchmarked to EvaluatePharma deal structure analysis (2020-2026). Bar opacity reflects probability of achievement.
-      </div>
+      </div>` : ''}
 
       ${pageFooter(meta.reportId)}
     </div>
   `;
+}
+
+/** Multi-page renderer: one `.report-page` per physical page, numbered from meta.currentPage. */
+export function renderMilestonePages(data: PDFReportData, meta: ReportMeta): string[] {
+  if (!data.milestoneProbabilities) return [];
+  const mp = data.milestoneProbabilities;
+  const layout = layoutMilestonePages(mp);
+  return layout.pages.map((page, i) => renderPage(mp, layout, page, i, meta));
+}
+
+/** Legacy single-string entry point — joins the physical pages. Prefer renderMilestonePages. */
+export function renderMilestonePage(data: PDFReportData, meta: ReportMeta): string {
+  return renderMilestonePages(data, meta).join('\n');
 }

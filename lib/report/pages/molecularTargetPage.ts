@@ -1,4 +1,4 @@
-import { pageHeader, pageFooter, COLORS } from '../helpers';
+import { pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import { DEAL_STATS } from '@/lib/config/constants';
 
@@ -19,7 +19,7 @@ export function renderMolecularTargetPage(data: PDFReportData, meta: ReportMeta)
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Molecular Target Analysis</div>
 

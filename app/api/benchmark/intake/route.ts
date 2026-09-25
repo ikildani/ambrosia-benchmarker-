@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
-import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -21,6 +20,13 @@ interface BenchmarkIntakeBody {
   customNotes?: string;
   whiteLabel?: boolean;
   brandName?: string;
+  // v3 asset fields
+  assetName?: string;
+  modality?: string;
+  mechanism?: string;
+  targetDealType?: string;
+  dataPackageStage?: string;
+  differentiationNotes?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -52,6 +58,14 @@ export async function POST(request: NextRequest) {
         brand_name: body.brandName || null,
         status: 'intake',
         source: 'website',
+        // v3 asset fields (migration 119)
+        modality: body.modality || null,
+        asset_name: body.assetName || null,
+        mechanism: body.mechanism || null,
+        target_deal_type: body.targetDealType || null,
+        data_package_stage: body.dataPackageStage || null,
+        differentiation_notes: body.differentiationNotes || null,
+        brief_version: 'v3',
       })
       .select('id')
       .single();
@@ -138,14 +152,14 @@ export async function POST(request: NextRequest) {
             <p>Thank you for requesting a Deal Intelligence Brief. We've received your intake and here's what happens next:</p>
             <ol style="line-height: 1.8;">
               <li><strong>Intake call</strong> — We'll reach out within 24 hours to schedule a brief 15-minute call to understand your specific angle and any customization needs.</li>
-              <li><strong>Generation</strong> — Your Brief will be generated within 24 hours of our call, covering ${body.modalities.length} modalities across ${body.dealTypes.length} deal structures for ${body.indication} (${body.phase}).</li>
-              <li><strong>Delivery</strong> — You'll receive a secure data room link with your PDF report, Excel data export, and a link to schedule your complimentary 30-minute walkthrough.</li>
+              <li><strong>Build</strong> — Your Brief is built within 24 hours of the call: cited comparable set, valuation bridge, buyer map with stage evidence, catalyst calendar and a written recommendation for ${body.indication} (${body.phase}${body.assetName ? `, ${body.assetName}` : ''}).</li>
+              <li><strong>Delivery</strong> — You'll receive a secure data room link with your PDF report, Excel data export, and a link to schedule your complimentary walkthrough.</li>
             </ol>
             <p>Your Brief will include:</p>
             <ul style="line-height: 1.8; color: #64748b;">
               <li>${body.modalities.length * body.dealTypes.length} deal term calculations</li>
-              <li>AI-written strategic narrative and negotiation playbook</li>
-              <li>Comparable transactions from our database of ${DEAL_STATS.TOTAL_DEALS} deals</li>
+              <li>Strategic analysis, positioning and objection handling, negotiation playbook</li>
+              <li>Comparable transactions with a source citation on every deal</li>
               <li>Partner matching with intent scoring</li>
               <li>Full financial model suite (rNPV, Monte Carlo, scenarios)</li>
               ${body.whiteLabel ? `<li>White-label branding under ${body.brandName || 'your firm name'}</li>` : ''}

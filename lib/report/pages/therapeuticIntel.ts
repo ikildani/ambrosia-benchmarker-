@@ -1,7 +1,7 @@
 // Page 13: Therapeutic Area Intelligence
 // TA-specific context, milestone allocation comparison, key considerations
 
-import { pageHeader, pageFooter, COLORS, escapeHtml, phaseLabels, modalityLabels, getLabel, getTAColors } from '../helpers';
+import { pageHeader, pageFooter, COLORS, escapeHtml, phaseLabels, modalityLabels, getLabel, getTAColors, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta): string {
@@ -51,7 +51,7 @@ export function renderTherapeuticIntelPage(data: PDFReportData, meta: ReportMeta
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
         <div style="width: 8px; height: 8px; border-radius: 50%; background: ${taColors.primary};"></div>

@@ -1,7 +1,10 @@
 // Page: Financial Modeling — rNPV & Monte Carlo
-// rNPV summary KPIs, cash flow table, Monte Carlo distribution, cross-validation
+// Page 1: rNPV summary KPIs, projected cash flows, cross-validation.
+// Page 2 (only when a Monte Carlo run exists): distribution, percentiles,
+// institutional risk metrics, and the key model assumptions.
+// Without Monte Carlo everything fits one page.
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { CashFlowYear } from '@/lib/financial/types';
 
@@ -53,13 +56,12 @@ function selectCashFlowRows(cashFlows: CashFlowYear[]): { rows: CashFlowYear[]; 
 }
 
 /**
- * Renders a text-based distribution shape using block characters.
- * Shows a simplified histogram bar for each of 10 bins.
+ * Renders the Monte Carlo distribution as horizontal bars, one per display bin
+ * (the raw histogram is consolidated into ~10 bins).
  */
-function renderDistributionShape(histogram: { binStart: number; binEnd: number; count: number; percentage: number }[]): string {
+function renderDistributionShape(histogram: { binStart: number; binEnd: number; count: number; percentage: number }[], barH = 8): string {
   if (!histogram || histogram.length === 0) return '';
 
-  // Consolidate into ~10 display bins
   const binCount = 10;
   const perGroup = Math.max(1, Math.ceil(histogram.length / binCount));
   const groups: { label: string; pct: number }[] = [];
@@ -79,9 +81,9 @@ function renderDistributionShape(histogram: { binStart: number; binEnd: number; 
   return groups.map(g => {
     const barWidth = Math.round((g.pct / maxPct) * 100);
     return `
-      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
         <div style="width: 50px; text-align: right; font-size: 8px; color: ${COLORS.gray400}; flex-shrink: 0;">${escapeHtml(g.label)}</div>
-        <div style="flex: 1; height: 8px; background: ${COLORS.gray100}; border-radius: 2px; overflow: hidden;">
+        <div style="flex: 1; height: ${barH}px; background: ${COLORS.gray100}; border-radius: 2px; overflow: hidden;">
           <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, ${COLORS.teal}, ${COLORS.cyan}); border-radius: 2px;"></div>
         </div>
         <div style="width: 32px; text-align: right; font-size: 8px; color: ${COLORS.gray400}; flex-shrink: 0;">${g.pct.toFixed(1)}%</div>
@@ -90,22 +92,19 @@ function renderDistributionShape(histogram: { binStart: number; binEnd: number; 
   }).join('');
 }
 
-export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta): string {
-  if (!data.rnpvResult) return '';
+/** 0 without an rNPV result, 2 when a Monte Carlo run exists, otherwise 1. */
+export function countFinancialModelPages(data: PDFReportData): number {
+  if (!data.rnpvResult) return 0;
+  return data.monteCarloResult ? 2 : 1;
+}
 
-  const rnpv = data.rnpvResult;
-  const mc = data.monteCarloResult;
-  const { rows, totalRow } = selectCashFlowRows(rnpv.cashFlows);
+type Rnpv = NonNullable<PDFReportData['rnpvResult']>;
+type MonteCarlo = NonNullable<PDFReportData['monteCarloResult']>;
 
+function renderKpis(rnpv: Rnpv, mc: MonteCarlo | undefined): string {
   return `
-    <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
-
-      <div class="section-title-lg">Financial Modeling &mdash; rNPV &amp; Monte Carlo</div>
-
-      <!-- rNPV Summary KPIs -->
       <div class="section-title">Risk-Adjusted NPV Summary</div>
-      <div class="grid-4" style="margin-bottom: 18px;">
+      <div class="grid-4" style="margin-bottom: 14px;">
         <div class="kpi-card">
           <div class="kpi-value">${formatUsd(rnpv.riskAdjustedNPV)}</div>
           <div class="kpi-label">Total rNPV</div>
@@ -126,12 +125,15 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
           <div class="kpi-label">Years to Market</div>
           <div class="kpi-sub">Peak sales ${rnpv.peakSalesYear}</div>
         </div>
-      </div>
+      </div>`;
+}
 
-      <!-- Cash Flow Table -->
+function renderCashFlowTable(rnpv: Rnpv): string {
+  const { rows, totalRow } = selectCashFlowRows(rnpv.cashFlows);
+  return `
       <div class="section-title">Projected Cash Flows</div>
-      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 18px;">
-        <table class="data-table">
+      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 14px;">
+        <table class="data-table compact">
           <thead>
             <tr>
               <th>Year</th>
@@ -155,7 +157,7 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
             `).join('')}
             ${rows.length < rnpv.cashFlows.length ? `
               <tr>
-                <td colspan="6" style="text-align: center; font-size: 9px; color: ${COLORS.gray400}; padding: 4px;">... ${rnpv.cashFlows.length - rows.length} additional years omitted ...</td>
+                <td colspan="6" style="text-align: center; font-size: 9px; color: ${COLORS.gray400}; padding: 3px;">... ${rnpv.cashFlows.length - rows.length} additional years omitted ...</td>
               </tr>
             ` : ''}
             ${totalRow ? `
@@ -170,17 +172,58 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
             ` : ''}
           </tbody>
         </table>
-      </div>
+      </div>`;
+}
 
-      ${mc ? `
-      <!-- Monte Carlo Distribution -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+function renderCrossValidation(rnpv: Rnpv): string {
+  const cv = rnpv.crossValidation;
+  if (!cv) return '';
+  return `
+      <div class="section-title">Cross-Validation: Benchmark vs. rNPV</div>
+      <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center;">
+        <div class="card-sm" style="text-align: center; border-top: 3px solid ${COLORS.navy};">
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;">Benchmark Comps</div>
+          <div style="font-size: 20px; font-weight: 800; color: ${COLORS.navy};">${formatUsd(cv.benchmarkMedian)}</div>
+          <div style="font-size: 8px; color: ${COLORS.gray400};">Median deal value</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 18px; font-weight: 800; color: ${cv.divergencePercent > 0 ? COLORS.teal : COLORS.rose};">
+            ${cv.divergencePercent > 0 ? '+' : ''}${formatPercent(cv.divergencePercent, 1)}
+          </div>
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em;">Divergence</div>
+        </div>
+        <div class="card-sm" style="text-align: center; border-top: 3px solid ${COLORS.teal};">
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;">rNPV-Implied</div>
+          <div style="font-size: 20px; font-weight: 800; color: ${COLORS.teal};">${formatUsd(cv.rnpvMedian)}</div>
+          <div style="font-size: 8px; color: ${COLORS.gray400};">Median implied value</div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top: 10px; margin-bottom: 14px;">
+        ${escapeHtml(cv.narrative)}
+      </div>`;
+}
+
+function renderAssumptions(rnpv: Rnpv): string {
+  if (!rnpv.modelAssumptions || rnpv.modelAssumptions.length === 0) return '';
+  return `
+      <div style="margin-top: 4px;">
+        <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Key Model Assumptions</div>
+        <div style="font-size: 9px; color: ${COLORS.gray500}; line-height: 1.55;">
+          ${rnpv.modelAssumptions.map(a => `<span style="margin-right: 6px;">&bull; ${escapeHtml(a)}</span>`).join('')}
+        </div>
+      </div>`;
+}
+
+function renderMonteCarlo(mc: MonteCarlo): string {
+  const probColor = mc.probabilityOfPositiveNPV >= 0.7 ? COLORS.green : mc.probabilityOfPositiveNPV >= 0.5 ? COLORS.amber : COLORS.rose;
+  return `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
         <div>
           <div class="section-title">Monte Carlo Distribution</div>
           <div class="card" style="padding: 12px;">
-            ${renderDistributionShape(mc.histogram)}
+            ${renderDistributionShape(mc.histogram, 10)}
             <div style="text-align: center; font-size: 8px; color: ${COLORS.gray400}; margin-top: 6px;">
-              ${mc.iterations.toLocaleString()} iterations &middot; rNPV distribution ($M)
+              ${mc.iterations.toLocaleString()} iterations &middot; rNPV distribution ($M) &middot; share of simulations per bin
             </div>
           </div>
         </div>
@@ -205,7 +248,7 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
           </div>
           <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div class="card-sm" style="text-align: center;">
-              <div style="font-size: 16px; font-weight: 800; color: ${mc.probabilityOfPositiveNPV >= 0.7 ? COLORS.green : mc.probabilityOfPositiveNPV >= 0.5 ? COLORS.amber : COLORS.rose};">${formatPercent(mc.probabilityOfPositiveNPV * 100, 0)}</div>
+              <div style="font-size: 16px; font-weight: 800; color: ${probColor};">${formatPercent(mc.probabilityOfPositiveNPV * 100, 0)}</div>
               <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-top: 2px;">Prob. Positive NPV</div>
             </div>
             <div class="card-sm" style="text-align: center;">
@@ -213,72 +256,72 @@ export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta):
               <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-top: 2px;">Std. Deviation</div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Risk Metrics: VaR / CVaR / Distribution Shape -->
-          ${mc.var95 !== undefined ? `
-          <div style="margin-top: 10px;">
-            <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Institutional Risk Metrics</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px;">
-              <div class="card-sm" style="text-align: center; border-top: 2px solid ${COLORS.rose};">
-                <div style="font-size: 12px; font-weight: 800; color: ${COLORS.rose};">${formatUsd(mc.var95)}</div>
-                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">VaR (95%)</div>
-              </div>
-              <div class="card-sm" style="text-align: center; border-top: 2px solid ${COLORS.rose};">
-                <div style="font-size: 12px; font-weight: 800; color: ${COLORS.rose};">${formatUsd(mc.cvar95)}</div>
-                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">CVaR (95%)</div>
-              </div>
-              <div class="card-sm" style="text-align: center; border-top: 2px solid ${mc.skewness > 0 ? COLORS.teal : COLORS.amber};">
-                <div style="font-size: 12px; font-weight: 800; color: ${mc.skewness > 0 ? COLORS.teal : COLORS.amber};">${mc.skewness > 0 ? '+' : ''}${mc.skewness.toFixed(2)}</div>
-                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Skewness</div>
-              </div>
-              <div class="card-sm" style="text-align: center; border-top: 2px solid ${mc.kurtosis > 1 ? COLORS.amber : COLORS.gray300};">
-                <div style="font-size: 12px; font-weight: 800; color: ${mc.kurtosis > 1 ? COLORS.amber : COLORS.navy};">${mc.kurtosis > 0 ? '+' : ''}${mc.kurtosis.toFixed(2)}</div>
-                <div style="font-size: 6px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Tail Risk</div>
-              </div>
-            </div>
-          </div>
-          ` : ''}
+      ${mc.var95 !== undefined ? `
+      <!-- Risk Metrics: VaR / CVaR / Distribution Shape -->
+      <div class="section-title">Institutional Risk Metrics</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+        <div class="card-sm" style="text-align: center; border-top: 3px solid ${COLORS.rose};">
+          <div style="font-size: 16px; font-weight: 800; color: ${COLORS.rose};">${formatUsd(mc.var95)}</div>
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">VaR (95%)</div>
+        </div>
+        <div class="card-sm" style="text-align: center; border-top: 3px solid ${COLORS.rose};">
+          <div style="font-size: 16px; font-weight: 800; color: ${COLORS.rose};">${formatUsd(mc.cvar95)}</div>
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">CVaR (95%)</div>
+        </div>
+        <div class="card-sm" style="text-align: center; border-top: 3px solid ${mc.skewness > 0 ? COLORS.teal : COLORS.amber};">
+          <div style="font-size: 16px; font-weight: 800; color: ${mc.skewness > 0 ? COLORS.teal : COLORS.amber};">${mc.skewness > 0 ? '+' : ''}${mc.skewness.toFixed(2)}</div>
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Skewness</div>
+        </div>
+        <div class="card-sm" style="text-align: center; border-top: 3px solid ${mc.kurtosis > 1 ? COLORS.amber : COLORS.gray300};">
+          <div style="font-size: 16px; font-weight: 800; color: ${mc.kurtosis > 1 ? COLORS.amber : COLORS.navy};">${mc.kurtosis > 0 ? '+' : ''}${mc.kurtosis.toFixed(2)}</div>
+          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 2px;">Tail Risk</div>
         </div>
       </div>
-      ` : ''}
+      ` : ''}`;
+}
 
-      ${rnpv.crossValidation ? `
-      <!-- Cross-Validation -->
-      <div class="section-title">Cross-Validation: Benchmark vs. rNPV</div>
-      <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center;">
-        <div class="card-sm" style="text-align: center; border-top: 3px solid ${COLORS.navy};">
-          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;">Benchmark Comps</div>
-          <div style="font-size: 20px; font-weight: 800; color: ${COLORS.navy};">${formatUsd(rnpv.crossValidation.benchmarkMedian)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400};">Median deal value</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 18px; font-weight: 800; color: ${rnpv.crossValidation.divergencePercent > 0 ? COLORS.teal : COLORS.rose};">
-            ${rnpv.crossValidation.divergencePercent > 0 ? '+' : ''}${formatPercent(rnpv.crossValidation.divergencePercent, 1)}
-          </div>
-          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.08em;">Divergence</div>
-        </div>
-        <div class="card-sm" style="text-align: center; border-top: 3px solid ${COLORS.teal};">
-          <div style="font-size: 7px; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;">rNPV-Implied</div>
-          <div style="font-size: 20px; font-weight: 800; color: ${COLORS.teal};">${formatUsd(rnpv.crossValidation.rnpvMedian)}</div>
-          <div style="font-size: 8px; color: ${COLORS.gray400};">Median implied value</div>
-        </div>
-      </div>
-      <div class="callout" style="margin-top: 10px;">
-        ${escapeHtml(rnpv.crossValidation.narrative)}
-      </div>
-      ` : ''}
+/** Multi-page renderer: one `.report-page` per physical page, numbered from meta.currentPage. */
+export function renderFinancialModelPages(data: PDFReportData, meta: ReportMeta): string[] {
+  if (!data.rnpvResult) return [];
 
-      <!-- Model Assumptions -->
-      ${rnpv.modelAssumptions && rnpv.modelAssumptions.length > 0 ? `
-      <div style="margin-top: 14px;">
-        <div style="font-size: 8px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Key Model Assumptions</div>
-        <div style="font-size: 9px; color: ${COLORS.gray500}; line-height: 1.6;">
-          ${rnpv.modelAssumptions.map(a => `<span style="margin-right: 6px;">&bull; ${escapeHtml(a)}</span>`).join('')}
-        </div>
-      </div>
-      ` : ''}
+  const rnpv = data.rnpvResult;
+  const mc = data.monteCarloResult;
+
+  const page1 = `
+    <div class="report-page">
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
+
+      <div class="section-title-lg">Financial Modeling &mdash; rNPV &amp; Monte Carlo</div>
+
+      ${renderKpis(rnpv, mc)}
+      ${renderCashFlowTable(rnpv)}
+      ${renderCrossValidation(rnpv)}
+      ${mc ? '' : renderAssumptions(rnpv)}
 
       ${pageFooter(meta.reportId)}
     </div>
   `;
+  if (!mc) return [page1];
+
+  const page2 = `
+    <div class="report-page">
+      ${pageHeader(meta.currentPage + 1, meta.pageCount, BRIEF_TITLE)}
+
+      <div class="section-title-lg">Financial Modeling &mdash; rNPV &amp; Monte Carlo <span style="font-size: 11px; font-weight: 600; color: ${COLORS.gray400};">(continued)</span></div>
+
+      ${renderMonteCarlo(mc)}
+      ${renderAssumptions(rnpv)}
+
+      ${pageFooter(meta.reportId)}
+    </div>
+  `;
+  return [page1, page2];
+}
+
+/** Legacy single-string entry point — joins the physical pages. Prefer renderFinancialModelPages. */
+export function renderFinancialModelPage(data: PDFReportData, meta: ReportMeta): string {
+  return renderFinancialModelPages(data, meta).join('\n');
 }

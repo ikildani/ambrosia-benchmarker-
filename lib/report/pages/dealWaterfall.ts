@@ -2,7 +2,7 @@
 // SVG waterfall chart showing step-down from unadjusted NPV to final deal value,
 // deal component allocation grid, narrative, and methodology note.
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { DealWaterfallStep } from '@/lib/financial/types';
 import { computeDifferentiationAdjustment, DIFFERENTIATION_FACTORS, type DifferentiationKey } from '@/lib/financial/differentiation-profiles';
@@ -168,13 +168,13 @@ export function renderDealWaterfallPage(data: PDFReportData, meta: ReportMeta): 
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Deal Valuation Waterfall</div>
+      <div class="section-title-lg" style="margin-bottom: 12px;">Deal Valuation Waterfall</div>
 
       <!-- Waterfall Chart -->
       <div class="section-title">Valuation Cascade</div>
-      <div class="card" style="padding: 14px 16px; margin-bottom: 14px; border-top: 3px solid ${COLORS.navy};">
+      <div class="card" style="padding: 10px 16px; margin-bottom: 10px; border-top: 3px solid ${COLORS.navy};">
         <div class="chart-container">
           ${renderDealWaterfallSVG(wf.steps)}
         </div>
@@ -182,8 +182,8 @@ export function renderDealWaterfallPage(data: PDFReportData, meta: ReportMeta): 
 
       <!-- Step Rationale Table -->
       <div class="section-title">Adjustment Rationale</div>
-      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
-        <table class="data-table">
+      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 10px;">
+        <table class="data-table compact">
           <thead>
             <tr>
               <th>Step</th>
@@ -213,7 +213,7 @@ export function renderDealWaterfallPage(data: PDFReportData, meta: ReportMeta): 
 
       <!-- Deal Component Allocation Grid -->
       <div class="section-title">Deal Component Allocation</div>
-      <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
         ${rangeBox('Upfront Payment', wf.upfrontPayment.low, wf.upfrontPayment.median, wf.upfrontPayment.high, COLORS.teal)}
         ${rangeBox('Dev Milestones', wf.developmentMilestones.low, wf.developmentMilestones.median, wf.developmentMilestones.high, COLORS.cyan)}
         ${rangeBox('Comm Milestones', wf.commercialMilestones.low, wf.commercialMilestones.median, wf.commercialMilestones.high, '#6366f1')}
@@ -267,12 +267,12 @@ export function renderDealWaterfallPage(data: PDFReportData, meta: ReportMeta): 
       })()}
 
       <!-- Narrative -->
-      <div class="callout" style="margin-bottom: 10px;">
+      <div class="callout" style="margin-bottom: 8px; padding: 10px 14px;">
         ${escapeHtml(wf.narrative)}
       </div>
 
       <!-- Methodology note -->
-      <div class="disclaimer-box">
+      <div class="disclaimer-box" style="padding: 10px 14px;">
         <strong>Methodology:</strong> Deal component allocation ratios derived from DealForma pharmaceutical licensing database (2020-2025, n=1,200+ transactions). Upfront percentages calibrated by phase: Preclinical 10-15%, Phase 1 15-20%, Phase 2 20-30%, Phase 3 30-40%, Approved 40-60%. Milestone split follows historical 55/45 development-to-commercial weighting. Royalty ranges benchmarked to modality-specific precedents.
       </div>
 

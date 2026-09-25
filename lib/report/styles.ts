@@ -250,6 +250,12 @@ export function getReportStyles(brandConfig?: BrandConfig): string {
       background: #f0fdfa;
     }
 
+    /* Opt-in denser table for pages that carry many rows (Brief overflow fixes). */
+    .data-table.compact th { padding: 6px 10px; }
+    .data-table.compact td { padding: 5px 10px; }
+    .data-table.compact-xs td { padding: 4px 10px; }
+    .data-table.compact-xs th { padding: 6px 10px; }
+
     .data-table .value-cell {
       font-weight: 700;
       color: ${secondaryColor};

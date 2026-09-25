@@ -3,7 +3,7 @@
 
 import { renderRiskGauge } from '../svg-charts/riskGauge';
 import { renderDonut } from '../svg-charts/donut';
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta): string {
@@ -29,7 +29,7 @@ export function renderExecutiveDashboard(data: PDFReportData, meta: ReportMeta):
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Executive Dashboard</div>
 

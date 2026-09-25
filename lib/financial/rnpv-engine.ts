@@ -1191,11 +1191,13 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     const expectedExerciseFee = exerciseFee * exerciseProbability;
 
     // Rebuild totalDeal around upfront + expected exercise fee + phase-based
-    // milestones. Anchor on |rNPV| × 0.40 so negative-rNPV early-stage
-    // options still surface a meaningful headline number; then add the
-    // expected exercise fee.
+    // milestones. Anchor on max(rNPV, 0) × 0.40, never |rNPV|: the absolute
+    // value made a more negative bear case publish a LARGER option headline
+    // than base (scenario.bear_deal_above_base, Sep 24 2026). Negative-rNPV
+    // early-stage options are carried by the expected exercise fee and the
+    // early-phase market floor below, not by the sign-flipped rNPV.
     const OPTION_BASE_CAPTURE = 0.40;
-    const optionBase = Math.abs(calibratedRNPV) * OPTION_BASE_CAPTURE;
+    const optionBase = Math.max(calibratedRNPV, 0) * OPTION_BASE_CAPTURE;
     const optionTotalMedian = optionBase + expectedExerciseFee;
     // Symmetric ±20% range around the median.
     const optionTotalLow = optionTotalMedian * 0.80;
@@ -1237,12 +1239,13 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       ? input.equityInvestment
       : 0;
 
-    // Collaboration capture baseline: |rNPV| × 0.30 (early-stage, value-share
-    // heavy on downstream milestones). Add FTE + equity on top. |·| keeps the
-    // headline non-zero for negative-rNPV preclinical assets where the deal
-    // is predominantly research funding.
+    // Collaboration capture baseline: max(rNPV, 0) × 0.30 (early-stage,
+    // value-share heavy on downstream milestones). Add FTE + equity on top.
+    // Not |rNPV|: a sign flip made a worse rNPV publish a larger headline.
+    // For negative-rNPV preclinical assets the deal is predominantly research
+    // funding, which FTE + equity and the early-phase floor already carry.
     const COLLAB_BASE_CAPTURE = 0.30;
-    const collabBase = Math.abs(calibratedRNPV) * COLLAB_BASE_CAPTURE;
+    const collabBase = Math.max(calibratedRNPV, 0) * COLLAB_BASE_CAPTURE;
     const collabTotalMedian = collabBase + fteValue + equityValue;
     const collabTotalLow = collabTotalMedian * 0.80;
     const collabTotalHigh = collabTotalMedian * 1.20;
@@ -1289,7 +1292,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
 
     // Formulation IP premium: 8-12% of deal value, reflecting the value
     // of the reference product data package and formulation know-how
-    const ipPremium = Math.abs(calibratedRNPV) * 0.10;
+    const ipPremium = Math.max(calibratedRNPV, 0) * 0.10;
 
     // Phase-specific reformulation multipliers (mirroring calculations.ts).
     // Lower than licensing because reformulation deals are typically $10-200M
@@ -1307,8 +1310,9 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       approved: 0.75,
     };
 
-    // Rebuild total deal with reformulation economics
-    const reformBase = Math.abs(calibratedRNPV) * (PHASE_REFORM_MULTIPLIERS[phase] ?? 0.55);
+    // Rebuild total deal with reformulation economics. max(rNPV, 0), not
+    // |rNPV|, so the headline is monotonic in rNPV across scenarios.
+    const reformBase = Math.max(calibratedRNPV, 0) * (PHASE_REFORM_MULTIPLIERS[phase] ?? 0.55);
     const reformTotalMedian = reformBase + ipPremium;
     const reformTotalLow = reformTotalMedian * 0.80;
     const reformTotalHigh = reformTotalMedian * 1.20;
@@ -1365,34 +1369,43 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     phase1: 25,
     phase1_2: 40,
   };
+  //
+  // The floor is applied as an element-wise MAX of the method's own range and
+  // a constant floor range (the comp range when supplied, otherwise a
+  // conservative spread around the phase minimum). A max against a constant
+  // keeps the published number monotonic in rNPV, which the bear/base/bull
+  // comparison relies on. The previous form switched between "keep the
+  // method's shape" and "defer to the comp range" on whether the median
+  // cleared the floor, so a bear case just under the floor jumped to the comp
+  // median while base just over it kept a smaller method value
+  // (scenario.bear_deal_above_base, Sep 24 2026).
   const earlyFloor = EARLY_UPFRONT_FLOOR_M[phase];
   if (earlyFloor != null) {
     const bench = benchmarkUpfront && benchmarkUpfront.low > 0 ? benchmarkUpfront : null;
+    const benchTotal = bench && benchmarkDealValue && benchmarkDealValue.low > 0 ? benchmarkDealValue : null;
     const upFloor = Math.max(earlyFloor, bench?.low ?? 0);
-    if (impliedDealValue.upfront.median >= upFloor) {
-      // Floor binds on the low bound at most: keep the method's own shape.
-      impliedDealValue.upfront = floorRange(impliedDealValue.upfront, upFloor);
-      impliedDealValue.totalDeal = floorRange(impliedDealValue.totalDeal, upFloor);
-    } else if (bench && benchmarkDealValue && benchmarkDealValue.low > 0) {
-      // Floor binds on the median: the rNPV method has no signal at this
-      // phase, so defer to the comp engine's observed range for both upfront
-      // and total rather than publishing a flat "$182M to $182M".
-      impliedDealValue.upfront = { low: bench.low, median: bench.median, high: bench.high };
-      impliedDealValue.totalDeal = {
-        low: Math.max(benchmarkDealValue.low, bench.low),
-        median: Math.max(benchmarkDealValue.median, bench.median),
-        high: Math.max(benchmarkDealValue.high, bench.high),
-      };
-    } else {
-      // No comps supplied: conservative spread around the phase minimum.
-      impliedDealValue.upfront = { low: upFloor, median: upFloor * 1.5, high: upFloor * 2.2 };
-      impliedDealValue.totalDeal = floorRange(impliedDealValue.totalDeal, upFloor);
-      impliedDealValue.totalDeal = {
-        low: Math.max(impliedDealValue.totalDeal.low, impliedDealValue.upfront.low),
-        median: Math.max(impliedDealValue.totalDeal.median, impliedDealValue.upfront.median),
-        high: Math.max(impliedDealValue.totalDeal.high, impliedDealValue.upfront.high),
-      };
-    }
+    // The comp range when the floor binds; a conservative spread otherwise,
+    // never a flat single point.
+    const upfrontFloor = bench
+      ? { low: upFloor, median: Math.max(upFloor, bench.median), high: Math.max(upFloor, bench.high) }
+      : { low: upFloor, median: upFloor * 1.5, high: upFloor * 2.2 };
+    const totalFloor = benchTotal
+      ? {
+        low: Math.max(benchTotal.low, upfrontFloor.low),
+        median: Math.max(benchTotal.median, upfrontFloor.median),
+        high: Math.max(benchTotal.high, upfrontFloor.high),
+      }
+      : upfrontFloor;
+    impliedDealValue.upfront = floorRange({
+      low: Math.max(impliedDealValue.upfront.low, upfrontFloor.low),
+      median: Math.max(impliedDealValue.upfront.median, upfrontFloor.median),
+      high: Math.max(impliedDealValue.upfront.high, upfrontFloor.high),
+    }, 0);
+    impliedDealValue.totalDeal = floorRange({
+      low: Math.max(impliedDealValue.totalDeal.low, totalFloor.low),
+      median: Math.max(impliedDealValue.totalDeal.median, totalFloor.median),
+      high: Math.max(impliedDealValue.totalDeal.high, totalFloor.high),
+    }, 0);
   }
   impliedDealValue.totalDeal = floorRange(impliedDealValue.totalDeal, 0);
   impliedDealValue.upfront = floorRange(impliedDealValue.upfront, 0);

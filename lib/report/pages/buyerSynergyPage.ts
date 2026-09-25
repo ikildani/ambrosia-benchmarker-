@@ -2,7 +2,7 @@
 // Comparison table of buyer synergy premiums, stacked bar breakdown for top buyer,
 // integration risk badges, and narrative callout.
 
-import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, formatPercent, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { BuyerSynergyResult, IntegrationRisk } from '@/lib/financial/buyer-synergy';
 
@@ -100,7 +100,7 @@ export function renderBuyerSynergyPage(data: PDFReportData, meta: ReportMeta): s
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
       <div class="section-title-lg">Buyer Synergy Analysis</div>
 

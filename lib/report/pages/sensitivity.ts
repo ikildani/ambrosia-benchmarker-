@@ -2,7 +2,7 @@
 // Top value driver callout, tornado chart, parameter impact table, TA risk factors
 
 import { renderTornado } from '../svg-charts/tornado';
-import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 function impactBadge(level: string): string {
@@ -24,12 +24,12 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
 
   return `
     <div class="report-page">
-      ${pageHeader(meta.currentPage, meta.pageCount, 'Deal Valuation Report')}
+      ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
 
-      <div class="section-title-lg">Sensitivity Analysis</div>
+      <div class="section-title-lg" style="margin-bottom: 12px;">Sensitivity Analysis</div>
 
       <!-- Top Value Driver Callout -->
-      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 18px; background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 20px 24px; color: white;">
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 12px; background: linear-gradient(145deg, ${COLORS.navy} 0%, #252a5e 100%); border-radius: 6px; padding: 14px 20px; color: white;">
         <div>
           <div style="font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.16em; font-weight: 700; margin-bottom: 6px;">Top Value Driver</div>
           <div style="font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 5px;">${escapeHtml(topDriver.parameterLabel)}</div>
@@ -42,7 +42,7 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
       </div>
 
       <!-- Tornado Chart -->
-      <div class="card" style="margin-bottom: 18px; padding: 14px; border-top: 3px solid ${COLORS.navy};">
+      <div class="card" style="margin-bottom: 12px; padding: 10px 14px; border-top: 3px solid ${COLORS.navy};">
         <div class="section-title" style="margin-bottom: 4px;">Parameter Impact (Tornado Chart)</div>
         <div class="chart-container">
           ${tornadoHtml}
@@ -50,10 +50,10 @@ export function renderSensitivityPage(data: PDFReportData, meta: ReportMeta): st
       </div>
 
       <!-- Parameter Impact Table -->
-      <div style="margin-bottom: 12px;">
+      <div style="margin-bottom: 10px;">
         <div class="section-title">Parameter Details</div>
         <div class="card" style="padding: 0; overflow: hidden;">
-          <table class="data-table">
+          <table class="data-table compact">
             <thead>
               <tr>
                 <th>Parameter</th>
