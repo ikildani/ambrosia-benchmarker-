@@ -3,6 +3,20 @@
 import { pageHeader, pageFooter, sectionHead, chartSource, emptyState, microLabel, phaseLabelAny, fmtM, escapeHtml, COLORS, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { BuyerCandidate, BuyerPriorDeal } from '@/lib/brief/types';
+import { isLargeBucket, isMidBucket } from '@/lib/brief/buyer-map';
+
+const TYPE_LABEL: Record<string, string> = {
+  large_pharma: 'Large pharma', mid_pharma: 'Mid pharma', large_biotech: 'Large biotech', mid_biotech: 'Mid biotech', specialty: 'Specialty',
+};
+
+/** "Large pharma · large-cap" / "Mid biotech · mid-sized" / "Mid-sized (by revenue)" when the type is undisclosed. */
+function sizeTag(c: BuyerCandidate): string {
+  const size = isMidBucket(c.sizeBucket) ? 'mid-sized' : isLargeBucket(c.sizeBucket) ? 'large-cap' : null;
+  const type = c.companyType ? (TYPE_LABEL[c.companyType] ?? c.companyType) : null;
+  const text = type && size ? `${type} · ${size}` : size ? `${size[0].toUpperCase()}${size.slice(1)} (by revenue)` : type ?? 'Size undisclosed';
+  const color = isMidBucket(c.sizeBucket) ? COLORS.teal : COLORS.gray500;
+  return `<span style="font-size: 6.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: ${color}; margin-left: 6px; white-space: nowrap;">${escapeHtml(text)}</span>`;
+}
 
 const STRUCTURE_LABEL: Record<string, string> = {
   license: 'License', option: 'Option', acquisition: 'Acquisition', collaboration: 'Collaboration', co_development: 'Co-dev', co_promotion: 'Co-promo', other: 'Other',
@@ -53,7 +67,7 @@ function buyerCard(c: BuyerCandidate, rank: number): string {
   return `
     <div class="card" style="padding: 8px 10px; border-top: 3px solid ${verdictColor}; page-break-inside: avoid; min-width: 0; overflow: hidden;">
       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px;">
-        <div style="font-size: 10px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.01em;">${rank}. ${escapeHtml(c.name)}${premium}${c.source === 'deal_history' ? `<span style="font-size: 6.5px; font-weight: 600; color: ${COLORS.gray400}; letter-spacing: 0.04em; margin-left: 4px; white-space: nowrap;">from deal history</span>` : ''}</div>
+        <div style="font-size: 10px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: -0.01em;">${rank}. ${escapeHtml(c.name)}${sizeTag(c)}${premium}${c.source === 'deal_history' ? `<span style="font-size: 6.5px; font-weight: 600; color: ${COLORS.gray400}; letter-spacing: 0.04em; margin-left: 4px; white-space: nowrap;">from deal history</span>` : ''}</div>
         <div style="font-size: 6.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${verdictColor}; white-space: nowrap;">${verdictText}</div>
       </div>
       <div style="font-size: 8.5px; color: ${COLORS.gray700}; line-height: 1.4; margin-bottom: 2px;"><span style="font-weight: 700; color: ${COLORS.gray500};">Why now.</span> ${escapeHtml(c.whyNow)}</div>

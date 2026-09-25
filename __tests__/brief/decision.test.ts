@@ -110,7 +110,7 @@ function makeCompSet(n = 14, sameIndication = true): CompSet {
 
 function candidate(name: string, urgency: number, transacts: BuyerCandidate['transactsAtPhase'] = 'yes'): BuyerCandidate {
   return {
-    companyId: null, name, companyType: 'large_pharma', hqRegion: 'North America', hqCountry: 'US',
+    companyId: null, name, companyType: 'large_pharma', sizeBucket: 'large_pharma', hqRegion: 'North America', hqCountry: 'US',
     fit: 80, urgency, intentScore: 70, intentTier: 'high', preferredDealType: 'license',
     dealsLast12mo: 4, dealsLast24mo: 7, lastDealDate: '2026-05-01', phasePreference: { min: 'phase_1', max: 'phase_3' },
     transactsAtPhase: transacts, totalRevenueUsd: null, revenueAtRisk: { y2025: null, y2026: null, y2027: null },
@@ -126,6 +126,7 @@ function makeBuyerMap(leadUrgency = [75, 70]): BuyerMap {
     candidates: cands,
     excluded: [{ name: 'AbbVie', reason: 'does not transact at Phase 2 in this area' }],
     process: { lead: ['Roche', 'Merck'], tension: ['Pfizer'], hold: ['Novartis'], rationale: 'Two leads with LOE pressure.' },
+    mix: { large: 4, mid: 0, unknown: 0, regions: ['north_america'] },
   };
 }
 
