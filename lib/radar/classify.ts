@@ -41,6 +41,7 @@ import { z } from 'zod';
 import { deriveRunStatus, logRadarRun } from '@/lib/radar/run-log';
 import { isNonDrugIntervention, isPlaceboOrGeneric, normalizeKey } from '@/lib/radar/drug-name';
 import type { ClassificationStatus, OwnerType } from '@/lib/radar/types';
+import { RADAR_PHASE_OPTIONS } from '@/lib/radar/vocab';
 import {
   ClassificationItemSchema,
   INDICATION_CATEGORIES,
@@ -335,11 +336,21 @@ function asRows(data: unknown): RawQueueRow[] {
   return (data ?? []) as RawQueueRow[];
 }
 
+/** Phases a buyer can license before approval: everything in the vocab except phase_4. */
+export const CORE_UNIVERSE_PHASES: readonly string[] = RADAR_PHASE_OPTIONS
+  .map(o => o.value)
+  .filter(v => v !== 'phase_4');
+
+/** Partnership states that leave rights on the table. */
+export const CORE_UNIVERSE_PARTNERSHIP: readonly string[] = ['unpartnered', 'partially_partnered'];
+
 /**
- * Queue order: unclassified industry-owned, unclassified other owners,
- * unclassified without a company, then needs_review older than 30 days.
- * Within each group the stalest updated_at first (index
- * idx_clinical_assets_classification_queue).
+ * Queue order: the core universe (industry-owned, unpartnered or partially
+ * partnered, pre-approval) first because it is what the feed ranks; then the
+ * rest of the unclassified industry assets, other owners, assets without a
+ * company, then needs_review older than 30 days. Within each group the
+ * stalest updated_at first (index idx_clinical_assets_classification_queue,
+ * plus idx_clinical_assets_classify_core from migration 125).
  */
 export async function fetchClassificationQueue(
   supabase: SupabaseClient,
@@ -360,15 +371,29 @@ export async function fetchClassificationQueue(
   const remaining = () => limit - out.length;
 
   if (wants('unclassified')) {
-    const { data: industry, error: e1 } = await supabase
+    const { data: core, error: e0 } = await supabase
       .from('clinical_assets')
       .select(`${QUEUE_COLUMNS}, ${COMPANY_EMBED}!inner(owner_type)`)
       .eq('classification_status', 'unclassified')
       .eq('companies.owner_type', 'industry')
+      .in('partnership_status', [...CORE_UNIVERSE_PARTNERSHIP])
+      .in('phase', [...CORE_UNIVERSE_PHASES])
       .order('updated_at', { ascending: true })
       .limit(remaining());
-    if (e1) throw new Error(`classification queue (industry) read failed: ${e1.message}`);
-    push(asRows(industry));
+    if (e0) throw new Error(`classification queue (core universe) read failed: ${e0.message}`);
+    push(asRows(core));
+
+    if (remaining() > 0) {
+      const { data: industry, error: e1 } = await supabase
+        .from('clinical_assets')
+        .select(`${QUEUE_COLUMNS}, ${COMPANY_EMBED}!inner(owner_type)`)
+        .eq('classification_status', 'unclassified')
+        .eq('companies.owner_type', 'industry')
+        .order('updated_at', { ascending: true })
+        .limit(remaining());
+      if (e1) throw new Error(`classification queue (industry) read failed: ${e1.message}`);
+      push(asRows(industry));
+    }
 
     if (remaining() > 0) {
       const { data: others, error: e2 } = await supabase
