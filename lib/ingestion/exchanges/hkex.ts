@@ -223,54 +223,75 @@ export async function runHkexIngestion(supabase: SupabaseClient, opts: HkexRunOp
   const funnel = new FunnelCounter();
   const errors: string[] = [];
   const today = new Date().toISOString().slice(0, 10);
+  const MIN_WINDOW_BUDGET_MS = 45_000;
 
-  let window: { fromIso: string; toIso: string };
+  // Backfill state (cursor) — only read when walking the cursor.
   let backoffUntil: string | null = null;
-  if (opts.window) window = opts.window;
-  else if (opts.mode === 'daily') window = { fromIso: addDays(today, -HKEX_WINDOW_DAYS), toIso: today };
-  else {
+  let cursorFrom: string | null = null;
+  if (!opts.window && opts.mode === 'backfill') {
     const cur = await readSyncCursor<{ fromIso?: string; backoffUntil?: string | null }>(supabase, HKEX_CURSOR_SOURCE);
     backoffUntil = cur.state.backoffUntil ?? null;
-    const fromIso = cur.state.fromIso ?? HKEX_FROM_DATE;
-    window = { fromIso, toIso: addDays(fromIso, HKEX_WINDOW_DAYS - 1) };
+    cursorFrom = cur.state.fromIso ?? HKEX_FROM_DATE;
     if (backoffUntil && new Date(backoffUntil).getTime() > Date.now()) {
-      const summary = 'backoff';
-      return { mode: opts.mode, window, announcements: 0, dealTitles: 0, extracted: 0, inserted: 0, throttled: true, errors: [`HKEX backoff until ${backoffUntil}`], funnel: funnel.toJSON(), summary, next: { fromIso } };
+      const window = { fromIso: cursorFrom, toIso: addDays(cursorFrom, HKEX_WINDOW_DAYS - 1) };
+      return { mode: opts.mode, window, announcements: 0, dealTitles: 0, extracted: 0, inserted: 0, throttled: true, errors: [`HKEX backoff until ${backoffUntil}`], funnel: funnel.toJSON(), summary: 'backoff', next: { fromIso: cursorFrom } };
     }
   }
-  if (window.toIso > today) window.toIso = today;
 
-  const seen = new Map<string, HkexAnnouncement>();
+  let announcementsTotal = 0, dealTitlesTotal = 0, extracted = 0, inserted = 0;
   let throttled = false;
-  for (const term of HKEX_TITLE_TERMS) {
-    if (Date.now() - start > budget) { funnel.count('time_budget', 'terms_remaining'); break; }
-    const { rows, throttled: t } = await searchHkexTitles(term, window.fromIso, window.toIso);
-    if (t) { throttled = true; break; }
-    for (const r of rows) if (!seen.has(r.newsId)) seen.set(r.newsId, r);
-  }
-  const announcements = seen.size;
-  for (let i = 0; i < announcements; i++) funnel.count('fetched');
-  const dealRows = [...seen.values()].filter(r => isDealTitle(r.title));
-  for (let i = 0; i < announcements - dealRows.length; i++) funnel.count('keyword_filtered', 'title');
-
-  let extracted = 0, inserted = 0;
-  for (const a of dealRows) {
-    if (Date.now() - start > budget) { funnel.count('time_budget', 'announcements_remaining'); break; }
-    if (extracted >= maxExtractions) { funnel.count('time_budget', 'extraction_cap'); break; }
-    try {
-      extracted++;
-      const outcome = await processHkexAnnouncement(supabase, a, { anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel });
-      if (outcome === 'inserted') inserted++;
-      if (outcome === 'error') errors.push(`insert error ${a.newsId}`);
-    } catch (e) {
-      funnel.count('extraction_error', undefined, String(e).slice(0, 120));
-      errors.push(`${a.newsId}: ${String(e).slice(0, 160)}`);
-    }
-  }
-
+  let firstWindow: { fromIso: string; toIso: string } | null = null;
+  let lastWindow: { fromIso: string; toIso: string } | null = null;
   let next: { fromIso: string } | undefined;
-  if (opts.mode === 'backfill' && !opts.window) {
-    const advanceTo = throttled ? window.fromIso : addDays(window.toIso, 1);
+  let windows = 0;
+
+  // Sep 25 2026: a backfill run walks window after window until its budget or cap is
+  // used (one 14-day window per run meant ~250 runs from 2017, i.e. four months at two
+  // runs a day). Daily mode and explicit windows still do exactly one window.
+  while (true) {
+    let window: { fromIso: string; toIso: string };
+    if (opts.window) window = opts.window;
+    else if (opts.mode === 'daily') window = { fromIso: addDays(today, -HKEX_WINDOW_DAYS), toIso: today };
+    else window = { fromIso: cursorFrom!, toIso: addDays(cursorFrom!, HKEX_WINDOW_DAYS - 1) };
+    if (window.toIso > today) window.toIso = today;
+    if (!firstWindow) firstWindow = window;
+    lastWindow = window;
+    windows++;
+
+    const seen = new Map<string, HkexAnnouncement>();
+    for (const term of HKEX_TITLE_TERMS) {
+      if (Date.now() - start > budget) { funnel.count('time_budget', 'terms_remaining'); break; }
+      const { rows, throttled: t } = await searchHkexTitles(term, window.fromIso, window.toIso);
+      if (t) { throttled = true; break; }
+      for (const r of rows) if (!seen.has(r.newsId)) seen.set(r.newsId, r);
+    }
+    const announcements = seen.size;
+    announcementsTotal += announcements;
+    for (let i = 0; i < announcements; i++) funnel.count('fetched');
+    const dealRows = [...seen.values()].filter(r => isDealTitle(r.title));
+    dealTitlesTotal += dealRows.length;
+    for (let i = 0; i < announcements - dealRows.length; i++) funnel.count('keyword_filtered', 'title');
+
+    let windowComplete = !throttled;
+    for (const a of dealRows) {
+      if (Date.now() - start > budget) { funnel.count('time_budget', 'announcements_remaining'); windowComplete = false; break; }
+      if (extracted >= maxExtractions) { funnel.count('time_budget', 'extraction_cap'); windowComplete = false; break; }
+      try {
+        extracted++;
+        const outcome = await processHkexAnnouncement(supabase, a, { anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel });
+        if (outcome === 'inserted') inserted++;
+        if (outcome === 'error') errors.push(`insert error ${a.newsId}`);
+      } catch (e) {
+        funnel.count('extraction_error', undefined, String(e).slice(0, 120));
+        errors.push(`${a.newsId}: ${String(e).slice(0, 160)}`);
+      }
+    }
+
+    if (opts.mode !== 'backfill' || opts.window) break; // single window modes
+
+    // Advance the cursor only when the window was fully processed; an unfinished window
+    // is re-scanned next run (processHkexAnnouncement dedupes on the announcement id).
+    const advanceTo = windowComplete ? addDays(window.toIso, 1) : window.fromIso;
     next = { fromIso: advanceTo > today ? today : advanceTo };
     if (!dryRun) {
       await writeSyncCursor(supabase, HKEX_CURSOR_SOURCE, next.fromIso, {
@@ -279,9 +300,16 @@ export async function runHkexIngestion(supabase: SupabaseClient, opts: HkexRunOp
         lastWindow: window,
       });
     }
+    cursorFrom = next.fromIso;
+    if (throttled || !windowComplete) break;
+    if (window.toIso >= today) break;                                  // caught up
+    if (Date.now() - start > budget - MIN_WINDOW_BUDGET_MS) break;     // not enough budget for another window
+    if (extracted >= maxExtractions) break;
   }
+
   if (throttled) errors.push('HKEX throttled this run; window not advanced');
   const summary = funnel.summary();
-  console.log(`[hkex] ${opts.mode} ${window.fromIso}..${window.toIso} announcements=${announcements} deals=${dealRows.length} ${summary}${throttled ? ' THROTTLED' : ''}${dryRun ? ' (dry run)' : ''}`);
-  return { mode: opts.mode, window, announcements, dealTitles: dealRows.length, extracted, inserted, throttled, errors, funnel: funnel.toJSON(), summary, next };
+  const window = { fromIso: firstWindow!.fromIso, toIso: lastWindow!.toIso };
+  console.log(`[hkex] ${opts.mode} ${window.fromIso}..${window.toIso} windows=${windows} announcements=${announcementsTotal} deals=${dealTitlesTotal} ${summary}${throttled ? ' THROTTLED' : ''}${dryRun ? ' (dry run)' : ''}`);
+  return { mode: opts.mode, window, announcements: announcementsTotal, dealTitles: dealTitlesTotal, extracted, inserted, throttled, errors, funnel: funnel.toJSON(), summary, next };
 }

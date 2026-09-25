@@ -67,6 +67,37 @@ const FEED_SOURCES: FeedSource[] = [
     type: 'rss',
     dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'collaboration', 'fda', 'pipeline', 'biologic'],
   },
+  // === Tier 2b: Company-issued releases by country (Sep 25 2026). These are the
+  // issuer's own statement, not press coverage; the pipeline stores the release URL
+  // as the citation. Added for ex-US coverage of deals that never touch EDGAR.
+  {
+    name: 'GlobeNewswire_Japan',
+    family: 'globenewswire',
+    url: 'https://www.globenewswire.com/RssFeed/country/Japan/feedTitle/GlobeNewswire%20-%20Japan',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'licence', 'collaboration', 'co-development', 'out-licens', 'in-licens', 'exclusive rights', 'milestone', 'upfront', 'royalt', 'biologic', 'cell therapy', 'vaccine'],
+  },
+  {
+    name: 'GlobeNewswire_China',
+    family: 'globenewswire',
+    url: 'https://www.globenewswire.com/RssFeed/country/China/feedTitle/GlobeNewswire%20-%20China',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'licence', 'collaboration', 'co-development', 'out-licens', 'in-licens', 'exclusive rights', 'milestone', 'upfront', 'royalt', 'biologic', 'cell therapy', 'vaccine'],
+  },
+  {
+    name: 'GlobeNewswire_Korea',
+    family: 'globenewswire',
+    url: 'https://www.globenewswire.com/RssFeed/country/Korea%2C%20Republic%20of/feedTitle/GlobeNewswire%20-%20Korea',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'licence', 'collaboration', 'co-development', 'out-licens', 'in-licens', 'exclusive rights', 'milestone', 'upfront', 'royalt', 'biologic', 'cell therapy', 'vaccine'],
+  },
+  {
+    name: 'PR_Newswire_APAC',
+    family: 'prnewswire',
+    url: 'https://www.prnewswire.com/apac/rss/news-releases-list.rss',
+    type: 'rss',
+    dealKeywords: ['pharma', 'biotech', 'therapeutic', 'clinical', 'drug', 'oncology', 'antibody', 'gene therapy', 'license', 'licence', 'collaboration', 'co-development', 'out-licens', 'in-licens', 'exclusive rights', 'milestone', 'upfront', 'royalt', 'biologic', 'cell therapy', 'vaccine'],
+  },
   {
     name: 'GlobeNewswire_MA',
     family: 'globenewswire',
