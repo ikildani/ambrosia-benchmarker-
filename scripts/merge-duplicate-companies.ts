@@ -144,7 +144,14 @@ async function countReferences(supabase: Client, ids: readonly string[]): Promis
       qb = col.kind === 'uuid[]' ? qb.overlaps(col.column, chunk) : qb.in(col.column, chunk);
       if (col.kind === 'uuid') qb = qb.order(col.column);
       for (const k of col.pk) qb = qb.order(k);
-      const { data, error } = await qb.range(from, from + PAGE - 1);
+      let data: unknown[] | null = null;
+      let error: { message: string } | null = null;
+      for (let attempt = 1; attempt <= 4; attempt++) {
+        const res = await qb.range(from, from + PAGE - 1);
+        data = res.data as unknown[] | null; error = res.error;
+        if (!error || !/timeout|canceling statement/i.test(error.message) || attempt === 4) break;
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+      }
       if (error) throw Object.assign(new Error(`${columnKey(col)} count failed: ${error.message}`), { timeout: /timeout|canceling statement/i.test(error.message) });
       const rows = (data ?? []) as Array<Record<string, unknown>>;
       for (const r of rows) {
@@ -162,7 +169,14 @@ async function countReferences(supabase: Client, ids: readonly string[]): Promis
     for (let i = 0; i < chunk.length; i += 8) {
       await Promise.all(
         chunk.slice(i, i + 8).map(async id => {
-          const { count, error } = await supabase.from(col.table).select(col.column, { count: 'exact', head: true }).eq(col.column, id);
+          let count: number | null = null;
+          let error: { message: string } | null = null;
+          for (let attempt = 1; attempt <= 4; attempt++) {
+            const res = await supabase.from(col.table).select(col.column, { count: 'exact', head: true }).eq(col.column, id);
+            count = res.count; error = res.error;
+            if (!error || attempt === 4) break;
+            await new Promise(r => setTimeout(r, 1500 * attempt));
+          }
           if (error) throw new Error(`${columnKey(col)} count for ${id} failed: ${error.message}`);
           if (count) bump(id, col, count);
         }),
