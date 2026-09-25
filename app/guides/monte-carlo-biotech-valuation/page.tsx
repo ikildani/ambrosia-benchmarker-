@@ -165,7 +165,7 @@ export default function MonteCarloBiotechValuationPage() {
             </p>
 
             <p className="text-slate-600 leading-relaxed">
-              Across {DEAL_STATS.TOTAL_DEALS} transactions in the Solidus database, actual deal values fall within Monte Carlo 80% confidence intervals 73% of the time, compared to just 41% accuracy for single-point rNPV estimates. This guide explains why, shows how Monte Carlo works in a pharma context, and walks through a practical example you can replicate using our <Link href="/simulator" className="text-teal-600 font-medium hover:text-teal-700">free simulator</Link>.
+              We do not yet measure how often disclosed deals land inside the simulator&apos;s P10-P90 band. The engine accuracy we do measure is published at <Link href="/accuracy" className="text-teal-600 font-medium hover:text-teal-700">/accuracy</Link>. This guide explains why a distribution is the right frame for a term sheet and walks through an example you can replicate in the <Link href="/simulator" className="text-teal-600 font-medium hover:text-teal-700">free simulator</Link>.
             </p>
 
             {/* Section 1: Why Single-Point rNPV Isn't Enough */}
@@ -389,21 +389,21 @@ export default function MonteCarloBiotechValuationPage() {
 
             {/* Section 5: What the Data Shows */}
             <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="what-data-shows">
-              What {DEAL_STATS.TOTAL_DEALS} Transactions Reveal About Uncertainty
+              What the distribution tells you that the point estimate cannot
             </h2>
 
             <p className="text-slate-600 leading-relaxed">
-              When we back-test Monte Carlo models against actual deal outcomes in the Solidus database, three patterns emerge consistently:
+              Three things a distribution shows that a single rNPV figure hides:
             </p>
 
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
-              <li><strong>Monte Carlo confidence intervals are well-calibrated:</strong> Actual deal values fall within the 80% confidence interval (P10-P90) 73% of the time. The slight undershoot from 80% reflects extreme outcomes that even broad distributions underestimate -- acquisitions at massive strategic premiums and deals that collapsed due to unforeseen safety signals.</li>
-              <li><strong>Single-point rNPV over-predicts 59% of the time:</strong> Because rNPV uses mean inputs and deal outcomes are right-skewed, the mean rNPV exceeds the actual deal value in the majority of cases. Monte Carlo&apos;s median (P50) is a better predictor of the actual outcome than rNPV&apos;s expected value.</li>
-              <li><strong>Phase 2 assets have the widest distributions:</strong> The P25-P75 range for Phase 2 assets averages 3.1x, compared to 2.0x for Phase 3 and 1.6x for approved products. This confirms intuition: earlier-stage assets carry more uncertainty, and Monte Carlo is most valuable precisely where that uncertainty is greatest.</li>
+              <li><strong>Interval coverage is the metric that matters, and it is not yet published:</strong> The honest test of a simulator is how often the disclosed deal lands inside its P10-P90 band. We do not yet measure that, so this guide makes no coverage claim. The point-estimate accuracy we do measure is on <Link href="/accuracy" className="text-teal-600 font-medium hover:text-teal-700">/accuracy</Link>.</li>
+              <li><strong>Use P50, not the mean:</strong> When inputs are right-skewed (peak sales, timing), the mean rNPV sits above the median of the simulated outcomes. The median (P50) is the better anchor for a term sheet than the expected value.</li>
+              <li><strong>Earlier-stage assets have the widest spread:</strong> Probability of success and timing dominate the variance, so Phase 2 distributions are wider than Phase 3, which are wider than approved products. Monte Carlo is most useful precisely where that uncertainty is greatest.</li>
             </ul>
 
             <p className="text-slate-600 leading-relaxed">
-              These findings are not academic. They directly affect how you should price risk. A deal team using single-point rNPV is systematically overvaluing most assets and undervaluing the information contained in the distribution of possible outcomes.
+              Numbers in the worked example are illustrative, not measured. The framing still affects how you should price risk: a deal team using single-point rNPV tends to overvalue assets and undervalue the information contained in the distribution of possible outcomes.
             </p>
 
             {/* Section 6: Common Mistakes */}

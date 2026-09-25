@@ -94,6 +94,13 @@ export interface AccuracyDashboardData {
   slicesByPhase: SliceRow[];
   slicesByModality: SliceRow[];
   worstMisses: WorstMiss[];
+  /**
+   * Provenance split of the per-case `results` rows. Rows pulled from the
+   * production deals table carry ids prefixed `sb_`; every other id
+   * (`cv-001`, `gi-001`, `enrich-derm-004`, ...) is a hand-curated case.
+   * Both are 0 when the report carries no `results`.
+   */
+  corpus: { curated: number; fromDatabase: number };
   calibrationRounds: CalibrationRound[];
   holdout?: {
     train: BucketSummary;
@@ -104,7 +111,7 @@ export interface AccuracyDashboardData {
       hit50: number;
       meanAbsErrorPct: number;
     };
-    /** Per-TA slices on the 20% held-out test set (deals the engine never saw during tuning). */
+    /** Per-TA slices on the 20% held-out test set (held out since Round 13; Rounds 1-12 were tuned on the full corpus). */
     testByTA: SliceRow[];
     /** Per-TA slices on the 80% train set — paired with testByTA to expose over-fit gaps per TA. */
     trainByTA: SliceRow[];
@@ -178,6 +185,8 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
 
     const rows = report.results ?? [];
     const coreRows = rows.filter(isCoreScope);
+    const fromDatabase = rows.filter(r => r.case.id.startsWith('sb_')).length;
+    const corpus = { curated: rows.length - fromDatabase, fromDatabase };
 
     const toBucket = (s: typeof report.coreScope, scopeRows?: BacktestResultRow[]): BucketSummary => ({
       n: s.totalDeals,
@@ -242,6 +251,7 @@ export function loadAccuracyData(): AccuracyDashboardData | null {
         predictedUpfront_M: w.predictedUpfront_M,
         errorPct: w.upfrontErrorPct,
       })),
+      corpus,
       calibrationRounds: CALIBRATION_ROUNDS,
       holdout: report.holdout ? {
         train: toBucket(report.holdout.coreTrain),

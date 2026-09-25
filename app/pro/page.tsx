@@ -682,7 +682,7 @@ export default function ProPage() {
                       { title: 'Patent cliff timelines', sub: 'Revenue-at-risk analysis with LOE dates and biosimilar exposure' },
                       { title: 'Pipeline gap detection', sub: 'Active ClinicalTrials.gov monitoring across all phases and TAs' },
                       { title: 'Acquisition appetite scoring', sub: 'Composite signal from deal velocity, cash reserves, and pipeline depth' },
-                      { title: '10-factor Pharma Intent Score', sub: 'Predictive model calibrated against 378 historical transactions' },
+                      { title: '10-factor Pharma Intent Score', sub: 'Weighted signal model over pipeline gaps, patent cliffs, deal velocity and cash; weights published' },
                       { title: 'Competitive peer mapping', sub: 'Side-by-side comparison of pipeline overlap and strategic positioning' },
                     ].map(f => (
                       <div key={f.title} className="flex items-start gap-2.5">

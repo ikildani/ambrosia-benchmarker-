@@ -82,7 +82,7 @@ function DatabaseCoverageSection() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{DEAL_STATS.TOTAL_DEALS} verified transactions across {stats.length} therapeutic areas</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{DEAL_STATS.TOTAL_DEALS} disclosed transactions across {stats.length} therapeutic areas</p>
           </div>
           <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
             Updated daily from SEC filings, press releases, FTC pre-merger filings & regulatory databases
@@ -106,7 +106,7 @@ function DatabaseCoverageSection() {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
           {[
-            { label: 'Verified Deals', value: DEAL_STATS.TOTAL_DEALS },
+            { label: 'Disclosed Deals', value: DEAL_STATS.TOTAL_DEALS },
             { label: 'Deal Types', value: '5' },
             { label: 'Sources', value: '10+' },
             { label: 'Updated', value: 'Daily' },
@@ -361,7 +361,7 @@ export default function HomeContent() {
           {/* Subheadline */}
           <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             Stop guessing on upfronts, milestones, and royalties.
-            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified transactions</span> — in seconds.
+            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} disclosed transactions</span> — in seconds.
           </p>
 
           {/* Single clear CTA */}
@@ -392,7 +392,7 @@ export default function HomeContent() {
           <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-slate-400 dark:text-slate-500 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              {DEAL_STATS.TOTAL_DEALS} verified deals
+              {DEAL_STATS.TOTAL_DEALS} disclosed deals
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -748,7 +748,7 @@ export default function HomeContent() {
         <div className="max-w-4xl xl:max-w-5xl mx-auto relative text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Primary-Source Verified Data</h2>
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-            Solidus is built on {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions — sourced from regulatory filings and direct research. No secondary data. No scraped estimates. Updated daily.
+            Solidus is built on {DEAL_STATS.TOTAL_DEALS} disclosed biopharma transactions — sourced from regulatory filings and direct research. No secondary data. No scraped estimates. Updated daily.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-8">
             {[
