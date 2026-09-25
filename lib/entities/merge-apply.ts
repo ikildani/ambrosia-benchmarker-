@@ -149,12 +149,12 @@ export async function repointColumn(client: EntityClient, col: ReferencingColumn
       const keys = chunk.map(r => r[singlePk] as string);
       let attempt = 0;
       let lastError: { message: string } | null = null;
-      while (attempt < 3) {
+      while (attempt < 5) {
         const res = await client.from(col.table).update({ [col.column]: canonicalId }).eq(col.column, mergedId).in(singlePk, keys);
         if (!res.error) { lastError = null; break; }
         lastError = res.error;
         if (isUniqueViolation(res.error)) break;
-        if (!/timeout|canceling statement/i.test(res.error.message)) throw new Error(`${columnKey(col)} update failed: ${res.error.message}`);
+        if (!/timeout|canceling statement|fetch failed|ECONNRESET|ETIMEDOUT|socket hang up|network/i.test(res.error.message)) throw new Error(`${columnKey(col)} update failed: ${res.error.message}`);
         attempt++;
         await new Promise(r => setTimeout(r, 1500 * attempt));
       }
