@@ -344,11 +344,11 @@
     },
     {
       "path": "/api/cron/drug-resolve",
-      "schedule": "20 * * * *"
+      "schedule": "20 */3 * * *"
     },
     {
       "path": "/api/cron/partnership-refresh",
-      "schedule": "45 * * * *"
+      "schedule": "45 */3 * * *"
     },
     {
       "path": "/api/cron/press-releases?persist_only=true",
@@ -360,7 +360,7 @@
     },
     {
       "path": "/api/cron/asset-universe",
-      "schedule": "30 * * * *"
+      "schedule": "30 */3 * * *"
     },
     {
       "path": "/api/cron/licensing-signals",
@@ -388,7 +388,7 @@
     },
     {
       "path": "/api/cron/asset-classify?limit=400",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/company-financials",
