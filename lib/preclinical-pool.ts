@@ -62,6 +62,9 @@ async function queryPreclinicalPool(): Promise<PreclinicalPool> {
     .eq('is_synthetic', false)
     .or('is_canonical.is.null,is_canonical.eq.true')
     .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+    // Mirrors lib/comparableDeals.server.ts (Sep 25 2026): a 60-74 confidence row inserted for
+    // verifier review is not a comparable until verified.
+    .or('verification_status.eq.verified,confidence_score.is.null,confidence_score.gte.75')
     .in('phase_at_signing', ['preclinical', 'discovery'])
     .not('total_deal_value_usd', 'is', null)
     .gt('total_deal_value_usd', 0)
