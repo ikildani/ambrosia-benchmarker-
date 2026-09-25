@@ -25,6 +25,7 @@ import { renderPDFBuffer } from '@/lib/report/server-renderer';
 import epiData from '@/data/epidemiology.json';
 import { resolveIntake } from '@/lib/brief/intake-map';
 import { buildBrief } from '@/lib/brief/build';
+import { recordBriefPrediction } from '@/lib/outcomes/writers';
 import { modalityLabels } from '@/lib/report/helpers';
 import type { MPOpinion } from '@/lib/brief/types';
 
@@ -178,6 +179,16 @@ export async function POST(request: NextRequest) {
       log: (m) => console.log(m),
     });
     genNotes.push(...built.notes);
+
+    // Step 5c: Outcome ledger — commit the brief's ask/floor, buyers and window
+    // as a prediction (Alaric WS1). Fire-and-forget; never breaks generation.
+    try {
+      void recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null }).catch((e: unknown) => {
+        console.warn('[Outcomes] brief prediction rejected:', e instanceof Error ? e.message : e);
+      });
+    } catch (e) {
+      console.warn('[Outcomes] brief prediction threw:', e instanceof Error ? e.message : e);
+    }
 
     // Step 6: Assemble PDFReportData
     const pdfData: PDFReportData = {
