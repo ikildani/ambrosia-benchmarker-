@@ -14,10 +14,10 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-/** Values accepted by deals_source_type_check after migration 113. */
+/** Values accepted by deals_source_type_check (migrations 113, 114, 120, 121). */
 export const DEAL_SOURCE_TYPES = [
   'sec_8k', 'sec_10k', 'sec_10q', 'sec_6k', 'press_release', 'clinicaltrials', 'manual', 'openfda',
-  'hkex', 'edinet', 'dart', 'sedar', 'asx', 'other',
+  'hkex', 'edinet', 'tdnet', 'dart', 'sedar', 'asx', 'perplexity_discovery', 'other',
 ] as const;
 export type DealSourceType = (typeof DEAL_SOURCE_TYPES)[number];
 

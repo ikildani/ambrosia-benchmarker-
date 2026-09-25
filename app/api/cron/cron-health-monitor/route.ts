@@ -31,6 +31,7 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   'edgar_fts_backfill': { frequency: 'every-15m', expectedRunsPerWeek: 672 },  // */15 * * * *
   'hkex_announcements': { frequency: '2x-daily', expectedRunsPerWeek: 14 },   // 45 5,17 * * * (mode=both)
   'hkex_backfill': { frequency: '2x-daily', expectedRunsPerWeek: 14 },        // same run, second phase
+  'tdnet_announcements': { frequency: '2x-daily', expectedRunsPerWeek: 14 },  // same run, TDnet phase (Japan)
   'api_credit_check': { frequency: 'hourly', expectedRunsPerWeek: 168 },      // 20 * * * *
   'deal_inflow_check': { frequency: 'daily', expectedRunsPerWeek: 7 },        // inside api_credit_check at 13:20 UTC
   'deal-enrichment': { frequency: '3x-daily', expectedRunsPerWeek: 21 },

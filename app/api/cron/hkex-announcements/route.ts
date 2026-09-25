@@ -1,14 +1,16 @@
 /**
  * Cron: HKEX announcements. `?mode=daily` (default) scans the last 14 days;
  * `?mode=backfill` advances the 2017→present cursor one 14-day window per run;
- * `?mode=both` runs the daily scan first, then backfill with the remaining
- * budget. The schedule uses `both` twice a day: Vercel caps a project at 100
- * cron entries, so the two modes share one. See lib/ingestion/exchanges/hkex.ts.
+ * `?mode=both` runs the HKEX daily scan, then the TDnet (Japan) daily scan, then
+ * HKEX backfill with the remaining budget. The schedule uses `both` twice a day:
+ * Vercel caps a project at 100 cron entries, so the exchange adapters share one.
+ * See lib/ingestion/exchanges/hkex.ts and tdnet.ts.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runHkexIngestion } from '@/lib/ingestion/exchanges/hkex';
+import { runTdnetIngestion } from '@/lib/ingestion/exchanges/tdnet';
 import { logCronRun } from '@/lib/cron-utils';
 
 export const maxDuration = 300;
@@ -33,10 +35,33 @@ export async function GET(request: NextRequest) {
   const DAILY_BUDGET_MS = 90_000;
 
   // `both`: daily scan (bounded) then backfill with whatever budget is left.
-  const modes: Array<'daily' | 'backfill'> = requested === 'both' ? ['daily', 'backfill'] : requested === 'backfill' ? ['backfill'] : ['daily'];
+  const modes: Array<'daily' | 'backfill'> = requested === 'both' ? ['daily', 'backfill'] : requested === 'backfill' ? ['backfill'] : requested === 'tdnet' ? [] : ['daily'];
   const started = Date.now();
   const results: Record<string, unknown> = {};
+  const TDNET_BUDGET_MS = 70_000;
+
+  // TDnet (Japan) daily phase, between the HKEX daily scan and the HKEX backfill.
+  const runTdnet = async () => {
+    try {
+      const r = await runTdnetIngestion(supabase, { anthropicApiKey, dryRun, timeBudgetMs: TDNET_BUDGET_MS });
+      if (!dryRun) {
+        await logCronRun(supabase, 'tdnet_announcements', {
+          fetched: r.disclosures, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel,
+          parameters: { dates: r.dates, dealTitles: r.dealTitles },
+          // A weekend or holiday list is legitimately empty.
+          expectRecords: r.disclosures > 0,
+        });
+      }
+      results.tdnet = r;
+    } catch (error) {
+      console.error('[tdnet] failed:', error);
+      try { await logCronRun(supabase, 'tdnet_announcements', { fetched: 0, processed: 0, inserted: 0, errors: [String(error)], status: 'failed' }); } catch {}
+      results.tdnet = { error: String(error).slice(0, 200) };
+    }
+  };
+
   for (const mode of modes) {
+    if (mode === 'backfill' && requested === 'both') await runTdnet();
     const source = mode === 'backfill' ? 'hkex_backfill' : 'hkex_announcements';
     const remaining = TOTAL_BUDGET_MS - (Date.now() - started);
     const timeBudgetMs = modes.length > 1 && mode === 'daily' ? Math.min(DAILY_BUDGET_MS, remaining) : remaining;
@@ -62,6 +87,8 @@ export async function GET(request: NextRequest) {
       results[mode] = { error: String(error).slice(0, 200) };
     }
   }
-  const failed = modes.every(m => (results[m] as { error?: string })?.error);
-  return NextResponse.json({ success: !failed, dryRun, modes, ...results }, { status: failed ? 500 : 200 });
+  if (requested === 'tdnet') await runTdnet();
+  const phases = [...modes, ...(results.tdnet ? ['tdnet'] : [])];
+  const failed = phases.length > 0 && phases.every(m => (results[m] as { error?: string })?.error);
+  return NextResponse.json({ success: !failed, dryRun, modes: phases, ...results }, { status: failed ? 500 : 200 });
 }
