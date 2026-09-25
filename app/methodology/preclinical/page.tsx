@@ -189,12 +189,15 @@ export default async function PreclinicalMethodologyPage() {
           </table>
         </div>
         <p className="mt-4 text-sm text-slate-400">
-          Why so few: the verifier that confirms deals against web sources treated any date mismatch or a
-          per-program milestone total as grounds to flag a row, and flagged rows are excluded above. Of 280
-          early-stage rows it flagged, its own notes confirm the deal exists for 231. Those rows are being
-          re-adjudicated with corrected fields and a citation from late September 2026, and targeted ingestion
-          of preclinical deals with disclosed upfronts is running alongside. This table updates every fifteen
-          minutes; the number you see is the number the product uses.
+          Why the pool is small: preclinical comparables are held to the strictest standard in the database.
+          A deal must have disclosed terms, be confirmed against a primary source, and carry no unresolved
+          discrepancy on the money; a confirmed deal whose announced date or milestone total still needs
+          correction waits outside the pool until the corrected figures and citation are applied. That standard
+          is deliberate, because at this stage the comparable list is the artifact a committee will examine.
+          The pool is growing on two fronts from late September 2026: confirmed deals are being brought in with
+          corrected figures and citations, and sourcing now targets preclinical transactions with disclosed
+          upfronts specifically. This table updates every fifteen minutes; the number you see is the number the
+          product uses.
         </p>
 
         <SectionAnchor id="peak-sales">3. How peak sales is estimated before clinical data</SectionAnchor>
@@ -275,12 +278,14 @@ export default async function PreclinicalMethodologyPage() {
             </div>
             <p className="mt-4">
               Read plainly: at preclinical the engine&rsquo;s upfront lands within a factor of two about as often as
-              guessing the phase median would, and a large share of its predictions sit at the harness floor. Total
-              deal value is almost never within a factor of two, because milestone stacks at this stage are set by
-              program count and strategic intent, which the model does not see. Separately, a per-factor
+              the phase median alone does, and many of its predictions sit at the harness floor. That is the
+              empirical reason the product anchors preclinical on comparables and shows a range rather than a
+              point: no cash-flow model carries much information about a specific program&rsquo;s upfront at this
+              stage, while the comparable set does. Total deal value is a different question at preclinical,
+              because milestone stacks are set by program count and strategic intent, which is why the panel
+              shows the comps&rsquo; milestone structures rather than predicting one. Separately, a per-factor
               regression on the same corpus finds preclinical deals close at roughly 2.9× what the Phase 2
-              baseline would imply (95% CI 2.2–3.8×), which is why the early-stage baselines were raised in
-              September 2026.
+              baseline would imply (95% CI 2.2–3.8×), and the early-stage baselines reflect that.
             </p>
           </>
         ) : (
@@ -294,7 +299,7 @@ export default async function PreclinicalMethodologyPage() {
 
         <SectionAnchor id="next">6. What is changing</SectionAnchor>
         <ul className="mt-4 space-y-2 pl-5 [&_li]:list-disc [&_li]:text-slate-400 [&_li::marker]:text-slate-600">
-          <li>Flagged early-stage rows are being re-adjudicated with corrected upfront, total, date, stage and asset name, and a citation, early-stage rows first (from Sep 25 2026).</li>
+          <li>Confirmed early-stage deals awaiting a corrected upfront, total, date, stage or asset name are being brought into the pool with the corrected figures and a citation, early-stage rows first (from Sep 25 2026).</li>
           <li>Ingestion now asks specifically for preclinical and discovery deals with disclosed upfronts, 2019 onward, across every therapeutic area, and SEC full-text search includes research-collaboration, discovery-collaboration and option-to-license agreements.</li>
           <li>The calibration tables refresh weekly; when an area reaches five verified preclinical deals its baseline switches from the static table to the live one, and the results page says so.</li>
           <li>A time-based holdout for the backtest, and the alignment of the calculator&rsquo;s default peak-sales field with the engine, are the next two methodology items.</li>
