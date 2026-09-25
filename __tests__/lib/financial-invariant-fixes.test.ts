@@ -260,3 +260,83 @@ describe('7. the blended headline rests on the same comparables as the published
     expect(model.ensemble.customCompCount).toBe(4);
   });
 });
+
+describe('8. scenario ordering on negative-rNPV programs (Sep 24 2026 Sentry follow-up)', () => {
+  const scenarioCriticals = (input: RNPVInput) =>
+    checkScenarioInvariants(generateScenarioComparison(input, calculateRNPV(input), calculateRNPV))
+      .filter(x => x.severity === 'critical')
+      .map(x => x.rule);
+
+  it.each([
+    ['preclinical CNS licensing', preclinicalCNS],
+    ['phase 1 gastric ADC codev', phase1GastricADCCodev],
+    ['phase 2 NSCLC licensing', phase2NSCLC],
+  ])('%s raises no scenario critical', (_label, input) => {
+    expect(scenarioCriticals(input)).toEqual([]);
+  });
+
+  it('a bear case above a NON-positive base is a warning, not a critical', () => {
+    const base = calculateRNPV(phase2NSCLC);
+    const sc = generateScenarioComparison(phase2NSCLC, base, calculateRNPV);
+    const tampered = {
+      ...sc,
+      base: { ...sc.base, rnpv: -40 },
+      bear: { ...sc.bear, rnpv: -12 },
+    };
+    const out = checkScenarioInvariants(tampered);
+    expect(out.map(x => x.rule)).not.toContain('scenario.bear_above_base');
+    const warn = out.find(x => x.rule === 'scenario.bear_above_base_negative_base');
+    expect(warn?.severity).toBe('warning');
+  });
+
+  it('a bear case above a POSITIVE base is still a critical', () => {
+    const base = calculateRNPV(phase2NSCLC);
+    const sc = generateScenarioComparison(phase2NSCLC, base, calculateRNPV);
+    expect(sc.base.rnpv).toBeGreaterThan(0);
+    const tampered = { ...sc, bear: { ...sc.bear, rnpv: sc.base.rnpv * 2 } };
+    const crit = checkScenarioInvariants(tampered).find(x => x.rule === 'scenario.bear_above_base');
+    expect(crit?.severity).toBe('critical');
+  });
+});
+
+describe('9. the orchestrator check block is Sentry-quiet across the phase x TA x deal-type grid', () => {
+  // Mirrors run-financial-model.ts (Layer 2 cross-engine consistency): the
+  // four rules that reached Sentry on Sep 24 2026 all live in this block, and
+  // none of the property/fuzz suites exercised it before this test.
+  const grid: Array<{ phase: string; ta: string; modality: string; indication: string; dealType: string; peak: number }> = [];
+  for (const phase of ['discovery', 'preclinical', 'phase1', 'phase1_2', 'phase2', 'phase3']) {
+    for (const [ta, modality, indication] of [
+      ['neurology', 'smallMolecule', 'schizophrenia'],
+      ['oncology', 'adc', 'gastric'],
+      ['rareDisease', 'geneTherapy', 'dmd'],
+    ]) {
+      for (const dealType of ['licensing', 'codevelopment', 'option', 'acquisition']) {
+        grid.push({ phase, ta, modality, indication, dealType, peak: ta === 'rareDisease' ? 500 : 2000 });
+      }
+    }
+  }
+
+  it.each(grid.map(g => [`${g.phase} ${g.ta} ${g.dealType}`, g] as const))('%s', (_label, g) => {
+    const input: RNPVInput = {
+      phase: g.phase as never,
+      therapeuticArea: g.ta as never,
+      modality: g.modality as never,
+      indication: g.indication,
+      territory: 'global',
+      peakSalesEstimate: { low: g.peak * 0.5, median: g.peak, high: g.peak * 2 },
+      competitivePosition: 'racing',
+      dataQuality: 'promising',
+      regulatoryDesignations: designations,
+      dealType: g.dealType as never,
+    };
+    const rnpv = calculateRNPV(input);
+    const mc = runMonteCarlo({ rnpvInput: input, engineRNPV: rnpv.riskAdjustedNPV }, 42);
+    const wf = buildDealWaterfall(input, rnpv);
+    const sc = generateScenarioComparison(input, rnpv, calculateRNPV);
+    const criticals = [
+      ...checkScenarioInvariants(sc),
+      ...checkCrossEngineConsistency(rnpv, mc, undefined, sc, wf, undefined),
+    ].filter(x => x.severity === 'critical');
+    expect(criticals.map(x => `${x.rule}: ${x.message}`)).toEqual([]);
+  });
+});
