@@ -16,6 +16,7 @@ import { logCronRun } from '@/lib/cron-utils';
 import { verifyPendingDeals } from '@/lib/ingestion/deal-verifier';
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
 import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
+import { runOutcomePhase } from '@/lib/outcomes/cron';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -160,6 +161,19 @@ export async function GET(request: NextRequest) {
     });
   } catch {}
 
+  // Outcome ledger phase (Alaric WS1). Lives here because vercel.json is at the
+  // 100-cron cap: resolves open predictions against deals ingested since the
+  // last run; at 02:00 UTC also runs the Radar writer + accuracy rollups and
+  // sends the day-45 / day-120 brief outcome follow-up emails (WS2).
+  // Isolated — a failure here never fails verification.
+  let outcomes: { autoResolved: number; queued: number; expired: number; followupsSent: number | null; errors: number } | null = null;
+  try {
+    const phase = await runOutcomePhase(supabase, { rollupHour: 2 });
+    outcomes = { autoResolved: phase.resolver.autoResolved, queued: phase.resolver.queued, expired: phase.resolver.expired, followupsSent: phase.followups?.sent ?? null, errors: phase.errors.length };
+  } catch (error) {
+    console.error('[Outcomes] phase failed inside deal-verification:', error instanceof Error ? error.message : error);
+  }
+
   return NextResponse.json({
     success: true,
     verified: result.verified,
@@ -167,5 +181,6 @@ export async function GET(request: NextRequest) {
     unchanged: result.unchanged,
     sourceUrlsAdded: result.sourceUrlsAdded,
     errors: result.errors.length,
+    outcomes,
   });
 }

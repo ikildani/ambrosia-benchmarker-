@@ -8,6 +8,7 @@ import { calculationRequestSchema, clampInt } from '@/lib/api-validation';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { notifyCalculation } from '@/lib/slack/notify';
 import { recordAuditEvent } from '@/lib/audit-log';
+import { recordCalculatorPrediction } from '@/lib/outcomes/writers';
 import { z } from 'zod';
 
 // ── Team-scope history (migration 100) ───────────────────────────────────────
@@ -151,10 +152,11 @@ export async function POST(request: NextRequest) {
     let userTier = 'free';
     let userEmail: string | undefined;
     let userName: string | undefined;
+    let userCompanyName: string | null = null;
     if (verifiedUserId) {
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('tier, email, full_name')
+        .select('tier, email, full_name, company_name')
         .eq('id', verifiedUserId)
         .single();
 
@@ -163,6 +165,7 @@ export async function POST(request: NextRequest) {
       }
       userEmail = profile?.email || undefined;
       userName = profile?.full_name || undefined;
+      userCompanyName = profile?.company_name || null;
     }
 
     // Store the calculation
@@ -241,6 +244,30 @@ export async function POST(request: NextRequest) {
         },
         request,
       });
+    }
+
+    // Outcome ledger (Alaric WS1) — signed-in users only; deduped per user per
+    // fingerprint per 24 h inside the writer. Fire-and-forget; never throws.
+    if (verifiedUserId) {
+      try {
+        void recordCalculatorPrediction(supabase, {
+          userId: verifiedUserId,
+          calculationId: calculation!.id,
+          fingerprint: calculationData.calculation_fingerprint,
+          therapeuticArea: calculationData.therapeutic_area,
+          modality: calculationData.modality,
+          phase: calculationData.development_phase,
+          indication: calculationData.indication_specific || calculationData.indication_category || null,
+          dealType: calculationData.deal_type,
+          territory: calculationData.territory_scope,
+          licensorName: userCompanyName,
+          outputs: body.outputs ?? null,
+        }).catch((e: unknown) => {
+          console.warn('[Outcomes] calculator prediction rejected:', e instanceof Error ? e.message : e);
+        });
+      } catch (e) {
+        console.warn('[Outcomes] calculator prediction threw:', e instanceof Error ? e.message : e);
+      }
     }
 
     // Fire event and update session count (non-blocking — don't let these fail the response)

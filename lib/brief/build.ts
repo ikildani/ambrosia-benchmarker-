@@ -17,6 +17,7 @@
  *   8. diligence       [asset, intake ready/gaps]
  *   9. positioning     [decision, comps, buyer map]  (Anthropic call, optional)
  *  10. coverage        [raw rows, comps]
+ *  11. coverage.accuracy [accuracy_rollups for the TA; null below n = 10]
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -45,6 +46,7 @@ import { buildDecisionSummary } from './decision';
 import { buildDiligenceChecklist } from './diligence-checklist';
 import { generatePositioningObjections } from '@/lib/ai/objection-generator';
 import { fmtM } from '@/lib/report/helpers';
+import { loadBriefAccuracyStatement } from '@/lib/outcomes/statements';
 
 export interface BuildBriefInput {
   supabase: SupabaseClient;
@@ -214,6 +216,12 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
 
   // 10. Coverage (honesty block)
   brief.coverage = coverageFromRows(raw, asset, brief, asOf);
+
+  // 11. Resolved-brief accuracy for this TA (outcome ledger). The loader never
+  // throws and returns null below the n ≥ 10 threshold, so the methodology
+  // page keeps its "omitted rather than estimated" line.
+  const accuracy = await step('coverage.accuracy', notes, log, () => loadBriefAccuracyStatement(supabase, asset.therapeuticArea));
+  if (accuracy) brief.coverage.accuracy = accuracy;
 
   return { brief, buyerValuations, notes };
 }
