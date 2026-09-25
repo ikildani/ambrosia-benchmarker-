@@ -150,7 +150,8 @@ export async function GET(request: NextRequest) {
     processed: result.verified + result.flagged,
     inserted: result.verified,
     errors: result.errors,
-    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded },
+    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped },
+    notes: result.regressions > 0 ? `BACKTEST: ${result.regressions} previously verified row(s) no longer hold` : undefined,
   });
 
   // Intelligence tracking
