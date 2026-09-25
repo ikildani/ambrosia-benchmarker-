@@ -8,10 +8,10 @@
  * now read this; LIVE_DEAL_COUNT stays only as the fallback and for client
  * components that cannot query.
  *
- * Count definition (Issa, Sep 25 2026): every real row (is_synthetic = false).
- * The old rule also dropped rows whose therapeutic area is 'other'; that predated
- * the cleanup that quarantined fabricated rows and hid ~140 real, cited deals.
- * Verified and cited counts are shown alongside so the headline stays honest.
+ * Count definition (Issa, Sep 25 2026, revised the same day): primary-sourced
+ * real rows — a regulator/exchange filing id, an issuer release URL, or a URL
+ * from a primary pipeline. The site promises no secondary data; rows without
+ * such a citation are a re-sourcing backlog and are not counted.
  */
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -52,7 +52,7 @@ async function queryLiveDealStats(): Promise<LiveDealStats> {
   const supabase = createServiceClient();
   const real = supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false);
   const [total, verified, cited, tas, sources, countries, years, newest] = await Promise.all([
-    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false),
+    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or("source_filing_id.not.is.null,press_release_url.not.is.null,and(source_url.not.is.null,source_type.in.(sec_8k,sec_6k,sec_10k,sec_10q,hkex,tdnet,asx,cninfo,mfn,dart,press_release))"),
     supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'verified'),
     supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or('source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null'),
     supabase.rpc('count_distinct_deal_column', { p_column: 'therapeutic_area' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),

@@ -37,6 +37,7 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   'dart_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
   'cninfo_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
   'mfn_announcements': { frequency: 'every-30m', expectedRunsPerWeek: 336 },
+  'deal_resourcing': { frequency: 'rotation', expectedRunsPerWeek: 40 },
   'api_credit_check': { frequency: 'hourly', expectedRunsPerWeek: 168 },      // 20 * * * *
   'deal_inflow_check': { frequency: 'daily', expectedRunsPerWeek: 7 },        // inside api_credit_check at 13:20 UTC
   'deal-enrichment': { frequency: '3x-daily', expectedRunsPerWeek: 21 },

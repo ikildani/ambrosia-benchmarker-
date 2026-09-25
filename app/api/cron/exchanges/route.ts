@@ -9,7 +9,8 @@
  * With seven adapters and 48 runs a day every adapter runs several times a day.
  *
  * Adapters: hkex_daily, tdnet (Japan), asx (Australia), dart (Korea, needs
- * DART_API_KEY), cninfo (mainland China), hkex_backfill (2017→), mfn (every run).
+ * DART_API_KEY), cninfo (mainland China), resource (primary citations for uncited
+ * rows), hkex_backfill (2017→), mfn (every run).
  * Manual: ?only=<key>&dryRun=true runs one adapter.
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,6 +25,7 @@ import { runAsxIngestion } from '@/lib/ingestion/exchanges/asx';
 import { runDartIngestion } from '@/lib/ingestion/exchanges/dart';
 import { runCninfoIngestion } from '@/lib/ingestion/exchanges/cninfo';
 import { runMfnIngestion } from '@/lib/ingestion/exchanges/mfn';
+import { runResourcing } from '@/lib/ingestion/resource';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -68,6 +70,11 @@ const ADAPTERS: Adapter[] = [
     key: 'cninfo', source: 'cninfo_announcements', budgetMs: 110_000,
     run: async (sb, c) => { const r = await runCninfoIngestion(sb, { anthropicApiKey: c.anthropicApiKey, dryRun: c.dryRun, timeBudgetMs: c.budgetMs });
       return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { candidates: r.candidates, ...(r.parameters ?? {}) }, expectRecords: r.expectRecords }; },
+  },
+  {
+    key: 'resource', source: 'deal_resourcing', budgetMs: 90_000,
+    run: async (sb, c) => { const r = await runResourcing(sb, { dryRun: c.dryRun, timeBudgetMs: c.budgetMs });
+      return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { attempted: r.candidates, ...(r.parameters ?? {}) }, expectRecords: r.expectRecords, notes: r.inserted ? `${r.inserted} rows gained a primary citation` : undefined }; },
   },
   {
     key: 'hkex_backfill', source: 'hkex_backfill', budgetMs: 120_000,
