@@ -125,7 +125,38 @@ const TA_DISCOVERY_QUERIES: Record<string, string[]> = {
     'All major biopharma acquisitions and licensing deals announced in the last 7 days with deal values over $500 million. Include acquirer, target, deal value, therapeutic area, and drug names.',
     'Biggest pharma and biotech deals announced this week including M&A, licensing, and collaboration agreements with financial terms disclosed. List all deals over $100 million.',
   ],
+  // Preclinical and discovery-stage deals with disclosed terms. Sep 25 2026: after the
+  // verifier sweep only 3-7 early-stage deals per therapeutic area passed the comps filter,
+  // and nothing in the pipeline asked for this stage. These keep their year windows (see
+  // HISTORICAL_QUERY_KEYS) because the goal is the 2019-2026 backlog, not last month.
+  _preclinical_deals: [
+    'List preclinical and discovery-stage oncology licensing deals, research collaborations, option-to-license and platform deals announced 2024-2026 with a disclosed upfront payment. Include IND-enabling, lead-optimization and target-discovery collaborations (ADC, bispecific, radiopharmaceutical, cell therapy, small molecule). For each give licensor, licensee, program or target, upfront, milestones, total value, phase at signing, announced date and press release or SEC filing URL.',
+    'List preclinical and discovery-stage oncology deals announced 2019-2023 with a disclosed upfront payment: licensing, research collaborations, option agreements and platform deals. For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and a press release or SEC filing URL.',
+    'List preclinical and discovery-stage immunology and inflammation deals announced 2019-2026 with a disclosed upfront payment: licensing, research collaborations, option-to-license and platform deals for autoimmune disease, IBD, dermatology and fibrosis (including in vivo CAR-T, degraders, oral biologics). For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+    'List preclinical and discovery-stage neuroscience and CNS deals announced 2019-2026 with a disclosed upfront payment: research collaborations, licensing, option agreements and platform deals for Alzheimer\'s, Parkinson\'s, ALS, pain, psychiatry and rare neurological disease (antisense, siRNA, gene therapy, small molecule, antibody). For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+    'List preclinical and discovery-stage rare disease and genetic medicine deals announced 2019-2026 with a disclosed upfront payment: AAV and non-viral gene therapy, gene editing, RNA and enzyme replacement research collaborations, licensing and option deals. For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+    'List preclinical and discovery-stage cardiometabolic deals announced 2019-2026 with a disclosed upfront payment: obesity, diabetes, MASH, dyslipidemia, heart failure and hypertension research collaborations, licensing, option and platform deals (siRNA, antisense, peptide, small molecule). For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+    'List preclinical and discovery-stage infectious disease and vaccine deals announced 2019-2026 with a disclosed upfront payment: antibacterial, antiviral, antifungal and vaccine platform research collaborations, licensing and option deals. For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+    'List AI drug discovery, DNA-encoded library, protein degrader, molecular glue and other platform research collaborations between biotech and pharma announced 2019-2026 with a disclosed upfront payment, across all therapeutic areas. For each give licensor, licensee, target or program count, upfront, milestones, total value, announced date and source URL.',
+    'List preclinical licensing and research collaboration deals between Chinese, Korean or Japanese biotech companies and Western pharma announced 2021-2026 with a disclosed upfront payment, across all therapeutic areas. For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+    'List preclinical and discovery-stage ophthalmology, hematology, respiratory and gastroenterology deals announced 2019-2026 with a disclosed upfront payment: research collaborations, licensing and option agreements. For each give licensor, licensee, program or target, upfront, milestones, total value, announced date and source URL.',
+  ],
 };
+
+/**
+ * Query sets that keep the year ranges written into them. The recency window
+ * exists to stop rotation queries re-returning the famous deals of each era;
+ * these sets exist precisely to fill a historical gap, so the window would
+ * defeat them. The unique indexes still drop anything already in the table.
+ */
+export const HISTORICAL_QUERY_KEYS: ReadonlySet<string> = new Set(['_preclinical_deals']);
+
+/** Rotate a query list so successive runs start at different queries. */
+export function rotateQueries<T>(queries: readonly T[], offset: number): T[] {
+  if (queries.length === 0) return [];
+  const o = ((offset % queries.length) + queries.length) % queries.length;
+  return [...queries.slice(o), ...queries.slice(0, o)];
+}
 
 /** Why a discovered candidate did not become a row. Logged per run so a
  * zero-insert run can be read without console access. */
@@ -308,6 +339,12 @@ export async function runPerplexityDealDiscovery(
     timeBudgetMs?: number;
     /** Ask for deals announced within this many days. Default 45. */
     recencyDays?: number;
+    /**
+     * Start each TA's query list at this offset (wrapping), so a cron that
+     * runs only the first `maxQueriesPerTA` queries still reaches every
+     * query over successive runs. Default 0 (the first queries, as before).
+     */
+    queryOffset?: number;
   }
 ): Promise<{
   queries_run: number;
@@ -443,7 +480,8 @@ export async function runPerplexityDealDiscovery(
     const queries = TA_DISCOVERY_QUERIES[ta];
     if (!queries) continue;
 
-    for (const query of queries.slice(0, maxQueriesPerTA)) {
+    const keepYears = HISTORICAL_QUERY_KEYS.has(ta);
+    for (const query of rotateQueries(queries, options?.queryOffset ?? 0).slice(0, maxQueriesPerTA)) {
       if (Date.now() - startTime > timeBudget) break;
 
       try {
@@ -451,7 +489,7 @@ export async function runPerplexityDealDiscovery(
 
         // Step 1: Perplexity discovers deals from the web
         const { text: perplexityText, citations } = await queryPerplexityForDeals(
-          withRecencyWindow(query, sinceIso, recencyDays),
+          keepYears ? query : withRecencyWindow(query, sinceIso, recencyDays),
           perplexityApiKey
         );
         result.queries_run++;
@@ -469,6 +507,12 @@ export async function runPerplexityDealDiscovery(
 
         // Step 3: Insert into database
         for (const deal of deals) {
+          // Early-stage platform and multi-target deals often name no compound. Keep them
+          // under a descriptive program name rather than dropping the row; the verifier
+          // fills in the real name when a source states one.
+          if (keepYears && !deal.asset_name && deal.indication) {
+            deal.asset_name = `${deal.indication} program (${deal.phase || 'preclinical'})`;
+          }
           if (!deal.licensor || !deal.licensee || !deal.asset_name) { result.skipped.missing_fields++; continue; }
           if (deal.confidence < 80) { result.skipped.low_confidence++; continue; }
 
