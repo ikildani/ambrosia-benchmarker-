@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
       .from('deals')
       .select('id, licensee_id, licensee_name, indication_category, indication_specific, phase_at_signing, total_deal_value_usd, upfront_usd, modality, therapeutic_area')
       .eq('is_synthetic', false)
+      .not('verification_status', 'in', '("rejected","flagged")')
       .not('total_deal_value_usd', 'is', null)
       .not('licensee_id', 'is', null)
       .limit(5000);

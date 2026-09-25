@@ -1,5 +1,5 @@
 /**
- * Pure drug-name normalization for the Asset Radar drug master.
+ * Pure drug-name normalization for the Search & Evaluation drug master.
  *
  * No I/O. Everything here is deterministic string handling so it can be unit
  * tested exhaustively (__tests__/lib/drug-name.test.ts). The resolver in

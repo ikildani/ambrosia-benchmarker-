@@ -1,5 +1,5 @@
 /**
- * Asset classification pass for the Asset Radar (migration 112).
+ * Asset classification pass for the Search & Evaluation (migration 112).
  *
  * Fills therapeutic_area, indication_category, indication_specific, modality,
  * target, target_class, mechanism and moa_short on clinical_assets from the
@@ -41,6 +41,8 @@ import { z } from 'zod';
 import { deriveRunStatus, logRadarRun } from '@/lib/radar/run-log';
 import { isNonDrugIntervention, isPlaceboOrGeneric, normalizeKey } from '@/lib/radar/drug-name';
 import type { ClassificationStatus, OwnerType } from '@/lib/radar/types';
+import { RADAR_PHASE_OPTIONS } from '@/lib/radar/vocab';
+import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
 import {
   ClassificationItemSchema,
   INDICATION_CATEGORIES,
@@ -139,6 +141,10 @@ export interface ClassifyOptions {
   model?: string;
   /** Restrict the queue to these statuses (default: unclassified then needs_review). */
   onlyStatuses?: ClassificationStatus[];
+  /** 'core' (default): the feed's universe only; 'all': the long tail too. */
+  scope?: ClassificationScope;
+  /** One model call per resolved drug, siblings copied (default true). */
+  dedupeByDrug?: boolean;
   /** Assets per model request (default 20; 15-20 recommended). */
   batchSize?: number;
   /** Concurrent model requests (default 3). */
@@ -160,6 +166,8 @@ export interface ClassifyRunResult {
   processed: number;
   classified: number;
   fromDrugMaster: number;
+  /** Rows classified through a same-drug representative (one model call per drug). */
+  fromSibling: number;
   needsReview: number;
   skipped: number;
   failed: number;
@@ -335,17 +343,36 @@ function asRows(data: unknown): RawQueueRow[] {
   return (data ?? []) as RawQueueRow[];
 }
 
+/** Phases a buyer can license before approval: everything in the vocab except phase_4. */
+export const CORE_UNIVERSE_PHASES: readonly string[] = RADAR_PHASE_OPTIONS
+  .map(o => o.value)
+  .filter(v => v !== 'phase_4');
+
+/** Partnership states that leave rights on the table. */
+export const CORE_UNIVERSE_PARTNERSHIP: readonly string[] = ['unpartnered', 'partially_partnered'];
+
 /**
- * Queue order: unclassified industry-owned, unclassified other owners,
- * unclassified without a company, then needs_review older than 30 days.
- * Within each group the stalest updated_at first (index
- * idx_clinical_assets_classification_queue).
+ * Queue order: the core universe (industry-owned, unpartnered or partially
+ * partnered, pre-approval) first because it is what the feed ranks; then the
+ * rest of the unclassified industry assets, other owners, assets without a
+ * company, then needs_review older than 30 days. Within each group the
+ * stalest updated_at first (index idx_clinical_assets_classification_queue,
+ * plus idx_clinical_assets_classify_core from migration 125).
  */
+/**
+ * 'core' (default) classifies only what the feed ranks: the core universe
+ * minus programs the company does not own. 'all' adds the long tail (other
+ * industry assets, academic owners, orphans), which costs about three times
+ * as much and is hidden by default anyway.
+ */
+export type ClassificationScope = 'core' | 'all';
+
 export async function fetchClassificationQueue(
   supabase: SupabaseClient,
   limit: number,
   onlyStatuses?: ClassificationStatus[],
   now: () => number = Date.now,
+  scope: ClassificationScope = 'core',
 ): Promise<QueuedAsset[]> {
   const wants = (s: ClassificationStatus) => !onlyStatuses || onlyStatuses.includes(s);
   const out: QueuedAsset[] = [];
@@ -360,17 +387,32 @@ export async function fetchClassificationQueue(
   const remaining = () => limit - out.length;
 
   if (wants('unclassified')) {
-    const { data: industry, error: e1 } = await supabase
+    const { data: core, error: e0 } = await supabase
       .from('clinical_assets')
       .select(`${QUEUE_COLUMNS}, ${COMPANY_EMBED}!inner(owner_type)`)
       .eq('classification_status', 'unclassified')
       .eq('companies.owner_type', 'industry')
+      .in('partnership_status', [...CORE_UNIVERSE_PARTNERSHIP])
+      .in('phase', [...CORE_UNIVERSE_PHASES])
+      .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
       .order('updated_at', { ascending: true })
       .limit(remaining());
-    if (e1) throw new Error(`classification queue (industry) read failed: ${e1.message}`);
-    push(asRows(industry));
+    if (e0) throw new Error(`classification queue (core universe) read failed: ${e0.message}`);
+    push(asRows(core));
 
-    if (remaining() > 0) {
+    if (scope === 'all' && remaining() > 0) {
+      const { data: industry, error: e1 } = await supabase
+        .from('clinical_assets')
+        .select(`${QUEUE_COLUMNS}, ${COMPANY_EMBED}!inner(owner_type)`)
+        .eq('classification_status', 'unclassified')
+        .eq('companies.owner_type', 'industry')
+        .order('updated_at', { ascending: true })
+        .limit(remaining());
+      if (e1) throw new Error(`classification queue (industry) read failed: ${e1.message}`);
+      push(asRows(industry));
+    }
+
+    if (scope === 'all' && remaining() > 0) {
       const { data: others, error: e2 } = await supabase
         .from('clinical_assets')
         .select(`${QUEUE_COLUMNS}, ${COMPANY_EMBED}!inner(owner_type)`)
@@ -382,7 +424,7 @@ export async function fetchClassificationQueue(
       push(asRows(others));
     }
 
-    if (remaining() > 0) {
+    if (scope === 'all' && remaining() > 0) {
       const { data: orphans, error: e3 } = await supabase
         .from('clinical_assets')
         .select(QUEUE_COLUMNS)
@@ -685,6 +727,67 @@ export function planAssetPatch(
   return base;
 }
 
+/** A sibling never carries more confidence than this; its own trials were not read. */
+export const SIBLING_CONFIDENCE_MAX = 75;
+
+/** Suffix on classification_model for rows classified through a same-drug representative. */
+export const SIBLING_MODEL_SUFFIX = ':sibling';
+
+/**
+ * Group the model queue by resolved drug: one representative per drug (most
+ * trials first) and the rest as its siblings. Unresolved assets stay single.
+ */
+export function groupByDrug(assets: QueuedAsset[], enabled = true): { representatives: QueuedAsset[]; siblingsByRep: Map<string, QueuedAsset[]> } {
+  const siblingsByRep = new Map<string, QueuedAsset[]>();
+  if (!enabled) return { representatives: assets, siblingsByRep };
+  const byDrug = new Map<string, QueuedAsset[]>();
+  const representatives: QueuedAsset[] = [];
+  for (const a of assets) {
+    if (a.drug_master_id && a.drug_resolution_status === 'resolved') {
+      const list = byDrug.get(a.drug_master_id) ?? [];
+      list.push(a);
+      byDrug.set(a.drug_master_id, list);
+    } else {
+      representatives.push(a);
+    }
+  }
+  for (const group of byDrug.values()) {
+    group.sort((x, y) => (y.nct_ids?.length ?? 0) - (x.nct_ids?.length ?? 0) || x.id.localeCompare(y.id));
+    representatives.push(group[0]);
+    if (group.length > 1) siblingsByRep.set(group[0].id, group.slice(1));
+  }
+  return { representatives, siblingsByRep };
+}
+
+/**
+ * Patch for an asset that shares its drug with a classified representative:
+ * drug-level fields (modality, target, class, mechanism) come from the
+ * representative's answer; the asset-level fields (area, indication) keep
+ * the sibling's own values when it has them; confidence is capped and the
+ * model tag carries the ':sibling' suffix so the QA harness can tell.
+ */
+export function planSiblingPatch(
+  sibling: QueuedAsset,
+  rep: QueuedAsset,
+  item: ClassificationItem,
+  model: string,
+  nowIso: string,
+  dm?: ClassificationDrugMasterInput | null,
+): AssetPatch {
+  const own: ClassificationItem = {
+    ...item,
+    asset_id: sibling.id,
+    therapeutic_area: (sibling.therapeutic_area as ClassificationItem['therapeutic_area']) ?? item.therapeutic_area,
+    indication_category: (sibling.indication_category as ClassificationItem['indication_category']) ?? item.indication_category,
+    indication_specific: sibling.indication_specific ?? item.indication_specific,
+    confidence: Math.min(item.confidence, SIBLING_CONFIDENCE_MAX),
+    rationale: `same drug as ${rep.asset_name} (${rep.company_name}); ${item.rationale}`.slice(0, 160),
+  };
+  const patch = planAssetPatch(sibling, own, `${model}${SIBLING_MODEL_SUFFIX}`, nowIso, dm);
+  patch.classification_evidence.sibling_of = rep.id;
+  return patch;
+}
+
 /** Patch for a name that is not a drug. */
 export function planSkipPatch(asset: QueuedAsset, reason: SkipReason, nowIso: string): AssetPatch {
   return {
@@ -938,7 +1041,7 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
   const budget = new RequestBudget(maxRequests);
 
   const result: ClassifyRunResult = {
-    model, fetched: 0, processed: 0, classified: 0, fromDrugMaster: 0, needsReview: 0, skipped: 0, failed: 0,
+    model, fetched: 0, processed: 0, classified: 0, fromDrugMaster: 0, fromSibling: 0, needsReview: 0, skipped: 0, failed: 0,
     requests: 0, retries: 0, tokens: usage, estimatedCostUsd: 0, cacheHitRate: 0, timedOut: false, requestCapHit: false,
     errors, logged: false, dryRun,
   };
@@ -974,6 +1077,7 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
         counts: {
           classified: result.classified,
           from_drug_master: result.fromDrugMaster,
+          from_sibling: result.fromSibling,
           needs_review: result.needsReview,
           skipped: result.skipped,
           failed: result.failed,
@@ -993,7 +1097,7 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
 
   let queue: QueuedAsset[];
   try {
-    queue = await fetchClassificationQueue(supabase, limit, opts.onlyStatuses, now);
+    queue = await fetchClassificationQueue(supabase, limit, opts.onlyStatuses, now, opts.scope ?? 'core');
   } catch (err) {
     errors.push(err instanceof Error ? err.message : String(err));
     return finish('failed', 'queue read failed');
@@ -1035,12 +1139,21 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
     modelQueue.push(asset);
   }
 
+  // ── Stage B2: one model call per drug ─────────────────────────────────
+  // Target, mechanism, class and modality are properties of the drug, not of
+  // the sponsor's row, so assets that resolved to the same drug_master node
+  // ride on one representative (the one with the most trials) and receive
+  // its drug-level answer. In Sep 2026 the 56,973 core assets mapped to
+  // 27,128 drugs, so this halves the model spend.
+  const { representatives, siblingsByRep } = groupByDrug(modelQueue, opts.dedupeByDrug !== false);
+
   const applyCounts = (patches: AssetPatch[]) => {
     for (const p of patches) {
       result.processed++;
       if (p.classification_status === 'skipped') result.skipped++;
       else if (p.classification_status === 'needs_review') result.needsReview++;
       else if (p.classification_model === 'drug_master') result.fromDrugMaster++;
+      else if (p.classification_model.endsWith(SIBLING_MODEL_SUFFIX)) result.fromSibling++;
       else result.classified++;
     }
   };
@@ -1062,7 +1175,7 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
   // ── Stage C: model batches with a worker pool ─────────────────────────
   const client = opts.client ?? makeClient();
   const sleep = opts.sleep;
-  const batches = chunk(modelQueue, batchSize);
+  const batches = chunk(representatives, batchSize);
   let cursor = 0;
 
   const worker = async () => {
@@ -1098,6 +1211,9 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
         const item = outcome.items.get(asset.id);
         if (item) {
           patches.push(planAssetPatch(asset, item, model, nowIso, inputs.get(asset.id)?.drug_master ?? null));
+          for (const sibling of siblingsByRep.get(asset.id) ?? []) {
+            patches.push(planSiblingPatch(sibling, asset, item, model, nowIso, inputs.get(sibling.id)?.drug_master ?? null));
+          }
           continue;
         }
         const bad = outcome.invalid.get(asset.id);

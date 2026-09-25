@@ -201,16 +201,26 @@ export function useMandates(enabled = true) {
 
 // ── Search ────────────────────────────────────────────────────────────────
 
+/** How long typeahead stays quiet after a 429 before it tries again. */
+const TYPEAHEAD_PAUSE_MS = 20_000;
+
 export function useTypeahead(q: string, debounceMs = 150) {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
+  /** Set while the server has rate-limited us; the search box says so instead of going silently empty. */
+  const [paused, setPaused] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
+  const pausedUntilRef = useRef(0);
 
   useEffect(() => {
     controllerRef.current?.abort();
     const term = q.trim();
     if (term.length < 2) {
       setSuggestions([]);
+      setLoading(false);
+      return;
+    }
+    if (Date.now() < pausedUntilRef.current) {
       setLoading(false);
       return;
     }
@@ -223,11 +233,17 @@ export function useTypeahead(q: string, debounceMs = 150) {
           if (controller.signal.aborted) return;
           setSuggestions(res.suggestions);
           setLoading(false);
+          setPaused(false);
         })
         .catch(err => {
           if (controller.signal.aborted || isAbortError(err)) return;
           setSuggestions([]);
           setLoading(false);
+          if (err instanceof RadarApiError && err.status === 429) {
+            pausedUntilRef.current = Date.now() + TYPEAHEAD_PAUSE_MS;
+            setPaused(true);
+            window.setTimeout(() => setPaused(false), TYPEAHEAD_PAUSE_MS);
+          }
         });
     }, debounceMs);
     return () => {
@@ -236,7 +252,7 @@ export function useTypeahead(q: string, debounceMs = 150) {
     };
   }, [q, debounceMs]);
 
-  return { suggestions, loading };
+  return { suggestions, loading, paused };
 }
 
 export function useNaturalSearch() {

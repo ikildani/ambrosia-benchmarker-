@@ -81,7 +81,7 @@ export function AssetBriefPage({ brief, viewer }: { brief: AssetBrief; viewer: B
       <main className="pt-16 sm:pt-20 lg:pt-24">
         <div className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-12">
           <nav aria-label="Breadcrumb" className="mb-4 text-xs text-neutral-500 dark:text-neutral-400">
-            <Link href="/radar" className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"><ChevronLeftIcon className="h-3.5 w-3.5" aria-hidden="true" /> Asset Radar</Link>
+            <Link href="/radar" className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"><ChevronLeftIcon className="h-3.5 w-3.5" aria-hidden="true" /> Search & Evaluation</Link>
             <span className="mx-1.5" aria-hidden="true">/</span>
             <span className="text-neutral-700 dark:text-neutral-300">{brief.asset.asset_name}</span>
           </nav>

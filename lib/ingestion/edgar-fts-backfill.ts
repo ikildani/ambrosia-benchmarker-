@@ -20,7 +20,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { readSyncCursor, writeSyncCursor } from '../radar/sync-cursor';
 import { FunnelCounter } from './funnel';
-import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
+import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, quartersBetween, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
 import Anthropic from '@anthropic-ai/sdk';
 import { processEftsDocument, loadEftsDocumentText } from './edgar-realtime';
 import { backfillExtractionMode, submitExtractionBatch, drainExtractionBatches, type BatchItem, type BackfillExtractionMode } from './edgar-fts-batch';
@@ -36,6 +36,9 @@ export const PROCESSED_TABLE = 'edgar_fts_processed';
 
 export const BACKFILL_CURSOR_SOURCE = 'edgar_fts_backfill';
 export const BACKFILL_FROM_YEAR = 2017;
+/** Second pass, walked after the 2017→present quarters are complete (Issa, Sep 25 2026). */
+export const BACKFILL_EARLY_FROM_YEAR = 2010;
+export const BACKFILL_EARLY_TO_YEAR = 2016;
 
 export interface BackfillCursorState extends Record<string, unknown> {
   quarterKey: string;
@@ -122,7 +125,9 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   const minConfidence = opts.minConfidence ?? 75;
   const reviewConfidence = opts.reviewConfidence ?? 60;
   const dryRun = !!opts.dryRun;
-  const quarters = quartersSince(BACKFILL_FROM_YEAR);
+  // Recent years first (2017→now), then the early pass (2010–2016) appended after them so the
+  // cursor walks 2026 before 2010 and `finished` means both passes are done.
+  const quarters = [...quartersSince(BACKFILL_FROM_YEAR), ...quartersBetween(BACKFILL_EARLY_FROM_YEAR, BACKFILL_EARLY_TO_YEAR)];
   const funnel = new FunnelCounter();
   const errors: string[] = [];
   let extractionMode: BackfillExtractionMode = opts.extractionMode ?? backfillExtractionMode();

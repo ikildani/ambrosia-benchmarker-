@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 4: Mandate Matching Engine
+ * Search & Evaluation — Layer 4: Mandate Matching Engine
  *
  * Matches clinical_assets against user search mandates (radar_user_mandates).
  * Creates radar_mandate_matches for new asset-mandate pairs.
@@ -9,6 +9,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { OWNERSHIP_EXCLUDED_IN, isOwnershipHiddenByDefault } from '@/lib/radar/ownership';
 import { modalitiesMatch, phaseKey } from '@/lib/comparables/match-normalize';
 import { phaseRank as sharedPhaseRank } from '@/lib/comparable-scoring';
 import { radarPhaseToDb } from './deal-thesis';
@@ -47,6 +48,22 @@ interface Asset {
   licensing_intent_score: number;
   deal_readiness_score: number;
   confidence_score: number;
+  /** Migration 125; undefined on older payloads. */
+  ownership_status?: string | null;
+}
+
+export type StaleReason = 'partnered' | 'score_below_min' | 'ownership_excluded' | 'filter_mismatch' | 'asset_removed';
+
+/**
+ * Why a standing match no longer qualifies, or null when it still does.
+ * Checked in order of how loudly a BD user would object to seeing the row.
+ */
+export function staleReason(asset: Asset | null | undefined, mandate: Mandate): StaleReason | null {
+  if (!asset) return 'asset_removed';
+  if (asset.ownership_status && isOwnershipHiddenByDefault(asset.ownership_status)) return 'ownership_excluded';
+  if (asset.partnership_status === 'partnered' && !mandate.partnership_statuses.includes('partnered')) return 'partnered';
+  if ((asset.licensing_intent_score ?? 0) < (mandate.min_licensing_intent ?? 0)) return 'score_below_min';
+  return matchAssetToMandate(asset, mandate).matches ? null : 'filter_mismatch';
 }
 
 export interface MatchResult {
@@ -167,7 +184,48 @@ function computeMatchScore(asset: Asset, reasons: string[]): number {
 // ═══════════════════════════════════════════════════════════════════════
 
 const MAX_RUNTIME_MS = 240_000;
-const ASSET_SELECT = 'id, therapeutic_area, modality, phase, originator_country, originator_region, partnership_status, licensing_intent_score, deal_readiness_score, confidence_score';
+const ASSET_SELECT = 'id, therapeutic_area, modality, phase, originator_country, originator_region, partnership_status, licensing_intent_score, deal_readiness_score, confidence_score, ownership_status';
+/** Standing matches per mandate that the re-evaluation will look at (paged; PostgREST caps unranged reads at 1,000). */
+const EXISTING_MATCH_CAP = 5000;
+const EXISTING_MATCH_PAGE = 1000;
+
+interface ExistingMatchRow {
+  asset_id: string;
+  is_stale: boolean | null;
+  clinical_assets: Asset | Asset[] | null;
+}
+
+/** Existing matches for a mandate with their current asset rows, paged. */
+async function loadExistingMatches(supabase: SupabaseClient, mandateId: string): Promise<{ rows: ExistingMatchRow[]; error: string | null }> {
+  const rows: ExistingMatchRow[] = [];
+  for (let from = 0; from < EXISTING_MATCH_CAP; from += EXISTING_MATCH_PAGE) {
+    const { data, error } = await supabase
+      .from('radar_mandate_matches')
+      .select(`asset_id, is_stale, clinical_assets (${ASSET_SELECT})`)
+      .eq('mandate_id', mandateId)
+      .order('matched_at', { ascending: false })
+      .range(from, from + EXISTING_MATCH_PAGE - 1);
+    if (error) {
+      // Pre-127 schema: fall back to the bare id list so matching still runs.
+      if (/is_stale/.test(error.message)) {
+        const { data: bare, error: bareErr } = await supabase.from('radar_mandate_matches').select('asset_id').eq('mandate_id', mandateId).range(from, from + EXISTING_MATCH_PAGE - 1);
+        if (bareErr) return { rows, error: bareErr.message };
+        for (const r of bare ?? []) rows.push({ asset_id: r.asset_id as string, is_stale: null, clinical_assets: null });
+        if ((bare ?? []).length < EXISTING_MATCH_PAGE) break;
+        continue;
+      }
+      return { rows, error: error.message };
+    }
+    rows.push(...((data ?? []) as unknown as ExistingMatchRow[]));
+    if ((data ?? []).length < EXISTING_MATCH_PAGE) break;
+  }
+  return { rows, error: null };
+}
+
+function embeddedAsset(r: ExistingMatchRow): Asset | null {
+  const a = Array.isArray(r.clinical_assets) ? r.clinical_assets[0] : r.clinical_assets;
+  return a ?? null;
+}
 const FULL_POOL_CAP = 5000;
 const NEW_MANDATE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -186,6 +244,8 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
   let matchesCreated = 0;
   let existingMatchesSeen = 0;
   let newMandates = 0;
+  let matchesMarkedStale = 0;
+  let matchesRestored = 0;
   let timedOut = false;
 
   const fail = async (message: string): Promise<MatchResult> => {
@@ -215,6 +275,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
     .from('clinical_assets')
     .select(ASSET_SELECT)
     .gte('confidence_score', 15)
+    .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
     .gte('updated_at', cutoff.toISOString())
     .limit(FULL_POOL_CAP);
 
@@ -230,6 +291,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
       .from('clinical_assets')
       .select(ASSET_SELECT)
       .in('partnership_status', ['unpartnered', 'partially_partnered'])
+      .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
       .gte('confidence_score', 15)
       .order('licensing_intent_score', { ascending: false, nullsFirst: false })
       .limit(FULL_POOL_CAP);
@@ -249,14 +311,31 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
     if (fresh) newMandates++;
     const candidates: Asset[] = fresh ? await loadFullPool() : (recentAssets as Asset[]);
 
-    // Get existing matches to avoid duplicates
-    const { data: existingMatches } = await supabase
-      .from('radar_mandate_matches')
-      .select('asset_id')
-      .eq('mandate_id', mandate.id);
-
-    const existingAssetIds = new Set((existingMatches || []).map(m => m.asset_id));
+    // Standing matches: skipped as new, and re-evaluated so an asset that got
+    // partnered, re-attributed or fell below the mandate's floor is marked
+    // stale (migration 127). Read / saved / dismissed state is never touched.
+    const existing = await loadExistingMatches(supabase, mandate.id);
+    if (existing.error) errors.push(`existing matches read error for mandate ${mandate.id}: ${existing.error}`);
+    const existingAssetIds = new Set(existing.rows.map(m => m.asset_id));
     existingMatchesSeen += existingAssetIds.size;
+
+    const nowIso = new Date().toISOString();
+    const staleUpdates: { mandate_id: string; asset_id: string; user_id: string; is_stale: boolean; stale_reason: StaleReason | null; last_evaluated_at: string }[] = [];
+    for (const row of existing.rows) {
+      if (row.is_stale === null) continue; // pre-127 rows carry no asset embed
+      const reason = staleReason(embeddedAsset(row), mandate);
+      const shouldBeStale = reason !== null;
+      if (shouldBeStale !== !!row.is_stale) {
+        staleUpdates.push({ mandate_id: mandate.id, asset_id: row.asset_id, user_id: mandate.user_id, is_stale: shouldBeStale, stale_reason: reason, last_evaluated_at: nowIso });
+        if (shouldBeStale) matchesMarkedStale++; else matchesRestored++;
+      }
+    }
+    if (staleUpdates.length > 0) {
+      const { error: staleErr } = await supabase
+        .from('radar_mandate_matches')
+        .upsert(staleUpdates, { onConflict: 'mandate_id,asset_id' });
+      if (staleErr) errors.push(`stale update error for mandate ${mandate.id}: ${staleErr.message}`);
+    }
 
     const newMatches: {
       mandate_id: string;
@@ -264,6 +343,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
       user_id: string;
       match_score: number;
       match_reasons: string[];
+      last_evaluated_at: string;
     }[] = [];
 
     for (const asset of candidates) {
@@ -272,6 +352,9 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
       const { matches, reasons } = matchAssetToMandate(asset, mandate);
       if (!matches) continue;
 
+      // Programs the company does not own never match (same rule as the feed).
+      if (asset.ownership_status && isOwnershipHiddenByDefault(asset.ownership_status)) continue;
+
       const score = computeMatchScore(asset, reasons);
       newMatches.push({
         mandate_id: mandate.id,
@@ -279,6 +362,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
         user_id: mandate.user_id,
         match_score: score,
         match_reasons: reasons,
+        last_evaluated_at: nowIso,
       });
     }
 
@@ -338,6 +422,8 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
       // fullPool is assigned inside a closure, so TS narrows it to null here.
       full_pool_assets: (fullPool as Asset[] | null)?.length ?? null,
       existing_matches_seen: existingMatchesSeen,
+      matches_marked_stale: matchesMarkedStale,
+      matches_restored: matchesRestored,
       timed_out: timedOut,
     },
   });

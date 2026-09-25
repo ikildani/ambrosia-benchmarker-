@@ -1,5 +1,5 @@
 /**
- * Cron: Competitive Intelligence (Asset Radar Layer 5)
+ * Cron: Competitive Intelligence (Search & Evaluation Layer 5)
  *
  * Analyzes competitive landscape for each clinical asset:
  * user interest, competitor deals, patent overlap, conference overlap,

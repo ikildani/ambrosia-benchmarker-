@@ -4,7 +4,8 @@
  * client islands. Everything the one-page deal brief renders is here.
  */
 
-import type { ClinicalAssetRow, ScoreFactorContribution, PartnershipEvidence } from '@/lib/radar/types';
+import type { ClinicalAssetRow, ScoreFactorContribution, PartnershipEvidence, PartnershipBasis, PartnershipSourcesChecked, ScoreInterval } from '@/lib/radar/types';
+import type { ScorePresentation } from '@/lib/radar/client/score-copy';
 
 export interface AssetOwner {
   company_id: string | null;
@@ -51,6 +52,8 @@ export interface ScoreBreakdown {
   /** True when the contributions were reconstructed from the legacy factor_scores map. */
   legacy_shape: boolean;
   snapshot_date: string | null;
+  /** Percentile, probability, base rate, interval and low-power flag (migration 126). */
+  presentation?: ScorePresentation & { interval?: ScoreInterval | null };
 }
 
 export interface TrendPoint {
@@ -218,6 +221,9 @@ export interface AssetBrief {
     confidence: number;
     evidence: PartnershipEvidence[];
     rights_available: string[];
+    /** Evidence class behind the status (migration 125). */
+    basis: PartnershipBasis | null;
+    sources_checked: PartnershipSourcesChecked | null;
   };
   score: ScoreBreakdown;
   trend: ScoreTrend;

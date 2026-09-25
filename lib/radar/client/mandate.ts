@@ -83,6 +83,7 @@ export function unsavedFilterKeys(f: RadarFilterState): (keyof RadarFilterState)
   const out: (keyof RadarFilterState)[] = [];
   if (f.q) out.push('q');
   if (f.owner_type.length) out.push('owner_type');
+  if (f.ownership.length) out.push('ownership');
   if (f.trial_status.length) out.push('trial_status');
   if (f.indication.length) out.push('indication');
   if (f.target.length) out.push('target');

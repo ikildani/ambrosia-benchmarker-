@@ -1,5 +1,5 @@
 /**
- * Asset Radar Layer 3 — deal thesis cron.
+ * Search & Evaluation Layer 3 — deal thesis cron.
  *
  * Works through the `radar_thesis_queue` backlog (migration 116): every
  * industry-owned, unpartnered / partially-partnered clinical asset gets a

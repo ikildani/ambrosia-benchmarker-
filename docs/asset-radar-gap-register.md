@@ -120,3 +120,20 @@ No incumbent (Cortellis, GlobalData, Citeline, Evaluate, DealForma, Biotechgate,
 - Predicted terms only ever come from the calculator's comps engine.
 - No intelligence table is readable by the anon key.
 - Migrations are applied to production the day they merge; the migration list in this document is the checklist.
+
+## Sep 25 2026 audit: credibility fixes (branch feat/radar-credibility)
+
+Production on Sep 25: 150,113 assets, 0 classified (the classifier 400'd on every batch since Sep 18: `For 'integer' type, properties maximum, minimum are not supported`), 163 partnered, 79,027 assets whose drug_master originator was another company, feed top rows Pembrolizumab@Merck KGaA / Nusinersen@Scholar Rock, 90% of the core universe scoring under 15 on a calibrated-probability scale, model importance owner_industry .34 + asset_age .24 with every financial/intent feature at zero.
+
+Shipped on this branch (migrations 124 = renamed QA harness, 125 = ownership + partnership basis):
+
+- Classifier schema fix; core universe (industry, unpartnered/partial, pre-approval) classified first.
+- `clinical_assets.ownership_status` from drug_master originator, drug_owners roles and trial arm roles (`radar_apply_ownership`, mirrored in `lib/radar/ownership.ts`); the feed, facets, scoring queue, thesis view, mandate matcher and deal creator hide `comparator_or_background` and `marketed_other` by default; `phase_4` hidden unless a phase is picked; both stay in the rail with counts.
+- `partnership_basis` + `partnership_sources_checked`: "unpartnered" is shown as "no deal, collaborator or press evidence · checked N deals, M press items".
+- `clinical_assets.owner_type` mirror (trigger), no companies join on the feed/facets path; pg_trgm indexes for the ILIKE search.
+- Per-user rate-limit identity from the chunked `@supabase/ssr` cookie; typeahead on its own 120/min bucket; the search box says when suggestions are paused.
+- Hygiene: conference keywords whole-word, single `competitive_heat` writer, one `deriveTA`, registry first-post date, `.env.example`, `/radar` out of the sitemap, `radar-qa` scheduled weekly (took the press backfill slot; the 2-hourly persist run covers new items).
+
+Also shipped the same day (migrations 126, 127): the score presentation contract (probability, peer percentile within phase × TA, base rate, 80% interval from the calibration bin, top drivers with evidence; `radar_refresh_score_percentiles()` after every scoring run; feed, cards, asset header, waterfall, compare and XLSX use `lib/radar/client/score-copy.ts`); the phase_history trigger; stale mandate matches re-evaluated each run; the gate only claims a backtest when one is active; one `RadarPageFrame` for header + auth modal; CIK resolution fixed (`stripSecTitleNoise`, no candidate cap: 29 of 3,464 US industry companies had a CIK) with 120 filers / 30 filings per run; the backtest rebuilds itself when sources grow 25% or the model is 30 days old, and a low-power candidate never displaces a validated incumbent.
+
+Still to do from the plan: cron consolidation into lanes; watchlist / alerts / mandate-matches pages; acquirer view page; team plan mechanics; designations + press-derived labels; QA invariants for ownership / basis / percentile; perf caches and the load run; packaging surfaces and the landing page.

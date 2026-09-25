@@ -1,5 +1,5 @@
 /**
- * Sponsor-agnostic ClinicalTrials.gov sweep (Asset Radar Phase 2, item 1).
+ * Sponsor-agnostic ClinicalTrials.gov sweep (Search & Evaluation Phase 2, item 1).
  *
  * The per-company ingester (lib/ingestion/clinical-trials.ts) only crawls
  * companies flagged actively_acquiring — a buyer list — so the asset universe

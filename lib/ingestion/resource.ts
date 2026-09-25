@@ -65,13 +65,26 @@ async function findIssuerRelease(supabase: SupabaseClient, row: UncitedRow): Pro
   return null;
 }
 
+/**
+ * The filer must be one of the parties. Sep 25 2026: without this, CSPC → AstraZeneca was pinned to a
+ * Corbus exhibit and Daiichi → Merck to an AstraZeneca 6-K, because both names merely appeared in the text.
+ */
+export function filerIsParty(filerName: string, licensor: string, licensee: string): boolean {
+  const f = partyKey(filerName);
+  const a = partyKey(licensor), b = partyKey(licensee);
+  if (f.length < 4) return false;
+  const near = (x: string, y: string) => x.length >= 4 && y.length >= 4 && (x.includes(y.slice(0, Math.min(6, y.length))) || y.includes(x.slice(0, Math.min(6, x.length))));
+  return near(f, a) || near(f, b);
+}
+
 async function findFiling(row: UncitedRow): Promise<{ accession: string; url: string; form: string } | null> {
   const q = `"${row.licensor_name.replace(/"/g, '')}" "${row.licensee_name.replace(/"/g, '')}"`;
   const page = await eftsSearch({ q, startdt: addDays(row.announced_date, -45), enddt: addDays(row.announced_date, 45), from: 0, size: 20 });
   if (page.status !== 200) return null;
-  for (const hit of page.hits.slice(0, 5)) {
+  for (const hit of page.hits.slice(0, 8)) {
     const doc = hitToDocument(hit);
     if (!doc) continue;
+    if (!filerIsParty(doc.companyName, row.licensor_name, row.licensee_name)) continue;
     const text = await fetchSecDocumentText(doc.url);
     if (text.ok && mentionsBoth(text.text.slice(0, 40_000), row.licensor_name, row.licensee_name)) return { accession: doc.accession, url: doc.url, form: doc.form };
   }

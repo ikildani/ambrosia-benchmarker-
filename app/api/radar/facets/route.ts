@@ -1,5 +1,5 @@
 /**
- * Asset Radar — facet counts for the filter rail.
+ * Search & Evaluation — facet counts for the filter rail.
  *
  * GET /api/radar/facets?<same filter params as /api/radar/feed>
  *   → { facets: { region: [{value,count}], country: [...], ... }, total, cached }

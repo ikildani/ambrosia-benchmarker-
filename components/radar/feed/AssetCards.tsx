@@ -48,7 +48,14 @@ export function AssetCards({ rows, compareIds, compareFull, onToggleCompare, loa
                   <OwnerTypeChip type={row.owner_type} />
                 </div>
               </div>
-              <ScoreCell size="card" score={row.licensing_intent_score} confidence={row.score_confidence} delta30d={row.score_delta_30d} spark={row.score_spark} />
+              <ScoreCell
+                size="card"
+                score={row.licensing_intent_score}
+                confidence={row.score_confidence}
+                delta30d={row.score_delta_30d}
+                spark={row.score_spark}
+                presentation={{ probability: row.score_probability, pct_peer: row.score_pct_peer, peer_n: row.score_peer_n, peer_key: row.score_peer_key, base_rate: row.score_base_rate }}
+              />
             </div>
 
             <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">

@@ -12,3 +12,16 @@ describe('re-sourcing party match', () => {
     expect(mentionsBoth('the ono deal', 'Ono', 'BMS')).toBe(false);
   });
 });
+
+import { filerIsParty } from '@/lib/ingestion/resource';
+
+describe('re-sourcing filer check', () => {
+  it('accepts a filing by either party', () => {
+    expect(filerIsParty('ALEXION PHARMACEUTICALS, INC.', 'Alexion', 'AstraZeneca')).toBe(true);
+    expect(filerIsParty('ASTRAZENECA PLC', 'CSPC Pharmaceutical Group', 'AstraZeneca')).toBe(true);
+  });
+  it('rejects a third-party filer that merely mentions both', () => {
+    expect(filerIsParty('Corbus Pharmaceuticals Holdings, Inc.', 'CSPC', 'AstraZeneca')).toBe(false);
+    expect(filerIsParty('ASTRAZENECA PLC', 'Daiichi Sankyo', 'Merck')).toBe(false);
+  });
+});
