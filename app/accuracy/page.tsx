@@ -16,8 +16,8 @@ export function generateMetadata(): Metadata {
   const data = loadAccuracyData();
   const n = data ? data.fullScope.n.toLocaleString() : 'real';
   const description =
-    `Honest accuracy disclosure for the Solidus directional BD tool. Live backtest against ${n} real disclosed deals from 2017-2026. Model view, hit rates, calibration journey — fully transparent.`;
-  const short = `Directional benchmark accuracy vs. ${n} verified real disclosed deals. No inflated metrics.`;
+    `Published validation of the Solidus benchmark engine: live backtest against ${n} disclosed deals from 2017-2026, hit rates by scope, held-out split, and the full calibration log.`;
+  const short = `Benchmark validation against ${n} disclosed deals, published in full.`;
   return {
     title: 'Benchmark Accuracy | Solidus',
     description,
@@ -36,7 +36,7 @@ export function generateMetadata(): Metadata {
       siteName: 'Solidus',
       images: [
         {
-          url: `/api/og?title=Benchmark%20Accuracy&subtitle=${encodeURIComponent(`Honest directional context vs ${n} real deals`)}`,
+          url: `/api/og?title=Benchmark%20Accuracy&subtitle=${encodeURIComponent(`Published validation vs ${n} disclosed deals`)}`,
           width: 1200,
           height: 630,
           alt: 'Solidus accuracy dashboard',
@@ -129,14 +129,14 @@ export default function AccuracyDashboard() {
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
-            Benchmark Accuracy — Fully Public
+            Benchmark Accuracy, Published in Full
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
             Solidus is a directional tool for BD professionals: it shows where your
             deal sits in the distribution of real comparable transactions, not a prediction
-            of a specific dollar amount. Below is the honest track record against{' '}
+            of a specific dollar amount. Below is the validation record against{' '}
             <span className="text-slate-200">{data.fullScope.n} real disclosed licensing, co-development, and acquisition deals</span>{' '}
-            from 2017&ndash;2026. Every hit, every miss, every calibration round — in the open.
+            from 2017&ndash;2026: every scope, every calibration round, the held-out split and the largest errors. Publishing it is the standard the engine is held to.
           </p>
           <p className="mt-4 max-w-3xl text-sm text-slate-500">
             <span className="text-teal-400 font-semibold">How to read this page:</span>{' '}
@@ -422,22 +422,20 @@ export default function AccuracyDashboard() {
       <section className="border-b border-slate-800/60 bg-amber-500/5">
         <div className="mx-auto max-w-6xl px-6 py-12">
           <div className="mb-6 flex items-start gap-3">
-            <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold">!</div>
+            <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold">i</div>
             <div>
-              <h2 className="text-xl font-semibold text-slate-100">Honest transparency — why the numbers are lower than last month</h2>
+              <h2 className="text-xl font-semibold text-slate-100">The validation baseline</h2>
               <p className="mt-2 max-w-3xl text-sm text-slate-400">
-                In April 2026 we expanded the backtest corpus from 251 hand-curated deals
-                to {data.fullScope.n.toLocaleString()} deals pulled from production Supabase. Core-scope
-                hit rates dropped — not because the engine got worse, but because the
-                previous numbers were overfit to a narrow hand-picked sample. The larger
-                corpus exposed calibration gaps the original corpus couldn&rsquo;t see
-                (oncology especially: 21 deals → 188 deals). We also de-duped 500+ duplicate
-                database entries that had been artificially inflating hit counts.
+                In April 2026 the backtest corpus was widened from 251 hand-curated deals to{' '}
+                {data.fullScope.n.toLocaleString()} deals drawn from the production table, with 500+
+                duplicate entries removed, and oncology coverage grew from 21 deals to 188. Hit rates on
+                the wider corpus are lower than on the curated sample, as expected when a sample is
+                broadened, and they are the numbers every calibration round is measured against.
               </p>
               <p className="mt-3 max-w-3xl text-sm text-slate-400">
-                <span className="text-slate-200 font-medium">This is the real baseline.</span>{' '}
-                Every calibration round going forward is measured against these numbers on
-                the de-duped corpus — not the smaller, noisier one.
+                <span className="text-slate-200 font-medium">The standard:</span>{' '}
+                a change ships only if it holds or improves accuracy on this corpus and cites a source.
+                Rounds that do not clear that bar are reverted and recorded below.
               </p>
             </div>
           </div>
@@ -462,9 +460,9 @@ export default function AccuracyDashboard() {
                 By Therapeutic Area
               </h3>
               <p className="mb-3 text-xs text-slate-500 leading-relaxed">
-                TA-level accuracy exposes where our modality + indication profile coverage
-                is deepest (oncology, immunology) vs. where thin corpus coverage still
-                drives misses (rare disease, neurology).
+                TA-level accuracy shows where modality and indication coverage is deepest
+                (oncology, immunology) and where corpus depth is still building (rare
+                disease, neurology).
               </p>
               <SliceTable rows={data.slicesByTA} dimension="TA" />
             </div>
@@ -500,9 +498,9 @@ export default function AccuracyDashboard() {
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-slate-100">Calibration journey</h2>
             <p className="mt-2 max-w-3xl text-sm text-slate-400">
-              Every round of empirical tuning, including the failed hypotheses. We publish
-              the regressions alongside the wins&mdash;the only platform in this space that does.
-              If a round didn&rsquo;t move hit rates, we say so and move on.
+              Every round of empirical tuning, including the rounds that did not move hit
+              rates and were reverted. Regressions are recorded alongside the wins, with the
+              source each change cites.
             </p>
           </div>
           <CalibrationTimeline rounds={data.calibrationRounds} />
@@ -512,10 +510,12 @@ export default function AccuracyDashboard() {
       {/* Worst misses */}
       <section className="border-b border-slate-800/60">
         <div className="mx-auto max-w-6xl px-6 py-12">
-          <h2 className="mb-6 text-2xl font-semibold text-slate-100">Honest misses</h2>
+          <h2 className="mb-6 text-2xl font-semibold text-slate-100">Largest errors</h2>
           <p className="mb-6 max-w-3xl text-sm text-slate-400">
-            The 10 worst-predicted deals in core scope. Publishing these keeps us honest&mdash;
-            and tells users exactly which deal archetypes the model isn&rsquo;t ready to price.
+            The 10 largest signed errors in core scope. They map the deal archetypes that price
+            on factors outside an intrinsic-value frame (strategic premiums, option structures,
+            small ex-US deals), which is where the comparable list, not the engine&rsquo;s point,
+            is the reference.
           </p>
           <div className="overflow-x-auto rounded-lg border border-slate-800">
             <table className="w-full text-sm">
@@ -589,17 +589,16 @@ export default function AccuracyDashboard() {
               actually maps onto market clearing price. Early-stage deals price on strategic
               option value; acquisitions price on bidding-war premium; approved deals are
               commercialization handoffs where the bulk of value flows through royalties.
-              These segments need distinct pricing paths &mdash; we&rsquo;re building them in
-              parallel, but don&rsquo;t count them against core-scope accuracy until they
-              ship.
+              Those segments are anchored on the comparable set and reported under full
+              scope; they are not part of core-scope accuracy.
             </p>
             <p>
               Calibration follows an <span className="text-slate-200">Option B rigor</span>{' '}
               standard: every change must improve or maintain backtest accuracy against the
               held-out corpus and cite a specific source (FDA CDER, Wong/Siah/Lo 2019, Nature
               Reviews Drug Discovery, company 10-K, or the backtest itself as empirical
-              source). Failed rounds are reverted and documented publicly&mdash;visible in
-              the Calibration Journey above.
+              source). Rounds that do not clear that bar are reverted and recorded in the
+              calibration journey above.
             </p>
           </div>
         </div>
