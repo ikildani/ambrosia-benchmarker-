@@ -5,7 +5,8 @@
  *   POST { outcome_id, action: 'accept' | 'reject', notes? }
  *
  * Auth: ADMIN_API_KEY bearer or admin email (lib/admin-auth verifyAdminAuth).
- * A UI page (/admin/outcomes) is a follow-up; this route is what it will call.
+ * The UI at /admin/outcomes reads the queue through the service client and
+ * posts decisions here; QUEUE_SELECT is shared from lib/outcomes/admin-view.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,15 +16,9 @@ import { verifyAdminAuth } from '@/lib/admin-auth';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { captureApiError } from '@/lib/sentry-api';
 import { acceptOutcome, rejectOutcome } from '@/lib/outcomes/resolver';
+import { QUEUE_SELECT } from '@/lib/outcomes/admin-view';
 
 export const dynamic = 'force-dynamic';
-
-const QUEUE_SELECT = [
-  'id', 'prediction_id', 'deal_id', 'match_confidence', 'match_evidence', 'upfront_m', 'total_m', 'licensee_name', 'signed_date', 'deal_type',
-  'abs_pct_error_upfront', 'abs_pct_error_total', 'within_band_upfront', 'within_band_total', 'buyer_hit', 'window_hit', 'created_at',
-  'predictions(id,source,source_id,user_id,licensor_name,asset_name,indication,therapeutic_area,phase,upfront_low,upfront_mid,upfront_high,total_low,total_mid,total_high,predicted_buyers,predicted_window_start,predicted_window_end,created_at)',
-  'deals(id,licensor_name,licensee_name,asset_name,announced_date,phase_at_signing,indication_specific,indication_category,therapeutic_area,upfront_usd,total_deal_value_usd,source_url)',
-].join(',');
 
 export async function GET(request: NextRequest) {
   const denied = await verifyAdminAuth(request);

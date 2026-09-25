@@ -6,7 +6,13 @@
  * Marks deals as verified, flagged, or rejected with confidence scores.
  *
  * Cost: ~$0.006 per Perplexity query + ~$0.01 per Claude verification
- * Expected throughput: ~20 deals per cron run
+ * Expected throughput: ~50 deals per cron run
+ *
+ * Sep 25 2026: a date gap, a per-program total, a vague asset name or a wrong
+ * stage are corrections, not grounds to flag. Under the old rule 231 of 280
+ * flagged discovery/preclinical rows were deals the verifier itself confirmed.
+ * Flagged rows are re-adjudicated after a day, early-stage first, and the
+ * verifier's confidence is persisted so verified rows reach calibration.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -172,10 +178,51 @@ interface VerificationResult {
   status: 'verified' | 'flagged' | 'rejected';
   confidence: number;
   reason: string;
-  corrected_value?: number;
-  corrected_date?: string;
+  /** Corrected total headline value (upfront + all milestones for the whole deal). */
+  corrected_value?: number | null;
+  corrected_date?: string | null;
+  corrected_upfront?: number | null;
+  corrected_milestones?: number | null;
+  corrected_phase?: string | null;
+  corrected_asset_name?: string | null;
   /** True when the web evidence shows the database has licensor and licensee swapped. */
   roles_reversed?: boolean;
+}
+
+const PHASE_VALUES = new Set(['discovery', 'preclinical', 'phase_1', 'phase_2', 'phase_3', 'approved']);
+
+/** Share of the flagged re-adjudication slots reserved for discovery/preclinical rows. */
+const EARLY_STAGE_REVERIFY_SHARE = 0.5;
+
+/**
+ * Notes written by other jobs. Those rows are not re-adjudicated by the web
+ * check: duplicates and outliers need their own remediation, and a backtest
+ * downgrade is a signal we want to keep visible.
+ */
+export function isReverifiable(notes: string | null | undefined): boolean {
+  const n = (notes || '').trim();
+  if (!n) return true;
+  if (/^Potential duplicate of deal/i.test(n)) return false;
+  if (/^Auto-flagged: outlier/i.test(n)) return false;
+  if (/\bBACKTEST \d{4}-\d{2}-\d{2}/.test(n)) return false;
+  return true;
+}
+
+/** Positive finite USD figure, or null. */
+function usd(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.round(v) : null;
+}
+
+/**
+ * Asset names worth adding to the web search. Bare indications
+ * ("psoriasis", "atopic_dermatitis") narrow the search to the wrong thing;
+ * codes and brand names ("NM26", "GLPG3067") sharpen it.
+ */
+export function searchableAssetName(name: string | null | undefined): string | null {
+  if (!name) return null;
+  const n = name.trim();
+  if (n.length < 3 || n.length > 40 || n.includes('_')) return null;
+  return /[A-Z0-9]/.test(n) ? n : null;
 }
 
 const BACKTEST_SAMPLE = 3;
@@ -195,6 +242,12 @@ export async function verifyPendingDeals(
      * is filled in. Default 0 (off).
      */
     sourceBackfillSlots?: number;
+    /**
+     * Flagged rows untouched for this many days are re-adjudicated with the
+     * leftover slots. Default 1: every flagged row gets a fresh look under the
+     * current rules, then waits a day before being picked again.
+     */
+    flaggedRetryAfterDays?: number;
   }
 ): Promise<{
   verified: number;
@@ -213,6 +266,7 @@ export async function verifyPendingDeals(
   const startTime = Date.now();
   const priorityTAs = options?.priorityTAs || [];
   const sourceBackfillSlots = options?.sourceBackfillSlots ?? 0;
+  const flaggedRetryAfterDays = options?.flaggedRetryAfterDays ?? 1;
 
   const result = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, reverified: 0, regressions: 0, rolesSwapped: 0, errors: [] as string[] };
   const DEAL_COLUMNS = 'id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, press_release_url, raw_text_excerpt, verification_notes, confidence_score, verification_status';
@@ -249,19 +303,47 @@ export async function verifyPendingDeals(
   //  (b) backtest: a few 'verified' rows older than 30 days are re-checked every run. A verdict
   //      that no longer holds is downgraded to 'flagged' with a BACKTEST note and counted as a
   //      regression, so verifier drift shows up in the log instead of in the product.
+  //  Discovery/preclinical flagged rows get half the re-adjudication slots: they are the
+  //  thinnest slice in comps and calibration (Sep 25: 231 of 280 early-stage flagged rows
+  //  were confirmed real by the verifier's own note and flagged over a date or a total).
   const reverifySlots = Math.max(0, maxDeals - deals.length);
   const backtestIds = new Set<string>();
   if (reverifySlots > 0) {
-    const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
-    const { data: flaggedDeals } = await supabase
+    const retryCutoff = new Date(Date.now() - flaggedRetryAfterDays * 86_400_000).toISOString();
+    const pushReverifiable = (rows: Array<Record<string, unknown>> | null, cap: number) => {
+      let added = 0;
+      for (const d of rows || []) {
+        if (added >= cap) break;
+        if (deals.some(x => x.id === d.id)) continue;
+        if (!isReverifiable(d.verification_notes as string | null)) continue;
+        deals.push(d as (typeof deals)[number]);
+        added++;
+      }
+    };
+    const earlySlots = Math.ceil(reverifySlots * EARLY_STAGE_REVERIFY_SHARE);
+    const { data: earlyFlagged } = await supabase
       .from('deals')
       .select(DEAL_COLUMNS)
       .eq('verification_status', 'flagged')
       .or('is_synthetic.is.null,is_synthetic.eq.false')
-      .lt('updated_at', weekAgo)
+      .in('phase_at_signing', ['discovery', 'preclinical'])
+      .lt('updated_at', retryCutoff)
       .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
-      .limit(reverifySlots);
-    for (const d of flaggedDeals || []) if (!deals.some(x => x.id === d.id)) deals.push(d);
+      .limit(earlySlots * 2);
+    pushReverifiable(earlyFlagged, earlySlots);
+
+    const remainingSlots = Math.max(0, maxDeals - deals.length);
+    if (remainingSlots > 0) {
+      const { data: flaggedDeals } = await supabase
+        .from('deals')
+        .select(DEAL_COLUMNS)
+        .eq('verification_status', 'flagged')
+        .or('is_synthetic.is.null,is_synthetic.eq.false')
+        .lt('updated_at', retryCutoff)
+        .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
+        .limit(remainingSlots * 2 + earlySlots);
+      pushReverifiable(flaggedDeals, remainingSlots);
+    }
   }
   {
     const monthAgo = new Date(Date.now() - 30 * 86_400_000).toISOString();
@@ -329,7 +411,8 @@ export async function verifyPendingDeals(
       const year = deal.announced_date
         ? new Date(deal.announced_date).getFullYear()
         : '';
-      const searchQuery = `"${deal.licensor_name}" "${deal.licensee_name}" deal ${year} terms`;
+      const assetTerm = searchableAssetName(deal.asset_name);
+      const searchQuery = `"${deal.licensor_name}" "${deal.licensee_name}" ${assetTerm ? `"${assetTerm}" ` : ''}deal ${year} terms upfront`;
 
       // 2b. Call Perplexity API
       const response = await fetchWithTimeout(PERPLEXITY_API, {
@@ -366,7 +449,11 @@ export async function verifyPendingDeals(
       }
 
       if (perplexityText.length < 50) {
-        // Not enough data to verify — leave as pending
+        // Not enough data to verify — leave the verdict alone. A flagged row is
+        // re-stamped so the retry queue rotates instead of re-picking it every run.
+        if (deal.verification_status === 'flagged') {
+          await supabase.from('deals').update({ updated_at: new Date().toISOString() }).eq('id', deal.id);
+        }
         result.unchanged++;
         continue;
       }
@@ -400,17 +487,20 @@ Database record: ${JSON.stringify(dealRecord)}
 
 Web search results: ${perplexityText.substring(0, 4000)}
 
-Respond with JSON: { "status": "verified" | "flagged" | "rejected", "confidence": number (0-100), "reason": string, "corrected_value": number | null, "corrected_date": string | null, "roles_reversed": boolean }
+Respond with JSON: { "status": "verified" | "flagged" | "rejected", "confidence": number (0-100), "reason": string, "corrected_upfront": number | null, "corrected_milestones": number | null, "corrected_value": number | null, "corrected_date": string | null, "corrected_phase": string | null, "corrected_asset_name": string | null, "roles_reversed": boolean }
 
 Rules:
-- "verified": The deal exists and key facts (companies, approximate value, date) match.
-- "flagged": The deal likely exists but has significant discrepancies (value off by >30%, date off by more than 7 days, wrong companies).
-- "rejected": No evidence this deal exists or it appears fabricated.
-- A date difference of 7 days or less is NOT a discrepancy: SEC and exchange filings post a day or more after the press announcement. Return "verified" and put the announcement date in corrected_date.
-- Missing or differently-worded indication text is NOT a discrepancy when companies, asset and value match.
-- roles_reversed: true ONLY if the web evidence clearly shows the database has the parties backwards (the DB licensor is actually the buyer/licensee). The licensor is the party granting rights or being acquired; the licensee is the party paying. In that case the deal still exists: return "verified" (or "flagged" if other facts are off) with roles_reversed true.
-- corrected_value: If the total deal value in the DB is wrong, provide the correct value in USD. Otherwise null.
-- corrected_date: If the announced date is wrong (including a small filing-lag difference), provide the correct date as YYYY-MM-DD. Otherwise null.`,
+- "verified": the deal exists between these two companies (in either role order) and the money is settled: the DB upfront is within 15% of the web figure, or the web gives an upfront you can put in corrected_upfront. Everything else is a correction, not a discrepancy: a wrong announced date (any gap), a total that counts per-program instead of aggregate milestones (or the reverse), a missing, vague or wrong asset name, imprecise indication wording, a wrong development stage, or a minor territory nuance. Return "verified" and fill the corrected_* fields.
+- "flagged": the deal probably exists but the money cannot be settled (sources disagree on the upfront by more than 30% and none is a press release or filing), or the web evidence names different companies.
+- "rejected": no evidence this deal exists, or it looks fabricated (real companies paired with an asset, target or partner they never dealt on).
+- corrected_upfront: the upfront payment in USD when the DB figure is wrong. Otherwise null.
+- corrected_milestones: total milestone payments in USD for the whole deal (all programs) when the DB figure is wrong or missing. Otherwise null.
+- corrected_value: the total headline value in USD (upfront + all milestones, whole deal, not per program) when the DB figure is wrong. Otherwise null.
+- corrected_date: the public announcement date as YYYY-MM-DD when the DB date is wrong for any reason (filing lag, wrong month, wrong year). Otherwise null.
+- corrected_phase: one of discovery | preclinical | phase_1 | phase_2 | phase_3 | approved when the DB stage at signing is wrong. discovery = no development candidate selected yet (target validation, hit-to-lead, platform research); preclinical = candidate selected, IND-enabling work, pre-IND. For a multi-asset deal use the most advanced asset. Otherwise null.
+- corrected_asset_name: the program, compound code, target or platform name when the DB asset is missing, a bare indication ("psoriasis"), or wrong. Otherwise null.
+- roles_reversed: true ONLY if the web evidence clearly shows the database has the parties backwards (the DB licensor is actually the buyer/licensee). The licensor is the party granting rights or being acquired; the licensee is the party paying. In that case the deal still exists: return "verified" (or "flagged" if the money is unresolved) with roles_reversed true.
+- confidence: how sure you are of the verdict, 0-100. Primary sources (press release, 8-K, exchange filing) in the results justify 85+.`,
         }],
       });
 
@@ -521,15 +611,43 @@ Rules:
         updates.verified = true;
         if (wasFlagged) result.reverified++;
 
-        // 2h. Apply corrections if verified with corrected values
-        if (verification.corrected_value && verification.corrected_value > 0) {
-          updates.total_deal_value_usd = verification.corrected_value;
+        // 2h. Apply corrections if verified with corrected values. Money fields are
+        // kept mutually consistent: upfront never exceeds the total.
+        const correctedUpfront = usd(verification.corrected_upfront);
+        const correctedMilestones = usd(verification.corrected_milestones);
+        const correctedTotal = usd(verification.corrected_value);
+        if (correctedUpfront) updates.upfront_usd = correctedUpfront;
+        if (correctedMilestones) updates.milestones_total_usd = correctedMilestones;
+        if (correctedTotal) updates.total_deal_value_usd = correctedTotal;
+        {
+          const upfront = (updates.upfront_usd as number | undefined) ?? Number(deal.upfront_usd ?? 0);
+          const milestones = (updates.milestones_total_usd as number | undefined) ?? Number(deal.milestones_total_usd ?? 0);
+          const total = (updates.total_deal_value_usd as number | undefined) ?? Number(deal.total_deal_value_usd ?? 0);
+          if (upfront > 0 && total > 0 && upfront > total * 1.05) {
+            updates.total_deal_value_usd = upfront + (milestones > 0 ? milestones : 0);
+          }
         }
+        if (correctedUpfront || correctedMilestones || correctedTotal) updates.terms_disclosed = true;
         if (verification.corrected_date && /^\d{4}-\d{2}-\d{2}$/.test(verification.corrected_date)) {
           const today = new Date().toISOString().split('T')[0];
           if (verification.corrected_date <= today && verification.corrected_date >= '2017-01-01') {
             updates.announced_date = verification.corrected_date;
           }
+        }
+        if (typeof verification.corrected_phase === 'string' && PHASE_VALUES.has(verification.corrected_phase)
+            && verification.corrected_phase !== deal.phase_at_signing) {
+          updates.phase_at_signing = verification.corrected_phase;
+        }
+        if (typeof verification.corrected_asset_name === 'string') {
+          const name = verification.corrected_asset_name.trim();
+          if (name.length >= 2 && name.length <= 120 && name !== deal.asset_name) updates.asset_name = name;
+        }
+        // Persist the verifier's confidence: calibration only admits rows at 75+, and rows
+        // ingested in the 60-74 review band otherwise never reach it even once verified.
+        if (Number.isFinite(verification.confidence)) {
+          const existing = Number(deal.confidence_score ?? 0);
+          const c = Math.max(0, Math.min(100, Math.round(verification.confidence)));
+          if (c > existing) updates.confidence_score = c;
         }
 
         result.verified++;

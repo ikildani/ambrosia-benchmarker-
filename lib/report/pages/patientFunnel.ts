@@ -5,6 +5,7 @@ import { pageHeader, pageFooter, sectionHead, chartSource, emptyState, microLabe
 import { renderPatientFunnel } from '../svg-charts/funnel';
 import type { PDFReportData, ReportMeta } from '../types';
 import type { PatientFunnel } from '@/lib/brief/types';
+import { TERRAIN_DEMAND_SOURCE } from '@/lib/brief/terrain-demand';
 
 const ASSUMPTIONS: Record<string, string> = {
   'Population': 'Territory population',
@@ -12,7 +13,18 @@ const ASSUMPTIONS: Record<string, string> = {
   'Diagnosed': 'Diagnosis rate in the territory',
   'Treated': 'Share of diagnosed patients on any therapy',
   'Drug-eligible': 'Label, line of therapy and contraindications',
+  'Adherent': 'Real-world adherence and persistence on therapy',
   'Addressable': 'Eligible patients the asset can realistically reach',
+};
+
+/** Row assumptions that differ by source; the funnel's SourceNote decides which set prints. */
+const PRICE_ASSUMPTION: Record<'local' | 'terrain', string> = {
+  local: 'Territory-adjusted net revenue per treated patient',
+  terrain: 'Base WAC of therapy-area comparables, net of gross-to-net (Terrain price benchmark)',
+};
+const SHARE_ASSUMPTION: Record<'local' | 'terrain', string> = {
+  local: 'Competitive density and order of entry',
+  terrain: 'Stage-adjusted capturable share of addressable patients (Terrain market-sizing engine)',
 };
 
 function fmtInt(v: number): string {
@@ -28,13 +40,14 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
     <div class="report-page">
       ${pageHeader(meta.currentPage, meta.pageCount, BRIEF_TITLE)}
       ${head}
-      ${emptyState('No patient funnel for this indication', 'The epidemiology model has no prevalence, diagnosis or treatment rates for this indication and territory, so peak sales cannot be built bottom-up. The rNPV uses the comparable-derived peak-sales range instead.')}
+      ${emptyState('No patient funnel for this indication', 'Neither the Terrain demand layer nor the local epidemiology model has prevalence, diagnosis or treatment rates for this indication and territory, so peak sales cannot be built bottom-up. The rNPV uses the comparable-derived peak-sales range instead.')}
       ${pageFooter(meta.reportId)}
     </div>`;
   }
 
   const territory = getLabel(funnel.territory, territoryLabels);
   const source = { ...funnel.source, note: funnel.source.note ?? territory };
+  const basis: 'local' | 'terrain' = funnel.source.source === TERRAIN_DEMAND_SOURCE ? 'terrain' : 'local';
   const last = funnel.steps[funnel.steps.length - 1];
   const share = funnel.peakShare;
   const impliedPeak = share && funnel.pricePerYearUsd
@@ -99,14 +112,14 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
               <td style="font-weight: 600; padding: 6px 12px;">Net price per patient-year</td>
               <td style="text-align: right; font-weight: 700; padding: 6px 12px;">${funnel.pricePerYearUsd ? `$${fmtInt(funnel.pricePerYearUsd)}` : '—'}</td>
               <td style="text-align: right; color: ${COLORS.gray500}; padding: 6px 12px;">—</td>
-              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">Territory-adjusted net revenue per treated patient</td>
+              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">${escapeHtml(PRICE_ASSUMPTION[basis])}</td>
             </tr>
             ${share ? `
             <tr>
               <td style="font-weight: 600; padding: 6px 12px;">Peak share of addressable</td>
               <td style="text-align: right; font-weight: 700; padding: 6px 12px;">${fmtShare(share.median)}</td>
               <td style="text-align: right; color: ${COLORS.gray500}; padding: 6px 12px;">${fmtShare(share.low)}–${fmtShare(share.high)}</td>
-              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">Competitive density and order of entry${impliedPeak != null ? `; implies ${fmtM(impliedPeak)} at median before ramp and erosion adjustments` : ''}</td>
+              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">${escapeHtml(SHARE_ASSUMPTION[basis])}${impliedPeak != null ? `; implies ${fmtM(impliedPeak)} at median before ramp and erosion adjustments` : ''}</td>
             </tr>` : ''}
           </tbody>
         </table>

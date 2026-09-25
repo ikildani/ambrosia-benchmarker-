@@ -108,9 +108,112 @@ Two hazards found on the way, both for the merge job:
 1. `deals.licensor_id` / `licensee_id` do not always point at the best-populated row. The Jul 2026 AstraZeneca → Merck (Lynparza) deal has `licensor_id` = *Alexion (AstraZeneca)*, because that subsidiary row lists "AstraZeneca" in its `name_variations`. Subsidiary rows borrowing the parent's name as a variation will mis-route alias matches whenever no exact-name row exists; the name resolver is safe here only because an exact *AstraZeneca* row exists and exact beats alias.
 2. `drug_aliases` carries combination-partner names as aliases of the wrong drug (pembrolizumab's alias list includes nivolumab, OPDIVO, cadonilimab from combo-arm strings). Brand/INN lookups still land on the right row because the externally-resolved row outranks internal placeholders, but the ambiguity shows up in `candidates` at 0.95 and should be cleaned at the source.
 
+## Merge job
+
+`scripts/merge-duplicate-companies.ts` folds each duplicate group into its best-populated row. Planning is pure (`lib/entities/merge.ts`), execution is `lib/entities/merge-apply.ts`, the schema is migration `127_company_merges.sql`. **Nothing is ever deleted**: a folded row stays in `companies` with `merged_into = <canonical id>` and `merged_at`, the resolver follows the pointer (`matchedOn: 'merged'`, confidence 1) and `GET /api/entities/company/:id` on an old id returns the canonical record, so every `companies.id` Terrain or Augur has stored keeps working.
+
+### What one merge does
+
+For a group of rows sharing a normalised name (spacing ignored):
+
+1. **Canonical row** = highest `companyPopulationScore` (data quality + revenue + recent deals + classification + ids + aliases), ties broken by references already pointing at the row, then a non-registry row, then the oldest row.
+2. **Alias union**: `name_variations` on the canonical becomes the union of every row's name and variations (canonical spelling first, exact-string dedupe).
+3. **Hazard 1 strip**: any variation that is the *exact name of a separate canonical row* is dropped from the union and recorded (`Kite (Gilead)` loses "Gilead" and "Gilead Sciences"; `Alexion (AstraZeneca)` loses "AstraZeneca"; the row keeps its own stem "Alexion"). Rows outside any group get the same treatment as their own `alias_strip` audit row.
+4. **Re-point** every column below from the merged id to the canonical id.
+5. `merged_into` / `merged_at` on the surplus row; one `company_merges` audit row per surplus row with the alias union, the strips, `{table.column: rows}` re-pointed, the moved primary keys and any unique-index conflicts.
+
+### Guard rails (never merged, listed under "Review" in the report)
+
+| Guard | Rule | Example |
+|---|---|---|
+| ticker conflict | two rows in the group carry different tickers | `Merck` MRK vs `Merck Inc` MKGAF |
+| cik conflict | two rows carry different `cik` / `sec_cik` (zero-padding ignored) | |
+| subsidiary / division marker | rows' names differ by a parenthetical, a trailing division word (`oncology`, `respiratory`, `ophthalmology`, `consumer health`, `vaccines`, `japan`, …) or a known subsidiary next to its parent (`Genentech`/Roche, `Janssen`/J&J, `Alexion`/AstraZeneca, `Kite`/Gilead, …) | `Novartis Pharma AG (UK)` vs `Novartis Pharma AG UK` |
+| marker review (information only) | a row whose stem is another canonical row's name is listed, not merged | `Pfizer Oncology` ↔ `Pfizer` |
+
+A row that has a ticker next to one that has none merges normally (the canonical keeps the id).
+
+### Tables that hold a `companies.id` (measured from `pg_constraint` / `pg_attribute`, Sep 25 2026)
+
+Every column below is re-pointed. `unique with` names the other columns of a unique index that includes the company column: a row whose key already exists on the canonical id cannot move, stays on the merged id (which still exists) and is counted under `conflicts` in the audit row.
+
+| table.column | FK | on delete | unique with |
+|---|---|---|---|
+| deals.licensor_id | yes | set null | — |
+| deals.licensee_id | yes | set null | — |
+| drug_owners.company_id | yes | cascade | drug_id, role, territory |
+| drug_master.originator_company_id | yes | set null | — |
+| clinical_assets.company_id | yes | set null | — |
+| clinical_assets.partner_company_id | yes | set null | — |
+| counterparty_premiums.company_id | yes | cascade | as_of_date |
+| company_trials.company_id | yes | cascade | nct_id |
+| company_financials.company_id | yes | cascade | fiscal_period_end, period_type |
+| company_intent_signals.company_id | yes | cascade | signal_type, source_type, source_id |
+| company_patents.company_id | yes | cascade | patent_id |
+| licensing_signals.company_id | yes | set null | — |
+| intent_score_snapshots.company_id | yes | cascade | modality, indication, snapshot_date |
+| drug_revenues.company_id | yes | cascade | drug_name_normalized, fiscal_year, fiscal_period |
+| trial_interventions.company_id | yes | set null | — |
+| sponsor_aliases.company_id | yes | set null | — |
+| competitive_intel.competitor_company_id | yes | set null | — |
+| radar_deal_opportunities.acquirer_company_id | yes | cascade | asset_id |
+| radar_deal_opportunities.asset_company_id | yes | set null | — |
+| asset_catalysts.company_id | yes | set null | — |
+| predictions.company_id | yes | set null | — |
+| outcomes.licensee_id | yes | set null | — |
+| outreach_emails.company_id | yes | set null | — |
+| watchlist_items.company_id | yes | cascade | — |
+| radar_score_snapshots.company_id | no | — | — (pk feature_version, as_of, asset_id) |
+| portfolio_deal_pipelines.partner_company_id | no | — | — |
+| press_releases.company_ids (`uuid[]`) | no | — | — (array_replace) |
+
+Not company ids, checked and excluded: `registry_trials.mapped_company_trial_id` (→ `company_trials.id`), the `*_name` text columns, `partner_match_results.top_match_company` (text), `radar_deal_theses.likely_acquirers` (jsonb of names). The list lives in `COMPANY_REFERENCING_COLUMNS` (`lib/entities/merge.ts`); a new table that stores a `companies.id` must be added there.
+
+### Dry run (default, read-only)
+
+```
+npx tsx scripts/merge-duplicate-companies.ts
+```
+
+Pages all `companies` rows, counts references for every group member in every column above (index-aligned pages; per-id HEAD counts when a chunk times out), plans, and writes:
+
+- `tmp/company-merge-report.md` — summary table; references per table.column; top 20 groups by references; the review list (guard rails); marker review; the alias strips; deals whose party id points at a row that carries the party name only as a stripped alias while a row named exactly that exists (hazard 1 in the wild, 445 on Sep 25 — the job does not re-point those, it only stops them recurring; a person decides which row is right); every planned group; the SQL for the top group.
+- `tmp/company-merge-plan.json` — the full plan (`plans[]` with canonical, merged rows, reasons, alias union, strips; `review[]`; `markerReview[]`; `singletonStrips[]`; `misroutedDeals[]`; `referencingColumns`).
+
+The console prints the same summary. Both files are gitignored (`tmp/`).
+
+### Apply (Issa only)
+
+Apply migration 127 first (Supabase SQL editor or `supabase db push`); the script refuses to run when `company_merges` or `companies.merged_into` is missing. Then, from the repo root:
+
+```
+MERGE_APPLY=yes npx tsx scripts/merge-duplicate-companies.ts --apply --run-id merge-2026-09-26
+```
+
+Three guards must all be present: `--apply`, `--run-id <id>` (3–64 chars, becomes `company_merges.run_id`) and the environment variable `MERGE_APPLY=yes`. The apply re-plans from the live table (never from a stale JSON), applies the plans in reference-count order, then the singleton alias strips. Staged rollout: `--limit 20` (top 20 groups), `--only <key>` (one group by its compact key, e.g. `janssencilag`), `--skip-strips`. Re-running is idempotent: rows already carrying `merged_into` are skipped. A hard error stops the run; audit rows written so far stay and describe exactly what moved.
+
+Deploy order: migration 127 can go in before the code (it is additive); the resolver tolerates either schema. After the migration is live, `merged_into` can be added to `COMPANY_COLS` so name-pool queries skip folded rows outright (today `pickBestCompany` only demotes them).
+
+### Rollback
+
+Everything is reversible because nothing is deleted and each audit row carries what changed:
+
+```sql
+-- one merge
+SELECT canonical_id, merged_id, repointed, repointed_ids, conflicts, alias_union, aliases_stripped
+FROM company_merges WHERE run_id = 'merge-2026-09-26' AND merged_id = '<id>';
+
+UPDATE companies SET merged_into = NULL, merged_at = NULL WHERE id = '<merged_id>';
+-- for each "table.column" in repointed_ids, move the listed primary keys back:
+UPDATE deals SET licensor_id = '<merged_id>' WHERE id = ANY(ARRAY[...]::uuid[]);  -- etc.
+-- restore the canonical's previous name_variations from the row's own name plus the union minus the merged row's names, or from a backup
+```
+
+`repointed_ids` is capped at 20,000 keys per column (`_truncated: true` flags it); for a larger column, rows to move back are those where `column = canonical_id` and the row's own company-name text matches the merged name. The whole run reverts with the same statements over `WHERE run_id = '…'`. Alias strips (`reason = 'alias_strip'`) revert by appending `aliases_stripped` back onto `name_variations`.
+
 ## Follow-ups
 
-- **Merge job for duplicate companies** (not written; needs a decision on write access). Input: `meta.duplicateIds` from a full-table resolve, or the grouping script above. For each group: keep the best-populated row, union `name_variations`, repoint `deals.licensor_id` / `licensee_id`, `drug_owners.company_id`, `clinical_assets` sponsor ids, `counterparty_premiums.company_id` and `partner` rows to the survivor, then soft-delete the rest (or keep them with a `merged_into` column so old ids still resolve). Strip a parent's name from a subsidiary's `name_variations` first (hazard 1).
+- **Merge job**: run the dry run, read the review list, apply migration 127, then apply in stages (top 20 by references first). After the apply, re-resolve the deals listed under "mis-routed" in the report and add `merged_into` to `COMPANY_COLS`.
 - **Terrain**: replace `company_name` / `asset_name` text keys on indication competitive-density and pipeline rows with `company_id` / `asset_id` (`companies.id` / `drug_master.id`) filled through `/api/entities/resolve`; keep the raw strings as `*_raw`. Expose the demand-layer API keyed on those ids (Sequencing §4).
 - **Augur**: portfolio companies and rounds store `companies.id`; exits that are licensing deals store `deals.id`. NAV marks vs later rounds join on the id, not the name.
 - **Deal coverage**: only 312 of 2,072 deals pass the quality filter today (1,496 are rejected / flagged, 913 non-canonical), so deal resolution covers the verified core only; the outcome resolver (Workstream 1) should expect nulls for older or unverified deals until the backfill validator has been re-run.

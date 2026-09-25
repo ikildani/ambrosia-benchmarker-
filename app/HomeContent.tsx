@@ -45,36 +45,63 @@ const TA_DISPLAY_NAMES: Record<string, string> = {
   gastroenterology: 'Gastroenterology', hematology: 'Hematology',
 };
 
+const PHASE_DISPLAY: Array<{ key: string; label: string }> = [
+  { key: 'discovery', label: 'Discovery' }, { key: 'preclinical', label: 'Preclinical' }, { key: 'phase_1', label: 'Phase 1' },
+  { key: 'phase_2', label: 'Phase 2' }, { key: 'phase_3', label: 'Phase 3' }, { key: 'approved', label: 'Approved' },
+];
+
+interface CoverageStats {
+  total: number; primary: number; primaryVerified: number; backlog: number; verified: number; cited: number;
+  byTA: Record<string, number>; byTAVerified: Record<string, number>; byPhase: Record<string, number>;
+  byType: Record<string, number>; byYear: Record<string, number>; sourceTypes: number; countries: number;
+}
+
+function CoverageBars({ items, max }: { items: Array<{ key: string; label: string; value: number; sub?: string }>; max: number }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
+      {items.map(item => (
+        <div key={item.key} className="flex flex-col">
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-100 truncate">{item.label}</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-300 ml-2 tabular-nums">
+              {item.value.toLocaleString()}{item.sub ? <span className="text-slate-400 dark:text-slate-400"> · {item.sub}</span> : null}
+            </span>
+          </div>
+          <div className="h-1.5 bg-slate-100 dark:bg-slate-700/80 rounded-full overflow-hidden">
+            <div className="h-full bg-slate-700 dark:bg-blue-400 rounded-full transition-all duration-1000" style={{ width: `${Math.max((item.value / max) * 100, 3)}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DatabaseCoverageSection() {
-  const [stats, setStats] = useState<{ ta: string; deals: number }[]>([]);
+  const [stats, setStats] = useState<CoverageStats | null>(null);
 
   useEffect(() => {
     fetch('/api/deals/stats')
       .then(r => r.json())
-      .then(data => {
-        if (data.byTA) {
-          const sorted = Object.entries(data.byTA as Record<string, number>)
-            .filter(([ta]) => ta !== 'other' && !ta.startsWith('_'))
-            .sort(([, a], [, b]) => (b as number) - (a as number))
-            .map(([ta, deals]) => ({ ta, deals: deals as number }));
-          setStats(sorted);
-        }
-      })
-      .catch(() => {
-        const fallback = [
-          { ta: 'oncology', deals: 433 }, { ta: 'neurology', deals: 130 },
-          { ta: 'immunology', deals: 116 }, { ta: 'rareDisease', deals: 124 },
-          { ta: 'cardiovascular', deals: 78 }, { ta: 'metabolic', deals: 74 },
-          { ta: 'infectiousDisease', deals: 146 }, { ta: 'ophthalmology', deals: 64 },
-          { ta: 'dermatology', deals: 55 }, { ta: 'womensHealth', deals: 66 },
-          { ta: 'gastroenterology', deals: 62 }, { ta: 'hematology', deals: 54 },
-        ];
-        setStats(fallback);
-      });
+      .then((data: CoverageStats) => { if (data && data.primary > 0) setStats(data); })
+      .catch(() => { /* panel stays hidden rather than showing stale placeholders */ });
   }, []);
 
-  if (stats.length === 0) return null;
-  const maxDeals = stats[0]?.deals || 1;
+  if (!stats) return null;
+
+  const taItems = Object.entries(stats.byTA)
+    .filter(([ta]) => ta !== 'other' && !ta.startsWith('_') && TA_DISPLAY_NAMES[ta])
+    .sort(([, a], [, b]) => b - a)
+    .map(([ta, n]) => ({ key: ta, label: TA_DISPLAY_NAMES[ta], value: n, sub: stats.byTAVerified[ta] ? `${stats.byTAVerified[ta]} verified` : undefined }));
+  const taMax = taItems[0]?.value || 1;
+
+  const phaseItems = PHASE_DISPLAY.map(p => ({ key: p.key, label: p.label, value: stats.byPhase[p.key] ?? 0 }));
+  const phaseMax = Math.max(...phaseItems.map(p => p.value), 1);
+  const unstaged = stats.byPhase.unknown ?? 0;
+
+  const years = Object.keys(stats.byYear).map(Number).filter(Number.isFinite).sort();
+  const yearSpan = years.length ? `${years[0]}–${years[years.length - 1]}` : '2017–2026';
+  const dealTypes = Object.keys(stats.byType).filter(t => t !== 'other' && t !== 'unknown').length;
+  const headline = `${(Math.floor(stats.primary / 100) * 100).toLocaleString()}+`;
 
   return (
     <section className="py-8 sm:py-10 px-4 xl:px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
@@ -82,38 +109,40 @@ function DatabaseCoverageSection() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{DEAL_STATS.TOTAL_DEALS} disclosed transactions across {stats.length} therapeutic areas</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              {headline} primary-sourced transactions across {taItems.length} therapeutic areas · {stats.primaryVerified.toLocaleString()} verifier-confirmed
+            </p>
+            {stats.backlog > 0 ? (
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {stats.backlog.toLocaleString()} further extracted deals are awaiting a primary citation and are not counted here.
+              </p>
+            ) : null}
           </div>
-          <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
-            Updated daily from SEC filings, press releases, FTC pre-merger filings & regulatory databases
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
+            Updated continuously from SEC EDGAR, HKEX, TDnet, ASX, SSE/SZSE, issuer wires &amp; regulatory databases
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
-          {stats.map(item => (
-            <div key={item.ta} className="flex flex-col">
-              <div className="flex items-baseline justify-between mb-1">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 truncate">{TA_DISPLAY_NAMES[item.ta] || item.ta}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-2 tabular-nums">{item.deals.toLocaleString()}</span>
-              </div>
-              <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-slate-700 dark:bg-blue-400 rounded-full transition-all duration-1000"
-                  style={{ width: `${Math.max((item.deals / maxDeals) * 100, 3)}%` }}
-                />
-              </div>
-            </div>
-          ))}
+
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">By therapeutic area</div>
+        <CoverageBars items={taItems} max={taMax} />
+
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-2">
+          By phase at signing{unstaged > 0 ? <span className="normal-case font-normal tracking-normal"> · {unstaged.toLocaleString()} without a disclosed stage</span> : null}
         </div>
+        <CoverageBars items={phaseItems} max={phaseMax} />
+
         <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
           {[
-            { label: 'Disclosed Deals', value: DEAL_STATS.TOTAL_DEALS },
-            { label: 'Deal Types', value: '5' },
-            { label: 'Sources', value: '10+' },
+            { label: 'Primary-Sourced Deals', value: headline },
+            { label: 'Years', value: yearSpan },
+            { label: 'Deal Types', value: String(dealTypes) },
+            { label: 'Primary Sources', value: String(stats.sourceTypes) },
+            { label: 'Countries', value: String(stats.countries) },
             { label: 'Updated', value: 'Daily' },
           ].map(s => (
             <div key={s.label} className="text-center">
               <div className="text-lg font-bold text-slate-900 dark:text-white">{s.value}</div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.label}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">{s.label}</div>
             </div>
           ))}
         </div>
@@ -361,7 +390,7 @@ export default function HomeContent() {
           {/* Subheadline */}
           <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             Stop guessing on upfronts, milestones, and royalties.
-            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} disclosed transactions</span> — in seconds.
+            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified transactions</span> — in seconds.
           </p>
 
           {/* Single clear CTA */}
@@ -392,7 +421,7 @@ export default function HomeContent() {
           <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-slate-400 dark:text-slate-500 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              {DEAL_STATS.TOTAL_DEALS} disclosed deals
+              {DEAL_STATS.TOTAL_DEALS} verified deals
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -748,7 +777,7 @@ export default function HomeContent() {
         <div className="max-w-4xl xl:max-w-5xl mx-auto relative text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Primary-Source Verified Data</h2>
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-            Solidus is built on {DEAL_STATS.TOTAL_DEALS} disclosed biopharma transactions — sourced from regulatory filings and direct research. No secondary data. No scraped estimates. Updated daily.
+            Solidus is built on {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions — sourced from regulatory filings and direct research. No secondary data. No scraped estimates. Updated daily.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-8">
             {[

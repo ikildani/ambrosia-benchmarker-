@@ -25,16 +25,18 @@ export const dynamic = 'force-dynamic';
 // Cycle through TAs — 2-3 per run, covering all over ~3 days
 // Every run also includes _mega_deals query for large deals across all TAs
 // Includes cross-TA queries for underrepresented deal types
+// _preclinical_deals rides in every other slot (Sep 25 2026): early-stage deals are the
+// thinnest slice in comps and calibration, and its queries keep their year windows.
 const TA_ROTATION = [
-  ['oncology', 'neurology', 'immunology'],
+  ['oncology', 'neurology', 'immunology', '_preclinical_deals'],
   ['metabolic', 'cardiovascular', 'rareDisease'],
-  ['hematology', 'ophthalmology', 'infectiousDisease'],
+  ['hematology', 'ophthalmology', 'infectiousDisease', '_preclinical_deals'],
   ['dermatology', 'gastroenterology', 'womensHealth'],
-  ['_option_deals', '_codev_deals', '_china_deals'],   // Cross-TA deal type focus
+  ['_option_deals', '_codev_deals', '_china_deals', '_preclinical_deals'],   // Cross-TA deal type focus
   ['oncology', 'neurology', 'metabolic'],               // High-priority TAs again
-  ['immunology', 'cardiovascular', 'hematology'],
+  ['immunology', 'cardiovascular', 'hematology', '_preclinical_deals'],
   ['rareDisease', 'ophthalmology', 'dermatology'],
-  ['infectiousDisease', 'gastroenterology', 'womensHealth'],
+  ['infectiousDisease', 'gastroenterology', 'womensHealth', '_preclinical_deals'],
   ['_option_deals', '_codev_deals', 'oncology'],        // Deal type focus + oncology
 ];
 
@@ -111,6 +113,11 @@ export async function GET(request: NextRequest) {
     maxQueriesPerTA: 2,
     timeBudgetMs: 240_000,
     recencyDays: 45,
+    // Start each list two queries further along on every full pass of the rotation
+    // (about 40 hours at one run per 4 hours), so lists longer than two queries (the
+    // preclinical set has ten) are all reached. The stored cursor wraps at the rotation
+    // length, so the pass count comes from the clock instead.
+    queryOffset: Math.floor(Date.now() / (4 * 3_600_000 * TA_ROTATION.length)) * 2,
   });
 
   // Post-processing

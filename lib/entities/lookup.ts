@@ -9,6 +9,7 @@ import {
   COMPANY_COLS,
   DRUG_COLS,
   applyDealQualityFilter,
+  followMergedInto,
   usdToM,
   type CompanyRow,
   type DrugRow,
@@ -29,7 +30,8 @@ export async function lookupCompany(supabase: EntityClient, id: string): Promise
   const { data, error } = await supabase.from('companies').select(COMPANY_COLS).eq('id', id).maybeSingle();
   if (error) throw new Error(`companies lookup failed: ${error.message}`);
   if (!data) return null;
-  const row = data as CompanyRow;
+  // A folded duplicate id (companies.merged_into) returns its canonical record.
+  const row = (await followMergedInto(supabase, data as CompanyRow)) ?? (data as CompanyRow);
   const key = normalizeCompanyName(row.name);
   let duplicates: CompanyRow[] = [];
   const anchor = anchorToken(key);
