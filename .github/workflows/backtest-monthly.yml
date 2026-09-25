@@ -1,0 +1,51 @@
+name: Monthly backtest
+
+# The deal-terms backtest (what /accuracy reads) and the per-factor
+# regression only ran when someone remembered to run them: Apr 17 and
+# Sep 7 2026. Both use the static corpus in data/, so they need no
+# database. This runs them on the first of every month and opens a PR
+# with the refreshed report, so the run date on /accuracy is never more
+# than a month old and every change to the numbers is reviewed.
+#
+# Repo setting required once: Settings → Actions → General →
+# "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backtest:
+    name: Deal-terms backtest + per-factor regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Deal-terms backtest (writes __tests__/backtest/baseline-errors.json)
+        run: NODE_OPTIONS=--max-old-space-size=6144 npx tsx scripts/run-deal-backtest.ts
+      - name: Per-factor regression (writes docs/calibration-per-factor-*.md)
+        run: NODE_OPTIONS=--max-old-space-size=6144 npm run calibration:per-factor
+        continue-on-error: true
+      - name: Summary
+        run: |
+          node -e "const j=require('./__tests__/backtest/baseline-errors.json'); console.log('runAt', j.runAt, 'full n', j.fullScope.totalDeals ?? j.fullScope.n, 'core hit50', j.coreScope?.hitRate50 ?? j.coreScope?.hit50)"
+      - name: Open a PR with the refreshed report
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/monthly-backtest
+          delete-branch: true
+          title: 'chore(backtest): monthly deal-terms backtest refresh'
+          commit-message: 'chore(backtest): monthly deal-terms backtest and per-factor regression'
+          body: |
+            Automated monthly run of `scripts/run-deal-backtest.ts` and `npm run calibration:per-factor`.
+            Review the diff of `__tests__/backtest/baseline-errors.json` (hit rates, worst misses) before merging; `/accuracy` and `/methodology/preclinical` read this file.
+          labels: backtest
