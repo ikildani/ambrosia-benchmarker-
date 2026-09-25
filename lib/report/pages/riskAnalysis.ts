@@ -1,7 +1,7 @@
 // Page: Risk Analysis — Dedicated risk breakdown with gauge, factors, probability-weighted value
 
 import { renderRiskGauge } from '../svg-charts/riskGauge';
-import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml } from '../helpers';
+import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 interface RiskFactor {

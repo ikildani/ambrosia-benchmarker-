@@ -603,7 +603,7 @@ export async function buildBuyerMap(
           strategic_context: null,
           source: 'deal_history',
         };
-        resolved.push({ partner, company });
+        resolved.push({ partner: { ...partner, source: 'deal_history' as const }, company });
         g.aliases.forEach(a => taken.add(norm(a)));
         if (g.companyId) takenIds.add(g.companyId);
         supplementCount++;

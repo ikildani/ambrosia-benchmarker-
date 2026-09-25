@@ -1,7 +1,7 @@
 // Page: Deal Timeline — Gantt-style visualization from signing to commercial milestones
 
 import { renderDealTimeline, getDefaultMilestones } from '../svg-charts/timeline';
-import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml, getLabel, phaseLabels } from '../helpers';
+import { formatUsd, pageHeader, pageFooter, COLORS, escapeHtml, getLabel, phaseLabels, BRIEF_TITLE } from '../helpers';
 import type { PDFReportData, ReportMeta } from '../types';
 
 export function renderDealTimelinePage(data: PDFReportData, meta: ReportMeta): string {
