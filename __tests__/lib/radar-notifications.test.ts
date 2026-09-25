@@ -144,16 +144,16 @@ describe('buildMandateDigest', () => {
 
   it('returns null when matches reference unknown or dismissed assets', () => {
     const matches: DigestMatch[] = [
-      { asset_id: '77777777-7777-4777-8777-777777777777', match_score: 80, match_reasons: [], matched_at: '2026-09-15T01:00:00Z' },
-      { asset_id: A1, match_score: 80, match_reasons: [], matched_at: '2026-09-15T01:00:00Z', is_dismissed: true },
+      { asset_id: '77777777-7777-4777-8777-777777777777', match_score: 80, match_reasons: [], matched_at: '2026-09-15T01:00:00Z', is_stale: false },
+      { asset_id: A1, match_score: 80, match_reasons: [], matched_at: '2026-09-15T01:00:00Z', is_dismissed: true, is_stale: false },
     ];
     expect(buildMandateDigest({ mandate, matches, assets, since: new Date('2026-09-14T00:00:00Z'), now: NOW })).toBeNull();
   });
 
   it('orders by score, builds why-now lines, and caps items while keeping total_new', () => {
     const matches: DigestMatch[] = [
-      { asset_id: A2, match_score: 90, match_reasons: ['Neurology', 'Phase 1'], matched_at: '2026-09-15T01:00:00Z' },
-      { asset_id: A1, match_score: 70, match_reasons: ['Oncology'], matched_at: '2026-09-15T02:00:00Z' },
+      { asset_id: A2, match_score: 90, match_reasons: ['Neurology', 'Phase 1'], matched_at: '2026-09-15T01:00:00Z', is_stale: false },
+      { asset_id: A1, match_score: 70, match_reasons: ['Oncology'], matched_at: '2026-09-15T02:00:00Z', is_stale: false },
     ];
     const d = buildMandateDigest({ mandate, matches, assets, since: new Date('2026-09-14T00:00:00Z'), now: NOW, maxItems: 1, baseUrl: 'https://example.test/' });
     expect(d).not.toBeNull();
@@ -264,7 +264,7 @@ describe('runRadarNotifications', () => {
     ],
     user_profiles: [{ id: U1, email: 'analyst@example.com' }],
     radar_mandate_matches: [
-      { mandate_id: M1, asset_id: A1, match_score: 80, match_reasons: ['Oncology'], matched_at: '2026-09-15T03:00:00Z', is_dismissed: false },
+      { mandate_id: M1, asset_id: A1, match_score: 80, match_reasons: ['Oncology'], matched_at: '2026-09-15T03:00:00Z', is_dismissed: false, is_stale: false },
     ],
     clinical_assets: [
       { id: A1, asset_name: 'ABC-123', company_name: 'Acme Bio', phase: 'phase_2', modality: 'antibody', therapeutic_area: 'oncology', originator_country: 'KR', partnership_status: 'unpartnered', partner_company_name: null, licensing_intent_score: 81, score_confidence: 60, nct_ids: [] },

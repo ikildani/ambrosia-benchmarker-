@@ -581,6 +581,8 @@ export async function runRadarNotifications(
       .from('radar_mandate_matches')
       .select('asset_id, match_score, match_reasons, matched_at, is_dismissed')
       .eq('mandate_id', mandate.id)
+      // Stale matches (partnered since, re-attributed, below the floor) never reach a digest.
+      .eq('is_stale', false)
       .gt('matched_at', since.toISOString())
       .order('matched_at', { ascending: false })
       .limit(200);

@@ -19,6 +19,8 @@ import { isUuid } from '@/app/api/radar/_lib/radar-api';
 import { loadAssetBrief } from '@/components/radar/asset/brief-loader';
 import { AssetBriefPage } from '@/components/radar/asset/AssetBriefPage';
 import { RadarUpgradeGate } from '@/components/radar/RadarUpgradeGate';
+import { RadarPageFrame } from '@/components/radar/RadarPageFrame';
+import { radarBacktested } from '@/lib/radar/backtested';
 import type { BriefViewer } from '@/components/radar/asset/types';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +51,12 @@ export default async function AssetBriefRoute({ params }: Props) {
 
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) {
-    return <RadarUpgradeGate isAuthenticated={auth.isAuthenticated} />;
+    const backtested = await radarBacktested();
+    return (
+      <RadarPageFrame>
+        <RadarUpgradeGate isAuthenticated={auth.isAuthenticated} backtested={backtested} />
+      </RadarPageFrame>
+    );
   }
 
   const supabase = createServiceClient();

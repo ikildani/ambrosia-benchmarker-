@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'Asset Radar — Clinical Asset Intelligence | Solidus',
   description:
-    'Discover unpartnered clinical-stage assets with licensing intent signals, predicted deal terms from 1,800+ comparable transactions, and competitive intelligence. Updated daily from ClinicalTrials.gov.',
+    `Screen unpartnered clinical-stage programs from registries in 100 countries, with a licensing-intent score shown against peers, predicted deal terms from ${formatDealCount(LIVE_DEAL_COUNT)} comparable transactions, and the evidence behind each number.`,
   alternates: { canonical: `${BASE_URL}/radar` },
   openGraph: {
     title: 'Asset Radar — Clinical Asset Intelligence | Solidus',
