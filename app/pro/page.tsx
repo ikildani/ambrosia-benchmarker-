@@ -518,6 +518,13 @@ export default function ProPage() {
           .btc-stagger-5 { animation: btc-fade-up 0.6s ease both; animation-delay: 0.5s; }
           .btc-stagger-6 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.15s; }
           .btc-stagger-7 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.25s; }
+          /* Phones and reduced-motion: no entrance stagger, no perpetual glow. The runner
+             measured 6 s of rendering on this page at 4x CPU slowdown; decorative motion
+             is desktop-only. */
+          @media (max-width: 767px), (prefers-reduced-motion: reduce) {
+            .btc-stagger-1, .btc-stagger-2, .btc-stagger-3, .btc-stagger-4, .btc-stagger-5, .btc-stagger-6, .btc-stagger-7 { animation: none; opacity: 1; transform: none; }
+            [style*="btc-pulse-glow"], [style*="btc-number-pulse"], [style*="btc-border-shimmer"], [style*="btc-bar-grow"] { animation: none !important; }
+          }
           .btc-stagger-8 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.35s; }
           .btc-stagger-9 { animation: btc-fade-up-2 0.6s ease both; animation-delay: 0.45s; }
           .btc-metric-live {
