@@ -1,0 +1,8 @@
+# hand-excluded Sep 26 2026: different companies sharing a stem, or ambiguous bare names
+8b683017-51eb-425d-afd2-4b8948f6ed60  # Queen Elizabeth Hospital (Hong Kong)
+7979c8de-d1b1-4fa6-ab47-30c27ef96104  # Eiger Group International, Inc.
+436ba57c-71b8-4424-9560-4fae6c41384c  # Forward-Pharma GmbH
+0fe1fcb9-191b-4864-9d30-e4c04443f9ab  # Prism Pharmaceuticals
+24f80adc-1ce4-48ef-aecb-cef9c399dfc3  # Fusion Pharma LLC
+ba3a1171-47f6-4c11-acef-8dd978e0764d  # Merck Pharma GmbH
+6b16eea7-34c8-4c10-80f3-5b6696858e88  # Merck B.V. (The Netherlands)

@@ -221,6 +221,18 @@ Every deal-ingestion path (EDGAR, press releases, Perplexity, FTC, HKEX / TDnet 
 
 Why: the old lookup linked "Ionis Pharmaceuticals" to "Orionis Biosciences", "Cara Therapeutics" to "Zucara", "Arcus" to a person named Marcus, and kept attaching new deals to rows the merge job had folded minutes earlier (cninfo, Shanghai Junshi, 15:34 UTC). 482 deal sides were re-pointed by hand on Sep 26 (`company_merges` reason `deal_party_reresolve`, run ids `reresolve-2026-09-26` and `reresolve-2026-09-26-review`). The EMA marketing-authorisation-holder lookup in `lib/ingestion/ema-medicines.ts` uses the same resolver.
 
+## Cleanup jobs (Sep 26 2026)
+
+Three scripts finish what the merge job leaves behind. Every row they delete, detach, fill or reclassify is snapshotted first into `company_cleanup_log` (migration 133: `run_id`, `action`, `table_name`, `row_id`, `row` before-image, `changes` applied), so each action reverses by re-inserting `row` or re-applying it over `changes`.
+
+| script | what | audit |
+|---|---|---|
+| `scripts/dedupe-merge-conflicts.ts` | rows a unique index kept on a folded company (company_trials (company_id, nct_id), drug_owners, intent_score_snapshots, company_financials …): copies every value the kept twin lacks, then deletes the duplicate; a row with no twin (written by a cron after the merge) is re-pointed | `company_cleanup_log` actions `deleted_duplicate` (`changes` = values copied to `kept_row_id`) and `repointed` |
+| `scripts/retire-junk-companies.ts` | `companies` rows that are funding / supply sentences (`lib/entities/junk-companies.ts`): deleted when unreferenced or when every reference is detachable (company_trials keeps its rows with company_id NULL; ON DELETE SET NULL columns are nulled); people tagged industry are reclassified owner_type other | actions `deleted_company`, `detached`, `reclassified` |
+| `scripts/merge-same-company-rows.ts` | same company under different names (`lib/entities/same-company.ts`): stem = name minus legal forms, industry descriptors, neutral words, national-affiliate words and Chinese region prefixes; institutions keep every word except a parenthetical country tag; plans need compatible descriptors, one ticker / CIK / domain / HQ country, no division or subsidiary marker, no placeholder | `company_merges` reason `same_company_alias` (same rollback as the merge job) |
+
+Run Sep 26 2026: `cleanup-2026-09-26-conflicts` deleted 1,034 duplicates (153 kept rows filled) and re-pointed 9; `cleanup-2026-09-26-junk` deleted 71 sentence rows, detached 542 references, reclassified 23 people (+3 sentence rows kept because `company_merges.merged_id` references them, reclassified instead).
+
 ## Follow-ups
 
 - **Merge job**: run the dry run, read the review list, apply migration 127, then apply in stages (top 20 by references first). After the apply, re-resolve the deals listed under "mis-routed" in the report and add `merged_into` to `COMPANY_COLS`.

@@ -89,7 +89,15 @@ function isUniqueViolation(err: { code?: string; message?: string } | null): boo
 async function pageRows(client: EntityClient, table: string, select: string, filter: (qb: any) => any): Promise<Record<string, unknown>[]> { // eslint-disable-line @typescript-eslint/no-explicit-any
   const out: Record<string, unknown>[] = [];
   for (let from = 0; ; from += PAGE) {
-    const { data, error } = await filter(client.from(table).select(select)).range(from, from + PAGE - 1);
+    let data: unknown[] | null = null;
+    let error: { message: string } | null = null;
+    // Retry transient failures (network drops, statement timeouts, gateway 52x pages) before giving up.
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      const res = await filter(client.from(table).select(select)).range(from, from + PAGE - 1);
+      data = res.data; error = res.error;
+      if (!error || attempt === 5 || !/timeout|canceling statement|fetch failed|ECONNRESET|ETIMEDOUT|socket hang up|network|Unexpected token|<!DOCTYPE|JSON|52[0-9]/i.test(error.message)) break;
+      await new Promise(r => setTimeout(r, 1500 * attempt));
+    }
     if (error) throw new Error(`${table} page failed: ${error.message}`);
     const rows = (data ?? []) as Record<string, unknown>[];
     out.push(...rows);
