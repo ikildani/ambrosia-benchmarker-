@@ -101,7 +101,7 @@ export const intakeBodySchema = z.object({
   billingEmail: z.string().trim().email().max(200).nullable().optional(),
   poNumber: z.string().trim().max(60).nullable().optional(),
   // provenance
-  intakePath: z.enum(['/intake', '/benchmark']).default('/intake'),
+  intakePath: z.enum(['/intake', '/brief', '/benchmark']).default('/intake'),
   ref: z.string().trim().max(120).nullable().optional(),
 });
 export type IntakeBody = z.infer<typeof intakeBodySchema>;

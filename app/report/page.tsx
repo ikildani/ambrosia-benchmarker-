@@ -892,7 +892,7 @@ export default function ReportPage() {
                 </div>
 
                 <Link
-                  href="/benchmark"
+                  href="/brief"
                   className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 hover:-translate-y-0.5 transition-all"
                 >
                   Configure Your Brief

@@ -604,7 +604,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>Can I benchmark deals without an enterprise subscription?</h3>
             <p>
-              Yes. Start a 7-day free <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Pro trial</Link> for full access to comparable transactions, rNPV valuation, partner matching, sensitivity analysis, and negotiation playbooks. For a done-for-you decision on one asset, the <Link href="/benchmark" className="text-teal-600 font-medium hover:text-teal-700">Deal Intelligence Brief</Link> ($2,500) delivers a signed recommendation with cited comparables and evidence-ranked buyers.
+              Yes. Start a 7-day free <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Pro trial</Link> for full access to comparable transactions, rNPV valuation, partner matching, sensitivity analysis, and negotiation playbooks. For a done-for-you decision on one asset, the <Link href="/brief" className="text-teal-600 font-medium hover:text-teal-700">Deal Intelligence Brief</Link> ($2,500) delivers a signed recommendation with cited comparables and evidence-ranked buyers.
             </p>
 
             <h3>How often should deal benchmarking data be updated?</h3>

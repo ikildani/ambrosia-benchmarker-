@@ -129,7 +129,7 @@ export default function ReportCTA({ modality, phase, dealCount, className = '' }
             )}
           </button>
           <a
-            href="/benchmark"
+            href="/brief"
             className="flex-1 flex items-center justify-center gap-2 px-5 py-3 border border-neutral-300 dark:border-slate-600 text-neutral-700 dark:text-slate-200 font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-slate-700 transition-all text-sm"
           >
             Deal Intelligence Brief — $2,500

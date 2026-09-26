@@ -11,7 +11,7 @@ const footerLinks: Record<string, FooterLink[]> = {
   Product: [
     { label: 'Solidus', href: '/calculator' },
     { label: 'Pro Plan', href: '/pro' },
-    { label: 'Deal Intelligence Brief', href: '/benchmark' },
+    { label: 'Deal Intelligence Brief', href: '/brief' },
     { label: 'Portfolio License', href: '/portfolio' },
     { label: 'Benchmarks', href: '/benchmarks' },
     { label: 'Deal Pulse', href: '/pulse' },

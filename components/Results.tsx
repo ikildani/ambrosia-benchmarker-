@@ -1845,7 +1845,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               </div>
               <div className="flex flex-col gap-2 flex-shrink-0">
                 <a
-                  href="/benchmark"
+                  href="/brief"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all whitespace-nowrap"
                 >
                   Get Brief — $2,500
@@ -2655,7 +2655,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href="/benchmark"
+                href="/brief"
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-white text-navy-900 text-sm font-semibold rounded-xl hover:bg-neutral-100 transition-all shadow-soft w-full sm:w-auto"
               >
                 <span>Get Deal Intelligence Brief — $2,500</span>

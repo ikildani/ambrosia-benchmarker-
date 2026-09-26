@@ -195,7 +195,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
           <div className="text-center">
             <a
-              href="/benchmark"
+              href="/brief"
               className="inline-flex items-center justify-center px-10 py-3.5 rounded-xl font-bold text-base transition-all duration-200 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5"
             >
               Configure Your Brief
@@ -409,7 +409,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         {/* Deal Intelligence Brief CTA — concierge benchmark product */}
         <div className="text-center mb-6">
           <Link
-            href="/benchmark"
+            href="/brief"
             className="group inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-5 p-4 sm:p-6 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40 rounded-xl sm:rounded-2xl border border-teal-200 dark:border-teal-500/30 hover:border-teal-400 dark:hover:border-teal-400/60 hover:shadow-lg hover:shadow-teal-500/10 transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">

@@ -820,7 +820,7 @@ export default function HomeContent() {
           <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             {/* Deal Intelligence Brief */}
             <Link
-              href="/benchmark"
+              href="/brief"
               className="group relative bg-gradient-to-b from-teal-500/[0.03] to-[#0d1420] border border-teal-500/20 rounded-2xl p-7 hover:border-teal-500/40 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">

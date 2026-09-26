@@ -382,7 +382,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
             </p>
             <div className="flex items-center gap-4">
               <Link
-                href="/benchmark"
+                href="/brief"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-sm rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
               >
                 Configure Brief — $2,500
