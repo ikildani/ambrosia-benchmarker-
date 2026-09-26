@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { BriefIntakeForm, type IntakePrefill } from '@/components/intake/BriefIntakeForm';
 import { BENCHMARK_PRICING } from '@/lib/config/constants';
 
@@ -7,7 +8,7 @@ import { BENCHMARK_PRICING } from '@/lib/config/constants';
  * Standalone intake for the Deal Intelligence Brief, linked from email:
  *   /intake?name=…&email=…&company=…&asset=…&indication=…&ref=…
  * Prefills what we already know so the client only adds what we do not.
- * Not indexed; the public product page is /benchmark.
+ * Not indexed; the product page is /brief.
  */
 
 export const metadata: Metadata = {
@@ -19,31 +20,31 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 interface Props { searchParams: Promise<Record<string, string | string[] | undefined>> }
-
 const pick = (v: string | string[] | undefined): string | undefined => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 200) : undefined);
 
 export default async function IntakePage({ searchParams }: Props) {
   const sp = await searchParams;
-  const prefill: IntakePrefill = {
-    name: pick(sp.name), email: pick(sp.email), company: pick(sp.company), title: pick(sp.title),
-    assetName: pick(sp.asset), indication: pick(sp.indication), ref: pick(sp.ref),
-  };
+  const prefill: IntakePrefill = { name: pick(sp.name), email: pick(sp.email), company: pick(sp.company), title: pick(sp.title), assetName: pick(sp.asset), indication: pick(sp.indication), ref: pick(sp.ref) };
+  const first = prefill.name?.split(' ')[0];
+
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400">Deal Intelligence Brief</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Intake{prefill.name ? ` for ${prefill.name.split(' ')[0]}` : ''}</h1>
-        <p className="mt-3 text-base text-slate-600 dark:text-slate-300">
-          One asset, one signed recommendation, about 30 data-backed pages, built from public data plus what you tell us here.
-          {' '}{BENCHMARK_PRICING.PRICE}, invoiced within one business day; a 15-minute call on receipt; the brief within 24 hours of the call.
-        </p>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          Required fields are the asset and your contact details. Sections 2 to 5 are optional; each one you fill replaces a public-data assumption with your own number.
-          {' '}<Link href="/benchmark" className="text-teal-600 dark:text-teal-400 hover:underline">What the brief contains →</Link>
-        </p>
-        <div className="mt-8">
-          <BriefIntakeForm prefill={prefill} intakePath="/intake" />
+    <main className="min-h-screen overflow-x-clip bg-[#0b0e13] text-slate-100">
+      <InstitutionalNav activePath="/brief" />
+      <div className="mx-auto max-w-6xl px-6 pt-28 pb-20">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-slate-800/80 pb-8">
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">Deal Intelligence Brief · intake</p>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">{first ? `${first}, tell us about the asset.` : 'Tell us about the asset.'}</h1>
+            <p className="mt-3 text-slate-400">One asset, one signed recommendation, about thirty data-backed pages, built from public data plus what you add here. Two minutes with the asset alone; ten with your model to hand.</p>
+          </div>
+          <dl className="grid grid-cols-3 gap-6 text-sm">
+            {[[BENCHMARK_PRICING.PRICE, 'invoiced at intake'], ['15 min', 'call on receipt'], ['24 h', 'to delivery']].map(([v, l]) => (
+              <div key={l}><dt className="font-mono text-xl font-semibold text-slate-50">{v}</dt><dd className="mt-0.5 text-xs text-slate-500">{l}</dd></div>
+            ))}
+          </dl>
         </div>
+        <BriefIntakeForm prefill={prefill} intakePath="/intake" />
+        <p className="mt-8 text-xs text-slate-600">What the brief contains, page by page: <Link href="/brief" className="text-teal-300 hover:underline">/brief</Link>.</p>
       </div>
     </main>
   );

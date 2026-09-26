@@ -69,7 +69,7 @@ export function InsightCTA({
         <div className="mt-8 pt-6 border-t border-slate-700">
           <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">For Funds & Advisors</p>
           <Link
-            href="/benchmark"
+            href="/brief"
             className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors"
           >
             Need a decision for one asset? Get a Deal Intelligence Brief — $2,500 →

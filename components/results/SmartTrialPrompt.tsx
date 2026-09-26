@@ -395,7 +395,7 @@ export default function SmartTrialPrompt({
 
           {/* Secondary CTA — Brief */}
           <a
-            href="/benchmark"
+            href="/brief"
             className="w-full mt-3 py-2.5 bg-transparent border border-slate-700 hover:border-slate-600 text-slate-400 hover:text-slate-300 text-xs font-medium rounded-xl transition-all block text-center"
           >
             Or get a Deal Intelligence Brief — $2,500
