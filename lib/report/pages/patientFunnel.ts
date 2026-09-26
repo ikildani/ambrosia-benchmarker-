@@ -51,6 +51,9 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
   const last = funnel.steps[funnel.steps.length - 1];
   const share = funnel.peakShare;
   const fromModel = funnel.peakSalesBasis === 'model';
+  const impliedPeak = share && funnel.pricePerYearUsd
+    ? (last.value * share.median * funnel.pricePerYearUsd) / 1e6
+    : null;
 
   return `
     <div class="report-page">
