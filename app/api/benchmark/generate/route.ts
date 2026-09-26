@@ -181,10 +181,15 @@ export async function POST(request: NextRequest) {
 
     // Step 5c: Outcome ledger — commit the brief's ask/floor, buyers and window
     // as a prediction (Alaric WS1). Fire-and-forget; never breaks generation.
+    let predictionId: string | null = null;
     try {
-      void recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null }).catch((e: unknown) => {
-        console.warn('[Outcomes] brief prediction rejected:', e instanceof Error ? e.message : e);
-      });
+      const written = await recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null });
+      if (written.ok) predictionId = written.id;
+      else if (written.reason === 'deduped') {
+        // Re-run within 24 h: keep the row already registered for this request.
+        const { data: existing } = await supabase.from('predictions').select('id').eq('source', 'brief').eq('source_id', requestId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+        predictionId = (existing as { id?: string } | null)?.id ?? null;
+      }
     } catch (e) {
       console.warn('[Outcomes] brief prediction threw:', e instanceof Error ? e.message : e);
     }
@@ -311,6 +316,9 @@ export async function POST(request: NextRequest) {
         brief_token: briefToken,
         brief_page_count: pageCount,
         admin_notes: noteLines.join('\n'),
+        // Migration 133: the brief as data (data room, alerts, follow-ups) and the ledger row it registered.
+        brief_json: built.brief,
+        prediction_id: predictionId,
       })
       .eq('id', requestId);
 

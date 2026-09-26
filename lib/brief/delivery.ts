@@ -15,7 +15,7 @@ export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const SITE_URL = 'https://solidus.ambrosiaventures.co';
 
 /** Columns the delivery layer reads from benchmark_requests. */
-export const DELIVERY_COLUMNS = 'id,name,email,company,asset_name,indication,phase,modality,brief_token,pdf_storage_path,excel_storage_path,brief_page_count,delivered_at,status,mp_reviewer,mp_reviewed_at,walkthrough_scheduled_at';
+export const DELIVERY_COLUMNS = 'id,name,email,company,asset_name,indication,phase,modality,brief_token,pdf_storage_path,excel_storage_path,brief_page_count,delivered_at,status,mp_reviewer,mp_reviewed_at,walkthrough_scheduled_at,prediction_id';
 
 export interface BriefDeliveryRow {
   id: string;
@@ -35,6 +35,8 @@ export interface BriefDeliveryRow {
   mp_reviewer: string | null;
   mp_reviewed_at: string | null;
   walkthrough_scheduled_at: string | null;
+  /** Migration 133: the outcome-ledger row registered at generation. */
+  prediction_id?: string | null;
 }
 
 export const DELIVERED_STATUSES = new Set(['delivered', 'walkthrough_scheduled', 'walkthrough_complete']);
