@@ -18,6 +18,13 @@ export default function CookieConsent() {
     return () => clearTimeout(timer);
   }, []);
 
+  // One owner of the bottom edge: while the bar is up, any sticky bottom dock
+  // (the calculator's live estimate) moves above it instead of underneath it.
+  useEffect(() => {
+    document.documentElement.classList.toggle('has-consent-bar', visible);
+    return () => document.documentElement.classList.remove('has-consent-bar');
+  }, [visible]);
+
   function decide(value: ConsentValue) {
     try {
       localStorage.setItem('cookie-consent', value);

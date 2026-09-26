@@ -1018,3 +1018,8 @@ html, body { overflow-x: clip; }
 @media (max-width: 639px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: max(1em, 16px); }
 }
+
+/* Bottom-edge ownership: sticky docks lift above the consent bar while it is visible. */
+@media (max-width: 767px) {
+  html.has-consent-bar .bottom-dock { bottom: 4.5rem; }
+}

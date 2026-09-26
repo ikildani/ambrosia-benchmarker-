@@ -103,7 +103,7 @@ const LiveDealPreview = React.memo(function LiveDealPreview({
       </div>
 
       {/* Mobile: fixed bottom bar */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-neutral-200 dark:border-slate-700 safe-bottom">
+      <div className="bottom-dock md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-neutral-200 dark:border-slate-700 safe-bottom">
         <div className="px-4 py-3 flex items-center justify-between">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-slate-500">

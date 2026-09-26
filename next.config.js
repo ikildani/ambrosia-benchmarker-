@@ -154,6 +154,10 @@ module.exports = withSentryConfig(withBundleAnalyzer(nextConfig), {
     excludeReplayIframe: true,
     excludeReplayShadowDom: true,
     excludeReplayWorker: true,
+    // Client-side tracing removed too (round 2): the Sentry core chunk still cost
+    // 1.7 s of scripting on the mobile calculator. Web Vitals now reach GA4 via
+    // WebVitalsReporter, so BrowserTracing no longer earns its weight.
+    excludeTracing: true,
   },
 });
 // rebuild 1773876763
