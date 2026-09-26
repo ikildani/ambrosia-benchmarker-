@@ -1,6 +1,5 @@
-import React from 'react';
-
-const HeroProductPreview = React.memo(function HeroProductPreview() {
+// Server-renderable static mock-up (no memo: rendered once in the HTML).
+function HeroProductPreview() {
   return (
     <div className="hidden lg:block relative" aria-hidden="true">
       {/* Ambient glow */}
@@ -83,6 +82,6 @@ const HeroProductPreview = React.memo(function HeroProductPreview() {
       </div>
     </div>
   );
-});
+}
 
 export default HeroProductPreview;

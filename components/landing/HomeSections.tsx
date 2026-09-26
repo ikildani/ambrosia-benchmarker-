@@ -1,466 +1,16 @@
-'use client';
-
-import { useState, useEffect, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+// Server components: the marketing sections below the fold. They used to live
+// inside a 1,000-line client component and were hydrated on every visit; now
+// they are HTML with no JavaScript attached.
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { Check, ArrowRight } from 'lucide-react';
+import { PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
-import Header from '@/components/Header';
-import AuthModal from '@/components/AuthModal';
-import ExitIntentCapture from '@/components/ExitIntentCapture';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
-import HeroProductPreview from '@/components/landing/HeroProductPreview';
-import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
-import { Check, ArrowRight } from 'lucide-react';
 
-// Below-fold components loaded dynamically
-const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
-const FAQSection = dynamic(() => import('@/components/FAQSection'), { ssr: true });
-
-import { useAuth } from '@/contexts/AuthContext';
-import type { UserTier } from '@/types/tier';
-import {
-  calculateDealTerms,
-  formatCurrency,
-  phaseOptions,
-  modalityOptions,
-  indicationOptions,
-  type Phase,
-  type Modality,
-  type Indication,
-  type CalculationInput,
-} from '@/lib/calculations';
-
-// Flatten grouped options for the demo selects
-const flatModalities = modalityOptions.flatMap(g => g.options);
-const flatIndications = indicationOptions.flatMap(g => g.options);
-
-const TA_DISPLAY_NAMES: Record<string, string> = {
-  oncology: 'Oncology', neurology: 'Neurology', immunology: 'Immunology',
-  rareDisease: 'Rare Disease', cardiovascular: 'Cardiovascular', metabolic: 'Metabolic',
-  infectiousDisease: 'Infectious Disease', ophthalmology: 'Ophthalmology',
-  dermatology: 'Dermatology', womensHealth: "Women's Health",
-  gastroenterology: 'Gastroenterology', hematology: 'Hematology',
-};
-
-const COMPANY_TYPE_DISPLAY: Array<{ key: string; label: string }> = [
-  { key: 'large_pharma', label: 'Large pharma' }, { key: 'mid_pharma', label: 'Mid-sized pharma' }, { key: 'large_biotech', label: 'Large biotech' },
-  { key: 'mid_biotech', label: 'Mid-sized biotech' }, { key: 'specialty', label: 'Specialty' }, { key: 'academic', label: 'Academic' },
-  { key: 'government', label: 'Government' }, { key: 'nonprofit', label: 'Non-profit' }, { key: 'cro_cdmo', label: 'CRO / CDMO' },
-];
-
-const PHASE_DISPLAY: Array<{ key: string; label: string }> = [
-  { key: 'discovery', label: 'Discovery' }, { key: 'preclinical', label: 'Preclinical' }, { key: 'phase_1', label: 'Phase 1' },
-  { key: 'phase_2', label: 'Phase 2' }, { key: 'phase_3', label: 'Phase 3' }, { key: 'approved', label: 'Approved' },
-];
-
-interface CoverageStats {
-  total: number; primary: number; primaryVerified: number; backlog: number; verified: number; cited: number;
-  byTA: Record<string, number>; byTAVerified: Record<string, number>; byPhase: Record<string, number>;
-  byType: Record<string, number>; byYear: Record<string, number>; sourceTypes: number; countries: number;
-  byCompanyType: Record<string, number>; companies: number;
-}
-
-function CoverageBars({ items, max }: { items: Array<{ key: string; label: string; value: number; sub?: string }>; max: number }) {
+export function HomeMiddle({ dealCount }: { dealCount: string }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3">
-      {items.map(item => (
-        <div key={item.key} className="flex flex-col">
-          <div className="flex items-baseline justify-between mb-1">
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-100 truncate">{item.label}</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-300 ml-2 tabular-nums">
-              {item.value.toLocaleString()}{item.sub ? <span className="text-slate-400 dark:text-slate-400"> · {item.sub}</span> : null}
-            </span>
-          </div>
-          <div className="h-1.5 bg-slate-100 dark:bg-slate-700/80 rounded-full overflow-hidden">
-            <div className="h-full bg-slate-700 dark:bg-blue-400 rounded-full transition-all duration-1000" style={{ width: `${Math.max((item.value / max) * 100, 3)}%` }} />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DatabaseCoverageSection() {
-  const [stats, setStats] = useState<CoverageStats | null>(null);
-
-  useEffect(() => {
-    fetch('/api/deals/stats')
-      .then(r => r.json())
-      .then((data: CoverageStats) => { if (data && data.primary > 0) setStats(data); })
-      .catch(() => { /* panel stays hidden rather than showing stale placeholders */ });
-  }, []);
-
-  if (!stats) return null;
-
-  const taItems = Object.entries(stats.byTA)
-    .filter(([ta]) => ta !== 'other' && !ta.startsWith('_') && TA_DISPLAY_NAMES[ta])
-    .sort(([, a], [, b]) => b - a)
-    .map(([ta, n]) => ({ key: ta, label: TA_DISPLAY_NAMES[ta], value: n }));
-  const taMax = taItems[0]?.value || 1;
-
-  const phaseItems = PHASE_DISPLAY.map(p => ({ key: p.key, label: p.label, value: stats.byPhase[p.key] ?? 0 }));
-  const phaseMax = Math.max(...phaseItems.map(p => p.value), 1);
-
-  const typeItems = COMPANY_TYPE_DISPLAY.map(t => ({ key: t.key, label: t.label, value: stats.byCompanyType?.[t.key] ?? 0 })).filter(t => t.value > 0);
-  const typeMax = Math.max(...typeItems.map(t => t.value), 1);
-
-  const years = Object.keys(stats.byYear).map(Number).filter(Number.isFinite).sort();
-  const yearSpan = years.length ? `${years[0]}–${years[years.length - 1]}` : '2017–2026';
-  const dealTypes = Object.keys(stats.byType).filter(t => t !== 'other' && t !== 'unknown').length;
-  const headline = `${(Math.floor(stats.primary / 100) * 100).toLocaleString()}+`;
-
-  return (
-    <section className="py-8 sm:py-10 px-4 xl:px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              {headline} primary-sourced transactions across {taItems.length} therapeutic areas
-            </p>
-          </div>
-          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
-            Updated continuously from SEC EDGAR, HKEX, TDnet, ASX, SSE/SZSE, issuer wires &amp; regulatory databases
-          </div>
-        </div>
-
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">By therapeutic area</div>
-        <CoverageBars items={taItems} max={taMax} />
-
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-2">
-          By phase at signing
-        </div>
-        <CoverageBars items={phaseItems} max={phaseMax} />
-
-        {typeItems.length > 0 ? (
-          <>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-2">
-              Counterparties by type · {stats.companies.toLocaleString()} organisations
-            </div>
-            <CoverageBars items={typeItems} max={typeMax} />
-          </>
-        ) : null}
-
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-          {[
-            { label: 'Primary-Sourced Deals', value: headline },
-            { label: 'Years', value: yearSpan },
-            { label: 'Deal Types', value: String(dealTypes) },
-            { label: 'Primary Sources', value: String(stats.sourceTypes) },
-            { label: 'Organisations', value: stats.companies.toLocaleString() },
-            { label: 'Countries', value: String(stats.countries) },
-            { label: 'Updated', value: 'Daily' },
-          ].map(s => (
-            <div key={s.label} className="text-center">
-              <div className="text-lg font-bold text-slate-900 dark:text-white">{s.value}</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function LiveDemoSection() {
-  const [demoPhase, setDemoPhase] = useState<Phase>('phase2');
-  const [demoModality, setDemoModality] = useState<Modality>('adc');
-  const [demoIndication, setDemoIndication] = useState<Indication>('breast_tnbc');
-
-  const result = useMemo(() => {
-    const input: CalculationInput = {
-      therapeuticArea: 'oncology',
-      phase: demoPhase,
-      modality: demoModality,
-      indication: demoIndication,
-      territory: 'global',
-      biomarker: 'unselected',
-      lineOfTherapy: '2L',
-      treatmentApproach: 'symptomatic',
-      combinationPotential: 'some',
-      competitivePosition: 'racing',
-      dataQuality: 'promising',
-      regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
-    };
-    return calculateDealTerms(input);
-  }, [demoPhase, demoModality, demoIndication]);
-
-  const styledSelect = "w-full px-4 py-3 min-h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-base sm:text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-10 shadow-sm hover:border-slate-300 dark:hover:border-slate-500";
-
-  const phasePills = [
-    { value: 'preclinical', label: 'Preclinical' },
-    { value: 'phase1', label: 'Phase 1' },
-    { value: 'phase2', label: 'Phase 2' },
-    { value: 'phase3', label: 'Phase 3' },
-    { value: 'approved', label: 'Approved' },
-  ];
-
-  return (
-    <section className="py-10 sm:py-12 lg:py-16 xl:py-18 px-4 xl:px-6 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
-      <div className="max-w-5xl xl:max-w-6xl mx-auto">
-        <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display text-navy-800 dark:text-white mb-3">
-            See Your Deal Terms Instantly
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            Select parameters below — benchmarks update in real time
-          </p>
-        </div>
-
-        {/* Phase Selector — Pill buttons */}
-        <div className="max-w-3xl xl:max-w-4xl mx-auto mb-6">
-          <p className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 text-center">Development Phase</p>
-          <div className="grid grid-cols-3 sm:flex sm:items-center sm:justify-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl p-1" role="group" aria-label="Development phase">
-            {phasePills.map(p => (
-              <button
-                key={p.value}
-                onClick={() => setDemoPhase(p.value as Phase)}
-                aria-pressed={demoPhase === p.value}
-                className={`px-3 sm:px-5 min-h-11 sm:min-h-0 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-200 ${
-                  demoPhase === p.value
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Modality & Indication — Styled dropdowns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl xl:max-w-3xl mx-auto mb-8">
-          <div>
-            <label htmlFor="demo-modality" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Modality</label>
-            <select id="demo-modality" value={demoModality} onChange={(e) => setDemoModality(e.target.value as Modality)} className={styledSelect}>
-              {modalityOptions.map(g => (
-                <optgroup key={g.group} label={g.group}>
-                  {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="demo-indication" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Indication</label>
-            <select id="demo-indication" value={demoIndication} onChange={(e) => setDemoIndication(e.target.value as Indication)} className={styledSelect}>
-              {indicationOptions.map(g => (
-                <optgroup key={g.group} label={g.group}>
-                  {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Result Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl xl:max-w-4xl mx-auto mb-8">
-          {[
-            {
-              label: 'Upfront Payment',
-              value: `${formatCurrency(result.terms.upfront.low)} - ${formatCurrency(result.terms.upfront.high)}`,
-              median: formatCurrency(result.terms.upfront.median),
-            },
-            {
-              label: 'Total Deal Value',
-              value: `${formatCurrency(result.terms.totalDealValue.low)} - ${formatCurrency(result.terms.totalDealValue.high)}`,
-              median: formatCurrency(result.terms.totalDealValue.median),
-            },
-            {
-              label: 'Royalty Rate',
-              value: `${result.tieredRoyalties.base.low}% - ${result.tieredRoyalties.base.high}%`,
-              median: `${((result.tieredRoyalties.base.low + result.tieredRoyalties.base.high) / 2).toFixed(1)}%`,
-            },
-          ].map((card, idx) => (
-            <div key={idx} className="group bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-600 p-4 sm:p-5 lg:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{card.label}</div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                {card.value}
-              </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">Median: {card.median}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="text-center">
-          <Link
-            href={`/calculator?phase=${demoPhase}&modality=${demoModality}&indication=${demoIndication}`}
-            className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold px-8 py-4 rounded-xl
-                     shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
-          >
-            <span>Get Full Analysis with Milestones & Partner Matching</span>
-            <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Free to use. No account required.</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export default function HomeContent({ dealCountDisplay }: { dealCountDisplay?: string } = {}) {
-  const dealCount = dealCountDisplay || DEAL_STATS.TOTAL_DEALS;
-  const {
-    isAuthenticated,
-    user,
-    tier,
-    setTier,
-    signIn,
-    signOut,
-    openAuthModal,
-    closeAuthModal,
-    showAuthModal,
-    authModalMode,
-    isLoading,
-    isPortfolioAdmin,
-  } = useAuth();
-
-  const [urlPromoCode, setUrlPromoCode] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    // Read ?code= param for promo code (email campaign link)
-    const params = new URLSearchParams(window.location.search);
-    const codeParam = params.get('code');
-    if (codeParam) {
-      setUrlPromoCode(codeParam.toUpperCase());
-      // Clean the code param from URL but preserve hash
-      const url = new URL(window.location.href);
-      url.searchParams.delete('code');
-      window.history.replaceState({}, '', url.toString());
-      // Auto-scroll to pricing section
-      setTimeout(() => {
-        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-      }, 500);
-    }
-  }, []);
-
-  const handleTierChange = (newTier: UserTier) => {
-    setTier(newTier);
-  };
-
-  const handleAuthSuccess = (email: string, name: string) => {
-    signIn(email, name);
-  };
-
-  const router = useRouter();
-  const handleDashboardClick = () => {
-    router.push('/dashboard');
-  };
-
-  return (
-    <main id="main-content" className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
-      {/* Header */}
-      <Header
-        isAuthenticated={isAuthenticated}
-        userName={user?.name}
-        userEmail={user?.email}
-        tier={tier}
-        isPortfolioAdmin={isPortfolioAdmin}
-        onSignInClick={() => openAuthModal('signin')}
-        onSignUpClick={() => openAuthModal('signup')}
-        onSignOut={signOut}
-        onDashboardClick={handleDashboardClick}
-      />
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={closeAuthModal}
-        onSuccess={handleAuthSuccess}
-        initialMode={authModalMode}
-      />
-
-      {/* Hero Section */}
-      <section className="relative bg-white dark:bg-slate-900 pt-28 sm:pt-32 lg:pt-40 xl:pt-44 pb-14 sm:pb-24 lg:pb-28 px-4 xl:px-6 overflow-hidden lg:min-h-[85vh] flex items-center transition-colors duration-300">
-        {/* Clean background — single subtle gradient */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(14,165,165,0.08),transparent)]" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto w-full lg:flex lg:items-center lg:gap-16 xl:gap-20">
-          <div className="text-center lg:text-left lg:flex-1">
-
-          {/* Product eyebrow */}
-          <div className="flex items-center gap-2 mb-6 justify-center lg:justify-start animate-rise">
-            <span className="text-sm font-semibold tracking-wide text-slate-900 dark:text-white">Solidus</span>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
-            <span className="text-sm text-slate-400 dark:text-slate-500">The gold standard for deal intelligence</span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-[64px] xl:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight leading-[1.08] animate-rise animate-rise-d1">
-            <span className="text-slate-900 dark:text-white">Know what your</span>
-            <br />
-            <span className="text-slate-900 dark:text-white">deal is </span>
-            <span className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">worth</span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-xl lg:max-w-lg mx-auto lg:mx-0 mb-8 lg:mb-12 leading-relaxed animate-rise animate-rise-d2">
-            Stop guessing on upfronts, milestones, and royalties.
-            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{dealCount} primary-sourced transactions</span> — in seconds.
-          </p>
-
-          {/* Single clear CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8 sm:mb-12 animate-rise animate-rise-d3">
-            <Link
-              href="/calculator"
-              prefetch={false}
-              onMouseEnter={() => router.prefetch('/calculator')}
-              onTouchStart={() => router.prefetch('/calculator')}
-              className="group relative inline-flex items-center justify-center gap-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold px-10 py-4 rounded-xl
-                       shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-base"
-            >
-              <span>Benchmark Your Deal — Free</span>
-              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Link>
-
-            {isAuthenticated && (
-              <Link
-                href="/dashboard"
-                className="group inline-flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium px-8 py-4 rounded-xl
-                         hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white transition-all duration-300 w-full sm:w-auto text-[15px]"
-              >
-                <span>My Dashboard</span>
-              </Link>
-            )}
-          </div>
-
-          {/* Social proof — what, not features */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 max-w-xs mx-auto sm:max-w-none sm:flex sm:flex-wrap sm:items-center sm:justify-center lg:justify-start sm:gap-x-6 text-sm text-slate-500 dark:text-slate-400 animate-rise animate-rise-d4">
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              {dealCount} primary-sourced deals
-            </span>
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Results in 30 seconds
-            </span>
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Free to start
-            </span>
-          </div>
-          </div>
-
-          {/* Product Preview */}
-          <HeroProductPreview />
-        </div>
-      </section>
-
-      {/* Live Demo Section */}
-      <LiveDemoSection />
-
-      {/* Data Coverage Section — dynamic, data-forward visualization */}
-      <DatabaseCoverageSection />
-
+    <>
       {/* How It Works Section */}
       <section id="how-it-works" className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-gradient-to-b from-slate-50 dark:from-slate-800 to-white dark:to-slate-900 scroll-mt-20 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
@@ -881,9 +431,13 @@ export default function HomeContent({ dealCountDisplay }: { dealCountDisplay?: s
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <Pricing currentTier={tier} onSelectTier={handleTierChange} userEmail={user?.email} userId={user?.id} initialPromoCode={urlPromoCode} />
+    </>
+  );
+}
 
+export function HomeGuides({ dealCount }: { dealCount: string }) {
+  return (
+    <>
       {/* Featured Guides */}
       <section className="py-20 px-4 bg-slate-950 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
@@ -924,9 +478,13 @@ export default function HomeContent({ dealCountDisplay }: { dealCountDisplay?: s
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <FAQSection />
+    </>
+  );
+}
 
+export function HomeAbout() {
+  return (
+    <>
       {/* About Section */}
       <section id="about" className="py-10 sm:py-14 lg:py-18 xl:py-20 px-4 xl:px-6 bg-white dark:bg-slate-900 scroll-mt-20 transition-colors duration-300">
         <div className="max-w-4xl xl:max-w-5xl mx-auto text-center">
@@ -1050,8 +608,6 @@ export default function HomeContent({ dealCountDisplay }: { dealCountDisplay?: s
           </div>
         </div>
       </footer>
-      <ExitIntentCapture />
-    </main>
+    </>
   );
 }
-

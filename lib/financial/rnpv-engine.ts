@@ -1639,21 +1639,23 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
       rnpvResult.riskDecomposition = decomposeRisk(input, rnpvResult, calculateRNPV);
       // Surface >10% reconciliation gaps as Sentry breadcrumbs so we can
       // catch drift without breaking the calculation.
-      if (rnpvResult.riskDecomposition.reconciliationGap > 0.10) {
+      const decomposition = rnpvResult.riskDecomposition;
+      if (decomposition.reconciliationGap > 0.10) {
         try {
-          const Sentry = require('@sentry/nextjs');
-          Sentry.addBreadcrumb?.({
+          // Dynamic import: a static require here pulled the whole Sentry browser
+          // SDK into the calculator's engine chunk (Sep 2026 performance pass).
+          void import('@sentry/nextjs').then((Sentry) => Sentry.addBreadcrumb?.({
             category: 'engine.risk-decomposition',
             level: 'warning',
-            message: `Risk decomposition reconciliation gap ${(rnpvResult.riskDecomposition.reconciliationGap * 100).toFixed(1)}% > 10%`,
+            message: `Risk decomposition reconciliation gap ${(decomposition.reconciliationGap * 100).toFixed(1)}% > 10%`,
             data: {
               phase: input.phase,
               therapeuticArea: input.therapeuticArea,
               modality: input.modality,
               indication: input.indication,
-              total_M: rnpvResult.riskDecomposition.total_M,
+              total_M: decomposition.total_M,
             },
-          });
+          })).catch(() => { /* breadcrumb is best effort */ });
         } catch {
           // Sentry is optional in test environments.
         }

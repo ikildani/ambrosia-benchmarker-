@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import ConsentScripts from "@/components/ConsentScripts";
 import WebVitalsReporter from "@/components/WebVitalsReporter";
+import LazySentry from "@/components/LazySentry";
 import { Toaster } from "sonner";
 import { TrackingProvider } from "@/components/TrackingProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -121,6 +122,7 @@ export default function RootLayout({
           <Analytics />
           <ConsentScripts />
           <WebVitalsReporter />
+          <LazySentry />
           <CookieConsent />
         </ThemeProvider>
       </body>
