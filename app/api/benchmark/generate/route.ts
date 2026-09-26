@@ -43,6 +43,9 @@ function isAdminAuth(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   const adminKey = process.env.ADMIN_API_KEY;
   if (adminKey && authHeader === `Bearer ${adminKey}`) return true;
+  // Internal callers (the intake route's automatic draft) authenticate with the cron secret.
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && request.headers.get('x-internal-secret') === cronSecret) return true;
   return false;
 }
 
@@ -324,6 +327,8 @@ export async function POST(request: NextRequest) {
         // Migration 133: the brief as data (data room, alerts, follow-ups) and the ledger row it registered.
         brief_json: built.brief,
         prediction_id: predictionId,
+        // Migration 137: an automatic draft reports back here.
+        auto_draft_status: reviewed ? 'delivered' : 'draft_ready',
       })
       .eq('id', requestId);
 

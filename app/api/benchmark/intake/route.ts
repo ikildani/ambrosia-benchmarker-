@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
 import { BENCHMARK_PRICING } from '@/lib/config/constants';
-import { intakeBodySchema, clientIntakeToColumns, dataPackageToDiligence, DATA_PACKAGE_ITEMS, bestPriorOffer } from '@/lib/brief/client-intake';
+import { intakeBodySchema, clientIntakeToColumns, dataPackageToDiligence, DATA_PACKAGE_ITEMS, bestPriorOffer, STRUCTURE_PREF_KEYS } from '@/lib/brief/client-intake';
 
 /**
  * Deal Intelligence Brief intake.
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
         payment_status: 'pending',
         invoice_requested_at: now,
         intake_path: body.intakePath,
+        // Migration 137
+        structure_prefs: body.structurePrefs ?? {},
+        auto_draft_requested_at: now,
+        auto_draft_status: 'requested',
         admin_notes: body.ref ? `ref ${body.ref}` : null,
       })
       .select('id')
@@ -108,6 +112,7 @@ export async function POST(request: NextRequest) {
         ['Upstream licences', client.upstreamLicenses ?? '—'],
         ['IP notes', client.ipNotes ?? '—'],
         ['Differentiation', body.differentiationNotes ?? '—'],
+        ['Structure answers', Object.entries(body.structurePrefs ?? {}).map(([k, v]) => `${STRUCTURE_PREF_KEYS[k] ?? k}: ${String(v)}`).join('; ') || '—'],
         ['Invoice to', `${body.billingEntity || body.company || body.name} · ${body.billingEmail || body.email}${body.poNumber ? ` · PO ${body.poNumber}` : ''}${body.billingAddress ? ` · ${body.billingAddress}` : ''}`],
         ['Path', `${body.intakePath}${body.ref ? ` (ref ${body.ref})` : ''}`],
       ];
@@ -172,6 +177,34 @@ export async function POST(request: NextRequest) {
     } catch (autoReplyErr) {
       console.error('[Benchmark] Auto-reply failed:', autoReplyErr);
     }
+
+    // Automatic draft: ask the generate route to build the brief now, so the intake call
+    // reviews a real draft. Without an MP opinion the generate route stores a draft
+    // (status call_complete) and sends nothing to the client. The call is fired after the
+    // response; the generate invocation carries on server-side once it has been received.
+    after(async () => {
+      const secret = process.env.CRON_SECRET;
+      const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://solidus.ambrosiaventures.co';
+      if (!secret) return;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8_000);
+      try {
+        await fetch(`${base}/api/benchmark/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret },
+          body: JSON.stringify({ requestId }),
+          signal: controller.signal,
+        });
+      } catch (e) {
+        // An abort here is expected: the draft keeps building on the receiving side.
+        if (!(e instanceof Error && e.name === 'AbortError')) {
+          console.error('[Benchmark] auto-draft request failed:', e instanceof Error ? e.message : e);
+          await supabase.from('benchmark_requests').update({ auto_draft_status: 'failed' }).eq('id', requestId);
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    });
 
     return NextResponse.json({ success: true, requestId });
   } catch (err) {
