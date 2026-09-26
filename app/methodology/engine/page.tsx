@@ -282,7 +282,7 @@ git diff __tests__/backtest/baseline-errors.json`}</code>
         <div className="mt-12 rounded-lg border border-slate-800 bg-slate-900/40 p-6 text-sm text-slate-400">
           <p className="text-slate-200">Questions, critique, or your own backtest?</p>
           <p className="mt-2">
-            We welcome rigorous challenge. Email <code className="rounded bg-slate-800 px-1 py-0.5">issa@ambrosiaventures.co</code> with
+            We welcome rigorous challenge. Email <code className="rounded bg-slate-800 px-1 py-0.5">info@ambrosiaventures.co</code> with
             a deal you think we got wrong, and we&rsquo;ll include it in the next calibration round with the reason documented
             in the iteration log.
           </p>
