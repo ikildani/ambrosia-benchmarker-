@@ -132,6 +132,10 @@ const briefFixture: BriefIntelligence = {
     floor: { totalM: 600, upfrontM: 45 },
     walkAway: { upfrontM: 35 },
     reconciliation: 'x',
+    askBasis: { total: 'comps', upfront: 'comps' },
+    policy: 'ask = max(engine mid, comps ex-outlier median)',
+    rnpvInformative: true,
+    rnpvNote: null,
   },
   buyerMap: {
     source: { source: 'Solidus', n: 8, asOf: '2026-09-25' },

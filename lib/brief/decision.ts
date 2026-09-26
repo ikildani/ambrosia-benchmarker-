@@ -38,6 +38,8 @@ export interface DecisionInput {
   memo?: DealMemo;
   result: CalculationResult;
   asOf: string;
+  /** Intake data; an offer on the table adds a lever. */
+  client?: import('./client-intake').ClientIntake | null;
 }
 
 const LABELS: Record<DecisionSummary['recommendation'], string> = {
@@ -93,13 +95,16 @@ function isAsiaBased(c: BuyerCandidate): boolean {
   return /asia|china|japan|korea|cn\b|jp\b|kr\b|apac/.test(r);
 }
 
-function pickLevers(asset: AssetProfile, buyerMap: BuyerMap | null | undefined): string[] {
+function pickLevers(asset: AssetProfile, buyerMap: BuyerMap | null | undefined, client?: import('./client-intake').ClientIntake | null): string[] {
   const bucket = phaseBucket(asset.phase);
   const structure = (asset.targetDealType || '').toLowerCase();
   const anyAsia = (buyerMap?.candidates ?? []).some(isAsiaBased);
   const territoryGlobal = /global|world/i.test(asset.territory || 'global');
 
   const levers: string[] = [];
+  const offers = (client?.priorOffers ?? []).filter(o => o.status !== 'declined' && o.status !== 'expired');
+  const best = offers.slice().sort((a, b) => ((b.totalM ?? b.upfrontM ?? 0) - (a.totalM ?? a.upfrontM ?? 0)))[0];
+  if (best) levers.push(`Open every conversation above the ${best.party} offer already on the table${best.upfrontM != null ? ` ($${Math.round(best.upfrontM)}M upfront)` : ''}; it is the floor of the process, not the ask`);
   if (structure.includes('option')) levers.push('Option fee sized to the buyer’s diligence cost, creditable against the upfront on exercise');
   if (structure.includes('acqui') || structure.includes('m&a')) levers.push('Contingent value right on the lead-indication approval so the price tracks the data');
 
@@ -274,7 +279,7 @@ export function buildDecisionSummary(input: DecisionInput): DecisionSummary {
     ask: { totalM: ask.totalM, upfrontM: ask.upfrontM, royaltyPct: royaltyRange(result) },
     floor: { totalM: floor.totalM, upfrontM: floor.upfrontM },
     walkAwayUpfrontM,
-    levers: pickLevers(asset, buyerMap),
+    levers: pickLevers(asset, buyerMap, input.client),
     wouldChangeView,
     timeline: buildTimeline(asset),
     confidence,
