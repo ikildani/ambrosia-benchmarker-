@@ -94,6 +94,15 @@ const nextConfig = {
         ],
       },
       {
+        // Private data rooms: never cached, never sent as a referrer, never indexed.
+        source: '/brief/r/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store, max-age=0' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+        ],
+      },
+      {
         // Cacheable public GET API routes
         source: '/api/(content|landing-pages|companies/search|health|deals/comparable|trials/intelligence)/:path*',
         headers: [

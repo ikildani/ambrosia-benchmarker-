@@ -25,7 +25,7 @@ interface Props { params: Promise<{ token: string }> }
  * page the client will later open. Everyone else sees a 404 for a draft.
  */
 async function loadRow(token: string): Promise<{ row: BriefDeliveryRow; draft: boolean } | null> {
-  if (!/^[a-f0-9]{16}$/i.test(token)) return null;
+  if (!/^[a-f0-9]{16}$|^[a-f0-9]{32}$/i.test(token)) return null;
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('benchmark_requests')
@@ -71,7 +71,8 @@ export default async function BriefDataRoomPage({ params }: Props) {
   if (!loaded) notFound();
   const { row, draft } = loaded;
   const supabase = createServiceClient();
-  const links = await mintBriefLinks(supabase, row);
+  // Links minted for a page view live a day; the page mints fresh ones on every visit.
+  const links = await mintBriefLinks(supabase, row, 60 * 60 * 24);
   const call = await loadBriefCall(supabase, { id: row.id, prediction_id: row.prediction_id ?? null });
   const status = callStatus(call.prediction, call.outcome);
   const pred = call.prediction;
@@ -183,7 +184,7 @@ export default async function BriefDataRoomPage({ params }: Props) {
           {row.mp_reviewer ? <p className="mt-4 text-xs text-slate-500">Reviewed and signed by {row.mp_reviewer}{row.mp_reviewed_at ? `, ${fmtDate(row.mp_reviewed_at)}` : ''}.</p> : null}
         </div>
 
-        <p className="mt-8 text-xs text-slate-500">Download links on this page are issued fresh on each visit and expire after 30 days. This brief is confidential and intended solely for {row.company ? row.company : 'the addressee'}.</p>
+        <p className="mt-8 text-xs text-slate-500">Download links on this page are issued fresh on each visit and expire after 24 hours. This brief is confidential and intended solely for {row.company ? row.company : 'the addressee'}.</p>
       </div>
     </main>
   );

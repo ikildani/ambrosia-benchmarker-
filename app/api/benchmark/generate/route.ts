@@ -252,7 +252,8 @@ export async function POST(request: NextRequest) {
     const pageCount = (html.match(/class="report-page"/g) || []).length;
 
     // Step 9: Upload to Supabase Storage
-    const briefToken = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+    // 128-bit token (32 hex): the data-room URL is the credential.
+    const briefToken = crypto.randomUUID().replace(/-/g, '');
     const pdfPath = `briefs/${briefToken}/report.pdf`;
 
     const { error: uploadErr } = await supabase.storage
