@@ -1,0 +1,25 @@
+name: Lighthouse budget
+
+# Mobile performance budget on production (Sep 2026): home and calculator must
+# stay >= 80 with LCP under 3 s. Runs after each deploy settles and daily.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    name: Mobile budget (production)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Wait for the deploy to settle
+        if: github.event_name == 'push'
+        run: sleep 240
+      - name: Run Lighthouse CI against production
+        run: npx --yes @lhci/cli@0.14.x autorun --config=lighthouserc.json

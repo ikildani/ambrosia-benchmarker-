@@ -1,0 +1,24 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://solidus.ambrosiaventures.co/",
+        "https://solidus.ambrosiaventures.co/calculator",
+        "https://solidus.ambrosiaventures.co/pro",
+        "https://solidus.ambrosiaventures.co/companies"
+      ],
+      "numberOfRuns": 2,
+      "settings": { "preset": "perf", "formFactor": "mobile", "screenEmulation": { "mobile": true, "width": 412, "height": 823, "deviceScaleFactor": 1.75, "disabled": false } }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.8, "aggregationMethod": "median-run" }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 3000, "aggregationMethod": "median-run" }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 600, "aggregationMethod": "median-run" }],
+        "errors-in-console": "warn"
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}
