@@ -370,6 +370,10 @@ export interface ExtractedDeal {
   territories_included: string[];
   exclusivity: string;
   deal_type: string;
+  /** Finer structure than deal_type; see migration 123. */
+  deal_subtype?: string | null;
+  /** 505b2 | nda | bla | anda | ind | other, when the filing states it. */
+  regulatory_pathway?: string | null;
   upfront_usd: number | null;
   milestones_total_usd: number | null;
   milestones_development_usd: number | null;
@@ -571,6 +575,12 @@ global, us, ex_us, us_eu, us_eu_japan, china, japan, asia_pacific, europe, regio
 DEAL TYPE VALUES (use exactly):
 license, option, collaboration, acquisition, co_development, co_promotion, other
 
+DEAL SUBTYPE VALUES (use exactly; the finer structure behind deal_type):
+research_collaboration (discovery/preclinical research with funding), discovery_platform (platform or target-discovery collaboration), option_to_license, license, co_development, co_promotion, asset_purchase (single asset or program acquired), company_acquisition (merger or share purchase of the whole company), commercialization (rights to sell an approved or late-stage product), distribution_supply, reformulation_505b2 (reformulated or repurposed approved drug, incl. 505(b)(2) programs), other
+
+REGULATORY PATHWAY VALUES (use exactly, or null when the filing does not say):
+505b2, nda, bla, anda, ind, other
+
 EXCLUSIVITY VALUES (use exactly):
 exclusive, co_exclusive, non_exclusive, unknown
 
@@ -614,6 +624,8 @@ If it IS a deal, return this structure:
   "territories_included": ["array", "of", "specific", "territories"],
   "exclusivity": "one of the exclusivity values",
   "deal_type": "one of the deal type values",
+  "deal_subtype": "one of the deal subtype values",
+  "regulatory_pathway": "one of the regulatory pathway values, or null",
   "upfront_usd": number or null,
   "milestones_total_usd": number or null,
   "milestones_development_usd": number or null,
