@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { ensureBenchmarksLoaded } from '@/lib/benchmarks';
 import { calculateDealTerms, type CalculationInput } from '@/lib/calculations';
 import { computeSensitivityAnalysis } from '@/lib/sensitivity';
 import { calculateRiskScore } from '@/lib/calculations';
@@ -80,6 +81,9 @@ export async function POST(request: NextRequest) {
     } as CalculationInput;
     const genNotes: string[] = [...resolved.notes];
 
+    // Live calibrations overlay the static tables only once the cache is warm. Without this a
+    // brief generated on a cold instance priced from data/benchmarks.json (found Sep 26 2026).
+    await ensureBenchmarksLoaded();
     const baseResult = calculateDealTerms(baseInput);
     const sensitivityData = computeSensitivityAnalysis(baseInput, baseResult);
     const riskScore = calculateRiskScore(baseInput);
