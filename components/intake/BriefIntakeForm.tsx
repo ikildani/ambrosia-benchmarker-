@@ -32,6 +32,28 @@ const MODALITIES = [['SM', 'Small molecule'], ['mAb', 'Monoclonal antibody'], ['
 const DEAL_TYPES = ['Licensing', 'Option', 'Co-Development', 'M&A / Acquisition'] as const;
 const TERRITORIES = [['global', 'Global'], ['us', 'US only'], ['ex_us', 'Ex-US'], ['ex_china', 'Ex-China'], ['japan', 'Japan'], ['china', 'China']] as const;
 const YES_NO = [['yes', 'Yes'], ['no', 'No']] as const;
+const DESIGNATIONS = [['orphan', 'Orphan'], ['breakthrough', 'Breakthrough'], ['fastTrack', 'Fast Track'], ['prime', 'EMA PRIME']] as const;
+/** Routes a buyer would ask about, by modality; the engine carries a PoS and peak-sales modifier for each. */
+const ROUTES_BY_MODALITY: Record<string, ReadonlyArray<readonly [string, string]>> = {
+  SM: [['oral', 'Oral'], ['sc', 'Subcutaneous'], ['iv', 'IV'], ['inhaled', 'Inhaled'], ['topical', 'Topical'], ['intranasal', 'Intranasal']],
+  PEP: [['sc', 'Subcutaneous'], ['oral', 'Oral'], ['iv', 'IV'], ['autoinjector', 'Autoinjector']],
+  mAb: [['iv', 'IV'], ['sc', 'Subcutaneous'], ['autoinjector', 'Autoinjector'], ['intravitreal', 'Intravitreal']],
+  ADC: [['iv', 'IV']], BSAB: [['iv', 'IV'], ['sc', 'Subcutaneous']], TSAB: [['iv', 'IV'], ['sc', 'Subcutaneous']],
+  GT: [['gene_therapy_vector', 'Systemic vector'], ['intrathecal', 'Intrathecal'], ['intravitreal', 'Intravitreal'], ['implantable', 'Local / implant']],
+  CT: [['iv', 'IV infusion']], RNAi: [['sc', 'Subcutaneous'], ['intrathecal', 'Intrathecal'], ['intravitreal', 'Intravitreal']], ASO: [['intrathecal', 'Intrathecal'], ['sc', 'Subcutaneous'], ['intravitreal', 'Intravitreal']],
+  mRNA: [['iv', 'IV'], ['sc', 'Subcutaneous']], RP: [['iv', 'IV']], VAX: [['sc', 'Subcutaneous'], ['intranasal', 'Intranasal']], OTH: [['iv', 'IV'], ['sc', 'Subcutaneous'], ['oral', 'Oral']],
+};
+/** What a buyer asks first about each modality; free text, printed in the asset profile. */
+const DETAIL_PROMPT: Record<string, [string, string]> = {
+  ADC: ['Payload, linker and DAR', 'topoisomerase-I payload, cleavable linker, DAR 8'],
+  BSAB: ['Targets and format', 'CD3 × BCMA, 2+1'], TSAB: ['Targets and format', 'CD3 × CD19 × CD20'],
+  CT: ['Autologous or allogeneic, and the target', 'allogeneic CAR-T, BCMA'],
+  GT: ['Vector, serotype and dose', 'AAV9, single IV dose'],
+  RNAi: ['Conjugate and dosing interval', 'GalNAc, twice yearly'], ASO: ['Chemistry and dosing interval', '2\'-MOE gapmer, quarterly intrathecal'],
+  SM: ['Selectivity and dosing', 'oral once daily, >100× selective over the closest isoform'],
+  PEP: ['Half-life and dosing', 'weekly subcutaneous, albumin-binding'],
+  RP: ['Isotope and targeting ligand', '177Lu, PSMA'], mRNA: ['Antigen or protein and delivery', 'LNP, two-dose'], VAX: ['Antigen and adjuvant', ''], mAb: ['Isotype and engineering', 'IgG1, Fc-silenced, half-life extended'], OTH: ['What a buyer asks first', ''],
+};
 
 /** Package stages a buyer would plausibly see at each phase. */
 const PACKAGE_STAGES: Record<string, string[]> = {
@@ -64,6 +86,8 @@ interface Draft {
   assetName: string; ta: string; indication: string; phase: string; modality: string; mechanism: string; target: string; dealType: string; territory: string; stage: string; differentiation: string;
   // structure follow-ups
   optionFeeM: string; optionMonths: string; costSharePct: string; coPromote: string; minPriceM: string; chinaLicensed: string; chinaPartner: string; readoutDate: string;
+  // evidence
+  designations: string[]; biomarker: string; route: string; modalityDetail: string;
   peak: string; pos: string; launch: string; devCost: string; expUp: string; expTotal: string; modelNotes: string;
   cash: string; runway: string; raise: string; raiseDate: string;
   hasOffers: string; offers: OfferDraft[]; termSheets: string; targetBuyers: string; excludedBuyers: string; upstream: string; ip: string;
@@ -74,6 +98,7 @@ const blank = (p: IntakePrefill): Draft => ({
   name: p.name ?? '', email: p.email ?? '', company: p.company ?? '', title: p.title ?? '',
   assetName: p.assetName ?? '', ta: '', indication: p.indication ?? '', phase: '', modality: '', mechanism: '', target: '', dealType: 'Licensing', territory: 'global', stage: '', differentiation: '',
   optionFeeM: '', optionMonths: '', costSharePct: '', coPromote: '', minPriceM: '', chinaLicensed: '', chinaPartner: '', readoutDate: '',
+  designations: [], biomarker: '', route: '', modalityDetail: '',
   peak: '', pos: '', launch: '', devCost: '', expUp: '', expTotal: '', modelNotes: '',
   cash: '', runway: '', raise: '', raiseDate: '',
   hasOffers: '', offers: [], termSheets: '', targetBuyers: '', excludedBuyers: '', upstream: '', ip: '',
@@ -84,8 +109,8 @@ const blank = (p: IntakePrefill): Draft => ({
 interface Ctx {
   ta: string; phase: string;
   indication: { key: string; label: string; matched: boolean };
-  solidus: { peakSalesM: number | null; cumulativePoSPct: number | null; yearsToLaunch: number | null };
-  comps: { eligible: number; window: string };
+  solidus: { peakSalesM: number | null; cumulativePoSPct: number | null; basePoSPct: number | null; yearsToLaunch: number | null };
+  comps: { eligible: number; window: string; upfront: { p25: number; p50: number; p75: number } | null; total: { p25: number; p50: number; p75: number } | null };
   topBuyers: Array<{ name: string; deals: number }>;
 }
 
@@ -245,13 +270,14 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
     const t = setTimeout(async () => {
       setCtxLoading(true);
       try {
-        const q = new URLSearchParams({ ta: d.ta, phase: d.phase, indication: d.indication, modality: d.modality });
+        const flags = JSON.stringify({ orphan: d.designations.includes('orphan'), breakthrough: d.designations.includes('breakthrough'), fastTrack: d.designations.includes('fastTrack'), prime: d.designations.includes('prime'), biomarker: d.biomarker === 'yes', route: d.route });
+        const q = new URLSearchParams({ ta: d.ta, phase: d.phase, indication: d.indication, modality: d.modality, flags });
         const res = await fetch(`/api/brief/intake-context?${q}`, { signal: ctrl.signal });
         if (res.ok) setCtx(await res.json() as Ctx);
       } catch { /* keep the last context */ } finally { if (!ctrl.signal.aborted) setCtxLoading(false); }
     }, 350);
     return () => { clearTimeout(t); ctrl.abort(); };
-  }, [d.ta, d.phase, d.indication, d.modality]);
+  }, [d.ta, d.phase, d.indication, d.modality, d.designations, d.biomarker, d.route]);
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD(prev => ({ ...prev, [k]: v }));
   const identityOk = !!(d.indication.trim() && d.ta);
@@ -271,6 +297,12 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
   const clinical = CLINICAL.has(d.phase);
   const okFor = (k: Screen) => (k === 'identity' ? identityOk : k === 'stage' ? stageOk : k === 'contact' ? contactOk : true);
 
+  const routes = ROUTES_BY_MODALITY[d.modality] ?? ROUTES_BY_MODALITY.OTH;
+  const detail = DETAIL_PROMPT[d.modality] ?? DETAIL_PROMPT.OTH;
+  const posMoved = ctx?.solidus.cumulativePoSPct != null && ctx.solidus.basePoSPct != null && Math.abs(ctx.solidus.cumulativePoSPct - ctx.solidus.basePoSPct) >= 0.05;
+  const expUpN = num(d.expUp);
+  const upQ = ctx?.comps.upfront ?? null;
+  const upfrontBand = expUpN != null && upQ ? (expUpN < upQ.p25 ? 'below the bottom quartile' : expUpN < upQ.p50 ? 'in the second quartile' : expUpN <= upQ.p75 ? 'in the third quartile' : 'above the top quartile') : null;
   const peakN = num(d.peak);
   const peakRatio = peakN && ctx?.solidus.peakSalesM ? peakN / ctx.solidus.peakSalesM : null;
   const runwayN = num(d.runway);
@@ -299,6 +331,10 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
     if (isMA && num(d.minPriceM) != null) prefs.minPriceM = num(d.minPriceM) as number;
     if (asksChina && d.chinaLicensed) { prefs.chinaLicensed = d.chinaLicensed === 'yes'; if (d.chinaLicensed === 'yes' && d.chinaPartner.trim()) prefs.chinaPartner = d.chinaPartner.trim(); }
     if (clinical && d.readoutDate.trim()) prefs.readoutDate = d.readoutDate.trim();
+    for (const k of d.designations) prefs[k] = true;
+    if (d.biomarker) prefs.biomarkerSelected = d.biomarker === 'yes';
+    if (d.route) prefs.route = d.route;
+    if (d.modalityDetail.trim()) prefs.modalityDetail = d.modalityDetail.trim();
     const body = {
       name: d.name.trim(), email: d.email.trim(), company: d.company.trim() || null, title: d.title.trim() || null,
       therapeuticArea: d.ta, indication: d.indication.trim(), phase: d.phase, modality: d.modality,
@@ -350,8 +386,22 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
   const pct = Math.round((i / (SCREENS.length - 1)) * 100);
   const optional = !screen.required && screen.key !== 'review';
 
+  const rail: Array<{ n: string; title: string; on: boolean; detail: string }> = [
+    { n: '03', title: 'The decision', on: identityOk && stageOk, detail: 'Ask, floor, walk-away, who to open with.' },
+    { n: '04', title: 'This call is scored', on: identityOk && stageOk, detail: 'Registered in the outcome ledger on delivery.' },
+    { n: '05', title: 'Indicative term sheet', on: identityOk && stageOk, detail: `${d.dealType}${isOption && d.optionFeeM ? ` · your option fee ${fmtM(num(d.optionFeeM) ?? 0)}` : ''}${isMA && d.minPriceM ? ` · your floor ${fmtM(num(d.minPriceM) ?? 0)}` : ''}${d.chinaLicensed === 'yes' ? ' · China carved out' : ''}${clinical && d.readoutDate ? ` · clock set to ${d.readoutDate}` : ''}` },
+    { n: '07', title: 'Valuation bridge', on: identityOk && stageOk, detail: ctx ? `${ctx.comps.eligible} comparables, calibrated range, risk-adjusted value` : 'Comparables, calibrated range, risk-adjusted value.' },
+    { n: '08', title: 'Your model vs Solidus', on: modelFilled, detail: modelFilled ? `${peakRatio != null ? `Peak ${peakRatio.toFixed(1)}× ours` : 'Your numbers'} line by line` : 'Add your model to switch this page on.' },
+    { n: '11', title: 'Comparable set', on: identityOk && stageOk, detail: ctx ? `${ctx.comps.eligible} disclosed, ${ctx.comps.window.replace(/_/g, ' ')}` : 'Disclosed, adjacent stages, with sources.' },
+    { n: '18', title: 'Path to the next inflection', on: identityOk && stageOk, detail: runwayFilled ? `Uses your ${d.runway || '—'} months of runway${d.raise ? ` and ${fmtM(num(d.raise) ?? 0)} raise` : ''}` : 'Uses a benchmark raise until you add runway.' },
+    { n: '19', title: 'Buyer map', on: identityOk && stageOk, detail: `${list(d.targetBuyers).length ? `${list(d.targetBuyers).length} named` : 'Ranked on fit and urgency'}${list(d.excludedBuyers).length ? ` · ${list(d.excludedBuyers).length} excluded` : ''}` },
+    { n: '22', title: 'Catalyst calendar', on: identityOk && stageOk, detail: clinical && d.readoutDate ? `24 months, anchored on your ${d.readoutDate} readout` : '24-month window.' },
+    { n: '23', title: 'Diligence readiness', on: pkgCount > 0, detail: pkgCount ? `${pkgCount} of ${pkgItems.length} items in hand` : 'Tick the data package to mark items ready.' },
+  ];
+
   return (
-    <div ref={top} className="mx-auto max-w-2xl scroll-mt-28" onKeyDown={onKey}>
+    <div ref={top} className="scroll-mt-28 lg:grid lg:grid-cols-[minmax(0,42rem)_15rem] lg:gap-14" onKeyDown={onKey}>
+    <div className="mx-auto w-full max-w-2xl">
       {/* Progress */}
       <div className="mb-10">
         <div className="flex items-baseline justify-between text-xs text-slate-500">
@@ -376,13 +426,33 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
         {screen.key === 'stage' ? (<>
           <Field l="Stage at signing *"><Pills options={PHASES} value={d.phase} onChange={v => set('phase', v)} />{touched && !d.phase ? <p className="mt-1.5 text-xs text-rose-400">Pick one.</p> : null}</Field>
           <Field l="Modality *"><Pills options={MODALITIES} value={d.modality} onChange={v => set('modality', v)} />{touched && !d.modality ? <p className="mt-1.5 text-xs text-rose-400">Pick one.</p> : null}</Field>
+          {d.modality ? (
+            <FollowUp>
+              <Field l="Route of administration" hint="Carries a probability and peak-sales modifier in the engine.">
+                <Pills options={routes} value={d.route} onChange={v => set('route', v === d.route ? '' : v)} />
+              </Field>
+              <Field l={detail[0]}><input className={input} value={d.modalityDetail} onChange={e => set('modalityDetail', e.target.value)} placeholder={detail[1]} /></Field>
+            </FollowUp>
+          ) : null}
+          {d.phase ? (
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Field l="Regulatory designations" hint="Tap all that apply; each moves the probability chain.">
+                <div className="flex flex-wrap gap-2">
+                  {DESIGNATIONS.map(([k, l]) => { const on = d.designations.includes(k); return <button type="button" key={k} className={pill(on)} onClick={() => set('designations', on ? d.designations.filter(x => x !== k) : [...d.designations, k])}>{l}</button>; })}
+                  <button type="button" className={pill(d.designations.length === 0 && d.biomarker !== '')} onClick={() => set('designations', [])}>None yet</button>
+                </div>
+              </Field>
+              <Field l="Biomarker-selected population?" hint="Selected populations clear later phases more often."><Pills options={YES_NO} value={d.biomarker} onChange={v => set('biomarker', v)} /></Field>
+            </div>
+          ) : null}
           {d.phase && d.ta ? (
             <Note>
-              {ctxLoading && !ctx ? 'Reading the comparable set for this profile…' : ctx ? (
-                ctx.comps.eligible >= 12
+              {ctxLoading && !ctx ? 'Reading the comparable set for this profile…' : ctx ? (<>
+                {ctx.comps.eligible >= 12
                   ? <>{ctx.comps.eligible} disclosed deals at adjacent stages in {d.ta.toLowerCase()} qualify as comparables. The brief scores each one against this asset and prints the top set with its source.</>
-                  : <>{ctx.comps.eligible} disclosed deals at adjacent stages in {d.ta.toLowerCase()} qualify today. The brief widens to the area and says so on every figure; the headline rests on calibrated baselines, not on a thin percentile.</>
-              ) : null}
+                  : <>{ctx.comps.eligible} disclosed deals at adjacent stages in {d.ta.toLowerCase()} qualify today. The brief widens to the area and says so on every figure; the headline rests on calibrated baselines, not on a thin percentile.</>}
+                {ctx.solidus.cumulativePoSPct != null ? <> Probability to approval from here: <span className="font-semibold text-slate-100">{ctx.solidus.cumulativePoSPct}%</span>{posMoved && ctx.solidus.basePoSPct != null ? <> (from {ctx.solidus.basePoSPct}% before your designations, population and route)</> : null}.</> : null}
+              </>) : null}
             </Note>
           ) : null}
           <div className="grid gap-6 sm:grid-cols-2">
@@ -445,6 +515,11 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
                 : peakRatio < 0.67
                   ? <>Your peak sales is {Math.round(peakRatio * 100)}% of the Solidus epidemiology estimate. Conservative is fine, but the brief will say what the extra headroom is worth in the ask.</>
                   : <>Your peak sales sits within the Solidus range. The comparison page will focus on probability, timing and cost instead.</>}
+            </Note>
+          ) : null}
+          {expUpN != null && upQ && upfrontBand ? (
+            <Note tone={upfrontBand.startsWith('above') ? 'amber' : 'teal'}>
+              Your expected upfront of {fmtM(expUpN)} sits {upfrontBand} of disclosed upfronts at adjacent stages in {d.ta.toLowerCase()} (p25 {fmtM(upQ.p25)}, median {fmtM(upQ.p50)}, p75 {fmtM(upQ.p75)}, n={ctx?.comps.eligible}). {upfrontBand.startsWith('above') ? 'The brief will show which comparables and levers get you there, and where the floor sits if they do not.' : upfrontBand.startsWith('below') ? 'The brief may set the ask above your expectation; the bridge will say why.' : 'The ask will be set from the bridge, not from the median, but you are inside the disclosed range.'}
             </Note>
           ) : null}
           <Field l="Notes on your model" hint="Source of the peak-sales view, pricing assumption, geography, anything a buyer will challenge."><textarea className={input} rows={2} value={d.modelNotes} onChange={e => set('modelNotes', e.target.value)} /></Field>
@@ -550,7 +625,8 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
         {screen.key === 'review' ? (
           <div className="divide-y divide-slate-800 border-y border-slate-800">
             {([
-              ['The asset', `${d.assetName || 'Unnamed'} · ${d.indication || '—'} · ${d.phase || '—'} · ${MODALITIES.find(m => m[0] === d.modality)?.[1] ?? '—'} · ${d.dealType} · ${TERRITORIES.find(t => t[0] === d.territory)?.[1] ?? d.territory}${d.chinaLicensed === 'yes' ? ` · China licensed${d.chinaPartner ? ` to ${d.chinaPartner}` : ''}` : ''}`, 0, identityOk && stageOk],
+              ['The asset', `${d.assetName || 'Unnamed'} · ${d.indication || '—'} · ${d.phase || '—'} · ${MODALITIES.find(m => m[0] === d.modality)?.[1] ?? '—'}${d.route ? ` · ${routes.find(r => r[0] === d.route)?.[1] ?? d.route}` : ''} · ${d.dealType} · ${TERRITORIES.find(t => t[0] === d.territory)?.[1] ?? d.territory}${d.chinaLicensed === 'yes' ? ` · China licensed${d.chinaPartner ? ` to ${d.chinaPartner}` : ''}` : ''}`, 0, identityOk && stageOk],
+              ['Evidence', d.designations.length || d.biomarker ? `${d.designations.map(k => DESIGNATIONS.find(x => x[0] === k)?.[1] ?? k).join(', ') || 'No designations'}${d.biomarker ? ` · ${d.biomarker === 'yes' ? 'biomarker-selected' : 'all-comers'}` : ''}${ctx?.solidus.cumulativePoSPct != null ? ` · PoS ${ctx.solidus.cumulativePoSPct}%` : ''}` : 'No designations or population answered; the probability chain uses the stage default.', 1, d.designations.length > 0 || !!d.biomarker],
               ['Your model', modelFilled ? `Peak $${d.peak || '—'}M${peakRatio != null ? ` (${peakRatio.toFixed(1)}× Solidus)` : ''} · PoS ${d.pos || '—'}% · launch ${d.launch || '—'} · cost $${d.devCost || '—'}M · expects $${d.expUp || '—'}M up / $${d.expTotal || '—'}M total` : 'Not supplied. The “your model vs Solidus” page prints an empty state.', 3, modelFilled],
               ['Runway', runwayFilled ? `Cash $${d.cash || '—'}M · ${d.runway || '—'} months · next raise $${d.raise || '—'}M ${d.raiseDate}` : 'Not supplied. The fund-or-partner page uses a benchmark raise.', 4, runwayFilled],
               ['Offers', d.hasOffers === 'no' ? 'None on the table.' : offersFilled ? `${d.offers.filter(o => o.party.trim()).length} offer(s)${d.termSheets ? ` · ${d.termSheets} term sheets` : ''}` : 'Not answered.', 5, d.hasOffers === 'no' || offersFilled],
@@ -584,6 +660,25 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
         </div>
       </div>
       {screen.key === 'review' ? <p className="mt-6 text-xs leading-relaxed text-slate-600">Everything you enter stays in your brief and your data room. Nothing is published in a way that identifies you or the asset. A draft starts building the moment you submit; nothing is sent until the Managing Partner has reviewed it.</p> : null}
+    </div>
+    {/* Your brief so far: which pages your answers have switched on */}
+    <aside className="hidden lg:block">
+      <div className="sticky top-28">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Your brief so far</p>
+        <ol className="mt-4 space-y-3">
+          {rail.map(item => (
+            <li key={item.n} className={`flex gap-3 transition-opacity ${item.on ? 'opacity-100' : 'opacity-40'}`}>
+              <span className={`mt-0.5 font-mono text-[11px] ${item.on ? 'text-teal-400' : 'text-slate-600'}`}>{item.n}</span>
+              <span className="min-w-0">
+                <span className="block text-sm text-slate-200">{item.title}</span>
+                <span className="block text-[11px] leading-relaxed text-slate-500">{item.detail}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-5 text-[11px] leading-relaxed text-slate-600">{rail.filter(r => r.on).length} of {rail.length} pages populated from your answers. The rest print an honest empty state.</p>
+      </div>
+    </aside>
     </div>
   );
 }

@@ -123,6 +123,13 @@ export const STRUCTURE_PREF_KEYS: Record<string, string> = {
   chinaLicensed: 'Greater China rights already licensed',
   chinaPartner: 'Greater China partner',
   readoutDate: 'Next readout (YYYY-MM)',
+  orphan: 'Orphan designation',
+  breakthrough: 'Breakthrough therapy',
+  fastTrack: 'Fast Track',
+  prime: 'EMA PRIME',
+  biomarkerSelected: 'Biomarker-selected population',
+  route: 'Route of administration',
+  modalityDetail: 'Modality detail',
 };
 
 /** Columns on benchmark_requests written from the client block (migration 135). */
