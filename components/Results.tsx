@@ -10,7 +10,7 @@ const ReportGenerationModal = dynamic(() => import('./ReportGenerationModal'), {
 const ShareModal = dynamic(() => import('./ShareModal'), { ssr: false });
 import { useTracking } from './TrackingProvider';
 import { captureClientError } from '@/lib/sentry-client';
-import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import type { DealMemo } from '@/lib/ai/deal-memo-generator';
 import { staticBenchmarks as benchmarks, getBenchmarksSync } from '@/lib/benchmarks';
 import { getHistory, formatDate as historyFormatDate } from '@/lib/history';
@@ -1404,7 +1404,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {!hasFullAccess && !isPowerCalc && tier === 'free' && (() => {
           // Personalize banner with user's calculation history
           let bannerTitle = "You've used your free Power Analysis";
-          let bannerDesc = "Upgrade to Pro for unlimited access to all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more.";
+          let bannerDesc = `Upgrade to Pro for unlimited access to all ${ENGINE_COUNT} engines — rNPV, Monte Carlo, partner matching, deal memos, and more.`;
           try {
             const prefs = JSON.parse(localStorage.getItem('user_prefs') || '{}');
             const tas: string[] = prefs.tas || [];
@@ -1422,7 +1422,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               };
               const taName = taDisplay[topTA] || topTA;
               bannerTitle = `You've benchmarked ${tas.length} ${taName} deal${tas.length !== 1 ? 's' : ''}. Upgrade for unlimited access.`;
-              bannerDesc = `Pro unlocks all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more for your ${taName} pipeline.`;
+              bannerDesc = `Pro unlocks all ${ENGINE_COUNT} engines — rNPV, Monte Carlo, partner matching, deal memos, and more for your ${taName} pipeline.`;
             }
           } catch {}
           return (
@@ -1840,7 +1840,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <div className="mt-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-900/20 to-orange-900/10 dark:from-amber-900/20 dark:to-orange-900/10 p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-amber-200 mb-1">Get the Complete Picture — Deal Intelligence Brief</h4>
+                <h4 className="text-sm font-bold text-amber-200 mb-1">One Asset, One Scored Recommendation — Deal Intelligence Brief</h4>
                 <p className="text-xs text-amber-300/70">A signed recommendation for your asset — ask, floor, walk-away — with cited comparables, buyers ranked on evidence and a catalyst calendar. Reviewed by the Managing Partner. Within 24 hours of the intake call.</p>
               </div>
               <div className="flex flex-col gap-2 flex-shrink-0">

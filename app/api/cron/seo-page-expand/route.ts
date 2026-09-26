@@ -19,6 +19,7 @@ import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { logCronRun } from '@/lib/cron-utils';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import type { BenchmarkPageData } from '@/lib/benchmarkPages';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -190,7 +191,7 @@ async function identifyGSCGaps(existingSlugs: Set<string>): Promise<PageOpportun
       pageData: buildPageData({
         slug: suggestedSlug,
         title: `${titleQuery} Benchmarks 2026 | Deal Terms & Market Data`,
-        metaDescription: `Explore ${query} deal benchmarks including upfront payments, milestones, royalties, and total deal values. Data-driven insights from 1,500+ biopharma transactions.`,
+        metaDescription: `Explore ${query} deal benchmarks including upfront payments, milestones, royalties, and total deal values. Data-driven insights from ${DEAL_STATS.TOTAL_DEALS} biopharma transactions.`,
         h1: `${titleQuery} Benchmarks`,
         category: 'overview',
         calculatorPrefill: {},

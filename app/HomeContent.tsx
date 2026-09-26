@@ -12,7 +12,7 @@ import ExitIntentCapture from '@/components/ExitIntentCapture';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
 import HeroProductPreview from '@/components/landing/HeroProductPreview';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 import { Check, ArrowRight } from 'lucide-react';
 
 // Below-fold components loaded dynamically
@@ -588,7 +588,7 @@ export default function HomeContent() {
               {
                 icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
                 title: 'Deal Toolkit',
-                description: 'AI deal memos, negotiation playbooks, sensitivity analysis, scenario comparison, outreach email generation, and 16-page branded PDF reports.',
+                description: 'AI deal memos, negotiation playbooks, sensitivity analysis, scenario comparison, outreach email generation, and 20-page branded PDF reports.',
                 gradient: 'from-slate-700 to-slate-900',
               },
               {
@@ -768,7 +768,7 @@ export default function HomeContent() {
                 <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">Advanced Deal Intelligence</h3>
               </div>
               <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
-                Institutional-grade deal memos, negotiation playbooks with counterparty-specific tactics, outreach email templates, and 16-page branded PDF reports — all customized to your specific asset and market position.
+                Institutional-grade deal memos, negotiation playbooks with counterparty-specific tactics, outreach email templates, and 20-page branded PDF reports — all customized to your specific asset and market position.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Deal memos', 'Negotiation playbooks', 'Outreach emails', 'Deal reports'].map((tag) => (
@@ -832,9 +832,9 @@ export default function HomeContent() {
               </div>
               <h3 className="text-lg font-bold text-white mb-1">Intelligence Brief</h3>
               <p className="text-xs text-slate-500 mb-1 font-medium text-teal-400/70">Map the landscape</p>
-              <p className="text-xs text-slate-500 mb-5 leading-relaxed">All modalities, all deal structures, AI narrative, white-label branding + walkthrough.</p>
+              <p className="text-xs text-slate-500 mb-5 leading-relaxed">One asset, one scored recommendation, about 30 data-backed pages. Invoiced at intake; credited in full against a subsequent advisory mandate.</p>
               <ul className="space-y-2 mb-5">
-                {['A signed recommendation: ask, floor, walk-away', 'Cited comparables and evidence-ranked buyers', 'Managing Partner review + walkthrough', 'Within 24 hours of the intake call'].map(item => (
+                {['A signed recommendation: ask, floor, walk-away', 'Cited comparables and evidence-ranked buyers', 'Managing Partner review + 30-minute walkthrough', 'Within 24 hours of the intake call'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-[11px] text-slate-400">
                     <Check className="w-3 h-3 text-teal-500 flex-shrink-0" />
                     {item}
@@ -862,7 +862,7 @@ export default function HomeContent() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Pro — Unlimited Access</h3>
-              <p className="text-sm text-slate-500 mb-6 leading-relaxed">Unlimited calculations, all 14 engines, partner matching, and export. For teams running multiple deals.</p>
+              <p className="text-sm text-slate-500 mb-6 leading-relaxed">Unlimited calculations, all {ENGINE_COUNT} engines, partner matching, and export. For teams running multiple deals.</p>
               <ul className="space-y-2 mb-6">
                 {['Everything in Report, unlimited', 'Buyer-specific valuation (3 partners)', 'Pharma Intent Score (10-factor)', 'Tornado + compound scenarios'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
@@ -898,7 +898,7 @@ export default function HomeContent() {
               { href: '/guides/biopharma-licensing-benchmarks', title: 'Biopharma Licensing Benchmarks 2026', desc: 'Upfront, milestone, and royalty benchmarks by phase, modality, and TA', tag: 'Data' },
               { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Biotech Valuation Guide', desc: 'Phase transition probabilities, cash flow modeling, and Monte Carlo enhancement', tag: 'Methodology' },
               { href: '/guides/negotiate-pharma-royalty-rates', title: 'Pharma Royalty Rate Benchmarks', desc: 'Royalty rates by phase and modality with negotiation strategies', tag: 'Benchmarks' },
-              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: '21 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
+              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: `${ENGINE_COUNT} engines, 12 therapeutic areas, 23+ modalities — how to use the platform`, tag: 'Tutorial' },
               { href: '/guides/biotech-licensing-deal-structure', title: 'Deal Structure Guide', desc: 'Upfront, milestone, and royalty allocation by deal type and stage', tag: 'Strategy' },
               { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
               { href: '/guides/monte-carlo-biotech-valuation', title: 'Monte Carlo Biotech Valuation', desc: '10,000-iteration stochastic modeling with correlated variables and phase-dependent risk', tag: 'Methodology' },

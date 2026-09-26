@@ -26,7 +26,7 @@ These VCs actively publish deal analysis content. A mention from any of them is 
 **Email template:**
 > Subject: Deal benchmark data for your portfolio companies
 >
-> Bruce — we built an open-access deal intelligence platform backed by 2,600+ verified biopharma transactions. When your portfolio companies are negotiating licensing terms, this gives them comparable transaction data, rNPV modeling, and real-time benchmarks across 12 TAs.
+> Bruce — we built an open-access deal intelligence platform backed by 300+ primary-sourced verified biopharma transactions. When your portfolio companies are negotiating licensing terms, this gives them comparable transaction data, rNPV modeling, and real-time benchmarks across 12 TAs.
 >
 > Happy to give Pro access to any portfolio company in active deal discussions. No strings.
 >
@@ -56,9 +56,9 @@ Target the portfolio support / platform team, not just the partners. These peopl
 **Email template (to platform/portfolio support):**
 > Subject: Free deal benchmarking tool for [Firm] portfolio companies
 >
-> Hi [Name] — I run Ambrosia Ventures, a deal intelligence platform used by BD teams to benchmark licensing terms. We analyze 2,600+ real transactions across 12 TAs.
+> Hi [Name] — I run Ambrosia Ventures, a deal intelligence platform used by BD teams to benchmark licensing terms. We analyze 300+ primary-sourced real transactions across 12 TAs.
 >
-> I'd like to offer complimentary Pro access to [Firm] portfolio companies that are actively in deal discussions. It gives them comparable transactions, rNPV, Monte Carlo, and AI-generated negotiation playbooks.
+> I'd like to offer complimentary Pro access to [Firm] portfolio companies that are actively in deal discussions. It gives them comparable transactions, rNPV, Monte Carlo, and negotiation playbooks.
 >
 > Would it be helpful to set up access for your portfolio support team to evaluate?
 >

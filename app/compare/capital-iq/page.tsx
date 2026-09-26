@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Ambrosia vs S&P Capital IQ | Biotech Deal Benchmarking',
@@ -207,7 +207,7 @@ export default function CapitalIQComparePage() {
                 or {PRICING.PRO_MONTHLY} month-to-month
               </p>
               <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                <li>All 14 calculation engines</li>
+                <li>All {ENGINE_COUNT} calculation engines</li>
                 <li>Unlimited benchmarks</li>
                 <li>PDF/Excel export</li>
                 <li>Partner matching</li>

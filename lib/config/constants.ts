@@ -27,6 +27,11 @@ export const PRICING = {
   REPORT_LABEL: 'Deal Report',
 } as const;
 
+// Engine count — 14 is canonical (Issa, Sep 26 2026). Every user-facing engine figure reads this;
+// never write the number as a literal in copy.
+export const ENGINE_COUNT = 14;
+export const ENGINE_COUNT_DISPLAY = `${ENGINE_COUNT} engines`;
+
 // Portfolio License — multi-seat enterprise tier for biotech and pharma VC firms.
 // All tiers require annual billing. Sales-led — no self-serve checkout.
 // Pricing calibrated against comparable enterprise platforms (Cortellis, Evaluate Pharma,
@@ -121,9 +126,9 @@ export const BENCHMARK_PRICING = {
     'Catalyst calendar and go-to-market window for the next 24 months',
     'Positioning, the five objections you will hear, and the evidence to prepare',
     'Diligence readiness list for your phase and modality',
-    'Reviewed by the Managing Partner before it leaves; walkthrough call included',
-    'Delivered as a confidential PDF within 24 hours of the intake call',
-    'Credited in full against any subsequent advisory mandate',
+    'Reviewed by the Managing Partner before it leaves; 30-minute walkthrough arranged by reply',
+    'About 30 data-backed pages, delivered as a confidential PDF within 24 hours of the intake call; invoiced at intake',
+    'Credited in full against a subsequent advisory mandate',
   ],
   DELIVERY_HOURS: 24,
   PORTFOLIO_DISCOUNT_PRICE: '$1,500',

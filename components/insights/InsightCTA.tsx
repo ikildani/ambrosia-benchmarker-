@@ -72,7 +72,7 @@ export function InsightCTA({
             href="/benchmark"
             className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors"
           >
-            Need the full landscape? Get a Deal Intelligence Brief — $2,500 →
+            Need a decision for one asset? Get a Deal Intelligence Brief — $2,500 →
           </Link>
         </div>
       </div>

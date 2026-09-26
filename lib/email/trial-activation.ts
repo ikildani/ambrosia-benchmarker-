@@ -1,4 +1,5 @@
 import { sendEmail } from './client';
+import { ENGINE_COUNT } from '@/lib/config/constants';
 
 const LOGO_URL = 'https://solidus.ambrosiaventures.co/logo.png';
 const APP_URL = 'https://solidus.ambrosiaventures.co';
@@ -45,11 +46,11 @@ export async function sendTrialWelcome(to: string, name: string, ta?: string) {
     ${header('Welcome to Pro', 'Your 7-day trial is active')}
     ${body(`
       <p style="font-size: 16px; margin-top: 0;">Hi ${name},</p>
-      <p style="font-size: 15px; color: #334155;">Your Pro trial is live. You now have full access to all 14 engines — rNPV, Monte Carlo, partner matching, deal memos, and more.</p>
+      <p style="font-size: 15px; color: #334155;">Your Pro trial is live. You now have full access to all ${ENGINE_COUNT} engines — rNPV, Monte Carlo, partner matching, deal memos, and more.</p>
       <p style="font-size: 15px; color: #334155;">${taLine}</p>
       <ol style="font-size: 14px; color: #334155; padding-left: 20px;">
         <li style="margin-bottom: 8px;"><strong>Run a deal benchmark</strong> — enter your asset's phase, modality, and indication to get instant deal terms</li>
-        <li style="margin-bottom: 8px;"><strong>Generate a deal memo</strong> — AI-written institutional-quality memo for your board or IC</li>
+        <li style="margin-bottom: 8px;"><strong>Generate a deal memo</strong> — an institutional-quality written memo for your board or IC</li>
         <li style="margin-bottom: 8px;"><strong>Match with partners</strong> — see which of 700+ companies are the best fit for your asset</li>
       </ol>
       ${cta('Run Your First Calculation', `${APP_URL}/calculator`)}

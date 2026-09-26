@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import ProCheckoutButton from '@/components/ProCheckoutButton';
 import AuthModalGlobal from '@/components/AuthModalGlobal';
 import {
@@ -62,7 +62,7 @@ const comparison = [
 ];
 
 const faqs = [
-  { q: 'Is there a free trial?', a: 'Yes. Start a 7-day free trial with full Pro access — all 14 engines, unlimited calculations, PDF exports. Cancel anytime during the trial and you won\'t be charged.' },
+  { q: 'Is there a free trial?', a: `Yes. Start a 7-day free trial with full Pro access — all ${ENGINE_COUNT} engines, unlimited calculations, PDF exports. Cancel anytime during the trial and you won't be charged.` },
   { q: 'Can I cancel anytime?', a: 'Yes. Cancel from your account settings at any time. You keep full access through the end of your billing period with no penalties or hidden fees.' },
   { q: 'What\'s included in the annual plan?', a: `Everything in monthly Pro, billed annually at ${PRICING.PRO_ANNUAL_PRICE}/year (${PRICING.PRO_ANNUAL_MONTHLY}). You save ${PRICING.PRO_ANNUAL_SAVINGS} compared to monthly billing.` },
   { q: 'Do I get access to all therapeutic areas?', a: 'Yes. Pro unlocks all 12 therapeutic areas and 562 indications with full deal benchmarks, partner matching, and competitive landscape data.' },
@@ -80,7 +80,7 @@ export default function ProPage() {
   const productSchema = {
     '@context': 'https://schema.org', '@type': 'Product',
     name: 'Ambrosia Ventures Pro Plan',
-    description: `Unlimited biopharma deal intelligence with 14 calculation engines, 12 therapeutic areas, and ${DEAL_STATS.TOTAL_DEALS} transaction benchmarks.`,
+    description: `Unlimited biopharma deal intelligence with ${ENGINE_COUNT} calculation engines, 12 therapeutic areas, and ${DEAL_STATS.TOTAL_DEALS} transaction benchmarks.`,
     url: 'https://solidus.ambrosiaventures.co/pro',
     brand: { '@type': 'Organization', name: 'Ambrosia Ventures' },
     offers: [
@@ -126,7 +126,7 @@ export default function ProPage() {
                 </h1>
 
                 <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-lg">
-                  14 engines. 12 therapeutic areas. {DEAL_STATS.TOTAL_DEALS} transactions.
+                  {ENGINE_COUNT} engines. 12 therapeutic areas. {DEAL_STATS.TOTAL_DEALS} transactions.
                   Run rNPV, Monte Carlo, scenario modeling, and buyer-specific valuation — in under 30 seconds.
                 </p>
 
@@ -989,7 +989,7 @@ export default function ProPage() {
             {/* Feature grid — 4 cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
               {[
-                { icon: Layers, title: 'Full Pro per seat', desc: 'All 14 engines, unlimited calculations, PDF & Excel exports for every team member.', accent: 'from-indigo-500/20 to-purple-500/20', border: 'border-indigo-500/20', iconColor: 'text-indigo-400' },
+                { icon: Layers, title: 'Full Pro per seat', desc: `All ${ENGINE_COUNT} engines, unlimited calculations, PDF & Excel exports for every team member.`, accent: 'from-indigo-500/20 to-purple-500/20', border: 'border-indigo-500/20', iconColor: 'text-indigo-400' },
                 { icon: Users, title: 'Dedicated onboarding', desc: '30-minute kickoff walkthrough. Your team runs live calculations before the session ends.', accent: 'from-purple-500/20 to-fuchsia-500/20', border: 'border-purple-500/20', iconColor: 'text-purple-400' },
                 { icon: Search, title: 'Pre-loaded intelligence', desc: 'Partner profiles and counterparty data configured for your therapeutic focus from day one.', accent: 'from-cyan-500/20 to-indigo-500/20', border: 'border-cyan-500/20', iconColor: 'text-cyan-400' },
                 { icon: Shield, title: 'Direct support line', desc: 'Email access to Ambrosia for engine questions, methodology queries, and deal-readiness support.', accent: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/20', iconColor: 'text-teal-400' },
@@ -1086,7 +1086,7 @@ export default function ProPage() {
               Stop guessing. Start benchmarking.
             </h2>
             <p className="mt-4 text-lg text-slate-500 max-w-xl mx-auto">
-              {DEAL_STATS.TOTAL_DEALS} transactions. 14 engines. Under 30 seconds.
+              {DEAL_STATS.TOTAL_DEALS} transactions. {ENGINE_COUNT} engines. Under 30 seconds.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">

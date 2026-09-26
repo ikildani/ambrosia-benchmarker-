@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -589,7 +589,7 @@ function WelcomePageInner() {
 
           <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
             You now have full access to institutional-grade deal intelligence.
-            14 analytical engines, {DEAL_STATS.TOTAL_DEALS} benchmarked transactions, and unlimited analyses.
+            {ENGINE_COUNT} analytical engines, {DEAL_STATS.TOTAL_DEALS} benchmarked transactions, and unlimited analyses.
           </p>
 
           {sessionData?.email && (
@@ -605,7 +605,7 @@ function WelcomePageInner() {
         <section className={`mb-16 sm:mb-24 transition-all duration-1000 delay-200 ${enginesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center mb-10">
             <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2">What You Unlocked</h2>
-            <p className="text-slate-400 text-sm">All 14 engines are now available without limits</p>
+            <p className="text-slate-400 text-sm">All {ENGINE_COUNT} engines are now available without limits</p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -850,7 +850,7 @@ function WelcomePageInner() {
           </button>
 
           <p className="mt-4 text-slate-500 text-xs">
-            All 14 engines unlocked. Unlimited analyses. Cancel anytime.
+            All {ENGINE_COUNT} engines unlocked. Unlimited analyses. Cancel anytime.
           </p>
         </section>
       </div>
