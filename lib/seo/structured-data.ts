@@ -246,7 +246,7 @@ export function generatePricingSchema() {
         name: 'Deal Intelligence Brief',
         price: '2500',
         priceCurrency: 'USD',
-        description: 'The complete deal landscape for any indication — 52 deal calculations across 13 modalities and 4 deal structures, AI strategic narrative and negotiation playbook, comparable transactions, partner matching with intent scoring, white-label branding, and complimentary walkthrough. Delivered within 24 hours.',
+        description: 'One asset, one scored recommendation: ask, floor and walk-away, with the valuation bridge, cited comparables, evidence-ranked buyers and catalyst calendar behind it. About 30 data-backed pages, reviewed by the Managing Partner, delivered within 24 hours of the intake call. Invoiced at intake; 30-minute walkthrough arranged by reply; credited in full against a subsequent advisory mandate.',
         url: `${BASE_URL}/benchmark`,
         availability: 'https://schema.org/InStock',
       },

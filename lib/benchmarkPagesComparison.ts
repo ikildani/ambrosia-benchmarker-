@@ -8,6 +8,7 @@ import {
   type TherapeuticArea,
 } from './calculations';
 import type { BenchmarkPageData } from './benchmarkPages';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 // ── Label maps ──────────────────────────────────────────────────────────────
 

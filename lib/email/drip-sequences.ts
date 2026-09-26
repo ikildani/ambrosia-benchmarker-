@@ -1,3 +1,4 @@
+import { PRICING } from '@/lib/config/constants';
 // ---------------------------------------------------------------------------
 // Drip Email Sequences for Free → Paid Conversion
 // Day 0: Advisory-level insight based on their calculation

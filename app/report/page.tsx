@@ -865,21 +865,21 @@ export default function ReportPage() {
                 </div>
 
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3 leading-tight">
-                  Need the full landscape?
+                  Need a decision for one asset?
                 </h2>
                 <p className="text-lg text-teal-400 font-medium mb-4">
                   Deal Intelligence Brief — {BENCHMARK_PRICING.PRICE}
                 </p>
                 <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-lg">
-                  {BENCHMARK_PRICING.DESCRIPTION} White-label branding included. Delivered within 24 hours with a complimentary 30-minute walkthrough.
+                  {BENCHMARK_PRICING.DESCRIPTION} About 30 data-backed pages, invoiced at intake. Delivered within 24 hours of the intake call with a 30-minute walkthrough arranged by reply; credited in full against a subsequent advisory mandate.
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 mb-8">
                   {[
-                    { val: '52', label: 'Deal calculations', sub: '13 modalities × 4 structures' },
-                    { val: 'AI', label: 'Strategic narrative', sub: 'IC-ready analysis' },
-                    { val: '24hr', label: 'Delivery', sub: 'With intake call' },
-                    { val: 'Free', label: 'Walkthrough call', sub: '30 minutes included' },
+                    { val: '1', label: 'Scored recommendation', sub: 'One asset: ask, floor, walk-away' },
+                    { val: '~30', label: 'Data-backed pages', sub: 'Every figure sourced' },
+                    { val: '24hr', label: 'Delivery', sub: 'From the intake call' },
+                    { val: '30min', label: 'Walkthrough', sub: 'Arranged by reply' },
                   ].map(({ val, label, sub }) => (
                     <div key={label} className="flex items-start gap-3">
                       <div className="text-lg font-bold text-teal-400 font-mono min-w-[36px]">{val}</div>

@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';

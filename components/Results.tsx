@@ -1840,7 +1840,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           <div className="mt-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-900/20 to-orange-900/10 dark:from-amber-900/20 dark:to-orange-900/10 p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-amber-200 mb-1">Get the Complete Picture — Deal Intelligence Brief</h4>
+                <h4 className="text-sm font-bold text-amber-200 mb-1">One Asset, One Scored Recommendation — Deal Intelligence Brief</h4>
                 <p className="text-xs text-amber-300/70">A signed recommendation for your asset — ask, floor, walk-away — with cited comparables, buyers ranked on evidence and a catalyst calendar. Reviewed by the Managing Partner. Within 24 hours of the intake call.</p>
               </div>
               <div className="flex flex-col gap-2 flex-shrink-0">

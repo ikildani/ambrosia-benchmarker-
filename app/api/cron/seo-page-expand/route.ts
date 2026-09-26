@@ -19,6 +19,7 @@ import { getAllBenchmarkSlugs } from '@/lib/benchmarkPages';
 import { logCronRun } from '@/lib/cron-utils';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import type { BenchmarkPageData } from '@/lib/benchmarkPages';
+import { DEAL_STATS } from '@/lib/config/constants';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
