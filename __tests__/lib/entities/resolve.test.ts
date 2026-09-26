@@ -310,3 +310,28 @@ describe('lookup by id', () => {
     expect(d?.sourceUrl).toBe('https://example.com/press');
   });
 });
+
+describe('resolveCompany — folded duplicates (companies.merged_into)', () => {
+  const FOLDED = '946a722b-0000-4000-8000-0000000000f0';
+  const foldedPfizer = { ...COMPANIES[4], id: FOLDED, name: 'Pfizer', name_variations: ['Pfizer', 'Pfizer Inc.'], merged_into: UUID.pfizer, ticker: null, sec_cik: null, data_quality_score: 100, total_annual_revenue: 99e9, deals_last_24mo: 99 };
+  const folded = () => fixtureClient({ companies: [...COMPANIES, foldedPfizer] }) as unknown as Parameters<typeof resolveCompany>[0];
+
+  it('a folded row never wins by name, however well populated', async () => {
+    const r = await resolveCompany(folded(), { name: 'Pfizer Inc.' });
+    expect(r.match?.id).toBe(UUID.pfizer);
+    expect(r.match?.matchedOn).toBe('exact');
+    expect((r.match?.meta as CompanyMeta).duplicateIds).not.toContain(FOLDED);
+  });
+
+  it('a folded row is not offered as a fuzzy candidate either', async () => {
+    const r = await resolveCompany(folded(), { name: 'Pfizzer' });
+    expect(r.candidates.map(c => c.id)).not.toContain(FOLDED);
+    expect(r.match?.id ?? null).not.toBe(FOLDED);
+  });
+
+  it('a ticker carried only by a folded row answers with its canonical row', async () => {
+    const onlyFolded = fixtureClient({ companies: [...COMPANIES.filter(c => c.id !== UUID.pfizer), { ...COMPANIES[4], ticker: null }, { ...foldedPfizer, ticker: 'PFE' }] }) as unknown as Parameters<typeof resolveCompany>[0];
+    const r = await resolveCompany(onlyFolded, { ticker: 'PFE' });
+    expect(r.match?.id).toBe(UUID.pfizer);
+  });
+});

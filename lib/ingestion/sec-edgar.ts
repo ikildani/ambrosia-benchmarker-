@@ -6,6 +6,7 @@ import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { secThrottle, SEC_USER_AGENT, eftsSearch } from './edgar-fts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { validateExtractedDeal, extractAuditExcerpt, normalizeRoyaltyPct } from './deal-extraction-validator';
+import { resolveCompany } from '@/lib/entities/resolve';
 
 const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 const SEC_COMPANY_SEARCH = 'https://data.sec.gov/submissions';
@@ -717,30 +718,32 @@ export async function findOrCreateCompany(
 ): Promise<string | null> {
   if (!companyName) return null;
 
-  const normalizedName = normalizeCompanyName(companyName);
-
-  // Try to find existing company (escape SQL pattern chars to prevent injection)
-  const safeName = escapeLikePattern(normalizedName);
-  const safeArrayName = escapeArrayLiteral(companyName);
-  const { data: existing } = await supabase
-    .from('companies')
-    .select('id, name, name_variations')
-    .or(`name.ilike.%${safeName}%,name_variations.cs.{${safeArrayName}}`)
-    .limit(1)
-    .single();
-
-  if (existing) {
-    // Add name variation if not present
-    if (!existing.name_variations?.includes(companyName)) {
+  // Resolve through the shared entity resolver (lib/entities/resolve): exact
+  // normalised name, then a name_variations alias, then fuzzy at
+  // FUZZY_MATCH_THRESHOLD, never a row the merge job has folded
+  // (companies.merged_into). The previous substring ilike + limit(1) linked
+  // "Ionis" to "Orionis Biosciences" and "Cara" to "Zucara", and kept pointing
+  // new deals at duplicates after they were folded.
+  const resolved = await resolveCompany(supabase, { name: companyName }).catch((err: unknown) => {
+    console.warn(`[findOrCreateCompany] resolve failed for "${companyName}": ${err instanceof Error ? err.message : String(err)}`);
+    return null;
+  });
+  const match = resolved?.match;
+  if (match) {
+    // Record the source spelling only when the row *is* this company (exact
+    // match). Writing it on an alias or fuzzy hit is how parent names became
+    // aliases of subsidiaries (docs/entity-graph.md, hazard 1).
+    if (match.matchedOn === 'exact' && !match.aliases.includes(companyName)) {
+      const { data: row } = await supabase.from('companies').select('name_variations').eq('id', match.id).maybeSingle();
       await supabase
         .from('companies')
         .update({
-          name_variations: [...(existing.name_variations || []), companyName],
+          name_variations: [...(((row as { name_variations?: string[] | null } | null)?.name_variations) ?? []), companyName],
           updated_at: new Date().toISOString(),
         })
-        .eq('id', existing.id);
+        .eq('id', match.id);
     }
-    return existing.id;
+    return match.id;
   }
 
   // Create new company
@@ -1052,20 +1055,5 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
   }
 }
 
-function normalizeCompanyName(name: string): string {
-  return name
-    .replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?|Company|Pharmaceuticals?|Therapeutics?|Biosciences?|Biotech|Sciences?|AG|SA|S\.A\.?|N\.V\.?|SE|GmbH|A\/S)$/i, '')
-    .replace(/\s*\(.*?\)\s*/g, ' ')
-    .replace(/\s*\/\s*/g, '/')
-    .replace(/\band\b/gi, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
-function escapeLikePattern(str: string): string {
-  return str.replace(/[%_\\]/g, '\\$&');
-}
 
-function escapeArrayLiteral(str: string): string {
-  return str.replace(/[{}"\\,]/g, '\\$&');
-}
