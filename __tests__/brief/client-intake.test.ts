@@ -93,6 +93,18 @@ describe('indicative term sheet', () => {
     expect(ts.counterparties).toEqual(['Eli Lilly', 'Roche']);
   });
 
+  it('honours the structure answers from the adaptive intake', () => {
+    const client = { ...intakeBodySchema.parse(body).client, structurePrefs: { optionFeeM: 12, optionMonths: 6, chinaLicensed: true, chinaPartner: 'Hansoh', readoutDate: '2027-06' } };
+    const ts = buildIndicativeTermSheet({ asset: { ...asset, targetDealType: 'Option' }, decision, client, asOf: '2026-09-26' });
+    expect(ts.lines.find(l => l.term === 'Option fee')?.position).toMatch(/^\$12M/);
+    expect(ts.lines.find(l => l.term === 'Exclusivity period')?.position).toMatch(/6 months/);
+    expect(ts.lines.find(l => l.term === 'Territory')?.position).toBe('Worldwide excluding Greater China (already licensed to Hansoh)');
+    expect(ts.notes.some(n => n.includes('Next readout 2027-06'))).toBe(true);
+    const ma = buildIndicativeTermSheet({ asset: { ...asset, targetDealType: 'M&A / Acquisition' }, decision, client: { ...client, structurePrefs: { minPriceM: 120 } }, asOf: '2026-09-26' });
+    expect(ma.lines.find(l => l.term === 'Consideration at close')?.floor).toMatch(/\$120M \(floor; you set \$120M/);
+    expect(parseClientIntake({ structure_prefs: { costSharePct: 30, coPromote: true, junk: { nested: 1 } } })?.structurePrefs).toEqual({ costSharePct: 30, coPromote: true });
+  });
+
   it('renders both pages and their empty states', () => {
     const meta = { currentPage: 5, pageCount: 33, reportId: 'AMB-TEST' } as ReportMeta;
     const ts = buildIndicativeTermSheet({ asset, decision, asOf: '2026-09-26' });

@@ -70,27 +70,37 @@ export function buildIndicativeTermSheet(input: {
   const royalty = decision.ask.royaltyPct;
   const term = termSheet?.termYears ? Math.round(termSheet.termYears.p50) : null;
   const anyAsia = (buyerMap?.candidates ?? []).some(c => /asia|china|japan|korea|apac/i.test(`${c.hqRegion ?? ''} ${c.hqCountry ?? ''}`));
-  const retainChina = /global|world/i.test(territory) && !anyAsia && !(client?.targetBuyers ?? []).some(n => /(china|shanghai|beijing|jiangsu|hengrui|hansoh|sino|takeda|daiichi|astellas|eisai|chugai|ono|otsuka)/i.test(n));
+  const prefs = client?.structurePrefs ?? {};
+  const prefNum = (k: string): number | null => { const v = prefs[k]; const x = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN; return Number.isFinite(x) && x > 0 ? x : null; };
+  const prefYes = (k: string): boolean => prefs[k] === true || (typeof prefs[k] === 'string' && /^(yes|true|y)$/i.test(prefs[k] as string));
+  const chinaLicensed = prefYes('chinaLicensed');
+  const chinaPartner = typeof prefs.chinaPartner === 'string' && prefs.chinaPartner.trim() ? prefs.chinaPartner.trim() : null;
+  const retainChina = !chinaLicensed && /global|world/i.test(territory) && !anyAsia && !(client?.targetBuyers ?? []).some(n => /(china|shanghai|beijing|jiangsu|hengrui|hansoh|sino|takeda|daiichi|astellas|eisai|chugai|ono|otsuka)/i.test(n));
+  const optionFee = prefNum('optionFeeM') ?? Math.round(decision.ask.upfrontM * 0.25);
+  const optionMonths = prefNum('optionMonths') ?? 9;
+  const costShare = prefNum('costSharePct');
+  const minPrice = prefNum('minPriceM');
 
   const lines: TermSheetLine[] = [];
   lines.push({ term: 'Structure', position: isMA ? 'Acquisition of the asset (or the company) with contingent consideration' : isOption ? 'Option to an exclusive licence, with an evaluation period' : isCodev ? 'Co-development and commercialisation licence with a profit-share election' : 'Exclusive licence to develop and commercialise', basis: `Structure you are preparing for at intake${isMA ? '' : `; licences are ${pctText(clauseShare('exclusive') ?? clauseShare('exclusivity'))} exclusive`}` });
-  lines.push({ term: 'Territory', position: retainChina ? 'Worldwide excluding Greater China (retained)' : /global|world/i.test(territory) ? 'Worldwide' : territory.replace(/_/g, ' '), basis: retainChina ? 'No buyer on the list is Asia-based; Greater China is a second transaction' : 'Territory on offer at intake' });
-  if (isOption) lines.push({ term: 'Option fee', position: `${fmt(Math.round(decision.ask.upfrontM * 0.25))}, creditable against the upfront on exercise`, basis: 'Sized to the buyer\'s diligence cost (decision lever); option fees are disclosed in ' + pctText(clauseShare('option_fee')), floor: `${fmt(Math.round(decision.floor.upfrontM * 0.2))}` });
-  lines.push({ term: isOption ? 'Upfront on exercise' : isMA ? 'Consideration at close' : 'Upfront', position: fmt(decision.ask.upfrontM), basis: 'The ask on page three', floor: `${fmt(decision.floor.upfrontM)} (floor); walk away below ${fmt(decision.walkAwayUpfrontM)}` });
+  lines.push({ term: 'Territory', position: chinaLicensed ? `Worldwide excluding Greater China (already licensed${chinaPartner ? ` to ${chinaPartner}` : ''})` : retainChina ? 'Worldwide excluding Greater China (retained)' : /global|world/i.test(territory) ? 'Worldwide' : territory.replace(/_/g, ' '), basis: chinaLicensed ? 'Greater China rights are out under an existing licence (intake); the buyer takes the rest of the world' : retainChina ? 'No buyer on the list is Asia-based; Greater China is a second transaction' : 'Territory on offer at intake' });
+  if (isOption) lines.push({ term: 'Option fee', position: `${fmt(optionFee)}, creditable against the upfront on exercise`, basis: (prefNum('optionFeeM') ? 'The fee you said you would accept at intake' : 'Sized to the buyer\'s diligence cost (decision lever)') + '; option fees are disclosed in ' + pctText(clauseShare('option_fee')), floor: `${fmt(Math.round(decision.floor.upfrontM * 0.2))}` });
+  lines.push({ term: isOption ? 'Upfront on exercise' : isMA ? 'Consideration at close' : 'Upfront', position: fmt(decision.ask.upfrontM), basis: 'The ask on page three', floor: isMA && minPrice ? `${fmt(Math.max(minPrice, decision.floor.upfrontM))} (floor; you set ${fmt(minPrice)} as the price below which you would not sell)` : `${fmt(decision.floor.upfrontM)} (floor); walk away below ${fmt(decision.walkAwayUpfrontM)}` });
   lines.push({ term: isMA ? 'Contingent consideration' : 'Development and regulatory milestones', position: `${fmt(milestonesPool)} in aggregate, weighted as scheduled below`, basis: `Total ask ${fmt(decision.ask.totalM)} less the upfront; weighting follows the stage lever`, floor: `${fmt(Math.max(0, decision.floor.totalM - decision.floor.upfrontM))}` });
   if (!isMA) lines.push({ term: 'Sales milestones', position: b === 'phase_3' ? 'Stepped at $500M and $1B net sales' : 'Stepped at $500M and $1B net sales, in addition to the schedule', basis: `Sales milestones appear in ${pctText(clauseShare('sales_milestones'))}` });
   if (!isMA) lines.push({ term: 'Royalty', position: royalty ? `Tiered ${Math.round(royalty.low)}% to ${Math.round(royalty.high)}% of net sales` : 'Tiered, to be set from the comparable royalty band', basis: royalty ? 'Royalty range on page three, from the comparable set' : 'No royalty band could be built from disclosed comps', floor: 'Anti-stacking floor at 4%; no reduction below it for third-party licences' });
   if (!isMA) lines.push({ term: 'Royalty term', position: term ? `Later of patent expiry, regulatory exclusivity, or ${term} years from first sale` : 'Later of patent expiry, regulatory exclusivity, or 12 years from first sale', basis: term ? `Median disclosed term is ${term} years (n=${termSheet?.termYears?.n ?? 0})` : 'Decision lever' });
-  if (isCodev || b === 'preclinical' || b === 'phase_1') lines.push({ term: 'Co-development election', position: 'Option to co-fund from pivotal start in exchange for a US profit share', basis: 'Decision lever for early-stage assets; keeps upside if the data outruns the ask' });
-  if (b === 'phase_2') lines.push({ term: 'Co-promotion', position: 'US co-promotion right on the lead indication', basis: 'Decision lever for Phase 2 assets' });
+  if (isCodev || b === 'preclinical' || b === 'phase_1') lines.push({ term: 'Co-development election', position: costShare ? `Fund ${Math.round(costShare)}% of development cost from pivotal start for a matching share of US profit` : 'Option to co-fund from pivotal start in exchange for a US profit share', basis: costShare ? 'Cost share you said you would fund at intake' : 'Decision lever for early-stage assets; keeps upside if the data outruns the ask' });
+  if (b === 'phase_2' || prefYes('coPromote')) lines.push({ term: 'Co-promotion', position: 'US co-promotion right on the lead indication', basis: prefYes('coPromote') ? 'You asked for co-promotion at intake' : 'Decision lever for Phase 2 assets' });
   lines.push({ term: 'Diligence', position: 'Commercially reasonable efforts with objective diligence milestones (first patient dosed, filing) and reversion on failure', basis: `Diligence obligations are disclosed in ${pctText(clauseShare('diligence'))}` });
-  lines.push({ term: 'Exclusivity period', position: isOption ? 'Evaluation period of 9 months, extendable once for a fee' : '45 days of exclusive negotiation from signing of this term sheet', basis: 'Keeps the tension list warm; see the timeline on page three' });
+  lines.push({ term: 'Exclusivity period', position: isOption ? `Evaluation period of ${Math.round(optionMonths)} months, extendable once for a fee` : '45 days of exclusive negotiation from signing of this term sheet', basis: prefNum('optionMonths') ? 'The evaluation period you said you would accept at intake' : 'Keeps the tension list warm; see the timeline on page three' });
   if (client?.upstreamLicenses) lines.push({ term: 'Upstream obligations', position: 'Buyer assumes pass-through of upstream royalties and milestones as disclosed', basis: `Intake: ${client.upstreamLicenses.slice(0, 140)}` });
 
   const notes: string[] = [];
   notes.push(`Indicative only. Positions are the opening set consistent with the decision on page three; the floor column is where we would stop.`);
   if (decision.levers.length) notes.push(`Levers: ${decision.levers.join('; ')}.`);
   if (client?.priorOffers?.length) notes.push(`An offer is already on the table; page "Your model vs Solidus" sets it against the floor and the ask.`);
+  if (typeof prefs.readoutDate === 'string' && prefs.readoutDate.trim()) notes.push(`Next readout ${prefs.readoutDate.trim()} (intake): the exclusivity clock is set so a signed term sheet lands before it, or the process restarts after it with the data in hand.`);
 
   return {
     asOf,
