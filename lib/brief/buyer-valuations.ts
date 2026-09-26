@@ -5,29 +5,96 @@
  * partner matches, builds a BuyerProfile per partner and runs the existing
  * buyer-specific valuation engine against the generic waterfall. Pure and
  * synchronous; no database access. Counterparty premiums (from
- * counterparty_premiums) can be passed in as a map keyed by company name.
+ * counterparty_premiums) can be passed in as a map keyed by company name;
+ * when the entry carries the per-TA / per-phase slices and the asset's TA and
+ * phase are given, the lookup goes through `getCounterpartyPremium`, which
+ * prefers a phase- or TA-specific premium with n ≥ 5 and otherwise falls back
+ * to the company-wide multiplier (Sep 26 2026: previously always company-wide).
  */
 
-import type { DealWaterfall, RNPVResult, CounterpartyPremiumLookup } from '@/lib/financial/types';
+import type { DealWaterfall, RNPVResult, CounterpartyPremium, CounterpartyPremiumLookup } from '@/lib/financial/types';
 import {
   buildBuyerProfileFromMatch,
   calculateBuyerSpecificValuation,
   type BuyerSpecificValuation,
 } from '@/lib/financial/buyer-specific-valuation';
+import { getCounterpartyPremium } from '@/lib/financial/counterparty-premiums';
+import { normalizePhase } from '@/lib/brief/comp-set';
 import type { PartnerForPDF } from '@/lib/report/types';
 
-export interface PremiumEntry { multiplier: number; n: number; confidence: string }
+export type PremiumSlice = Record<string, { premium: number; n: number }>;
+
+export interface PremiumEntry {
+  multiplier: number;
+  n: number;
+  confidence: string;
+  /** counterparty_premiums.company_id (optional; only used to label the lookup). */
+  companyId?: string | null;
+  /** counterparty_premiums.by_therapeutic_area — { oncology: { premium, n } }. */
+  byTherapeuticArea?: PremiumSlice | null;
+  /** counterparty_premiums.by_phase — keyed on the DB phase ({ phase_2: { premium, n } }). */
+  byPhase?: PremiumSlice | null;
+}
+
+/** Asset context for the TA / phase slice lookup. */
+export interface PremiumContext {
+  therapeuticArea?: string | null;
+  phase?: string | null;
+}
 
 /** Number of partners priced by default; the buyer-specific page shows the top few. */
 export const BUYER_VALUATION_LIMIT = 6;
 
 const norm = (s: string | null | undefined): string => (s ?? '').trim().toLowerCase();
 
-function toLookup(entry: PremiumEntry | undefined): CounterpartyPremiumLookup | undefined {
+function toConfidence(c: string | null | undefined): CounterpartyPremiumLookup['confidence'] {
+  const k = norm(c);
+  return k === 'high' ? 'high' : k === 'medium' ? 'medium' : 'low';
+}
+
+function cleanSlice(slice: PremiumSlice | null | undefined): PremiumSlice {
+  const out: PremiumSlice = {};
+  if (!slice || typeof slice !== 'object') return out;
+  for (const [k, v] of Object.entries(slice)) {
+    const premium = Number(v?.premium);
+    const n = Number(v?.n);
+    if (Number.isFinite(premium) && premium > 0 && Number.isFinite(n) && n > 0) out[k] = { premium, n };
+  }
+  return out;
+}
+
+/**
+ * Turn a premium row into the lookup the valuation engine takes. With a
+ * context, `getCounterpartyPremium` picks the phase slice (n ≥ 5), then the TA
+ * slice (n ≥ 5), then the company-wide multiplier; without one, or when the
+ * entry has no slices, the result is the company-wide lookup as before.
+ */
+export function toLookup(entry: PremiumEntry | undefined, context?: PremiumContext): CounterpartyPremiumLookup | undefined {
   if (!entry || !Number.isFinite(entry.multiplier) || entry.multiplier <= 0) return undefined;
-  const c = norm(entry.confidence);
-  const confidence: CounterpartyPremiumLookup['confidence'] = c === 'high' ? 'high' : c === 'medium' ? 'medium' : 'low';
-  return { multiplier: entry.multiplier, confidence, source: 'company_wide' };
+  const confidence = toConfidence(entry.confidence);
+  const byTherapeuticArea = cleanSlice(entry.byTherapeuticArea);
+  const byPhase = cleanSlice(entry.byPhase);
+  const hasSlices = Object.keys(byTherapeuticArea).length > 0 || Object.keys(byPhase).length > 0;
+  if (!context || !hasSlices) return { multiplier: entry.multiplier, confidence, source: 'company_wide' };
+  const id = entry.companyId ?? 'entry';
+  const premium: CounterpartyPremium = {
+    companyId: id,
+    companyName: id,
+    premiumMultiplier: entry.multiplier,
+    sampleSize: Number.isFinite(entry.n) ? entry.n : 0,
+    confidence,
+    byTherapeuticArea,
+    byPhase,
+    asOfDate: '',
+    calculationNotes: '',
+  };
+  // Asset phases arrive as engine keys ("phase_2") or labels ("Phase 2"); the
+  // slices are keyed on the DB phase, which normalizePhase produces.
+  const phase = context.phase ? normalizePhase(context.phase) : 'unknown';
+  return getCounterpartyPremium(id, [premium], {
+    therapeuticArea: context.therapeuticArea ?? undefined,
+    phase: phase === 'unknown' ? undefined : phase,
+  });
 }
 
 /**
@@ -41,6 +108,7 @@ export function computeBuyerValuations(
   rnpv: RNPVResult,
   premiums?: Map<string, PremiumEntry>,
   limit: number = BUYER_VALUATION_LIMIT,
+  context?: PremiumContext,
 ): BuyerSpecificValuation[] {
   if (!Array.isArray(partners) || !waterfall || !rnpv) return [];
   const top = [...partners]
@@ -69,7 +137,7 @@ export function computeBuyerValuations(
       hq_country: p.hq_country ?? null,
       company_type: ext.company_type ?? null,
     });
-    const premium = premiums ? toLookup(premiums.get(norm(p.company_name)) ?? premiums.get(p.company_name)) : undefined;
+    const premium = premiums ? toLookup(premiums.get(norm(p.company_name)) ?? premiums.get(p.company_name), context) : undefined;
     try {
       out.push(calculateBuyerSpecificValuation(profile, waterfall, rnpv, premium));
     } catch {

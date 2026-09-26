@@ -5,9 +5,10 @@
  *
  * Every call runs the resolver. Once a day — when the UTC hour equals
  * `rollupHour`, or when `forceRollups` is set — it also runs the Radar writer
- * (if enabled), materialises the accuracy rollups and sends the day-45 /
- * day-120 brief outcome follow-ups. Never throws; returns a report and logs
- * exactly one line with counts.
+ * (if enabled), materialises the accuracy rollups, blends client outcomes
+ * into the buyer premiums (outcome priors; idempotent, writes only on change)
+ * and sends the day-45 / day-120 brief outcome follow-ups. Never throws;
+ * returns a report and logs exactly one line with counts.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -15,6 +16,7 @@ import { runResolver } from './resolver';
 import { materialiseRollups } from './rollups';
 import { recordRadarPredictions } from './writers';
 import { runOutcomeFollowups, type FollowupRunReport } from './followups';
+import { refreshOutcomePriors, type PriorsRunReport } from './priors';
 import type { RadarWriterReport, ResolverRunReport, RollupRunReport } from './types';
 
 export interface OutcomePhaseOptions {
@@ -26,12 +28,15 @@ export interface OutcomePhaseOptions {
   cursorOverride?: string;
   /** Skip the follow-up emails on a nightly run (manual re-runs). */
   skipFollowups?: boolean;
+  /** Skip the outcome-priors blend on a nightly run. */
+  skipPriors?: boolean;
 }
 
 export interface OutcomePhaseReport {
   resolver: ResolverRunReport;
   radar: RadarWriterReport | null;
   rollups: RollupRunReport | null;
+  priors: PriorsRunReport | null;
   followups: FollowupRunReport | null;
   nightly: boolean;
   ms: number;
@@ -54,6 +59,7 @@ export async function runOutcomePhase(supabase: SupabaseClient, opts: OutcomePha
 
   let radar: RadarWriterReport | null = null;
   let rollups: RollupRunReport | null = null;
+  let priors: PriorsRunReport | null = null;
   let followups: FollowupRunReport | null = null;
   if (nightly) {
     try {
@@ -67,6 +73,14 @@ export async function runOutcomePhase(supabase: SupabaseClient, opts: OutcomePha
       errors.push(...rollups.errors);
     } catch (e) {
       errors.push(`rollups: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    if (!opts.skipPriors) {
+      try {
+        priors = await refreshOutcomePriors(supabase, { now });
+        errors.push(...priors.errors.map((e) => `priors: ${e}`));
+      } catch (e) {
+        errors.push(`priors: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
     if (!opts.skipFollowups) {
       try {
@@ -82,8 +96,8 @@ export async function runOutcomePhase(supabase: SupabaseClient, opts: OutcomePha
   console.log(
     `[Outcomes] resolve: deals=${resolver.dealsScanned} open=${resolver.openPredictions} pairs=${resolver.pairsScored} ` +
     `auto=${resolver.autoResolved} queued=${resolver.queued} expired=${resolver.expired} cursor=${resolver.cursorTo ?? '-'}` +
-    (nightly ? ` | nightly: radar=${radar ? `${radar.inserted}/${radar.candidates}${radar.enabled ? '' : ' (off)'}` : '-'} rollups=${rollups ? `${rollups.cells} cells from ${rollups.inputRows} rows` : '-'} followups=${followups ? `${followups.sent}/${followups.due} due of ${followups.requests}` : '-'}` : '') +
+    (nightly ? ` | nightly: radar=${radar ? `${radar.inserted}/${radar.candidates}${radar.enabled ? '' : ' (off)'}` : '-'} rollups=${rollups ? `${rollups.cells} cells from ${rollups.inputRows} rows` : '-'} priors=${priors ? `${priors.buyersTouched} buyers from ${priors.observations} obs` : '-'} followups=${followups ? `${followups.sent}/${followups.due} due of ${followups.requests}` : '-'}` : '') +
     ` | ${ms}ms${errors.length ? ` | errors=${errors.length}: ${errors.slice(0, 3).join('; ')}` : ''}`,
   );
-  return { resolver, radar, rollups, followups, nightly, ms, errors };
+  return { resolver, radar, rollups, priors, followups, nightly, ms, errors };
 }
