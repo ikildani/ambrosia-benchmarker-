@@ -4,6 +4,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { deriveTherapeuticArea } from './sec-edgar';
+import { resolveCompany } from '@/lib/entities/resolve';
 
 // === EMA RSS Feed ===
 
@@ -290,24 +291,9 @@ async function matchMAHToCompany(
 ): Promise<string | null> {
   if (!mahName) return null;
 
-  // Normalize: strip common suffixes
-  const normalized = mahName
-    .replace(/,?\s*(Ltd\.?|Limited|GmbH|S\.?A\.?|B\.?V\.?|Inc\.?|Corp\.?|PLC|AB|AG|N\.?V\.?|SE|KGaA|Oyj|A\/S)$/i, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  // Escape special characters for LIKE/array queries
-  const safeName = normalized.replace(/[%_\\]/g, '\\$&');
-  const safeArrayName = mahName.replace(/[{}"\\,]/g, '\\$&');
-
-  const { data: existing } = await supabase
-    .from('companies')
-    .select('id, name, name_variations')
-    .or(`name.ilike.%${safeName}%,name_variations.cs.{${safeArrayName}}`)
-    .limit(1)
-    .single();
-
-  return existing?.id || null;
+  // Shared entity resolver: exact / alias / fuzzy, never a folded duplicate.
+  const resolved = await resolveCompany(supabase, { name: mahName }).catch(() => null);
+  return resolved?.match?.id ?? null;
 }
 
 // === Deal Matching & Enrichment ===
