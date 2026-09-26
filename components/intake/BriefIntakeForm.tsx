@@ -78,11 +78,12 @@ function Field({ l, children, hint }: { l: string; children: React.ReactNode; hi
     </div>
   );
 }
-function Pills<T extends string>({ options, value, onChange }: { options: ReadonlyArray<readonly [T, string]> | ReadonlyArray<T>; value: string; onChange: (v: T) => void }) {
+function Pills({ options, value, onChange }: { options: ReadonlyArray<readonly [string, string]> | ReadonlyArray<string>; value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {options.map(o => {
-        const [k, l] = Array.isArray(o) ? (o as readonly [T, string]) : ([o as T, o as string] as const);
+      {(options as ReadonlyArray<string | readonly [string, string]>).map(o => {
+        const k = typeof o === 'string' ? o : o[0];
+        const l = typeof o === 'string' ? o : o[1];
         return <button type="button" key={k} className={pill(value === k)} onClick={() => onChange(k)}>{l}</button>;
       })}
     </div>
@@ -251,7 +252,7 @@ export function BriefIntakeForm({ prefill = {}, intakePath }: Props) {
                   <input className={input} placeholder="Upfront, $M" inputMode="decimal" value={o.upfrontM} onChange={e => set('offers', d.offers.map((x, j) => j === k ? { ...x, upfrontM: e.target.value } : x))} />
                   <input className={input} placeholder="Total, $M" inputMode="decimal" value={o.totalM} onChange={e => set('offers', d.offers.map((x, j) => j === k ? { ...x, totalM: e.target.value } : x))} />
                 </div>
-                <Pills options={PRIOR_OFFER_STATUSES} value={o.status} onChange={v => set('offers', d.offers.map((x, j) => j === k ? { ...x, status: v } : x))} />
+                <Pills options={PRIOR_OFFER_STATUSES} value={o.status} onChange={v => set('offers', d.offers.map((x, j) => j === k ? { ...x, status: v as PriorOffer['status'] } : x))} />
                 <input className={input} placeholder="Structure and what stalled" value={o.notes} onChange={e => set('offers', d.offers.map((x, j) => j === k ? { ...x, notes: e.target.value } : x))} />
                 <button type="button" className="text-xs text-slate-500 hover:text-rose-400" onClick={() => set('offers', d.offers.filter((_, j) => j !== k))}>Remove this offer</button>
               </div>
