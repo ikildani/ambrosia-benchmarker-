@@ -49,27 +49,32 @@ export default async function AdminBriefsPage({ searchParams }: { searchParams: 
   const counts = { building: rows.filter(r => r.status === 'intake' && r.auto_draft_status === 'requested').length, draft: rows.filter(r => r.status === 'call_complete').length, invoice: rows.filter(r => !r.invoice_sent_at && r.status !== 'delivered').length };
 
   return (
+    <div className="min-h-screen bg-slate-950 text-slate-100">
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-50">Deal Intelligence Briefs</h1>
-          <p className="mt-1 text-sm text-slate-400">Flow: intake → draft builds automatically → invoice → 15-minute call with the draft → opinion → Deliver (uploads final PDF + Excel, emails the data-room link) → walkthrough → scored.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">Deal Intelligence Brief</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-50">Requests</h1>
+          <ol className="mt-3 flex flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
+            {['Intake', 'Draft builds', 'Invoice', 'Call with the draft', 'Opinion', 'Deliver', 'Walkthrough', 'Scored'].map((step, i, a) => <li key={step} className="flex items-center gap-2"><span className="text-slate-200">{step}</span>{i < a.length - 1 ? <span className="text-slate-600">›</span> : null}</li>)}
+          </ol>
         </div>
         <div className="flex gap-2 text-sm">
-          <a href="/admin/briefs?show=open" className={`rounded-md px-3 py-1.5 ${show === 'open' ? 'bg-slate-800 text-slate-100' : 'text-slate-400 hover:text-slate-200'}`}>Open</a>
-          <a href="/admin/briefs?show=all" className={`rounded-md px-3 py-1.5 ${show === 'all' ? 'bg-slate-800 text-slate-100' : 'text-slate-400 hover:text-slate-200'}`}>All</a>
+          <a href="/admin/briefs?show=open" className={`rounded-md border px-3 py-1.5 ${show === 'open' ? 'border-teal-400/50 bg-teal-500/10 text-teal-200' : 'border-slate-700 text-slate-400 hover:text-slate-200'}`}>Open</a>
+          <a href="/admin/briefs?show=all" className={`rounded-md border px-3 py-1.5 ${show === 'all' ? 'border-teal-400/50 bg-teal-500/10 text-teal-200' : 'border-slate-700 text-slate-400 hover:text-slate-200'}`}>All</a>
         </div>
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {[['Drafts building', counts.building], ['Drafts ready for the call', counts.draft], ['Invoices to send', counts.invoice]].map(([k, v]) => (
-          <div key={String(k)} className="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-4"><div className="text-xs text-slate-500">{k}</div><div className="mt-1 text-2xl font-semibold text-slate-50">{v}</div></div>
+          <div key={String(k)} className="rounded-xl border border-slate-800 bg-slate-900/60 px-5 py-4"><div className="text-xs text-slate-400">{k}</div><div className="mt-1 text-2xl font-semibold text-slate-50">{v}</div></div>
         ))}
       </div>
       {error ? <p className="mt-6 text-sm text-rose-400">{error.message}</p> : null}
       <div className="mt-8 space-y-4">
         {views.length === 0 ? <p className="text-sm text-slate-500">No requests{show === 'open' ? ' open' : ''}.</p> : views.map(v => <BriefRequestRow key={v.id} r={v} />)}
       </div>
-      <p className="mt-8 text-xs text-slate-600">Data-room links are permanent per brief (<code>/brief/r/&lt;token&gt;</code>) and mint fresh 30-day download links each visit; the PDF and Excel links on this page are one-hour signed URLs.</p>
+      <p className="mt-8 text-xs text-slate-600">Data-room links are permanent per brief and mint fresh 30-day download links each visit; a draft's data room shows a preview banner and is only visible to you until delivered. The PDF and Excel links on this page are one-hour signed URLs.</p>
+    </div>
     </div>
   );
 }
