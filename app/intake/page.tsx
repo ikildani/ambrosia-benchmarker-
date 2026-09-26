@@ -30,21 +30,13 @@ export default async function IntakePage({ searchParams }: Props) {
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0e13] text-slate-100">
       <InstitutionalNav activePath="/brief" />
-      <div className="mx-auto max-w-6xl px-6 pt-28 pb-20">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-slate-800/80 pb-8">
-          <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">Deal Intelligence Brief · intake</p>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">{first ? `${first}, tell us about the asset.` : 'Tell us about the asset.'}</h1>
-            <p className="mt-3 text-slate-400">One asset, one signed recommendation, about thirty data-backed pages, built from public data plus what you add here. Two minutes with the asset alone; ten with your model to hand.</p>
-          </div>
-          <dl className="grid grid-cols-3 gap-6 text-sm">
-            {[[BENCHMARK_PRICING.PRICE, 'invoiced at intake'], ['15 min', 'call on receipt'], ['24 h', 'to delivery']].map(([v, l]) => (
-              <div key={l}><dt className="font-mono text-xl font-semibold text-slate-50">{v}</dt><dd className="mt-0.5 text-xs text-slate-500">{l}</dd></div>
-            ))}
-          </dl>
-        </div>
+      <div className="mx-auto max-w-2xl px-6 pt-28 pb-24">
+        <header className="mb-12">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">Deal Intelligence Brief · intake</p>
+          <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-50">{first ? `${first}, a few questions about the asset.` : 'A few questions about the asset.'}</h1>
+          <p className="mt-2 text-sm text-slate-500">{BENCHMARK_PRICING.PRICE}, invoiced at intake · 15-minute call on receipt · delivered within 24 hours of the call · <Link href="/brief" className="text-teal-300 hover:underline">what the brief contains</Link></p>
+        </header>
         <BriefIntakeForm prefill={prefill} intakePath="/intake" />
-        <p className="mt-8 text-xs text-slate-600">What the brief contains, page by page: <Link href="/brief" className="text-teal-300 hover:underline">/brief</Link>.</p>
       </div>
     </main>
   );
