@@ -33,7 +33,10 @@ function renderCrlGauge(crlProbability: number): string {
     const y1 = cy - r * Math.sin(s);
     const x2 = cx + r * Math.cos(e);
     const y2 = cy - r * Math.sin(e);
-    const largeArc = Math.abs(endPct - startPct) > 25 ? 1 : 0;
+    // Each zone spans at most 180 degrees; the large-arc flag is only needed for
+    // the full semicircle (a span above 25 points used to send the 20–50 zone the
+    // long way round the circle).
+    const largeArc = Math.abs(endPct - startPct) >= 50 ? 1 : 0;
     return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
   };
 
