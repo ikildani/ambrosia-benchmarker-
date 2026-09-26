@@ -261,12 +261,20 @@ export function buildDecisionSummary(input: DecisionInput): DecisionSummary {
 
   // Confidence
   const sameIndicationN = compSet ? compSet.rows.filter(r => r.sameIndication).length : 0;
+  // One verdict. Pricing evidence (same-indication comparables) sets it; the
+  // strategic read can only lower it, and is described without a second
+  // adjective so the page never says "low" and "high" on the same line.
   let confidence: DecisionSummary['confidence'] = sameIndicationN >= CONFIDENCE_HIGH_N ? 'high' : sameIndicationN >= CONFIDENCE_MEDIUM_N ? 'medium' : 'low';
   const rank = { low: 0, medium: 1, high: 2 } as const;
-  let confidenceBasis = `${sameIndicationN} same-indication comparable${sameIndicationN === 1 ? '' : 's'}${compSet ? ` of ${compSet.rows.length} in the set` : ' (no comparable set)'}`;
+  let confidenceBasis = `Pricing evidence: ${sameIndicationN} same-indication comparable${sameIndicationN === 1 ? '' : 's'}${compSet ? ` of ${compSet.rows.length} in the set` : ' (no comparable set)'}`;
   if (memo?.confidence_level) {
-    if (rank[memo.confidence_level] < rank[confidence]) confidence = memo.confidence_level;
-    confidenceBasis += `; strategic analysis confidence ${memo.confidence_level}${memo.confidence_basis ? ` (${memo.confidence_basis})` : ''}`;
+    const memoWhy = memo.confidence_basis ? memo.confidence_basis.replace(/\s*\(high ≥ \d+, medium ≥ \d+\)\s*$/i, '').trim() : '';
+    if (rank[memo.confidence_level] < rank[confidence]) {
+      confidence = memo.confidence_level;
+      confidenceBasis += `; the strategic read is weaker${memoWhy ? ` (${memoWhy})` : ''} and sets the verdict`;
+    } else if (rank[memo.confidence_level] > rank[confidence]) {
+      confidenceBasis += `; the strategic read is stronger${memoWhy ? ` (${memoWhy})` : ''}, but pricing evidence sets the verdict`;
+    }
   }
 
   return {

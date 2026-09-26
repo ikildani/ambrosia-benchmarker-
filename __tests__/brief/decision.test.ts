@@ -312,7 +312,9 @@ describe('buildDecisionSummary', () => {
     const d2 = buildDecisionSummary({ asset, bridge, compSet: makeCompSet(8, false), buyerMap: makeBuyerMap(), result, asOf: AS_OF });
     expect(d2.confidence).toBe('low');
     const d3 = buildDecisionSummary({ asset, bridge, compSet: makeCompSet(14), buyerMap: makeBuyerMap(), result, asOf: AS_OF, memo: { confidence_level: 'low' } as never });
-    expect(d3.confidence).toBe('low'); expect(d3.confidenceBasis).toContain('strategic analysis confidence low');
+    expect(d3.confidence).toBe('low'); expect(d3.confidenceBasis).toContain('the strategic read is weaker');
+    // One adjective per line: the basis never carries a second confidence word that contradicts the verdict.
+    expect(d3.confidenceBasis).not.toMatch(/confidence (high|medium|low)/);
   });
 });
 
