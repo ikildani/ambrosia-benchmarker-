@@ -98,16 +98,14 @@ function DatabaseCoverageSection() {
   const taItems = Object.entries(stats.byTA)
     .filter(([ta]) => ta !== 'other' && !ta.startsWith('_') && TA_DISPLAY_NAMES[ta])
     .sort(([, a], [, b]) => b - a)
-    .map(([ta, n]) => ({ key: ta, label: TA_DISPLAY_NAMES[ta], value: n, sub: stats.byTAVerified[ta] ? `${stats.byTAVerified[ta]} verified` : undefined }));
+    .map(([ta, n]) => ({ key: ta, label: TA_DISPLAY_NAMES[ta], value: n }));
   const taMax = taItems[0]?.value || 1;
 
   const phaseItems = PHASE_DISPLAY.map(p => ({ key: p.key, label: p.label, value: stats.byPhase[p.key] ?? 0 }));
   const phaseMax = Math.max(...phaseItems.map(p => p.value), 1);
-  const unstaged = stats.byPhase.unknown ?? 0;
 
   const typeItems = COMPANY_TYPE_DISPLAY.map(t => ({ key: t.key, label: t.label, value: stats.byCompanyType?.[t.key] ?? 0 })).filter(t => t.value > 0);
   const typeMax = Math.max(...typeItems.map(t => t.value), 1);
-  const unclassified = stats.byCompanyType?.unclassified ?? 0;
 
   const years = Object.keys(stats.byYear).map(Number).filter(Number.isFinite).sort();
   const yearSpan = years.length ? `${years[0]}–${years[years.length - 1]}` : '2017–2026';
@@ -121,13 +119,8 @@ function DatabaseCoverageSection() {
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Database Coverage</h2>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              {headline} primary-sourced transactions across {taItems.length} therapeutic areas · {stats.primaryVerified.toLocaleString()} verifier-confirmed
+              {headline} primary-sourced transactions across {taItems.length} therapeutic areas
             </p>
-            {stats.backlog > 0 ? (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {stats.backlog.toLocaleString()} further extracted deals are awaiting a primary citation and are not counted here.
-              </p>
-            ) : null}
           </div>
           <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
             Updated continuously from SEC EDGAR, HKEX, TDnet, ASX, SSE/SZSE, issuer wires &amp; regulatory databases
@@ -138,14 +131,14 @@ function DatabaseCoverageSection() {
         <CoverageBars items={taItems} max={taMax} />
 
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-2">
-          By phase at signing{unstaged > 0 ? <span className="normal-case font-normal tracking-normal"> · {unstaged.toLocaleString()} without a disclosed stage</span> : null}
+          By phase at signing
         </div>
         <CoverageBars items={phaseItems} max={phaseMax} />
 
         {typeItems.length > 0 ? (
           <>
             <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-2">
-              Counterparties by type · {stats.companies.toLocaleString()} organisations{unclassified > 0 ? <span className="normal-case font-normal tracking-normal"> · {unclassified.toLocaleString()} not yet classified</span> : null}
+              Counterparties by type · {stats.companies.toLocaleString()} organisations
             </div>
             <CoverageBars items={typeItems} max={typeMax} />
           </>
