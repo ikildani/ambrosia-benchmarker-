@@ -172,7 +172,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
 
 <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 
-  <p style="font-size: 15px; color: #334155; margin-top: 0;">You've seen the headline benchmarks. Here's what the full Deal Intelligence Report gives you:</p>
+  <p style="font-size: 15px; color: #334155; margin-top: 0;">You've seen the headline benchmarks. Here's what the full ${PRICING.REPORT_LABEL} gives you:</p>
 
   <div style="margin: 24px 0;">
     <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">

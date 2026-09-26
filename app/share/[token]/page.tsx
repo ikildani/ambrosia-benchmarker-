@@ -142,7 +142,7 @@ export default async function SharePage({ params }: Props) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/[0.06] border border-teal-500/[0.1] mb-8">
             <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></div>
-            <span className="text-[11px] font-bold text-teal-400/80 tracking-[0.15em] uppercase">Deal Intelligence Report</span>
+            <span className="text-[11px] font-bold text-teal-400/80 tracking-[0.15em] uppercase">{PRICING.REPORT_LABEL}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.03em] leading-[1.05] text-white mb-4">
@@ -187,7 +187,7 @@ export default async function SharePage({ params }: Props) {
 
           <div className="relative z-10 p-8 sm:p-14">
             <div className="max-w-2xl mx-auto text-center">
-              <p className="text-[11px] font-bold text-teal-400/70 tracking-[0.15em] uppercase mb-6">Full Deal Intelligence Report</p>
+              <p className="text-[11px] font-bold text-teal-400/70 tracking-[0.15em] uppercase mb-6">{PRICING.REPORT_LABEL}</p>
 
               <h3 className="text-3xl sm:text-4xl font-black text-white tracking-[-0.02em] mb-4">
                 Get the complete analysis<br />

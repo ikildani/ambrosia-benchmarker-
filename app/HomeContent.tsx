@@ -588,7 +588,7 @@ export default function HomeContent() {
               {
                 icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
                 title: 'Deal Toolkit',
-                description: 'AI deal memos, negotiation playbooks, sensitivity analysis, scenario comparison, outreach email generation, and 16-page branded PDF reports.',
+                description: 'AI deal memos, negotiation playbooks, sensitivity analysis, scenario comparison, outreach email generation, and 20-page branded PDF reports.',
                 gradient: 'from-slate-700 to-slate-900',
               },
               {
@@ -768,7 +768,7 @@ export default function HomeContent() {
                 <h3 className="text-lg sm:text-xl font-bold text-navy-800 dark:text-white">Advanced Deal Intelligence</h3>
               </div>
               <p className="text-sm sm:text-base text-neutral-600 dark:text-slate-400 leading-relaxed mb-4">
-                Institutional-grade deal memos, negotiation playbooks with counterparty-specific tactics, outreach email templates, and 16-page branded PDF reports — all customized to your specific asset and market position.
+                Institutional-grade deal memos, negotiation playbooks with counterparty-specific tactics, outreach email templates, and 20-page branded PDF reports — all customized to your specific asset and market position.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Deal memos', 'Negotiation playbooks', 'Outreach emails', 'Deal reports'].map((tag) => (

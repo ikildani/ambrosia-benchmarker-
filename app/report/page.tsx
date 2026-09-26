@@ -12,18 +12,18 @@ import { DEAL_STATS, PRICING, BENCHMARK_PRICING, ENGINE_COUNT } from '@/lib/conf
 import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
-  title: 'Deal Intelligence Report — $499',
+  title: `${PRICING.REPORT_LABEL} — ${PRICING.REPORT_PRICE}`,
   description: `Board-ready biopharma deal benchmarking in 60 seconds. rNPV valuation, comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} verified SEC filings.`,
   openGraph: {
-    title: 'Deal Intelligence Report — $499',
+    title: `${PRICING.REPORT_LABEL} — ${PRICING.REPORT_PRICE}`,
     description: `Board-ready biopharma deal benchmarking. Comparable deals, partner matching, sensitivity analysis, and negotiation playbook from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/report',
-    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'Ambrosia Ventures Deal Intelligence Report' }],
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: `Ambrosia Ventures ${PRICING.REPORT_LABEL}` }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Intelligence Report — $499',
+    title: `${PRICING.REPORT_LABEL} — ${PRICING.REPORT_PRICE}`,
     description: `Board-ready biopharma deal benchmarking from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     images: ['/api/og'],
   },
@@ -311,7 +311,7 @@ export default function ReportPage() {
                 {/* Report header */}
                 <div className="flex items-start justify-between mb-8">
                   <div>
-                    <div className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-2">Deal Intelligence Report</div>
+                    <div className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-2">{PRICING.REPORT_LABEL}</div>
                     <div className="text-xl sm:text-2xl font-bold text-white mb-1">ADC Licensing — Oncology</div>
                     <div className="text-xs text-slate-500">Phase 2 &middot; Solid Tumors &middot; Generated Apr 2026</div>
                   </div>
