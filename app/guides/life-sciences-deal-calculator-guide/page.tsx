@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: `Biotech Deal Calculator: 14 Engines, ${DEAL_STATS.TOTAL_DEALS} Deals, Instant Benchmarks`,
@@ -44,7 +44,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: 'Solidus: Benchmark Upfronts, Milestones & Royalties',
-    description: 'Complete guide to Solidus covering all 14 engines, step-by-step usage, and methodology.',
+    description: `Complete guide to Solidus covering all ${ENGINE_COUNT} engines, step-by-step usage, and methodology.`,
     author: {
       '@type': 'Organization',
       name: 'Ambrosia Ventures',
@@ -109,7 +109,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     url: `${baseUrl}/calculator`,
-    description: `Life sciences deal benchmarking tool with 14 calculation engines, ${DEAL_STATS.TOTAL_DEALS} comparable transactions, and institutional-quality reporting.`,
+    description: `Life sciences deal benchmarking tool with ${ENGINE_COUNT} calculation engines, ${DEAL_STATS.TOTAL_DEALS} comparable transactions, and institutional-quality reporting.`,
     offers: [
       {
         '@type': 'Offer',
@@ -121,7 +121,7 @@ export default function LifeSciencesDealCalculatorGuidePage() {
         '@type': 'Offer',
         price: '299',
         priceCurrency: 'USD',
-        description: 'Pro subscription with all 14 engines',
+        description: `Pro subscription with all ${ENGINE_COUNT} engines`,
         billingIncrement: 'P1M',
       },
     ],

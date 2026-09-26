@@ -361,7 +361,7 @@ export default function DealQuery({ showBlurredPreview = true, onUpgrade, compac
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">Pro Feature</p>
-                      <p className="text-xs text-slate-400 mt-1">Deal Intelligence Query is available for Pro and Portfolio subscribers. Unlock AI-powered analysis of 1,500+ deals.</p>
+                      <p className="text-xs text-slate-400 mt-1">Deal Intelligence Query is available for Pro and Portfolio subscribers. Unlock AI-powered analysis of {DEAL_STATS.TOTAL_DEALS} deals.</p>
                       {onUpgrade && (
                         <button
                           onClick={onUpgrade}

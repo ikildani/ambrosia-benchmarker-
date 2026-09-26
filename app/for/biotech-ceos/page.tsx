@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -69,7 +69,7 @@ export default function BiotechCEOsPage() {
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">What Solidus does for you</h2>
           <div className="space-y-4">
             {[
-              { title: 'Before the first meeting', desc: 'Run your asset through 21 engines. In 30 seconds, you know the upfront range, total deal value, milestone structure, and royalty tiers for your specific TA, modality, phase, and indication. Based on verified SEC 8-K filings — not press releases.' },
+              { title: 'Before the first meeting', desc: `Run your asset through ${ENGINE_COUNT} engines. In 30 seconds, you know the upfront range, total deal value, milestone structure, and royalty tiers for your specific TA, modality, phase, and indication. Based on verified SEC 8-K filings — not press releases.` },
               { title: 'Before the board meeting', desc: 'Generate a deal intelligence brief with comparable transactions, rNPV analysis, Monte Carlo distributions, and scenario comparisons (Bear/Base/Bull). Your board sees institutional-grade analysis, not a spreadsheet with three rows of comps.' },
               { title: 'Before you sign the term sheet', desc: 'The Deal Structure Optimizer models all five deal structures (licensing, acquisition, co-development, option, collaboration) side by side. Know whether you\'re leaving money on the table with the structure you\'ve been offered.' },
               { title: 'When the buyer says "this is market"', desc: 'Pull the actual comp set. Filter by indication, modality, stage, territory. See exactly what "market" is — and where your asset falls relative to it. The Pharma Intent Score tells you how likely each buyer is to close.' },
@@ -88,7 +88,7 @@ export default function BiotechCEOsPage() {
             A Phase 2 oncology licensing deal has a median total deal value of $400M+. The difference between a well-benchmarked negotiation and an under-informed one is typically 10-20% of deal value. On a $400M deal, that&apos;s $40-80M left on the table.
           </p>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Solidus Pro costs $299/month. A Deal Intelligence Brief is $2,500 for the full landscape. The math speaks for itself.
+            Solidus Pro costs $299/month. A Deal Intelligence Brief is $2,500 for one asset and one scored recommendation, credited in full against a subsequent advisory mandate. The math speaks for itself.
           </p>
         </div>
 

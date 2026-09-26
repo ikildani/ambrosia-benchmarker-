@@ -11,7 +11,7 @@
 ```
 [First name],
 
-We analyzed 2,600+ biopharma licensing deals (2020-2026) and found
+We analyzed 300+ primary-sourced biopharma licensing deals (2020-2026) and found
 [specific surprising data point — rotate from data-hooks.md].
 
 Full analysis with embeddable charts: [quarterly report URL]
@@ -75,7 +75,7 @@ No need to reply. Just wanted this in your toolkit.
 [First name],
 
 I run Ambrosia Ventures — we built a deal intelligence platform
-backed by 2,600+ verified biopharma transactions across 12
+backed by 300+ primary-sourced verified biopharma transactions across 12
 therapeutic areas. Phase-specific upfronts, milestones, royalties,
 comparable deals, rNPV, Monte Carlo — the full stack.
 
@@ -123,7 +123,7 @@ company names and I'll set it up.
 ```
 Hi [Name],
 
-I run a biopharma deal intelligence platform (2,600+ transactions,
+I run a biopharma deal intelligence platform (300+ primary-sourced transactions,
 12 TAs, real-time benchmarks). Several portfolio companies at
 other firms use it to prep for licensing conversations.
 
@@ -153,7 +153,7 @@ solidus.ambrosiaventures.co
 
 When your team advises clients on licensing deal terms, they need
 comparable transaction data. We've built the most comprehensive
-public dataset: 2,600+ verified biopharma deals across 12 TAs
+public dataset: 300+ primary-sourced verified biopharma deals across 12 TAs
 with phase-specific upfronts, milestones, and royalties.
 
 Use case: your analyst is building a comp set for a client's
@@ -182,7 +182,7 @@ Ambrosia Ventures
 ```
 [Name],
 
-We maintain a structured database of 2,600+ biopharma licensing
+We maintain a structured database of 300+ primary-sourced biopharma licensing
 transactions with disclosed terms (upfront, milestones, royalties,
 territory) across 12 therapeutic areas. Updated weekly from SEC
 filings and press releases.
@@ -214,7 +214,7 @@ Hi [Name],
 
 Preparing for a licensing conversation? Our platform benchmarks
 upfront payments, milestone structures, and royalty rates across
-2,600+ verified biopharma deals.
+300+ primary-sourced verified biopharma deals.
 
 Quick data point for [their TA]:
 Phase 2 median upfront: $[X]M
@@ -222,7 +222,7 @@ Total deal value: $[Y]B
 Base royalty: [A]-[B]%
 
 Try it free: [calculator link with TA prefilled]
-Full report with comparable deals + negotiation playbook: $149
+Full report with comparable deals + negotiation playbook: $499
 
 Used by BD teams at 50+ biopharma companies.
 
@@ -240,7 +240,7 @@ Ambrosia Ventures
 ```
 Hi,
 
-Ambrosia Ventures maintains a database of 2,600+ verified
+Ambrosia Ventures maintains a database of 300+ primary-sourced verified
 biopharma licensing transactions with structured deal terms
 across 12 therapeutic areas (2020-2026).
 

@@ -99,7 +99,7 @@ export function buildProGateEmail1(
 
   <p style="font-size: 15px; color: #334155;">These are median values based on comparable transactions in our database. The actual range varies significantly by deal structure, competitive dynamics, and data quality.</p>
 
-  <p style="font-size: 15px; color: #334155;">Want the full comparable deals table and negotiation playbook? Pro members get unlimited access to every benchmark, plus AI-generated deal memos and PDF exports.</p>
+  <p style="font-size: 15px; color: #334155;">Want the full comparable deals table and negotiation playbook? Pro members get unlimited access to every benchmark, plus written deal memos and PDF exports.</p>
 
   ${cta('Start Pro Trial — $299/mo', PRO_URL)}
 
@@ -263,7 +263,7 @@ export function buildProGateEmail4(
         <td style="padding: 8px 0; font-size: 14px; color: #16a34a; text-align: right; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Included</td>
       </tr>
       <tr>
-        <td style="padding: 8px 0; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9;">AI-generated negotiation playbook</td>
+        <td style="padding: 8px 0; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9;">Negotiation playbook built from the comp set</td>
         <td style="padding: 8px 0; font-size: 14px; color: #16a34a; text-align: right; font-weight: 600; border-bottom: 1px solid #f1f5f9;">Included</td>
       </tr>
       <tr>
@@ -312,7 +312,7 @@ export function buildProGateEmail5(
 
   <p style="font-size: 15px; color: #334155;">You looked at ${context.ta} ${context.phase} benchmarks last week. I wanted to ask directly — are you working on an active deal?</p>
 
-  <p style="font-size: 15px; color: #334155;">If so, I'd genuinely recommend the full analysis. The comparable deals alone — 15+ transactions with detailed term breakdowns — save hours of diligence work. And the AI-generated negotiation playbook gives you specific, data-backed arguments for your modality and phase.</p>
+  <p style="font-size: 15px; color: #334155;">If so, I'd genuinely recommend the full analysis. The comparable deals alone — 15+ transactions with detailed term breakdowns — save hours of diligence work. And the negotiation playbook gives you specific, data-backed arguments for your modality and phase.</p>
 
   <p style="font-size: 15px; color: #334155;">If you're not in an active deal, no worries at all. The free benchmarks are always there when you need them.</p>
 

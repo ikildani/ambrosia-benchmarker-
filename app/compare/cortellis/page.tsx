@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Solidus vs Cortellis Deals Intelligence — Platform Comparison | 2026',
@@ -37,7 +37,7 @@ const FAQ_ITEMS = [
   {
     question: 'What is the main difference between Solidus and Cortellis Deals Intelligence?',
     answer:
-      'Cortellis Deals Intelligence is part of the Clarivate ecosystem and provides a massive database of 15,500+ deal records with contract-level access, regulatory data, and patent analytics. Solidus is purpose-built for deal teams who need to move from data to decision — integrating deal benchmarks with 21 analytical engines including rNPV modeling, Monte Carlo simulation, AI deal memos, and partner matching. Cortellis covers breadth; Solidus covers analytical depth.',
+      `Cortellis Deals Intelligence is part of the Clarivate ecosystem and provides a massive database of 15,500+ deal records with contract-level access, regulatory data, and patent analytics. Solidus is purpose-built for deal teams who need to move from data to decision — integrating deal benchmarks with ${ENGINE_COUNT} analytical engines including rNPV modeling, Monte Carlo simulation, AI deal memos, and partner matching. Cortellis covers breadth; Solidus covers analytical depth.`,
   },
   {
     question: 'Is Solidus a cheaper alternative to Cortellis?',
@@ -326,7 +326,7 @@ export default function CortellisComparePage() {
                 or {PRICING.PRO_MONTHLY} month-to-month
               </p>
               <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                <li>All 21 analytical engines</li>
+                <li>All {ENGINE_COUNT} analytical engines</li>
                 <li>Unlimited benchmarks &amp; exports</li>
                 <li>AI deal memos &amp; negotiation playbooks</li>
                 <li>Partner matching &amp; intent scoring</li>
@@ -400,7 +400,7 @@ export default function CortellisComparePage() {
             The Deal Modeling Layer Cortellis Doesn&apos;t Cover
           </h2>
           <p className="text-slate-400 mb-6 max-w-xl mx-auto">
-            Run your asset through Solidus&apos;s 21 analytical engines and get the deal-level
+            Run your asset through Solidus&apos;s {ENGINE_COUNT} analytical engines and get the deal-level
             modeling that pipeline databases can&apos;t provide.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

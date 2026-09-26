@@ -8,7 +8,7 @@ import {
   FileText, Shield, Building2, Zap, ChevronRight,
 } from 'lucide-react';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 export default function Q1BenchmarksReport() {
   const [email, setEmail] = useState('');
@@ -272,7 +272,7 @@ export default function Q1BenchmarksReport() {
           <Image src="/logo-white.png" alt="Ambrosia Ventures" width={160} height={32} className="h-6 w-auto mx-auto opacity-40 mb-6" />
           <p className="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
             Report data sourced from the Solidus deal intelligence platform — {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions,
-            1,308 company profiles, 14 valuation engines. Updated weekly from SEC EDGAR, ClinicalTrials.gov, press disclosures,
+            1,308 company profiles, {ENGINE_COUNT} valuation engines. Updated weekly from SEC EDGAR, ClinicalTrials.gov, press disclosures,
             and proprietary calibration corpus.
           </p>
           <div className="mt-6 flex items-center justify-center gap-8 text-xs text-slate-600">

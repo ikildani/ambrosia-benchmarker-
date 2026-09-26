@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '@/components/AuthModal';
+import { ENGINE_COUNT } from '@/lib/config/constants';
 
 function TrialPageContent() {
   const searchParams = useSearchParams();
@@ -70,7 +71,7 @@ function TrialPageContent() {
           Start your 7-day Pro trial
         </h1>
         <p className="mt-3 text-sm text-slate-400">
-          Full access to all 21 engines, reformulation benchmarking, partner matching, and comparable deals. No charge for 7 days.
+          Full access to all {ENGINE_COUNT} engines, reformulation benchmarking, partner matching, and comparable deals. No charge for 7 days.
         </p>
 
         {activating && (

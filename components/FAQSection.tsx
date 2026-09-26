@@ -5,7 +5,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 const faqs = [
   {
     question: "How does Solidus work?",
-    answer: `Enter your asset's details — modality, development phase, indication, and deal type — and our engine analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions to generate benchmark ranges for upfront payments, milestones, royalties, and total deal value. Pro subscribers also get risk-adjusted NPV (rNPV) with Monte Carlo simulation, AI-generated deal memos, negotiation playbooks, partner matching, and branded exports. Results are generated in under 30 seconds.`
+    answer: `Enter your asset's details — modality, development phase, indication, and deal type — and our engine analyzes ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions to generate benchmark ranges for upfront payments, milestones, royalties, and total deal value. Pro subscribers also get risk-adjusted NPV (rNPV) with Monte Carlo simulation, written deal memos, negotiation playbooks, partner matching, and branded exports. Results are generated in under 30 seconds.`
   },
   {
     question: "What data sources power the benchmarks?",

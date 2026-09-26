@@ -6,6 +6,7 @@ import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { secThrottle, SEC_USER_AGENT, eftsSearch } from './edgar-fts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { validateExtractedDeal, extractAuditExcerpt, normalizeRoyaltyPct } from './deal-extraction-validator';
+import { resolveCompany } from '@/lib/entities/resolve';
 
 const SEC_FULL_TEXT_SEARCH = 'https://efts.sec.gov/LATEST/search-index';
 const SEC_COMPANY_SEARCH = 'https://data.sec.gov/submissions';
@@ -370,6 +371,10 @@ export interface ExtractedDeal {
   territories_included: string[];
   exclusivity: string;
   deal_type: string;
+  /** Finer structure than deal_type; see migration 123. */
+  deal_subtype?: string | null;
+  /** 505b2 | nda | bla | anda | ind | other, when the filing states it. */
+  regulatory_pathway?: string | null;
   upfront_usd: number | null;
   milestones_total_usd: number | null;
   milestones_development_usd: number | null;
@@ -571,6 +576,12 @@ global, us, ex_us, us_eu, us_eu_japan, china, japan, asia_pacific, europe, regio
 DEAL TYPE VALUES (use exactly):
 license, option, collaboration, acquisition, co_development, co_promotion, other
 
+DEAL SUBTYPE VALUES (use exactly; the finer structure behind deal_type):
+research_collaboration (discovery/preclinical research with funding), discovery_platform (platform or target-discovery collaboration), option_to_license, license, co_development, co_promotion, asset_purchase (single asset or program acquired), company_acquisition (merger or share purchase of the whole company), commercialization (rights to sell an approved or late-stage product), distribution_supply, reformulation_505b2 (reformulated or repurposed approved drug, incl. 505(b)(2) programs), other
+
+REGULATORY PATHWAY VALUES (use exactly, or null when the filing does not say):
+505b2, nda, bla, anda, ind, other
+
 EXCLUSIVITY VALUES (use exactly):
 exclusive, co_exclusive, non_exclusive, unknown
 
@@ -614,6 +625,8 @@ If it IS a deal, return this structure:
   "territories_included": ["array", "of", "specific", "territories"],
   "exclusivity": "one of the exclusivity values",
   "deal_type": "one of the deal type values",
+  "deal_subtype": "one of the deal subtype values",
+  "regulatory_pathway": "one of the regulatory pathway values, or null",
   "upfront_usd": number or null,
   "milestones_total_usd": number or null,
   "milestones_development_usd": number or null,
@@ -705,30 +718,32 @@ export async function findOrCreateCompany(
 ): Promise<string | null> {
   if (!companyName) return null;
 
-  const normalizedName = normalizeCompanyName(companyName);
-
-  // Try to find existing company (escape SQL pattern chars to prevent injection)
-  const safeName = escapeLikePattern(normalizedName);
-  const safeArrayName = escapeArrayLiteral(companyName);
-  const { data: existing } = await supabase
-    .from('companies')
-    .select('id, name, name_variations')
-    .or(`name.ilike.%${safeName}%,name_variations.cs.{${safeArrayName}}`)
-    .limit(1)
-    .single();
-
-  if (existing) {
-    // Add name variation if not present
-    if (!existing.name_variations?.includes(companyName)) {
+  // Resolve through the shared entity resolver (lib/entities/resolve): exact
+  // normalised name, then a name_variations alias, then fuzzy at
+  // FUZZY_MATCH_THRESHOLD, never a row the merge job has folded
+  // (companies.merged_into). The previous substring ilike + limit(1) linked
+  // "Ionis" to "Orionis Biosciences" and "Cara" to "Zucara", and kept pointing
+  // new deals at duplicates after they were folded.
+  const resolved = await resolveCompany(supabase, { name: companyName }).catch((err: unknown) => {
+    console.warn(`[findOrCreateCompany] resolve failed for "${companyName}": ${err instanceof Error ? err.message : String(err)}`);
+    return null;
+  });
+  const match = resolved?.match;
+  if (match) {
+    // Record the source spelling only when the row *is* this company (exact
+    // match). Writing it on an alias or fuzzy hit is how parent names became
+    // aliases of subsidiaries (docs/entity-graph.md, hazard 1).
+    if (match.matchedOn === 'exact' && !match.aliases.includes(companyName)) {
+      const { data: row } = await supabase.from('companies').select('name_variations').eq('id', match.id).maybeSingle();
       await supabase
         .from('companies')
         .update({
-          name_variations: [...(existing.name_variations || []), companyName],
+          name_variations: [...(((row as { name_variations?: string[] | null } | null)?.name_variations) ?? []), companyName],
           updated_at: new Date().toISOString(),
         })
-        .eq('id', existing.id);
+        .eq('id', match.id);
     }
-    return existing.id;
+    return match.id;
   }
 
   // Create new company
@@ -1040,20 +1055,5 @@ export function deriveTherapeuticArea(indicationCategory: string | null): string
   }
 }
 
-function normalizeCompanyName(name: string): string {
-  return name
-    .replace(/,?\s*(Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|PLC|LLC|LP|Co\.?|Company|Pharmaceuticals?|Therapeutics?|Biosciences?|Biotech|Sciences?|AG|SA|S\.A\.?|N\.V\.?|SE|GmbH|A\/S)$/i, '')
-    .replace(/\s*\(.*?\)\s*/g, ' ')
-    .replace(/\s*\/\s*/g, '/')
-    .replace(/\band\b/gi, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
-function escapeLikePattern(str: string): string {
-  return str.replace(/[%_\\]/g, '\\$&');
-}
 
-function escapeArrayLiteral(str: string): string {
-  return str.replace(/[{}"\\,]/g, '\\$&');
-}

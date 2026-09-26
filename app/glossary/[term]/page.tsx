@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllTermSlugs, getTermBySlug, getRelatedTermEntries } from '@/lib/glossaryTerms';
+import { getLiveDealStats } from '@/lib/deal-stats';
 
 export function generateStaticParams() {
   return getAllTermSlugs().map((term) => ({ term }));
@@ -60,6 +61,7 @@ export default async function GlossaryTermPage({
   if (!entry) notFound();
 
   const related = getRelatedTermEntries(entry.relatedTerms);
+  const stats = await getLiveDealStats();
   const baseUrl = 'https://solidus.ambrosiaventures.co';
 
   const definedTermSchema = {
@@ -166,7 +168,7 @@ export default async function GlossaryTermPage({
               See How {entry.term} Affects Deal Economics
             </h2>
             <p className="text-slate-600 mb-8">
-              Model deal terms with real benchmark data from 1,500+ biopharma transactions.
+              Model deal terms with real benchmark data from {stats.totalDealsDisplay} biopharma transactions.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

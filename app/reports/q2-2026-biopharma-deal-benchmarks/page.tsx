@@ -8,6 +8,7 @@ import { TrustBar } from '@/components/insights/TrustBar';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { createServiceClient } from '@/lib/supabase/server';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { getLiveDealStats } from '@/lib/deal-stats';
 
 const ChartSkeleton = () => (
   <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
@@ -191,6 +192,7 @@ export default async function Q2BenchmarkReportPage() {
   const topDeals = await getTopDeals();
   const q1Count = await getQ1DealCount();
   const q2Count = await getQ2DealCount();
+  const stats = await getLiveDealStats();
 
   const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
@@ -200,7 +202,7 @@ export default async function Q2BenchmarkReportPage() {
   const articleSchema = { '@context': 'https://schema.org', '@type': 'Article', headline: 'Q2 2026 Biopharma Deal Benchmarks Report', author: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://solidus.ambrosiaventures.co' }, datePublished: '2026-07-15', dateModified: '2026-07-15', publisher: { '@type': 'Organization', name: 'Ambrosia Ventures', logo: { '@type': 'ImageObject', url: 'https://solidus.ambrosiaventures.co/logo.png' } } };
   const datasetSchema = { '@context': 'https://schema.org', '@type': 'Dataset', name: 'Q2 2026 Biopharma Deal Benchmarks', description: `Phase-by-phase upfront payments, risk-adjusted economics, royalty rates, and deal structure evolution from ${DEAL_STATS.TOTAL_DEALS} verified biopharma transactions (2020-2026).`, creator: { '@type': 'Organization', name: 'Ambrosia Ventures' }, temporalCoverage: '2020/2026' };
   const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
-    { '@type': 'Question', name: 'What is the risk-adjusted optimal exit point for biotech assets?', acceptedAnswer: { '@type': 'Answer', text: 'Based on analysis of 1,500+ deals, Phase 2 proof-of-concept is the risk-adjusted optimal exit for most single-asset biotechs. Phase 3 median upfront is $678M vs $300M at Phase 2, but after subtracting $200-500M in trial costs and accounting for 40-50% Phase 3 failure rates, the expected value of holding to Phase 3 is lower than the certain Phase 2 exit value.' } },
+    { '@type': 'Question', name: 'What is the risk-adjusted optimal exit point for biotech assets?', acceptedAnswer: { '@type': 'Answer', text: `Based on analysis of ${stats.totalDealsDisplay} deals, Phase 2 proof-of-concept is the risk-adjusted optimal exit for most single-asset biotechs. Phase 3 median upfront is $678M vs $300M at Phase 2, but after subtracting $200-500M in trial costs and accounting for 40-50% Phase 3 failure rates, the expected value of holding to Phase 3 is lower than the certain Phase 2 exit value.` } },
     { '@type': 'Question', name: 'What are current biopharma royalty rate benchmarks?', acceptedAnswer: { '@type': 'Answer', text: 'Royalty rates range from 3-7% at discovery to 18-25% for approved assets. At Phase 2, ADCs command the highest median royalty at 14%, followed by radiopharmaceuticals at 13.5% and bispecifics at 12.5%. Over 70% of licensing deals now employ tiered royalty structures with escalation clauses tied to sales thresholds.' } },
     { '@type': 'Question', name: 'How have ADC deal premiums changed?', acceptedAnswer: { '@type': 'Answer', text: 'ADC premiums peaked at ~1.70x during the 2023 Pfizer/Seagen cycle ($371.8B total ADC deal value). They have since normalized to 1.45x over small molecule baselines, with total ADC deal value declining from $371.8B (2023) to $104.4B (2024) to $36.7B (2025 through Q3). The market is shifting from platform acquisitions to focused single-asset licensing.' } },
   ]};

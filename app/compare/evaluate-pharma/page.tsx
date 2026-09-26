@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Ambrosia vs EvaluatePharma | Biopharma Deal Intelligence Comparison',
@@ -29,7 +29,7 @@ const FAQ_ITEMS = [
   {
     question: 'How does Ambrosia compare to EvaluatePharma?',
     answer:
-      'Ambrosia focuses on deal-specific benchmarking — upfront payments, milestones, royalty rates, and partner matching across 1,500+ verified transactions. EvaluatePharma excels at consensus revenue forecasts and pipeline coverage but lacks deal-specific mechanics like Monte Carlo simulation for deal terms, real options valuation, and competitive dynamics engines.',
+      `Ambrosia focuses on deal-specific benchmarking — upfront payments, milestones, royalty rates, and partner matching across ${DEAL_STATS.TOTAL_DEALS} verified transactions. EvaluatePharma excels at consensus revenue forecasts and pipeline coverage but lacks deal-specific mechanics like Monte Carlo simulation for deal terms, real options valuation, and competitive dynamics engines.`,
   },
   {
     question: 'What makes Ambrosia different from EvaluatePharma?',
@@ -117,7 +117,7 @@ export default function EvaluatePharmaComparePage() {
         <p className="text-lg text-slate-400 max-w-3xl">
           EvaluatePharma leads in consensus revenue forecasts and pipeline analytics. Ambrosia
           delivers deal-specific benchmarking with {DEAL_STATS.TOTAL_DEALS} verified transactions,
-          14 calculation engines, and transparent pricing starting at {PRICING.PRO_ANNUAL_MONTHLY}.
+          {ENGINE_COUNT} calculation engines, and transparent pricing starting at {PRICING.PRO_ANNUAL_MONTHLY}.
         </p>
       </section>
 
@@ -206,7 +206,7 @@ export default function EvaluatePharmaComparePage() {
                 or {PRICING.PRO_MONTHLY} month-to-month
               </p>
               <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                <li>All 14 calculation engines</li>
+                <li>All {ENGINE_COUNT} calculation engines</li>
                 <li>Unlimited benchmarks</li>
                 <li>PDF/Excel export</li>
                 <li>Partner matching</li>
@@ -255,7 +255,7 @@ export default function EvaluatePharmaComparePage() {
             See the Difference With Your Own Deal
           </h2>
           <p className="text-slate-400 mb-6 max-w-xl mx-auto">
-            Run your deal parameters through Ambrosia&apos;s 14 engines and compare the depth of
+            Run your deal parameters through Ambrosia&apos;s {ENGINE_COUNT} engines and compare the depth of
             analysis to any platform on the market.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

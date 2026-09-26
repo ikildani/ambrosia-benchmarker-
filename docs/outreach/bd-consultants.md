@@ -4,7 +4,7 @@
 
 This audience is split between two goals:
 1. **Consultants and industry bodies** → backlinks + authority (they cite data in reports and presentations)
-2. **BD professionals** → paying customers ($149 reports, $99/mo Pro subscriptions)
+2. **BD professionals** → paying customers ($499 reports, $99/mo Pro subscriptions)
 
 ---
 
@@ -14,7 +14,7 @@ These firms advise pharma companies on deal strategy. If they adopt your data as
 
 | Firm | Practice | Key People to Target | Pitch |
 |------|----------|---------------------|-------|
-| **McKinsey — Pharma & Medical Products** | Licensing strategy, M&A | Partners in pharma practice (varies by office) | "Complement to your deal advisory — our benchmarks cover 2,600+ transactions your analysts can reference" |
+| **McKinsey — Pharma & Medical Products** | Licensing strategy, M&A | Partners in pharma practice (varies by office) | "Complement to your deal advisory — our benchmarks cover 300+ primary-sourced transactions your analysts can reference" |
 | **BCG — Biopharma** | Portfolio strategy, deal evaluation | Managing directors in health care | Same angle — tool for their analyst teams |
 | **LEK Consulting — Life Sciences** | Deal due diligence, licensing advisory | Partners and principals | LEK does hands-on deal advisory. Your data directly supports their work. |
 | **Deloitte — Life Sciences M&A** | Transaction advisory | Managing directors | Pitch for their "Future of Biopharma" annual report — offer data for inclusion |
@@ -30,7 +30,7 @@ These firms advise pharma companies on deal strategy. If they adopt your data as
 **Email template:**
 > Subject: Biopharma deal benchmarks for your advisory practice
 >
-> [Name] — when your team advises clients on licensing deal terms, they need comparable transaction data. We've built the most comprehensive public dataset: 2,600+ verified biopharma deals across 12 TAs with phase-specific upfronts, milestones, and royalties.
+> [Name] — when your team advises clients on licensing deal terms, they need comparable transaction data. We've built the most comprehensive public dataset: 300+ primary-sourced verified biopharma deals across 12 TAs with phase-specific upfronts, milestones, and royalties.
 >
 > I'd like to offer complimentary Pro access for your life sciences practice. Your analysts get instant benchmarks; we get better market intelligence.
 >
@@ -58,7 +58,7 @@ These firms structure actual deals. They're both users and authority sources.
 **Email template:**
 > Subject: Deal comp data for your healthcare practice
 >
-> [Name] — we maintain a database of 2,600+ biopharma licensing transactions with structured terms (upfront, milestones, royalties, territory) across 12 therapeutic areas. When your team is building comps for a client's licensing deal, this saves hours of manual research.
+> [Name] — we maintain a database of 300+ primary-sourced biopharma licensing transactions with structured terms (upfront, milestones, royalties, territory) across 12 therapeutic areas. When your team is building comps for a client's licensing deal, this saves hours of manual research.
 >
 > Happy to set up trial access for your healthcare group.
 >
@@ -86,7 +86,7 @@ Getting listed/cited by industry bodies creates permanent, high-DA backlinks.
 **Email template (intern sends):**
 > Subject: Biopharma deal benchmark data for [Organization] resources
 >
-> Hi — Ambrosia Ventures maintains a database of 2,600+ verified biopharma licensing transactions with structured deal terms across 12 therapeutic areas. We believe this data would be a valuable resource for [Organization] members.
+> Hi — Ambrosia Ventures maintains a database of 300+ primary-sourced verified biopharma licensing transactions with structured deal terms across 12 therapeutic areas. We believe this data would be a valuable resource for [Organization] members.
 >
 > We'd be happy to:
 > - Contribute data for your annual report or industry analysis
@@ -149,13 +149,13 @@ These are direct customers, not backlink targets. But they refer colleagues and 
 | Blueprint Medicines | Precision oncology |
 
 **Email template (intern sends):**
-> Subject: Benchmark your [TA] licensing deal against 2,600+ real transactions
+> Subject: Benchmark your [TA] licensing deal against 300+ primary-sourced real transactions
 >
-> Hi [Name] — preparing for a licensing conversation? Our platform benchmarks upfront payments, milestone structures, and royalty rates across 2,600+ verified biopharma deals in [their TA].
+> Hi [Name] — preparing for a licensing conversation? Our platform benchmarks upfront payments, milestone structures, and royalty rates across 300+ primary-sourced verified biopharma deals in [their TA].
 >
 > Quick example: Phase 2 [their TA] deals average [specific $X]M upfront with [Y-Z]% base royalties.
 >
 > Try it free: [calculator link with TA prefilled]
-> Full report with comparable deals: $149
+> Full report with comparable deals: $499
 >
 > Used by BD teams at 50+ biopharma companies.

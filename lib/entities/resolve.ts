@@ -90,7 +90,12 @@ export interface CompanyRow {
 }
 
 export const COMPANY_COLS =
-  'id,name,name_variations,company_type,owner_type,hq_country,hq_region,ticker,cik,sec_cik,website_url,data_quality_score,total_annual_revenue,deals_last_24mo';
+  'id,name,name_variations,company_type,owner_type,hq_country,hq_region,ticker,cik,sec_cik,website_url,data_quality_score,total_annual_revenue,deals_last_24mo,merged_into';
+
+/** Rows folded by the merge job (companies.merged_into set) never take part in matching. */
+function dropMerged<T extends CompanyRow>(rows: readonly T[]): T[] {
+  return rows.filter(r => !r.merged_into);
+}
 
 /** Follow merged_into at most this many hops (a chain should never exist; the check is cheap). */
 const MERGE_HOPS = 4;
@@ -218,13 +223,18 @@ async function runCompanyPool(supabase: EntityClient, filters: string[]): Promis
     .order('data_quality_score', { ascending: false, nullsFirst: false })
     .limit(POOL_LIMIT);
   if (error) throw new Error(`companies pool lookup failed: ${error.message}`);
-  return (data ?? []) as CompanyRow[];
+  return dropMerged((data ?? []) as CompanyRow[]);
 }
 
 async function fetchCompaniesWhere(supabase: EntityClient, column: string, value: string): Promise<CompanyRow[]> {
   const { data, error } = await supabase.from('companies').select(COMPANY_COLS).eq(column, value).limit(50);
   if (error) throw new Error(`companies ${column} lookup failed: ${error.message}`);
-  return (data ?? []) as CompanyRow[];
+  const rows = (data ?? []) as CompanyRow[];
+  const live = dropMerged(rows);
+  if (live.length || !rows.length) return live;
+  // Only folded rows carry this ticker / cik: answer with their canonical row.
+  const canonical = await followMergedInto(supabase, rows[0]);
+  return canonical ? [canonical] : [];
 }
 
 /** Duplicates of a row already in hand (by-id / ticker / cik routes). */

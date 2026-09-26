@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Compare Ambrosia Ventures | Biopharma Deal Intelligence Alternatives',
-  description: `Compare Ambrosia Ventures to EvaluatePharma, S&P Capital IQ, and Cortellis for biopharma deal benchmarking. ${DEAL_STATS.TOTAL_DEALS} deals, 14 engines, transparent pricing.`,
+  description: `Compare Ambrosia Ventures to EvaluatePharma, S&P Capital IQ, and Cortellis for biopharma deal benchmarking. ${DEAL_STATS.TOTAL_DEALS} deals, ${ENGINE_COUNT} engines, transparent pricing.`,
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/compare',
   },
@@ -28,9 +28,9 @@ const COMPARISONS = [
     name: 'DealForma',
     tagline: 'Deal comps database vs integrated deal intelligence',
     description:
-      'DealForma is a well-established licensing deal comps database used across BD. Solidus integrates deal benchmarks with 21 analytical engines — rNPV, Monte Carlo, AI deal memos, and partner matching — so you go from data to decision in one platform.',
+      `DealForma is a well-established licensing deal comps database used across BD. Solidus integrates deal benchmarks with ${ENGINE_COUNT} analytical engines — rNPV, Monte Carlo, AI deal memos, and partner matching — so you go from data to decision in one platform.`,
     strengths: ['Established deal comps', 'Licensing deal data'],
-    ambrosiaEdge: ['21 analytical engines', 'AI deal memos', 'Partner matching'],
+    ambrosiaEdge: [`${ENGINE_COUNT} analytical engines`, 'AI deal memos', 'Partner matching'],
   },
   {
     slug: 'evaluate-pharma',
@@ -55,7 +55,7 @@ const COMPARISONS = [
     name: 'Clarivate Cortellis',
     tagline: 'Enterprise data platform vs deal modeling workbench',
     description:
-      'Cortellis provides deep pipeline, regulatory, and patent intelligence with 15,500+ deal records. Solidus delivers the deal economics and modeling layer — 21 engines for valuation, competitive dynamics, and partner matching.',
+      `Cortellis provides deep pipeline, regulatory, and patent intelligence with 15,500+ deal records. Solidus delivers the deal economics and modeling layer — ${ENGINE_COUNT} engines for valuation, competitive dynamics, and partner matching.`,
     strengths: ['Pipeline/regulatory data', 'Patent intelligence', '15,500+ deal records'],
     ambrosiaEdge: ['Deal valuation engines', 'Competitive dynamics', 'Transparent pricing'],
   },
@@ -74,7 +74,7 @@ export default function ComparePage() {
             How Ambrosia Compares
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            {DEAL_STATS.TOTAL_DEALS} real biopharma deals. 14 calculation engines. 12 therapeutic
+            {DEAL_STATS.TOTAL_DEALS} real biopharma deals. {ENGINE_COUNT} calculation engines. 12 therapeutic
             areas. See how Ambrosia stacks up against the legacy platforms.
           </p>
         </div>
