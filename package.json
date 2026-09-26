@@ -59,6 +59,13 @@
     "uuid": "^13.0.0",
     "zod": "^4.3.6"
   },
+  "browserslist": [
+    "chrome >= 100",
+    "edge >= 100",
+    "firefox >= 100",
+    "safari >= 15.4",
+    "ios_saf >= 15.4"
+  ],
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.12",
     "@playwright/test": "^1.58.1",

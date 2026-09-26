@@ -83,10 +83,10 @@ export default async function MethodologyPage() {
               <AmbrosiaLogo variant="auto" height={40} />
             </Link>
             <Link
-              href="/"
-              className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-2 rounded-lg"
+              href="/calculator"
+              className="text-sm font-semibold text-white dark:text-slate-900 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors px-4 py-2.5 min-h-11 inline-flex items-center rounded-xl whitespace-nowrap"
             >
-              Back to Home
+              Benchmark a deal
             </Link>
           </div>
         </div>

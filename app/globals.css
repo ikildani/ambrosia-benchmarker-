@@ -994,3 +994,27 @@ select::selection {
     color: #64748b;
   }
 }
+
+
+/* ── Entrance animation without a hydration gate (LCP fix, Sep 2026) ──
+   Runs from first paint in CSS; content is never parked at opacity 0 waiting for JS. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-rise { animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-rise-d1 { animation-delay: 60ms; }
+.animate-rise-d2 { animation-delay: 120ms; }
+.animate-rise-d3 { animation-delay: 180ms; }
+.animate-rise-d4 { animation-delay: 240ms; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise { animation: none; }
+}
+
+/* ── Mobile layout guards ── */
+/* Nothing may widen the document; clipped content is a bug we test for, not a scrollbar users fight. */
+html, body { overflow-x: clip; }
+/* iOS Safari zooms into any focused control under 16px; keep every control at 16px on phones. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: max(1em, 16px); }
+}

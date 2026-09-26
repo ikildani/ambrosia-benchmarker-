@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { DEAL_STATS } from '@/lib/config/constants';
+import FooterSection from './FooterSection';
 
 type FooterLink = {
   label: string;
@@ -58,45 +59,40 @@ export function SiteFooter() {
   return (
     <footer className="bg-slate-900 border-t border-slate-800 py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-0 md:gap-8 mb-10">
           {Object.entries(footerLinks).map(([section, links]) => (
-            <div key={section}>
-              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
-                {section}
-              </h3>
-              <ul className="space-y-2">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    {link.external ? (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-slate-500 hover:text-white transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="text-sm text-slate-500 hover:text-white transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <FooterSection key={section} title={section}>
+              {links.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center min-h-11 md:min-h-8 text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="flex items-center min-h-11 md:min-h-8 text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </FooterSection>
           ))}
         </div>
 
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-400">
             &copy; {new Date().getFullYear()} Ambrosia Ventures. All rights reserved.
           </p>
-          <p className="text-xs text-slate-600">
-            Benchmarks powered by {DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals
+          <p className="text-xs text-slate-400">
+            Benchmarks powered by {DEAL_STATS.TOTAL_DEALS} primary-sourced biopharma licensing deals
           </p>
         </div>
       </div>

@@ -31,18 +31,8 @@ export default function CalculatorPage() {
     signIn(email, name);
   };
 
-  // Show loading state while auth is initializing
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-teal-200 dark:border-teal-800 border-t-teal-500 animate-spin" />
-          <p className="text-slate-600 dark:text-slate-300 font-medium">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // The form renders immediately (server HTML is the LCP); tier-dependent chrome
+  // waits for auth instead of hiding the whole page behind a spinner.
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
       <Header
@@ -65,7 +55,7 @@ export default function CalculatorPage() {
               Solidus
             </h1>
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto px-2">
-              Data-driven estimates for upfront payments, milestones, and royalties across oncology, neurology, immunology, and metabolic/obesity licensing deals
+              Data-driven estimates for upfront payments, milestones, and royalties across 12 therapeutic areas of biopharma licensing deals
             </p>
           </div>
         </div>
@@ -74,7 +64,7 @@ export default function CalculatorPage() {
         <Calculator tier={tier} onUpgrade={handleUpgrade} />
 
         {/* Upgrade Banner for Free Users */}
-        {tier === 'free' && (
+        {tier === 'free' && !isLoading && (
           <div className="max-w-6xl mx-auto mt-8 sm:mt-12">
             <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 relative overflow-hidden">
               <div className="absolute inset-0 opacity-10">
@@ -136,7 +126,7 @@ export default function CalculatorPage() {
         initialMode={authModalMode}
       />
 
-      {tier === 'free' && <ExitIntentCapture />}
+      {tier === 'free' && !isLoading && <ExitIntentCapture />}
     </div>
   );
 }

@@ -168,7 +168,7 @@ export default function ProPage() {
 
               {/* Right: Product mockup — rNPV KPI cards */}
               <div className="hidden lg:block">
-                <div className="bg-[#0d1420] border border-white/[0.06] rounded-2xl p-6 shadow-2xl shadow-black/40">
+                <div aria-hidden="true" className="bg-[#0d1420] border border-white/[0.06] rounded-2xl p-6 shadow-2xl shadow-black/40">
                   <div className="flex items-center gap-2 mb-5">
                     <div className="w-2 h-2 rounded-full bg-teal-500" />
                     <span className="text-xs text-slate-500 font-medium">Phase 2 ADC — Oncology (Solid Tumor)</span>
@@ -298,7 +298,7 @@ export default function ProPage() {
                 </ul>
               </div>
               {/* Mockup */}
-              <div className="bg-[#0d1420] border border-white/[0.06] rounded-xl p-5">
+              <div aria-hidden="true" className="bg-[#0d1420] border border-white/[0.06] rounded-xl p-5">
                 <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-3">Scenario Comparison</p>
                 <div className="grid grid-cols-3 gap-3">
                   {[
@@ -323,7 +323,7 @@ export default function ProPage() {
             {/* Feature 2: Buyer-Specific Valuation */}
             <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
               {/* Mockup first (left) */}
-              <div className="bg-[#0d1420] border border-white/[0.06] rounded-xl p-5 order-2 lg:order-1">
+              <div aria-hidden="true" className="bg-[#0d1420] border border-white/[0.06] rounded-xl p-5 order-2 lg:order-1">
                 <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-3">Buyer-Specific Valuation</p>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="p-3 bg-slate-700/20 border border-slate-600/30 rounded-lg text-center">
@@ -395,7 +395,7 @@ export default function ProPage() {
                 </ul>
               </div>
               {/* Mockup */}
-              <div className="bg-[#0d1420] border border-white/[0.06] rounded-xl p-5">
+              <div aria-hidden="true" className="bg-[#0d1420] border border-white/[0.06] rounded-xl p-5">
                 <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-3">Top Partner Matches</p>
                 <div className="space-y-2">
                   {[
