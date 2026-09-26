@@ -60,10 +60,32 @@ export default function ConsentScripts() {
     return () => window.removeEventListener(CONSENT_EVENT, onChange);
   }, []);
 
+  // Hold the tags until the browser has gone idle after load (or 6 s at most).
+  // gtag.js alone is 190 KB and 250 ms of main-thread time on a phone; behind
+  // idle it no longer competes with hydration for the interactivity window.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let done = false;
+    const go = () => { if (!done) { done = true; setReady(true); } };
+    const afterLoad = () => {
+      if ('requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback(go, { timeout: 4000 });
+      } else {
+        setTimeout(go, 2500);
+      }
+    };
+    if (document.readyState === 'complete') afterLoad();
+    else window.addEventListener('load', afterLoad, { once: true });
+    const cap = setTimeout(go, 6000);
+    return () => { clearTimeout(cap); window.removeEventListener('load', afterLoad); };
+  }, []);
+
   const granted = consent === 'accepted';
   const state = granted ? 'granted' : 'denied';
   const partnerId = process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID;
   const wantsRetargeting = granted && !!partnerId && RETARGETING_ROUTES.some((r) => pathname?.startsWith(r));
+
+  if (!ready) return null;
 
   return (
     <>
