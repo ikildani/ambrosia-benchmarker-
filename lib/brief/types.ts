@@ -325,7 +325,7 @@ export interface ValuationBridge {
   floor: { totalM: number; upfrontM: number };
   walkAway: { upfrontM: number };
   /** Which method set the ask on each basis: the calibrated headline or the comparable-set median. */
-  askBasis: { total: 'headline' | 'comps'; upfront: 'headline' | 'comps' };
+  askBasis: { total: 'headline' | 'comps' | 'comps_p75_cap'; upfront: 'headline' | 'comps' | 'comps_p75_cap' };
   /** The anchoring rule, printed on the bridge page so the reader can check it. */
   policy: string;
   /** False when the risk-adjusted NPV is at or below zero and cannot anchor a value. */
