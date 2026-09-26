@@ -601,6 +601,32 @@ describe('computeBuyerValuations', () => {
     expect(withPremium[0].counterpartyAdjustment?.contribution).toBeCloseTo(0.3, 5);
     expect(withPremium[0].buyerSpecificDealValue.median).toBeGreaterThan(out[0].buyerSpecificDealValue.median);
   });
+  it('uses the phase / TA slice (n ≥ 5) for the asset context, else the company-wide multiplier', () => {
+    const partners: PartnerForPDF[] = [{ company_name: 'Buyer 0', match_score: 90, match_reasons: [], deals_last_12mo: 3, hq_country: null }];
+    const entry = {
+      multiplier: 1.3, n: 40, confidence: 'high', companyId: 'b0',
+      byTherapeuticArea: { oncology: { premium: 1.1, n: 12 }, neurology: { premium: 0.9, n: 3 } },
+      byPhase: { phase_2: { premium: 0.8, n: 7 }, phase_3: { premium: 1.4, n: 2 } },
+    };
+    const premiums = new Map([['buyer 0', entry]]);
+    // phase slice wins when reliable
+    const p2 = computeBuyerValuations(partners, waterfall, rnpv, premiums, 6, { therapeuticArea: 'oncology', phase: 'Phase 2' });
+    // n = 7 → medium confidence → the engine applies the −0.2 premium at half weight
+    expect(p2[0].counterpartyAdjustment?.contribution).toBeCloseTo(-0.1, 5);
+    expect(p2[0].counterpartyAdjustment?.confidence).toBe('medium');
+    expect(p2[0].counterpartyAdjustment?.source).toBe('phase_specific');
+    // thin phase slice → TA slice
+    const p3 = computeBuyerValuations(partners, waterfall, rnpv, premiums, 6, { therapeuticArea: 'oncology', phase: 'phase_3' });
+    expect(p3[0].counterpartyAdjustment?.contribution).toBeCloseTo(0.1, 5);
+    expect(p3[0].counterpartyAdjustment?.source).toBe('ta_specific');
+    // thin TA slice and no phase slice → company-wide
+    const cw = computeBuyerValuations(partners, waterfall, rnpv, premiums, 6, { therapeuticArea: 'neurology', phase: 'preclinical' });
+    expect(cw[0].counterpartyAdjustment?.contribution).toBeCloseTo(0.3, 5);
+    expect(cw[0].counterpartyAdjustment?.source).toBe('company_wide');
+    // no context → unchanged behaviour
+    const none = computeBuyerValuations(partners, waterfall, rnpv, premiums);
+    expect(none[0].counterpartyAdjustment?.contribution).toBeCloseTo(0.3, 5);
+  });
   it('returns [] for missing inputs', () => {
     expect(computeBuyerValuations([], waterfall, rnpv)).toEqual([]);
     expect(computeBuyerValuations([{ company_name: '', match_score: 90, match_reasons: [], deals_last_12mo: 0, hq_country: null }], waterfall, rnpv)).toEqual([]);

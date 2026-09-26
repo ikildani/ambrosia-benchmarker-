@@ -93,7 +93,7 @@ function median(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-function trimmedMean(values: number[], trimFraction: number = 0.1): number {
+export function trimmedMean(values: number[], trimFraction: number = 0.1): number {
   if (values.length === 0) return 0;
   if (values.length < 10) {
     return values.reduce((a, b) => a + b, 0) / values.length;
@@ -108,7 +108,8 @@ function clamp(value: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, value));
 }
 
-function confidenceFromN(n: number): 'high' | 'medium' | 'low' {
+/** Confidence bucket for a premium computed from `n` observations (high ≥ 10, medium ≥ 5). */
+export function confidenceFromN(n: number): 'high' | 'medium' | 'low' {
   if (n >= 10) return 'high';
   if (n >= 5) return 'medium';
   return 'low';

@@ -9,6 +9,8 @@
 import {
   computeCounterpartyPremiums,
   getCounterpartyPremium,
+  confidenceFromN,
+  findPeerMedian,
   __test,
   type DealRow,
   type CompanyRow,
@@ -442,5 +444,31 @@ describe('integration with calculateBuyerSpecificValuation', () => {
     expect(adjusted.buyerSpecificDealValue.median).toBeLessThan(
       baseline.buyerSpecificDealValue.median,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Named exports used by the outcome-priors blend (Sep 2026)
+// ---------------------------------------------------------------------------
+
+describe('named exports for outcome priors', () => {
+  test('confidenceFromN and findPeerMedian are exported by name and match __test', () => {
+    expect(confidenceFromN).toBe(__test.confidenceFromN);
+    expect(findPeerMedian).toBe(__test.findPeerMedian);
+    expect(confidenceFromN(10)).toBe('high');
+    expect(confidenceFromN(5)).toBe('medium');
+    expect(confidenceFromN(4)).toBe('low');
+  });
+
+  test('findPeerMedian widens to the therapeutic area when the target has no indication category', () => {
+    // Five peer deals from other buyers in the same TA and phase, no category on the target.
+    const peers = [400e6, 500e6, 600e6, 700e6, 800e6].map((v, i) =>
+      makeDeal(`peer-${i}`, { licensee_id: `other-${i}`, total_deal_value_usd: v, indication_category: 'lung_nsclc' }),
+    );
+    const target = makeDeal('obs', { licensee_id: 'buyer-x', indication_category: null, total_deal_value_usd: 900e6 });
+    expect(findPeerMedian(target, peers, __test.DEFAULT_OPTIONS)).toBe(600e6);
+    // The buyer's own deals never sit in its peer pool.
+    const own = makeDeal('own', { licensee_id: 'buyer-x', total_deal_value_usd: 5e9, indication_category: null });
+    expect(findPeerMedian(target, [...peers, own], __test.DEFAULT_OPTIONS)).toBe(600e6);
   });
 });

@@ -186,21 +186,29 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
       const names = partners.slice(0, 10).map(p => p.company_name);
       const { data } = await supabase
         .from('counterparty_premiums')
-        .select('company_name, premium_multiplier, sample_size, confidence, as_of_date')
+        .select('company_id, company_name, premium_multiplier, sample_size, confidence, by_therapeutic_area, by_phase, as_of_date')
         .in('company_name', names)
         // Quarterly history is kept per company; take the newest row per name (Sep 26 2026:
         // unordered reads returned whichever quarter came back last).
         .order('as_of_date', { ascending: false });
       const map = new Map<string, PremiumEntry>();
-      for (const r of (data ?? []) as Array<{ company_name: string; premium_multiplier: number; sample_size: number; confidence: string }>) {
+      for (const r of (data ?? []) as Array<{ company_id?: string | null; company_name: string; premium_multiplier: number; sample_size: number; confidence: string; by_therapeutic_area?: PremiumEntry['byTherapeuticArea']; by_phase?: PremiumEntry['byPhase'] }>) {
         const key = r.company_name.toLowerCase();
         if (map.has(key)) continue;
-        map.set(key, { multiplier: Number(r.premium_multiplier), n: Number(r.sample_size), confidence: r.confidence });
+        map.set(key, {
+          multiplier: Number(r.premium_multiplier),
+          n: Number(r.sample_size),
+          confidence: r.confidence,
+          companyId: r.company_id ?? null,
+          byTherapeuticArea: r.by_therapeutic_area ?? null,
+          byPhase: r.by_phase ?? null,
+        });
       }
       return map;
     });
+    // TA / phase slices (n ≥ 5) apply when the buyer has them; otherwise company-wide.
     buyerValuations = (await step('buyers.valuations', notes, log, () =>
-      computeBuyerValuations(partners, fm.dealWaterfall!, fm.rnpv!, premiums ?? undefined, 4),
+      computeBuyerValuations(partners, fm.dealWaterfall!, fm.rnpv!, premiums ?? undefined, 4, { therapeuticArea: asset.therapeuticArea, phase: asset.phase }),
     )) ?? [];
   }
 
