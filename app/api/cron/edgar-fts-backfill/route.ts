@@ -37,8 +37,14 @@ export async function GET(request: NextRequest) {
   const dailyCap = Math.max(0, Number(process.env.BACKFILL_DAILY_EXTRACTION_CAP ?? 1200));
   if (dailyCap > 0 && !dryRun) {
     const dayStart = new Date(); dayStart.setUTCHours(0, 0, 0, 0);
-    const { data: todayRuns } = await supabase.from('data_ingestion_log').select('records_processed').eq('source', 'edgar_fts_backfill').gte('started_at', dayStart.toISOString());
-    const usedToday = (todayRuns ?? []).reduce((a, r) => a + (r.records_processed ?? 0), 0);
+    // Only runs that actually paid for extraction count: a batch was submitted, or sync mode ran clean.
+    // (Runs during an API outage log processed > 0 but extracted nothing — 4,763 of them on Sep 26.)
+    const { data: todayRuns } = await supabase.from('data_ingestion_log').select('records_processed, records_failed, parameters').eq('source', 'edgar_fts_backfill').gte('started_at', dayStart.toISOString());
+    const usedToday = (todayRuns ?? []).reduce((a, r) => {
+      const p = (r.parameters ?? {}) as Record<string, unknown>;
+      const paid = !!p.batchId || (p.extractionMode === 'sync' && (r.records_failed ?? 0) === 0);
+      return a + (paid ? (r.records_processed ?? 0) : 0);
+    }, 0);
     if (usedToday >= dailyCap) {
       await logCronRun(supabase, 'edgar_fts_backfill', { fetched: 0, processed: 0, inserted: 0, expectRecords: false, notes: `daily cap reached (${usedToday}/${dailyCap}); resumes at 00:00 UTC` });
       return NextResponse.json({ success: true, skipped: 'daily_cap', usedToday, dailyCap });
