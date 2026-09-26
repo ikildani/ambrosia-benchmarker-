@@ -10,6 +10,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { envelope, stepper, button, signature, p, esc } from '@/lib/email/brief-template';
 
 export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const SITE_URL = 'https://solidus.ambrosiaventures.co';
@@ -67,10 +68,6 @@ export async function mintBriefLinks(supabase: SupabaseClient, row: Pick<BriefDe
   return { pdfUrl, excelUrl, expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString() };
 }
 
-function esc(s: string | null | undefined): string {
-  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 export function briefSubjectLine(row: Pick<BriefDeliveryRow, 'asset_name' | 'indication' | 'phase'>): string {
   const what = row.asset_name ? `${row.asset_name} (${row.indication}, ${row.phase})` : `${row.indication} (${row.phase})`;
   return `Your Deal Intelligence Brief — ${what}`;
@@ -86,18 +83,31 @@ export function buildDeliveryEmail(row: BriefDeliveryRow, links: BriefLinks): { 
   const room = row.brief_token ? dataRoomUrl(row.brief_token) : null;
   const pages = row.brief_page_count ? `${row.brief_page_count} pages` : null;
 
-  const html = `
-    <div style="font-family: -apple-system, 'Segoe UI', sans-serif; max-width: 600px; color: #1e293b; line-height: 1.6;">
-      <p>Hi ${esc(first)},</p>
-      <p>The Deal Intelligence Brief for ${esc(what)} is ready${pages ? ` (${pages})` : ''}. I have read it and signed the recommendation on page three.</p>
-      ${room ? `<p><a href="${esc(room)}" style="display: inline-block; background: #0f766e; color: #fff; padding: 10px 22px; border-radius: 4px; text-decoration: none; font-weight: 600;">Open the brief</a></p>
-      <p style="font-size: 13px; color: #64748b;">That link is your private data room; it issues a fresh download link each time you open it. Please do not forward it outside the team that needs the number.</p>` : ''}
-      ${links.pdfUrl ? `<p style="font-size: 13px; color: #64748b;">Direct PDF link (valid 30 days): <a href="${esc(links.pdfUrl)}">download</a>${links.excelUrl ? ` · Excel data export: <a href="${esc(links.excelUrl)}">download</a>` : ''}</p>` : ''}
-      <p><strong>How to read it.</strong> Start with page three: the recommendation, the ask, the floor and the walk-away, and who to open with. Pages five and eight show where the number comes from (the valuation bridge and the cited comparable set). The buyer map, the catalyst calendar, the objections and the diligence list follow. Every figure that appears on more than one page comes from one place.</p>
-      <p><strong>30-minute walkthrough.</strong> Reply with two or three times that work for you this week or next and we will spend thirty minutes going through the pages together and turning them into the position you take into the room.</p>
-      <p>The fee for this brief is credited in full against a subsequent advisory mandate.</p>
-      <p style="margin-top: 24px;">Best,<br><strong>Issa Kildani</strong><br>Managing Partner, Ambrosia Ventures<br>ikildani@ambrosiaventures.co</p>
-    </div>`;
+  const body = `
+    ${p(`Hi ${esc(first)},`)}
+    ${p(`The Deal Intelligence Brief for <strong>${esc(what)}</strong> is ready${pages ? ` (${pages})` : ''}. I have read it and signed the recommendation on page three.`)}
+    ${room ? button('Open your data room', room) : ''}
+    ${room ? p(`That link is your private data room. It holds the PDF, the Excel with the data behind every figure, and the status of the call as it is scored. It issues fresh download links each time you open it. Please keep it to the team that needs the number.`, { muted: true }) : ''}
+    ${links.pdfUrl ? p(`Direct links, valid 30 days: <a href="${esc(links.pdfUrl)}" style="color:#0f766e;">PDF</a>${links.excelUrl ? ` · <a href="${esc(links.excelUrl)}" style="color:#0f766e;">Excel</a>` : ''}.`, { muted: true }) : ''}
+    ${p(`<strong>How to read it.</strong> Start with page three: the recommendation, the ask, the floor and the walk-away, and who to open with. Page four says how that call will be scored. The valuation bridge and the cited comparable set show where the number comes from. The term sheet, buyer map, catalyst calendar, objections and diligence list follow. Every figure that appears on more than one page comes from one place, and the Excel opens on the same decision.`)}
+    ${stepper([
+      { title: 'Intake', body: 'Received.', done: true },
+      { title: 'Invoice', body: 'Sent.', done: true },
+      { title: 'Intake call', body: 'Done, with the draft in front of us.', done: true },
+      { title: 'Brief delivered', body: 'Reviewed and signed by the Managing Partner; in your data room now.', done: true },
+      { title: '30-minute walkthrough', body: 'Reply with two or three times that work this week or next. We go through the pages together and turn them into the position you take into the room.', now: true },
+      { title: 'Scoring', body: 'The call is registered in the Solidus outcome ledger. You hear from us at day 45 and day 120, and whenever a catalyst, buyer move or new comparable touches the decision while it is live.' },
+    ])}
+    ${p(`The fee for this brief is credited in full against a subsequent advisory mandate.`, { muted: true })}
+    ${signature()}`;
+
+  const html = envelope({
+    eyebrow: 'Deal Intelligence Brief · delivered',
+    headline: `${row.asset_name ? `${row.asset_name}: ` : ''}the brief is ready`,
+    sub: `${row.indication} · ${row.phase}${row.company ? ` · ${row.company}` : ''}`,
+    body,
+    preheader: `Your brief for ${what} is in your data room. Reply with times for the walkthrough.`,
+  });
 
   return { subject: briefSubjectLine(row), html };
 }
