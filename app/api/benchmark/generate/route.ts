@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { ensureBenchmarksLoaded } from '@/lib/benchmarks';
+import { parseClientIntake, dataPackageToDiligence } from '@/lib/brief/client-intake';
 import { calculateDealTerms, type CalculationInput } from '@/lib/calculations';
 import { computeSensitivityAnalysis } from '@/lib/sensitivity';
 import { calculateRiskScore } from '@/lib/calculations';
@@ -160,8 +161,10 @@ export async function POST(request: NextRequest) {
       partners: partnerMatches ?? [],
       memo: memoData,
       mpOpinion,
-      diligenceReady: req.diligence_ready ?? [],
-      diligenceGaps: req.diligence_gaps ?? [],
+      diligenceReady: req.diligence_ready?.length ? req.diligence_ready : dataPackageToDiligence(req.data_package).ready,
+      diligenceGaps: req.diligence_gaps?.length ? req.diligence_gaps : dataPackageToDiligence(req.data_package).gaps,
+      // Migration 135: the client's own model, runway, offers, buyers and package.
+      client: parseClientIntake(req as Record<string, unknown>),
       log: (m) => console.log(m),
     });
     genNotes.push(...built.notes);

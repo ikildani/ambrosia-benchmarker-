@@ -463,4 +463,10 @@ export interface BriefIntelligence {
   diligence?: DiligenceChecklist | null;
   coverage?: DataCoverage | null;
   mpOpinion?: MPOpinion | null;
+  /** The client's own data as supplied at intake (migration 135); never blended into the ask. */
+  client?: import('./client-intake').ClientIntake | null;
+  /** "Your model vs Solidus" page data. */
+  clientComparison?: import('./client-comparison').ClientComparison | null;
+  /** Indicative term sheet generated from the decision. */
+  indicativeTermSheet?: import('./indicative-term-sheet').IndicativeTermSheet | null;
 }

@@ -28,6 +28,8 @@ import { renderEarnoutPages } from './pages/earnoutPage';
 // Brief v3 pages
 import { renderDecisionPage } from './pages/decisionPage';
 import { renderScoredCallPage } from './pages/scoredCall';
+import { renderIndicativeTermSheetPage } from './pages/indicativeTermSheet';
+import { renderYourModelVsSolidusPage } from './pages/yourModelVsSolidus';
 import { renderValuationBridgePage } from './pages/valuationBridge';
 import { renderCompScatterPage } from './pages/compScatter';
 import { renderCompAppendixPages, countCompAppendixPages } from './pages/compAppendix';
@@ -92,8 +94,10 @@ export function buildPageSpecs(data: PDFReportData): PageSpec[] {
   add('Table of Contents', 'Section guide', renderTableOfContents);
   if (b) add('The Decision', 'Recommendation, counterparties, ask, floor, walk-away, and timeline', renderDecisionPage);
   if (b) add('This Call Is Scored', 'The registered ask, floor, buyers and window; how the call is scored and when you hear from us', renderScoredCallPage);
+  if (b) add('Indicative Term Sheet', 'Opening positions consistent with the decision, the floor on each, and the milestone schedule', renderIndicativeTermSheetPage);
   add('Executive Dashboard', 'Key metrics, value split, and deal recommendation', renderExecutiveDashboard);
   if (b) add('Valuation Bridge', 'Comps, rNPV, Monte Carlo, scenarios, and buyer-implied ranges reconciled to one ask', renderValuationBridgePage);
+  if (b) add('Your Model vs Solidus', 'Your assumptions against ours, line by line, and any offer on the table against the floor and the ask', renderYourModelVsSolidusPage);
   add('Deal Structure', 'Payment architecture and milestone waterfall', renderDealStructurePage);
   add('Deal Terms', 'Detailed term ranges, royalties, and modifiers', renderDealTermsPage);
 

@@ -124,6 +124,8 @@ export interface InflectionInput {
     discountRate?: number;
     /** Override the phase step-up table. */
     stepUp?: Partial<Record<string, number>>;
+    /** From intake: the raise the client actually plans replaces the cost-plus-buffer estimate. */
+    financing?: { nextRaiseM?: number | null; cashOnHandM?: number | null; runwayMonths?: number | null } | null;
   };
 }
 
@@ -274,10 +276,12 @@ export function buildInflectionPath(input: InflectionInput): InflectionPath | nu
   // Financing alternative (next phase)
   const nextDil = next.dilution;
   const retainedIfLicense = round1(dealValueTodayM(terms.upfront.median, terms.totalDealValue.median));
+  const clientRaise = input.assumptions?.financing?.nextRaiseM;
+  const useClientRaise = typeof clientRaise === 'number' && Number.isFinite(clientRaise) && clientRaise > 0;
   const financing = nextDil != null ? {
     preMoneyM: round1(preMoneyM),
-    basis: preMoneyBasis,
-    raiseM: round1(next.costM * (1 + buffer)),
+    basis: useClientRaise ? `${preMoneyBasis}; raise per intake` : preMoneyBasis,
+    raiseM: round1(useClientRaise ? clientRaise : next.costM * (1 + buffer)),
     dilution: nextDil,
     retainedValueIfFinanceM: round1((1 - nextDil) * dealValueTodayM(next.upfrontIfReached.median, next.totalIfReached.median) * next.pReach * discountFactor(next.months)),
     retainedValueIfLicenseM: retainedIfLicense,

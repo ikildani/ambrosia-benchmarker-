@@ -48,6 +48,9 @@ import { buildTermSheetPrecedent } from './term-sheet';
 import { computeBuyerValuations, type PremiumEntry } from './buyer-valuations';
 import { buildBuyerMap } from './buyer-map';
 import { buildLandscape, landscapeUsesTerrain } from './landscape';
+import { buildClientComparison } from './client-comparison';
+import { buildIndicativeTermSheet } from './indicative-term-sheet';
+import type { ClientIntake } from './client-intake';
 import { fetchDemandProfile } from './terrain-demand';
 import { buildValuationBridge } from './valuation-bridge';
 import { buildInflectionPath } from './inflection';
@@ -72,6 +75,8 @@ export interface BuildBriefInput {
   /** Diligence items the client says are ready / missing (free text from intake). */
   diligenceReady?: string[];
   diligenceGaps?: string[];
+  /** The client's own data from intake; drives the comparison page, the term sheet and the levers. */
+  client?: ClientIntake | null;
   /** Skip the Anthropic call (tests, offline renders). */
   skipPositioning?: boolean;
   asOf?: string;
@@ -236,13 +241,13 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
 
   // 6. Inflection path
   brief.inflection = await step('inflection', notes, log, () =>
-    buildInflectionPath({ inputs, result, rnpv: fm.rnpv, asOf }),
+    buildInflectionPath({ inputs, result, rnpv: fm.rnpv, asOf, assumptions: input.client?.financing ? { financing: input.client.financing } : undefined }),
   );
 
   // 7. Decision summary
   if (brief.bridge) {
     brief.decision = await step('decision', notes, log, () =>
-      buildDecisionSummary({
+      buildDecisionSummary({ client: input.client ?? null,
         asset,
         bridge: brief.bridge!,
         inflection: brief.inflection,
@@ -257,6 +262,16 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
   }
 
   // 8. Diligence readiness
+  brief.client = input.client ?? null;
+  brief.clientComparison = await step('client.compare', notes, log, () =>
+    buildClientComparison(input.client, { asset, bridge: brief.bridge, rnpv: fm.rnpv, inflection: brief.inflection, asOf }),
+  );
+  if (brief.decision) {
+    brief.indicativeTermSheet = await step('termSheet.indicative', notes, log, () =>
+      buildIndicativeTermSheet({ asset, decision: brief.decision!, termSheet: brief.termSheet, buyerMap: brief.buyerMap, client: input.client, asOf }),
+    );
+  }
+
   brief.diligence = await step('diligence', notes, log, () =>
     buildDiligenceChecklist(asset, { ready: input.diligenceReady, gaps: input.diligenceGaps }),
   );
