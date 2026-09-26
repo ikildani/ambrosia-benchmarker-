@@ -71,6 +71,8 @@ export const clientIntakeSchema = z.object({
   upstreamLicenses: longText,
   ipNotes: longText,
   dataPackage: z.record(z.string(), z.boolean()).default({}),
+  /** Structure- and territory-specific answers (migration 137); see STRUCTURE_PREF_KEYS. */
+  structurePrefs: z.record(z.string(), z.union([z.string().max(300), z.number().finite(), z.boolean()])).default({}),
 });
 export type ClientIntake = z.infer<typeof clientIntakeSchema>;
 
@@ -94,7 +96,12 @@ export const intakeBodySchema = z.object({
   dataPackageStage: z.string().trim().max(80).nullable().optional(),
   differentiationNotes: longText,
   // the client's data
-  client: clientIntakeSchema.default({ priorOffers: [], targetBuyers: [], excludedBuyers: [], dataPackage: {} }),
+  client: clientIntakeSchema.default({ priorOffers: [], targetBuyers: [], excludedBuyers: [], dataPackage: {}, structurePrefs: {} }),
+  /**
+   * Structure- and territory-specific follow-ups the form asks once the deal
+   * type or territory is known. Free-form keys; see STRUCTURE_PREF_KEYS.
+   */
+  structurePrefs: z.record(z.string(), z.union([z.string().max(300), z.number().finite(), z.boolean()])).default({}),
   // invoice
   billingEntity: shortText,
   billingAddress: longText,
@@ -105,6 +112,25 @@ export const intakeBodySchema = z.object({
   ref: z.string().trim().max(120).nullable().optional(),
 });
 export type IntakeBody = z.infer<typeof intakeBodySchema>;
+
+/** Keys the form writes into structurePrefs, with the label the admin email and term sheet print. */
+export const STRUCTURE_PREF_KEYS: Record<string, string> = {
+  optionFeeM: 'Option fee you would accept ($M)',
+  optionMonths: 'Evaluation period you would accept (months)',
+  costSharePct: 'Share of development cost you would fund (%)',
+  coPromote: 'Interest in US co-promotion',
+  minPriceM: 'Price below which you would not sell ($M)',
+  chinaLicensed: 'Greater China rights already licensed',
+  chinaPartner: 'Greater China partner',
+  readoutDate: 'Next readout (YYYY-MM)',
+  orphan: 'Orphan designation',
+  breakthrough: 'Breakthrough therapy',
+  fastTrack: 'Fast Track',
+  prime: 'EMA PRIME',
+  biomarkerSelected: 'Biomarker-selected population',
+  route: 'Route of administration',
+  modalityDetail: 'Modality detail',
+};
 
 /** Columns on benchmark_requests written from the client block (migration 135). */
 export function clientIntakeToColumns(c: ClientIntake): Record<string, unknown> {
@@ -137,6 +163,16 @@ function normaliseDate(v: string): string {
 }
 
 /** The same block read back from a benchmark_requests row. */
+/** structure_prefs column → typed map (unknown keys kept, values coerced). */
+export function parseStructurePrefs(row: Record<string, unknown>): Record<string, string | number | boolean> {
+  const raw = row.structure_prefs && typeof row.structure_prefs === 'object' ? (row.structure_prefs as Record<string, unknown>) : {};
+  const out: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') out[k] = v;
+  }
+  return out;
+}
+
 export function parseClientIntake(row: Record<string, unknown>): ClientIntake | null {
   const n = (k: string): number | null => {
     const v = row[k];
@@ -179,9 +215,11 @@ export function parseClientIntake(row: Record<string, unknown>): ClientIntake | 
     upstreamLicenses: s('upstream_licenses'),
     ipNotes: s('ip_notes'),
     dataPackage,
+    structurePrefs: parseStructurePrefs(row),
   };
   const empty = !hasModel && !hasFinancing && priorOffers.length === 0 && intake.targetBuyers.length === 0
-    && intake.excludedBuyers.length === 0 && !intake.upstreamLicenses && !intake.ipNotes && Object.keys(dataPackage).length === 0;
+    && intake.excludedBuyers.length === 0 && !intake.upstreamLicenses && !intake.ipNotes && Object.keys(dataPackage).length === 0
+    && Object.keys(intake.structurePrefs).length === 0;
   return empty ? null : intake;
 }
 

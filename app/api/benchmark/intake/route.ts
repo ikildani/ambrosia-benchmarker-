@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email/client';
 import { BENCHMARK_PRICING } from '@/lib/config/constants';
-import { intakeBodySchema, clientIntakeToColumns, dataPackageToDiligence, DATA_PACKAGE_ITEMS, bestPriorOffer } from '@/lib/brief/client-intake';
+import { intakeBodySchema, clientIntakeToColumns, dataPackageToDiligence, DATA_PACKAGE_ITEMS, bestPriorOffer, STRUCTURE_PREF_KEYS } from '@/lib/brief/client-intake';
+import { envelope, stepper, factsTable, callout, signature, p, esc } from '@/lib/email/brief-template';
 
 /**
  * Deal Intelligence Brief intake.
@@ -18,7 +19,6 @@ import { intakeBodySchema, clientIntakeToColumns, dataPackageToDiligence, DATA_P
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
-const esc = (s: string | null | undefined) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
 const m = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? `$${v >= 1000 ? `${(v / 1000).toFixed(2)}B` : `${Math.round(v)}M`}` : '—');
 
 export async function POST(request: NextRequest) {
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
         payment_status: 'pending',
         invoice_requested_at: now,
         intake_path: body.intakePath,
+        // Migration 137
+        structure_prefs: body.structurePrefs ?? {},
+        auto_draft_requested_at: now,
+        auto_draft_status: 'requested',
         admin_notes: body.ref ? `ref ${body.ref}` : null,
       })
       .select('id')
@@ -108,17 +112,24 @@ export async function POST(request: NextRequest) {
         ['Upstream licences', client.upstreamLicenses ?? '—'],
         ['IP notes', client.ipNotes ?? '—'],
         ['Differentiation', body.differentiationNotes ?? '—'],
+        ['Structure answers', Object.entries(body.structurePrefs ?? {}).map(([k, v]) => `${STRUCTURE_PREF_KEYS[k] ?? k}: ${String(v)}`).join('; ') || '—'],
         ['Invoice to', `${body.billingEntity || body.company || body.name} · ${body.billingEmail || body.email}${body.poNumber ? ` · PO ${body.poNumber}` : ''}${body.billingAddress ? ` · ${body.billingAddress}` : ''}`],
         ['Path', `${body.intakePath}${body.ref ? ` (ref ${body.ref})` : ''}`],
       ];
+      const adminBody = `
+        ${p(`New Deal Intelligence Brief intake from <strong>${esc(body.name)}</strong>${body.company ? ` at <strong>${esc(body.company)}</strong>` : ''}. A draft is building now; it lands as <em>call_complete</em> in <a href="https://solidus.ambrosiaventures.co/admin/briefs" style="color:#0f766e;">/admin/briefs</a> when done.`)}
+        ${stepper([
+          { title: 'Draft', body: 'Building automatically from the intake. Review it before the call; if it fails, rebuild from /admin/briefs.', now: true },
+          { title: 'Invoice', body: `Send ${BENCHMARK_PRICING.PRICE} within one business day to ${esc(body.billingEntity || body.company || body.name)} (${esc(body.billingEmail || body.email)}${body.poNumber ? `, PO ${esc(body.poNumber)}` : ''}).` },
+          { title: 'Call', body: 'Fifteen minutes on receipt, with the draft open. Confirm asset, structure, counterparties in and out.' },
+          { title: 'Deliver', body: 'Set mp_opinion, mp_reviewer, mp_reviewed_at and re-run generate. That uploads the final PDF and Excel and emails the data-room link.' },
+        ])}
+        ${offer ? callout(`<strong>An offer is already on the table</strong> from ${esc(offer.party)} at ${m(offer.upfrontM)} upfront / ${m(offer.totalM)} total. The brief prints it against the floor and the ask.`, 'amber') : ''}
+        ${factsTable(rows.map(([k, v]) => [k, esc(v)] as [string, string]))}`;
       await sendEmail({
         to: 'ikildani@ambrosiaventures.co',
         subject: `Brief intake: ${assetLabel} — ${body.company ?? body.name} — invoice ${BENCHMARK_PRICING.PRICE}`,
-        html: `<div style="font-family: -apple-system, sans-serif; max-width: 720px; color: #1e293b; font-size: 14px;">
-          <p><strong>New Deal Intelligence Brief intake.</strong> Send the invoice for ${BENCHMARK_PRICING.PRICE} within one business day, then schedule the 15-minute call.</p>
-          <table style="border-collapse: collapse; width: 100%;">${rows.map(([k, v]) => `<tr><td style="padding: 4px 8px; color: #64748b; vertical-align: top; white-space: nowrap;">${esc(k)}</td><td style="padding: 4px 8px;">${esc(v)}</td></tr>`).join('')}</table>
-          ${offer ? `<p style="color: #b45309;"><strong>An offer is already on the table</strong> from ${esc(offer.party)} at ${m(offer.upfrontM)} upfront / ${m(offer.totalM)} total. The brief prints it against the floor and the ask.</p>` : ''}
-        </div>`,
+        html: envelope({ eyebrow: 'Deal Intelligence Brief · new intake', headline: assetLabel, sub: `${body.therapeuticArea} · ${body.phase} · ${body.modality} · ${body.targetDealType ?? 'Licensing'} · ${body.territory ?? 'global'}`, body: adminBody, preheader: `Intake from ${body.name}${body.company ? `, ${body.company}` : ''}. Draft building; invoice to send.` }),
         replyTo: body.email,
       });
     } catch (adminErr) {
@@ -141,37 +152,58 @@ export async function POST(request: NextRequest) {
 
     // Confirmation to the client
     try {
+      const named = client.targetBuyers.slice(0, 3).map(esc).join(', ');
+      const clientBody = `
+        ${p(`Hi ${esc(first)},`)}
+        ${p(`Thank you. Your intake for <strong>${esc(assetLabel)}</strong> is in, and a first draft of the brief has started building from what you entered. Nothing is sent from that draft; it is what we review together on the call.`)}
+        ${stepper([
+          { title: 'Intake', body: 'Received. Reply to this email with anything you want added before the call.', done: true },
+          { title: 'Draft', body: 'Built now from your intake: the comparable set, the valuation bridge, the buyer map and a first version of the decision. Held for review.', now: true },
+          { title: 'Invoice', body: `${BENCHMARK_PRICING.PRICE}, sent within one business day${body.billingEntity ? ` to ${esc(body.billingEntity)}` : ''}. No card, no checkout. Credited in full against a subsequent advisory mandate.` },
+          { title: 'Intake call', body: 'Fifteen minutes on receipt of the invoice, with the draft in front of us: the asset, the structure you are preparing for, the counterparties you want in or out, and anything the draft got wrong.' },
+          { title: 'Brief', body: 'Within 24 hours of the call, reviewed and signed by the Managing Partner, delivered to a private data room with the PDF and the Excel behind every figure.' },
+          { title: 'Walkthrough and scoring', body: 'A 30-minute walkthrough arranged by reply. The call is then registered in the Solidus outcome ledger and scored against what happens; you see the status in your data room and hear from us at day 45 and day 120.' },
+        ])}
+        ${p(`<strong>What the brief commits to.</strong> The recommendation on page three: the ask, the floor, the walk-away, and who to open with. A valuation bridge reconciling cited comparables, the calibrated range and risk-adjusted value to one ask${client.model ? ', and a page setting your own model against ours line by line' : ''}. An indicative term sheet built from the levers in the decision${Object.keys(body.structurePrefs ?? {}).length ? ' and the structure answers you gave' : ''}. Buyers ranked on fit, urgency and what each has paid at your stage${named ? `, with ${named} assessed on the same terms` : ''}, with a 24-month catalyst calendar. Positioning, the objections you will hear with the evidence to answer them, and diligence readiness from the package you described.`)}
+        ${client.model ? '' : callout(`You left the "your model" section blank. Send your peak-sales, probability and timing assumptions before the call and the brief adds a page comparing them to ours, line by line.`)}
+        ${signature()}`;
       await sendEmail({
         to: body.email,
         subject: `Your Deal Intelligence Brief — ${assetLabel}`,
-        html: `
-          <div style="font-family: -apple-system, sans-serif; max-width: 600px; color: #1e293b; line-height: 1.6;">
-            <p>Hi ${esc(first)},</p>
-            <p>Thank you. Your intake for <strong>${esc(assetLabel)}</strong> is in. What happens next:</p>
-            <ol style="line-height: 1.8;">
-              <li><strong>Invoice</strong> — an invoice for ${BENCHMARK_PRICING.PRICE} follows within one business day${body.billingEntity ? ` to ${esc(body.billingEntity)}` : ''}. The fee is credited in full against a subsequent advisory mandate.</li>
-              <li><strong>Intake call</strong> — a 15-minute call on receipt, to confirm the asset, the structure you are preparing for and the counterparties you want in or out.</li>
-              <li><strong>Build</strong> — the brief is built within 24 hours of the call: one asset, one signed recommendation, about 30 data-backed pages.</li>
-              <li><strong>Delivery</strong> — a private data room with the PDF and the Excel behind every figure, followed by a 30-minute walkthrough arranged by reply.</li>
-            </ol>
-            <p>What the brief commits to:</p>
-            <ul style="line-height: 1.8; color: #475569;">
-              <li>The recommendation on page three: the ask, the floor, the walk-away, and who to open with. It is registered in our outcome ledger and scored against what actually happens; you see the score in your data room.</li>
-              <li>A valuation bridge reconciling cited comparables, the calibrated range and risk-adjusted value to one ask${client.model ? ', and a page setting your own model against ours line by line' : ''}.</li>
-              <li>An indicative term sheet you can carry into the room, built from the levers in the decision.</li>
-              <li>Buyers ranked on fit, urgency and what each has paid at your stage${client.targetBuyers.length ? `, with ${esc(client.targetBuyers.slice(0, 3).join(', '))} assessed on the same terms` : ''}, with a 24-month catalyst calendar.</li>
-              <li>Positioning, the objections you will hear with the evidence to answer them, and diligence readiness from the package you described.</li>
-            </ul>
-            ${client.model ? '' : `<p style="color: #475569;">You left the "your model" section blank. If you send your peak-sales, probability and timing assumptions before the call, the brief adds a page comparing them to ours.</p>`}
-            <p>Reply to this email with anything you want on the call.</p>
-            <p style="margin-top: 24px;">Best,<br><strong>Issa Kildani</strong><br>Ambrosia Ventures<br>solidus.ambrosiaventures.co</p>
-          </div>
-        `,
+        html: envelope({ eyebrow: 'Deal Intelligence Brief · intake received', headline: `${assetLabel}: the draft is building`, sub: `${body.indication} · ${body.phase} · ${body.targetDealType ?? 'Licensing'}`, body: clientBody, preheader: `Your intake is in and a draft is building. Invoice within one business day, then a 15-minute call with the draft open.` }),
         replyTo: 'ikildani@ambrosiaventures.co',
       });
     } catch (autoReplyErr) {
       console.error('[Benchmark] Auto-reply failed:', autoReplyErr);
     }
+
+    // Automatic draft: ask the generate route to build the brief now, so the intake call
+    // reviews a real draft. Without an MP opinion the generate route stores a draft
+    // (status call_complete) and sends nothing to the client. The call is fired after the
+    // response; the generate invocation carries on server-side once it has been received.
+    after(async () => {
+      const secret = process.env.CRON_SECRET;
+      const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://solidus.ambrosiaventures.co';
+      if (!secret) return;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8_000);
+      try {
+        await fetch(`${base}/api/benchmark/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret },
+          body: JSON.stringify({ requestId }),
+          signal: controller.signal,
+        });
+      } catch (e) {
+        // An abort here is expected: the draft keeps building on the receiving side.
+        if (!(e instanceof Error && e.name === 'AbortError')) {
+          console.error('[Benchmark] auto-draft request failed:', e instanceof Error ? e.message : e);
+          await supabase.from('benchmark_requests').update({ auto_draft_status: 'failed' }).eq('id', requestId);
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    });
 
     return NextResponse.json({ success: true, requestId });
   } catch (err) {

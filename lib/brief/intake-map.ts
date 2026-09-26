@@ -30,6 +30,26 @@ export interface BenchmarkRequestRow {
   differentiation_notes?: string | null;
   data_package_stage?: string | null;
   custom_notes?: string | null;
+  /** Migration 137: structure, territory and evidence answers from the adaptive intake. */
+  structure_prefs?: Record<string, unknown> | null;
+}
+
+const ROUTE_KEYS = new Set(['iv', 'sc', 'oral', 'intrathecal', 'intravitreal', 'inhaled', 'topical', 'implantable', 'gene_therapy_vector', 'device_combo', 'autoinjector', 'intranasal']);
+const yes = (v: unknown) => v === true || (typeof v === 'string' && /^(yes|true|y)$/i.test(v));
+
+/** Engine inputs the adaptive intake can set: designations, biomarker, route, targets. */
+export function engineInputsFromPrefs(prefs: Record<string, unknown> | null | undefined, target: string | null | undefined): Partial<CalculationInput> & { notes: string[] } {
+  const p = prefs ?? {};
+  const notes: string[] = [];
+  const regulatoryDesignations = { breakthrough: yes(p.breakthrough), fastTrack: yes(p.fastTrack), orphan: yes(p.orphan), prime: yes(p.prime) };
+  const designations = Object.entries(regulatoryDesignations).filter(([, v]) => v).map(([k]) => k);
+  if (designations.length) notes.push(`Designations from intake: ${designations.join(', ')}.`);
+  const biomarker: CalculationInput['biomarker'] = yes(p.biomarkerSelected) ? 'selected' : 'unselected';
+  if (biomarker === 'selected') notes.push('Biomarker-selected population from intake.');
+  const route = typeof p.route === 'string' && ROUTE_KEYS.has(p.route) ? (p.route as NonNullable<CalculationInput['deliveryRoute']>) : undefined;
+  if (route) notes.push(`Route of administration from intake: ${route}.`);
+  const molecularTargets = target && target.trim() ? target.split(/[,/;+]/).map(t => t.trim()).filter(Boolean).slice(0, 4) : undefined;
+  return { regulatoryDesignations, biomarker, ...(route ? { deliveryRoute: route } : {}), ...(molecularTargets?.length ? { molecularTargets } : {}), notes };
 }
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
@@ -180,6 +200,8 @@ export function resolveIntake(req: BenchmarkRequestRow, modalityLabels: Record<s
   if (ind.how === 'fuzzy') notes.push(`Indication "${req.indication}" matched to ${ind.label} by fuzzy match; confirm.`);
   const territory = (req.territory || 'global') as CalculationInput['territory'];
 
+  const { notes: prefNotes, ...fromPrefs } = engineInputsFromPrefs(req.structure_prefs, req.target);
+  notes.push(...prefNotes);
   const input = {
     therapeuticArea: ta,
     phase,
@@ -189,8 +211,7 @@ export function resolveIntake(req: BenchmarkRequestRow, modalityLabels: Record<s
     territory,
     competitivePosition: 'racing',
     dataQuality: dataQualityForPhase(phase),
-    biomarker: 'unselected',
-    regulatoryDesignations: { breakthrough: false, fastTrack: false, orphan: false, prime: false },
+    ...fromPrefs,
   } as unknown as CalculationInput;
 
   const asset: AssetProfile = {

@@ -39,9 +39,9 @@ const PAGES: Array<{ n: string; title: string; text: string }> = [
 ];
 
 const STEPS: Array<[string, string]> = [
-  ['Intake', 'The asset and your contact are required. Your model, runway, offers, buyers and data package are optional and make the brief yours.'],
+  ['Intake', 'The asset and your contact are required. Your model, runway, offers, buyers and data package are optional and make the brief yours. The form answers back as you go: our peak-sales and probability read for the profile, the size of the comparable set, the buyers most active at your stage. A first draft starts building the moment you submit.'],
   ['Invoice', `${PRICE}, sent within one business day. No card, no checkout. Credited in full against a subsequent advisory mandate.`],
-  ['Call', 'Fifteen minutes on receipt to confirm the asset and the counterparties you want in or out.'],
+  ['Call', 'Fifteen minutes on receipt, with the draft in front of us, to confirm the asset, the counterparties you want in or out, and anything the draft got wrong.'],
   ['Brief', 'Within 24 hours of the call, reviewed and signed by the Managing Partner, delivered to a private data room with the Excel behind every figure.'],
   ['After', 'A 30-minute walkthrough. Then the call is scored, and catalyst dates, buyer moves and new comps reach you while the decision is live.'],
 ];

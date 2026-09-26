@@ -67,6 +67,7 @@ export default function AdminLayoutClient({
     { href: '/admin/updates', icon: Bell, label: 'Updates' },
     { href: '/admin/generate', icon: Sparkles, label: 'Generate' },
     { href: '/admin/outcomes', icon: ClipboardCheck, label: 'Outcomes' },
+    { href: '/admin/briefs', icon: FileText, label: 'Briefs' },
   ];
 
   return (

@@ -31,6 +31,7 @@ import { recordBriefPrediction } from '@/lib/outcomes/writers';
 import { loadPriorsSnapshot } from '@/lib/outcomes/priors-snapshot';
 import { fetchBriefPartners } from '@/lib/brief/partners';
 import { buildExcelWorkbook } from '@/lib/generateExcel';
+import { addBriefSheets } from '@/lib/brief/excel-sheets';
 import { sendEmail } from '@/lib/email/client';
 import { buildDeliveryEmail, dataRoomUrl, mintBriefLinks, DELIVERY_COLUMNS, SIGNED_URL_TTL_SECONDS, type BriefDeliveryRow } from '@/lib/brief/delivery';
 import { modalityLabels } from '@/lib/report/helpers';
@@ -43,6 +44,9 @@ function isAdminAuth(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   const adminKey = process.env.ADMIN_API_KEY;
   if (adminKey && authHeader === `Bearer ${adminKey}`) return true;
+  // Internal callers (the intake route's automatic draft) authenticate with the cron secret.
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && request.headers.get('x-internal-secret') === cronSecret) return true;
   return false;
 }
 
@@ -279,6 +283,13 @@ export async function POST(request: NextRequest) {
         undefined,
         sensitivityData,
       );
+      // The brief sheets go first: decision, scored call, term sheet, bridge,
+      // your model vs Solidus, comps with sources, buyers, catalysts, path, diligence.
+      try {
+        addBriefSheets(wb, built.brief, { deliveredAt: new Date().toISOString() });
+      } catch (sheetErr) {
+        genNotes.push(`brief sheets failed: ${sheetErr instanceof Error ? sheetErr.message : String(sheetErr)}`);
+      }
       const xlsx = Buffer.from(await wb.xlsx.writeBuffer());
       const candidate = `briefs/${briefToken}/data.xlsx`;
       const { error: xlsxErr } = await supabase.storage.from('reports').upload(candidate, xlsx, {
@@ -324,6 +335,8 @@ export async function POST(request: NextRequest) {
         // Migration 133: the brief as data (data room, alerts, follow-ups) and the ledger row it registered.
         brief_json: built.brief,
         prediction_id: predictionId,
+        // Migration 137: an automatic draft reports back here.
+        auto_draft_status: reviewed ? 'delivered' : 'draft_ready',
       })
       .eq('id', requestId);
 
