@@ -66,13 +66,14 @@ const APPETITE_CONFIG: Record<string, { label: string; color: string; bg: string
   inactive: { label: 'Inactive', color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-500/10' },
 };
 
-export default function CompaniesPageClient() {
+export default function CompaniesPageClient({ initialCompanies = [] }: { initialCompanies?: Company[] }) {
   const { isAuthenticated, user, tier, signIn, signOut, openAuthModal, closeAuthModal, showAuthModal, authModalMode, isPortfolioAdmin } = useAuth();
   const isPro = tier === 'pro' || tier === 'portfolio';
 
   const [query, setQuery] = useState('');
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Server-rendered first page: the directory paints with the HTML instead of after a client fetch.
+  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
+  const [loading, setLoading] = useState(initialCompanies.length === 0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -353,7 +354,7 @@ export default function CompaniesPageClient() {
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       {company.company_type && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{formatType(company.company_type)}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">{formatType(company.company_type)}</p>
                       )}
                       {company.hq_country && (
                         <span className="text-xs text-slate-500 dark:text-slate-400">{company.hq_country}</span>
@@ -369,11 +370,11 @@ export default function CompaniesPageClient() {
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{company.deals_last_12mo ?? 0}</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Deals (12mo)</p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 uppercase tracking-wider">Deals (12mo)</p>
                   </div>
                   <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
                     <p className="text-lg font-bold text-slate-900 dark:text-white">{company.active_trials_count ?? 0}</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Trials</p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 uppercase tracking-wider">Active Trials</p>
                   </div>
                 </div>
 

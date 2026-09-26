@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import CompaniesPageClient from './CompaniesPageClient';
+import SiteHeaderAuto from '@/components/SiteHeaderAuto';
 import { resolveUserTier } from '@/lib/auth/tier-check';
 import { IntelligenceUpgradeGate } from '@/components/intelligence/IntelligenceUpgradeGate';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -39,7 +40,7 @@ async function getPublicCompanyDirectory() {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('companies')
-    .select('id, name, company_type, deals_last_12mo, deals_last_24mo')
+    .select('id, name, company_type, deals_last_12mo, deals_last_24mo, hq_country, modalities_active, active_trials_count, acquisition_appetite, last_deal_date, last_deal_modality, data_quality_score')
     .order('deals_last_12mo', { ascending: false, nullsFirst: false })
     .limit(100);
 
@@ -76,7 +77,7 @@ export default async function CompaniesPage() {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
         />
-        <CompaniesPageClient />
+        <CompaniesPageClient initialCompanies={await getPublicCompanyDirectory()} />
       </>
     );
   }
@@ -89,8 +90,9 @@ export default async function CompaniesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
-      <main className="min-h-screen bg-slate-950 text-slate-100">
-        <section className="mx-auto max-w-6xl px-6 pt-16 pb-8">
+      <SiteHeaderAuto />
+      <main id="main-content" className="min-h-screen bg-slate-950 text-slate-100">
+        <section className="mx-auto max-w-6xl px-4 sm:px-6 pt-24 sm:pt-28 lg:pt-32 pb-8">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
             Biopharma Company Profiles
           </h1>
@@ -100,24 +102,24 @@ export default async function CompaniesPage() {
           </p>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 pb-12">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-12">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {companies.map((company) => (
               <Link
                 key={company.id}
                 href={`/companies/${company.id}`}
-                className="group flex items-center justify-between rounded-lg border border-slate-800/60 bg-slate-900/40 px-4 py-3 transition-colors hover:border-teal-500/30 hover:bg-slate-900/70"
+                className="group flex min-w-0 items-center justify-between gap-3 rounded-lg border border-slate-800/60 bg-slate-900/40 px-4 py-3 min-h-14 transition-colors hover:border-teal-500/30 hover:bg-slate-900/70"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-slate-200 group-hover:text-teal-300">
                     {company.name}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-400">
                     {TYPE_LABELS[company.company_type] || company.company_type || 'Biopharma'}
                   </span>
                 </div>
                 {company.deals_last_24mo != null && company.deals_last_24mo > 0 && (
-                  <span className="ml-3 shrink-0 rounded-full bg-slate-800/60 px-2 py-0.5 text-xs tabular-nums text-slate-400">
+                  <span className="shrink-0 rounded-full bg-slate-800/60 px-2 py-0.5 text-xs tabular-nums text-slate-300">
                     {company.deals_last_24mo} deal{company.deals_last_24mo !== 1 ? 's' : ''} · 24mo
                   </span>
                 )}
@@ -126,7 +128,7 @@ export default async function CompaniesPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 pb-20">
+        <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-20">
           <IntelligenceUpgradeGate isAuthenticated={auth.isAuthenticated} />
         </section>
       </main>

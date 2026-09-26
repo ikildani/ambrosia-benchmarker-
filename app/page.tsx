@@ -33,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function HomePage() {
-  return <HomeContent />;
+export default async function HomePage() {
+  const stats = await getLiveDealStats();
+  return <HomeContent dealCountDisplay={stats.totalDealsDisplay} />;
 }

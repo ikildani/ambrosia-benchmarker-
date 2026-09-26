@@ -188,7 +188,7 @@ function LiveDemoSection() {
     return calculateDealTerms(input);
   }, [demoPhase, demoModality, demoIndication]);
 
-  const styledSelect = "w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-10 shadow-sm hover:border-slate-300 dark:hover:border-slate-500";
+  const styledSelect = "w-full px-4 py-3 min-h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-base sm:text-sm font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-10 shadow-sm hover:border-slate-300 dark:hover:border-slate-500";
 
   const phasePills = [
     { value: 'preclinical', label: 'Preclinical' },
@@ -212,16 +212,17 @@ function LiveDemoSection() {
 
         {/* Phase Selector — Pill buttons */}
         <div className="max-w-3xl xl:max-w-4xl mx-auto mb-6">
-          <label className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 text-center">Development Phase</label>
-          <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+          <p className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 text-center">Development Phase</p>
+          <div className="grid grid-cols-3 sm:flex sm:items-center sm:justify-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl p-1" role="group" aria-label="Development phase">
             {phasePills.map(p => (
               <button
                 key={p.value}
                 onClick={() => setDemoPhase(p.value as Phase)}
-                className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
+                aria-pressed={demoPhase === p.value}
+                className={`px-3 sm:px-5 min-h-11 sm:min-h-0 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-200 ${
                   demoPhase === p.value
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {p.label}
@@ -233,8 +234,8 @@ function LiveDemoSection() {
         {/* Modality & Indication — Styled dropdowns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl xl:max-w-3xl mx-auto mb-8">
           <div>
-            <label className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Modality</label>
-            <select value={demoModality} onChange={(e) => setDemoModality(e.target.value as Modality)} className={styledSelect}>
+            <label htmlFor="demo-modality" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Modality</label>
+            <select id="demo-modality" value={demoModality} onChange={(e) => setDemoModality(e.target.value as Modality)} className={styledSelect}>
               {modalityOptions.map(g => (
                 <optgroup key={g.group} label={g.group}>
                   {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -243,8 +244,8 @@ function LiveDemoSection() {
             </select>
           </div>
           <div>
-            <label className="block text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Indication</label>
-            <select value={demoIndication} onChange={(e) => setDemoIndication(e.target.value as Indication)} className={styledSelect}>
+            <label htmlFor="demo-indication" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Indication</label>
+            <select id="demo-indication" value={demoIndication} onChange={(e) => setDemoIndication(e.target.value as Indication)} className={styledSelect}>
               {indicationOptions.map(g => (
                 <optgroup key={g.group} label={g.group}>
                   {g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -302,7 +303,8 @@ function LiveDemoSection() {
   );
 }
 
-export default function HomeContent() {
+export default function HomeContent({ dealCountDisplay }: { dealCountDisplay?: string } = {}) {
+  const dealCount = dealCountDisplay || DEAL_STATS.TOTAL_DEALS;
   const {
     isAuthenticated,
     user,
@@ -318,12 +320,9 @@ export default function HomeContent() {
     isPortfolioAdmin,
   } = useAuth();
 
-  const [isVisible, setIsVisible] = useState(false);
   const [urlPromoCode, setUrlPromoCode] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    setIsVisible(true);
-
     // Read ?code= param for promo code (email campaign link)
     const params = new URLSearchParams(window.location.search);
     const codeParam = params.get('code');
@@ -377,24 +376,24 @@ export default function HomeContent() {
       />
 
       {/* Hero Section */}
-      <section className="relative bg-white dark:bg-slate-900 pt-24 sm:pt-32 lg:pt-40 xl:pt-44 pb-20 sm:pb-24 lg:pb-28 px-4 xl:px-6 overflow-hidden min-h-[85vh] flex items-center transition-colors duration-300">
+      <section className="relative bg-white dark:bg-slate-900 pt-28 sm:pt-32 lg:pt-40 xl:pt-44 pb-14 sm:pb-24 lg:pb-28 px-4 xl:px-6 overflow-hidden lg:min-h-[85vh] flex items-center transition-colors duration-300">
         {/* Clean background — single subtle gradient */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(14,165,165,0.08),transparent)]" />
         </div>
 
-        <div className={`relative max-w-7xl mx-auto w-full transition-all duration-1000 lg:flex lg:items-center lg:gap-16 xl:gap-20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className="relative max-w-7xl mx-auto w-full lg:flex lg:items-center lg:gap-16 xl:gap-20">
           <div className="text-center lg:text-left lg:flex-1">
 
           {/* Product eyebrow */}
-          <div className={`flex items-center gap-2 mb-6 justify-center lg:justify-start transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="flex items-center gap-2 mb-6 justify-center lg:justify-start animate-rise">
             <span className="text-sm font-semibold tracking-wide text-slate-900 dark:text-white">Solidus</span>
             <span className="text-slate-300 dark:text-slate-600">·</span>
             <span className="text-sm text-slate-400 dark:text-slate-500">The gold standard for deal intelligence</span>
           </div>
 
           {/* Headline */}
-          <h1 className={`text-4xl sm:text-5xl lg:text-[64px] xl:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight leading-[1.08] transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <h1 className="text-4xl sm:text-5xl lg:text-[64px] xl:text-7xl font-bold font-display mb-6 lg:mb-8 tracking-tight leading-[1.08] animate-rise animate-rise-d1">
             <span className="text-slate-900 dark:text-white">Know what your</span>
             <br />
             <span className="text-slate-900 dark:text-white">deal is </span>
@@ -402,15 +401,18 @@ export default function HomeContent() {
           </h1>
 
           {/* Subheadline */}
-          <p className={`text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl lg:max-w-lg mb-10 lg:mb-12 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-xl lg:max-w-lg mx-auto lg:mx-0 mb-8 lg:mb-12 leading-relaxed animate-rise animate-rise-d2">
             Stop guessing on upfronts, milestones, and royalties.
-            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{DEAL_STATS.TOTAL_DEALS} verified transactions</span> — in seconds.
+            {' '}Solidus benchmarks your deal against <span className="font-semibold text-slate-700 dark:text-slate-200">{dealCount} primary-sourced transactions</span> — in seconds.
           </p>
 
           {/* Single clear CTA */}
-          <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8 sm:mb-12 animate-rise animate-rise-d3">
             <Link
               href="/calculator"
+              prefetch={false}
+              onMouseEnter={() => router.prefetch('/calculator')}
+              onTouchStart={() => router.prefetch('/calculator')}
               className="group relative inline-flex items-center justify-center gap-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold px-10 py-4 rounded-xl
                        shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-base"
             >
@@ -432,10 +434,10 @@ export default function HomeContent() {
           </div>
 
           {/* Social proof — what, not features */}
-          <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-slate-400 dark:text-slate-500 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 max-w-xs mx-auto sm:max-w-none sm:flex sm:flex-wrap sm:items-center sm:justify-center lg:justify-start sm:gap-x-6 text-sm text-slate-500 dark:text-slate-400 animate-rise animate-rise-d4">
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              {DEAL_STATS.TOTAL_DEALS} verified deals
+              {dealCount} primary-sourced deals
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -564,7 +566,7 @@ export default function HomeContent() {
               {
                 icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
                 title: 'Deal Benchmarking',
-                description: `Instant benchmarks from ${DEAL_STATS.TOTAL_DEALS} real deals across 12 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.`,
+                description: `Instant benchmarks from ${dealCount} primary-sourced deals across 12 therapeutic areas. Upfront payments, milestones, royalties, and comparable deal matching.`,
                 gradient: 'from-slate-800 to-slate-900',
               },
               {
@@ -791,7 +793,7 @@ export default function HomeContent() {
         <div className="max-w-4xl xl:max-w-5xl mx-auto relative text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">Primary-Source Verified Data</h2>
           <p className="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-            Solidus is built on {DEAL_STATS.TOTAL_DEALS} verified biopharma transactions — sourced from regulatory filings and direct research. No secondary data. No scraped estimates. Updated daily.
+            Solidus is built on {dealCount} primary-sourced biopharma transactions — every row cites a regulatory filing or an issuer release. No secondary data. No scraped estimates. Updated daily.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-8">
             {[
@@ -890,7 +892,7 @@ export default function HomeContent() {
               Deal Intelligence Guides
             </h2>
             <p className="text-slate-400 max-w-2xl mx-auto">
-              In-depth resources for BD teams, deal committees, and licensing professionals — backed by data from {DEAL_STATS.TOTAL_DEALS} transactions.
+              In-depth resources for BD teams, deal committees, and licensing professionals — backed by data from {dealCount} primary-sourced transactions.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

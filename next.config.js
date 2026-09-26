@@ -142,6 +142,17 @@ module.exports = withSentryConfig(withBundleAnalyzer(nextConfig), {
   hideSourceMaps: true,
   // Disable Sentry logger to reduce bundle size
   disableLogger: true,
+  // Sep 2026 performance pass: Session Replay shipped in every page's critical
+  // path (168 KB compressed, 100% unused at load) because replaysOnErrorSampleRate
+  // was set. Replay is off on the client now; these flags tree-shake its code paths
+  // and Sentry's debug statements out of the bundles. Tracing stays (0.1) because it
+  // reports Web Vitals from real sessions.
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+    excludeReplayWorker: true,
+  },
 });
 // rebuild 1773876763
 // rebuild 1773884185
