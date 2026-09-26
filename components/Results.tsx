@@ -2527,6 +2527,12 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             />
           )}
         </div>
+        </>
+        )}
+
+        {/* Modals, toast and the sticky drawer belong to every tab. They sat inside the
+           playbook tab's fragment, so on Summary/Analysis/Comparables the Download
+           Report, Share and Playbook buttons changed state but nothing mounted. */}
 
         {/* History Picker Modal */}
         {showHistoryPicker && (
@@ -2575,6 +2581,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
             fullInputs={fullInputs}
             partnerMatches={partnerMatches}
             existingMemo={dealMemo}
+            existingPlaybook={cachedPlaybook}
             reportId={reportId}
             userId={userId}
             userEmail={userEmail}
@@ -2646,8 +2653,6 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
           }}
         />
 
-        </>
-        )}
 
         {/* Upgrade CTA for Free Users */}
         {!hasFullAccess && (
