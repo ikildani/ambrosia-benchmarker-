@@ -525,11 +525,17 @@ const COMBINED_CORPUS: ExtendedComparableDeal[] = (() => {
   const seenSemanticKeys = new Set<string>();
   const combined: ExtendedComparableDeal[] = [];
 
-  const semanticKey = (d: ExtendedComparableDeal): string => {
-    const lic = (d.licensor ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const lee = (d.licensee ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return `${lic}|${lee}|${d.year}|${Math.round(d.upfront)}`;
+  // Sep 25 2026: key on a company-name stem rather than the full name, so
+  // "Reata" and "Reata Pharmaceuticals" (Biogen, 2023, $7.3B) collapse to one
+  // row. Upfront is bucketed to the nearest $10M for the same reason.
+  const SUFFIX = /\b(inc|corp|corporation|ltd|limited|plc|llc|lp|co|company|pharmaceuticals?|pharma|therapeutics?|biosciences?|biotech|biotechnology|sciences?|ag|sa|nv|ab|holdings?|group|medicines?|bio)\b/g;
+  const stem = (name: string | undefined): string => {
+    const cleaned = (name ?? '').toLowerCase().replace(/[.,()&/]/g, ' ').replace(SUFFIX, ' ');
+    const token = cleaned.split(/\s+/).map(t => t.replace(/[^a-z0-9]/g, '')).find(t => t.length >= 3);
+    return token || cleaned.replace(/[^a-z0-9]/g, '');
   };
+  const semanticKey = (d: ExtendedComparableDeal): string =>
+    `${stem(d.licensor)}|${stem(d.licensee)}|${d.year}|${Math.round(d.upfront / 10)}`;
 
   // Extended first (curated gets priority), then Supabase fills gaps.
   for (const d of [...EXTENDED_COMPARABLE_DEALS, ...SUPABASE_COMPARABLE_DEALS]) {
