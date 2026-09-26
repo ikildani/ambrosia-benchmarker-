@@ -66,6 +66,9 @@ export interface RawDealRow {
   royalty_high_pct: number | null;
   equity_investment_usd: number | null;
   verified: boolean | null;
+  deal_status?: string | null;
+  /** When the status pass last confirmed the deal is still in force; null = never checked (the column defaults to 'active'). */
+  deal_status_checked_at?: string | null;
   source_type: string | null;
   source_url: string | null;
   press_release_url: string | null;
@@ -89,7 +92,7 @@ export const DEAL_SELECT_COLUMNS = [
   'id', 'licensor_name', 'licensee_name', 'asset_name', 'announced_date', 'phase_at_signing',
   'deal_type', 'modality', 'indication_category', 'indication_specific', 'therapeutic_area',
   'territory', 'upfront_usd', 'total_deal_value_usd', 'milestones_total_usd', 'royalty_low_pct',
-  'royalty_high_pct', 'equity_investment_usd', 'verified', 'source_type', 'source_url',
+  'royalty_high_pct', 'equity_investment_usd', 'verified', 'source_type', 'source_url', 'deal_status', 'deal_status_checked_at',
   'press_release_url', 'target', 'mechanism_of_action', 'includes_co_development', 'includes_co_promotion', 'sublicense_rights',
   'rights_retained', 'opt_in_rights', 'opt_in_stage', 'research_funding_usd', 'profit_share_pct',
   'cost_share_ratio', 'option_exercise_fee', 'term_years',
@@ -147,7 +150,7 @@ export function outlierThreshold(totals: Array<number | null>): number {
 
 // ─── Normalisers ───────────────────────────────────────────────────────────
 
-const PHASE_RANK: Record<DealPhase, number> = {
+export const PHASE_RANK: Record<DealPhase, number> = {
   discovery: 0, preclinical: 1, phase_1: 2, phase_2: 3, phase_3: 4, approved: 5, unknown: -1,
 };
 
