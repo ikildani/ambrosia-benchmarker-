@@ -23,6 +23,7 @@ import { FunnelCounter } from './funnel';
 import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, quartersBetween, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
 import Anthropic from '@anthropic-ai/sdk';
 import { processEftsDocument, loadEftsDocumentText } from './edgar-realtime';
+import { ExtractionUnavailableError } from './sec-edgar';
 import { backfillExtractionMode, submitExtractionBatch, drainExtractionBatches, type BatchItem, type BackfillExtractionMode } from './edgar-fts-batch';
 import { mapWithConcurrency } from './concurrency';
 
@@ -169,6 +170,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   let cur: BackfillCursorState = { ...state };
   const startKey = { quarterKey: cur.quarterKey, queryIndex: cur.queryIndex };
   let pages = 0, candidates = 0, prefiltered = 0, alreadyProcessed = 0, extracted = 0, passed = 0, inserted = 0;
+  let extractorDown = false;
 
   const record = async (doc: EftsDocument, outcome: string, quarterKey: string, queryKey: string) => {
     if (dryRun) return;
@@ -249,16 +251,12 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
         if (items.length > 0) {
           const sub = await submitExtractionBatch(supabase, anthropic, items, { dryRun, funnel });
           if (sub.error) {
+            // Sep 26 2026: do not fall back inline and do not record anything — if the batch API refused us
+            // (credit, rate limit), inline calls fail the same way and the gated filings were being recorded as
+            // skipped (5,371 overnight). Hold the page; the ledger skips what was already done next time.
             errors.push(sub.error);
-            // Could not batch: extract inline so the gated filings are not lost, then stop submitting this run.
-            for (const it of items) {
-              if (Date.now() - start >= budget) break;
-              const outcome = await processEftsDocument(supabase, it.doc, {
-                anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel, sourceType: it.sourceType, gate: 'none',
-              });
-              if (outcome === 'inserted') { passed++; inserted++; }
-              await record(it.doc, outcome === 'error' ? 'insert_error' : outcome, quarter.key, query.key);
-            }
+            funnel.count('extraction_error', 'batch_submit_failed', sub.error.slice(0, 120));
+            extractorDown = true;
           } else {
             batchId = sub.batchId ?? batchId;
           }
@@ -273,6 +271,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
             });
           } catch (e) {
             // One attempt per filing: recording the failure keeps a flaky filing from pinning the cursor.
+            if (e instanceof ExtractionUnavailableError) { extractorDown = true; throw e; } // not the filing's fault: leave it unrecorded
             await record(doc, 'extraction_error', quarter.key, query.key);
             throw e;
           }
@@ -295,7 +294,8 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
       const partialParse = page.parseFailed && (cur.retries ?? 0) < MAX_PAGE_RETRIES;
       if (partialParse) errors.push(`EFTS partial parse failure for ${query.key} ${quarter.key} from=${cur.from}; page will be retried`);
 
-      if (capHit || budgetHit || partialParse) step = 'stay';
+      if (extractorDown) { step = 'stay'; errors.push('extractor unavailable; cursor held'); }
+      else if (capHit || budgetHit || partialParse) step = 'stay';
       else if (cur.from + EFTS_PAGE_SIZE < page.total) step = 'next_page';
       else step = 'next_query';
     }
@@ -304,7 +304,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
     if (!dryRun && !opts.cursorOverride) {
       await writeSyncCursor(supabase, BACKFILL_CURSOR_SOURCE, `${next.quarterKey}:${next.queryIndex}:${next.from}`, next);
     }
-    if (step === 'stay') { cur = next; break; } // cap/budget/parse: nothing more to do this run
+    if (step === 'stay' || extractorDown) { cur = next; break; } // cap/budget/parse: nothing more to do this run
     cur = next;
   }
 

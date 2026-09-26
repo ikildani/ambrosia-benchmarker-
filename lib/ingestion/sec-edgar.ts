@@ -673,6 +673,11 @@ export function parseDealExtraction(text: string): ExtractedDeal | null {
   return parsed as ExtractedDeal;
 }
 
+/** The extractor could not run (credit, rate limit, network). Distinct from "not a deal". */
+export class ExtractionUnavailableError extends Error {
+  constructor(msg: string) { super(msg); this.name = 'ExtractionUnavailableError'; }
+}
+
 export async function extractDealFromFiling(
   filingText: string,
   anthropicApiKey: string
@@ -684,8 +689,11 @@ export async function extractDealFromFiling(
     if (content.type !== 'text') return null;
     return parseDealExtraction(content.text);
   } catch (error) {
+    // Sep 26 2026: an API failure (credit exhausted, rate limit, timeout) must not read as "not a deal".
+    // Overnight, 5,371 filings were recorded as skipped while the account had no credit. Throw so callers
+    // stop the run and leave the filing unrecorded for the next pass.
     console.error('Deal extraction error:', error);
-    return null;
+    throw new ExtractionUnavailableError(error instanceof Error ? error.message : String(error));
   }
 }
 
