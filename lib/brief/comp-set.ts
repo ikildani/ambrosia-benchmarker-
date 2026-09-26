@@ -615,6 +615,8 @@ export async function fetchQualityDealRows(supabase: SupabaseClient): Promise<Ra
     const { data, error } = await supabase
       .from('deals')
       .select(DEAL_SELECT_COLUMNS)
+      // A terminated, expired or cancelled deal is not a precedent for what a buyer will pay now.
+      .or('deal_status.is.null,deal_status.not.in.("terminated","expired","cancelled")')
       .eq('is_synthetic', false)
       .not('is_canonical', 'is', false)
       .not('verification_status', 'in', '("rejected","flagged")')

@@ -51,7 +51,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AssetProfile, BuyerCandidate, BuyerMap, BuyerPriorDeal, BuyerSizeBucket, DealPhase, DealStructure, Range3 } from './types';
 import type { PartnerForPDF } from '@/lib/report/types';
 import type { BuyerSpecificValuation } from '@/lib/financial/buyer-specific-valuation';
-import { isSameTA, isSameIndication } from './comp-set';
+import { isSameTA, isSameIndication, normalizeStructure } from './comp-set';
 
 // ─── Input types ────────────────────────────────────────────────────────────
 
@@ -805,6 +805,40 @@ export async function buildBuyerMap(
         if (partner.company_id) takenIds.add(partner.company_id);
       }
       const groups = groupLicensees(taDeals, companyRows);
+      // A company that was itself bought (appears as the sold party in an
+      // acquisition-structured deal) is no longer a buyer; its history belongs
+      // to the acquirer. Covers rows the entity graph has not folded yet.
+      // Latest date each company was bought (sold party in an acquisition row).
+      // A company selling a unit is not gone: it only counts as acquired when it
+      // has signed nothing as a licensee since that date. The acquisition that
+      // removed a buyer is often in another area (AveXis → Novartis is rare
+      // disease, its licensing history is neurology), so every acquisition row
+      // is checked, not only the area pool.
+      const acquiredOn = new Map<string, string>();
+      const noteAcq = (name: string | null, date: string | null) => { if (!name) return; const k = norm(name); const d = date ?? '0000'; if ((acquiredOn.get(k) ?? '') < d) acquiredOn.set(k, d); };
+      for (const d of taDeals) if (normalizeStructure(d.deal_type) === 'acquisition') noteAcq(d.licensor_name, d.announced_date);
+      try {
+        const probe = groups.slice(0, 40).flatMap(g => g.aliases).filter(a => a.trim().length >= 3).slice(0, 80);
+        if (probe.length) {
+          const { data: acq } = await supabase
+            .from('deals')
+            .select('licensor_name, announced_date')
+            .in('deal_type', ['acquisition', 'M&A', 'merger'])
+            .not('verification_status', 'eq', 'rejected')
+            .or(probe.map(a => `licensor_name.ilike.${orValue(a)}`).join(','))
+            .limit(200);
+          for (const r of (acq ?? []) as Array<{ licensor_name: string | null; announced_date: string | null }>) noteAcq(r.licensor_name, r.announced_date);
+        }
+      } catch { /* the TA-pool rule above still applies */ }
+      const wasAcquired = (g: LicenseeGroup, company: CompanyRow | null): boolean => {
+        const dates = g.aliases.map(a => acquiredOn.get(norm(a))).filter((d): d is string => !!d);
+        if (!dates.length) return false;
+        const last = dates.sort().slice(-1)[0];
+        // Still buying anywhere (company-level cadence or a later deal in any area) means it sold a unit, not itself.
+        if (company && (Number(company.deals_last_12mo ?? 0) > 0 || (company.last_deal_date && company.last_deal_date > last))) return false;
+        const latest = [g.latest, company?.last_deal_date].filter((d): d is string => !!d).sort().slice(-1)[0];
+        return !latest || latest <= last;
+      };
       const cutoff = new Date(asOf); cutoff.setMonth(cutoff.getMonth() - 12);
       const cutoffIso = cutoff.toISOString().slice(0, 10);
       let added = 0;
@@ -816,6 +850,7 @@ export async function buildBuyerMap(
         // A company that no longer exists as a buyer (folded into an acquirer in
         // the entity graph) cannot be approached; its deal history belongs to the acquirer.
         if (company?.merged_into) continue;
+        if (wasAcquired(g, company)) continue;
         const recent = taDeals.filter(d => g.aliases.some(a => norm(a) === norm(d.licensee_name)) && (d.announced_date ?? '') >= cutoffIso).length;
         const partner: PartnerInput = {
           company_name: g.name,
