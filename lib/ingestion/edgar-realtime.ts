@@ -23,7 +23,8 @@ import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, fetchSecDocumentText, i
 export { hitToDocument } from './edgar-fts';
 
 /** Characters of filing text handed to the extractor (about 6,500 tokens). */
-export const EXTRACTION_TEXT_CHARS = 24_000;
+/** Sep 26 2026: 24K → 12K characters. Deal terms sit in the first pages of an 8-K/6-K exhibit; this halves the largest cost line. */
+export const EXTRACTION_TEXT_CHARS = 12_000;
 
 export interface EdgarRealtimeOptions {
   /** ISO date (UTC) to scan; defaults to today. */

@@ -650,7 +650,8 @@ ${filingText}`;
   return {
     model: EXTRACTION_MODEL,
     max_tokens: EXTRACTION_MAX_TOKENS,
-    system: systemPrompt,
+    // Sep 26 2026: the system prompt is ~2K tokens and identical on every call — cache it (≈10–20% off per extraction).
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userPrompt }],
   };
 }

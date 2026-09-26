@@ -164,7 +164,7 @@ export async function processHkexAnnouncement(
   const pdf = await fetchHkexPdfText(a.url);
   if (!pdf.ok) { funnel.count('content_unavailable', `http_${pdf.status}`, a.url); return 'skipped'; }
   if (pdf.text.length < 500) { funnel.count('content_too_short', 'pdf', a.title); return 'skipped'; }
-  const deal = await extractDealFromFiling(pdf.text.substring(0, 24_000), opts.anthropicApiKey);
+  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey);
   if (!deal) { funnel.count('not_a_deal', 'hkex', `${a.stockName}: ${a.title.slice(0, 80)}`); return 'skipped'; }
   if (deal.confidence_score < opts.minConfidence) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }
   if (!deal.licensor?.trim() || !deal.licensee?.trim()) { funnel.count('missing_parties'); return 'skipped'; }

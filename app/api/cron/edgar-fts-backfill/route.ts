@@ -31,6 +31,19 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
   const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
+
+  // Daily extraction cap (BACKFILL_DAILY_EXTRACTION_CAP, default 1200): keeps the API bill predictable.
+  // Counts today's extractions from the run log and skips the run once the cap is reached.
+  const dailyCap = Math.max(0, Number(process.env.BACKFILL_DAILY_EXTRACTION_CAP ?? 1200));
+  if (dailyCap > 0 && !dryRun) {
+    const dayStart = new Date(); dayStart.setUTCHours(0, 0, 0, 0);
+    const { data: todayRuns } = await supabase.from('data_ingestion_log').select('records_processed').eq('source', 'edgar_fts_backfill').gte('started_at', dayStart.toISOString());
+    const usedToday = (todayRuns ?? []).reduce((a, r) => a + (r.records_processed ?? 0), 0);
+    if (usedToday >= dailyCap) {
+      await logCronRun(supabase, 'edgar_fts_backfill', { fetched: 0, processed: 0, inserted: 0, expectRecords: false, notes: `daily cap reached (${usedToday}/${dailyCap}); resumes at 00:00 UTC` });
+      return NextResponse.json({ success: true, skipped: 'daily_cap', usedToday, dailyCap });
+    }
+  }
   const maxExtractions = Math.min(200, Number(request.nextUrl.searchParams.get('max')) || 80);
   const concurrency = Math.min(8, Number(request.nextUrl.searchParams.get('concurrency')) || 4);
   try {
