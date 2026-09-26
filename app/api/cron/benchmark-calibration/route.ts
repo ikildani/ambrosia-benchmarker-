@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
-import { runBenchmarkCalibration } from '@/lib/ingestion/benchmark-calibration';
+import { runBenchmarkCalibration, type DealRow } from '@/lib/ingestion/benchmark-calibration';
+import { loadClientObservations, observationsToDealRows } from '@/lib/outcomes/priors';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
@@ -35,7 +36,20 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceClient();
 
-    const result = await runBenchmarkCalibration(supabase);
+    // Outcome priors: client-reported signed terms (no deal row) join the
+    // phase-baseline grouping under the k-anonymity guards in
+    // computePhaseBaselines. A failure here never blocks the calibration.
+    let extraObservations: DealRow[] = [];
+    let observationsError: string | null = null;
+    try {
+      extraObservations = observationsToDealRows(await loadClientObservations(supabase));
+    } catch (e) {
+      observationsError = e instanceof Error ? e.message : String(e);
+      console.warn('[Outcomes] benchmark-calibration: observations unavailable:', observationsError);
+    }
+
+    const result = await runBenchmarkCalibration(supabase, { extraObservations });
+    if (observationsError) result.errors.push(`client observations unavailable: ${observationsError}`);
 
     // Intelligence tracking
     try {
@@ -47,6 +61,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      observationsOffered: extraObservations.length,
       ...result,
     });
   } catch (error) {

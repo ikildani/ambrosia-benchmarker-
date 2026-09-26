@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { runOutcomePhase } from '@/lib/outcomes/cron';
+import { refreshOutcomePriors } from '@/lib/outcomes/priors';
 import { runBriefAlerts } from '@/lib/brief/alerts';
 
 export const maxDuration = 120;
@@ -29,6 +30,10 @@ export const dynamic = 'force-dynamic';
 //                                                 (lib/brief/alerts.ts; scheduled in
 //                                                 /api/cron/radar-digest). Add &dryRun=true
 //                                                 to select without sending or writing.
+//   GET /api/cron/outcome-resolve?priors=true     run only the outcome-priors buyer blend
+//                                                 (lib/outcomes/priors.ts; scheduled in the
+//                                                 02:00 UTC nightly block). Add &dryRun=true
+//                                                 to compute without writing.
 // ---------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
@@ -55,6 +60,11 @@ export async function GET(request: NextRequest) {
         deadline: started + (maxDuration - 10) * 1000,
       });
       return NextResponse.json({ success: briefAlerts.errors.length === 0, briefAlerts, ms: Date.now() - started, timestamp: new Date().toISOString() });
+    }
+
+    if (params.get('priors') === 'true') {
+      const priors = await refreshOutcomePriors(supabase, { dryRun: params.get('dryRun') === 'true' });
+      return NextResponse.json({ success: priors.errors.length === 0, priors, timestamp: new Date().toISOString() });
     }
 
     const report = await runOutcomePhase(supabase, {

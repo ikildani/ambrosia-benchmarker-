@@ -75,7 +75,7 @@ export interface ComputeOptions {
   widenedPeerN?: number;
 }
 
-const DEFAULT_OPTIONS: Required<ComputeOptions> = {
+export const DEFAULT_OPTIONS: Required<ComputeOptions> = {
   minDealsRequired: 3,
   clampRange: [0.7, 1.5],
   strictPeerN: 5,
