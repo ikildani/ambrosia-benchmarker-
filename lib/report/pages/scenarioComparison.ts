@@ -154,7 +154,7 @@ export function renderScenarioComparisonPage(data: PDFReportData, meta: ReportMe
 
       <!-- Methodology note -->
       <div style="margin-top: 10px; font-size: 8px; color: ${COLORS.gray400}; line-height: 1.6;">
-        <strong>Methodology:</strong> Scenario weights calibrated to BIO/Informa clinical phase transition distributions. Bear case models CRL + competitive erosion; Bull case models breakthrough designation + favorable readout. Expected value is the probability-weighted mean across all three scenarios.
+        <strong>Methodology:</strong> Scenario weights follow published BIO/QLS clinical phase transition distributions. Bear case models CRL + competitive erosion; Bull case models breakthrough designation + favorable readout. Expected value is the probability-weighted mean across all three scenarios.
       </div>
 
       ${pageFooter(meta.reportId)}

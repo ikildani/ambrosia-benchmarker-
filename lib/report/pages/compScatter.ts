@@ -74,7 +74,7 @@ export function renderCompScatterPage(data: PDFReportData, meta: ReportMeta): st
         <tbody>
           ${driverRows.map((r) => `
             <tr>
-              <td style="padding: 4px 8px;">${escapeHtml(r.licensor)} → ${escapeHtml(r.licensee)}${r.sameIndication ? ' <span class="badge badge-teal" style="font-size: 6.5px; padding: 1px 4px;">Same indication</span>' : ''}</td>
+              <td style="padding: 4px 8px;">${escapeHtml(r.licensor)} → ${escapeHtml(r.licensee)}${r.sameIndication ? ' <span class="badge badge-teal" style="font-size: 6.5px; padding: 1px 4px;">Same indication</span>' : r.sameMechanism ? ' <span class="badge badge-navy" style="font-size: 6.5px; padding: 1px 4px;">Same mechanism</span>' : ''}</td>
               <td style="padding: 4px 8px;">${r.year ?? '—'}</td>
               <td style="padding: 4px 8px;">${escapeHtml(phaseLabelAny(r.phase))}</td>
               <td style="padding: 4px 8px; text-align: right;">${fmtM(r.upfrontM)}</td>

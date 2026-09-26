@@ -165,7 +165,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         <div className="relative bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-8 sm:p-10 lg:p-12 border-2 border-teal-300 dark:border-teal-500 shadow-soft-xl transition-all duration-300 mb-6">
           <div className="text-center mb-6">
             <h3 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-2">Deal Intelligence Brief</h3>
-            <p className="text-neutral-500 dark:text-slate-400 text-sm sm:text-base">The complete deal landscape — done for you in 24 hours</p>
+            <p className="text-neutral-500 dark:text-slate-400 text-sm sm:text-base">One asset, one decision — built for you within 24 hours of the intake call</p>
           </div>
 
           <div className="text-center mb-8">
@@ -175,12 +175,12 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mb-8 max-w-lg mx-auto">
             {[
-              '52 deal calculations (13 modalities × 4 structures)',
-              'AI strategic narrative + negotiation playbook',
-              'Comparable transactions with full terms',
-              'Partner matching with intent scoring',
-              'White-label branding for board/IC',
-              'Complimentary walkthrough call',
+              'A signed recommendation: ask, floor, walk-away',
+              'Valuation bridge reconciled to one number',
+              'Cited comparables, phase-matched',
+              'Buyers ranked on evidence, not a match score',
+              'Catalyst calendar and go-to-market window',
+              'Managing Partner review and walkthrough call',
             ].map((item, idx) => (
               <li key={idx} className="flex items-start gap-2.5 list-none">
                 <div className="w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -422,7 +422,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                   <span className="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-500/15 text-teal-600 dark:text-teal-300 rounded-full border border-teal-500/20">New</span>
                 </div>
                 <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 mt-0.5">
-                  $2,500 — All modalities, all deal structures, AI narrative, white-label branding + walkthrough
+                  $2,500 — a signed recommendation, cited comparables, evidence-ranked buyers, walkthrough included
                 </p>
               </div>
             </div>

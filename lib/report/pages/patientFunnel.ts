@@ -50,6 +50,7 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
   const basis: 'local' | 'terrain' = funnel.source.source === TERRAIN_DEMAND_SOURCE ? 'terrain' : 'local';
   const last = funnel.steps[funnel.steps.length - 1];
   const share = funnel.peakShare;
+  const fromModel = funnel.peakSalesBasis === 'model';
   const impliedPeak = share && funnel.pricePerYearUsd
     ? (last.value * share.median * funnel.pricePerYearUsd) / 1e6
     : null;
@@ -119,7 +120,7 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
               <td style="font-weight: 600; padding: 6px 12px;">Peak share of addressable</td>
               <td style="text-align: right; font-weight: 700; padding: 6px 12px;">${fmtShare(share.median)}</td>
               <td style="text-align: right; color: ${COLORS.gray500}; padding: 6px 12px;">${fmtShare(share.low)}–${fmtShare(share.high)}</td>
-              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">${escapeHtml(SHARE_ASSUMPTION[basis])}${impliedPeak != null ? `; implies ${fmtM(impliedPeak)} at median before ramp and erosion adjustments` : ''}</td>
+              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">${fromModel ? `Share of addressable patients implied by the modelled peak sales of ${fmtM(funnel.peakSalesM.median)} at the net price above` : `${escapeHtml(SHARE_ASSUMPTION[basis])}${impliedPeak != null ? `; implies ${fmtM(impliedPeak)} at median before ramp and erosion adjustments` : ''}`}</td>
             </tr>` : ''}
           </tbody>
         </table>
@@ -127,7 +128,7 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
       </div>
 
       <div class="callout" style="margin-top: 10px; padding: 8px 14px;">
-        <div style="font-size: 9.5px; line-height: 1.5;"><strong>How this feeds the valuation.</strong> The median peak-sales figure above is the revenue input to the rNPV on the financial model page; the low and high cases bound the Monte Carlo range. Change a funnel rate and the headline moves with it.</div>
+        <div style="font-size: 9.5px; line-height: 1.5;"><strong>How this feeds the valuation.</strong> ${fromModel ? 'The peak-sales figures above are the ones the rNPV model ran with, after its market-size ceiling and modifiers; the same median appears on the financial model page and in the scenario set. The share row shows what that peak implies against the addressable population and net price.' : 'The peak-sales figures above come from the epidemiology estimate; no rNPV result was available to reconcile them, so treat them as the top-down input rather than the modelled outcome.'}</div>
       </div>
 
       ${pageFooter(meta.reportId)}

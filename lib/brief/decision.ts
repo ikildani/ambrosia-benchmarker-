@@ -57,6 +57,17 @@ function phaseBucket(phase: string): PhaseBucket {
   return 'preclinical';
 }
 
+/** Bucket a deals-table phase key (discovery|preclinical|phase_1|…) onto the same four buckets. */
+function dealPhaseBucket(phase: string | null | undefined): PhaseBucket | null {
+  if (!phase) return null;
+  const k = phase.replace(/_/g, '').toLowerCase();
+  if (k === 'discovery' || k === 'preclinical') return 'preclinical';
+  if (k === 'phase1' || k === 'phase12') return 'phase_1';
+  if (k === 'phase2' || k === 'phase23') return 'phase_2';
+  if (k === 'phase3' || k === 'approved' || k === 'ndafiled' || k === 'nda') return 'phase_3';
+  return null;
+}
+
 function phaseWord(phase: string): string {
   const b = phaseBucket(phase);
   return b === 'preclinical' ? 'preclinical' : b === 'phase_1' ? 'Phase 1' : b === 'phase_2' ? 'Phase 2' : 'Phase 3';
@@ -177,14 +188,21 @@ export function buildDecisionSummary(input: DecisionInput): DecisionSummary {
   const stats = compSet ? (compSet.stats.exOutliers.n > 0 ? compSet.stats.exOutliers : compSet.stats.all) : null;
   if (stats && stats.n > 0 && (stats.total || stats.upfront)) {
     const sameInd = compSet!.rows.filter(r => r.sameIndication).length;
+    const bucket = phaseBucket(asset.phase);
+    const samePhase = compSet!.rows.filter(r => dealPhaseBucket(r.phase) === bucket).length;
     const parts: string[] = [];
     if (stats.total) parts.push(`median total ${fmt(stats.total.p50)}`);
     if (stats.upfront) parts.push(`median upfront ${fmt(stats.upfront.p50)}`);
-    rationale.push(`${stats.n} comparable ${phaseWord(asset.phase)} deals (${sameInd} same-indication): ${parts.join(', ')}, outliers removed.`);
+    const askSrc = bridge.askBasis.total === 'comps' || bridge.askBasis.upfront === 'comps'
+      ? ' The ask is anchored on that median.'
+      : ' The calibrated headline sits above that median, so the ask is anchored on the headline.';
+    rationale.push(`${stats.n} comparable deals (${sameInd} same-indication, ${samePhase} at ${phaseWord(asset.phase)}): ${parts.join(', ')}, outliers removed.${askSrc}`);
   }
   const rnpvBar = bridge.bars.find(b => b.key === 'rnpv');
-  if (rnpvBar && rnpvBar.mid != null && rnpvBar.mid > 0) {
+  if (rnpvBar && rnpvBar.mid != null && rnpvBar.mid > 0 && bridge.rnpvInformative) {
     rationale.push(`Risk-adjusted NPV of ${fmt(rnpvBar.mid)}; the ${fmt(ask.totalM)} ask is ${((ask.totalM / rnpvBar.mid) * 100).toFixed(0)}% of it, in line with a licence that transfers development risk.`);
+  } else if (bridge.rnpvNote) {
+    rationale.push(bridge.rnpvNote);
   }
   if (lead) {
     rationale.push(`${lead.name} scores ${Math.round(lead.urgency)}/100 on urgency with ${lead.dealsLast12mo} deal${lead.dealsLast12mo === 1 ? '' : 's'} in the last 12 months${lead.transactsAtPhase === 'yes' ? ` and a record of transacting at ${phaseWord(asset.phase)}` : lead.transactsAtPhase === 'no' ? `, but no record of transacting at ${phaseWord(asset.phase)}` : ''}.`);
@@ -194,10 +212,11 @@ export function buildDecisionSummary(input: DecisionInput): DecisionSummary {
   }
   if (inflection && nextOpt) {
     const now = inflection.options.find(o => o.key === 'deal_now');
-    rationale.push(`Funding to ${nextOpt.label.replace('Partner after ', '')} costs ${fmt(nextOpt.costM)} over ${nextOpt.months} months at ${(nextOpt.pReach * 100).toFixed(0)}% probability; expected upfront ${fmt(nextOpt.expectedUpfrontM)} today against ${fmt(now?.expectedUpfrontM ?? ask.upfrontM)} now.`);
+    rationale.push(`Funding to ${nextOpt.label.replace('Partner after ', '')} costs ${fmt(nextOpt.costM)} over ${nextOpt.months} months at ${(nextOpt.pReach * 100).toFixed(0)}% probability; expected value ${fmt(nextOpt.expectedValueM)} today (upfront plus milestone value, after dilution and time) against ${fmt(now?.expectedValueM ?? ask.upfrontM)} now.`);
   } else if (inflection) {
-    const alt = inflection.options.filter(o => o.key !== 'deal_now').sort((a, b) => b.expectedUpfrontM - a.expectedUpfrontM)[0];
-    if (alt) rationale.push(`Deferring to ${alt.label.replace('Partner after ', '')} would cost ${fmt(alt.costM)} for a ${(alt.pReach * 100).toFixed(0)}% chance of reaching it; expected upfront ${fmt(alt.expectedUpfrontM)} today does not beat ${fmt(ask.upfrontM)} now by the 15% hurdle.`);
+    const now = inflection.options.find(o => o.key === 'deal_now');
+    const alt = inflection.options.filter(o => o.key !== 'deal_now').sort((a, b) => b.expectedValueM - a.expectedValueM)[0];
+    if (alt) rationale.push(`Deferring to ${alt.label.replace('Partner after ', '')} would cost ${fmt(alt.costM)} for a ${(alt.pReach * 100).toFixed(0)}% chance of reaching it; expected value ${fmt(alt.expectedValueM)} today (upfront plus milestone value, after dilution and time) does not beat ${fmt(now?.expectedValueM ?? ask.upfrontM)} now by the 15% hurdle.`);
   }
   if (rationale.length < 3) {
     rationale.push(`Ask ${fmt(ask.totalM)} total and ${fmt(ask.upfrontM)} upfront against a floor of ${fmt(floor.totalM)} / ${fmt(floor.upfrontM)} and a walk-away at ${fmt(walkAwayUpfrontM)} upfront.`);

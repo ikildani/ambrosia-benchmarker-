@@ -177,7 +177,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'Can I benchmark deals without an enterprise platform?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. Pro subscriptions ($299/month) provide ongoing access to all 14 calculation engines for teams running multiple evaluations. For a comprehensive one-time landscape, the Deal Intelligence Brief ($2,500) covers 52 deal calculations across 13 modalities.',
+          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. Pro subscriptions ($299/month) provide ongoing access to all 14 calculation engines for teams running multiple evaluations. For a single asset, the Deal Intelligence Brief ($2,500) delivers a signed recommendation with cited comparables and evidence-ranked buyers.',
         },
       },
       {
@@ -604,7 +604,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>Can I benchmark deals without an enterprise subscription?</h3>
             <p>
-              Yes. Start a 7-day free <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Pro trial</Link> for full access to comparable transactions, rNPV valuation, partner matching, sensitivity analysis, and negotiation playbooks. For a comprehensive done-for-you landscape, the <Link href="/benchmark" className="text-teal-600 font-medium hover:text-teal-700">Deal Intelligence Brief</Link> ($2,500) covers 52 calculations across 13 modalities with white-label branding.
+              Yes. Start a 7-day free <Link href="/pro" className="text-teal-600 font-medium hover:text-teal-700">Pro trial</Link> for full access to comparable transactions, rNPV valuation, partner matching, sensitivity analysis, and negotiation playbooks. For a done-for-you decision on one asset, the <Link href="/benchmark" className="text-teal-600 font-medium hover:text-teal-700">Deal Intelligence Brief</Link> ($2,500) delivers a signed recommendation with cited comparables and evidence-ranked buyers.
             </p>
 
             <h3>How often should deal benchmarking data be updated?</h3>

@@ -277,7 +277,7 @@ export function renderRegulatoryRiskPage(data: PDFReportData, meta: ReportMeta):
 
       <!-- Methodology -->
       <div class="disclaimer-box">
-        <strong>Methodology:</strong> CRL base rates derived from FDA CDER action letters 2015-2024 by therapeutic division. AdComm convening patterns based on FDA public advisory committee calendar 2015-2024 (n=200+ meetings). PDUFA timing distribution from CDER PDUFA VII compliance data. PRV valuations from BioCentury PRV Tracker transaction database. Accelerated approval risk calibrated to GAO-22-105951 and post-AADCA 2023 enforcement statistics.
+        <strong>Methodology:</strong> CRL base rates derived from FDA CDER action letters 2015-2024 by therapeutic division. AdComm convening patterns based on FDA public advisory committee calendar 2015-2024 (n=200+ meetings). PDUFA timing distribution from CDER PDUFA VII compliance data. Priority review voucher values reflect disclosed voucher sales in company filings. Accelerated approval risk calibrated to GAO-22-105951 and post-AADCA 2023 enforcement statistics.
       </div>
 
       ${pageFooter(meta.reportId)}

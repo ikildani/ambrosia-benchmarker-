@@ -8,6 +8,7 @@
  */
 
 import { parseJsonResponse } from './parse-json';
+import { modalityLabels } from '@/lib/report/helpers';
 import type { AssetProfile, DecisionSummary, PositioningObjections } from '@/lib/brief/types';
 
 export const OBJECTION_MODEL = 'claude-opus-4-6';
@@ -141,6 +142,8 @@ export function buildFallbackObjections(input: ObjectionInput): PositioningObjec
   const name = asset.assetName || asset.company || 'The asset';
   const phase = phaseWord(asset.phase);
   const mech = asset.mechanism ? `${asset.mechanism} ` : '';
+  const indication = asset.indicationLabel || asset.indication.replace(/_/g, ' ');
+  const modality = modalityLabels[asset.modality] ?? asset.modality.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
   const rationale = decision.rationale;
   const compLine = rationale.find(r => /comparable/i.test(r)) || `Comparable evidence: ${decision.confidenceBasis}.`;
   const rnpvLine = rationale.find(r => /risk-adjusted/i.test(r)) || `The ask of ${fmt(decision.ask.totalM)} sits above a floor of ${fmt(decision.floor.totalM)}.`;
@@ -149,7 +152,7 @@ export function buildFallbackObjections(input: ObjectionInput): PositioningObjec
   const royalty = decision.ask.royaltyPct ? `, royalty ${decision.ask.royaltyPct.low}–${decision.ask.royaltyPct.high}%` : '';
 
   const positioning = [
-    `${name} is a ${phase} ${mech}${asset.modality} for ${asset.indication}${asset.differentiationNotes ? `. ${asset.differentiationNotes.split(/(?<=\.)\s/)[0]}` : ''}. ${decision.headline}`,
+    `${name} is a ${phase} ${mech}${modality} for ${indication}${asset.differentiationNotes ? `. ${asset.differentiationNotes.split(/(?<=\.)\s/)[0]}` : ''}. ${decision.headline}`,
     `The ask is ${fmt(decision.ask.totalM)} total with ${fmt(decision.ask.upfrontM)} upfront${royalty}. ${compLine} ${rnpvLine} The floor is ${fmt(decision.floor.totalM)} total and ${fmt(decision.floor.upfrontM)} upfront; below ${fmt(decision.walkAwayUpfrontM)} upfront we walk.`,
   ];
 
@@ -160,7 +163,7 @@ export function buildFallbackObjections(input: ObjectionInput): PositioningObjec
       evidenceToPrepare: asset.dataPackageStage ? `Full data package through “${asset.dataPackageStage}” with study reports, plus the gap list from the diligence readiness page.` : 'Full data package with study reports and the gap list from the diligence readiness page.',
     },
     {
-      objection: `The mechanism is crowded; why does this ${asset.modality} win against what is already in ${asset.indication}?`,
+      objection: `The mechanism is crowded; why does this ${modality} win against what is already in ${indication}?`,
       answer: asset.differentiationNotes
         ? `${asset.differentiationNotes} The comparable set already prices this crowding: ${compLine}`
         : `The comparable set already prices the field: ${compLine} The differentiation case rests on the target product profile against current standard of care.`,
@@ -173,7 +176,7 @@ export function buildFallbackObjections(input: ObjectionInput): PositioningObjec
     },
     {
       objection: 'Manufacturing and supply are not ready for the next study, and the cost of goods is unknown.',
-      answer: `The CMC package and its gaps are listed on the diligence readiness page; the items marked as gaps are being closed before outreach. Scale-up cost is carried in the development cost behind the ask.`,
+      answer: `The CMC package, and what is still open, is listed on the diligence readiness page so nothing surfaces for the first time in confirmatory diligence. Scale-up is a milestone the buyer can gate rather than a reason to discount the upfront.`,
       evidenceToPrepare: 'Batch records, stability data, CMO agreements and a commercial cost-of-goods estimate with assumptions.',
     },
     {

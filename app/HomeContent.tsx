@@ -834,7 +834,7 @@ export default function HomeContent() {
               <p className="text-xs text-slate-500 mb-1 font-medium text-teal-400/70">Map the landscape</p>
               <p className="text-xs text-slate-500 mb-5 leading-relaxed">All modalities, all deal structures, AI narrative, white-label branding + walkthrough.</p>
               <ul className="space-y-2 mb-5">
-                {['52 deal calculations (13 × 4)', 'M&A, CVR & earnout structures', 'White-label + walkthrough included', 'Concierge 24-hour delivery'].map(item => (
+                {['A signed recommendation: ask, floor, walk-away', 'Cited comparables and evidence-ranked buyers', 'Managing Partner review + walkthrough', 'Within 24 hours of the intake call'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-[11px] text-slate-400">
                     <Check className="w-3 h-3 text-teal-500 flex-shrink-0" />
                     {item}

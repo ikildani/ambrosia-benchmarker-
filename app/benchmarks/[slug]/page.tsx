@@ -378,7 +378,7 @@ export default async function BenchmarkPage({ params }: PageProps) {
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Need the full deal landscape?</h3>
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 max-w-xl">
-              The Deal Intelligence Brief covers <strong>every modality and deal structure</strong> for this indication — 52 deal calculations, AI strategic narrative, comparable transactions, partner matching, and white-label branding. Delivered in 24 hours.
+              The Deal Intelligence Brief turns this landscape into <strong>a decision for one asset</strong> — a signed recommendation with ask, floor and walk-away, cited comparables, buyers ranked on evidence, and a 24-month catalyst calendar. Reviewed by the Managing Partner; delivered within 24 hours of the intake call.
             </p>
             <div className="flex items-center gap-4">
               <Link

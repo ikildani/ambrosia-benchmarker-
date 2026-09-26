@@ -479,11 +479,11 @@ async function queueFunnelEmail(
         <p>You've been deep in ${indicationRef} deal benchmarking — ${lead.calculationsLast7Days} calculations this week across ${lead.recentModalities.slice(0, 3).join(', ') || 'multiple modalities'}.</p>
         <p>Our <strong>Deal Intelligence Brief</strong> covers the complete landscape in one deliverable:</p>
         <ul style="color: #334155; line-height: 2;">
-          <li>52 deal calculations (13 modalities × 4 structures) for ${indicationRef}</li>
-          <li>AI-written strategic narrative and negotiation playbook</li>
-          <li>Partner matching with intent scoring (6-10 counterparties)</li>
-          <li>Full financial model suite — rNPV, Monte Carlo, scenario comparison</li>
-          <li>White-labeled with your company branding</li>
+          <li>A signed recommendation for ${indicationRef}: what to ask, the floor, the walk-away, and who to approach first</li>
+          <li>Cited comparable deals, phase-matched, every row sourced</li>
+          <li>Buyers ranked on fit, urgency and what they have paid at your stage</li>
+          <li>A 24-month catalyst calendar with the window to go to market</li>
+          <li>The objections you will hear, with the evidence to prepare</li>
         </ul>
         <p><strong>$2,500. Delivered in 24 hours.</strong></p>
         <p><a href="https://solidus.ambrosiaventures.co/benchmark" style="display: inline-block; background: #14B8A6; color: white; padding: 10px 24px; text-decoration: none; border-radius: 4px; font-weight: 600;">Order Your Brief →</a></p>
@@ -559,7 +559,7 @@ async function queueAdvisoryEmail(
       body: `
         <p>Hi ${name},</p>
         <p>You recently exported a deal benchmarking report for ${phaseRef} ${modalityRef} in ${indicationRef}. That usually means you're sharing it with your board or a potential partner.</p>
-        <p>Our Deal Intelligence Brief ($2,500) goes deeper — covering all 13 modalities × 4 deal structures for your indication, with AI-generated negotiation playbook, partner matching with intent scoring, and full financial model suite (rNPV, Monte Carlo, scenarios). White-labeled with your company branding.</p>
+        <p>Our Deal Intelligence Brief ($2,500) goes further than a report: one asset, one signed recommendation, with the cited comparables, the buyers ranked on evidence and the catalyst calendar behind it. I read every number before it goes out, and we walk through it together.</p>
         <p>Or if you're further along and need full advisory support on the transaction, we do that too — from valuation through close.</p>
         <p>Reply to this email and I'll share a sample brief.</p>
         <p>Best,<br>Issa Kildani<br>Managing Partner, Ambrosia Ventures</p>

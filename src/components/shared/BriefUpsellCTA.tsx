@@ -32,7 +32,7 @@ export function BriefUpsellCTA({ therapeuticArea, indication, userTier }: BriefU
           Want every deal structure for {label}?
         </div>
         <div style={{ fontSize: '12px', color: '#94A3B8', lineHeight: '1.5' }}>
-          Our Deal Intelligence Brief covers 52 calculations across 13 modalities, with AI negotiation playbook and partner matching. $2,500, delivered in 24 hours.
+          Our Deal Intelligence Brief gives one asset a signed recommendation: ask, floor, walk-away, the cited comparables and the buyers ranked on evidence. $2,500, within 24 hours of the intake call.
         </div>
       </div>
       <a

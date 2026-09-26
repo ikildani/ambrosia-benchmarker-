@@ -6,11 +6,19 @@
  * is isolated: a failing step logs and yields null so the document still
  * renders with an honest empty state instead of failing the whole brief.
  *
+ * Two steps are load-bearing and are reported as `fatal` when they fail:
+ * the comparable-deal fetch and the buyer map. Without them the decision
+ * page would print "Hold: no buyer transacts at this phase" because of an
+ * infrastructure timeout, not because of the evidence. Callers must not
+ * deliver a brief whose `fatal` list is non-empty. Database reads are retried
+ * before they count as failed (Supabase returns Cloudflare 522 pages under
+ * load).
+ *
  * Order (dependencies in brackets):
  *   1. comps           — quality-filtered deal rows → comp set, regional, term sheet
  *   2. buyer valuations[waterfall, rNPV, partners]
  *   3. buyer map       [partners, valuations]
- *   4. landscape       [market estimate, buyer names]
+ *   4. landscape       [market estimate, rNPV peak sales, buyer names]
  *   5. bridge          [result, rNPV, MC, scenarios, valuations, comps]
  *   6. inflection      [inputs, result, rNPV]
  *   7. decision        [bridge, inflection, buyer map, comps, catalyst window]
@@ -49,6 +57,9 @@ import { generatePositioningObjections } from '@/lib/ai/objection-generator';
 import { fmtM } from '@/lib/report/helpers';
 import { loadBriefAccuracyStatement } from '@/lib/outcomes/statements';
 
+export const DB_RETRY_ATTEMPTS = 3;
+export const DB_RETRY_BASE_MS = 1500;
+
 export interface BuildBriefInput {
   supabase: SupabaseClient;
   asset: AssetProfile;
@@ -57,7 +68,6 @@ export interface BuildBriefInput {
   fm: FinancialModelResult;
   partners: PartnerForPDF[];
   memo?: DealMemo;
-  defensive?: { walkAwayThreshold: number; defensiveFloor: number } | undefined;
   mpOpinion?: MPOpinion | null;
   /** Diligence items the client says are ready / missing (free text from intake). */
   diligenceReady?: string[];
@@ -66,6 +76,8 @@ export interface BuildBriefInput {
   skipPositioning?: boolean;
   asOf?: string;
   log?: (msg: string) => void;
+  /** Override the retry pause (tests). */
+  retryBaseMs?: number;
 }
 
 export interface BuildBriefOutput {
@@ -74,6 +86,11 @@ export interface BuildBriefOutput {
   buyerValuations: BuyerSpecificValuation[];
   /** Step-level notes for the admin log. */
   notes: string[];
+  /**
+   * Load-bearing steps that failed after retries. A brief with entries here
+   * must not be delivered: its decision page would rest on missing evidence.
+   */
+  fatal: string[];
 }
 
 async function step<T>(label: string, notes: string[], log: (m: string) => void, fn: () => Promise<T> | T): Promise<T | null> {
@@ -83,11 +100,35 @@ async function step<T>(label: string, notes: string[], log: (m: string) => void,
     log(`[Brief] ${label} ok (${Date.now() - t0} ms)`);
     return out;
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = shortError(err);
     notes.push(`${label} failed: ${msg}`);
     log(`[Brief] ${label} FAILED: ${msg}`);
     return null;
   }
+}
+
+/** Retry a database read with linear back-off; rethrows the last error. */
+async function withRetry<T>(label: string, log: (m: string) => void, baseMs: number, fn: () => Promise<T>): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= DB_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      log(`[Brief] ${label} attempt ${attempt}/${DB_RETRY_ATTEMPTS} failed: ${shortError(err)}`);
+      if (attempt < DB_RETRY_ATTEMPTS && baseMs > 0) await new Promise(r => setTimeout(r, baseMs * attempt));
+    }
+  }
+  throw lastErr;
+}
+
+/** Supabase errors under load carry a whole Cloudflare HTML page; keep the first line. */
+export function shortError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  const m = /<title>([^<]+)<\/title>/i.exec(msg);
+  if (m) return `upstream error: ${m[1].trim()}`;
+  const firstLine = msg.split('\n')[0].trim();
+  return firstLine.length > 240 ? `${firstLine.slice(0, 237)}…` : firstLine;
 }
 
 function summariseComps(brief: BriefIntelligence): string {
@@ -115,18 +156,22 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
   const asOf = input.asOf ?? new Date().toISOString().slice(0, 10);
   const log = input.log ?? ((m: string) => console.log(m));
   const notes: string[] = [];
+  const fatal: string[] = [];
+  const retryMs = input.retryBaseMs ?? DB_RETRY_BASE_MS;
   const { supabase, asset, inputs, result, fm, partners } = input;
 
   const brief: BriefIntelligence = { asOf, asset, mpOpinion: input.mpOpinion ?? null };
 
   // 1. Comps (one round-trip; regional + term sheet derive from the same rows)
-  const raw = (await step('comps.fetch', notes, log, () => fetchQualityDealRows(supabase))) ?? [];
-  if (raw.length) {
-    brief.compSet = await step('comps.set', notes, log, () => buildCompSetFromRows(raw, asset, { asOf }));
+  const raw = await step('comps.fetch', notes, log, () => withRetry('comps.fetch', log, retryMs, () => fetchQualityDealRows(supabase)));
+  if (raw == null) fatal.push('comps.fetch');
+  const rows = raw ?? [];
+  if (rows.length) {
+    brief.compSet = await step('comps.set', notes, log, () => buildCompSetFromRows(rows, asset, { asOf }));
     if (brief.compSet) {
       brief.regional = await step('comps.regional', notes, log, () => buildRegionalStrategy(brief.compSet!.rows, asset, asOf));
     }
-    brief.termSheet = await step('comps.termSheet', notes, log, () => buildTermSheetPrecedent(selectClauseRows(raw, asset), asset, asOf));
+    brief.termSheet = await step('comps.termSheet', notes, log, () => buildTermSheetPrecedent(selectClauseRows(rows, asset), asset, asOf));
   }
 
   // 2. Buyer valuations (existing engine) — needs waterfall + rNPV
@@ -149,12 +194,12 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
     )) ?? [];
   }
 
-  // 3. Buyer map
-  if (partners.length) {
-    brief.buyerMap = await step('buyers.map', notes, log, () =>
-      buildBuyerMap(supabase, asset, partners, { asOf, valuations: buyerValuations }),
-    );
-  }
+  // 3. Buyer map — always attempted; the deal-history supplement inside can
+  //    build a list even when partner matching returned nothing.
+  brief.buyerMap = await step('buyers.map', notes, log, () =>
+    withRetry('buyers.map', log, retryMs, () => buildBuyerMap(supabase, asset, partners, { asOf, valuations: buyerValuations })),
+  );
+  if (brief.buyerMap == null) fatal.push('buyers.map');
 
   // 4. Landscape. Terrain's demand profile (patient funnel, key programs,
   // crowding) is read here and passed through; it never throws, and the local
@@ -163,7 +208,7 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
   const buyerNames = brief.buyerMap?.candidates.map(c => c.name) ?? partners.map(p => p.company_name);
   brief.landscape = await step('landscape', notes, log, async () => {
     const demand = await fetchDemandProfile(asset.indication, { territory: asset.territory });
-    const landscape = await buildLandscape(supabase, asset, fm.marketSize ?? null, { asOf, buyerNames, terrain: demand?.profile ?? null });
+    const landscape = await buildLandscape(supabase, asset, fm.marketSize ?? null, { asOf, buyerNames, terrain: demand?.profile ?? null, rnpv: fm.rnpv });
     if (demand && landscapeUsesTerrain(landscape)) {
       notes.push(`terrainAsOf ${demand.asOf} (indication ${asset.indication}${demand.profile.identity.match === 'proxy' ? ', proxy match' : ''})`);
       log(`[Brief] landscape used Terrain demand layer (indication ${asset.indication}, asOf ${demand.asOf})`);
@@ -180,7 +225,6 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
       scenarios: fm.scenarios,
       buyerValuations,
       compSet: brief.compSet ?? null,
-      defensive: input.defensive as never,
       asOf,
     }),
   );
@@ -225,7 +269,7 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
   }
 
   // 10. Coverage (honesty block)
-  brief.coverage = coverageFromRows(raw, asset, brief, asOf);
+  brief.coverage = coverageFromRows(rows, asset, brief, asOf);
 
   // 11. Resolved-brief accuracy for this TA (outcome ledger). The loader never
   // throws and returns null below the n ≥ 10 threshold, so the methodology
@@ -233,7 +277,8 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
   const accuracy = await step('coverage.accuracy', notes, log, () => loadBriefAccuracyStatement(supabase, asset.therapeuticArea));
   if (accuracy) brief.coverage.accuracy = accuracy;
 
-  return { brief, buyerValuations, notes };
+  if (fatal.length) log(`[Brief] FATAL: ${fatal.join(', ')} — do not deliver`);
+  return { brief, buyerValuations, notes, fatal };
 }
 
 export function coverageFromRows(raw: RawDealRow[], asset: AssetProfile, brief: BriefIntelligence, asOf: string): DataCoverage {

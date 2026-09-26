@@ -105,7 +105,7 @@ export function buildRegionalStrategy(rows: CompRow[], asset: AssetProfile, asOf
     const pct = Math.round((best.upfrontVsGlobal ?? 0) * 100);
     recommendation = `A ${best.label} carve-out is priced in the data: ${best.n} deals with a median upfront of ${fmtMoney(best.upfront?.p50)} (${pct}% of the global median). Consider running ${best.label} rights as a separate track alongside ${assetScope}, and only concede them inside a global deal if the global upfront rises by at least that amount.`;
   } else {
-    recommendation = `Regional data is thin: no region other than global has three or more deals with a median upfront at 35% or more of the global median. Keep ${assetScope} as the base case unless a regional buyer is on the list, in which case price the carve-out against the global median rather than the regional sample.`;
+    recommendation = `Regional data is thin: no region other than global has three or more deals with a median upfront at 35% or more of the global median. Keep ${assetScope} as the base case unless a regional buyer is on the list, in which case price the carve-out against the global median rather than the regional rows.`;
   }
 
   const globalN = globalRows.length;

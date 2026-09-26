@@ -11,34 +11,20 @@ import { renderDealTermsPage } from './pages/dealTerms';
 import { renderSensitivityPage } from './pages/sensitivity';
 import { renderComparablesPage } from './pages/comparables';
 import { renderPartnersPage } from './pages/partners';
-import { renderAIMemoPages } from './pages/aiMemo';
 import { renderRiskAnalysisPage } from './pages/riskAnalysis';
 import { renderDealTimelinePage } from './pages/dealTimeline';
-import { renderNegotiationPages } from './pages/negotiation';
-import { renderTherapeuticIntelPage } from './pages/therapeuticIntel';
 import { renderMethodologyPage } from './pages/methodology';
 import { renderFinancialModelPages } from './pages/financialModel';
-import { renderCurrencySensitivityPage } from './pages/currencySensitivity';
 import { renderDealFlowContextPage } from './pages/dealFlowContext';
 import { renderDefensiveAdvicePage } from './pages/defensiveAdvice';
 import { renderScenarioComparisonPage } from './pages/scenarioComparison';
 import { renderDealWaterfallPage } from './pages/dealWaterfall';
 import { renderRealOptionsLifecyclePage } from './pages/realOptionsLifecycle';
-import { renderBuyerSpecificPages } from './pages/buyerSpecific';
 import { renderRegulatoryRiskPage } from './pages/regulatoryRiskPage';
 import { renderMilestonePages } from './pages/milestonePage';
-import { renderTaxStructurePage } from './pages/taxStructurePage';
-import { renderRoyaltyStackingPage } from './pages/royaltyStackingPage';
 import { renderPatentDynamicsPage } from './pages/patentDynamicsPage';
 import { renderCMCRiskPage } from './pages/cmcRiskPage';
 import { renderEarnoutPages } from './pages/earnoutPage';
-import { renderPricingAccessPage } from './pages/pricingAccessPage';
-import { renderIndicationSequencingPage } from './pages/indicationSequencingPage';
-import { renderBuyerSynergyPage } from './pages/buyerSynergyPage';
-import { renderMAAcquisitionPage } from './pages/maAcquisitionPage';
-import { renderDeliveryRoutePage } from './pages/deliveryRoutePage';
-import { renderMolecularTargetPage } from './pages/molecularTargetPage';
-import { renderTrispecificPage } from './pages/trispecificPage';
 // Brief v3 pages
 import { renderDecisionPage } from './pages/decisionPage';
 import { renderValuationBridgePage } from './pages/valuationBridge';
@@ -79,77 +65,104 @@ interface PageSpec {
  */
 export function buildPageSpecs(data: PDFReportData): PageSpec[] {
   const b = data.brief;
-  const hasPlaybook = !!data.playbookData;
   const hasFinancialModel = !!data.rnpvResult;
-  const hasScenarioComparison = !!data.scenarioComparison;
-  const hasDealWaterfall = !!data.dealWaterfall;
-  const hasAdvancedAnalytics = !!data.realOptions || !!data.competitiveDynamics || !!data.lifecycleExtensions;
-  const hasBuyerSpecific = !!data.buyerSpecificValuation || (data.buyerSpecificValuations && data.buyerSpecificValuations.length > 0);
+  // A negative or zero risk-adjusted NPV is a statement about the stage, not
+  // a value: the pages that derive numbers from it (defensive thresholds,
+  // scenario values, waterfall, real options) would print inverted ranges and
+  // nonsense percentages. They are included only when the rNPV is informative;
+  // the bridge and the financial model page say why they are absent.
+  const rnpvInformative = hasFinancialModel && (b?.bridge ? b.bridge.rnpvInformative : (data.rnpvResult!.riskAdjustedNPV > 0));
+  const hasScenarioComparison = rnpvInformative && !!data.scenarioComparison;
+  const hasDealWaterfall = rnpvInformative && !!data.dealWaterfall;
+  const hasAdvancedAnalytics = rnpvInformative && (!!data.realOptions || !!data.competitiveDynamics || !!data.lifecycleExtensions);
   const hasCompSet = !!b?.compSet && b.compSet.rows.length >= 3;
+  const dealType = `${data.inputs.dealType ?? ''} ${b?.asset.targetDealType ?? ''}`.toLowerCase();
+  const isAcquisition = /acqui|m&a|merger/.test(dealType);
 
   const specs: PageSpec[] = [];
   const add = (title: string, description: string, render: PageRenderer | MultiPageRenderer, count = 1) =>
     specs.push({ title, description, render, count });
 
+  // Front matter and the decision layer. The v3 sections are always listed
+  // when the intelligence layer ran: each page renders its own empty state
+  // that says what is missing and why, so a thin section is visible rather
+  // than silently absent (format rule 4).
   add('Cover', 'Asset, headline range, and risk score', renderCoverPage);
   add('Table of Contents', 'Section guide', renderTableOfContents);
-  if (b?.decision) add('The Decision', 'Recommendation, counterparties, ask, floor, walk-away, and timeline', renderDecisionPage);
+  if (b) add('The Decision', 'Recommendation, counterparties, ask, floor, walk-away, and timeline', renderDecisionPage);
   add('Executive Dashboard', 'Key metrics, value split, and deal recommendation', renderExecutiveDashboard);
-  if (b?.bridge) add('Valuation Bridge', 'Comps, rNPV, Monte Carlo, scenarios, and buyer-implied ranges reconciled to one ask', renderValuationBridgePage);
+  if (b) add('Valuation Bridge', 'Comps, rNPV, Monte Carlo, scenarios, and buyer-implied ranges reconciled to one ask', renderValuationBridgePage);
   add('Deal Structure', 'Payment architecture and milestone waterfall', renderDealStructurePage);
   add('Deal Terms', 'Detailed term ranges, royalties, and modifiers', renderDealTermsPage);
-  if (hasCompSet) {
+
+  // Evidence: comparables
+  if (b) {
     add('Comparable Set', 'Scatter of matched deals, distribution by phase, and the deals that drive the headline', renderCompScatterPage);
+    add('Regional Deal Strategy', 'What regional rights fetch versus a global deal', renderRegionalStrategyPage);
+    add('Term-Sheet Precedent Map', 'Clause frequency in comparable deals and what to ask for', renderTermSheetPrecedentPage);
   } else {
     add('Comparable Deals', 'Recent transactions and market benchmarks', renderComparablesPage);
   }
-  if (b?.regional) add('Regional Deal Strategy', 'What regional rights fetch versus a global deal', renderRegionalStrategyPage);
-  if (b?.termSheet) add('Term-Sheet Precedent Map', 'Clause frequency in comparable deals and what to ask for', renderTermSheetPrecedentPage);
-  add('M&A Acquisition Benchmarks', 'Milestones, earnouts, CVRs, and acquisition value by modality', renderMAAcquisitionPage);
-  add('Trispecific Antibody Analysis', 'Modality deep-dive: multiplier, precedent deals, target combinations', renderTrispecificPage);
-  add('Delivery Route & Administration', 'SubQ, IV, device lifecycle extensions and deal impact', renderDeliveryRoutePage);
-  add('Molecular Target Analysis', 'Target class precedent and premium', renderMolecularTargetPage);
   add('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers', renderSensitivityPage);
+
+  // Evidence: financial model
   if (hasFinancialModel) {
     add('Financial Model', 'rNPV, Monte Carlo, and cash flow analysis', renderFinancialModelPages);
-    if (b?.landscape?.funnel) add('Patient Funnel', 'Where the peak-sales number comes from', renderPatientFunnelPage);
-    if (b?.inflection) add('Path to Next Inflection', 'Partner now versus fund to the next data point; financing alternative', renderInflectionPathPage);
-    add('Currency & Pricing Sensitivity', 'FX impact and regulatory pricing scenarios', renderCurrencySensitivityPage);
+    if (b) add('Patient Funnel', 'Where the peak-sales number comes from', renderPatientFunnelPage);
+    if (b) add('Path to Next Inflection', 'Partner now versus fund to the next data point; financing alternative', renderInflectionPathPage);
     add('Deal Flow & Market Context', 'Historical deal flow, competitive landscape, and market sizing', renderDealFlowContextPage);
-    add('Defensive Analysis', 'Worst/best case scenarios and walk-away thresholds', renderDefensiveAdvicePage);
+    if (rnpvInformative) add('Defensive Analysis', 'Worst/best case scenarios and the walk-away', renderDefensiveAdvicePage);
     if (hasScenarioComparison) add('Scenario Comparison', 'Bear/Base/Bull rNPV with probability-weighted expected value', renderScenarioComparisonPage);
     if (hasDealWaterfall) add('Deal Valuation Waterfall', 'Valuation cascade and deal component allocation', renderDealWaterfallPage);
     if (hasAdvancedAnalytics) add('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions', renderRealOptionsLifecyclePage);
   }
-  if (b?.buyerMap) {
+
+  // Evidence: buyers and landscape
+  if (b) {
     add('Buyer Map', 'Fit versus urgency, capacity, and loss-of-exclusivity calendar', renderBuyerMapPage);
     add('Buyer Stage Behaviour', 'What each buyer has paid at this stage, who is excluded, and the process', renderBuyerBehaviourPage);
+    add('Pipeline Map', 'Every active program for the indication by mechanism and phase', renderPipelineMapPage);
+    add('Catalyst Calendar', 'Readouts and exclusivity losses in the next 24 months; go-to-market window', renderCatalystCalendarPage);
+  } else {
+    add('Partner Matches', 'Ranked potential licensing partners with intent scores', renderPartnersPage);
   }
-  add('Partner Matches', 'Ranked potential licensing partners with intent scores', renderPartnersPage);
-  if (hasFinancialModel && hasBuyerSpecific) add('Buyer-Specific Valuation', 'Strategic premium analysis across matched partners', renderBuyerSpecificPages);
-  if (b?.landscape?.pipeline) add('Pipeline Map', 'Every active program for the indication by mechanism and phase', renderPipelineMapPage);
-  if (b?.landscape?.catalysts) add('Catalyst Calendar', 'Readouts and exclusivity losses in the next 24 months; go-to-market window', renderCatalystCalendarPage);
-  add('Therapeutic Intelligence', 'Indication-specific market context and trends', renderTherapeuticIntelPage);
-  add('Strategic Analysis', 'Narrative and deal structure analysis', renderAIMemoPages);
-  if (hasPlaybook) add('Negotiation Strategy', 'Negotiation playbook and tactics', renderNegotiationPages);
-  if (b?.positioning) add('Positioning & Objections', 'How to tell the story and what buyers will push back on', renderPositioningObjectionsPage);
-  if (b?.diligence) add('Diligence Readiness', 'What a buyer will ask for and what to close before outreach', renderDiligenceReadinessPage);
+
+  // The written position
+  if (b) {
+    add('Positioning & Objections', 'How to tell the story and what buyers will push back on', renderPositioningObjectionsPage);
+    add('Diligence Readiness', 'What a buyer will ask for and what to close before outreach', renderDiligenceReadinessPage);
+  }
+
+  // Risk and execution
   add('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation', renderRiskAnalysisPage);
   add('Deal Timeline', 'Milestone schedule from signing to launch', renderDealTimelinePage);
   if (data.regulatoryRisk) add('Regulatory Risk', 'FDA CRL, AdComm, PDUFA, and PRV analysis', renderRegulatoryRiskPage);
   if (data.milestoneProbabilities) add('Milestone Analysis', 'Individual milestone probability weighting', renderMilestonePages);
-  if (data.earnoutValuation) add('Earnout & CVR', 'Contingent payment probability and time value', renderEarnoutPages);
+  if (isAcquisition && data.earnoutValuation) add('Earnout & CVR', 'Contingent payment probability and time value', renderEarnoutPages);
   if (data.patentDynamics) add('Patent & LOE', 'Patent term adjustments and generic entry dynamics', renderPatentDynamicsPage);
   if (data.cmcRisk) add('Manufacturing Risk', 'CMC timeline, scalability, and supply chain risk', renderCMCRiskPage);
-  if (data.pricingConstraints) add('Pricing & Access', 'ICER thresholds, IRA exposure, and payer dynamics', renderPricingAccessPage);
-  if (data.indicationSequence) add('Franchise Expansion', 'Indication sequencing and cannibalization', renderIndicationSequencingPage);
-  if (data.taxStructure) add('Tax Structure', 'Cross-border IP structuring and tax optimization', renderTaxStructurePage);
-  if (data.royaltyStacking) add('Royalty Stacking', 'Upstream IP obligations and net royalty impact', renderRoyaltyStackingPage);
-  if (data.buyerSynergies?.length) add('Buyer Synergies', 'Acquirer-specific synergy analysis', renderBuyerSynergyPage);
+
+  // Appendix
   if (hasCompSet) add('Comparable Appendix', 'Every comparable deal with date, structure, terms, and source', renderCompAppendixPages, countCompAppendixPages(data));
   add('Methodology', 'Model design, data sources, coverage, and disclaimer', renderMethodologyPage);
   return specs;
 }
+
+/**
+ * Legacy sections removed from the client brief on 2026-09-25. Each either
+ * printed hard-coded figures for every asset (M&A benchmarks, trispecific,
+ * delivery route), cited third-party databases Solidus does not license
+ * (tax, royalty stacking, buyer synergies, franchise expansion, pricing and
+ * access, currency), duplicated a v3 section with a different answer
+ * (legacy partner matches, buyer-specific valuation, strategic analysis,
+ * negotiation playbook), or was template prose (therapeutic intelligence).
+ * They return only when rebuilt on Solidus data and reconciled to the bridge.
+ */
+export const RETIRED_SECTIONS = [
+  'M&A Acquisition Benchmarks', 'Trispecific Antibody Analysis', 'Delivery Route & Administration', 'Molecular Target Analysis',
+  'Currency & Pricing Sensitivity', 'Buyer-Specific Valuation', 'Therapeutic Intelligence', 'Strategic Analysis', 'Negotiation Strategy',
+  'Pricing & Access', 'Franchise Expansion', 'Tax Structure', 'Royalty Stacking', 'Buyer Synergies',
+] as const;
 
 /** Returns the full HTML document string for the report with styles.
  *  Pages without data are excluded — no placeholders.
