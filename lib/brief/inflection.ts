@@ -24,8 +24,13 @@
  *    overheads and a runway cushion.
  *  - PRE_MONEY_MULTIPLE_OF_RNPV = 1.0 — assumed pre-money equals the
  *    risk-adjusted NPV when it is positive; otherwise 0.5 × headline total.
- *  - MILESTONE_PV_FACTOR = 0.45 — present value of contingent milestones as a
- *    share of face value.
+ *  - MILESTONE_PV_FACTOR = 0.45 — fallback share of milestone face value when
+ *    no probability chain is available. When one is, the share is computed:
+ *    each development milestone is weighted by the cumulative probability of
+ *    reaching it from the current phase (IND, first patient, Phase 2 start,
+ *    pivotal, filing, approval, second approval, with the stage schedule the
+ *    term sheet uses), so a preclinical asset at 1–2% cumulative PoS carries
+ *    milestones at roughly a quarter of face, not nearly half.
  *  - OPTION_VALUE_HURDLE = 0.15 — a deferred option must beat "deal now" by
  *    at least 15% on expected value before it is recommended.
  *  - DEFAULT_DISCOUNT_RATE = 0.12 — used when the financial model did not
@@ -108,9 +113,42 @@ function scale(r: Range3, f: number): Range3 {
 
 function round1(v: number): number { return Math.round(v * 10) / 10; }
 
-/** Upfront plus the present value of contingent milestones at their face value. */
-export function dealValueTodayM(upfrontM: number, totalM: number): number {
-  return upfrontM + MILESTONE_PV_FACTOR * Math.max(0, totalM - upfrontM);
+/** Upfront plus contingent milestones at `factor` of face value (probability-weighted when known). */
+export function dealValueTodayM(upfrontM: number, totalM: number, factor: number = MILESTONE_PV_FACTOR): number {
+  return upfrontM + factor * Math.max(0, totalM - upfrontM);
+}
+
+/** Milestone events as shares of the development pool, by the phase the deal signs at. */
+const MILESTONE_SCHEDULE: Record<string, Array<[PathPhase | 'approved' | 'second_approval', number]>> = {
+  discovery: [['preclinical', 0.15], ['phase1', 0.15], ['phase2', 0.15], ['phase3', 0.15], ['nda_filed', 0.15], ['approved', 0.15], ['second_approval', 0.10]],
+  preclinical: [['phase1', 0.15], ['phase1', 0.15], ['phase2', 0.15], ['phase3', 0.15], ['nda_filed', 0.15], ['approved', 0.15], ['second_approval', 0.10]],
+  phase1: [['phase2', 0.20], ['phase2', 0.15], ['phase3', 0.20], ['nda_filed', 0.15], ['approved', 0.20], ['second_approval', 0.10]],
+  phase2: [['phase3', 0.25], ['nda_filed', 0.25], ['approved', 0.30], ['second_approval', 0.20]],
+  phase3: [['nda_filed', 0.20], ['approved', 0.45], ['second_approval', 0.20], ['approved', 0.15]],
+  nda_filed: [['approved', 0.80], ['second_approval', 0.20]],
+};
+
+/**
+ * Share of milestone face value expected to be paid, given the chain of phase
+ * transition probabilities from the current phase. Pure; exported for tests.
+ */
+export function milestoneFactorFromChain(current: PathPhase, ta: string): number {
+  const schedule = MILESTONE_SCHEDULE[current];
+  if (!schedule) return MILESTONE_PV_FACTOR;
+  const idx = PATHWAY.indexOf(current);
+  const chain = PATHWAY.slice(idx).filter(p => p !== 'approved') as PathPhase[];
+  const trans = transitionsFromTables(ta, chain);
+  // cumulative probability of having reached each later phase
+  const reach = new Map<string, number>();
+  let cum = 1;
+  chain.forEach((p, i) => { cum *= trans[i]?.probability ?? 0.5; const next = PATHWAY[PATHWAY.indexOf(p) + 1]; if (next) reach.set(next, cum); });
+  const approved = reach.get('approved') ?? cum;
+  let factor = 0;
+  for (const [event, share] of schedule) {
+    const p = event === 'second_approval' ? approved * 0.7 : event === 'approved' ? approved : (reach.get(event) ?? approved);
+    factor += share * p;
+  }
+  return Math.max(0.05, Math.min(0.9, Math.round(factor * 1000) / 1000));
 }
 
 export interface InflectionInput {
@@ -166,6 +204,7 @@ export function buildInflectionPath(input: InflectionInput): InflectionPath | nu
   const discountRate = assumptions?.discountRate
     ?? (rnpv && Number.isFinite(rnpv.discountRate) && rnpv.discountRate > 0 ? rnpv.discountRate : DEFAULT_DISCOUNT_RATE);
   const discountFactor = (months: number) => 1 / Math.pow(1 + discountRate, months / 12);
+  const milestoneFactor = milestoneFactorFromChain(current, inputs.therapeuticArea);
 
   const terms = result.terms;
   const headlineTotal = terms.totalDealValue.median;
@@ -186,7 +225,7 @@ export function buildInflectionPath(input: InflectionInput): InflectionPath | nu
 
   const expectedValue = (o: { pReach: number; dilution: number | null; upfrontIfReached: Range3; totalIfReached: Range3; months: number; costM: number }): number => {
     const keep = 1 - (o.dilution ?? 0);
-    const valueIfReached = dealValueTodayM(o.upfrontIfReached.median, o.totalIfReached.median);
+    const valueIfReached = dealValueTodayM(o.upfrontIfReached.median, o.totalIfReached.median, milestoneFactor);
     return round1(o.pReach * keep * valueIfReached * discountFactor(o.months) - o.costM);
   };
 
@@ -275,7 +314,7 @@ export function buildInflectionPath(input: InflectionInput): InflectionPath | nu
 
   // Financing alternative (next phase)
   const nextDil = next.dilution;
-  const retainedIfLicense = round1(dealValueTodayM(terms.upfront.median, terms.totalDealValue.median));
+  const retainedIfLicense = round1(dealValueTodayM(terms.upfront.median, terms.totalDealValue.median, milestoneFactor));
   const clientRaise = input.assumptions?.financing?.nextRaiseM;
   const useClientRaise = typeof clientRaise === 'number' && Number.isFinite(clientRaise) && clientRaise > 0;
   const financing = nextDil != null ? {
@@ -283,7 +322,7 @@ export function buildInflectionPath(input: InflectionInput): InflectionPath | nu
     basis: useClientRaise ? `${preMoneyBasis}; raise per intake` : preMoneyBasis,
     raiseM: round1(useClientRaise ? clientRaise : next.costM * (1 + buffer)),
     dilution: nextDil,
-    retainedValueIfFinanceM: round1((1 - nextDil) * dealValueTodayM(next.upfrontIfReached.median, next.totalIfReached.median) * next.pReach * discountFactor(next.months)),
+    retainedValueIfFinanceM: round1((1 - nextDil) * dealValueTodayM(next.upfrontIfReached.median, next.totalIfReached.median, milestoneFactor) * next.pReach * discountFactor(next.months)),
     retainedValueIfLicenseM: retainedIfLicense,
   } : null;
 
@@ -302,5 +341,5 @@ export function buildInflectionPath(input: InflectionInput): InflectionPath | nu
     recommendation = `${rec.label}. Spending $${Math.round(rec.costM)}M over ${rec.months} months with a ${(rec.pReach * 100).toFixed(0)}% chance of reaching it lifts the expected value today to $${Math.round(rec.expectedValueM)}M, ${uplift}% above the $${Math.round(dealNow.expectedValueM)}M on offer now${rec.dilution != null ? `, after ${(rec.dilution * 100).toFixed(0)}% dilution` : ''}. That clears the ${OPTION_VALUE_HURDLE * 100}% hurdle, provided the financing is available on those terms.`;
   }
 
-  return { asOf, discountRate, options, financing, recommendation };
+  return { asOf, discountRate, milestoneFactor, options, financing, recommendation };
 }

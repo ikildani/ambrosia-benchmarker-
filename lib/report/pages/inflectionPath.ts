@@ -45,7 +45,7 @@ export function renderInflectionPathPage(data: PDFReportData, meta: ReportMeta):
         <div><span style="color: ${COLORS.gray500};">Pre-money</span><div style="font-weight: 700; color: ${COLORS.navy};">${fmtM(f.preMoneyM)}</div><div style="font-size: 7.5px; color: ${COLORS.gray400};">${escapeHtml(f.basis)}</div></div>
         <div><span style="color: ${COLORS.gray500};">Raise</span><div style="font-weight: 700; color: ${COLORS.navy};">${fmtM(f.raiseM)}</div><div style="font-size: 7.5px; color: ${COLORS.gray400};">${fmtShare(f.dilution)} dilution</div></div>
         <div><span style="color: ${COLORS.gray500};">Retained value if financed</span><div style="font-weight: 700; color: ${COLORS.navy};">${fmtM(f.retainedValueIfFinanceM)}</div><div style="font-size: 7.5px; color: ${COLORS.gray400};">(1 − dilution) × P(reach) × value if reached, discounted</div></div>
-        <div><span style="color: ${COLORS.gray500};">Retained value if licensed now</span><div style="font-weight: 700; color: ${COLORS.teal};">${fmtM(f.retainedValueIfLicenseM)}</div><div style="font-size: 7.5px; color: ${COLORS.gray400};">upfront + 45% of milestone face value</div></div>
+        <div><span style="color: ${COLORS.gray500};">Retained value if licensed now</span><div style="font-weight: 700; color: ${COLORS.teal};">${fmtM(f.retainedValueIfLicenseM)}</div><div style="font-size: 7.5px; color: ${COLORS.gray400};">upfront + ${Math.round((path.milestoneFactor ?? 0.45) * 100)}% of milestone face value (probability-weighted)</div></div>
       </div>
     </div>` : `
     <div class="card-sm" style="border-left: 3px solid ${COLORS.gray300};">
@@ -60,7 +60,7 @@ export function renderInflectionPathPage(data: PDFReportData, meta: ReportMeta):
 
       <div class="card" style="padding: 10px 12px 6px; margin-bottom: 10px;">
         <div class="chart-container" style="margin: 0;">${renderDecisionTree(path, 560, 230)}</div>
-        ${chartSource({ source: 'Financial engine phase transitions and Solidus phase step-up calibration', n: path.options.length, asOf: path.asOf, note: `expected value today = P(reach) × (1 − dilution) × (upfront + 45% of milestone face value) discounted at ${(path.discountRate * 100).toFixed(0)}% a year − development cost` })}
+        ${chartSource({ source: 'Financial engine phase transitions and Solidus phase step-up calibration', n: path.options.length, asOf: path.asOf, note: `expected value today = P(reach) × (1 − dilution) × (upfront + ${Math.round((path.milestoneFactor ?? 0.45) * 100)}% of milestone face value, weighted by the probability of reaching each milestone) discounted at ${(path.discountRate * 100).toFixed(0)}% a year − development cost` })}
       </div>
 
       <table class="data-table" style="font-size: 8.5px; margin-bottom: 10px;">
