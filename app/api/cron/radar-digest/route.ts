@@ -13,6 +13,12 @@
  *
  * Auth: Bearer CRON_SECRET, timing-safe. Logged through logRadarRun with
  * source 'mandate_matcher' and parameters.stage = 'radar_digest'.
+ *
+ * Second phase (vercel.json is at the 100-cron cap): after the radar run,
+ * the post-delivery brief alerts (lib/brief/alerts.ts) use whatever budget
+ * is left up to 280 s from the start. Its report rides in the same log row
+ * (parameters.brief_alerts) and the response. On demand:
+ * /api/cron/outcome-resolve?briefAlerts=true.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,6 +26,9 @@ import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runRadarNotifications } from '@/lib/radar/notifications';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import { runBriefAlerts, type BriefAlertRunReport } from '@/lib/brief/alerts';
+
+const BRIEF_ALERTS_DEADLINE_MS = 280_000;
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -43,6 +52,17 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await runRadarNotifications(supabase, { timeBudgetMs: 240_000 });
+
+    // Phase 2: brief alerts with the remaining budget. Never lets the radar log fail.
+    let briefAlerts: BriefAlertRunReport | { error: string } | null = null;
+    try {
+      briefAlerts = await runBriefAlerts(supabase, { deadline: startedAt + BRIEF_ALERTS_DEADLINE_MS });
+      console.log(`[cron/radar-digest] brief alerts: requests=${briefAlerts.requests} items=${briefAlerts.items} claimed=${briefAlerts.claimed} sent=${briefAlerts.sent} failed=${briefAlerts.failed}${briefAlerts.timedOut ? ' (timed out)' : ''}${briefAlerts.errors.length ? ` errors=${briefAlerts.errors.length}` : ''}`);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error('[cron/radar-digest] brief alerts failed:', message);
+      briefAlerts = { error: message };
+    }
 
     const produced = result.eventsCreated + result.duplicatesSkipped;
     const status = deriveRunStatus({
@@ -72,11 +92,13 @@ export async function GET(request: NextRequest) {
         deliveries_sent: result.deliveriesSent,
         deliveries_failed: result.deliveriesFailed,
         timed_out: result.timedOut,
+        brief_alerts: briefAlerts,
       },
-      notes: `digests ${result.digestsBuilt}, events ${result.eventsCreated}, sent ${result.deliveriesSent}`,
+      notes: `digests ${result.digestsBuilt}, events ${result.eventsCreated}, sent ${result.deliveriesSent}` +
+        (briefAlerts && 'sent' in briefAlerts ? `; brief alerts ${briefAlerts.sent} sent / ${briefAlerts.items} items` : ''),
     });
 
-    return NextResponse.json({ success: true, ...result, status, logged, duration_ms: Date.now() - startedAt });
+    return NextResponse.json({ success: true, ...result, briefAlerts, status, logged, duration_ms: Date.now() - startedAt });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[cron/radar-digest] failed:', message);

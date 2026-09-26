@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { runOutcomePhase } from '@/lib/outcomes/cron';
+import { runBriefAlerts } from '@/lib/brief/alerts';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,11 @@ export const dynamic = 'force-dynamic';
 //                                                 also send the day-45 / day-120 brief
 //                                                 outcome follow-ups (off by default here;
 //                                                 the scheduled 02:00 UTC run sends them)
+//   GET /api/cron/outcome-resolve?briefAlerts=true
+//                                                 run only the post-delivery brief alerts
+//                                                 (lib/brief/alerts.ts; scheduled in
+//                                                 /api/cron/radar-digest). Add &dryRun=true
+//                                                 to select without sending or writing.
 // ---------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
@@ -41,6 +47,16 @@ export async function GET(request: NextRequest) {
   const cursor = params.get('cursor');
   try {
     const supabase = createServiceClient();
+
+    if (params.get('briefAlerts') === 'true') {
+      const started = Date.now();
+      const briefAlerts = await runBriefAlerts(supabase, {
+        dryRun: params.get('dryRun') === 'true',
+        deadline: started + (maxDuration - 10) * 1000,
+      });
+      return NextResponse.json({ success: briefAlerts.errors.length === 0, briefAlerts, ms: Date.now() - started, timestamp: new Date().toISOString() });
+    }
+
     const report = await runOutcomePhase(supabase, {
       rollupHour: 3,
       forceRollups: params.get('rollups') === 'true',
