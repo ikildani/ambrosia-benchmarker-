@@ -149,8 +149,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
         <section className="relative overflow-hidden">
           {/* Radial teal glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1a] via-[#0a0f1a] to-[#0d1420]" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-teal-500/[0.07] rounded-full blur-[120px]" />
-          <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-blue-500/[0.04] rounded-full blur-[100px]" />
+          <div className="absolute inset-x-0 top-0 h-[600px]" style={{ background: 'radial-gradient(ellipse 480px 320px at 50% 15%, rgba(20,184,166,0.10), transparent 70%), radial-gradient(ellipse 260px 240px at 78% 25%, rgba(59,130,246,0.06), transparent 70%)' }} />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-12 sm:pb-16">
             <div className="text-center max-w-3xl mx-auto">
@@ -340,7 +339,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           <div className="relative rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#0d1420] via-[#111827] to-[#0d1420] p-10 sm:p-14 text-center overflow-hidden">
             {/* Background glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-teal-500/[0.06] rounded-full blur-[100px]" />
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 320px 200px at 50% 50%, rgba(20,184,166,0.09), transparent 70%)' }} />
 
             <div className="relative">
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
