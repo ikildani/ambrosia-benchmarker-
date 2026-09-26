@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Monte Carlo Simulation for Biotech Valuation: A Practical Guide',
@@ -445,7 +445,7 @@ export default function MonteCarloBiotechValuationPage() {
             </ol>
 
             <p className="text-slate-600 leading-relaxed">
-              For full deal benchmarking with all 14 engines (including Monte Carlo, rNPV, real options, competitive dynamics, and buyer-specific valuation), use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">calculator</Link>. The calculator integrates Monte Carlo output with deal term benchmarks and comparable transaction analysis for a complete valuation package.
+              For full deal benchmarking with all {ENGINE_COUNT} engines (including Monte Carlo, rNPV, real options, competitive dynamics, and buyer-specific valuation), use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">calculator</Link>. The calculator integrates Monte Carlo output with deal term benchmarks and comparable transaction analysis for a complete valuation package.
             </p>
           </div>
         </article>
@@ -546,7 +546,7 @@ export default function MonteCarloBiotechValuationPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { href: '/simulator', title: 'Monte Carlo Simulator', desc: 'Run 10,000 scenarios on your asset' },
-                { href: '/calculator', title: 'Solidus', desc: 'Full 14-engine deal benchmarking' },
+                { href: '/calculator', title: 'Solidus', desc: `Full ${ENGINE_COUNT}-engine deal benchmarking` },
                 { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Guide', desc: 'Risk-adjusted valuation methodology' },
                 { href: 'https://ambrosiaventures.co', title: 'Ambrosia Ventures', desc: 'Biopharma transaction advisory' },
               ].map((resource) => (

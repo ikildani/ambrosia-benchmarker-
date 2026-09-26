@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Solidus vs DealForma — Biopharma Deal Intelligence Comparison | 2026',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Solidus vs DealForma — Biopharma Deal Intelligence Comparison | 2026',
     description:
-      'Compare Solidus to DealForma for biopharma deal benchmarking. Integrated rNPV modeling, 21 analytical engines, and real-time benchmarking vs established deal comps.',
+      `Compare Solidus to DealForma for biopharma deal benchmarking. Integrated rNPV modeling, ${ENGINE_COUNT} analytical engines, and real-time benchmarking vs established deal comps.`,
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/compare/dealforma',
     images: [{ url: '/api/og', width: 1200, height: 630 }],
@@ -38,7 +38,7 @@ const FAQ_ITEMS = [
   {
     question: 'Is Solidus a good alternative to DealForma for biopharma deal comps?',
     answer:
-      'Yes. DealForma is well-established for licensing deal comparables, particularly upfront and milestone data. Solidus goes further by integrating deal comps with 21 analytical engines — rNPV modeling, Monte Carlo simulation, competitive dynamics, partner matching, and AI-generated deal memos — so you move from data to decision in one workflow. If your team needs more than a reference database, Solidus is built for that.',
+      `Yes. DealForma is well-established for licensing deal comparables, particularly upfront and milestone data. Solidus goes further by integrating deal comps with ${ENGINE_COUNT} analytical engines — rNPV modeling, Monte Carlo simulation, competitive dynamics, partner matching, and deal memos — so you move from data to decision in one workflow. If your team needs more than a reference database, Solidus is built for that.`,
   },
   {
     question: 'How does Solidus pricing compare to DealForma?',
@@ -318,7 +318,7 @@ export default function DealFormaComparePage() {
                 or {PRICING.PRO_MONTHLY} month-to-month
               </p>
               <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                <li>All 21 analytical engines</li>
+                <li>All {ENGINE_COUNT} analytical engines</li>
                 <li>Unlimited benchmarks &amp; exports</li>
                 <li>AI deal memos &amp; negotiation playbooks</li>
                 <li>Partner matching &amp; intent scoring</li>
@@ -392,7 +392,7 @@ export default function DealFormaComparePage() {
             More Than a Deal Database
           </h2>
           <p className="text-slate-400 mb-6 max-w-xl mx-auto">
-            Run your asset through Solidus&apos;s 21 engines and see the deal intelligence
+            Run your asset through Solidus&apos;s {ENGINE_COUNT} engines and see the deal intelligence
             that a reference database alone can&apos;t provide.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

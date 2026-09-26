@@ -12,7 +12,7 @@ import ExitIntentCapture from '@/components/ExitIntentCapture';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
 import HeroProductPreview from '@/components/landing/HeroProductPreview';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 import { Check, ArrowRight } from 'lucide-react';
 
 // Below-fold components loaded dynamically
@@ -862,7 +862,7 @@ export default function HomeContent() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Pro — Unlimited Access</h3>
-              <p className="text-sm text-slate-500 mb-6 leading-relaxed">Unlimited calculations, all 14 engines, partner matching, and export. For teams running multiple deals.</p>
+              <p className="text-sm text-slate-500 mb-6 leading-relaxed">Unlimited calculations, all {ENGINE_COUNT} engines, partner matching, and export. For teams running multiple deals.</p>
               <ul className="space-y-2 mb-6">
                 {['Everything in Report, unlimited', 'Buyer-specific valuation (3 partners)', 'Pharma Intent Score (10-factor)', 'Tornado + compound scenarios'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
@@ -898,7 +898,7 @@ export default function HomeContent() {
               { href: '/guides/biopharma-licensing-benchmarks', title: 'Biopharma Licensing Benchmarks 2026', desc: 'Upfront, milestone, and royalty benchmarks by phase, modality, and TA', tag: 'Data' },
               { href: '/guides/rnpv-biotech-valuation', title: 'rNPV Biotech Valuation Guide', desc: 'Phase transition probabilities, cash flow modeling, and Monte Carlo enhancement', tag: 'Methodology' },
               { href: '/guides/negotiate-pharma-royalty-rates', title: 'Pharma Royalty Rate Benchmarks', desc: 'Royalty rates by phase and modality with negotiation strategies', tag: 'Benchmarks' },
-              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: '21 engines, 12 therapeutic areas, 23+ modalities — how to use the platform', tag: 'Tutorial' },
+              { href: '/guides/life-sciences-deal-calculator-guide', title: 'Solidus Platform Guide', desc: `${ENGINE_COUNT} engines, 12 therapeutic areas, 23+ modalities — how to use the platform`, tag: 'Tutorial' },
               { href: '/guides/biotech-licensing-deal-structure', title: 'Deal Structure Guide', desc: 'Upfront, milestone, and royalty allocation by deal type and stage', tag: 'Strategy' },
               { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
               { href: '/guides/monte-carlo-biotech-valuation', title: 'Monte Carlo Biotech Valuation', desc: '10,000-iteration stochastic modeling with correlated variables and phase-dependent risk', tag: 'Methodology' },

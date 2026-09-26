@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, type JSX } from 'react';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import {
   ChevronLeft,
   ChevronRight,
@@ -478,7 +478,7 @@ export default function ResultsTour({ isOpen, onClose, onComplete }: ResultsTour
                 You&apos;re ready
               </h3>
               <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">
-                You&apos;ve seen all 14 engines. Explore your results, adjust inputs, and generate reports with confidence.
+                You&apos;ve seen all {ENGINE_COUNT} engines. Explore your results, adjust inputs, and generate reports with confidence.
               </p>
 
               <button
@@ -593,7 +593,7 @@ export default function ResultsTour({ isOpen, onClose, onComplete }: ResultsTour
       {/* ---- Live region for screen reader announcements ---- */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {showCompletion
-          ? 'Tour complete. You have seen all 14 engine sections.'
+          ? `Tour complete. You have seen all ${ENGINE_COUNT} engine sections.`
           : `Step ${currentStep + 1} of ${totalSteps}: ${step.title}. ${step.body}`}
       </div>
     </div>

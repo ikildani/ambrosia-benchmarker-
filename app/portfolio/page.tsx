@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { PRICING, DEAL_STATS, PORTFOLIO_PRICING, PORTFOLIO_DEMO_URL } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS, PORTFOLIO_PRICING, PORTFOLIO_DEMO_URL, ENGINE_COUNT } from '@/lib/config/constants';
 import {
   Users, LayoutDashboard, FileBarChart, Network, Bell,
   Shield, Lock, Server, Calendar, ArrowRight, Check, Crown,
@@ -530,7 +530,7 @@ export default function PortfolioPage() {
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Every seat unlocks the full Pro platform</h2>
               <p className="mt-3 text-slate-500 max-w-xl mx-auto">
-                14 calculation engines. 12 therapeutic areas. {DEAL_STATS.TOTAL_DEALS} transactions. No feature gates between portfolio companies.
+                {ENGINE_COUNT} calculation engines. 12 therapeutic areas. {DEAL_STATS.TOTAL_DEALS} transactions. No feature gates between portfolio companies.
               </p>
             </div>
 

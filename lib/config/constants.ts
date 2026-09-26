@@ -27,6 +27,11 @@ export const PRICING = {
   REPORT_LABEL: 'Deal Report',
 } as const;
 
+// Engine count — 14 is canonical (Issa, Sep 26 2026). Every user-facing engine figure reads this;
+// never write the number as a literal in copy.
+export const ENGINE_COUNT = 14;
+export const ENGINE_COUNT_DISPLAY = `${ENGINE_COUNT} engines`;
+
 // Portfolio License — multi-seat enterprise tier for biotech and pharma VC firms.
 // All tiers require annual billing. Sales-led — no self-serve checkout.
 // Pricing calibrated against comparable enterprise platforms (Cortellis, Evaluate Pharma,

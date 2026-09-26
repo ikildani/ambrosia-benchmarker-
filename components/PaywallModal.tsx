@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { useTracking } from './TrackingProvider';
-import { PRICING, DEAL_STATS } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
@@ -192,7 +192,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
             <p className="text-xs font-bold text-teal-400 tracking-wider uppercase mb-2">Recommended</p>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Try Pro Free for 7 Days</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-              14 engines · Unlimited calculations · PDF exports · 700+ company profiles
+              {ENGINE_COUNT} engines · Unlimited calculations · PDF exports · 700+ company profiles
             </p>
             <button
               onClick={handleTrialStart}
@@ -280,7 +280,7 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
               <ul className="space-y-1.5 mb-4 text-xs">
                 {[
                   'Unlimited calculations',
-                  'All 14 engines',
+                  `All ${ENGINE_COUNT} engines`,
                   'Full partner + intent scoring',
                   'Unlimited PDF + Excel',
                   'Watchlist & deal alerts',

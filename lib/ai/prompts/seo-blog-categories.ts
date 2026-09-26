@@ -1,4 +1,4 @@
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 /**
  * Category-specific SEO blog prompt generators.
@@ -424,7 +424,7 @@ ${data.comparisonAngle}
 
 ## IMPORTANT GUIDELINES
 - Be factual and fair. An obviously biased comparison hurts credibility.
-- Highlight Ambrosia's genuine advantages: 14 engines, ${DEAL_STATS.TOTAL_DEALS} deals, real-time benchmarks, 562 indications across 12 TAs.
+- Highlight Ambrosia's genuine advantages: ${ENGINE_COUNT} engines, ${DEAL_STATS.TOTAL_DEALS} deals, real-time benchmarks, 562 indications across 12 TAs.
 - Do not fabricate competitor capabilities. If unsure, say "based on publicly available information."
 - Write for a BD professional evaluating tools — not for a marketing audience.
 

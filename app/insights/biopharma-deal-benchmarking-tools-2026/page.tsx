@@ -8,7 +8,7 @@ import { InsightCTA } from '@/components/insights/InsightCTA';
 import { InsightEmailCapture } from '@/components/insights/InsightEmailCapture';
 import { RelatedInsights } from '@/components/insights/RelatedInsights';
 import { GatedBenchmarkTable } from '@/components/insights/GatedBenchmarkTable';
-import { DEAL_STATS, PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 
 const ScrollProgress = dynamic(() => import('@/components/insights/ScrollProgress').then(m => ({ default: m.ScrollProgress })));
 const StickyTOC = dynamic(() => import('@/components/insights/StickyTOC').then(m => ({ default: m.StickyTOC })));
@@ -19,7 +19,7 @@ const ReportViewTracker = dynamic(() => import('@/components/insights/ReportView
 
 export const metadata: Metadata = {
   title: 'Best Biopharma Deal Benchmarking Tools in 2026 — Platform Comparison',
-  description: `Compare biopharma deal benchmarking tools and pharma licensing intelligence platforms in 2026. How ${DEAL_STATS.TOTAL_DEALS} transactions, 8 calculation engines, and predictive analytics change BD outcomes.`,
+  description: `Compare biopharma deal benchmarking tools and pharma licensing intelligence platforms in 2026. How ${DEAL_STATS.TOTAL_DEALS} transactions, ${ENGINE_COUNT} calculation engines, and predictive analytics change BD outcomes.`,
   keywords: [
     'biopharma deal benchmarking tool',
     'pharma deal intelligence platform',
@@ -153,7 +153,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'What is the best biopharma deal benchmarking tool in 2026?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `The best biopharma deal benchmarking tools in 2026 combine real transaction data with predictive analytics. Key criteria include deal database size (2,000+ verified transactions minimum), therapeutic area coverage (10+ TAs), valuation model diversity (rNPV, Monte Carlo, sensitivity), and data freshness (weekly updates from SEC/FTC filings). Ambrosia Ventures provides all of these with ${DEAL_STATS.TOTAL_DEALS} deals, 12 TAs, 8 calculation engines, and weekly data updates.`,
+          text: `The best biopharma deal benchmarking tools in 2026 combine real transaction data with predictive analytics. Key criteria include deal database size (2,000+ verified transactions minimum), therapeutic area coverage (10+ TAs), valuation model diversity (rNPV, Monte Carlo, sensitivity), and data freshness (weekly updates from SEC/FTC filings). Ambrosia Ventures provides all of these with ${DEAL_STATS.TOTAL_DEALS} deals, 12 TAs, ${ENGINE_COUNT} calculation engines, and weekly data updates.`,
         },
       },
       {
@@ -177,7 +177,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         name: 'Can I benchmark deals without an enterprise platform?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. Pro subscriptions ($299/month) provide ongoing access to all 14 calculation engines for teams running multiple evaluations. For a single asset, the Deal Intelligence Brief ($2,500) delivers a signed recommendation with cited comparables and evidence-ranked buyers.',
+          text: `Yes. While enterprise platforms offer comprehensive datasets, specialized tools like Solidus provide targeted deal benchmarking at a fraction of the cost. Pro subscriptions ($299/month) provide ongoing access to all ${ENGINE_COUNT} calculation engines for teams running multiple evaluations. For a single asset, the Deal Intelligence Brief ($2,500) delivers a signed recommendation with cited comparables and evidence-ranked buyers.`,
         },
       },
       {
@@ -260,7 +260,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             'Modern deal benchmarking platforms deliver in minutes what consultants charge $50K-$150K to produce over 4-8 weeks — with fresher data and more scenarios.',
             'The minimum viable deal database is 2,000+ verified transactions. Below that threshold, benchmarks lack statistical significance for niche TA/modality/phase combinations.',
             'Predictive analytics (partner intent scoring, deal probability modeling) separate modern platforms from simple data repositories.',
-            `Ambrosia Ventures provides ${DEAL_STATS.TOTAL_DEALS} deals, 8 engines, 12 TAs, and weekly updates at ${PRICING.PRO_MONTHLY} — 95% less than enterprise alternatives.`,
+            `Ambrosia Ventures provides ${DEAL_STATS.TOTAL_DEALS} deals, ${ENGINE_COUNT} engines, 12 TAs, and weekly updates at ${PRICING.PRO_MONTHLY} — 95% less than enterprise alternatives.`,
           ]} />
 
           <div className="prose prose-slate prose-lg max-w-none">
@@ -309,7 +309,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
               ['Turnaround', '2-4 weeks', '4-8 weeks', 'Minutes'],
               ['Deal Database', '10-30 comps', '50-100 comps', `${DEAL_STATS.TOTAL_DEALS} verified`],
               ['Data Freshness', 'Point-in-time', 'Point-in-time', 'Weekly updates'],
-              ['Valuation Models', 'Spreadsheet', 'Custom models', '8 engines (rNPV, Monte Carlo, etc.)'],
+              ['Valuation Models', 'Spreadsheet', 'Custom models', `${ENGINE_COUNT} engines (rNPV, Monte Carlo, etc.)`],
               ['Partner Matching', 'Manual', 'Limited', `${DEAL_STATS.TOTAL_COMPANIES} scored`],
               ['Scenario Analysis', 'Ad hoc', 'Bear/base/bull', 'Tornado + Monte Carlo'],
               ['Repeatability', 'Low', 'Low', 'Unlimited analyses'],
@@ -384,7 +384,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           <InsightCTA
             variant="mid"
             heading="See the Platform in Action"
-            description={`Model deal terms across 12 therapeutic areas with ${DEAL_STATS.TOTAL_DEALS} transactions, 8 calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Start free, upgrade to Pro for full access.`}
+            description={`Model deal terms across 12 therapeutic areas with ${DEAL_STATS.TOTAL_DEALS} transactions, ${ENGINE_COUNT} calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Start free, upgrade to Pro for full access.`}
           />
 
           <div className="prose prose-slate prose-lg max-w-none">
@@ -450,7 +450,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
           <div className="mt-10 mb-2">
             <p className="text-xs font-semibold text-teal-600 uppercase tracking-[0.2em] mb-1">Exhibit 2A</p>
             <h3 className="text-base font-bold text-slate-900 mb-1">Annual Cost Comparison</h3>
-            <p className="text-xs text-slate-400 mb-4">Ambrosia Pro delivers 8 engines + {DEAL_STATS.TOTAL_DEALS} deals at 95% less than enterprise alternatives.</p>
+            <p className="text-xs text-slate-400 mb-4">Ambrosia Pro delivers {ENGINE_COUNT} engines + {DEAL_STATS.TOTAL_DEALS} deals at 95% less than enterprise alternatives.</p>
           </div>
 
           <div className="my-8 bg-white rounded-xl border border-slate-200 p-6">
@@ -554,7 +554,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
             <ul>
               <li><strong>Enterprise platforms</strong> (GlobalData Pharma Intelligence, Evaluate Pharma, Citeline): $50,000-$200,000/year. Comprehensive datasets but limited analytical tools — you export data and build your own models.</li>
               <li><strong>Boutique consulting</strong> (per engagement): $50,000-$150,000 per deal analysis. Deep strategic context but slow turnaround (4-8 weeks) and non-repeatable.</li>
-              <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all 14 engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses.</li>
+              <li><strong>Ambrosia Ventures Pro</strong>: {PRICING.PRO_MONTHLY}. Full access to all {ENGINE_COUNT} engines, {DEAL_STATS.TOTAL_DEALS} deals, {DEAL_STATS.TOTAL_COMPANIES} partner profiles, unlimited analyses.</li>
             </ul>
           </div>
 
@@ -589,7 +589,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
 
             <h3>What is the best biopharma deal benchmarking tool?</h3>
             <p>
-              The best tool depends on your needs. For enterprise teams needing broad market intelligence, platforms like GlobalData or Evaluate offer comprehensive datasets. For BD teams focused on deal execution — benchmarking, valuation, partner identification, and negotiation preparation — <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> provides {DEAL_STATS.TOTAL_DEALS} deals, 8 calculation engines, and predictive partner scoring at {PRICING.PRO_MONTHLY}.
+              The best tool depends on your needs. For enterprise teams needing broad market intelligence, platforms like GlobalData or Evaluate offer comprehensive datasets. For BD teams focused on deal execution — benchmarking, valuation, partner identification, and negotiation preparation — <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> provides {DEAL_STATS.TOTAL_DEALS} deals, {ENGINE_COUNT} calculation engines, and predictive partner scoring at {PRICING.PRO_MONTHLY}.
             </p>
 
             <h3>How much do pharma deal intelligence platforms cost?</h3>
@@ -655,7 +655,7 @@ export default function BiopharmaDealBenchmarkingToolsPage() {
         <InsightCTA
           variant="bottom"
           heading="Start Benchmarking With Real Data"
-          description={`Access ${DEAL_STATS.TOTAL_DEALS} verified transactions, 8 calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Free calculator or Pro at ${PRICING.PRO_MONTHLY}.`}
+          description={`Access ${DEAL_STATS.TOTAL_DEALS} verified transactions, ${ENGINE_COUNT} calculation engines, and ${DEAL_STATS.TOTAL_COMPANIES} partner profiles. Free calculator or Pro at ${PRICING.PRO_MONTHLY}.`}
         />
       </main>
     </>

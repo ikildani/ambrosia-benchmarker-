@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, ArrowRight, Clock, ChevronRight } from 'lucide-react';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'Biotech Deal Guides | Licensing & Valuation Resources',
@@ -275,7 +275,7 @@ export default function GuidesPage() {
               Ready to benchmark?
             </h2>
             <p className="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-              Model deal terms against {DEAL_STATS.TOTAL_DEALS}+ transactions across 12 therapeutic areas with 14 calculation engines.
+              Model deal terms against {DEAL_STATS.TOTAL_DEALS}+ transactions across 12 therapeutic areas with {ENGINE_COUNT} calculation engines.
             </p>
             <Link
               href="/calculator"

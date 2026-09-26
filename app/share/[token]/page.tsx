@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import SharedCalculationView from '@/components/SharedCalculationView';
 import { ShareEmailGate } from '@/components/share/ShareEmailGate';
 import { createServerClient } from '@/lib/supabase/server';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT, PRICING } from '@/lib/config/constants';
 import type { ShareProvenance } from '@/lib/financial/calculation-version';
 
 const ShareViewTracker = dynamic(() => import('@/components/insights/ShareViewTracker').then(m => ({ default: m.ShareViewTracker })));
@@ -237,7 +237,7 @@ export default async function SharePage({ params }: Props) {
                 <div className="p-5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-emerald-500/20 transition-colors">
                   <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">Pro Subscription</p>
                   <p className="text-3xl font-black text-white tracking-tight">$299<span className="text-lg text-slate-400">/mo</span></p>
-                  <p className="text-xs text-slate-400 mt-1 mb-4">All 14 engines, unlimited assets</p>
+                  <p className="text-xs text-slate-400 mt-1 mb-4">All {ENGINE_COUNT} engines, unlimited assets</p>
                   <a
                     href="/calculator"
                     className="block w-full text-center px-4 py-2.5 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-400 transition-all text-sm shadow-lg shadow-emerald-500/15"

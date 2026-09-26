@@ -8,7 +8,7 @@ import {
   Database, Lock, Download, Star, ChevronRight,
   Globe, Microscope, FlaskConical, Brain, Calculator,
 } from 'lucide-react';
-import { DEAL_STATS, PRICING, BENCHMARK_PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, BENCHMARK_PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
@@ -816,7 +816,7 @@ export default function ReportPage() {
               <h3 className="font-display text-xl font-bold text-white mb-2">Need unlimited reports?</h3>
               <p className="text-xs text-slate-500 max-w-md leading-relaxed">
                 Pro subscribers get unlimited deal reports, Pharma Intent Score access, priority data,
-                and all 8 calculation engines — {PRICING.PRO_MONTHLY}.
+                and all {ENGINE_COUNT} calculation engines — {PRICING.PRO_MONTHLY}.
               </p>
             </div>
             <Link

@@ -19,7 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { z } from 'zod';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 import { validateApiKey, type ApiKeyContext } from '@/lib/api-v1-auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -345,7 +345,7 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
   const server = new McpServer({
     name: 'Solidus',
     version: '2.0.0',
-    description: `Institutional-grade biopharma deal intelligence — 21 engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 700+ companies`,
+    description: `Institutional-grade biopharma deal intelligence — ${ENGINE_COUNT} engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 700+ companies`,
   });
 
   // ─────────────────────────────────────────────────────────────────────

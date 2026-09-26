@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { DEAL_STATS } from '@/lib/config/constants';
+import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 export const metadata: Metadata = {
   title: 'Solidus for VC Operating Partners | Portfolio Deal Intelligence',
-  description: `Deal intelligence for biotech VC and CVC operating partners. Benchmark deal terms across your entire portfolio with ${DEAL_STATS.TOTAL_DEALS} verified transactions, 21 engines, and dedicated analyst support.`,
+  description: `Deal intelligence for biotech VC and CVC operating partners. Benchmark deal terms across your entire portfolio with ${DEAL_STATS.TOTAL_DEALS} verified transactions, ${ENGINE_COUNT} engines, and dedicated analyst support.`,
   keywords: [
     'biotech VC deal intelligence',
     'CVC deal benchmarking',
@@ -69,7 +69,7 @@ export default function VCOperatingPartnersPage() {
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">What the Portfolio License includes</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {[
-              { title: 'Full 21-engine access for every seat', desc: 'Deal terms, rNPV, Monte Carlo, partner matching, buyer-specific valuation, competitive dynamics, real options, milestone optimization — all 21 engines, unlimited calculations.' },
+              { title: `Full ${ENGINE_COUNT}-engine access for every seat`, desc: `Deal terms, rNPV, Monte Carlo, partner matching, buyer-specific valuation, competitive dynamics, real options, milestone optimization — all ${ENGINE_COUNT} engines, unlimited calculations.` },
               { title: 'Admin dashboard', desc: 'Real-time visibility into which portfolio companies are benchmarking, what comps they\'re pulling, and where deal conversations are heading. No more status update emails.' },
               { title: 'Cross-portfolio pipeline tracker', desc: 'See active deal conversations across all portfolio companies. Catch conflicts — two companies approaching the same partner uncoordinated — before they become problems.' },
               { title: 'Dedicated analyst hours', desc: 'Every contract includes analyst hours from the Ambrosia team. Task them with custom comp sets, bespoke deal memos, or ad-hoc research. Delivered fund-branded.' },
