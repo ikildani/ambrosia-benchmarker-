@@ -143,11 +143,11 @@ const marqueeFundFeatures = [
     eyebrow: 'Deal Alert Feeds',
     title: 'Every relevant comp, the day it\'s filed — routed to the right portfolio company.',
     description:
-      'Configurable per portfolio company by therapeutic area, modality, or development stage. Each alert includes an AI-generated relevance summary explaining why the transaction is comparable. Delivered as a consolidated weekly digest to the operating partner.',
+      'Configurable per portfolio company by therapeutic area, modality, or development stage. Each alert includes a written relevance summary explaining why the transaction is comparable. Delivered as a consolidated weekly digest to the operating partner.',
     bullets: [
       'Per-company alert configuration with TA + modality tags',
       'Direct link to the full deal comp in the platform',
-      'AI-generated 3-sentence relevance summary for every alert',
+      '3-sentence relevance summary for every alert',
       'Consolidated weekly digest across the entire portfolio',
     ],
   },

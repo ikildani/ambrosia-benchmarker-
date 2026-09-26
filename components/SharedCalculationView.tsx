@@ -254,7 +254,7 @@ export default function SharedCalculationView({ results, labels, financialSummar
           { title: 'Comparable Transactions', desc: 'Real deals from SEC filings and press releases matched to this asset profile' },
           { title: 'Sensitivity Analysis', desc: 'How upfronts and milestones shift with changes in phase, competitive position, and data quality' },
           { title: 'Partner Matching', desc: 'Ranked list of 700+ pharma/biotech companies actively acquiring in this therapeutic area' },
-          { title: 'Negotiation Playbook', desc: 'AI-generated strategic recommendations, risk factors, and leverage points for your term sheet' },
+          { title: 'Negotiation Playbook', desc: 'Strategic recommendations, risk factors, and leverage points for your term sheet' },
         ]).map(({ title, desc }) => (
           <div key={title} className="flex items-center gap-4 p-5 rounded-2xl bg-white/[0.04] border border-white/[0.07]">
             <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0">

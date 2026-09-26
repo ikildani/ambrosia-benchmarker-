@@ -140,7 +140,7 @@ const TOUR_STEPS: TourStepDef[] = [
   {
     targetId: TOUR_STEP_IDS.AI_TOOLS,
     title: 'AI Deal Memo & Playbook',
-    body: 'One-click AI-generated deal memo and negotiation playbook. The memo summarizes your asset\u2019s value proposition; the playbook provides tactical negotiation strategies.',
+    body: 'One-click deal memo and negotiation playbook. The memo summarizes your asset\u2019s value proposition; the playbook provides tactical negotiation strategies.',
     icon: <FileText className={ICON_CLASS} />,
   },
 ];

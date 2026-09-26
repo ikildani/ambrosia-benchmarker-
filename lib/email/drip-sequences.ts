@@ -199,7 +199,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
         <span style="color: #16a34a; font-size: 14px;">✓</span>
       </div>
       <div>
-        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0f172a;">AI-generated deal memo</p>
+        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0f172a;">Written deal memo</p>
         <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Board-ready analysis of your deal's positioning, risks, and negotiation leverage</p>
       </div>
     </div>
