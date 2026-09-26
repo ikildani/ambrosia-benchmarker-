@@ -211,6 +211,16 @@ UPDATE deals SET licensor_id = '<merged_id>' WHERE id = ANY(ARRAY[...]::uuid[]);
 
 `repointed_ids` is capped at 20,000 keys per column (`_truncated: true` flags it); for a larger column, rows to move back are those where `column = canonical_id` and the row's own company-name text matches the merged name. The whole run reverts with the same statements over `WHERE run_id = '…'`. Alias strips (`reason = 'alias_strip'`) revert by appending `aliases_stripped` back onto `name_variations`.
 
+## Ingestion links parties through the resolver (Sep 26 2026)
+
+Every deal-ingestion path (EDGAR, press releases, Perplexity, FTC, HKEX / TDnet / ASX / cninfo / DART, backfills, admin ingest) sets `deals.licensor_id` / `licensee_id` through `findOrCreateCompany` in `lib/ingestion/sec-edgar.ts`. Since Sep 26 it delegates to `resolveCompany` (this document's resolve contract) instead of a substring `ilike` with `limit(1)`:
+
+- match order is exact normalised name → `name_variations` alias → fuzzy at `FUZZY_MATCH_THRESHOLD` (0.85); nothing below that creates a new row instead;
+- rows with `companies.merged_into` set are dropped from every candidate pool (`COMPANY_COLS` now selects the column), and a ticker / cik carried only by a folded row answers with its canonical row;
+- the source spelling is appended to `name_variations` only on an exact match. Writing it on an alias or fuzzy hit is how parent names became aliases of subsidiaries (hazard 1).
+
+Why: the old lookup linked "Ionis Pharmaceuticals" to "Orionis Biosciences", "Cara Therapeutics" to "Zucara", "Arcus" to a person named Marcus, and kept attaching new deals to rows the merge job had folded minutes earlier (cninfo, Shanghai Junshi, 15:34 UTC). 482 deal sides were re-pointed by hand on Sep 26 (`company_merges` reason `deal_party_reresolve`, run ids `reresolve-2026-09-26` and `reresolve-2026-09-26-review`). The EMA marketing-authorisation-holder lookup in `lib/ingestion/ema-medicines.ts` uses the same resolver.
+
 ## Follow-ups
 
 - **Merge job**: run the dry run, read the review list, apply migration 127, then apply in stages (top 20 by references first). After the apply, re-resolve the deals listed under "mis-routed" in the report and add `merged_into` to `COMPANY_COLS`.

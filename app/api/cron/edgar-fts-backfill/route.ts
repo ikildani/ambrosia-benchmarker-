@@ -1,6 +1,6 @@
 /**
  * Cron: SEC full-text-search historical backfill, 2017 → present.
- * Every 15 minutes, up to 80 extractions per run (4 in parallel), cursor in
+ * Every 15 minutes, up to 300 gated filings per run (6 fetch/gate workers), cursor in
  * sync_cursors. Sep 25 2026: filings pass a cheap gate (EXTRACTION_GATE) before
  * the extractor and are extracted through Message Batches at 50% price
  * (BACKFILL_EXTRACTION_MODE=batch); a run drains the previous batch first.
@@ -50,8 +50,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, skipped: 'daily_cap', usedToday, dailyCap });
     }
   }
-  const maxExtractions = Math.min(200, Number(request.nextUrl.searchParams.get('max')) || 80);
-  const concurrency = Math.min(8, Number(request.nextUrl.searchParams.get('concurrency')) || 4);
+  const maxExtractions = Math.min(400, Number(request.nextUrl.searchParams.get('max')) || 300);
+  const concurrency = Math.min(8, Number(request.nextUrl.searchParams.get('concurrency')) || 6);
   try {
     const result = await runEdgarFtsBackfill(supabase, { anthropicApiKey, dryRun, timeBudgetMs: 250_000, maxExtractions, concurrency });
     if (!dryRun) {
