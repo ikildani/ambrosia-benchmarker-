@@ -199,8 +199,10 @@ export default function BenchmarksIndex() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {categoryPages.map((page) => (
+                {/* The index used to render every page at once (150,000 px tall on a phone).
+                    Six per category are visible; the rest are one tap away and still crawlable. */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {categoryPages.slice(0, 6).map((page) => (
                     <Link
                       key={page.slug}
                       href={`/benchmarks/${page.slug}`}
@@ -231,6 +233,47 @@ export default function BenchmarksIndex() {
                     </Link>
                   ))}
                 </div>
+                {categoryPages.length > 6 && (
+                  <details className="group mt-4">
+                    <summary className="inline-flex cursor-pointer list-none items-center gap-2 min-h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:border-teal-300 hover:text-teal-700 transition-colors [&::-webkit-details-marker]:hidden">
+                      <span className="group-open:hidden">Show {categoryPages.length - 6} more {meta.label.toLowerCase()} benchmarks</span>
+                      <span className="hidden group-open:inline">Show fewer</span>
+                      <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </summary>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+                      {categoryPages.slice(6).map((page) => (
+                    <Link
+                      key={page.slug}
+                      href={`/benchmarks/${page.slug}`}
+                      className="group bg-white rounded-xl border border-slate-200 p-6 hover:border-teal-300 hover:shadow-soft-lg transition-all duration-300 hover:-translate-y-1"
+                    >
+                      <h3 className="text-lg font-semibold text-slate-900 group-hover:text-teal-700 transition-colors mb-2">
+                        {page.h1}
+                      </h3>
+                      <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+                        {page.metaDescription}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {page.heroStats.slice(0, 2).map((stat, i) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 px-2 py-1 rounded-full"
+                          >
+                            {stat.label}: {stat.value}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex items-center gap-1 text-sm font-medium text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        View benchmarks
+                        <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </div>
+                    </Link>
+                      ))}
+                    </div>
+                  </details>
+                )}
               </section>
             );
           })}

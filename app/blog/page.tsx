@@ -4,6 +4,9 @@ import { blogPosts, type BlogPost } from '@/lib/blogPosts';
 import { createServiceClient } from '@/lib/supabase/server';
 import { generateBreadcrumbSchema } from '@/lib/seo/structured-data';
 import { DEAL_STATS } from '@/lib/config/constants';
+import SiteHeaderAuto from '@/components/SiteHeaderAuto';
+
+const PAGE_SIZE = 24;
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -103,21 +106,39 @@ async function getAllPosts(): Promise<BlogPost[]> {
   }
 }
 
-export default async function BlogPage() {
+export default async function BlogPage({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = (await searchParams) || {};
   const allPosts = await getAllPosts();
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: BASE_URL },
     { name: 'Blog' },
   ]);
 
-  const featuredPost = allPosts[0];
-  const recentPosts = allPosts.slice(1);
-
   const categories = Array.from(new Set(allPosts.map(p => p.category)));
+  const rawCategory = typeof params.category === 'string' ? params.category : '';
+  const activeCategory = categories.find((c) => c.toLowerCase() === rawCategory.toLowerCase()) || null;
+  const filtered = activeCategory ? allPosts.filter((p) => p.category === activeCategory) : allPosts;
+
+  // 347 posts on one page was 138,000 px tall on a phone and 2.1 s of blocking time.
+  // 24 per page keeps every post crawlable via ?page= links and the sitemap.
+  const totalPages = Math.max(1, Math.ceil(Math.max(0, filtered.length - 1) / PAGE_SIZE));
+  const requestedPage = Number.parseInt(typeof params.page === 'string' ? params.page : '1', 10);
+  const page = Number.isFinite(requestedPage) ? Math.min(Math.max(1, requestedPage), totalPages) : 1;
+
+  const featuredPost = filtered[0];
+  const recentPosts = filtered.slice(1 + (page - 1) * PAGE_SIZE, 1 + page * PAGE_SIZE);
+  const pageHref = (n: number) => {
+    const q = new URLSearchParams();
+    if (activeCategory) q.set('category', activeCategory);
+    if (n > 1) q.set('page', String(n));
+    const qs = q.toString();
+    return `/blog${qs ? `?${qs}` : ''}`;
+  };
 
   return (
     <>
-      <main className="min-h-screen bg-[#0a0f1a]">
+      <SiteHeaderAuto />
+      <main id="main-content" className="min-h-screen bg-[#0a0f1a]">
         {/* Breadcrumb Schema */}
         <script
           type="application/ld+json"
@@ -131,7 +152,7 @@ export default async function BlogPage() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-teal-500/[0.07] rounded-full blur-[120px]" />
           <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-blue-500/[0.04] rounded-full blur-[100px]" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-12 sm:pb-16">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-12 sm:pb-16">
             <div className="text-center max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 mb-6">
                 <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
@@ -148,7 +169,7 @@ export default async function BlogPage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto mb-8">
-                Data-driven analysis backed by {DEAL_STATS.TOTAL_DEALS}+ verified biopharma
+                Data-driven analysis backed by {DEAL_STATS.TOTAL_DEALS} primary-sourced biopharma
                 transactions. Licensing benchmarks, negotiation strategies, and market intelligence.
               </p>
 
@@ -158,13 +179,22 @@ export default async function BlogPage() {
                   {allPosts.length} article{allPosts.length !== 1 ? 's' : ''}
                 </span>
                 <div className="flex flex-wrap justify-center gap-2">
+                  <Link
+                    href="/blog"
+                    aria-current={!activeCategory ? 'page' : undefined}
+                    className={`inline-flex items-center min-h-9 text-xs font-medium px-3 py-1 rounded-full ring-1 ring-inset transition-colors ${!activeCategory ? 'bg-white text-slate-900 ring-white' : 'bg-slate-500/10 text-slate-300 ring-slate-500/20 hover:bg-slate-500/20'}`}
+                  >
+                    All
+                  </Link>
                   {categories.map((cat) => (
-                    <span
+                    <Link
                       key={cat}
-                      className={`text-xs font-medium px-3 py-1 rounded-full ring-1 ring-inset ${CATEGORY_PILL_COLORS[cat] || 'bg-slate-500/10 text-slate-400 ring-slate-500/20'}`}
+                      href={`/blog?category=${encodeURIComponent(cat)}`}
+                      aria-current={activeCategory === cat ? 'page' : undefined}
+                      className={`inline-flex items-center min-h-9 text-xs font-medium px-3 py-1 rounded-full ring-1 ring-inset transition-colors ${activeCategory === cat ? 'bg-white text-slate-900 ring-white' : (CATEGORY_PILL_COLORS[cat] || 'bg-slate-500/10 text-slate-300 ring-slate-500/20')}`}
                     >
                       {cat}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -235,8 +265,8 @@ export default async function BlogPage() {
         {/* Recent Posts Grid */}
         {recentPosts.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-8">
-              Recent Articles
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-8">
+              {activeCategory ? `${activeCategory} articles` : 'Recent Articles'}{totalPages > 1 ? ` · page ${page} of ${totalPages}` : ''}
             </h2>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -252,7 +282,7 @@ export default async function BlogPage() {
                       >
                         {post.category}
                       </span>
-                      <span className="text-xs text-slate-600">
+                      <span className="text-xs text-slate-400">
                         {post.readTime}
                       </span>
                     </div>
@@ -268,7 +298,7 @@ export default async function BlogPage() {
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/[0.04]">
                       <time
                         dateTime={post.publishedAt}
-                        className="text-xs text-slate-500"
+                        className="text-xs text-slate-400"
                       >
                         {new Date(post.publishedAt).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -287,6 +317,22 @@ export default async function BlogPage() {
                 </article>
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <nav aria-label="Blog pages" className="mt-10 flex items-center justify-between gap-3">
+                {page > 1 ? (
+                  <Link href={pageHref(page - 1)} rel="prev" className="inline-flex items-center min-h-11 px-4 rounded-xl border border-white/10 text-sm font-medium text-slate-200 hover:bg-white/5 transition-colors">
+                    &larr; Newer
+                  </Link>
+                ) : <span />}
+                <span className="text-sm text-slate-400 tabular-nums">Page {page} of {totalPages}</span>
+                {page < totalPages ? (
+                  <Link href={pageHref(page + 1)} rel="next" className="inline-flex items-center min-h-11 px-4 rounded-xl border border-white/10 text-sm font-medium text-slate-200 hover:bg-white/5 transition-colors">
+                    Older &rarr;
+                  </Link>
+                ) : <span />}
+              </nav>
+            )}
           </section>
         )}
 
@@ -302,7 +348,7 @@ export default async function BlogPage() {
               </h2>
               <p className="text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed">
                 Get data-driven deal terms for any therapeutic area, modality, and clinical phase.
-                Powered by {DEAL_STATS.TOTAL_DEALS}+ verified biopharma transactions.
+                Powered by {DEAL_STATS.TOTAL_DEALS} primary-sourced biopharma transactions.
               </p>
               <Link
                 href="/calculator"
