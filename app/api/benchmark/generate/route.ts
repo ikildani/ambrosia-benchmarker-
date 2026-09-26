@@ -31,6 +31,7 @@ import { recordBriefPrediction } from '@/lib/outcomes/writers';
 import { loadPriorsSnapshot } from '@/lib/outcomes/priors-snapshot';
 import { fetchBriefPartners } from '@/lib/brief/partners';
 import { buildExcelWorkbook } from '@/lib/generateExcel';
+import { addBriefSheets } from '@/lib/brief/excel-sheets';
 import { sendEmail } from '@/lib/email/client';
 import { buildDeliveryEmail, dataRoomUrl, mintBriefLinks, DELIVERY_COLUMNS, SIGNED_URL_TTL_SECONDS, type BriefDeliveryRow } from '@/lib/brief/delivery';
 import { modalityLabels } from '@/lib/report/helpers';
@@ -282,6 +283,13 @@ export async function POST(request: NextRequest) {
         undefined,
         sensitivityData,
       );
+      // The brief sheets go first: decision, scored call, term sheet, bridge,
+      // your model vs Solidus, comps with sources, buyers, catalysts, path, diligence.
+      try {
+        addBriefSheets(wb, built.brief, { deliveredAt: new Date().toISOString() });
+      } catch (sheetErr) {
+        genNotes.push(`brief sheets failed: ${sheetErr instanceof Error ? sheetErr.message : String(sheetErr)}`);
+      }
       const xlsx = Buffer.from(await wb.xlsx.writeBuffer());
       const candidate = `briefs/${briefToken}/data.xlsx`;
       const { error: xlsxErr } = await supabase.storage.from('reports').upload(candidate, xlsx, {
