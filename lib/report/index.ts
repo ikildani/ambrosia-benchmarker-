@@ -56,6 +56,8 @@ interface PageSpec {
   render: PageRenderer | MultiPageRenderer;
   /** Number of physical pages this entry produces (default 1). */
   count?: number;
+  /** Appendix pages carry the engine detail behind the brief body. */
+  section?: 'body' | 'appendix';
 }
 
 /**
@@ -84,7 +86,9 @@ export function buildPageSpecs(data: PDFReportData): PageSpec[] {
 
   const specs: PageSpec[] = [];
   const add = (title: string, description: string, render: PageRenderer | MultiPageRenderer, count = 1) =>
-    specs.push({ title, description, render, count });
+    specs.push({ title, description, render, count, section: 'body' });
+  const appendix = (title: string, description: string, render: PageRenderer | MultiPageRenderer, count = 1) =>
+    specs.push({ title, description, render, count, section: 'appendix' });
 
   // Front matter and the decision layer. The v3 sections are always listed
   // when the intelligence layer ran: each page renders its own empty state
@@ -95,11 +99,8 @@ export function buildPageSpecs(data: PDFReportData): PageSpec[] {
   if (b) add('The Decision', 'Recommendation, counterparties, ask, floor, walk-away, and timeline', renderDecisionPage);
   if (b) add('This Call Is Scored', 'The registered ask, floor, buyers and window; how the call is scored and when you hear from us', renderScoredCallPage);
   if (b) add('Indicative Term Sheet', 'Opening positions consistent with the decision, the floor on each, and the milestone schedule', renderIndicativeTermSheetPage);
-  add('Executive Dashboard', 'Key metrics, value split, and deal recommendation', renderExecutiveDashboard);
   if (b) add('Valuation Bridge', 'Comps, rNPV, Monte Carlo, scenarios, and buyer-implied ranges reconciled to one ask', renderValuationBridgePage);
   if (b) add('Your Model vs Solidus', 'Your assumptions against ours, line by line, and any offer on the table against the floor and the ask', renderYourModelVsSolidusPage);
-  add('Deal Structure', 'Payment architecture and milestone waterfall', renderDealStructurePage);
-  add('Deal Terms', 'Detailed term ranges, royalties, and modifiers', renderDealTermsPage);
 
   // Evidence: comparables
   if (b) {
@@ -109,18 +110,12 @@ export function buildPageSpecs(data: PDFReportData): PageSpec[] {
   } else {
     add('Comparable Deals', 'Recent transactions and market benchmarks', renderComparablesPage);
   }
-  add('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers', renderSensitivityPage);
 
   // Evidence: financial model
   if (hasFinancialModel) {
     add('Financial Model', 'rNPV, Monte Carlo, and cash flow analysis', renderFinancialModelPages);
     if (b) add('Patient Funnel', 'Where the peak-sales number comes from', renderPatientFunnelPage);
     if (b) add('Path to Next Inflection', 'Partner now versus fund to the next data point; financing alternative', renderInflectionPathPage);
-    add('Deal Flow & Market Context', 'Historical deal flow, competitive landscape, and market sizing', renderDealFlowContextPage);
-    if (rnpvInformative) add('Defensive Analysis', 'Worst/best case scenarios and the walk-away', renderDefensiveAdvicePage);
-    if (hasScenarioComparison) add('Scenario Comparison', 'Bear/Base/Bull rNPV with probability-weighted expected value', renderScenarioComparisonPage);
-    if (hasDealWaterfall) add('Deal Valuation Waterfall', 'Valuation cascade and deal component allocation', renderDealWaterfallPage);
-    if (hasAdvancedAnalytics) add('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions', renderRealOptionsLifecyclePage);
   }
 
   // Evidence: buyers and landscape
@@ -139,20 +134,31 @@ export function buildPageSpecs(data: PDFReportData): PageSpec[] {
     add('Diligence Readiness', 'What a buyer will ask for and what to close before outreach', renderDiligenceReadinessPage);
   }
 
-  // Risk and execution
-  add('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation', renderRiskAnalysisPage);
-  add('Deal Timeline', 'Milestone schedule from signing to launch', renderDealTimelinePage);
+  // Appendix: the engine detail behind the body. Same numbers, more tables.
+  appendix('Executive Dashboard', 'Key metrics, value split, and deal recommendation', renderExecutiveDashboard);
+  appendix('Deal Structure', 'Payment architecture and milestone waterfall', renderDealStructurePage);
+  appendix('Deal Terms', 'Detailed term ranges, royalties, and modifiers', renderDealTermsPage);
+  appendix('Sensitivity Analysis', 'Parameter impact, tornado chart, and value drivers', renderSensitivityPage);
+  if (hasFinancialModel) {
+    appendix('Deal Flow & Market Context', 'Historical deal flow, competitive landscape, and market sizing', renderDealFlowContextPage);
+    if (rnpvInformative) appendix('Defensive Analysis', 'Worst/best case scenarios and the walk-away', renderDefensiveAdvicePage);
+    if (hasScenarioComparison) appendix('Scenario Comparison', 'Bear/Base/Bull rNPV with probability-weighted expected value', renderScenarioComparisonPage);
+    if (hasDealWaterfall) appendix('Deal Valuation Waterfall', 'Valuation cascade and deal component allocation', renderDealWaterfallPage);
+    if (hasAdvancedAnalytics) appendix('Advanced Analytics', 'Real options, competitive dynamics, and lifecycle extensions', renderRealOptionsLifecyclePage);
+  }
+  appendix('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation', renderRiskAnalysisPage);
+  appendix('Deal Timeline', 'Milestone schedule from signing to launch', renderDealTimelinePage);
   // FDA action risk only means something once a filing is inside the deal horizon.
   const filingInHorizon = /phase2|phase3|nda|approved/.test(String(data.inputs.phase ?? '').toLowerCase().replace(/[^a-z0-9]/g, ''));
-  if (data.regulatoryRisk && filingInHorizon) add('Regulatory Risk', 'FDA CRL, AdComm, PDUFA, and PRV analysis', renderRegulatoryRiskPage);
-  if (data.milestoneProbabilities) add('Milestone Analysis', 'Individual milestone probability weighting', renderMilestonePages);
-  if (isAcquisition && data.earnoutValuation) add('Earnout & CVR', 'Contingent payment probability and time value', renderEarnoutPages);
-  if (data.patentDynamics) add('Patent & LOE', 'Patent term adjustments and generic entry dynamics', renderPatentDynamicsPage);
-  if (data.cmcRisk) add('Manufacturing Risk', 'CMC timeline, scalability, and supply chain risk', renderCMCRiskPage);
+  if (data.regulatoryRisk && filingInHorizon) appendix('Regulatory Risk', 'FDA CRL, AdComm, PDUFA, and PRV analysis', renderRegulatoryRiskPage);
+  if (data.milestoneProbabilities) appendix('Milestone Analysis', 'Individual milestone probability weighting', renderMilestonePages);
+  if (isAcquisition && data.earnoutValuation) appendix('Earnout & CVR', 'Contingent payment probability and time value', renderEarnoutPages);
+  if (data.patentDynamics) appendix('Patent & LOE', 'Patent term adjustments and generic entry dynamics', renderPatentDynamicsPage);
+  if (data.cmcRisk) appendix('Manufacturing Risk', 'CMC timeline, scalability, and supply chain risk', renderCMCRiskPage);
 
   // Appendix
-  if (hasCompSet) add('Comparable Appendix', 'Every comparable deal with date, structure, terms, and source', renderCompAppendixPages, countCompAppendixPages(data));
-  add('Methodology', 'Model design, data sources, coverage, and disclaimer', renderMethodologyPage);
+  if (hasCompSet) appendix('Comparable Appendix', 'Every comparable deal with date, structure, terms, and source', renderCompAppendixPages, countCompAppendixPages(data));
+  appendix('Methodology', 'Model design, data sources, coverage, and disclaimer', renderMethodologyPage);
   return specs;
 }
 
@@ -199,7 +205,7 @@ export function generateReportHTML(data: PDFReportData, brandConfig?: BrandConfi
   const tocEntries: TocEntry[] = [];
   let pageNum = 0;
   for (const { spec, count } of live) {
-    tocEntries.push({ title: spec.title, page: pageNum + 1, description: spec.description });
+    tocEntries.push({ title: spec.title, page: pageNum + 1, description: spec.description, section: spec.section ?? 'body' });
     pageNum += count;
   }
 

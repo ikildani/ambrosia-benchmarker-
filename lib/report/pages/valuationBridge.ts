@@ -53,16 +53,36 @@ export function renderValuationBridgePage(data: PDFReportData, meta: ReportMeta)
     const color = muted ? COLORS.gray400 : COLORS.navy;
     return `
     <tr style="${muted ? `color: ${COLORS.gray400};` : ''}">
-      <td>${escapeHtml(b.label)}${muted ? ` <span style="font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: ${COLORS.rose};">not used</span>` : ''}</td>
-      <td style="text-align: right; font-variant-numeric: tabular-nums;">${fmtM(b.low)}</td>
-      <td style="text-align: right; font-weight: 700; color: ${color}; font-variant-numeric: tabular-nums;">${fmtM(b.mid)}</td>
-      <td style="text-align: right; font-variant-numeric: tabular-nums;">${fmtM(b.high)}</td>
+      <td style="padding: 4px 8px;">${escapeHtml(b.label)}${muted ? ` <span style="font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: ${COLORS.rose};">not used</span>` : ''}</td>
+      <td style="text-align: right; font-variant-numeric: tabular-nums; padding: 4px 8px;">${fmtM(b.low)}</td>
+      <td style="text-align: right; font-weight: 700; color: ${color}; font-variant-numeric: tabular-nums; padding: 4px 8px;">${fmtM(b.mid)}</td>
+      <td style="text-align: right; font-variant-numeric: tabular-nums; padding: 4px 8px;">${fmtM(b.high)}</td>
       <td style="text-align: right; color: ${COLORS.gray500};">${b.n != null ? b.n.toLocaleString() : '—'}</td>
       <td style="color: ${muted ? COLORS.gray400 : COLORS.gray600};">${escapeHtml(WHAT_IT_MEASURES[b.key])}${b.note ? ` <span style="color: ${COLORS.gray400};">— ${escapeHtml(b.note)}</span>` : ''}</td>
     </tr>`;
   }).join('');
 
   const askTag = (basis: 'headline' | 'comps') => basis === 'comps' ? 'comps median' : 'headline mid';
+
+  // How the calibrated headline is built: baseline median for this phase and
+  // area, then every modifier the engine applied, so the reader can follow the
+  // arithmetic instead of trusting a label.
+  const baseline = data.result.drillDown?.totalDealValue?.baseline ?? null;
+  const mods = (data.result.modifiers ?? []).filter(m => Number.isFinite(m.multiplier) && Math.abs(m.multiplier - 1) >= 0.005);
+  const shownMods = [...mods].sort((a, b) => Math.abs(b.multiplier - 1) - Math.abs(a.multiplier - 1)).slice(0, 8);
+  const headlineMid = data.result.terms.totalDealValue.median;
+  const buildUp = baseline ? `
+      <div class="card-sm" style="margin-bottom: 8px; padding: 6px 12px;">
+        ${microLabel('How the calibrated headline is built')}
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 8.5px; color: ${COLORS.gray700};">
+          <span><strong style="color: ${COLORS.navy};">${fmtM(baseline.totalValueMedian)}</strong> ${escapeHtml(String(baseline.therapeuticArea))} ${escapeHtml(String(baseline.phase).replace(/_/g, ' '))} baseline median${baseline.source === 'calibrated' ? ` (calibrated from ${baseline.sampleSize ?? '—'} disclosed deals${baseline.calibratedAt ? `, ${escapeHtml(String(baseline.calibratedAt).slice(0, 10))}` : ''})` : ' (static table; no calibration for this cell yet)'}</span>
+          ${Number.isFinite(baseline.dealTypeMultiplier) && Math.abs(baseline.dealTypeMultiplier - 1) >= 0.005 ? `<span>× <strong>${baseline.dealTypeMultiplier.toFixed(2)}</strong> deal structure</span>` : ''}
+          ${shownMods.map(m => `<span>× <strong>${m.multiplier.toFixed(2)}</strong> ${escapeHtml(m.name)}${m.context ? ` <span style="color: ${COLORS.gray400};">(${escapeHtml(m.context)})</span>` : ''}</span>`).join('')}
+          ${mods.length > shownMods.length ? `<span style="color: ${COLORS.gray400};">and ${mods.length - shownMods.length} smaller modifier${mods.length - shownMods.length === 1 ? '' : 's'}</span>` : ''}
+          <span>= <strong style="color: ${COLORS.teal};">${fmtM(headlineMid)}</strong> headline mid (effective × ${Number.isFinite(baseline.effectiveMultiplier) ? baseline.effectiveMultiplier.toFixed(2) : '—'}; ±${Math.round(baseline.rangeWidthPercent ?? 0)}% range)</span>
+        </div>
+        <div style="margin-top: 4px; font-size: 7.5px; color: ${COLORS.gray400};">Multipliers are dampened before they compound; the Deal Terms page in the appendix lists every one with its source.</div>
+      </div>` : '';
 
   return `
     <div class="report-page">
@@ -94,12 +114,14 @@ export function renderValuationBridgePage(data: PDFReportData, meta: ReportMeta)
         ${chartSource({ source: 'Solidus deal database and financial engine', n: compsN, asOf: bridge.asOf, note: compsNote })}
       </div>
 
-      <div class="callout" style="margin-bottom: 10px; font-size: 9.5px;">
+      <div class="callout" style="margin-bottom: 8px; font-size: 8.5px; padding: 8px 12px;">
         <div style="font-size: 7px; font-weight: 700; color: ${COLORS.teal}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Reconciliation</div>
         ${escapeHtml(bridge.reconciliation)}
       </div>
 
-      <table class="data-table" style="font-size: 8.5px;">
+      ${buildUp}
+
+      <table class="data-table compact" style="font-size: 8px;">
         <thead>
           <tr><th>Method</th><th style="text-align: right;">Low</th><th style="text-align: right;">Mid</th><th style="text-align: right;">High</th><th style="text-align: right;">n</th><th>What it measures</th></tr>
         </thead>
