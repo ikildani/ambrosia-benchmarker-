@@ -142,7 +142,9 @@ export function buildPageSpecs(data: PDFReportData): PageSpec[] {
   // Risk and execution
   add('Risk Analysis', 'Risk factor breakdown and probability-weighted valuation', renderRiskAnalysisPage);
   add('Deal Timeline', 'Milestone schedule from signing to launch', renderDealTimelinePage);
-  if (data.regulatoryRisk) add('Regulatory Risk', 'FDA CRL, AdComm, PDUFA, and PRV analysis', renderRegulatoryRiskPage);
+  // FDA action risk only means something once a filing is inside the deal horizon.
+  const filingInHorizon = /phase2|phase3|nda|approved/.test(String(data.inputs.phase ?? '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+  if (data.regulatoryRisk && filingInHorizon) add('Regulatory Risk', 'FDA CRL, AdComm, PDUFA, and PRV analysis', renderRegulatoryRiskPage);
   if (data.milestoneProbabilities) add('Milestone Analysis', 'Individual milestone probability weighting', renderMilestonePages);
   if (isAcquisition && data.earnoutValuation) add('Earnout & CVR', 'Contingent payment probability and time value', renderEarnoutPages);
   if (data.patentDynamics) add('Patent & LOE', 'Patent term adjustments and generic entry dynamics', renderPatentDynamicsPage);

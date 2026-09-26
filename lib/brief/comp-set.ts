@@ -403,6 +403,13 @@ export function scoreRow(raw: RawDealRow, asset: AssetProfile): { relevance: num
   const reasons: string[] = [];
   let score = 0;
 
+  // Structure: a company acquisition prices the whole company (platform,
+  // pipeline, cash), not one asset's licence. For a licence or option target it
+  // stays in the set as context but ranks below licences so it does not become
+  // a headline driver or a chart label.
+  const targetIsLicence = !/acqui|m&a|merger/i.test(asset.targetDealType || '');
+  if (targetIsLicence && normalizeStructure(raw.deal_type) === 'acquisition') { score -= 12; reasons.push('Company acquisition, not an asset licence'); }
+
   // Phase (25)
   const assetPhase = normalizePhase(asset.phase);
   const rowPhase = normalizePhase(raw.phase_at_signing);

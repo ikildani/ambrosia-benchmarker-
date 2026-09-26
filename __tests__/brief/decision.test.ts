@@ -238,13 +238,17 @@ describe('buildInflectionPath', () => {
     expect(after.label).toBe('Partner after Phase 3');
     expect(after.costM).toBe(270); expect(after.pReach).toBeCloseTo(0.32 * 0.58);
     expect(p.financing!.preMoneyM).toBe(420);
-    expect(p.financing!.retainedValueIfLicenseM).toBeCloseTo(60 + 0.45 * 440, 1);
+    // Milestones count at the probability-weighted share of face value for this phase chain,
+    // never the 45% fallback, and well below it for an early-stage asset.
+    const mf = p.milestoneFactor!;
+    expect(mf).toBeGreaterThan(0.05); expect(mf).toBeLessThan(0.45);
+    expect(p.financing!.retainedValueIfLicenseM).toBeCloseTo(60 + mf * 440, 1);
     expect(recommendedOptionKey(p.options)).toBe('deal_now');
     expect(p.recommendation).toMatch(/^Partner now/);
-    // Expected value counts milestones, dilution and time: deal now = upfront + 45% of milestone face value.
-    expect(now.expectedValueM).toBeCloseTo(60 + 0.45 * 440, 1);
+    // Expected value counts milestones, dilution and time: deal now = upfront + factor × milestone face value.
+    expect(now.expectedValueM).toBeCloseTo(60 + mf * 440, 1);
     const df = 1 / Math.pow(1 + p.discountRate, next.months / 12);
-    expect(next.expectedValueM).toBeCloseTo(0.32 * (1 - next.dilution!) * (next.upfrontIfReached.median + 0.45 * (next.totalIfReached.median - next.upfrontIfReached.median)) * df - 70, 0);
+    expect(next.expectedValueM).toBeCloseTo(0.32 * (1 - next.dilution!) * (next.upfrontIfReached.median + mf * (next.totalIfReached.median - next.upfrontIfReached.median)) * df - 70, 0);
   });
 
   it('recommends the deferred option only when it clears the hurdle', () => {

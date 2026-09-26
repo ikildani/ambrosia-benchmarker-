@@ -343,7 +343,9 @@ describe('sentence builders', () => {
     expect(s).not.toMatch(/leverage|synerg|AI\b/);
   });
   it('whyNow falls back to revenue at risk, then a recent deal, then cadence', () => {
-    expect(buildWhyNow({ ...candidate(), patentCliffs: [] }, 2026, 'neurology')).toContain('$3.0B of revenue is at risk');
+    // A same-area prior deal leads even without a cliff; only without one does revenue at risk speak.
+    expect(buildWhyNow({ ...candidate(), patentCliffs: [] }, 2026, 'neurology')).toMatch(/^Signed Verge Genomics in 2024/);
+    expect(buildWhyNow({ ...candidate(), patentCliffs: [], priorDeals: candidate().priorDeals.map(d => ({ ...d, sameTA: false })) }, 2026, 'neurology')).toContain('$3.0B of revenue is at risk');
     expect(buildWhyNow({ ...candidate(), patentCliffs: [], revenueAtRisk: { y2025: null, y2026: null, y2027: null } }, 2026, 'neurology')).toContain('Verge Genomics in 2024');
     expect(buildWhyNow({ ...candidate(), patentCliffs: [], revenueAtRisk: { y2025: null, y2026: null, y2027: null }, priorDeals: [] }, 2026, 'neurology')).toContain('8 deals');
   });

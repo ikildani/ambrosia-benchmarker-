@@ -419,7 +419,10 @@ describe('svg charts', () => {
     expect(svg).toContain('GO-TO-MARKET WINDOW');
     expect(svg).toContain('<circle');
     expect(svg).toContain('<rect');
-    expect(svg).toContain('Q4 26');
+    // The first quarter tick (Oct 2026) sits under "Today" and is not labelled; the next one is.
+    expect(svg).not.toContain('Q4 26');
+    expect(svg).toContain('Q1 27');
+    expect(svg).toContain('>Today<');
   });
   it('patient funnel log-scales a > 100× range and formats thousands', () => {
     const f = buildPatientFunnel(market, AS_OF)!;

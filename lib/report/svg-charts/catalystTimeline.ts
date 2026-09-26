@@ -75,7 +75,8 @@ export function renderCatalystTimeline(cal: CatalystCalendar, width = 560, heigh
     const q = Math.floor(tick.getUTCMonth() / 3) + 1;
     parts.push(`<line x1="${x}" y1="${axisY - 4}" x2="${x}" y2="${axisY + 4}" stroke="${COLORS.gray400}" stroke-width="1" />`);
     parts.push(`<line x1="${x}" y1="${axisY - 52}" x2="${x}" y2="${axisY + 52}" stroke="${COLORS.gray200}" stroke-width="0.6" stroke-dasharray="2,3" />`);
-    parts.push(`<text x="${x}" y="${axisY + 14}" text-anchor="middle" font-size="7" font-weight="600" fill="${COLORS.gray500}" font-family="${FONT}">Q${q} ${String(tick.getUTCFullYear()).slice(2)}</text>`);
+    // The first quarter label is dropped when it would sit under "Today".
+    if (x - padL > 30) parts.push(`<text x="${x}" y="${axisY + 14}" text-anchor="middle" font-size="7" font-weight="600" fill="${COLORS.gray500}" font-family="${FONT}">Q${q} ${String(tick.getUTCFullYear()).slice(2)}</text>`);
     tick.setUTCMonth(tick.getUTCMonth() + 3);
   }
   // Start / end labels

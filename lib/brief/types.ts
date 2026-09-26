@@ -367,6 +367,8 @@ export interface InflectionPath {
   asOf: string;
   /** Annual discount rate used to bring deferred proceeds back to today. */
   discountRate: number;
+  /** Share of milestone face value counted as value today (probability-weighted from the phase chain). */
+  milestoneFactor?: number;
   options: InflectionOption[];
   financing: {
     /** Assumed pre-money used for the dilution math ($M) and where it came from. */

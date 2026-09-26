@@ -60,7 +60,9 @@ function makeScale(values: number[], px0: number, px1: number): Scale {
       [1, 2, 5].forEach((m) => { const t = m * Math.pow(10, e); if (t >= lo && t <= hi) ticks.push(t); });
     }
     ticks.push(hi);
-    const span = Math.max(l1 - l0, 1);
+    // Headroom: a fifth of a decade above the top tick so the largest bubble
+    // and its label sit inside the plot instead of on the frame.
+    const span = Math.max(l1 - l0, 1) + 0.2;
     const decades = l1 - l0;
     const shown = decades > 3 ? ticks.filter((t) => Math.log10(t) % 1 === 0) : ticks;
     return {
@@ -70,7 +72,7 @@ function makeScale(values: number[], px0: number, px1: number): Scale {
     };
   }
   const step = niceStep(max, 5);
-  const top = Math.ceil(max / step) * step || step;
+  const top = (Math.ceil(max / step) * step || step) * 1.08;
   const ticks: number[] = [];
   for (let t = 0; t <= top + 1e-9; t += step) ticks.push(Number(t.toFixed(6)));
   return { isLog, ticks, pos: (v: number) => px0 + (Math.max(v, 0) / top) * (px1 - px0) };
@@ -122,16 +124,28 @@ export function renderCompScatter(
       : `<circle cx="${cx}" cy="${cy}" r="${rad}" fill="${fill}" fill-opacity="0.85" stroke="${COLORS.white}" stroke-width="1"/>`;
   }).join('');
 
+  const ax = xs.pos(asset.totalM), ay = ys.pos(asset.upfrontM);
+
+  // Label the three most relevant plotted rows. A label goes above its bubble
+  // unless that would leave the plot, and is dropped when it would sit on the
+  // ask marker's label or on a label already placed.
   const top3 = [...plotted].sort((a, b) => b.relevance - a.relevance).slice(0, 3);
+  const placed: Array<{ x: number; y: number; w: number }> = [{ x: ax, y: ay, w: asset.label.length * 4.6 + 14 }];
   const labels = top3.map((r) => {
     const x = xs.pos(r.totalM as number), y = ys.pos(r.upfrontM as number);
     const rad = royaltyRadius(r);
+    const text = shortName(r.licensee);
+    const w = text.length * 4.4;
     const anchor = x > width * 0.75 ? 'end' : 'start';
     const lx = anchor === 'end' ? x - rad - 3 : x + rad + 3;
-    return `<text x="${lx.toFixed(1)}" y="${(y - rad - 2).toFixed(1)}" text-anchor="${anchor}" font-size="7.5" font-weight="600" fill="${COLORS.gray700}" font-family="${FONT}">${escapeHtml(shortName(r.licensee))}</text>`;
+    const above = y - rad - 10 > py1;
+    const ly = above ? y - rad - 2 : y + rad + 9;
+    const cx = anchor === 'end' ? lx - w / 2 : lx + w / 2;
+    const clash = placed.some((p) => Math.abs(p.y - ly) < 10 && Math.abs(p.x - cx) < (p.w + w) / 2);
+    if (clash) return '';
+    placed.push({ x: cx, y: ly, w });
+    return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" font-size="7.5" font-weight="600" fill="${COLORS.gray700}" font-family="${FONT}">${escapeHtml(text)}</text>`;
   }).join('');
-
-  const ax = xs.pos(asset.totalM), ay = ys.pos(asset.upfrontM);
   const d = 7;
   const askAnchor = ax > width * 0.75 ? 'end' : 'start';
   const askX = askAnchor === 'end' ? ax - d - 3 : ax + d + 3;
@@ -153,8 +167,9 @@ export function renderCompScatter(
   lx += 11 + asset.label.length * 4.2 + 10;
   legendItems.push(`<text x="${lx}" y="${ly}" font-size="7" fill="${COLORS.gray400}" font-family="${FONT}">Bubble size = royalty midpoint</text>`);
 
+  // Undisclosed-terms count sits on the axis-title line, right-aligned, clear of the plot.
   const skippedNote = skipped > 0
-    ? `<text x="${px1}" y="${py1 + 8}" text-anchor="end" font-size="7" fill="${COLORS.gray400}" font-family="${FONT}">${skipped} row${skipped === 1 ? '' : 's'} with undisclosed terms not plotted</text>`
+    ? `<text x="${px1}" y="${py0 + 24}" text-anchor="end" font-size="7" fill="${COLORS.gray400}" font-family="${FONT}">${skipped} row${skipped === 1 ? '' : 's'} with undisclosed terms not plotted</text>`
     : '';
 
   return `

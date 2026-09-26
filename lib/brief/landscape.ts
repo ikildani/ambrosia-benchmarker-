@@ -660,7 +660,7 @@ export function computeRecommendedWindow(
     return {
       start: best.start,
       end: best.end,
-      rationale: `${Math.round(best.months)} clear months before the first same-mechanism Phase 3 primary completion (${threatMonth}); close before that data lands, or the buyer will wait to see it.`,
+      rationale: `A ${Math.round(best.months)}-month window that closes before the first same-mechanism Phase 3 primary completion (${threatMonth}); sign before that data lands, or the buyer will wait to see it.`,
     };
   }
   return {

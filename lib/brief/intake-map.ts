@@ -186,8 +186,21 @@ export function resolveIntake(req: BenchmarkRequestRow, modalityLabels: Record<s
   const notes: string[] = [];
   // Silent defaults are not allowed: every fallback is written to the build
   // notes so the operator sees it in admin_notes before the brief goes out.
-  const ta = resolveTherapeuticArea(req.therapeutic_area);
+  let ta = resolveTherapeuticArea(req.therapeutic_area);
   if (!TA_KEYS[norm(req.therapeutic_area)]) notes.push(`Therapeutic area "${req.therapeutic_area}" not recognised; defaulted to oncology. Confirm before delivery.`);
+  // The indication decides the area. When the stated area disagrees with the
+  // registry entry the indication resolves to (e.g. "Oncology" + "ALS"), the
+  // comparable set, calibration and buyers would all be built in the wrong
+  // area; the registry wins and the operator is told.
+  const anyTaMatch = resolveIndication(req.indication, ta);
+  const registryDef = anyTaMatch.how !== 'default' ? INDICATION_REGISTRY.find(d => d.value === anyTaMatch.key) : undefined;
+  if (registryDef && registryDef.ta !== ta) {
+    const exact = INDICATION_REGISTRY.filter(d => d.ta === ta).some(d => norm(d.label) === norm(req.indication) || norm(d.value) === norm(req.indication));
+    if (!exact) {
+      notes.push(`Therapeutic area "${req.therapeutic_area}" disagrees with the indication "${req.indication}" (${registryDef.label} is ${registryDef.ta}); the brief is built in ${registryDef.ta}. Confirm with the client.`);
+      ta = registryDef.ta;
+    }
+  }
   const phase = resolvePhase(req.phase);
   if (!PHASE_KEYS[norm(req.phase)]) notes.push(`Phase "${req.phase}" not recognised; defaulted to Phase 2. Confirm before delivery.`);
   const modalitySource = req.modality || req.modalities?.[0] || null;
