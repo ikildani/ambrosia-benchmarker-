@@ -235,6 +235,18 @@ export default function Header({
     },
   ];
 
+  // Phones get the full map. Signed-out visitors used to see three items and no
+  // route to Companies, Methodology or the blog from a search landing.
+  const mobileNavItems = isAuthenticated
+    ? navItems
+    : [
+        ...navItems.filter((i) => i.label !== 'Contact'),
+        { label: 'Companies', href: '/companies', isActive: !!isCompaniesPage },
+        { label: 'Methodology', href: '/methodology', isActive: pathname?.startsWith('/methodology') || false },
+        { label: 'Blog', href: '/blog', isActive: pathname?.startsWith('/blog') || false },
+        { label: 'Contact', href: '/contact', isActive: pathname === '/contact' },
+      ];
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -251,14 +263,14 @@ export default function Header({
             className="flex items-center gap-3 group"
           >
             <AmbrosiaLogo variant="auto" height={40} />
-            <span className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-neutral-400 dark:text-slate-500">
+            <span className="hidden xl:inline-flex items-center gap-2 text-sm font-medium text-neutral-400 dark:text-slate-500">
               <span className="w-px h-4 bg-neutral-200 dark:bg-slate-700" />
               <span className="text-neutral-700 dark:text-slate-300">Solidus</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-4 md:gap-6 lg:gap-8 xl:gap-10">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-4 md:gap-5 lg:gap-7 xl:gap-10 whitespace-nowrap">
             {navItems.map((item: { label: string; href: string; isActive: boolean; isDropdown?: boolean }, idx) => {
               if ((item as { isDropdown?: boolean }).isDropdown) {
                 return (
@@ -503,11 +515,12 @@ export default function Header({
                 </button>
                 <button
                   onClick={onSignUpClick}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 min-h-11 text-sm font-semibold rounded-xl whitespace-nowrap transition-all duration-200
                            bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-soft hover:shadow-glow hover:-translate-y-0.5"
                 >
-                  <span>Get Started</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="sm:hidden">Start free</span>
+                  <span className="hidden sm:inline">Get Started</span>
+                  <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </button>
@@ -536,7 +549,7 @@ export default function Header({
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 top-16 sm:top-20 bg-white dark:bg-slate-900 z-50 animate-mobile-menu overflow-y-auto safe-bottom">
             <nav aria-label="Mobile navigation" className="flex flex-col p-4 gap-1">
-              {navItems.map((item, idx) => {
+              {mobileNavItems.map((item, idx) => {
                 const iconMap: Record<string, JSX.Element> = {
                   Dashboard: (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -646,16 +659,16 @@ export default function Header({
                 </>
               ) : (
                 <>
-                  <div className="my-4 border-t border-slate-200" />
+                  <div className="my-4 border-t border-slate-200 dark:border-slate-800" />
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
                       onSignInClick?.();
                     }}
-                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-slate-700 hover:bg-slate-50 active:bg-slate-100 font-medium transition-colors touch-feedback"
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700 font-medium transition-colors touch-feedback"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                       </svg>
                     </div>

@@ -320,15 +320,15 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                         onClick={(e) => e.stopPropagation()}
                         placeholder="Promo code"
                         aria-label="Promo code"
-                        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-xs
-                                   placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-teal-500
+                        className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-lg px-3 py-2 min-h-11 sm:min-h-9 text-white text-sm
+                                   placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-teal-500
                                    focus:border-transparent transition-all"
                         maxLength={20}
                       />
                       <button
                         onClick={(e) => { e.stopPropagation(); validatePromoCode(promoCode); }}
                         disabled={!promoCode.trim() || promoStatus === 'validating'}
-                        className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-xs
+                        className="px-3 py-2 min-h-11 sm:min-h-9 bg-white/10 border border-white/20 rounded-lg text-white text-sm
                                    font-medium hover:bg-white/20 transition-all disabled:opacity-40
                                    disabled:cursor-not-allowed"
                       >

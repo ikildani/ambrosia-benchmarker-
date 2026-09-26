@@ -150,7 +150,7 @@ export default function OnboardingModal({
               Get deal terms in 60 seconds
             </h2>
             <p className="text-neutral-600 mb-6">
-              Based on {DEAL_STATS.TOTAL_DEALS} real biopharma licensing deals across oncology, neurology, and immunology, our calculator estimates:
+              Based on {DEAL_STATS.TOTAL_DEALS} primary-sourced biopharma licensing deals across 12 therapeutic areas, our calculator estimates:
             </p>
 
             <div className="text-left space-y-3 mb-8 max-w-sm mx-auto">
@@ -170,7 +170,7 @@ export default function OnboardingModal({
             </div>
 
             <p className="text-sm text-neutral-500 mb-8">
-              Used by BD teams at 50+ biotech companies
+              Free to start. Results in about 30 seconds.
             </p>
 
             <div className="space-y-3">

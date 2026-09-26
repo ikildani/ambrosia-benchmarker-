@@ -331,6 +331,10 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // Check if onboarding should show for first-time users
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Phones get the form, not a sheet on top of it: the three onboarding bullets
+      // are already visible in the page header, and a second overlay collides with
+      // the cookie bar on a 390px screen.
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches) return;
       if (shouldShowOnboarding()) {
         setShowOnboarding(true);
       }

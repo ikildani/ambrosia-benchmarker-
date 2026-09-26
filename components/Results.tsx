@@ -1877,7 +1877,10 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
               {modifiers.map((mod, idx) => (
                 <div key={idx} className="group relative flex-shrink-0">
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 cursor-help ${
+                    tabIndex={mod.context ? 0 : undefined}
+                    role={mod.context ? 'button' : undefined}
+                    aria-label={mod.context ? `${mod.name}: ${mod.context}` : undefined}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-9 rounded-lg text-xs font-medium transition-all duration-300 cursor-help focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                       mod.multiplier > 1
                         ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30'
                         : mod.multiplier < 1
@@ -1893,7 +1896,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                     )}
                   </span>
                   {mod.context && (
-                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-center leading-relaxed whitespace-normal hidden sm:block">
+                    <div role="tooltip" className="invisible group-hover:visible group-focus-within:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[min(280px,calc(100vw-2rem))] text-center leading-relaxed whitespace-normal">
                       {mod.context}
                       <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy-800 dark:border-t-slate-700" />
                     </div>
@@ -1906,11 +1909,11 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                 if (diff.totalAdjustment <= 0) return null;
                 return (
                   <div className="group relative flex-shrink-0">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 cursor-help">
+                    <span tabIndex={0} role="button" aria-label="Differentiation adjustment breakdown" className="inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-9 rounded-lg text-xs font-medium bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 cursor-help focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500">
                       <span className="whitespace-nowrap">Differentiation</span>
                       <span className="font-bold whitespace-nowrap">(+{(diff.totalAdjustment * 100).toFixed(0)}%)</span>
                     </span>
-                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[280px] text-left leading-relaxed whitespace-normal hidden sm:block">
+                    <div role="tooltip" className="invisible group-hover:visible group-focus-within:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-navy-800 dark:bg-slate-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 pointer-events-none z-[100] shadow-xl min-w-[200px] max-w-[min(280px,calc(100vw-2rem))] text-left leading-relaxed whitespace-normal">
                       {diff.factorBreakdown.map((f: { label: string; effectiveAdjustment: number; phaseScaling: number }, i: number) => (
                         <div key={i} className="flex justify-between gap-2">
                           <span>{f.label}</span>
