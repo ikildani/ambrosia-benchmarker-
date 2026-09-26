@@ -15,13 +15,14 @@ import { BriefRequestRow, type BriefRequestView } from '@/components/admin/brief
 export const metadata: Metadata = { title: 'Briefs | Admin', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
 
-const SELECT = 'id,created_at,name,email,company,asset_name,indication,phase,therapeutic_area,modality,modalities,target_deal_type,territory,status,payment_status,invoice_requested_at,invoice_sent_at,paid_at,auto_draft_status,mp_opinion,delivered_at,brief_page_count,brief_token,pdf_storage_path,excel_storage_path,intake_path,admin_notes';
+const SELECT = 'id,created_at,name,email,company,asset_name,indication,phase,therapeutic_area,modality,modalities,target_deal_type,territory,status,payment_status,invoice_requested_at,invoice_sent_at,paid_at,auto_draft_status,mp_opinion,delivered_at,brief_page_count,brief_token,pdf_storage_path,excel_storage_path,intake_path,admin_notes,readiness';
 
 interface Row {
   id: string; created_at: string; name: string; email: string; company: string | null; asset_name: string | null; indication: string; phase: string; therapeutic_area: string;
   modality: string | null; modalities: string[] | null; target_deal_type: string | null; territory: string | null; status: string; payment_status: string | null;
   invoice_requested_at: string | null; invoice_sent_at: string | null; paid_at: string | null; auto_draft_status: string | null; mp_opinion: string | null; delivered_at: string | null;
   brief_page_count: number | null; brief_token: string | null; pdf_storage_path: string | null; excel_storage_path: string | null; intake_path: string | null; admin_notes: string | null;
+  readiness: { overall: string; topUpRecommended: boolean; lines: Array<{ key: string; label: string; value: string; status: string; detail: string }> } | null;
 }
 
 export default async function AdminBriefsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -43,6 +44,7 @@ export default async function AdminBriefsPage({ searchParams }: { searchParams: 
       autoDraftStatus: r.auto_draft_status, hasOpinion: !!(r.mp_opinion && r.mp_opinion.trim()), deliveredAt: r.delivered_at, pageCount: r.brief_page_count,
       dataRoomUrl: r.brief_token ? dataRoomUrl(r.brief_token) : null, pdfUrl: links.pdfUrl, excelUrl: links.excelUrl, intakePath: r.intake_path,
       adminNotesHead: r.admin_notes ? r.admin_notes.split('\n')[0] : null,
+      readiness: r.readiness ? { overall: r.readiness.overall, topUp: r.readiness.topUpRecommended, lines: r.readiness.lines.map(l => ({ label: l.label, value: l.value, status: l.status, detail: l.detail })) } : null,
     };
   }));
 

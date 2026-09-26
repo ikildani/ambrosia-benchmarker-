@@ -25,7 +25,10 @@ export interface BriefRequestView {
   excelUrl: string | null;
   intakePath: string | null;
   adminNotesHead: string | null;
+  readiness: { overall: string; topUp: boolean; lines: Array<{ label: string; value: string; status: string; detail: string }> } | null;
 }
+
+const DOT: Record<string, string> = { green: 'bg-teal-400', amber: 'bg-amber-400', red: 'bg-rose-400' };
 
 const STATUS_TONE: Record<string, string> = {
   intake: 'bg-slate-700 text-slate-200',
@@ -82,6 +85,17 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
           <h3 className="mt-2 text-base font-semibold text-slate-50">{r.assetLabel}</h3>
           <p className="text-sm text-slate-400">{r.profile}</p>
           <p className="mt-1 text-sm text-slate-300">{r.name}{r.company ? `, ${r.company}` : ''} · <a className="text-teal-300 hover:underline" href={`mailto:${r.email}`}>{r.email}</a></p>
+          {r.readiness ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="text-[11px] uppercase tracking-wider text-slate-500">Data readiness</span>
+              {r.readiness.lines.map(l => (
+                <span key={l.label} className="flex items-center gap-1.5 text-xs text-slate-300" title={`${l.label}: ${l.value}. ${l.detail}`}>
+                  <span className={`h-2 w-2 rounded-full ${DOT[l.status] ?? 'bg-slate-600'}`} />{l.label.replace(/ \(.*\)$/, '')}<span className="text-slate-500">{l.value.split(' ')[0]}</span>
+                </span>
+              ))}
+              {r.readiness.topUp ? <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] text-amber-200">top-up queued</span> : null}
+            </div>
+          ) : null}
           {r.adminNotesHead ? <p className="mt-2 max-w-2xl truncate font-mono text-[11px] text-slate-500" title={r.adminNotesHead}>{r.adminNotesHead}</p> : null}
         </div>
         <div className="flex flex-col items-end gap-2 text-sm">

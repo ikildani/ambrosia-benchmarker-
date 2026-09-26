@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/email/client';
 import { BENCHMARK_PRICING } from '@/lib/config/constants';
 import { intakeBodySchema, clientIntakeToColumns, dataPackageToDiligence, DATA_PACKAGE_ITEMS, bestPriorOffer, STRUCTURE_PREF_KEYS } from '@/lib/brief/client-intake';
 import { envelope, stepper, factsTable, callout, signature, p, esc } from '@/lib/email/brief-template';
+import { computeReadiness, type Readiness } from '@/lib/brief/readiness';
 
 /**
  * Deal Intelligence Brief intake.
@@ -95,6 +96,35 @@ export async function POST(request: NextRequest) {
     const offer = bestPriorOffer(client.priorOffers);
     const packageTicked = DATA_PACKAGE_ITEMS.filter(i => client.dataPackage[i.key] === true).map(i => i.label);
 
+    // Data readiness for this profile: stored on the row, printed for the
+    // operator, and a top-up queued when the indication is thin. Never blocks
+    // the intake; a failure here is logged and the card reads "not computed".
+    let readiness: Readiness | null = null;
+    try {
+      readiness = await computeReadiness(supabase, { therapeuticArea: body.therapeuticArea, indication: body.indication, phase: body.phase });
+      await supabase.from('benchmark_requests').update({ readiness, readiness_checked_at: now }).eq('id', requestId);
+      if (readiness.topUpRecommended) {
+        await supabase.from('brief_topups').insert({
+          request_id: requestId, therapeutic_area: readiness.profile.therapeuticArea, indication: body.indication, indication_key: readiness.profile.indicationKey,
+          phase: body.phase, mechanism: body.mechanism || null, target: body.target || null, readiness_before: readiness,
+        });
+      }
+    } catch (readyErr) {
+      console.error('[Benchmark] readiness failed:', readyErr instanceof Error ? readyErr.message : readyErr);
+    }
+    const tone = (s: string) => (s === 'green' ? '#0f766e' : s === 'amber' ? '#d97706' : '#e11d48');
+    const readinessHtml = readiness
+      ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse; margin: 6px 0 14px; font-size:13px;">
+          ${readiness.lines.map(l => `<tr>
+            <td style="padding: 6px 8px 6px 0; width: 12px; vertical-align: top;"><span style="display:inline-block; width:9px; height:9px; border-radius:5px; background:${tone(l.status)};"></span></td>
+            <td style="padding: 6px 10px 6px 0; color:#0b1220; vertical-align: top; white-space: nowrap;">${esc(l.label)}</td>
+            <td style="padding: 6px 10px 6px 0; color:#0b1220; vertical-align: top; font-weight:600;">${esc(l.value)}</td>
+            <td style="padding: 6px 0; color:#64748b; vertical-align: top;">${esc(l.detail)}</td>
+          </tr>`).join('')}
+        </table>
+        ${readiness.topUpRecommended ? callout(`<strong>Top-up queued.</strong> An indication-scoped ingestion run for ${esc(body.indication)} starts on the next discovery cycle (within 4 hours) and the card is recomputed. Rebuild the draft from /admin/briefs before the call.`, 'amber') : ''}`
+      : p('Readiness card not computed (see logs).', { muted: true });
+
     // Admin notification: everything the intake call and the invoice need.
     try {
       const rows: Array<[string, string]> = [
@@ -125,6 +155,8 @@ export async function POST(request: NextRequest) {
           { title: 'Deliver', body: 'Set mp_opinion, mp_reviewer, mp_reviewed_at and re-run generate. That uploads the final PDF and Excel and emails the data-room link.' },
         ])}
         ${offer ? callout(`<strong>An offer is already on the table</strong> from ${esc(offer.party)} at ${m(offer.upfrontM)} upfront / ${m(offer.totalM)} total. The brief prints it against the floor and the ask.`, 'amber') : ''}
+        <div style="margin: 18px 0 4px; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#64748b;">Data readiness · ${readiness ? esc(readiness.overall) : 'n/a'}</div>
+        ${readinessHtml}
         ${factsTable(rows.map(([k, v]) => [k, esc(v)] as [string, string]))}`;
       await sendEmail({
         to: 'ikildani@ambrosiaventures.co',
