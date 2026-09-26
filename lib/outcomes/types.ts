@@ -45,6 +45,8 @@ export interface PredictionRow {
   predicted_window_end: string | null;
   model_version: string | null;
   fingerprint: string | null;
+  /** Calibration + premium snapshot the numbers were priced on (migration 136); brief only. */
+  priors_as_of?: string | null;
   status: PredictionStatus;
   resolve_after: string;
 }

@@ -189,6 +189,17 @@ describe('brief writer', () => {
     expect(row.predicted_window_end).toBe('2027-09-28');
     expect(row.model_version).toBe(BRIEF_MODEL_VERSION);
     expect(row.fingerprint).toBe('brief:req-1');
+    expect(row.priors_as_of).toBeNull();
+  });
+
+  it('records the priors snapshot in priors_as_of and keeps model_version fixed at brief-v3.1', () => {
+    expect(BRIEF_MODEL_VERSION).toBe('brief-v3.1');
+    const row = buildBriefPrediction(briefFixture, { requestId: 'req-1', userId: 'u1', priorsAsOf: '2026-09-22|2026-09-26' }, NOW)!;
+    expect(row.priors_as_of).toBe('2026-09-22|2026-09-26');
+    expect(row.model_version).toBe('brief-v3.1');
+    // the snapshot never leaks into model_version, and blanks are stored as null
+    expect(buildBriefPrediction(briefFixture, { requestId: 'req-1', userId: 'u1', priorsAsOf: '  ' }, NOW)!.priors_as_of).toBeNull();
+    expect(buildBriefPrediction(briefFixture, { requestId: 'req-1', userId: 'u1', modelVersion: 'brief-vX' }, NOW)!.model_version).toBe('brief-vX');
   });
 
   it('high never drops below the ask, and defaults to ask × 1.2 without bars', () => {

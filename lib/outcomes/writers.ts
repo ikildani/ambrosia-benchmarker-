@@ -22,7 +22,8 @@ import { normalizePhase } from '@/lib/brief/comp-set';
 import type { PredictionInsert, RadarWriterReport } from './types';
 
 export const CALCULATOR_MODEL_VERSION = 'calculator-1.0.0';
-export const BRIEF_MODEL_VERSION = 'brief-v3';
+/** brief-v3.1 (Sep 2026): outcome-informed priors — the snapshot used is recorded in priors_as_of, never here. */
+export const BRIEF_MODEL_VERSION = 'brief-v3.1';
 export const RADAR_MODEL_VERSION = 'radar-intent-v3';
 const DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const RADAR_MAX_ASSETS = 300;
@@ -160,6 +161,8 @@ export interface BriefPredictionContext {
   requestId: string;
   userId: string | null | undefined;
   modelVersion?: string;
+  /** From lib/outcomes/priors-snapshot.ts — "<calibrated_at date>|<premium as_of_date>". */
+  priorsAsOf?: string | null;
 }
 
 /** "2027-03" → "2027-03-01" (start) / "2027-03-28" (end); full dates pass through. */
@@ -221,6 +224,7 @@ export function buildBriefPrediction(brief: BriefIntelligence, ctx: BriefPredict
     predicted_window_end: windowDate(window?.end, 'end'),
     model_version: ctx.modelVersion ?? BRIEF_MODEL_VERSION,
     fingerprint: `brief:${ctx.requestId}`,
+    priors_as_of: ctx.priorsAsOf?.trim() || null,
     resolve_after: new Date(now.getTime() + 30 * 86_400_000).toISOString(),
   };
 }

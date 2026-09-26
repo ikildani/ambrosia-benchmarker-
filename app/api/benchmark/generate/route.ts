@@ -28,6 +28,7 @@ import epiData from '@/data/epidemiology.json';
 import { resolveIntake } from '@/lib/brief/intake-map';
 import { buildBrief } from '@/lib/brief/build';
 import { recordBriefPrediction } from '@/lib/outcomes/writers';
+import { loadPriorsSnapshot } from '@/lib/outcomes/priors-snapshot';
 import { fetchBriefPartners } from '@/lib/brief/partners';
 import { buildExcelWorkbook } from '@/lib/generateExcel';
 import { sendEmail } from '@/lib/email/client';
@@ -186,7 +187,8 @@ export async function POST(request: NextRequest) {
     // as a prediction (Alaric WS1). Fire-and-forget; never breaks generation.
     let predictionId: string | null = null;
     try {
-      const written = await recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null });
+      const priorsAsOf = await loadPriorsSnapshot(supabase);
+      const written = await recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null, priorsAsOf });
       if (written.ok) predictionId = written.id;
       else if (written.reason === 'deduped') {
         // Re-run within 24 h: keep the row already registered for this request.
