@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createServerClient } from '@/lib/supabase/server';
 import { DELIVERED_STATUSES, DELIVERY_COLUMNS, mintBriefLinks, type BriefDeliveryRow } from '@/lib/brief/delivery';
+import { isAdminEmail } from '@/lib/config/authorized-emails';
 import { loadBriefCall } from '@/lib/brief/outcome-status';
 import { callStatus, FOLLOWUP_DAYS } from '@/lib/brief/scored-call';
 
@@ -17,7 +18,13 @@ export const dynamic = 'force-dynamic';
 
 interface Props { params: Promise<{ token: string }> }
 
-async function loadRow(token: string): Promise<BriefDeliveryRow | null> {
+/**
+ * A delivered brief is visible to anyone holding the token. A draft (built
+ * automatically at intake, not yet reviewed) is visible only to a signed-in
+ * admin, with a preview banner, so the intake call can be run from the same
+ * page the client will later open. Everyone else sees a 404 for a draft.
+ */
+async function loadRow(token: string): Promise<{ row: BriefDeliveryRow; draft: boolean } | null> {
   if (!/^[a-f0-9]{16}$/i.test(token)) return null;
   const supabase = createServiceClient();
   const { data, error } = await supabase
@@ -27,13 +34,25 @@ async function loadRow(token: string): Promise<BriefDeliveryRow | null> {
     .maybeSingle();
   if (error || !data) return null;
   const row = data as unknown as BriefDeliveryRow;
-  if (!DELIVERED_STATUSES.has(row.status)) return null;
-  return row;
+  if (DELIVERED_STATUSES.has(row.status)) return { row, draft: false };
+  if (await viewerIsAdmin()) return { row, draft: true };
+  return null;
+}
+
+async function viewerIsAdmin(): Promise<boolean> {
+  try {
+    const client = await createServerClient();
+    const { data } = await client.auth.getUser();
+    return isAdminEmail(data.user?.email);
+  } catch {
+    return false;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
-  const row = await loadRow(token);
+  const loaded = await loadRow(token);
+  const row = loaded?.row ?? null;
   return {
     title: row ? `Deal Intelligence Brief — ${row.asset_name ?? row.indication}` : 'Deal Intelligence Brief',
     robots: { index: false, follow: false, nocache: true },
@@ -48,8 +67,9 @@ function fmtDate(iso: string | null): string {
 
 export default async function BriefDataRoomPage({ params }: Props) {
   const { token } = await params;
-  const row = await loadRow(token);
-  if (!row) notFound();
+  const loaded = await loadRow(token);
+  if (!loaded) notFound();
+  const { row, draft } = loaded;
   const supabase = createServiceClient();
   const links = await mintBriefLinks(supabase, row);
   const call = await loadBriefCall(supabase, { id: row.id, prediction_id: row.prediction_id ?? null });
@@ -67,6 +87,11 @@ export default async function BriefDataRoomPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-[#0b1220] text-slate-100">
       <div className="mx-auto max-w-2xl px-6 py-14">
+        {draft ? (
+          <div className="mb-8 rounded-md border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            <span className="font-semibold">Draft preview, visible to you only.</span> Built automatically from the intake and not yet reviewed. The client cannot open this page until you add the Managing Partner opinion and press Deliver in <a href="/admin/briefs" className="underline">/admin/briefs</a>.
+          </div>
+        ) : null}
         <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-teal-300/80">Solidus by Ambrosia Ventures · Confidential</div>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">Deal Intelligence Brief</h1>
         <p className="mt-1 text-lg text-slate-300">{title}</p>

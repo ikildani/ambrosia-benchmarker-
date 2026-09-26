@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { verifyAdminAuth } from '@/lib/admin-auth';
 import { createServiceClient } from '@/lib/supabase/server';
 
@@ -18,7 +18,7 @@ import { createServiceClient } from '@/lib/supabase/server';
  * Auth: admin email session or ADMIN_API_KEY bearer (verifyAdminAuth).
  */
 
-export const maxDuration = 60;
+export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
@@ -36,16 +36,20 @@ export async function POST(request: NextRequest) {
     if (!secret) return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 });
     const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://solidus.ambrosiaventures.co';
     await supabase.from('benchmark_requests').update({ auto_draft_requested_at: now, auto_draft_status: 'requested' }).eq('id', requestId);
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 55_000);
-    try {
-      const res = await fetch(`${base}/api/benchmark/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret }, body: JSON.stringify({ requestId }), signal: controller.signal });
-      const json = await res.json().catch(() => ({}));
-      return NextResponse.json({ ok: res.ok, status: res.status, result: json });
-    } catch (e) {
-      if (e instanceof Error && e.name === 'AbortError') return NextResponse.json({ ok: true, status: 202, result: { note: 'Still building; refresh in a minute.' } });
-      return NextResponse.json({ error: e instanceof Error ? e.message : 'build failed' }, { status: 502 });
-    } finally { clearTimeout(timer); }
+    // Fire after the response: the generate invocation carries on server-side; the
+    // admin page polls the row until it leaves 'generating'.
+    after(async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8_000);
+      try {
+        await fetch(`${base}/api/benchmark/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret }, body: JSON.stringify({ requestId }), signal: controller.signal });
+      } catch (e) {
+        if (!(e instanceof Error && e.name === 'AbortError')) {
+          await supabase.from('benchmark_requests').update({ auto_draft_status: 'failed' }).eq('id', requestId);
+        }
+      } finally { clearTimeout(timer); }
+    });
+    return NextResponse.json({ ok: true, status: 202, result: { note: 'Building. This page refreshes itself until the draft lands.' } }, { status: 202 });
   }
 
   if (action === 'opinion') {
