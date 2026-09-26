@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
-import { DecisionPreview } from '@/components/brief/DecisionPreview';
+import { BriefPageStack } from '@/components/brief/BriefPageStack';
 import { BENCHMARK_PRICING, DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import { getLiveDealStats } from '@/lib/deal-stats';
 
@@ -29,13 +29,13 @@ const PAGES: Array<{ n: string; title: string; text: string }> = [
   { n: '03', title: 'The decision', text: 'What we recommend, with whom, at what terms, by when. Signed by the Managing Partner.' },
   { n: '04', title: 'This call is scored', text: 'The ask, floor, buyers and window we registered; how the call is scored; when you hear from us.' },
   { n: '05', title: 'Indicative term sheet', text: 'Opening positions and floors from the decision, precedent shares, and a stage-weighted milestone schedule.' },
-  { n: '06', title: 'Valuation bridge', text: 'Cited comparables, the calibrated range and risk-adjusted value reconciled to one ask, with the policy printed.' },
-  { n: '07', title: 'Your model vs Solidus', text: 'Your peak sales, probability, timing, cost and expected terms against ours, with the source of each gap.' },
-  { n: '08', title: 'Comparable set', text: 'Phase-matched deals with a source on every row and the window used stated on the page.' },
-  { n: '14', title: 'Buyer map', text: 'Counterparties ranked on fit, urgency and what each paid at your stage; the buyers you name assessed on the same terms.' },
-  { n: '17', title: 'Catalyst calendar', text: 'Twenty-four months of readouts, LOEs and buyer events, and the window the recommendation rests on.' },
-  { n: '19', title: 'Path to the next inflection', text: 'Partner now versus fund to the next readout, using your real cash and raise.' },
-  { n: '22', title: 'Positioning, objections, diligence', text: 'How to present it, the objections you will hear with the evidence to answer them, and what is ready versus open.' },
+  { n: '07', title: 'Valuation bridge', text: 'Cited comparables, the calibrated range and risk-adjusted value reconciled to one ask, with the policy printed.' },
+  { n: '08', title: 'Your model vs Solidus', text: 'Your peak sales, probability, timing, cost and expected terms against ours, with the source of each gap.' },
+  { n: '11', title: 'Comparable set', text: 'Phase-matched deals with a source on every row and the window used stated on the page.' },
+  { n: '18', title: 'Path to the next inflection', text: 'Partner now versus fund to the next readout, using your real cash and raise.' },
+  { n: '19', title: 'Buyer map', text: 'Counterparties ranked on fit, urgency and what each paid at your stage; the buyers you name assessed on the same terms.' },
+  { n: '22', title: 'Catalyst calendar', text: 'Twenty-four months of readouts, LOEs and buyer events, and the window the recommendation rests on.' },
+  { n: '23', title: 'Positioning, objections, diligence', text: 'How to present it, the objections you will hear with the evidence to answer them, and what is ready versus open.' },
 ];
 
 const STEPS: Array<[string, string]> = [
@@ -91,7 +91,7 @@ export default async function BriefPage() {
               {[
                 [stats.totalDealsDisplay, 'primary-sourced deals, live'],
                 [String(ENGINE_COUNT), 'engines on one asset'],
-                ['~30', 'data-backed pages'],
+                ['35', 'data-backed pages'],
                 ['24h', 'from the intake call'],
               ].map(([v, l]) => (
                 <div key={l}>
@@ -102,7 +102,7 @@ export default async function BriefPage() {
             </dl>
           </div>
           <div className="lg:pl-4">
-            <DecisionPreview />
+            <BriefPageStack />
           </div>
         </div>
       </section>
@@ -112,7 +112,7 @@ export default async function BriefPage() {
         <div className="mx-auto max-w-6xl px-6 py-20">
           <div className="max-w-2xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">What you receive</p>
-            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-50">About thirty pages, each built from cited data or from what you tell us.</h2>
+            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-50">Thirty-five pages, each built from cited data or from what you tell us.</h2>
             <p className="mt-3 text-slate-400">Nothing is generated to fill space. A page with no defensible data prints an empty state that says why, not a paragraph of prose.</p>
           </div>
           <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
