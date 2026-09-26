@@ -119,6 +119,14 @@ const AFFILIATE = new Set([
   'turkey', 'russia', 'thailand', 'argentina', 'chile', 'south africa', 'czech', 'hungary', 'pacific', 'overseas', 'united states', 'united kingdom',
 ]);
 
+const COUNTRY_ALIAS: Readonly<Record<string, string>> = {
+  us: 'us', usa: 'us', 'united states': 'us', 'united states of america': 'us', uk: 'gb', gb: 'gb', 'united kingdom': 'gb', england: 'gb',
+  de: 'de', germany: 'de', deutschland: 'de', fr: 'fr', france: 'fr', ch: 'ch', switzerland: 'ch', jp: 'jp', japan: 'jp', cn: 'cn', china: 'cn',
+  kr: 'kr', korea: 'kr', 'south korea': 'kr', ca: 'ca', canada: 'ca', au: 'au', australia: 'au', in: 'in', india: 'in', it: 'it', italy: 'it',
+  es: 'es', spain: 'es', nl: 'nl', netherlands: 'nl', 'the netherlands': 'nl', be: 'be', belgium: 'be', se: 'se', sweden: 'se', dk: 'dk', denmark: 'dk',
+  ie: 'ie', ireland: 'ie', il: 'il', israel: 'il', sg: 'sg', singapore: 'sg', tw: 'tw', taiwan: 'tw', hk: 'hk', 'hong kong': 'hk',
+};
+
 /** Leading region prefixes on Chinese entity names ("Jiangsu Hansoh", "Shanghai Junshi"). */
 const LEADING_REGION = new Set([
   'jiangsu', 'shanghai', 'beijing', 'suzhou', 'hangzhou', 'guangzhou', 'shenzhen', 'zhejiang', 'sichuan', 'chongqing', 'tianjin', 'nanjing',
@@ -166,6 +174,8 @@ export interface SameCompanyParts {
   excluded: 'division' | 'subsidiary' | 'placeholder' | 'generic' | null;
   /** Institution: only the parenthetical country tag was ignorable. */
   institutional: boolean;
+  /** Country named by a parenthetical tag ("(UK)", "(The Netherlands)"), normalised; null when none. */
+  countryTag: string | null;
 }
 
 export interface PartsOptions {
@@ -186,12 +196,21 @@ function pairAt(tokens: string[], i: number): string {
 /** Reduce a raw company name to its identity stem. Pure; exported for tests. */
 export function sameCompanyParts(raw: string | null | undefined, opts: PartsOptions = {}): SameCompanyParts {
   const institutional = opts.institutional ?? isInstitutional(raw);
-  const { stem: s0, markers } = splitNameMarkers(raw);
-  const out: SameCompanyParts = { stem: '', descriptors: [], classes: [], affiliate: false, tagged: [], excluded: null, institutional };
+  const out: SameCompanyParts = { stem: '', descriptors: [], classes: [], affiliate: false, tagged: [], excluded: null, institutional, countryTag: null };
   if (PLACEHOLDER_RE.test((raw ?? '').trim())) { out.excluded = 'placeholder'; return out; }
+  let s0: string;
+  let markers: string[];
+  if (institutional) {
+    // Institutions: parentheticals are tags; every other word, including a trailing country, is identity.
+    markers = [];
+    const stripped = (raw ?? '').replace(/\(([^()]*)\)/g, (_m, inner: string) => { const k = normalizeCompanyName(inner); if (k) markers.push(k); return ' '; });
+    s0 = normalizeCompanyName(stripped);
+  } else {
+    ({ stem: s0, markers } = splitNameMarkers(raw));
+  }
 
   for (const m of markers) {
-    if (COUNTRY_DIVISION.has(m) || AFFILIATE.has(m) || LEADING_REGION.has(m)) { out.affiliate = true; continue; }
+    if (COUNTRY_DIVISION.has(m) || AFFILIATE.has(m) || LEADING_REGION.has(m)) { out.affiliate = true; out.countryTag = out.countryTag ?? (COUNTRY_ALIAS[m] ?? m); continue; }
     if (DIVISION_MARKERS.includes(m)) { out.excluded = 'division'; continue; }
     if (m in KNOWN_SUBSIDIARIES) { out.excluded = 'subsidiary'; continue; }
     if (CODE_TAG.test(m) || PARENT_TAGS.has(m)) continue;
@@ -308,13 +327,6 @@ function domainOf(r: MergeCompanyRow): string | null {
 function distinct(values: Array<string | null>): string[] {
   return [...new Set(values.filter((v): v is string => !!v))];
 }
-const COUNTRY_ALIAS: Readonly<Record<string, string>> = {
-  us: 'us', usa: 'us', 'united states': 'us', 'united states of america': 'us', uk: 'gb', gb: 'gb', 'united kingdom': 'gb', england: 'gb',
-  de: 'de', germany: 'de', deutschland: 'de', fr: 'fr', france: 'fr', ch: 'ch', switzerland: 'ch', jp: 'jp', japan: 'jp', cn: 'cn', china: 'cn',
-  kr: 'kr', korea: 'kr', 'south korea': 'kr', ca: 'ca', canada: 'ca', au: 'au', australia: 'au', in: 'in', india: 'in', it: 'it', italy: 'it',
-  es: 'es', spain: 'es', nl: 'nl', netherlands: 'nl', 'the netherlands': 'nl', be: 'be', belgium: 'be', se: 'se', sweden: 'se', dk: 'dk', denmark: 'dk',
-  ie: 'ie', ireland: 'ie', il: 'il', israel: 'il', sg: 'sg', singapore: 'sg', tw: 'tw', taiwan: 'tw', hk: 'hk', 'hong kong': 'hk',
-};
 function countryOf(r: MergeCompanyRow): string | null {
   const c = (r.hq_country ?? '').trim().toLowerCase();
   if (!c) return null;
@@ -416,7 +428,9 @@ export function planSameCompanyMerges(rows: readonly MergeCompanyRow[], opts: Sa
 
     const institutional = members.every(r => parts.get(r.id)!.institutional);
     if (institutional) {
-      // Only parenthetical country tags differed: exact same words.
+      // Only parenthetical country tags differed: exact same words — but two different countries are two institutions.
+      const tags = distinct(members.map(r => parts.get(r.id)!.countryTag));
+      if (tags.length > 1) { review.push({ stem, reason: 'country_conflict', detail: `country tags ${tags.join(', ')}`, rows: summary(members) }); continue; }
       makePlan(stem, members, 'institution, same words');
       continue;
     }
@@ -467,7 +481,7 @@ export function isSameCompanyName(a: string, b: string, opts: PartsOptions = {})
   const pb = sameCompanyParts(b, opts);
   if (!pa.stem || !pb.stem || pa.excluded || pb.excluded || pa.tagged.length || pb.tagged.length) return false;
   if (!sameCompanyKey(pa.stem, pb.stem)) return false;
-  if (pa.institutional && pb.institutional) return true;
+  if (pa.institutional && pb.institutional) return !(pa.countryTag && pb.countryTag && pa.countryTag !== pb.countryTag);
   if (pa.institutional !== pb.institutional) return false;
   if (isDistinctiveStem(pa.stem)) return descriptorsCompatible(pa, pb);
   const da = descriptorSignature(pa);

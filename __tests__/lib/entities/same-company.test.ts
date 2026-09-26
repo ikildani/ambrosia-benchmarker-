@@ -87,6 +87,9 @@ describe('isSameCompanyName', () => {
     ['Zhejiang University', 'The University of Hong Kong'],
     ['Shanghai Cell Therapy Group Co.,Ltd', 'Cell Therapy Limited'],
     ['Undisclosed European biotech company', 'Undisclosed'],
+    ['Department of Health (UK)', 'Department of Health (Taiwan)'],
+    ['Centers for Disease Control and Prevention', 'Centers for Disease Control and Prevention, China'],
+    ['Malaria Consortium', 'Malaria Consortium, UK'],
     ['Individual Sponsor (Denmark)', 'Individual Sponsor (Germany)'],
   ])('%s is not %s', (a, b) => {
     expect(isSameCompanyName(a, b)).toBe(false);
@@ -186,6 +189,15 @@ describe('planSameCompanyMerges', () => {
     const r = planSameCompanyMerges(rows);
     expect(r.plans).toHaveLength(1);
     expect(r.plans[0].canonicalId).toBe('b');
+  });
+
+  it('institutions with different parenthetical countries go to review', () => {
+    const rows = [row('a', 'Department of Health', { owner_type: 'government' }), row('b', 'Department of Health (UK)', { owner_type: 'government' }), row('c', 'Department of Health (Taiwan)', { owner_type: 'government' })];
+    const r = planSameCompanyMerges(rows);
+    expect(r.plans).toHaveLength(0);
+    expect(r.review[0]?.reason).toBe('country_conflict');
+    const ok = planSameCompanyMerges([row('a', 'University of Oxford', { owner_type: 'academic' }), row('b', 'University of Oxford (UK)', { owner_type: 'academic' })]);
+    expect(ok.plans).toHaveLength(1);
   });
 
   it('different HQ countries among non-affiliate rows go to review', () => {
