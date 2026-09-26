@@ -68,6 +68,10 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
         <div class="chart-container" style="margin: 0;">${renderPatientFunnel(funnel, 560, 200)}</div>
         ${chartSource(source)}
       </div>
+      ${fromModel && share && share.median >= 0.95 && funnel.pricePerYearUsd ? `
+      <div class="callout-amber" style="padding: 8px 12px; font-size: 9px; margin-top: 10px;">
+        <strong>Check before the room.</strong> The modelled peak of ${fmtM(funnel.peakSalesM.median)} needs ${fmtShare(share.median)} of the ${fmtInt(last.value)} addressable patients at $${fmtInt(funnel.pricePerYearUsd)} a year, which is the whole market. Either the net price is too low for this indication or the peak is too high; a buyer will test this line first, so the walkthrough should settle which.
+      </div>` : ''}
 
       <div class="grid-3" style="margin-top: 12px; gap: 10px;">
         <div class="kpi-card" style="padding: 10px 8px; border-top-color: ${COLORS.gray400};">

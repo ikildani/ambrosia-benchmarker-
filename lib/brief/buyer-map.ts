@@ -481,10 +481,18 @@ export function buildWhyNow(c: {
   }
   const upcoming = c.patentCliffs.filter(p => p.expiryYear >= nowYear).sort((a, b) => (b.revenueUsd ?? 0) - (a.revenueUsd ?? 0));
   const cliff = upcoming.find(p => p.revenueUsd) ?? upcoming[0];
-  if (cliff) {
-    const rev = usdShort(cliff.revenueUsd);
-    const share = revenueShare(cliff.revenueUsd, c.totalRevenueUsd);
-    return `${cliff.drug} loses exclusivity in ${cliff.expiryYear}${rev ? ` (${rev} of revenue${share != null ? `, ${share}% of the total` : ''})` : ''}; the replacement has to be signed before then.`;
+  // A signed deal in this area is the strongest reason; the exclusivity cliff
+  // says why the budget is open, not why this asset. Lead with the deal when
+  // there is one and let the cliff follow.
+  const sameArea = [...c.priorDeals].filter(d => d.sameTA).sort((a, b) => (b.year ?? 0) - (a.year ?? 0))[0];
+  const cliffClause = cliff ? `${cliff.drug} loses exclusivity in ${cliff.expiryYear}${usdShort(cliff.revenueUsd) ? ` (${usdShort(cliff.revenueUsd)} of revenue${revenueShare(cliff.revenueUsd, c.totalRevenueUsd) != null ? `, ${revenueShare(cliff.revenueUsd, c.totalRevenueUsd)}% of the total` : ''})` : ''}` : null;
+  if (sameArea && sameArea.year) {
+    const money = sameArea.upfrontM != null ? ` at ${sameArea.upfrontM >= 1000 ? `$${(sameArea.upfrontM / 1000).toFixed(1)}B` : `$${Math.round(sameArea.upfrontM)}M`} upfront` : '';
+    const what = `${PHASE_TEXT[sameArea.phase]} ${STRUCTURE_TEXT[sameArea.structure]}`;
+    return `Signed ${sameArea.parties.split(' → ')[0]} in ${sameArea.year}${money} (${what} in ${taLabel})${cliffClause ? `; ${cliffClause}, so the budget for replacements is open` : '; the team that did it is still buying'}.`;
+  }
+  if (cliff && cliffClause) {
+    return `${cliffClause}; the replacement has to be signed before then.`;
   }
   const rar = (c.revenueAtRisk.y2026 ?? 0) + (c.revenueAtRisk.y2027 ?? 0);
   if (rar > 0) {
@@ -554,6 +562,8 @@ interface CompanyRow {
   id: string;
   name: string;
   name_variations: string[] | null;
+  /** Entity graph: set when this company has been folded into another (acquired, renamed). */
+  merged_into?: string | null;
   company_type: string | null;
   hq_region: string | null;
   hq_country: string | null;
@@ -598,7 +608,7 @@ interface PremiumRow {
   as_of_date: string | null;
 }
 
-const COMPANY_COLS = 'id,name,name_variations,company_type,hq_region,hq_country,phase_preference_min,phase_preference_max,deals_last_12mo,deals_last_24mo,last_deal_date,total_annual_revenue,revenue_at_risk_2025,revenue_at_risk_2026,revenue_at_risk_2027,patent_cliffs,hiring_bd_roles,acquisition_appetite,data_quality_score';
+const COMPANY_COLS = 'id,name,name_variations,merged_into,company_type,hq_region,hq_country,phase_preference_min,phase_preference_max,deals_last_12mo,deals_last_24mo,last_deal_date,total_annual_revenue,revenue_at_risk_2025,revenue_at_risk_2026,revenue_at_risk_2027,patent_cliffs,hiring_bd_roles,acquisition_appetite,data_quality_score';
 const DEAL_COLS = 'id,licensor_name,licensee_name,asset_name,announced_date,phase_at_signing,deal_type,upfront_usd,total_deal_value_usd,therapeutic_area,indication_category,indication_specific,source_url,verified';
 
 /** Quote a value for a PostgREST `.or()` filter (commas, parens, quotes are unsafe bare). */
@@ -803,6 +813,9 @@ export async function buildBuyerMap(
         const dup = (g.companyId && takenIds.has(g.companyId)) || g.aliases.some(a => taken.has(norm(a)));
         if (dup) continue;
         const company = g.companyId ? companyRows.find(r => r.id === g.companyId) ?? null : null;
+        // A company that no longer exists as a buyer (folded into an acquirer in
+        // the entity graph) cannot be approached; its deal history belongs to the acquirer.
+        if (company?.merged_into) continue;
         const recent = taDeals.filter(d => g.aliases.some(a => norm(a) === norm(d.licensee_name)) && (d.announced_date ?? '') >= cutoffIso).length;
         const partner: PartnerInput = {
           company_name: g.name,
