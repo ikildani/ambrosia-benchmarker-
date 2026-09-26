@@ -66,7 +66,7 @@ export const PORTFOLIO_PRICING = {
 } as const;
 
 export const PORTFOLIO_DEMO_URL =
-  'mailto:issa@ambrosiaventures.co?subject=Portfolio%20License%20Demo%20Request&body=Fund%20name%3A%20%0APortfolio%20size%20(companies)%3A%20%0AEstimated%20seats%20needed%3A%20%0APrimary%20therapeutic%20areas%3A%20%0APreferred%20demo%20time%3A%20';
+  'mailto:info@ambrosiaventures.co?subject=Portfolio%20License%20Demo%20Request&body=Fund%20name%3A%20%0APortfolio%20size%20(companies)%3A%20%0AEstimated%20seats%20needed%3A%20%0APrimary%20therapeutic%20areas%3A%20%0APreferred%20demo%20time%3A%20';
 
 /**
  * Rounds a count down to the nearest 100 and formats as "X,Y00+".

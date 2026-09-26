@@ -320,7 +320,7 @@ export async function GET(request: NextRequest) {
 
           const adminEmails = process.env.ADMIN_EMAILS
             ? process.env.ADMIN_EMAILS.split(',').map((e) => e.trim())
-            : ['issa@ambrosiaventures.co'];
+            : ['ikildani@ambrosiaventures.co'];
 
           await sgMail.send({
             to: adminEmails,

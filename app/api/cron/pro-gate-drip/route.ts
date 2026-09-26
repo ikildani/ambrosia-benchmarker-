@@ -258,8 +258,8 @@ export async function GET(request: NextRequest) {
             to: lead.email,
             subject,
             html,
-            from: 'Issa Kildani <issa@ambrosiaventures.co>',
-            replyTo: 'issa@ambrosiaventures.co',
+            from: 'Issa Kildani <ikildani@ambrosiaventures.co>',
+            replyTo: 'ikildani@ambrosiaventures.co',
           });
           if (result.success) {
             await supabase.from('leads').update({ drip_5_sent: true }).eq('id', lead.id);
@@ -275,8 +275,8 @@ export async function GET(request: NextRequest) {
           const { subject, html } = buildProGateEmail6(lead.email, context);
           const result = await sendEmail({
             to: lead.email, subject, html,
-            from: 'Issa Kildani <issa@ambrosiaventures.co>',
-            replyTo: 'issa@ambrosiaventures.co',
+            from: 'Issa Kildani <ikildani@ambrosiaventures.co>',
+            replyTo: 'ikildani@ambrosiaventures.co',
           });
           if (result.success) {
             await supabase.from('leads').update({ drip_6_sent: true }).eq('id', lead.id);
@@ -292,8 +292,8 @@ export async function GET(request: NextRequest) {
           const { subject, html } = buildProGateEmail7(lead.email, context);
           const result = await sendEmail({
             to: lead.email, subject, html,
-            from: 'Issa Kildani <issa@ambrosiaventures.co>',
-            replyTo: 'issa@ambrosiaventures.co',
+            from: 'Issa Kildani <ikildani@ambrosiaventures.co>',
+            replyTo: 'ikildani@ambrosiaventures.co',
           });
           if (result.success) {
             await supabase.from('leads').update({ drip_7_sent: true }).eq('id', lead.id);

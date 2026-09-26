@@ -267,7 +267,7 @@ export default function CapitalIQComparePage() {
               Start Free Trial
             </Link>
             <Link
-              href="mailto:issa@ambrosiaventures.co?subject=Demo%20Request"
+              href="mailto:info@ambrosiaventures.co?subject=Demo%20Request"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white/[0.04] border border-white/[0.1] text-white font-semibold rounded-xl hover:bg-white/[0.08] transition-all text-sm"
             >
               Schedule Demo

@@ -24,7 +24,7 @@ export default function ReportsPage() {
           Fund-branded report generation is available on the Scale and Enterprise tiers. Upgrade to generate deal reports with your fund&apos;s logo, colors, and disclaimer.
         </p>
         <a
-          href="mailto:issa@ambrosiaventures.co?subject=Portfolio%20License%20Upgrade%20%E2%80%94%20Scale%20Tier"
+          href="mailto:info@ambrosiaventures.co?subject=Portfolio%20License%20Upgrade%20%E2%80%94%20Scale%20Tier"
           className="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors"
         >
           Upgrade to Scale <ArrowUpRight className="w-4 h-4" />

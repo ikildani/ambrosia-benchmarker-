@@ -516,7 +516,7 @@ async function queueFunnelEmail(
     html,
     from: emailType === 'pro_nudge'
       ? 'Solidus by Ambrosia Ventures <info@ambrosiaventures.co>'
-      : 'Issa Kildani <issa@ambrosiaventures.co>',
+      : 'Issa Kildani <ikildani@ambrosiaventures.co>',
     replyTo: 'ikildani@ambrosiaventures.co',
   });
 }
@@ -598,7 +598,7 @@ async function queueAdvisoryEmail(
     to: lead.email,
     subject: template.subject,
     html,
-    from: 'Issa Kildani <issa@ambrosiaventures.co>',
+    from: 'Issa Kildani <ikildani@ambrosiaventures.co>',
     replyTo: 'ikildani@ambrosiaventures.co',
   });
 }
