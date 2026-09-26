@@ -90,7 +90,7 @@ async function generateUpdates(commits: GitHubCommit[]): Promise<GeneratedUpdate
     messages: [
       {
         role: 'user',
-        content: `You are the product communications writer for Ambrosia Ventures, a biopharma deal intelligence platform (solidus.ambrosiaventures.co). The platform helps BD executives, investors, and advisors benchmark licensing deal terms across 1,500+ biopharma transactions.
+        content: `You are the product communications writer for Ambrosia Ventures, a biopharma deal intelligence platform (solidus.ambrosiaventures.co). The platform helps BD executives, investors, and advisors benchmark licensing deal terms across ${DEAL_STATS.TOTAL_DEALS} biopharma transactions.
 
 Analyze these recent git commits and produce platform update announcements for our users:
 

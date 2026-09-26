@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { InsightCTA } from '@/components/insights/InsightCTA';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { getLiveDealStats } from '@/lib/deal-stats';
 
 export const metadata: Metadata = {
   title: 'Press Data Kit — Biopharma Deal Benchmarks',
@@ -36,7 +37,8 @@ const embedCharts = [
   { title: 'Territory Value Split', type: 'territory-split', description: 'Deal value distribution across global, US-only, ex-US, and regional structures.' },
 ];
 
-export default function PressDataKitPage() {
+export default async function PressDataKitPage() {
+  const live = await getLiveDealStats();
   const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://solidus.ambrosiaventures.co' },
     { '@type': 'ListItem', position: 2, name: 'Press', item: 'https://solidus.ambrosiaventures.co/press' },
@@ -221,7 +223,7 @@ export default function PressDataKitPage() {
                   <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">50-Word Version</p>
                   <div className="bg-slate-50 rounded-lg p-4">
                     <p className="text-sm text-slate-700 leading-relaxed">
-                      Ambrosia Ventures provides data-driven deal intelligence for biopharma licensing professionals. The platform analyzes 1,500+ verified transactions across 12 therapeutic areas, offering real-time benchmarks for upfront payments, milestones, and royalties. Used by BD teams, investors, and consultants to benchmark and structure biopharma partnerships.
+                      Ambrosia Ventures provides data-driven deal intelligence for biopharma licensing professionals. The platform analyzes {live.totalDealsDisplay} verified transactions across 12 therapeutic areas, offering real-time benchmarks for upfront payments, milestones, and royalties. Used by BD teams, investors, and consultants to benchmark and structure biopharma partnerships.
                     </p>
                   </div>
                 </div>

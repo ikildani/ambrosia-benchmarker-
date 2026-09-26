@@ -107,7 +107,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>Pharma spent $9.65B discovering that radiopharma could be bought. Regeneron just showed the next lesson: <strong>radiopharma can be optioned.</strong></p>
 
-<p>For data-driven deal-structure benchmarks across 3,500+ biopharma transactions &mdash; upfronts, milestones, royalty curves, co-development splits, opt-out clauses &mdash; with a fully public track record, explore the <a href="/calculator">Ambrosia deal calculator</a> or our <a href="/blog/adc-deal-trends-2026">ADC deal trends analysis</a> for a comparable category-level deep dive.</p>
+<p>For data-driven deal-structure benchmarks across ${DEAL_STATS.TOTAL_DEALS} biopharma transactions &mdash; upfronts, milestones, royalty curves, co-development splits, opt-out clauses &mdash; with a fully public track record, explore the <a href="/calculator">Ambrosia deal calculator</a> or our <a href="/blog/adc-deal-trends-2026">ADC deal trends analysis</a> for a comparable category-level deep dive.</p>
 `,
     faqs: [
       {

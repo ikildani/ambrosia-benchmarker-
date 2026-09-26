@@ -22,7 +22,7 @@
 Jason,
 
 We just published our Q1 2026 biopharma deal benchmarks — an
-analysis of 2,600+ verified licensing transactions — and one
+analysis of 300+ primary-sourced verified licensing transactions — and one
 finding jumped out that's relevant to your oncology coverage:
 
 ADC deal values have fully normalized from the 2023 Pfizer/Seagen
@@ -62,7 +62,7 @@ Amber,
 
 Quick note with a data resource that might be useful for your
 deal coverage. We maintain the largest public dataset of
-biopharma licensing transaction economics: 2,600+ verified deals
+biopharma licensing transaction economics: 300+ primary-sourced verified deals
 across 12 therapeutic areas with structured terms (upfront,
 milestones, royalties, territory).
 
@@ -94,7 +94,7 @@ solidus.ambrosiaventures.co
 ## 3. Damian Garde — STAT News
 **Angle:** Comprehensive deal benchmark data — primary source for transaction economics
 
-**Subject:** Biopharma deal benchmark dataset — 2,600+ transactions with structured terms
+**Subject:** Biopharma deal benchmark dataset — 300+ primary-sourced transactions with structured terms
 
 ```
 Damian,
@@ -103,7 +103,7 @@ I've followed your deal coverage for years — you're one of the
 few reporters who consistently gets into the economics behind
 the headlines. Wanted to put a data resource on your radar.
 
-We built a structured database of 2,600+ biopharma licensing and
+We built a structured database of 300+ primary-sourced biopharma licensing and
 M&A transactions (2020-2026) with disclosed terms: upfront payments,
 milestone structures, royalty rates, territory splits — all sourced
 from SEC filings and press releases. We just published our Q1 2026
@@ -186,7 +186,7 @@ solidus.ambrosiaventures.co
 Isabella,
 
 For your oncology coverage — a data resource that might be useful.
-We analyze 2,600+ biopharma licensing transactions and just
+We analyze 300+ primary-sourced biopharma licensing transactions and just
 published our Q1 2026 quarterly benchmarks. The oncology picture:
 
 • Phase 2 oncology median upfront: $120M ($1.3B total deal value)
@@ -221,14 +221,14 @@ solidus.ambrosiaventures.co
 ## 6. Eric Sagonowsky — Fierce Pharma
 **Angle:** Primary deal economics — comprehensive benchmarks
 
-**Subject:** Data for your deal coverage: 2,600+ biopharma transactions with structured economics
+**Subject:** Data for your deal coverage: 300+ primary-sourced biopharma transactions with structured economics
 
 ```
 Eric,
 
 You cover deal economics more thoroughly than anyone at Fierce —
 wanted to share a resource. We built a structured database of
-2,600+ biopharma licensing and M&A transactions with full
+300+ primary-sourced biopharma licensing and M&A transactions with full
 economics: upfront, milestones, royalties, territory, modality,
 and phase. Updated weekly from SEC filings.
 
@@ -267,7 +267,7 @@ solidus.ambrosiaventures.co
 Angus,
 
 For your coverage of pharma strategy — we track deal structure
-economics across 2,600+ transactions and the licensing vs
+economics across 300+ primary-sourced transactions and the licensing vs
 acquisition dynamic is shifting in ways worth noting:
 
 • Licensing deals: 15-20% upfront, 55-65% milestones, balance
@@ -309,7 +309,7 @@ solidus.ambrosiaventures.co
 Ben,
 
 Quick data note for your deal coverage. Our Q1 2026 quarterly
-analysis just went live — 2,600+ cumulative transactions
+analysis just went live — 300+ primary-sourced cumulative transactions
 analyzed. The Q1 volume story:
 
 • 180 transactions in Q1 2026 (+12% YoY)
@@ -347,7 +347,7 @@ solidus.ambrosiaventures.co
 Jacob,
 
 For your pharma strategy coverage — we track deal structure
-economics across 2,600+ transactions and the licensing vs
+economics across 300+ primary-sourced transactions and the licensing vs
 acquisition trend is worth a deeper look:
 
 The 2022-2023 cycle was defined by platform acquisitions
