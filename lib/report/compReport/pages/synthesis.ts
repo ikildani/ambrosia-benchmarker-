@@ -93,7 +93,7 @@ export function renderSynthesisPage(
         </div>
 
         <div style="font-size: 9px; color: ${COLORS.gray600}; line-height: 1.6; padding-top: 10px; border-top: 1px solid ${COLORS.gray200};">
-          Adjustment factors (development stage, territory scope, deal structure, competitive position) are computed deterministically from engine parameters and applied to each comparable for valuation bridging. AI-generated narratives are grounded in pre-computed quantitative data and cannot hallucinate financial figures.
+          Adjustment factors (development stage, territory scope, deal structure, competitive position) are computed deterministically from engine parameters and applied to each comparable for valuation bridging. The written narrative is grounded in the pre-computed quantitative data; every financial figure in it is taken from the engine outputs, not composed.
         </div>
       </div>
 

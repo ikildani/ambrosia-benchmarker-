@@ -72,7 +72,7 @@ export default function BDTeamsPage() {
             { title: 'Partner Matching', desc: '700+ companies scored across 11 strategic dimensions. Know which buyers have the pipeline gaps, financial capacity, and M&A history that make your asset a fit — before the first call.' },
             { title: 'Buyer-Specific Valuation', desc: 'The same asset is worth different amounts to different buyers. Solidus calibrates valuations to each acquirer\'s portfolio gaps, deal history, and strategic premiums.' },
             { title: 'Monte Carlo Simulation', desc: '10,000-iteration probabilistic analysis. See the full distribution of outcomes — not just the median. Know where P10, P50, and P90 land for your specific deal.' },
-            { title: 'Negotiation Playbook', desc: 'AI-generated playbook with opening position, walk-away, and counterparty-specific talking points. Built from the comp set, not generic advice.' },
+            { title: 'Negotiation Playbook', desc: 'Playbook with opening position, walk-away, and counterparty-specific talking points. Built from the comp set, not generic advice.' },
           ].map((item) => (
             <div key={item.title} className="p-5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2">{item.title}</h3>

@@ -191,7 +191,7 @@ export default function AboutPage() {
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Advanced Valuation</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">
                     rNPV modeling, Monte Carlo simulation with 10,000 iterations, scenario planning,
-                    and AI-generated negotiation playbooks.
+                    and negotiation playbooks built from the comp set.
                   </p>
                 </div>
               </div>

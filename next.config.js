@@ -20,6 +20,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Sep 26 2026: the Deal Intelligence Brief product page moved to /brief.
+      { source: '/benchmark', destination: '/brief', permanent: true },
       {
         source: '/benchmarks/alzheimers-deal-benchmarks',
         destination: '/benchmarks/alzheimers-licensing-deals',

@@ -180,7 +180,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               'Cited comparables, phase-matched',
               'Buyers ranked on evidence, not a match score',
               'Catalyst calendar and go-to-market window',
-              'Managing Partner review and walkthrough call',
+              'Managing Partner review and 30-minute walkthrough',
             ].map((item, idx) => (
               <li key={idx} className="flex items-start gap-2.5 list-none">
                 <div className="w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -195,12 +195,12 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
           <div className="text-center">
             <a
-              href="/benchmark"
+              href="/brief"
               className="inline-flex items-center justify-center px-10 py-3.5 rounded-xl font-bold text-base transition-all duration-200 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5"
             >
               Configure Your Brief
             </a>
-            <p className="text-xs text-neutral-400 dark:text-slate-500 mt-3">Delivered within 24 hours with walkthrough</p>
+            <p className="text-xs text-neutral-400 dark:text-slate-500 mt-3">About 30 data-backed pages · Invoiced at intake · Credited in full against a subsequent advisory mandate</p>
           </div>
         </div>
 
@@ -409,7 +409,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         {/* Deal Intelligence Brief CTA — concierge benchmark product */}
         <div className="text-center mb-6">
           <Link
-            href="/benchmark"
+            href="/brief"
             className="group inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-5 p-4 sm:p-6 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40 rounded-xl sm:rounded-2xl border border-teal-200 dark:border-teal-500/30 hover:border-teal-400 dark:hover:border-teal-400/60 hover:shadow-lg hover:shadow-teal-500/10 transition-all"
           >
             <div className="flex items-center gap-3 sm:gap-4">
@@ -418,11 +418,11 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               </div>
               <div className="text-center sm:text-left">
                 <div className="flex items-center gap-2 justify-center sm:justify-start">
-                  <p className="font-semibold text-neutral-900 dark:text-white text-sm sm:text-base">Need the full landscape? Get a Deal Intelligence Brief.</p>
+                  <p className="font-semibold text-neutral-900 dark:text-white text-sm sm:text-base">Need a decision for one asset? Get a Deal Intelligence Brief.</p>
                   <span className="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-500/15 text-teal-600 dark:text-teal-300 rounded-full border border-teal-500/20">New</span>
                 </div>
                 <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 mt-0.5">
-                  $2,500 — a signed recommendation, cited comparables, evidence-ranked buyers, walkthrough included
+                  $2,500 — one scored recommendation, cited comparables, evidence-ranked buyers, 30-minute walkthrough; credited in full against a subsequent advisory mandate
                 </p>
               </div>
             </div>

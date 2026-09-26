@@ -376,18 +376,18 @@ export default async function BenchmarkPage({ params }: PageProps) {
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-full">For Funds & Advisors</span>
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Need the full deal landscape?</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Need a decision for one asset?</h3>
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 max-w-xl">
               The Deal Intelligence Brief turns this landscape into <strong>a decision for one asset</strong> — a signed recommendation with ask, floor and walk-away, cited comparables, buyers ranked on evidence, and a 24-month catalyst calendar. Reviewed by the Managing Partner; delivered within 24 hours of the intake call.
             </p>
             <div className="flex items-center gap-4">
               <Link
-                href="/benchmark"
+                href="/brief"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-sm rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
               >
                 Configure Brief — $2,500
               </Link>
-              <span className="text-xs text-slate-400">All-inclusive · White-label · Walkthrough included</span>
+              <span className="text-xs text-slate-400">About 30 data-backed pages · Invoiced at intake · 30-minute walkthrough</span>
             </div>
           </div>
         </section>

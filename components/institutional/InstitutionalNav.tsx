@@ -20,6 +20,7 @@ interface NavItem {
 }
 
 const ITEMS: NavItem[] = [
+  { href: '/brief', label: 'Deal Intelligence Brief', shortLabel: 'Brief' },
   { href: '/playbook', label: 'Counterparty Playbooks', shortLabel: 'Playbooks' },
   { href: '/trade-space', label: 'Trade Space', shortLabel: 'Trade Space' },
   { href: '/simulator', label: 'Negotiation Simulator', shortLabel: 'Simulator' },

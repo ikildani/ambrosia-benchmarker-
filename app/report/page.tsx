@@ -8,22 +8,22 @@ import {
   Database, Lock, Download, Star, ChevronRight,
   Globe, Microscope, FlaskConical, Brain, Calculator,
 } from 'lucide-react';
-import { DEAL_STATS, PRICING, BENCHMARK_PRICING } from '@/lib/config/constants';
+import { DEAL_STATS, PRICING, BENCHMARK_PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 import ReportIntakeForm from '@/components/ReportIntakeForm';
 
 export const metadata: Metadata = {
-  title: 'Deal Intelligence Report — $499',
+  title: `${PRICING.REPORT_LABEL} — ${PRICING.REPORT_PRICE}`,
   description: `Board-ready biopharma deal benchmarking in 60 seconds. rNPV valuation, comparable transactions, partner matching, sensitivity analysis, negotiation playbook — powered by ${DEAL_STATS.TOTAL_DEALS} verified SEC filings.`,
   openGraph: {
-    title: 'Deal Intelligence Report — $499',
+    title: `${PRICING.REPORT_LABEL} — ${PRICING.REPORT_PRICE}`,
     description: `Board-ready biopharma deal benchmarking. Comparable deals, partner matching, sensitivity analysis, and negotiation playbook from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     type: 'website',
     url: 'https://solidus.ambrosiaventures.co/report',
-    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'Ambrosia Ventures Deal Intelligence Report' }],
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: `Ambrosia Ventures ${PRICING.REPORT_LABEL}` }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deal Intelligence Report — $499',
+    title: `${PRICING.REPORT_LABEL} — ${PRICING.REPORT_PRICE}`,
     description: `Board-ready biopharma deal benchmarking from ${DEAL_STATS.TOTAL_DEALS} real transactions.`,
     images: ['/api/og'],
   },
@@ -311,7 +311,7 @@ export default function ReportPage() {
                 {/* Report header */}
                 <div className="flex items-start justify-between mb-8">
                   <div>
-                    <div className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-2">Deal Intelligence Report</div>
+                    <div className="text-[10px] font-bold text-teal-500/50 tracking-[0.2em] uppercase mb-2">{PRICING.REPORT_LABEL}</div>
                     <div className="text-xl sm:text-2xl font-bold text-white mb-1">ADC Licensing — Oncology</div>
                     <div className="text-xs text-slate-500">Phase 2 &middot; Solid Tumors &middot; Generated Apr 2026</div>
                   </div>
@@ -816,7 +816,7 @@ export default function ReportPage() {
               <h3 className="font-display text-xl font-bold text-white mb-2">Need unlimited reports?</h3>
               <p className="text-xs text-slate-500 max-w-md leading-relaxed">
                 Pro subscribers get unlimited deal reports, Pharma Intent Score access, priority data,
-                and all 8 calculation engines — {PRICING.PRO_MONTHLY}.
+                and all {ENGINE_COUNT} calculation engines — {PRICING.PRO_MONTHLY}.
               </p>
             </div>
             <Link
@@ -865,21 +865,21 @@ export default function ReportPage() {
                 </div>
 
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3 leading-tight">
-                  Need the full landscape?
+                  Need a decision for one asset?
                 </h2>
                 <p className="text-lg text-teal-400 font-medium mb-4">
                   Deal Intelligence Brief — {BENCHMARK_PRICING.PRICE}
                 </p>
                 <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-lg">
-                  {BENCHMARK_PRICING.DESCRIPTION} White-label branding included. Delivered within 24 hours with a complimentary 30-minute walkthrough.
+                  {BENCHMARK_PRICING.DESCRIPTION} About 30 data-backed pages, invoiced at intake. Delivered within 24 hours of the intake call with a 30-minute walkthrough arranged by reply; credited in full against a subsequent advisory mandate.
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 mb-8">
                   {[
-                    { val: '52', label: 'Deal calculations', sub: '13 modalities × 4 structures' },
-                    { val: 'AI', label: 'Strategic narrative', sub: 'IC-ready analysis' },
-                    { val: '24hr', label: 'Delivery', sub: 'With intake call' },
-                    { val: 'Free', label: 'Walkthrough call', sub: '30 minutes included' },
+                    { val: '1', label: 'Scored recommendation', sub: 'One asset: ask, floor, walk-away' },
+                    { val: '~30', label: 'Data-backed pages', sub: 'Every figure sourced' },
+                    { val: '24hr', label: 'Delivery', sub: 'From the intake call' },
+                    { val: '30min', label: 'Walkthrough', sub: 'Arranged by reply' },
                   ].map(({ val, label, sub }) => (
                     <div key={label} className="flex items-start gap-3">
                       <div className="text-lg font-bold text-teal-400 font-mono min-w-[36px]">{val}</div>
@@ -892,7 +892,7 @@ export default function ReportPage() {
                 </div>
 
                 <Link
-                  href="/benchmark"
+                  href="/brief"
                   className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 hover:-translate-y-0.5 transition-all"
                 >
                   Configure Your Brief

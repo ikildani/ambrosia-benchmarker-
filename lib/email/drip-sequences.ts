@@ -1,3 +1,4 @@
+import { PRICING } from '@/lib/config/constants';
 // ---------------------------------------------------------------------------
 // Drip Email Sequences for Free → Paid Conversion
 // Day 0: Advisory-level insight based on their calculation
@@ -172,7 +173,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
 
 <div style="background: #fff; padding: 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
 
-  <p style="font-size: 15px; color: #334155; margin-top: 0;">You've seen the headline benchmarks. Here's what the full Deal Intelligence Report gives you:</p>
+  <p style="font-size: 15px; color: #334155; margin-top: 0;">You've seen the headline benchmarks. Here's what the full ${PRICING.REPORT_LABEL} gives you:</p>
 
   <div style="margin: 24px 0;">
     <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
@@ -198,7 +199,7 @@ export function buildDay5Email(email: string): { subject: string; html: string }
         <span style="color: #16a34a; font-size: 14px;">✓</span>
       </div>
       <div>
-        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0f172a;">AI-generated deal memo</p>
+        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #0f172a;">Written deal memo</p>
         <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Board-ready analysis of your deal's positioning, risks, and negotiation leverage</p>
       </div>
     </div>

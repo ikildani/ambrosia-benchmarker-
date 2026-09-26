@@ -4,6 +4,7 @@
  */
 
 import { sendEmail } from './client';
+import { ENGINE_COUNT } from '@/lib/config/constants';
 
 const BRAND_COLOR = '#0d9488';
 const BG_COLOR = '#0a0d1b';
@@ -55,7 +56,7 @@ export async function sendProEngagementConfirmation(opts: {
         Your Pro access is live${opts.name ? `, ${opts.name}` : ''}.
       </h1>
       <p style="font-size:16px; color:${TEXT_SECONDARY}; margin:0 0 24px; line-height:1.6;">
-        Full access to all 14 engines, unlimited calculations, PDF & Excel exports, partner intelligence, and Market Pulse — active through <strong style="color:${TEXT_PRIMARY};">${expiresFormatted}</strong>.
+        Full access to all ${ENGINE_COUNT} engines, unlimited calculations, PDF & Excel exports, partner intelligence, and Market Pulse — active through <strong style="color:${TEXT_PRIMARY};">${expiresFormatted}</strong>.
       </p>
       <a href="https://solidus.ambrosiaventures.co/calculator" style="display:inline-block; padding:14px 28px; background:${BRAND_COLOR}; color:white; font-size:15px; font-weight:600; border-radius:10px; text-decoration:none;">
         Open the platform →

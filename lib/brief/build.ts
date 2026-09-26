@@ -48,6 +48,9 @@ import { buildTermSheetPrecedent } from './term-sheet';
 import { computeBuyerValuations, type PremiumEntry } from './buyer-valuations';
 import { buildBuyerMap } from './buyer-map';
 import { buildLandscape, landscapeUsesTerrain } from './landscape';
+import { buildClientComparison } from './client-comparison';
+import { buildIndicativeTermSheet } from './indicative-term-sheet';
+import type { ClientIntake } from './client-intake';
 import { fetchDemandProfile } from './terrain-demand';
 import { buildValuationBridge } from './valuation-bridge';
 import { buildInflectionPath } from './inflection';
@@ -72,6 +75,8 @@ export interface BuildBriefInput {
   /** Diligence items the client says are ready / missing (free text from intake). */
   diligenceReady?: string[];
   diligenceGaps?: string[];
+  /** The client's own data from intake; drives the comparison page, the term sheet and the levers. */
+  client?: ClientIntake | null;
   /** Skip the Anthropic call (tests, offline renders). */
   skipPositioning?: boolean;
   asOf?: string;
@@ -181,11 +186,16 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
       const names = partners.slice(0, 10).map(p => p.company_name);
       const { data } = await supabase
         .from('counterparty_premiums')
-        .select('company_name, premium_multiplier, sample_size, confidence')
-        .in('company_name', names);
+        .select('company_name, premium_multiplier, sample_size, confidence, as_of_date')
+        .in('company_name', names)
+        // Quarterly history is kept per company; take the newest row per name (Sep 26 2026:
+        // unordered reads returned whichever quarter came back last).
+        .order('as_of_date', { ascending: false });
       const map = new Map<string, PremiumEntry>();
       for (const r of (data ?? []) as Array<{ company_name: string; premium_multiplier: number; sample_size: number; confidence: string }>) {
-        map.set(r.company_name.toLowerCase(), { multiplier: Number(r.premium_multiplier), n: Number(r.sample_size), confidence: r.confidence });
+        const key = r.company_name.toLowerCase();
+        if (map.has(key)) continue;
+        map.set(key, { multiplier: Number(r.premium_multiplier), n: Number(r.sample_size), confidence: r.confidence });
       }
       return map;
     });
@@ -231,13 +241,13 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
 
   // 6. Inflection path
   brief.inflection = await step('inflection', notes, log, () =>
-    buildInflectionPath({ inputs, result, rnpv: fm.rnpv, asOf }),
+    buildInflectionPath({ inputs, result, rnpv: fm.rnpv, asOf, assumptions: input.client?.financing ? { financing: input.client.financing } : undefined }),
   );
 
   // 7. Decision summary
   if (brief.bridge) {
     brief.decision = await step('decision', notes, log, () =>
-      buildDecisionSummary({
+      buildDecisionSummary({ client: input.client ?? null,
         asset,
         bridge: brief.bridge!,
         inflection: brief.inflection,
@@ -252,6 +262,16 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
   }
 
   // 8. Diligence readiness
+  brief.client = input.client ?? null;
+  brief.clientComparison = await step('client.compare', notes, log, () =>
+    buildClientComparison(input.client, { asset, bridge: brief.bridge, rnpv: fm.rnpv, inflection: brief.inflection, asOf }),
+  );
+  if (brief.decision) {
+    brief.indicativeTermSheet = await step('termSheet.indicative', notes, log, () =>
+      buildIndicativeTermSheet({ asset, decision: brief.decision!, termSheet: brief.termSheet, buyerMap: brief.buyerMap, client: input.client, asOf }),
+    );
+  }
+
   brief.diligence = await step('diligence', notes, log, () =>
     buildDiligenceChecklist(asset, { ready: input.diligenceReady, gaps: input.diligenceGaps }),
   );

@@ -45,8 +45,6 @@ export default function ReportCTA({ modality, phase, dealCount, className = '' }
   const context = [modalityLabel, phaseLabel].filter(Boolean).join(' ');
   const dealText = dealCount ? `${dealCount} deals` : 'verified deals';
 
-  const enterpriseMailto = `mailto:issa@ambrosiaventures.co?subject=${encodeURIComponent('Custom Analysis Inquiry')}&body=${encodeURIComponent(`Hi Issa,\n\nI'm interested in a custom deal analysis. Please share details on the $2,500 engagement.\n\nContext: ${context || '[please describe your deal/asset]'}\n\nThank you`)}`;
-
   async function handleCheckout() {
     setLoading(true);
     setError('');
@@ -131,10 +129,10 @@ export default function ReportCTA({ modality, phase, dealCount, className = '' }
             )}
           </button>
           <a
-            href={enterpriseMailto}
+            href="/brief"
             className="flex-1 flex items-center justify-center gap-2 px-5 py-3 border border-neutral-300 dark:border-slate-600 text-neutral-700 dark:text-slate-200 font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-slate-700 transition-all text-sm"
           >
-            Contact Us for Enterprise Pricing
+            Deal Intelligence Brief — $2,500
           </a>
         </div>
 

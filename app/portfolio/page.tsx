@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { PRICING, DEAL_STATS, PORTFOLIO_PRICING, PORTFOLIO_DEMO_URL } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS, PORTFOLIO_PRICING, PORTFOLIO_DEMO_URL, ENGINE_COUNT } from '@/lib/config/constants';
 import {
   Users, LayoutDashboard, FileBarChart, Network, Bell,
   Shield, Lock, Server, Calendar, ArrowRight, Check, Crown,
@@ -143,11 +143,11 @@ const marqueeFundFeatures = [
     eyebrow: 'Deal Alert Feeds',
     title: 'Every relevant comp, the day it\'s filed — routed to the right portfolio company.',
     description:
-      'Configurable per portfolio company by therapeutic area, modality, or development stage. Each alert includes an AI-generated relevance summary explaining why the transaction is comparable. Delivered as a consolidated weekly digest to the operating partner.',
+      'Configurable per portfolio company by therapeutic area, modality, or development stage. Each alert includes a written relevance summary explaining why the transaction is comparable. Delivered as a consolidated weekly digest to the operating partner.',
     bullets: [
       'Per-company alert configuration with TA + modality tags',
       'Direct link to the full deal comp in the platform',
-      'AI-generated 3-sentence relevance summary for every alert',
+      '3-sentence relevance summary for every alert',
       'Consolidated weekly digest across the entire portfolio',
     ],
   },
@@ -530,7 +530,7 @@ export default function PortfolioPage() {
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Every seat unlocks the full Pro platform</h2>
               <p className="mt-3 text-slate-500 max-w-xl mx-auto">
-                14 calculation engines. 12 therapeutic areas. {DEAL_STATS.TOTAL_DEALS} transactions. No feature gates between portfolio companies.
+                {ENGINE_COUNT} calculation engines. 12 therapeutic areas. {DEAL_STATS.TOTAL_DEALS} transactions. No feature gates between portfolio companies.
               </p>
             </div>
 

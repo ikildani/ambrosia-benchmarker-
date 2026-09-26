@@ -98,7 +98,7 @@ export async function writeCursor(supabase: SupabaseClient, cursor: string, stat
     .upsert({ source: RESOLVER_CURSOR_SOURCE, cursor, state, runs, last_run_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: 'source' });
 }
 
-async function fetchAllCompanies(supabase: SupabaseClient): Promise<CompanyAlias[]> {
+export async function fetchAllCompanies(supabase: SupabaseClient): Promise<CompanyAlias[]> {
   const out: CompanyAlias[] = [];
   for (let from = 0, pages = 0; pages < 5; from += 1000, pages++) {
     const { data, error } = await supabase

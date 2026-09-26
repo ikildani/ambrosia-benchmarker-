@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase/server';
 import { DELIVERED_STATUSES, DELIVERY_COLUMNS, mintBriefLinks, type BriefDeliveryRow } from '@/lib/brief/delivery';
+import { loadBriefCall } from '@/lib/brief/outcome-status';
+import { callStatus, FOLLOWUP_DAYS } from '@/lib/brief/scored-call';
 
 /**
  * Private data room for a delivered Deal Intelligence Brief.
@@ -50,6 +52,16 @@ export default async function BriefDataRoomPage({ params }: Props) {
   if (!row) notFound();
   const supabase = createServiceClient();
   const links = await mintBriefLinks(supabase, row);
+  const call = await loadBriefCall(supabase, { id: row.id, prediction_id: row.prediction_id ?? null });
+  const status = callStatus(call.prediction, call.outcome);
+  const pred = call.prediction;
+  const fmtM = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? `$${v >= 1000 ? `${(v / 1000).toFixed(1)}B` : `${Math.round(v)}M`}` : '—');
+  const followupDates = FOLLOWUP_DAYS.map(d => {
+    if (!row.delivered_at) return { day: d, date: null as string | null };
+    const t = new Date(row.delivered_at).getTime() + d * 86_400_000;
+    return { day: d, date: new Date(t).toISOString() };
+  });
+  const statusTone = status.state === 'resolved' ? 'text-teal-200' : status.state === 'expired' ? 'text-amber-200' : 'text-slate-200';
   const title = row.asset_name ? `${row.asset_name} · ${row.indication}` : row.indication;
 
   return (
@@ -78,6 +90,64 @@ export default async function BriefDataRoomPage({ params }: Props) {
               <div className="mt-1 text-xs text-slate-400">Every figure behind the pages, with provenance.</div>
             </a>
           ) : null}
+        </div>
+
+        <div className="mt-10 rounded-md border border-teal-400/30 bg-teal-500/5 p-5 text-sm leading-relaxed text-slate-300">
+          <div className="flex items-baseline justify-between gap-4">
+            <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-300/80">This call is scored</div>
+            <div className={`text-xs font-semibold ${statusTone}`}>{status.state === 'open' ? 'Open' : status.state === 'resolved' ? 'Resolved' : status.state === 'expired' ? 'Expired' : 'Withdrawn'}</div>
+          </div>
+          <p className="mt-2 text-slate-400">{status.note}</p>
+          {pred ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Ask registered</div>
+                <div className="mt-1 font-mono text-slate-100">{fmtM(pred.upfront_mid)} up · {fmtM(pred.total_mid)} total</div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Floor</div>
+                <div className="mt-1 font-mono text-slate-100">{fmtM(pred.upfront_low)} up · {fmtM(pred.total_low)} total</div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Window</div>
+                <div className="mt-1 font-mono text-slate-100">{pred.predicted_window_start ? fmtDate(pred.predicted_window_start) : '—'} – {pred.predicted_window_end ? fmtDate(pred.predicted_window_end) : '—'}</div>
+              </div>
+              {pred.predicted_buyers?.length ? (
+                <div className="sm:col-span-3">
+                  <div className="text-[11px] uppercase tracking-wider text-slate-500">Counterparties on the call</div>
+                  <div className="mt-1 text-slate-100">{pred.predicted_buyers.join(' · ')}</div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {status.state === 'resolved' ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-3 rounded-md border border-slate-800 bg-slate-900/60 p-4">
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">First offer</div>
+                <div className="mt-1 font-mono text-slate-100">{fmtM(status.outcome.firstOfferUpfrontM)} up · {fmtM(status.outcome.firstOfferTotalM)} total</div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Signed{status.outcome.licensee ? ` · ${status.outcome.licensee}` : ''}</div>
+                <div className="mt-1 font-mono text-slate-100">{fmtM(status.outcome.signedUpfrontM)} up · {fmtM(status.outcome.signedTotalM)} total</div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Value captured</div>
+                <div className="mt-1 font-mono text-teal-200">{fmtM(status.outcome.valueCapturedM)}</div>
+                <div className="mt-1 text-[11px] text-slate-500">
+                  {status.outcome.buyerHit != null ? `Buyer ${status.outcome.buyerHit ? 'on' : 'not on'} the list` : ''}{status.outcome.windowHit != null ? ` · ${status.outcome.windowHit ? 'inside' : 'outside'} the window` : ''}
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-400">
+            {followupDates.map(f => (
+              <span key={f.day}><span className="font-semibold text-slate-200">Day {f.day}</span> · {f.date ? fmtDate(f.date) : 'after delivery'}</span>
+            ))}
+            {call.reportUrl && status.state !== 'resolved' ? (
+              <a href={call.reportUrl} className="ml-auto rounded-md border border-teal-400/40 bg-teal-500/10 px-3 py-1.5 font-semibold text-teal-200 transition hover:bg-teal-500/20">Report the outcome now</a>
+            ) : null}
+          </div>
+          <p className="mt-3 text-[11px] text-slate-500">Scored automatically when a transaction is published, or from what you report. Nothing you report is published in a way that identifies you or the asset; the score feeds the next brief in this area.</p>
         </div>
 
         <div className="mt-10 rounded-md border border-slate-800 bg-slate-900/40 p-5 text-sm leading-relaxed text-slate-300">

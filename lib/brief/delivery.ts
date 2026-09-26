@@ -15,7 +15,7 @@ export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 30;
 export const SITE_URL = 'https://solidus.ambrosiaventures.co';
 
 /** Columns the delivery layer reads from benchmark_requests. */
-export const DELIVERY_COLUMNS = 'id,name,email,company,asset_name,indication,phase,modality,brief_token,pdf_storage_path,excel_storage_path,brief_page_count,delivered_at,status,mp_reviewer,mp_reviewed_at,walkthrough_scheduled_at';
+export const DELIVERY_COLUMNS = 'id,name,email,company,asset_name,indication,phase,modality,brief_token,pdf_storage_path,excel_storage_path,brief_page_count,delivered_at,status,mp_reviewer,mp_reviewed_at,walkthrough_scheduled_at,prediction_id';
 
 export interface BriefDeliveryRow {
   id: string;
@@ -35,6 +35,8 @@ export interface BriefDeliveryRow {
   mp_reviewer: string | null;
   mp_reviewed_at: string | null;
   walkthrough_scheduled_at: string | null;
+  /** Migration 133: the outcome-ledger row registered at generation. */
+  prediction_id?: string | null;
 }
 
 export const DELIVERED_STATUSES = new Set(['delivered', 'walkthrough_scheduled', 'walkthrough_complete']);
@@ -92,8 +94,8 @@ export function buildDeliveryEmail(row: BriefDeliveryRow, links: BriefLinks): { 
       <p style="font-size: 13px; color: #64748b;">That link is your private data room; it issues a fresh download link each time you open it. Please do not forward it outside the team that needs the number.</p>` : ''}
       ${links.pdfUrl ? `<p style="font-size: 13px; color: #64748b;">Direct PDF link (valid 30 days): <a href="${esc(links.pdfUrl)}">download</a>${links.excelUrl ? ` · Excel data export: <a href="${esc(links.excelUrl)}">download</a>` : ''}</p>` : ''}
       <p><strong>How to read it.</strong> Start with page three: the recommendation, the ask, the floor and the walk-away, and who to open with. Pages five and eight show where the number comes from (the valuation bridge and the cited comparable set). The buyer map, the catalyst calendar, the objections and the diligence list follow. Every figure that appears on more than one page comes from one place.</p>
-      <p><strong>Walkthrough.</strong> Reply with two or three times that work for you this week or next and we will go through the pages together and turn them into the position you take into the room.</p>
-      <p>The fee for this brief is credited in full against any advisory mandate that follows.</p>
+      <p><strong>30-minute walkthrough.</strong> Reply with two or three times that work for you this week or next and we will spend thirty minutes going through the pages together and turning them into the position you take into the room.</p>
+      <p>The fee for this brief is credited in full against a subsequent advisory mandate.</p>
       <p style="margin-top: 24px;">Best,<br><strong>Issa Kildani</strong><br>Managing Partner, Ambrosia Ventures<br>ikildani@ambrosiaventures.co</p>
     </div>`;
 

@@ -82,7 +82,7 @@ Each hook links to a specific page on the site for attribution.
 **Best for:** Finance-oriented journalists, valuation-focused investors, consulting firms
 
 ## Hook 16 — 2,600 Deals Analyzed
-**Stat:** We've analyzed 2,600+ verified biopharma licensing deals across 12 TAs (2020-2026) — the largest public dataset of its kind
+**Stat:** We've analyzed 300+ primary-sourced verified biopharma licensing deals across 12 TAs (2020-2026) — the largest public dataset of its kind
 **Page:** /reports/q1-2026-biopharma-deal-benchmarks
 **Best for:** ANY outreach — universal credibility hook
 
