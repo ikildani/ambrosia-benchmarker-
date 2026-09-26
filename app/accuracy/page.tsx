@@ -60,6 +60,17 @@ export const dynamic = 'force-dynamic';
 
 const TARGETS = { hit25: 0.60, hit35: 0.70, hit50: 0.80 };
 
+/**
+ * The deal-terms backtest runs on the first of every month
+ * (.github/workflows/backtest-monthly.yml) and lands as a reviewed PR, so the
+ * next run is the first day of the month after the last run.
+ */
+function nextMonthlyRun(lastRunIso: string): string {
+  const d = new Date(lastRunIso);
+  if (Number.isNaN(d.getTime())) return lastRunIso;
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString();
+}
+
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('en-US', {
@@ -157,11 +168,17 @@ export default function AccuracyDashboard() {
               <span className="font-mono text-amber-200">{formatDate(data.runAt)}</span>
             </span>
             <span className="text-slate-500">·</span>
+            <span>
+              Next scheduled run{' '}
+              <span className="font-mono text-amber-200">{formatDate(nextMonthlyRun(data.runAt))}</span>
+            </span>
+            <span className="text-slate-500">·</span>
             <span>Engine v{data.engineVersion}</span>
           </div>
           <p className="mt-3 max-w-3xl text-xs text-slate-500">
-            Every figure below comes from the backtest run dated above. Benchmark tables
-            changed after that run are not yet reflected in these numbers.
+            Every figure below comes from the backtest run dated above; the run repeats
+            monthly and each refresh is reviewed before it lands. Benchmark tables changed
+            after that run are not yet reflected in these numbers.
           </p>
           <p className="mt-4 text-sm text-slate-500">
             All hit rates on this page are recency-weighted ({data.recencyHalfLifeYears}-year

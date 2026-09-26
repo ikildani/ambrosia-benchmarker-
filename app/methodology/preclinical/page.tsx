@@ -212,10 +212,10 @@ export default async function PreclinicalMethodologyPage() {
           <li><strong className="text-slate-200">Multiple of deal value.</strong> When neither exists: for preclinical, {preMult.low}× / {preMult.median}× / {preMult.high}× the benchmark deal value (low / median / high).</li>
         </ol>
         <p className="mt-4 text-sm text-slate-400">
-          Known issue, disclosed rather than hidden: the default shown in the calculator&rsquo;s peak-sales field
-          is the indication&rsquo;s &ldquo;typical asset peak&rdquo; from a separate curated table, which can differ
-          from the epidemiology figure the rNPV actually uses. If you enter your own number the discrepancy
-          disappears. Aligning the two is on the engine roadmap.
+          The default shown in the calculator&rsquo;s peak-sales field is this same estimate, read from the same
+          epidemiology path and TAM cap the rNPV runs on, so the number you see is the number the model uses.
+          Your own figure overrides it in both places. (Until Sep 25 2026 the field showed a separately curated
+          &ldquo;typical asset peak&rdquo;, which could differ from the engine&rsquo;s figure.)
         </p>
 
         <SectionAnchor id="risk">4. The preclinical risk chain</SectionAnchor>
@@ -302,7 +302,7 @@ export default async function PreclinicalMethodologyPage() {
           <li>Confirmed early-stage deals awaiting a corrected upfront, total, date, stage or asset name are being brought into the pool with the corrected figures and a citation, early-stage rows first (from Sep 25 2026).</li>
           <li>Ingestion now asks specifically for preclinical and discovery deals with disclosed upfronts, 2019 onward, across every therapeutic area, and SEC full-text search includes research-collaboration, discovery-collaboration and option-to-license agreements.</li>
           <li>The calibration tables refresh weekly; when an area reaches five verified preclinical deals its baseline switches from the static table to the live one, and the results page says so.</li>
-          <li>A time-based holdout for the backtest, and the alignment of the calculator&rsquo;s default peak-sales field with the engine, are the next two methodology items.</li>
+          <li>The deal-terms backtest now runs on the first of every month and lands as a reviewed update; a time-based holdout is the next methodology item.</li>
         </ul>
         <p className="mt-8 text-sm text-slate-500">
           Questions about any figure on this page go through the{' '}

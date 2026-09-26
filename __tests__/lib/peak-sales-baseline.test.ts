@@ -4,12 +4,15 @@
  */
 import {
   getPeakSalesBaseline,
+  applyTamCeiling,
   tripleFromScalar,
   isPeakSalesOverrideSet,
   PEAK_SALES_PHASE_MULTIPLIER,
   PEAK_SALES_SCALAR_SPREAD,
 } from '@/components/calculator/peakSalesBaseline';
 import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
+import { estimateMarketSize, getEpidemiologyData } from '@/lib/financial/market-size';
+import type { EpidemiologyData } from '@/lib/financial/types';
 
 describe('peakSalesBaseline', () => {
   it('mirrors the engine scalar spread (0.7x / 1.5x)', () => {
@@ -43,6 +46,18 @@ describe('peakSalesBaseline', () => {
   it('defaults unknown phases to phase2 multipliers', () => {
     const baseline = getPeakSalesBaseline({ indication: null, phase: '', totalDealValueMedian: 100 });
     expect(baseline).toEqual({ low: 250, median: 500, high: 900 });
+  });
+
+  it('with the epidemiology dataset, returns the engine\'s own TAM-capped estimate (not the curated typical peak)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const epi = require('@/data/epidemiology.json') as { indications: Record<string, EpidemiologyData> };
+    const indication = Object.keys(epi.indications).find(k => !!epi.indications[k].peakSalesRangeM)!;
+    const engine = applyTamCeiling(
+      estimateMarketSize(indication, 'global', 'racing', getEpidemiologyData(indication, epi.indications)).peakSales,
+      indication,
+    );
+    const baseline = getPeakSalesBaseline({ indication, phase: 'preclinical', totalDealValueMedian: 400, epidemiologyDataset: epi.indications, territory: 'global', competitivePosition: 'racing' });
+    expect(baseline).toEqual({ low: Math.round(engine.low), median: Math.round(engine.median), high: Math.round(engine.high) });
   });
 
   it('returns null (never 0) when nothing is resolvable', () => {
