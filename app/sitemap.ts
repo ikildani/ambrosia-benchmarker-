@@ -99,8 +99,9 @@ function getCorePages(): MetadataRoute.Sitemap {
     staticEntry('/insights', 'weekly', 0.8),
     staticEntry('/glossary', 'monthly', 0.7),
     staticEntry('/pulse', 'weekly', 0.8),
-    // /radar is a hard 404 (and noindex) until NEXT_PUBLIC_RADAR_ENABLED=true.
-    ...(process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ? [staticEntry('/radar', 'weekly', 0.7)] : []),
+    // /radar is an app surface (noindex, Pro-gated) and stays out of the
+    // sitemap even when enabled; the public page for the module is the
+    // indexable landing page, not the feed.
     staticEntry('/privacy', 'yearly', 0.3),
     staticEntry('/terms', 'yearly', 0.3),
     staticEntry('/security', 'yearly', 0.4),
@@ -112,6 +113,7 @@ function getCorePages(): MetadataRoute.Sitemap {
     staticEntry('/intelligence', 'daily', 0.7),
     staticEntry('/methodology', 'monthly', 0.7),
     staticEntry('/methodology/engine', 'monthly', 0.7),
+    staticEntry('/methodology/preclinical', 'monthly', 0.7),
     staticEntry('/therapeutic-areas', 'weekly', 0.8),
     ...TA_SLUGS.map((ta) => staticEntry(`/therapeutic-areas/${ta}`, 'weekly', 0.8)),
     staticEntry('/benchmark', 'weekly', 0.9),

@@ -1,5 +1,5 @@
 /**
- * Asset Radar — mandate input validation (shared by mandates/route.ts and
+ * Search & Evaluation — mandate input validation (shared by mandates/route.ts and
  * mandates/[id]/route.ts). Kept out of the route files because Next.js only
  * allows handler/config exports from a route module.
  */

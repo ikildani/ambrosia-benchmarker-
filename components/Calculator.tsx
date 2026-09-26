@@ -83,6 +83,8 @@ import { AssetDifferentiationSection } from './calculator/AssetDifferentiationSe
 import { MolecularTargetSelector } from './calculator/MolecularTargetSelector';
 import PeakSalesOverrideInput from './calculator/PeakSalesOverrideInput';
 import { getPeakSalesBaseline } from './calculator/peakSalesBaseline';
+import epiData from '@/data/epidemiology.json';
+import type { EpidemiologyData } from '@/lib/financial/types';
 import { ensureBenchmarksLoaded } from '@/lib/benchmarks';
 import { getValidationWarnings } from '@/lib/validationWarnings';
 import type { WizardStep } from './calculator/index';
@@ -195,14 +197,20 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   }, [state]);
 
   // Peak-sales baseline shared by PeakSalesOverrideInput (asset step) and the
-  // CustomAssumptionsPanel "Peak Sales" section (deal step): indication typical
-  // asset peak, else phase multiple of the live estimate, else null (the panel
-  // shows "Model default: computed at calculation time", never 0).
+  // CustomAssumptionsPanel "Peak Sales" section (deal step). With the
+  // epidemiology dataset passed it is the same TAM-capped estimate the rNPV
+  // engine runs on (Results.tsx passes the same dataset to runFinancialModel),
+  // else phase multiple of the live estimate, else null (the panel shows
+  // "Model default: computed at calculation time", never 0).
   const peakSalesBaseline = useMemo(() => getPeakSalesBaseline({
     indication: state.indication || null,
     phase: state.phase || null,
     totalDealValueMedian: previewResult.terms.totalDealValue.median,
-  }), [state.indication, state.phase, previewResult.terms.totalDealValue.median]);
+    epidemiologyDataset: epiData.indications as unknown as Record<string, EpidemiologyData>,
+    territory: state.territory || null,
+    competitivePosition: state.competitivePosition || null,
+    therapeuticArea: state.therapeuticArea || null,
+  }), [state.indication, state.phase, previewResult.terms.totalDealValue.median, state.territory, state.competitivePosition, state.therapeuticArea]);
 
   // Selection summary chips for wizard context
   const selectionSummary = useMemo(() => {

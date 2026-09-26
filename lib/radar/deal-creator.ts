@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 6: Deal Creation Engine
+ * Search & Evaluation — Layer 6: Deal Creation Engine
  *
  * The capstone. Proposes transactions that don't exist yet by crossing:
  *   Pharma portfolio gaps × available unpartnered assets × deal economics
@@ -22,9 +22,11 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
 import { modalityKey, modalitiesMatch } from '@/lib/comparables/match-normalize';
 import { phaseRank as sharedPhaseRank } from '@/lib/comparable-scoring';
 import { radarPhaseToDb } from './deal-thesis';
+import { deriveTA } from './asset-universe';
 import { logRadarRun, deriveRunStatus } from './run-log';
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -139,37 +141,10 @@ export interface DealCreatorResult {
 
 // ═══════════════════════════════════════════════════════════════════════
 // INDICATION CATEGORY → THERAPEUTIC AREA
-// (same map as lib/radar/asset-universe.ts deriveTA — keep in sync)
+// One map, owned by the indexer; re-exported so existing imports keep working.
 // ═══════════════════════════════════════════════════════════════════════
 
-const INDICATION_CATEGORY_TO_TA: Record<string, string> = {
-  solid_tumor: 'oncology', solid_tumors: 'oncology', hematological: 'oncology',
-  hematologic: 'oncology', leukemia: 'oncology', lymphoma: 'oncology',
-  multiple_myeloma: 'oncology', lung_cancer: 'oncology', breast_cancer: 'oncology',
-  cns: 'neurology', alzheimers: 'neurology', parkinsons: 'neurology',
-  epilepsy: 'neurology', migraine: 'neurology', ms: 'neurology',
-  autoimmune: 'immunology', lupus: 'immunology', rheumatoid: 'immunology',
-  crohns: 'immunology', psoriatic_arthritis: 'immunology', atopic_dermatitis: 'immunology',
-  metabolic: 'metabolic', obesity: 'metabolic', diabetes: 'metabolic', nash: 'metabolic',
-  cardiovascular: 'cardiovascular', heart_failure: 'cardiovascular',
-  rare_disease: 'rare_disease', orphan: 'rare_disease',
-  infectious_disease: 'infectious_disease', hiv: 'infectious_disease', hepatitis: 'infectious_disease',
-  ophthalmology: 'ophthalmology', retinal: 'ophthalmology',
-  dermatology: 'dermatology', psoriasis: 'dermatology',
-  respiratory: 'respiratory', asthma: 'respiratory', copd: 'respiratory',
-  womens_health: 'womens_health', endometriosis: 'womens_health',
-  hematology: 'hematology', hemophilia: 'hematology', sickle_cell: 'hematology',
-};
-
-const KNOWN_TAS = new Set(Object.values(INDICATION_CATEGORY_TO_TA));
-
-/** TA for an indication category; also accepts a value that is already a TA. */
-export function deriveTA(indicationCategory: string | null | undefined): string | null {
-  if (!indicationCategory) return null;
-  const key = indicationCategory.toLowerCase().trim();
-  if (INDICATION_CATEGORY_TO_TA[key]) return INDICATION_CATEGORY_TO_TA[key];
-  return KNOWN_TAS.has(key) ? key : null;
-}
+export { deriveTA };
 
 /** Distinct TAs covered by a list of indication categories (order preserved). */
 export function categoriesToTAs(categories: string[] | null | undefined): string[] {
@@ -439,6 +414,7 @@ async function findMatchingAssets(
     .from('clinical_assets')
     .select(CANDIDATE_SELECT)
     .in('partnership_status', ['unpartnered', 'partially_partnered'])
+    .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
     .gte('confidence_score', 30)
     .gt('licensing_intent_score', 0)
     // `.neq('company_id', x)` silently drops NULL company_id rows (SQL NULL

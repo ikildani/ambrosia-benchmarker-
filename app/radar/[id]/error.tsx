@@ -11,7 +11,7 @@ export default function AssetBriefError({ error, reset }: { error: Error & { dig
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950 pt-16 sm:pt-20 lg:pt-24">
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Asset Radar</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Search & Evaluation</p>
         <h1 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">This brief could not be loaded</h1>
         <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
           The asset data or one of its intelligence layers failed to load. Retry, or go back to the feed.

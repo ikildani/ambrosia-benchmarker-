@@ -1,9 +1,9 @@
 /**
- * Cron: Deal Creation Engine (Asset Radar Layer 6)
+ * Cron: Deal Creation Engine (Search & Evaluation Layer 6)
  *
  * Proposes transactions that don't exist yet by crossing pharma
  * portfolio gaps against available unpartnered assets with predicted
- * deal economics. The capstone of Asset Radar.
+ * deal economics. The capstone of Search & Evaluation.
  *
  * Schedule: 11:30 AM UTC daily (after all other layers)
  */

@@ -1,6 +1,6 @@
 /**
  * Adapter contract for non-ClinicalTrials.gov trial registries
- * (Asset Radar Phase 2 item 5, docs/asset-radar-gap-register.md).
+ * (Search & Evaluation Phase 2 item 5, docs/asset-radar-gap-register.md).
  *
  * Every registry adapter under lib/ingestion/registries/ implements
  * `RegistryAdapter`. The cron route (app/api/cron/registry-sweep) pages

@@ -249,6 +249,12 @@ export interface PipelineMap {
   /** Where the asset sits (bucket label + phase). */
   assetPosition: { bucket: string; phase: DealPhase } | null;
   crowdingScore: number | null;    // 0–100 when computable
+  /**
+   * What `crowdingScore` was computed from: the Solidus trial-map formula, or
+   * Terrain's competitive density score (1–10 × 10) when the local score is
+   * unavailable. Absent means `solidus_trials`.
+   */
+  crowdingBasis?: 'solidus_trials' | 'terrain_density';
 }
 
 export interface CatalystEvent {

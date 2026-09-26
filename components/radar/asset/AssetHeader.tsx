@@ -4,11 +4,45 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import type { AssetBrief } from './types';
 import { Pill, KV, ExternalLink, scoreTone } from './ui';
 import { label, fmtAge, fmtDate, territoryLabel, signedPts } from './format';
+import {
+  LOW_POWER_NOTE,
+  baseRateMultiple,
+  percentileLabel,
+  probabilityLabel,
+  unrankedReason,
+  type ScorePresentation,
+} from '@/lib/radar/client/score-copy';
 
 const OWNER_TYPE_LABEL: Record<string, string> = {
   industry: 'Industry', academic: 'Academic', government: 'Government', hospital: 'Hospital',
   network: 'Network', cro: 'CRO', other: 'Other', unknown: 'Unknown owner type',
 };
+
+/** Hover text for the ownership pill: which rule fired and what it saw. */
+function ownershipTitle(status: string, evidence: AssetBrief['asset']['ownership_evidence'] | undefined): string {
+  const arms = evidence?.arms;
+  const armText = arms ? `arms: ${arms.experimental ?? 0} experimental, ${arms.comparator ?? 0} comparator, ${arms.unknown ?? 0} unknown` : 'no matched trial arms';
+  switch (status) {
+    case 'marketed_other': return `Another company's marketed drug; this sponsor is trialling it (${armText}).`;
+    case 'comparator_or_background': return `Used as a comparator or background therapy in this company's trials (${armText}).`;
+    case 'licensee': return 'In-licensed: a drug ownership record names this company as licensee.';
+    case 'co_developer': return 'Co-developed: a drug ownership record names this company as co-developer.';
+    default: return `Ownership not verified: ${evidence?.rule === 'originator_mismatch' ? 'the drug originated elsewhere but sits in an experimental arm here (possible licensee)' : armText}.`;
+  }
+}
+
+/** "No partner found · checked 1,512 deals, 3 trials, 41 press items". */
+function partnershipBasisText(p: AssetBrief['partnership']): string | null {
+  const s = p.sources_checked;
+  if (!p.basis) return null;
+  if (p.basis !== 'no_evidence') return label(p.basis);
+  const corpus = s?.corpus;
+  const parts: string[] = [];
+  if (corpus?.deals) parts.push(`${corpus.deals.toLocaleString('en-US')} deals`);
+  if (typeof s?.trial_collaborators === 'number') parts.push(`${s.trial_collaborators} trial collaborator${s.trial_collaborators === 1 ? '' : 's'}`);
+  if (corpus?.press) parts.push(`${corpus.press.toLocaleString('en-US')} press items`);
+  return parts.length ? `No deal, collaborator or press evidence · checked ${parts.join(', ')}` : 'No deal, collaborator or press evidence found';
+}
 
 function evidenceHref(e: AssetBrief['partnership']['evidence'][number]): string | null {
   if (e.url) return e.url;
@@ -26,7 +60,7 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
     <header className="border-b border-neutral-200 pb-5 dark:border-neutral-800">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Asset Radar · Deal brief</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Search & Evaluation · Deal brief</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-3xl">{asset.asset_name}</h1>
           {aliases.length > 0 && (
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Also known as {aliases.join(', ')}</p>
@@ -51,6 +85,14 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
             )}
             {asset.trial_status && <Pill>{asset.trial_status.replace(/_/g, ' ')}</Pill>}
             {designations.map(d => <Pill key={d} tone="sky">{d.replace(/_/g, ' ')}</Pill>)}
+            {asset.ownership_status && asset.ownership_status !== 'originator' && (
+              <Pill
+                tone={asset.ownership_status === 'comparator_or_background' || asset.ownership_status === 'marketed_other' ? 'rose' : 'amber'}
+                title={ownershipTitle(asset.ownership_status, asset.ownership_evidence)}
+              >
+                {label(asset.ownership_status)}
+              </Pill>
+            )}
           </div>
         </div>
 
@@ -63,6 +105,27 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
               confidence {score.confidence} · 30d {signedPts(trend.delta_30d, 0)} · 90d {signedPts(trend.delta_90d, 0)}
             </p>
+            {(() => {
+              const p: ScorePresentation = {
+                score: score.score,
+                probability: asset.score_probability ?? null,
+                pct_peer: asset.score_pct_peer ?? null,
+                peer_n: asset.score_peer_n ?? null,
+                peer_key: asset.score_peer_key ?? null,
+                base_rate: asset.score_base_rate ?? null,
+                low_power: asset.score_low_power ?? null,
+              };
+              const pct = percentileLabel(p, { withN: true });
+              const prob = probabilityLabel(p);
+              const mult = baseRateMultiple(p);
+              return (
+                <div className="mt-1.5 space-y-0.5 text-xs">
+                  <p className="font-medium text-neutral-800 dark:text-neutral-200">{pct ?? unrankedReason(p)}</p>
+                  {prob && <p className="text-neutral-500 dark:text-neutral-400">{prob}{mult ? ` · ${mult}` : ''}</p>}
+                  {p.low_power && <p className="text-amber-700 dark:text-amber-400">{LOW_POWER_NOTE}</p>}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -76,6 +139,9 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
         <KV label="Partnership">
           <Pill tone={partnership.status === 'unpartnered' ? 'emerald' : partnership.status === 'partnered' ? 'rose' : 'amber'}>{label(partnership.status)}</Pill>
           {partnership.partner_name && <span className="ml-1.5">{partnership.partner_name}</span>}
+          {partnershipBasisText(partnership) && (
+            <span className="block text-xs text-neutral-600 dark:text-neutral-300">{partnershipBasisText(partnership)}</span>
+          )}
           <span className="block text-xs text-neutral-500 dark:text-neutral-400">
             {Math.round(partnership.confidence)}% confidence
             {partnership.evidence.length > 0 && (

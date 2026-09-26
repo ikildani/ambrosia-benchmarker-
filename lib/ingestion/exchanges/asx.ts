@@ -178,7 +178,7 @@ export async function processAsxAnnouncement(
   const pdf = await fetchAsxPdfText(pdfUrl);
   if (!pdf.ok) { funnel.count('content_unavailable', `http_${pdf.status}`, pdfUrl); return 'skipped'; }
   if (pdf.text.length < 500) { funnel.count('content_too_short', 'pdf', a.headline); return 'skipped'; }
-  const deal = await extractDealFromFiling(pdf.text.substring(0, 24_000), opts.anthropicApiKey);
+  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey);
   if (!deal) { funnel.count('not_a_deal', 'asx', `${a.companyName}: ${a.headline.slice(0, 80)}`); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }

@@ -9,7 +9,8 @@
  * With seven adapters and 48 runs a day every adapter runs several times a day.
  *
  * Adapters: hkex_daily, tdnet (Japan), asx (Australia), dart (Korea, needs
- * DART_API_KEY), cninfo (mainland China), hkex_backfill (2017→), mfn (every run).
+ * DART_API_KEY), cninfo (mainland China), geo (country enrichment), hkex_backfill
+ * (2017→); every run: mfn and resource (primary citations for uncited rows).
  * Manual: ?only=<key>&dryRun=true runs one adapter.
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,6 +25,8 @@ import { runAsxIngestion } from '@/lib/ingestion/exchanges/asx';
 import { runDartIngestion } from '@/lib/ingestion/exchanges/dart';
 import { runCninfoIngestion } from '@/lib/ingestion/exchanges/cninfo';
 import { runMfnIngestion } from '@/lib/ingestion/exchanges/mfn';
+import { runResourcing } from '@/lib/ingestion/resource';
+import { runGeoEnrichment } from '@/lib/ingestion/geo-enrich';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -70,11 +73,22 @@ const ADAPTERS: Adapter[] = [
       return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { candidates: r.candidates, ...(r.parameters ?? {}) }, expectRecords: r.expectRecords }; },
   },
   {
+    key: 'geo', source: 'deal_geo_enrichment', budgetMs: 50_000,
+    run: async (sb, c) => { const r = await runGeoEnrichment(sb, { anthropicApiKey: c.anthropicApiKey, dryRun: c.dryRun, timeBudgetMs: c.budgetMs });
+      return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: r.parameters, expectRecords: false }; },
+  },
+  {
     key: 'hkex_backfill', source: 'hkex_backfill', budgetMs: 120_000,
     run: async (sb, c) => { const r = await runHkexIngestion(sb, { anthropicApiKey: c.anthropicApiKey, dryRun: c.dryRun, mode: 'backfill', timeBudgetMs: c.budgetMs });
       return { fetched: r.announcements, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { mode: 'backfill', window: r.window, dealTitles: r.dealTitles, next: r.next ?? null, throttled: r.throttled }, status: r.throttled ? 'partial' : undefined, expectRecords: !r.throttled }; },
   },
 ];
+
+const RESOURCE: Adapter = {
+  key: 'resource', source: 'deal_resourcing', budgetMs: 70_000,
+  run: async (sb, c) => { const r = await runResourcing(sb, { dryRun: c.dryRun, timeBudgetMs: c.budgetMs, maxRows: 25 });
+    return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { attempted: r.candidates, ...(r.parameters ?? {}) }, expectRecords: r.expectRecords, notes: r.inserted ? `${r.inserted} rows gained a primary citation` : undefined }; },
+};
 
 const MFN: Adapter = {
   key: 'mfn', source: 'mfn_announcements', budgetMs: 40_000,
@@ -120,14 +134,15 @@ export async function GET(request: NextRequest) {
   const ran: Record<string, unknown>[] = [];
 
   if (only) {
-    const a = [MFN, ...ADAPTERS].find(x => x.key === only);
-    if (!a) return NextResponse.json({ error: `unknown adapter ${only}`, adapters: [MFN, ...ADAPTERS].map(x => x.key) }, { status: 400 });
+    const a = [MFN, RESOURCE, ...ADAPTERS].find(x => x.key === only);
+    if (!a) return NextResponse.json({ error: `unknown adapter ${only}`, adapters: [MFN, RESOURCE, ...ADAPTERS].map(x => x.key) }, { status: 400 });
     ran.push(await runOne(supabase, a, { anthropicApiKey, dryRun, budgetMs: Math.min(a.budgetMs * 2, TOTAL_BUDGET_MS) }));
     return NextResponse.json({ success: true, dryRun, ran });
   }
 
-  // 1. MFN on every run.
+  // 1. Every run: MFN (feed holds only 48 items) and re-sourcing (1,300-row backlog must drain in days, not weeks).
   ran.push(await runOne(supabase, MFN, { anthropicApiKey, dryRun, budgetMs: MFN.budgetMs }));
+  ran.push(await runOne(supabase, RESOURCE, { anthropicApiKey, dryRun, budgetMs: RESOURCE.budgetMs }));
 
   // 2. Rotation.
   const cur = await readSyncCursor<{ index?: number }>(supabase, ROTATION_CURSOR);

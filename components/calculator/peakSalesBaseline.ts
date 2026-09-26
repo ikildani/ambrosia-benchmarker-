@@ -8,15 +8,24 @@
  * see useCalculatorState 'SET_PEAK_SALES_OVERRIDE'.
  *
  * Baseline resolution order mirrors what the engine does when nothing is
- * overridden (lib/financial/run-financial-model.ts, buildRNPVInput):
- *   1. Indication typical asset peak (lib/financial/index-drugs.ts
- *      getIndicationTypicalAssetPeak) — the "engine default" PeakSalesOverrideInput
- *      already displays — spread with the engine's scalar-override spread.
- *   2. Phase multiple of the live totalDealValue.median (PEAK_SALES_MULTIPLIER
+ * overridden (lib/financial/run-financial-model.ts + the TAM ceiling in
+ * lib/financial/rnpv-engine.ts):
+ *   1. Epidemiology-derived peak sales for the indication (estimateMarketSize
+ *      on data/epidemiology.json, curated range preferred, hard-capped at 80%
+ *      of the indication's TAM) — when the caller passes the dataset, which
+ *      the calculator does. This is the number the rNPV actually runs on.
+ *      Before Sep 25 2026 the field showed the curated "typical asset peak"
+ *      instead, which could differ from the engine by several-fold
+ *      (Alzheimer's: $2.0B shown vs $4.8B used).
+ *   2. Indication typical asset peak (lib/financial/index-drugs.ts) spread with
+ *      the engine's scalar-override spread — only when no dataset is passed.
+ *   3. Phase multiple of the live totalDealValue.median (PEAK_SALES_MULTIPLIER
  *      in run-financial-model.ts, mirrored below).
- *   3. null → the UI shows "Model default: computed at calculation time", never 0.
+ *   4. null → the UI shows "Model default: computed at calculation time", never 0.
  */
-import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
+import { getIndicationTypicalAssetPeak, checkPeakSalesCeiling } from '@/lib/financial/index-drugs';
+import { estimateMarketSize, getEpidemiologyData } from '@/lib/financial/market-size';
+import type { EpidemiologyData } from '@/lib/financial/types';
 
 export interface PeakSalesTriple {
   low: number;
@@ -66,6 +75,25 @@ export interface PeakSalesBaselineArgs {
   phase?: string | null;
   /** Live estimate from calculateDealTerms(...).terms.totalDealValue.median ($M). */
   totalDealValueMedian?: number | null;
+  /**
+   * data/epidemiology.json `indications`. When present the baseline is the
+   * engine's own epidemiology-derived, TAM-capped estimate (step 1 above).
+   */
+  epidemiologyDataset?: Record<string, EpidemiologyData> | null;
+  territory?: string | null;
+  competitivePosition?: string | null;
+  therapeuticArea?: string | null;
+}
+
+/**
+ * Mirror of the rNPV engine's indication TAM ceiling: a median above 80% of
+ * the indication's global TAM is hard-capped there and low/high scale with it.
+ */
+export function applyTamCeiling(t: PeakSalesTriple, indication: string): PeakSalesTriple {
+  const check = checkPeakSalesCeiling(t.median, indication);
+  if (check.ok || check.severity !== 'critical' || check.ceiling == null) return t;
+  const scale = check.ceiling / (t.median || 1);
+  return { low: t.low * scale, median: check.ceiling, high: t.high * scale };
 }
 
 /**
@@ -75,7 +103,16 @@ export interface PeakSalesBaselineArgs {
  * calculation time" rather than 0.
  */
 export function getPeakSalesBaseline(args: PeakSalesBaselineArgs): PeakSalesTriple | null {
-  const { indication, phase, totalDealValueMedian } = args;
+  const { indication, phase, totalDealValueMedian, epidemiologyDataset, territory, competitivePosition, therapeuticArea } = args;
+
+  if (indication && epidemiologyDataset) {
+    const epi = getEpidemiologyData(indication, epidemiologyDataset);
+    const market = estimateMarketSize(indication, territory || 'global', competitivePosition || 'racing', epi, therapeuticArea || undefined);
+    const peak = market.peakSales;
+    if (peak && Number.isFinite(peak.median) && peak.median > 0) {
+      return roundTriple(applyTamCeiling(peak, indication));
+    }
+  }
 
   if (indication) {
     const typical = getIndicationTypicalAssetPeak(indication);

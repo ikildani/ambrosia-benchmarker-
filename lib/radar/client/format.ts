@@ -40,6 +40,7 @@ export const FACET_TITLES: Record<keyof Omit<RadarFilterState, 'q' | 'phase_min'
   phase: 'Phase',
   target: 'Target',
   partnership: 'Partnership',
+  ownership: 'Ownership',
   owner_type: 'Owner type',
   score_band: 'Intent score',
   trial_status: 'Trial status',

@@ -212,7 +212,7 @@ export function RadarShell() {
         {/* Title row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-lg font-semibold tracking-tight">Asset Radar</h1>
+            <h1 className="text-lg font-semibold tracking-tight">Search & Evaluation</h1>
             {mandatesApi.status === 'error' ? (
               <span className="text-xs text-amber-700 dark:text-amber-300">Mandates unavailable</span>
             ) : (

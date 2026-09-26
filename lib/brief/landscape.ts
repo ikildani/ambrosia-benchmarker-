@@ -3,8 +3,14 @@
  *
  *  - buildPipelineMap      who else is developing for this indication, by modality bucket × phase
  *  - buildCatalystCalendar what reads out / loses exclusivity in the next N months
- *  - buildPatientFunnel    where the peak-sales number comes from (pure, from MarketSizeEstimate)
+ *  - buildPatientFunnel    where the peak-sales number comes from (pure; Terrain demand
+ *                          profile when supplied, else MarketSizeEstimate)
  *  - buildLandscape        runs the three with Promise.allSettled
+ *
+ * Terrain (lib/brief/terrain-demand.ts) is optional input: the funnel prefers
+ * it, the pipeline map uses its key programs only when the local registry
+ * match is thin and its density score only when the local crowding score is
+ * null. Solidus keeps the slug and the profile's asOf, never Terrain's numbers.
  *
  * Data source is `company_trials` (ClinicalTrials.gov via Solidus). `clinical_assets`
  * is deliberately not used: its indication_category is coarse (cns, solid_tumor…)
@@ -39,8 +45,16 @@ import type {
   PipelineCell,
   PipelineMap,
   Range3,
+  SourceNote,
 } from './types';
 import type { MarketSizeEstimate, RNPVResult } from '@/lib/financial/types';
+import {
+  TERRAIN_DEMAND_SOURCE,
+  densityToCrowding,
+  netPricePerYearUsd,
+  profileSlug,
+  type TerrainDemandProfile,
+} from './terrain-demand';
 
 // ─── Minimal client shape (lets tests stub the client) ─────────────────────
 
@@ -471,21 +485,88 @@ export function programsFromTrials(rows: TrialRow[], buyerNames: string[]): Prog
   return [...byKey.values()];
 }
 
+/**
+ * Terrain `keyPrograms[].mechanism` is free text ("Anti-amyloid mAb (N3pG)",
+ * "Tau antisense oligonucleotide", "Small molecule TKI"). Fold it to a
+ * company_trials-style modality token so `normaliseBucket` places it.
+ */
+export function mechanismToModality(mechanism: string | null | undefined): string | null {
+  const m = (mechanism ?? '').toLowerCase();
+  if (!m) return null;
+  if (/(antibod|\bmabs?\b|monoclonal|bispecific|trispecific|\badc\b|antibody.drug|nanobody|t.cell engager)/.test(m)) return 'antibody';
+  if (/(antisense|oligonucleotide|\baso\b|sirna|rnai|\bmrna\b|microrna)/.test(m)) return 'oligonucleotide';
+  if (/(gene therap|gene edit|\baav\b|crispr)/.test(m)) return 'gene_therapy';
+  if (/(car.?t\b|cell therap|stem cell|\bnk cell|\btil\b|\btreg)/.test(m)) return 'cell_therapy';
+  if (/vaccine/.test(m)) return 'vaccine';
+  if (/(peptide|fusion protein|recombinant|enzyme|hormone|\bglp|incretin|cytokine|fcrn|complement)/.test(m)) return 'peptide';
+  if (/(small.molecule|inhibitor|agonist|antagonist|modulator|degrader|protac|kinase|\btki\b|blocker|oral)/.test(m)) return 'small_molecule';
+  if (/(radioligand|radiopharm|oncolytic|device)/.test(m)) return 'other';
+  return mechanism ?? null;
+}
+
+/**
+ * Terrain `competition.keyPrograms` → programs. Used only when the local trial
+ * map is too thin (< 3 programs). Terrain lists at most ten programs, ordered
+ * Approved → Phase 3 → … so the map shows the incumbents and late-stage
+ * entrants, not the full early pipeline. Withdrawn/discontinued are dropped.
+ */
+export function programsFromTerrain(profile: TerrainDemandProfile, buyerNames: string[]): Program[] {
+  const byKey = new Map<string, Program>();
+  for (const kp of profile.competition?.keyPrograms ?? []) {
+    const phase = normaliseAssetPhase(kp.phase);
+    if (phase === 'unknown' || phase === 'discovery') continue;
+    const sponsor = (kp.company || 'Undisclosed sponsor').trim();
+    const intervention = (kp.asset || kp.mechanism || 'Undisclosed').trim();
+    const key = `${sponsor.toLowerCase()}|${intervention.toLowerCase().slice(0, 60)}`;
+    const p: Program = {
+      sponsor, intervention, nctId: null, status: null, phase,
+      bucket: normaliseBucket(mechanismToModality(kp.mechanism), null, kp.asset),
+      industry: true, isBuyerCandidate: matchesBuyer(sponsor, buyerNames),
+    };
+    const prev = byKey.get(key);
+    if (!prev || PHASE_RANK[phase] > PHASE_RANK[prev.phase]) byKey.set(key, p);
+  }
+  return [...byKey.values()];
+}
+
 export async function buildPipelineMap(
   db: LandscapeDb,
   asset: AssetProfile,
-  opts: { asOf?: string; buyerNames?: string[] } = {},
+  opts: { asOf?: string; buyerNames?: string[]; terrain?: TerrainDemandProfile | null } = {},
 ): Promise<PipelineMap | null> {
   const asOf = opts.asOf ?? todayIso();
   const buyerNames = opts.buyerNames ?? [];
+  const terrain = opts.terrain ?? null;
   const spec = indicationSpec(asset.indication);
   const rows = await fetchIndicationTrials(db, asset, spec);
   const all = programsFromTrials(rows, buyerNames);
 
   // Industry sponsors preferred; include academic/government when the industry set is thin.
   const industry = all.filter(p => p.industry);
-  const programs = industry.length >= 8 ? industry : all;
-  if (programs.length < 3) return null;
+  let programs = industry.length >= 8 ? industry : all;
+  let source: SourceNote;
+  let fromTerrain = false;
+
+  if (programs.length >= 3) {
+    source = {
+      source: 'ClinicalTrials.gov via Solidus',
+      n: programs.length,
+      asOf,
+      note: `${industry.length} industry-sponsored programs${programs.length > industry.length ? ', academic and government sponsors included' : ''}; active trials only, one program per sponsor and intervention`,
+    };
+  } else {
+    // Local registry match is too thin: fall back to Terrain's key programs when it has ≥ 3.
+    const tp = terrain ? programsFromTerrain(terrain, buyerNames) : [];
+    if (tp.length < 3) return null;
+    programs = tp;
+    fromTerrain = true;
+    source = {
+      source: TERRAIN_DEMAND_SOURCE,
+      n: tp.length,
+      asOf: terrain!.asOf,
+      note: `indication ${profileSlug(terrain!)}; ${all.length} local registry program${all.length === 1 ? '' : 's'} matched, Terrain key programs shown (approved and pipeline, up to ten); Solidus stores the slug and asOf only`,
+    };
+  }
 
   const assetBucket = normaliseBucket(asset.modality, null, asset.assetName ?? null);
   const assetPhase = normaliseAssetPhase(asset.phase);
@@ -513,17 +594,31 @@ export async function buildPipelineMap(
     ? programs.filter(p => p.bucket === assetBucket && PHASE_RANK[p.phase] >= assetRank).length
     : NaN;
 
+  // Crowding: the local formula needs the full registry map (Terrain's list is
+  // capped at ten, so the formula would understate it); otherwise Terrain's
+  // density score over its whole competitor database, rescaled to 0–100.
+  let crowding: number | null = !fromTerrain && assetPhase !== 'unknown' ? crowdingScore(atOrAhead, programs.length) : null;
+  let crowdingBasis: PipelineMap['crowdingBasis'] = 'solidus_trials';
+  if (crowding == null && terrain) {
+    const fromDensity = densityToCrowding(terrain);
+    if (fromDensity != null) {
+      crowding = fromDensity;
+      crowdingBasis = 'terrain_density';
+      const label = terrain.competition?.densityLabel ? ` (${terrain.competition.densityLabel.toLowerCase()})` : '';
+      source = {
+        ...source,
+        note: `${source.note ?? ''}${source.note ? '; ' : ''}crowding from Terrain density score ${terrain.competition.densityScore}/10${label}, as of ${terrain.asOf}`,
+      };
+    }
+  }
+
   return {
-    source: {
-      source: 'ClinicalTrials.gov via Solidus',
-      n: programs.length,
-      asOf,
-      note: `${industry.length} industry-sponsored programs${programs.length > industry.length ? ', academic and government sponsors included' : ''}; active trials only, one program per sponsor and intervention`,
-    },
+    source,
     rows: rowsOut,
     totals,
     assetPosition: assetPhase === 'unknown' ? null : { bucket: assetBucket, phase: assetPhase },
-    crowdingScore: assetPhase === 'unknown' ? null : crowdingScore(atOrAhead, programs.length),
+    crowdingScore: crowding,
+    crowdingBasis,
   };
 }
 
@@ -736,11 +831,115 @@ const FUNNEL_STEPS: Array<{ key: keyof MarketSizeEstimate['patientFunnel']; labe
   { key: 'addressablePatients', label: 'Addressable' },
 ];
 
+/**
+ * Overwrite a funnel's peak-sales band with the figure the financial model
+ * ran with (after the TAM ceiling and modifiers) and re-derive the share of
+ * addressable patients from it when a price is known.
+ */
+function withAppliedPeak(funnel: PatientFunnel, rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null): PatientFunnel {
+  const applied = rnpv?.peakSalesApplied;
+  if (!applied || ![applied.low, applied.median, applied.high].every(v => Number.isFinite(v) && v > 0)) return funnel;
+  const peakSalesM = { low: applied.low, median: applied.median, high: applied.high };
+  const addressable = funnel.steps[funnel.steps.length - 1]?.value ?? 0;
+  const price = funnel.pricePerYearUsd;
+  const peakShare = price && addressable > 0
+    ? (() => {
+        const toShare = (peakM: number) => Math.max(0, Math.min(1, (peakM * 1e6) / (addressable * price)));
+        return { low: toShare(peakSalesM.low), median: toShare(peakSalesM.median), high: toShare(peakSalesM.high) };
+      })()
+    : funnel.peakShare;
+  return { ...funnel, peakSalesM, peakShare, peakSalesBasis: 'model' };
+}
+
+/**
+ * Terrain demand profile → PatientFunnel. Field mapping (Terrain → brief):
+ *
+ *   market.territoryBreakdown[US].population   → step "Population"          (when present)
+ *   market.patientFunnel.us_prevalence          → step "Prevalent patients"
+ *   market.patientFunnel.diagnosed              → step "Diagnosed"
+ *   market.patientFunnel.treated                → step "Treated"
+ *   market.patientFunnel.adherent               → step "Adherent"           (Terrain's persistence step;
+ *                                                                             replaces the local "Drug-eligible")
+ *   market.patientFunnel.addressable            → step "Addressable"
+ *   priceBenchmark.wacAnnualUsd.base × (1 − grossToNet) → pricePerYearUsd  (net per patient-year, Terrain's own GTN)
+ *   market.patientFunnel.capturable_rate        → peakShare.median          (share of addressable at the assumed stage)
+ *   peakSalesUsdM.{low,high} / base × median    → peakShare.{low,high}      (Terrain's stage band expressed as a share)
+ *   market.peakSalesUsdM.{low,base,high}        → peakSalesM.{low,median,high}
+ *   asOf                                        → source.asOf
+ *
+ * Terrain epidemiology is US-only (territory changes the TAM breakdown, not
+ * the patient counts), so `territory` is always `us_only` here. A proxy
+ * mapping (Terrain covers a subset/superset of the Solidus key) is surfaced in
+ * the source note as the contract requires. Returns null when the profile has
+ * fewer than two positive steps or no peak-sales band, so the caller can fall
+ * back to the local epidemiology model.
+ */
+export function funnelFromTerrain(profile: TerrainDemandProfile): PatientFunnel | null {
+  const pf = profile.market?.patientFunnel;
+  const peak = profile.market?.peakSalesUsdM;
+  if (!pf || !peak) return null;
+  const usPop = profile.market.territoryBreakdown?.find(t => t.code === 'US')?.population;
+  const candidates: Array<{ label: string; value: unknown }> = [
+    { label: 'Population', value: usPop },
+    { label: 'Prevalent patients', value: pf.us_prevalence },
+    { label: 'Diagnosed', value: pf.diagnosed },
+    { label: 'Treated', value: pf.treated },
+    { label: 'Adherent', value: pf.adherent },
+    { label: 'Addressable', value: pf.addressable },
+  ];
+  const steps = candidates
+    .map(s => ({ label: s.label, value: Number(s.value) }))
+    .filter(s => Number.isFinite(s.value) && s.value > 0);
+  if (steps.length < 2) return null;
+  if (![peak.low, peak.base, peak.high].every(v => Number.isFinite(v) && v >= 0) || peak.base <= 0) return null;
+
+  const share = Number(pf.capturable_rate);
+  const peakShare = Number.isFinite(share) && share > 0 && share <= 1
+    ? {
+        low: Math.min(1, share * (peak.low / peak.base)),
+        median: share,
+        high: Math.min(1, share * (peak.high / peak.base)),
+      }
+    : null;
+
+  const slug = profileSlug(profile);
+  const proxy = profile.identity.match === 'proxy'
+    ? `; proxy match${profile.identity.matchNote ? `: ${profile.identity.matchNote}` : ''}`
+    : '';
+
+  return {
+    source: {
+      source: TERRAIN_DEMAND_SOURCE,
+      n: steps.length,
+      asOf: profile.asOf,
+      note: `indication ${slug}; Solidus stores the slug and asOf only${proxy}`,
+    },
+    territory: 'us_only',
+    steps,
+    pricePerYearUsd: netPricePerYearUsd(profile),
+    peakShare,
+    peakSalesM: { low: peak.low, median: peak.base, high: peak.high },
+    peakSalesBasis: 'market',
+  };
+}
+
+/**
+ * Patient funnel: Terrain demand profile when supplied and usable, else the
+ * local epidemiology model (`MarketSizeEstimate` from data/epidemiology.json).
+ */
 export function buildPatientFunnel(
   market: MarketSizeEstimate | undefined | null,
   asOf: string,
+  terrain?: TerrainDemandProfile | null,
   rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null,
 ): PatientFunnel | null {
+  if (terrain) {
+    const fromTerrain = funnelFromTerrain(terrain);
+    // Terrain supplies the patient steps and price; the peak-sales number the
+    // brief prints stays the one the financial model actually ran with, so the
+    // funnel and the rNPV page cannot disagree (see the local branch below).
+    if (fromTerrain) return withAppliedPeak(fromTerrain, rnpv);
+  }
   if (!market || !market.patientFunnel || !market.peakSales) return null;
   const pf = market.patientFunnel;
   const steps = FUNNEL_STEPS
@@ -801,13 +1000,14 @@ export async function buildLandscape(
   db: LandscapeDb,
   asset: AssetProfile,
   market: MarketSizeEstimate | undefined | null,
-  opts: { asOf?: string; windowMonths?: number; buyerNames?: string[]; rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null } = {},
+  opts: { asOf?: string; windowMonths?: number; buyerNames?: string[]; terrain?: TerrainDemandProfile | null; rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null } = {},
 ): Promise<Landscape> {
   const asOf = opts.asOf ?? todayIso();
+  const terrain = opts.terrain ?? null;
   const [pipeline, catalysts, funnel] = await Promise.allSettled([
-    buildPipelineMap(db, asset, { asOf, buyerNames: opts.buyerNames }),
+    buildPipelineMap(db, asset, { asOf, buyerNames: opts.buyerNames, terrain }),
     buildCatalystCalendar(db, asset, { asOf, windowMonths: opts.windowMonths, buyerNames: opts.buyerNames }),
-    Promise.resolve().then(() => buildPatientFunnel(market, asOf, opts.rnpv)),
+    Promise.resolve().then(() => buildPatientFunnel(market, asOf, terrain, opts.rnpv ?? null)),
   ]);
   const settle = <T>(r: PromiseSettledResult<T | null>, label: string): T | null => {
     if (r.status === 'fulfilled') return r.value;
@@ -819,4 +1019,12 @@ export async function buildLandscape(
     catalysts: settle(catalysts, 'catalysts'),
     funnel: settle(funnel, 'funnel'),
   };
+}
+
+/** True when any landscape section was built from (or scored by) the Terrain demand layer. */
+export function landscapeUsesTerrain(l: Landscape | null | undefined): boolean {
+  if (!l) return false;
+  return l.funnel?.source.source === TERRAIN_DEMAND_SOURCE
+    || l.pipeline?.source.source === TERRAIN_DEMAND_SOURCE
+    || l.pipeline?.crowdingBasis === 'terrain_density';
 }

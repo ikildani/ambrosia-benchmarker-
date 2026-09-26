@@ -506,12 +506,20 @@ export async function fetchFilingContent(url: string): Promise<string> {
   return text.substring(0, 20000);
 }
 
-export async function extractDealFromFiling(
-  filingText: string,
-  anthropicApiKey: string
-): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+/**
+ * Model for the Opus-class deal extraction. Overridable per environment so the
+ * extractor can be moved (e.g. to claude-sonnet-5) without a deploy; the
+ * provenance column records whichever model actually ran.
+ */
+export const EXTRACTION_MODEL = process.env.EXTRACTION_MODEL || 'claude-opus-4-6';
+export const EXTRACTION_MAX_TOKENS = 4000;
 
+/**
+ * The extraction request, built once so the synchronous path (real-time
+ * monitor) and the Message Batches path (historical backfill, 50% price)
+ * send byte-identical prompts.
+ */
+export function buildDealExtractionRequest(filingText: string): Anthropic.MessageCreateParamsNonStreaming {
   const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from SEC 8-K filings. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 
 Your task is to identify and extract structured deal data. Be precise and conservative:
@@ -639,40 +647,54 @@ If it IS a deal, return this structure:
 Filing text:
 ${filingText}`;
 
-  try {
-    const response = await anthropic.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 4000,
-      messages: [
-        { role: 'user', content: userPrompt }
-      ],
-      system: systemPrompt,
-    });
+  return {
+    model: EXTRACTION_MODEL,
+    max_tokens: EXTRACTION_MAX_TOKENS,
+    // Sep 26 2026: the system prompt is ~2K tokens and identical on every call — cache it (≈10–20% off per extraction).
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: userPrompt }],
+  };
+}
 
+/** Parse the extractor's reply. Null when it is not a deal or not parseable. */
+export function parseDealExtraction(text: string): ExtractedDeal | null {
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return null;
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (parseError) {
+    console.error(`JSON parse failed for extracted deal. Raw: ${jsonMatch[0].substring(0, 200)}`, parseError);
+    return null;
+  }
+  if (parsed.is_deal === false) {
+    console.log(`Not a deal: ${parsed.reason}`);
+    return null;
+  }
+  return parsed as ExtractedDeal;
+}
+
+/** The extractor could not run (credit, rate limit, network). Distinct from "not a deal". */
+export class ExtractionUnavailableError extends Error {
+  constructor(msg: string) { super(msg); this.name = 'ExtractionUnavailableError'; }
+}
+
+export async function extractDealFromFiling(
+  filingText: string,
+  anthropicApiKey: string
+): Promise<ExtractedDeal | null> {
+  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  try {
+    const response = await anthropic.messages.create(buildDealExtractionRequest(filingText));
     const content = response.content[0];
     if (content.type !== 'text') return null;
-
-    // Parse JSON from response
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    let parsed;
-    try {
-      parsed = JSON.parse(jsonMatch[0]);
-    } catch (parseError) {
-      console.error(`JSON parse failed for extracted deal. Raw: ${jsonMatch[0].substring(0, 200)}`, parseError);
-      return null;
-    }
-
-    if (parsed.is_deal === false) {
-      console.log(`Not a deal: ${parsed.reason}`);
-      return null;
-    }
-
-    return parsed as ExtractedDeal;
+    return parseDealExtraction(content.text);
   } catch (error) {
+    // Sep 26 2026: an API failure (credit exhausted, rate limit, timeout) must not read as "not a deal".
+    // Overnight, 5,371 filings were recorded as skipped while the account had no credit. Throw so callers
+    // stop the run and leave the filing unrecorded for the next pass.
     console.error('Deal extraction error:', error);
-    return null;
+    throw new ExtractionUnavailableError(error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -889,7 +911,7 @@ export async function runDailyIngestion(
             source_filing_id: filing.accessionNumber,
             terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
             confidence_score: deal.confidence_score,
-            extraction_model: 'claude-opus-4-6',
+            extraction_model: EXTRACTION_MODEL,
             extraction_timestamp: new Date().toISOString(),
             therapeutic_area: therapeuticArea,
             licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,

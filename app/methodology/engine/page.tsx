@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
 import { IntelligenceEmailCapture } from '@/components/intelligence/IntelligenceEmailCapture';
 import { LiveAccuracyDashboard } from '@/components/methodology/LiveAccuracyDashboard';
-import { FailureCaseExplorer } from '@/components/methodology/FailureCaseExplorer';
+import { WorstMissesTable } from '@/components/methodology/WorstMissesTable';
+import { loadAccuracyData } from '@/lib/accuracy-dashboard-data';
 import { DimensionExplorer } from '@/components/methodology/DimensionExplorer';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
@@ -11,11 +12,11 @@ const BASE_URL = 'https://solidus.ambrosiaventures.co';
 export const metadata: Metadata = {
   title: 'Engine Methodology | Solidus',
   description:
-    'Technical methodology for the Ambrosia rNPV engine — 14 modeling dimensions, calibration framework, held-out validation, honest limitations. For BD professionals and buy-side analysts who need a defensible model.',
+    'Technical methodology for the Ambrosia rNPV engine — 14 modeling dimensions, calibration framework, held-out validation, stated limitations. For BD professionals and buy-side analysts who need a defensible model.',
   alternates: { canonical: `${BASE_URL}/methodology/engine` },
   openGraph: {
     title: 'Engine Methodology | Solidus',
-    description: '14 modeling dimensions, Option B rigor, held-out validation, honest limitations.',
+    description: '14 modeling dimensions, Option B rigor, held-out validation, stated limitations.',
     type: 'article',
     url: `${BASE_URL}/methodology/engine`,
     siteName: 'Solidus',
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Engine Methodology | Solidus',
-    description: '14 dimensions, Option B rigor, held-out validation, honest limitations.',
+    description: '14 dimensions, Option B rigor, held-out validation, stated limitations.',
   },
 };
 
@@ -49,6 +50,9 @@ function SectionAnchor({ id, children }: { id: string; children: React.ReactNode
 }
 
 export default function EngineMethodology() {
+  const data = loadAccuracyData();
+  const fullN = data ? data.fullScope.n.toLocaleString() : null;
+  const coreN = data ? data.coreScope.n.toLocaleString() : null;
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <InstitutionalNav activePath="/methodology/engine" />
@@ -61,7 +65,7 @@ export default function EngineMethodology() {
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
             A finance-grade walkthrough of the Ambrosia rNPV engine: how it values assets, how
-            calibration works, and where the model is honestly not ready. Written for BD teams,
+            calibration works, and where its scope ends. Written for BD teams,
             buy-side analysts, and pharma finance professionals who need a model they can stand up
             to their investment committee.
           </p>
@@ -147,8 +151,8 @@ export default function EngineMethodology() {
           </li>
           <li>
             <strong className="text-slate-200">Held-out validation split.</strong> 80% of the corpus is used to
-            tune; 20% is held out as a test set the engine never sees during calibration. Deterministic hash on
-            deal id means the split is stable across runs.
+            tune; 20% is held out as a test set reported separately since Round 13; earlier rounds were tuned on
+            the full corpus. Deterministic hash on deal id means the split is stable across runs.
           </li>
           <li>
             <strong className="text-slate-200">Every change cited.</strong> FDA CDER approval reports, Wong/Siah/Lo
@@ -166,21 +170,21 @@ export default function EngineMethodology() {
         <SectionAnchor id="accuracy">4. Accuracy measurement</SectionAnchor>
         <p className="mt-4">
           We score the engine&rsquo;s predicted implied deal value against real disclosed terms
-          from 251 biopharma licensing, co-development, acquisition, and collaboration deals
+          from {fullN ? `${fullN} ` : ''}biopharma licensing, co-development, acquisition, and collaboration deals
           (2017&ndash;2026). For each deal, the engine is fed the asset profile known at deal
           date and computes an implied upfront. The hit rate is the share of deals where the
           absolute error falls within a tolerance band.
         </p>
         <p className="mt-4">
-          <strong className="text-slate-200">Core scope</strong> (Phase 2 / 3 licensing + codev,
-          n=69) is the primary calibration target &mdash; the segment where intrinsic-value
+          <strong className="text-slate-200">Core scope</strong> (Phase 2 / 3 licensing + codev{coreN ? `, n=${coreN}` : ''}) is the primary calibration target &mdash; the segment where intrinsic-value
           modeling maps onto market clearing price. <strong className="text-slate-200">Full
-          scope</strong> (all 251) is reported for transparency but includes segments (early-
+          scope</strong> {fullN ? `(all ${fullN}) ` : ''}is reported for transparency but includes segments (early-
           stage option value, approved commercialization) where single-asset rNPV is structurally
           the wrong frame.
         </p>
         <p className="mt-4">
-          Accuracy is measured on every calibration round against the held-out test set. We track
+          Accuracy is measured on every calibration round on the full corpus and, since Round 13, on the
+          20% held-out split as well. We track
           failed rounds alongside wins in the internal iteration log &mdash; the calibration
           journey itself is part of the model&rsquo;s methodology.
         </p>
@@ -188,17 +192,18 @@ export default function EngineMethodology() {
         <div className="my-12 border-t border-slate-800/60 pt-8">
           <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-slate-500">Engine Accuracy</h3>
           <LiveAccuracyDashboard />
-          <FailureCaseExplorer />
+          <WorstMissesTable />
         </div>
 
-        <SectionAnchor id="limitations">5. Honest limitations</SectionAnchor>
-        <p className="mt-4">The model is not ready for:</p>
+        <SectionAnchor id="limitations">5. Scope and limitations</SectionAnchor>
+        <p className="mt-4">Where the rNPV frame is not the anchor, and the comparable set is:</p>
         <ul className="mt-4 space-y-3 pl-5 [&_li]:list-disc [&_li]:text-slate-400 [&_li::marker]:text-slate-600">
           <li>
             <strong className="text-slate-200">Early-stage strategic upfronts.</strong> Phase 1 / preclinical
-            licensing prices on option value, not expected NPV. The engine&rsquo;s intrinsic-value output
-            will be too low; we apply empirical floors at the backtest level, but the underlying rNPV math
-            isn&rsquo;t the right frame. Use for anchoring only, not as a primary number.
+            licensing prices on option value, not expected NPV, so the engine&rsquo;s intrinsic-value output
+            sits below market. The product anchors these stages on comparables (at least two-thirds of the
+            ensemble weight) and the backtest applies an early-stage floor. The comparable list is the
+            primary reference; the rNPV is context.
           </li>
           <li>
             <strong className="text-slate-200">Acquisitions in competitive bidding.</strong> M&amp;A premiums
@@ -208,8 +213,8 @@ export default function EngineMethodology() {
           <li>
             <strong className="text-slate-200">Post-approval commercialization handoffs.</strong> Approved-asset
             licenses to territorial partners (Pharming&rarr;CSPC China, Epizyme&rarr;Ipsen ex-US) load most
-            value into royalties + milestones, not upfront. The backtest applies a territorial dampener but
-            the engine&rsquo;s upfront formula is structurally biased for this segment.
+            value into royalties + milestones, not upfront. The backtest applies a territorial dampener; the
+            upfront formula is not the right frame for this segment, and the comparable set is.
           </li>
           <li>
             <strong className="text-slate-200">Platform / multi-asset deals.</strong> Single-asset rNPV cannot

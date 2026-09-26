@@ -46,7 +46,7 @@ export async function processFilingText(
   const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', input.filingId).limit(1).maybeSingle();
   if (existing) { funnel.count('already_in_table'); return 'skipped'; }
   if (input.text.length < 300) { funnel.count('content_too_short', input.sourceType, input.label); return 'skipped'; }
-  const deal = await extractDealFromFiling(input.text.substring(0, 24_000), opts.anthropicApiKey);
+  const deal = await extractDealFromFiling(input.text.substring(0, 12_000), opts.anthropicApiKey);
   if (!deal) { funnel.count('not_a_deal', input.sourceType, input.label.slice(0, 100)); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }

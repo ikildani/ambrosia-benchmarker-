@@ -164,7 +164,7 @@
     },
     {
       "path": "/api/cron/deal-verification",
-      "schedule": "0 */2 * * *"
+      "schedule": "*/20 * * * *"
     },
     {
       "path": "/api/cron/re-extract-pending",
@@ -344,23 +344,23 @@
     },
     {
       "path": "/api/cron/drug-resolve",
-      "schedule": "20 * * * *"
+      "schedule": "20 */3 * * *"
     },
     {
       "path": "/api/cron/partnership-refresh",
-      "schedule": "45 * * * *"
+      "schedule": "45 */3 * * *"
     },
     {
       "path": "/api/cron/press-releases?persist_only=true",
       "schedule": "5 */2 * * *"
     },
     {
-      "path": "/api/cron/press-releases?backfill=true&months=24",
-      "schedule": "35 4 * * *"
+      "path": "/api/cron/radar-qa",
+      "schedule": "0 6 * * 1"
     },
     {
       "path": "/api/cron/asset-universe",
-      "schedule": "30 * * * *"
+      "schedule": "30 */3 * * *"
     },
     {
       "path": "/api/cron/licensing-signals",
@@ -388,7 +388,7 @@
     },
     {
       "path": "/api/cron/asset-classify?limit=1200",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/30 * * * *"
     },
     {
       "path": "/api/cron/company-financials",

@@ -1,6 +1,9 @@
 /**
  * Cron: SEC full-text-search historical backfill, 2017 → present.
  * Every 15 minutes, up to 80 extractions per run (4 in parallel), cursor in
+ * sync_cursors. Sep 25 2026: filings pass a cheap gate (EXTRACTION_GATE) before
+ * the extractor and are extracted through Message Batches at 50% price
+ * (BACKFILL_EXTRACTION_MODE=batch); a run drains the previous batch first.
  * radar_sync_cursors, processed-accession ledger in edgar_fts_processed.
  * Manual overrides: ?max=N&concurrency=N&dryRun=true.
  * See lib/ingestion/edgar-fts-backfill.ts.
@@ -28,6 +31,25 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
   const dryRun = request.nextUrl.searchParams.get('dryRun') === 'true';
+
+  // Daily extraction cap (BACKFILL_DAILY_EXTRACTION_CAP, default 1200): keeps the API bill predictable.
+  // Counts today's extractions from the run log and skips the run once the cap is reached.
+  const dailyCap = Math.max(0, Number(process.env.BACKFILL_DAILY_EXTRACTION_CAP ?? 1200));
+  if (dailyCap > 0 && !dryRun) {
+    const dayStart = new Date(); dayStart.setUTCHours(0, 0, 0, 0);
+    // Only runs that actually paid for extraction count: a batch was submitted, or sync mode ran clean.
+    // (Runs during an API outage log processed > 0 but extracted nothing — 4,763 of them on Sep 26.)
+    const { data: todayRuns } = await supabase.from('data_ingestion_log').select('records_processed, records_failed, parameters').eq('source', 'edgar_fts_backfill').gte('started_at', dayStart.toISOString());
+    const usedToday = (todayRuns ?? []).reduce((a, r) => {
+      const p = (r.parameters ?? {}) as Record<string, unknown>;
+      const paid = !!p.batchId || (p.extractionMode === 'sync' && (r.records_failed ?? 0) === 0);
+      return a + (paid ? (r.records_processed ?? 0) : 0);
+    }, 0);
+    if (usedToday >= dailyCap) {
+      await logCronRun(supabase, 'edgar_fts_backfill', { fetched: 0, processed: 0, inserted: 0, expectRecords: false, notes: `daily cap reached (${usedToday}/${dailyCap}); resumes at 00:00 UTC` });
+      return NextResponse.json({ success: true, skipped: 'daily_cap', usedToday, dailyCap });
+    }
+  }
   const maxExtractions = Math.min(200, Number(request.nextUrl.searchParams.get('max')) || 80);
   const concurrency = Math.min(8, Number(request.nextUrl.searchParams.get('concurrency')) || 4);
   try {
@@ -36,10 +58,10 @@ export async function GET(request: NextRequest) {
       await logCronRun(supabase, 'edgar_fts_backfill', {
         fetched: result.candidates,
         processed: result.extracted,
-        inserted: result.inserted,
+        inserted: result.inserted + (result.drained?.inserted ?? 0),
         errors: result.errors,
         funnel: result.funnel,
-        parameters: { quarter: result.quarterKey, query: result.query, pages: result.pages, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency },
+        parameters: { quarter: result.quarterKey, query: result.query, pages: result.pages, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency, extractionMode: process.env.BACKFILL_EXTRACTION_MODE || 'batch', gate: process.env.EXTRACTION_GATE || 'haiku', batchId: result.batchId ?? null, drained: result.drained ?? null },
         // A quarter/query with no hits is a legitimate empty page once the walk is finished.
         expectRecords: !result.finished,
         notes: result.finished ? 'backfill walk complete; cursor at the current quarter' : undefined,

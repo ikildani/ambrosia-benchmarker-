@@ -18,6 +18,8 @@ export type FunnelStage =
   | 'already_in_table'
   | 'content_unavailable'
   | 'content_too_short'
+  | 'gate_rejected'
+  | 'batch_submitted'
   | 'extraction_error'
   | 'not_a_deal'
   | 'confidence_gate'
@@ -73,7 +75,7 @@ export class FunnelCounter {
   summary(): string {
     const order: FunnelStage[] = [
       'fetched', 'keyword_filtered', 'already_in_table', 'content_unavailable', 'content_too_short',
-      'extraction_error', 'not_a_deal', 'confidence_gate', 'missing_parties', 'validator_rejected',
+      'gate_rejected', 'batch_submitted', 'extraction_error', 'not_a_deal', 'confidence_gate', 'missing_parties', 'validator_rejected',
       'duplicate_same_day', 'insert_duplicate', 'insert_error', 'inserted', 'dry_run_would_insert', 'time_budget',
     ];
     return order

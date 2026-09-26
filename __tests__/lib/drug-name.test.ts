@@ -1,6 +1,6 @@
 /**
  * Tests for lib/radar/drug-name.ts — pure drug-name normalization for the
- * Asset Radar drug master (migration 107).
+ * Search & Evaluation drug master (migration 107).
  */
 import {
   classifyAlias,

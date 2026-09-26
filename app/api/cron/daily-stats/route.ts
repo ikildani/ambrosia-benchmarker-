@@ -83,12 +83,11 @@ export async function GET(request: NextRequest) {
     // Query verified deals (excluding 'other' TA, matching /api/deals/stats).
     // R66 (2026-04-14): also exclude is_synthetic=true so the LIVE_DEAL_COUNT
     // doesn't include the 845 fabricated rows flagged by migrations 051 + 053.
+    // 2026-09-25: headline = every real row (matches lib/deal-stats.ts); 'other' TA no longer excluded.
     const { count: verifiedDeals } = await supabase
       .from('deals')
       .select('*', { count: 'exact', head: true })
-      .eq('is_synthetic', false)
-      .not('therapeutic_area', 'eq', 'other')
-      .not('therapeutic_area', 'like', '\\__%');
+      .eq('is_synthetic', false);
 
     if (verifiedDeals != null) {
       await updateDealCountIfChanged(verifiedDeals);

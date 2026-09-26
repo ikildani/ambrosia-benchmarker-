@@ -1,5 +1,5 @@
 /**
- * Asset Radar — Layer 5: Competitive Intelligence
+ * Search & Evaluation — Layer 5: Competitive Intelligence
  *
  * Answers "who else is circling this asset?" by mining 6 signal types:
  *
@@ -569,13 +569,11 @@ async function persistIntel(
     else inserted++;
   }
 
-  // Update competitive_heat on clinical_assets
-  const heat = computeCompetitiveHeat(signals);
-  const { error: heatError } = await supabase
-    .from('clinical_assets')
-    .update({ competitive_heat: heat })
-    .eq('id', asset.id);
-  if (heatError) errors.push(`Heat update error ${asset.asset_name}: ${heatError.message}`);
+  // clinical_assets.competitive_heat has one writer: the scoring wave in
+  // lib/radar/signal-detection.ts, which covers every asset every cycle. This
+  // module used to overwrite it for the top 200 once a day, so the number a
+  // user saw depended on which cron had run last. The intel rows written
+  // above are what the scoring wave and the asset page read.
 
   return inserted;
 }

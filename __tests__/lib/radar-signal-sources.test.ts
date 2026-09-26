@@ -20,6 +20,7 @@ import {
   listRecentFilings,
   matchCikEntry,
   normalizeCompanyKey,
+  stripSecTitleNoise,
   padCik,
   type CompanyFacts,
   type FilingRef,
@@ -248,6 +249,20 @@ describe('company-financials: CIK resolution', () => {
   it('matches by ticker first, stripping exchange suffixes', () => {
     expect(matchCikEntry({ name: 'Whatever', ticker: 'NASDAQ:MRNA' }, index)).toMatchObject({ cik: '1682852', method: 'ticker' });
     expect(matchCikEntry({ name: 'Whatever', ticker: 'vrtx' }, index)).toMatchObject({ cik: '875045', method: 'ticker' });
+  });
+
+  it('ignores state-of-incorporation and share-class noise in SEC titles', () => {
+    const noisy = buildCikIndex([
+      { cik_str: 2001, ticker: 'ALPH', title: 'ALPHA THERAPEUTICS INC /DE/' },
+      { cik_str: 2002, ticker: 'BETA', title: 'BETA BIO INC/NEW' },
+      { cik_str: 2003, ticker: 'GAMM', title: 'GAMMA PHARMACEUTICALS PLC /ADR/' },
+      { cik_str: 2004, ticker: 'DELT', title: 'Delta Corp (DE)' },
+    ]);
+    expect(stripSecTitleNoise('ALPHA THERAPEUTICS INC /DE/')).toBe('ALPHA THERAPEUTICS INC');
+    expect(matchCikEntry({ name: 'Alpha Therapeutics' }, noisy)).toMatchObject({ cik: '2001', method: 'name' });
+    expect(matchCikEntry({ name: 'Beta Bio, Inc.' }, noisy)).toMatchObject({ cik: '2002', method: 'name' });
+    expect(matchCikEntry({ name: 'Gamma Pharmaceuticals' }, noisy)).toMatchObject({ cik: '2003' });
+    expect(matchCikEntry({ name: 'Delta Corporation' }, noisy)).toMatchObject({ cik: '2004' });
   });
 
   it('matches by normalized name, only when unique', () => {

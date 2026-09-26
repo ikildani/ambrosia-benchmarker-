@@ -1,5 +1,5 @@
 /**
- * Cron: Management Intent (Asset Radar, Phase 3 Workstream C)
+ * Cron: Management Intent (Search & Evaluation, Phase 3 Workstream C)
  *
  * Classifies press releases (licensing / strategic_review / executive_hire /
  * layoffs / financing) and the MD&A / liquidity paragraphs of the latest

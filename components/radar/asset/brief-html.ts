@@ -76,7 +76,7 @@ export function buildBriefHtml(brief: AssetBrief, opts: { generatedAt?: Date; ba
   const headerHtml = `
     <div class="header section">
       <div>
-        <div class="kicker">Solidus Asset Radar · Committee brief</div>
+        <div class="kicker">Solidus Search & Evaluation · Committee brief</div>
         <h1>${esc(asset.asset_name)}</h1>
         <div class="muted" style="margin-top:2px;">${esc(owner.company_name)}${owner.owner_type && owner.owner_type !== 'unknown' ? ` · ${esc(owner.owner_type)}` : ''}${owner.country ? ` · ${esc(label(owner.country))}` : ''}${asset.asset_aliases?.length ? ` · aka ${esc(asset.asset_aliases.slice(0, 3).join(', '))}` : ''}</div>
         <div style="margin-top:5px;">
@@ -203,7 +203,7 @@ export function buildBriefHtml(brief: AssetBrief, opts: { generatedAt?: Date; ba
       ${catalystRows ? `<div style="margin-top:5px;"><span class="muted">Catalysts:</span> ${catalystRows}</div>` : ''}
     </div>`;
 
-  const footer = `<div class="footer"><span>Solidus Asset Radar · generated ${esc(generated.toISOString().slice(0, 16).replace('T', ' '))} UTC · model ${esc(score.model_version)}</span><span>${esc(baseUrl)}/radar/${esc(asset.id)} · Internal committee use</span></div>`;
+  const footer = `<div class="footer"><span>Solidus Search & Evaluation · generated ${esc(generated.toISOString().slice(0, 16).replace('T', ' '))} UTC · model ${esc(score.model_version)}</span><span>${esc(baseUrl)}/radar/${esc(asset.id)} · Internal committee use</span></div>`;
 
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(asset.asset_name)} — Solidus Asset Radar brief</title><style>${briefStyles()}</style></head><body><div class="page">${headerHtml}${identityHtml}${scoreHtml}${termsHtml}${acquirersHtml}${trialsHtml}</div>${footer}</body></html>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(asset.asset_name)} — Solidus Search & Evaluation brief</title><style>${briefStyles()}</style></head><body><div class="page">${headerHtml}${identityHtml}${scoreHtml}${termsHtml}${acquirersHtml}${trialsHtml}</div>${footer}</body></html>`;
 }

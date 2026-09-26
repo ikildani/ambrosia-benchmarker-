@@ -1,0 +1,2 @@
+-- Migration 128 — deal_coverage_stats(): by_year starts at 2010 (backfill early pass covers 2010–2016).
+-- Body identical to 127 except the by_year floor. Applied to prod 2026-09-25.

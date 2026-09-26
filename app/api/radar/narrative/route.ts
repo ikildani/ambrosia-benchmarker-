@@ -1,5 +1,5 @@
 /**
- * Asset Radar — AI Narrative API
+ * Search & Evaluation — AI Narrative API
  *
  * GET /api/radar/narrative?asset_id=UUID
  *   One-paragraph institutional analyst brief for an asset, synthesised from

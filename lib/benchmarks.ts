@@ -267,7 +267,11 @@ export async function refreshCalibrationCache(): Promise<void> {
       .eq('is_active', true);
 
     if (error) {
-      console.error('Failed to fetch calibration data:', error.message);
+      // When PostgREST is unreachable the message is Cloudflare's full HTML error page
+      // (Sep 25 2026: it repeated until the Vercel build log hit its 4 MB cap and hid
+      // the real build error). Log the first line only.
+      const msg = String(error.message ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+      console.error('Failed to fetch calibration data:', msg || 'unknown error');
       return;
     }
 

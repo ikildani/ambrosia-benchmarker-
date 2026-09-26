@@ -37,6 +37,8 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   'dart_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
   'cninfo_announcements': { frequency: 'rotation', expectedRunsPerWeek: 40 },
   'mfn_announcements': { frequency: 'every-30m', expectedRunsPerWeek: 336 },
+  'deal_resourcing': { frequency: 'rotation', expectedRunsPerWeek: 40 },
+  'deal_geo_enrichment': { frequency: 'rotation', expectedRunsPerWeek: 40 },
   'api_credit_check': { frequency: 'hourly', expectedRunsPerWeek: 168 },      // 20 * * * *
   'deal_inflow_check': { frequency: 'daily', expectedRunsPerWeek: 7 },        // inside api_credit_check at 13:20 UTC
   'deal-enrichment': { frequency: '3x-daily', expectedRunsPerWeek: 21 },
@@ -45,7 +47,7 @@ const KNOWN_CRONS: Record<string, { frequency: string; expectedRunsPerWeek: numb
   'trials-update': { frequency: 'daily', expectedRunsPerWeek: 7 },
   'embed-deals': { frequency: '3x-daily', expectedRunsPerWeek: 21 },
 
-  // Asset Radar crons (sources written by lib/radar/run-log.ts; schedules from vercel.json)
+  // Search & Evaluation crons (sources written by lib/radar/run-log.ts; schedules from vercel.json)
   // asset_universe rows also carry parameters.stage for the sweeps that share the source
   // (ctgov_sweep hourly, registry_sweep, drug_resolve, partnership_refresh).
   'asset_universe': { frequency: 'every-2h', expectedRunsPerWeek: 84 },  // 30 */2 * * * + ctgov-sweep 15 * * * *

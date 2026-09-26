@@ -146,7 +146,7 @@ export async function processTdnetDisclosure(
   const pdf = await fetchTdnetPdfText(a.url);
   if (!pdf.ok) { funnel.count('content_unavailable', `http_${pdf.status}`, a.url); return 'skipped'; }
   if (pdf.text.length < 300) { funnel.count('content_too_short', 'pdf', a.title); return 'skipped'; }
-  const deal = await extractDealFromFiling(pdf.text.substring(0, 24_000), opts.anthropicApiKey);
+  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey);
   if (!deal) { funnel.count('not_a_deal', 'tdnet', `${a.company}: ${a.title.slice(0, 80)}`); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }

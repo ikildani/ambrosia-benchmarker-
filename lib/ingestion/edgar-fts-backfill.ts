@@ -20,8 +20,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { readSyncCursor, writeSyncCursor } from '../radar/sync-cursor';
 import { FunnelCounter } from './funnel';
-import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
-import { processEftsDocument } from './edgar-realtime';
+import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, quartersBetween, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
+import Anthropic from '@anthropic-ai/sdk';
+import { processEftsDocument, loadEftsDocumentText } from './edgar-realtime';
+import { ExtractionUnavailableError } from './sec-edgar';
+import { backfillExtractionMode, submitExtractionBatch, drainExtractionBatches, type BatchItem, type BackfillExtractionMode } from './edgar-fts-batch';
 import { mapWithConcurrency } from './concurrency';
 
 /**
@@ -34,6 +37,9 @@ export const PROCESSED_TABLE = 'edgar_fts_processed';
 
 export const BACKFILL_CURSOR_SOURCE = 'edgar_fts_backfill';
 export const BACKFILL_FROM_YEAR = 2017;
+/** Second pass, walked after the 2017→present quarters are complete (Issa, Sep 25 2026). */
+export const BACKFILL_EARLY_FROM_YEAR = 2010;
+export const BACKFILL_EARLY_TO_YEAR = 2016;
 
 export interface BackfillCursorState extends Record<string, unknown> {
   quarterKey: string;
@@ -57,11 +63,17 @@ export interface BackfillOptions {
   cursorOverride?: Partial<BackfillCursorState>;
   /** Restrict to one query key for a local probe. */
   onlyQuery?: string;
+  /** 'batch' (default): gate synchronously, extract through Message Batches at 50% price, drain next run. 'sync': extract inline. */
+  extractionMode?: BackfillExtractionMode;
   /** Parallel extractions per run. Claude calls are I/O bound; 4 is safe under SEC's 10 req/s and Anthropic tier limits. */
   concurrency?: number;
 }
 
 export interface BackfillResult {
+  /** Batch mode: id of the batch submitted this run, if any. */
+  batchId?: string | null;
+  /** Batch mode: drain summary for batches that ended before this run. */
+  drained?: { batchesChecked: number; batchesDrained: number; results: number; inserted: number };
   /** Quarter/query the run started on. */
   quarterKey: string;
   query: string;
@@ -114,9 +126,30 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   const minConfidence = opts.minConfidence ?? 75;
   const reviewConfidence = opts.reviewConfidence ?? 60;
   const dryRun = !!opts.dryRun;
-  const quarters = quartersSince(BACKFILL_FROM_YEAR);
+  // Recent years first (2017→now), then the early pass (2010–2016) appended after them so the
+  // cursor walks 2026 before 2010 and `finished` means both passes are done.
+  const quarters = [...quartersSince(BACKFILL_FROM_YEAR), ...quartersBetween(BACKFILL_EARLY_FROM_YEAR, BACKFILL_EARLY_TO_YEAR)];
   const funnel = new FunnelCounter();
   const errors: string[] = [];
+  let extractionMode: BackfillExtractionMode = opts.extractionMode ?? backfillExtractionMode();
+  const anthropic = new Anthropic({ apiKey: opts.anthropicApiKey, timeout: 60_000 });
+  let batchId: string | null = null;
+  let drained: BackfillResult['drained'];
+
+  // Batch mode: persist the deals from batches that ended since the last run before walking further.
+  // Bounded to the first third of the budget so a run always submits new work too.
+  if (extractionMode === 'batch') {
+    const d = await drainExtractionBatches(supabase, anthropic, {
+      anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel, deadline: start + Math.floor(budget / 3),
+    });
+    drained = { batchesChecked: d.batchesChecked, batchesDrained: d.batchesDrained, results: d.results, inserted: d.inserted };
+    errors.push(...d.errors);
+    if (d.errors.some(e => /batch table read failed/.test(e))) {
+      // Migration 122 not applied: fall back to synchronous extraction rather than lose the run.
+      errors.push('edgar_fts_batches unavailable; extracting synchronously this run');
+      extractionMode = 'sync';
+    }
+  }
 
   const stored = opts.cursorOverride ? null : await readSyncCursor<BackfillCursorState>(supabase, BACKFILL_CURSOR_SOURCE);
   const state: BackfillCursorState = {
@@ -137,6 +170,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   let cur: BackfillCursorState = { ...state };
   const startKey = { quarterKey: cur.quarterKey, queryIndex: cur.queryIndex };
   let pages = 0, candidates = 0, prefiltered = 0, alreadyProcessed = 0, extracted = 0, passed = 0, inserted = 0;
+  let extractorDown = false;
 
   const record = async (doc: EftsDocument, outcome: string, quarterKey: string, queryKey: string) => {
     if (dryRun) return;
@@ -194,29 +228,65 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
       const batch = todo.slice(0, Math.max(0, maxExtractions - extracted));
       const capHit = todo.length > batch.length;
       if (capHit) funnel.count('time_budget', 'extraction_cap');
-      const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
-        let outcome: string;
-        try {
-          outcome = await processEftsDocument(supabase, doc, {
-            anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel,
-            sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
-          });
-        } catch (e) {
-          // One attempt per filing: recording the failure keeps a flaky filing from pinning the cursor.
-          await record(doc, 'extraction_error', quarter.key, query.key);
-          throw e;
+      let budgetHit = false;
+      if (extractionMode === 'batch') {
+        // Gate synchronously (cheap), then hand everything that passed to one Message Batch.
+        const items: BatchItem[] = [];
+        const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
+          const loaded = await loadEftsDocumentText(supabase, doc, { anthropicApiKey: opts.anthropicApiKey, funnel });
+          if (loaded.status === 'skipped') {
+            if (loaded.outcome !== 'already_in_table') await record(doc, loaded.outcome, quarter.key, query.key);
+            return loaded.outcome;
+          }
+          items.push({ doc, text: loaded.text, quarter: quarter.key, queryKey: query.key, sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k' });
+          return 'ready';
+        }, () => Date.now() - start < budget);
+        for (const e of run.errors) {
+          funnel.count('extraction_error', undefined, String(e.error).slice(0, 120));
+          errors.push(`${batch[e.index]?.accession}: ${String(e.error).slice(0, 160)}`);
         }
-        if (outcome === 'inserted') { passed++; inserted++; }
-        if (outcome === 'error') errors.push(`insert error ${doc.accession}`);
-        await record(doc, outcome === 'error' ? 'insert_error' : outcome, quarter.key, query.key);
-        return outcome;
-      }, () => Date.now() - start < budget);
-      extracted += run.started;
-      for (const e of run.errors) {
-        funnel.count('extraction_error', undefined, String(e.error).slice(0, 120));
-        errors.push(`${batch[e.index]?.accession}: ${String(e.error).slice(0, 160)}`);
+        budgetHit = run.started < batch.length;
+        // Only filings that reach the extractor count against the cap.
+        extracted += items.length;
+        if (items.length > 0) {
+          const sub = await submitExtractionBatch(supabase, anthropic, items, { dryRun, funnel });
+          if (sub.error) {
+            // Sep 26 2026: do not fall back inline and do not record anything — if the batch API refused us
+            // (credit, rate limit), inline calls fail the same way and the gated filings were being recorded as
+            // skipped (5,371 overnight). Hold the page; the ledger skips what was already done next time.
+            errors.push(sub.error);
+            funnel.count('extraction_error', 'batch_submit_failed', sub.error.slice(0, 120));
+            extractorDown = true;
+          } else {
+            batchId = sub.batchId ?? batchId;
+          }
+        }
+      } else {
+        const run = await mapWithConcurrency(batch, concurrency, async (doc) => {
+          let outcome: string;
+          try {
+            outcome = await processEftsDocument(supabase, doc, {
+              anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel,
+              sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
+            });
+          } catch (e) {
+            // One attempt per filing: recording the failure keeps a flaky filing from pinning the cursor.
+            if (e instanceof ExtractionUnavailableError) { extractorDown = true; throw e; } // not the filing's fault: leave it unrecorded
+            await record(doc, 'extraction_error', quarter.key, query.key);
+            throw e;
+          }
+          if (outcome === 'inserted') { passed++; inserted++; }
+          if (outcome === 'error') errors.push(`insert error ${doc.accession}`);
+          await record(doc, outcome === 'error' ? 'insert_error' : outcome, quarter.key, query.key);
+          return outcome;
+        }, () => Date.now() - start < budget);
+        extracted += run.started;
+        for (const e of run.errors) {
+          funnel.count('extraction_error', undefined, String(e.error).slice(0, 120));
+          errors.push(`${batch[e.index]?.accession}: ${String(e.error).slice(0, 160)}`);
+        }
+        budgetHit = run.started < batch.length;
       }
-      const budgetHit = run.started < batch.length;
       if (budgetHit) funnel.count('time_budget', 'hits_remaining');
 
       // A form that failed to parse means part of this page was never seen: re-request it next
@@ -224,7 +294,8 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
       const partialParse = page.parseFailed && (cur.retries ?? 0) < MAX_PAGE_RETRIES;
       if (partialParse) errors.push(`EFTS partial parse failure for ${query.key} ${quarter.key} from=${cur.from}; page will be retried`);
 
-      if (capHit || budgetHit || partialParse) step = 'stay';
+      if (extractorDown) { step = 'stay'; errors.push('extractor unavailable; cursor held'); }
+      else if (capHit || budgetHit || partialParse) step = 'stay';
       else if (cur.from + EFTS_PAGE_SIZE < page.total) step = 'next_page';
       else step = 'next_query';
     }
@@ -233,7 +304,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
     if (!dryRun && !opts.cursorOverride) {
       await writeSyncCursor(supabase, BACKFILL_CURSOR_SOURCE, `${next.quarterKey}:${next.queryIndex}:${next.from}`, next);
     }
-    if (step === 'stay') { cur = next; break; } // cap/budget/parse: nothing more to do this run
+    if (step === 'stay' || extractorDown) { cur = next; break; } // cap/budget/parse: nothing more to do this run
     cur = next;
   }
 
@@ -243,5 +314,6 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   return {
     quarterKey: startKey.quarterKey, query: PHARMA_DEAL_QUERIES[startKey.queryIndex]?.key ?? PHARMA_DEAL_QUERIES[0].key, pages,
     candidates, prefiltered, alreadyProcessed, extracted, passed, inserted, errors, funnel: funnel.toJSON(), summary, next: cur, finished,
+    batchId, drained,
   };
 }

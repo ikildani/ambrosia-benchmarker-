@@ -1,5 +1,5 @@
 /**
- * Asset Radar scoring v3 — feature layer.
+ * Search & Evaluation scoring v3 — feature layer.
  *
  * `buildFeatureVector(bundle, asOf)` is pure: it turns one asset's evidence
  * bundle into a documented, versioned numeric vector. Every feature is

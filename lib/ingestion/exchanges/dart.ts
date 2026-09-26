@@ -130,7 +130,7 @@ export async function processDartDisclosure(
   const doc = await fetchDartDocumentText(a.rcept_no);
   if (!doc.ok) { funnel.count('content_unavailable', `http_${doc.status}`, a.viewerUrl); return 'skipped'; }
   if (doc.text.length < 300) { funnel.count('content_too_short', 'xml', a.report_nm); return 'skipped'; }
-  const deal = await extractDealFromFiling(doc.text.substring(0, 24_000), opts.anthropicApiKey);
+  const deal = await extractDealFromFiling(doc.text.substring(0, 12_000), opts.anthropicApiKey);
   if (!deal) { funnel.count('not_a_deal', 'dart', `${a.corp_name}: ${a.report_nm.slice(0, 80)}`); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }

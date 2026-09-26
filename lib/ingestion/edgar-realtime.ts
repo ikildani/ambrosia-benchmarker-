@@ -12,7 +12,8 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
+import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea, EXTRACTION_MODEL, type ExtractedDeal } from './sec-edgar';
+import { dealGate, type GateMode } from './deal-gate';
 import { validateExtractedDeal } from './deal-extraction-validator';
 import { classifyAndEnrichDeal } from './company-geography';
 import { FunnelCounter } from './funnel';
@@ -20,6 +21,10 @@ import { insertCitedDeal } from './insert-deal';
 import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, fetchSecDocumentText, isLikelyPharmaDealHit, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
 
 export { hitToDocument } from './edgar-fts';
+
+/** Characters of filing text handed to the extractor (about 6,500 tokens). */
+/** Sep 26 2026: 24K → 12K characters. Deal terms sit in the first pages of an 8-K/6-K exhibit; this halves the largest cost line. */
+export const EXTRACTION_TEXT_CHARS = 12_000;
 
 export interface EdgarRealtimeOptions {
   /** ISO date (UTC) to scan; defaults to today. */
@@ -49,6 +54,48 @@ export interface EdgarRealtimeResult {
   noFilings: boolean;
 }
 
+export interface EftsProcessOptions {
+  anthropicApiKey: string; dryRun: boolean; minConfidence: number; funnel: FunnelCounter; sourceType: 'sec_8k' | 'sec_6k';
+  onHighValue?: EdgarRealtimeOptions['onHighValue'];
+  /**
+   * Sep 24 2026: filings scoring in [reviewConfidence, minConfidence) are inserted as
+   * pending with a review note instead of dropped. The first fast backfill run put
+   * Assembly → Allergan (c=72) and Nerviano → Trovagene (c=72), both real 2017 deals,
+   * on the floor. The verification cron is the gate that promotes to verified.
+   */
+  reviewConfidence?: number;
+  /** Gate in front of the extractor; defaults to EXTRACTION_GATE. */
+  gate?: GateMode;
+}
+
+export type EftsLoadResult =
+  | { status: 'ready'; text: string }
+  | { status: 'skipped'; outcome: 'already_in_table' | 'content_unavailable' | 'content_too_short' | 'gate_rejected' };
+
+/**
+ * Everything that happens before the Opus extractor: dedupe on the filing id,
+ * fetch the document, drop it if short, and run the cheap gate. Shared by the
+ * synchronous path and the batch path so the two cannot drift.
+ */
+export async function loadEftsDocumentText(
+  supabase: SupabaseClient,
+  doc: EftsDocument,
+  opts: Pick<EftsProcessOptions, 'anthropicApiKey' | 'funnel' | 'gate'>,
+): Promise<EftsLoadResult> {
+  const { funnel } = opts;
+  const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', doc.accession).limit(1).maybeSingle();
+  if (existing) { funnel.count('already_in_table'); return { status: 'skipped', outcome: 'already_in_table' }; }
+
+  const fetched = await fetchSecDocumentText(doc.url);
+  if (!fetched.ok) { funnel.count('content_unavailable', `http_${fetched.status}`, doc.url); return { status: 'skipped', outcome: 'content_unavailable' }; }
+  if (fetched.text.length < 500) { funnel.count('content_too_short', doc.fileType || 'unknown', doc.url); return { status: 'skipped', outcome: 'content_too_short' }; }
+
+  const text = fetched.text.substring(0, EXTRACTION_TEXT_CHARS);
+  const gate = await dealGate(text, opts.anthropicApiKey, opts.gate);
+  if (!gate.keep) { funnel.count('gate_rejected', gate.reason, `${doc.companyName} ${doc.fileType} ${doc.accession}`); return { status: 'skipped', outcome: 'gate_rejected' }; }
+  return { status: 'ready', text };
+}
+
 /**
  * Process one resolved EFTS document through extraction, validation and the
  * cited insert. Shared by the real-time monitor and the historical backfill
@@ -57,28 +104,27 @@ export interface EdgarRealtimeResult {
 export async function processEftsDocument(
   supabase: SupabaseClient,
   doc: EftsDocument,
-  opts: {
-    anthropicApiKey: string; dryRun: boolean; minConfidence: number; funnel: FunnelCounter; sourceType: 'sec_8k' | 'sec_6k';
-    onHighValue?: EdgarRealtimeOptions['onHighValue'];
-    /**
-     * Sep 24 2026: filings scoring in [reviewConfidence, minConfidence) are inserted as
-     * pending with a review note instead of dropped. The first fast backfill run put
-     * Assembly → Allergan (c=72) and Nerviano → Trovagene (c=72), both real 2017 deals,
-     * on the floor. The verification cron is the gate that promotes to verified.
-     */
-    reviewConfidence?: number;
-  },
+  opts: EftsProcessOptions,
+): Promise<'inserted' | 'skipped' | 'error'> {
+  const loaded = await loadEftsDocumentText(supabase, doc, opts);
+  if (loaded.status === 'skipped') return 'skipped';
+
+  const deal = await extractDealFromFiling(loaded.text, opts.anthropicApiKey);
+  if (!deal) { opts.funnel.count('not_a_deal', doc.fileType || 'unknown', `${doc.companyName} ${doc.accession}`); return 'skipped'; }
+  return persistExtractedDeal(supabase, doc, deal, opts);
+}
+
+/**
+ * Everything after the extractor: confidence floor, validator, same-day
+ * dedupe, company resolution, the cited insert, the high-value alert.
+ */
+export async function persistExtractedDeal(
+  supabase: SupabaseClient,
+  doc: EftsDocument,
+  deal: ExtractedDeal,
+  opts: EftsProcessOptions,
 ): Promise<'inserted' | 'skipped' | 'error'> {
   const { funnel, dryRun } = opts;
-  const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', doc.accession).limit(1).maybeSingle();
-  if (existing) { funnel.count('already_in_table'); return 'skipped'; }
-
-  const fetched = await fetchSecDocumentText(doc.url);
-  if (!fetched.ok) { funnel.count('content_unavailable', `http_${fetched.status}`, doc.url); return 'skipped'; }
-  if (fetched.text.length < 500) { funnel.count('content_too_short', doc.fileType || 'unknown', doc.url); return 'skipped'; }
-
-  const deal = await extractDealFromFiling(fetched.text.substring(0, 24_000), opts.anthropicApiKey);
-  if (!deal) { funnel.count('not_a_deal', doc.fileType || 'unknown', `${doc.companyName} ${doc.accession}`); return 'skipped'; }
   const floor = opts.reviewConfidence != null ? Math.min(opts.reviewConfidence, opts.minConfidence) : opts.minConfidence;
   if (deal.confidence_score < floor) {
     funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`);
@@ -104,7 +150,7 @@ export async function processEftsDocument(
     sourceType: opts.sourceType,
     sourceUrl: doc.url,
     sourceFilingId: doc.accession,
-    extractionModel: 'claude-opus-4-6',
+    extractionModel: EXTRACTION_MODEL,
     provenanceNote: `EFTS ${doc.form} ${doc.fileType}`.trim(),
     row: {
       licensor_name: deal.licensor, licensor_id: licensorId, licensee_name: deal.licensee, licensee_id: licenseeId,

@@ -2,6 +2,16 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { checkRateLimit, RATE_LIMIT_CONFIGS, getRateLimitHeaders } from '@/lib/rate-limit';
 import type { RateLimitConfig } from '@/lib/rate-limit';
+import { userIdFromCookies } from '@/lib/auth/session-cookie';
+
+// Method-specific overrides, checked before the path map. The Radar search
+// route serves typeahead on GET (every keystroke, plain DB read) and the
+// natural-language parser on POST (a model call); one budget for both meant
+// suggestions stopped after five keystrokes.
+const METHOD_ROUTE_RATE_LIMITS: Record<string, RateLimitConfig> = {
+  'GET /api/radar/search': RATE_LIMIT_CONFIGS.radarTypeahead,
+  'POST /api/radar/search': RATE_LIMIT_CONFIGS.radarNl,
+};
 
 // Route-to-rate-limit config map
 const ROUTE_RATE_LIMITS: Record<string, RateLimitConfig> = {
@@ -27,17 +37,17 @@ const ROUTE_RATE_LIMITS: Record<string, RateLimitConfig> = {
   '/api/embed': RATE_LIMIT_CONFIGS.default,
   '/api/watchlist': RATE_LIMIT_CONFIGS.default,
   '/api/promo': { limit: 10, windowSeconds: 60 },
-  // Asset Radar: narrative/export call Opus, search calls Sonnet — cap them
-  // like the other AI generation endpoints. signals is a plain DB read that
-  // the asset-detail modal fetches on every open, so it gets the `deals`
-  // budget (30/min) rather than the 5/min AI budget.
+  // Asset Radar: narrative calls Opus and export renders a PDF, so they keep
+  // the AI budget; search is split by method above; every other Radar route
+  // is a plain DB read (feed, facets, compare, signals, watchlist, alerts…).
   '/api/radar/narrative': RATE_LIMIT_CONFIGS.aiGeneration,
   '/api/radar/export': RATE_LIMIT_CONFIGS.aiGeneration,
-  '/api/radar/search': RATE_LIMIT_CONFIGS.aiGeneration,
-  '/api/radar/signals': RATE_LIMIT_CONFIGS.deals,
+  '/api/radar': RATE_LIMIT_CONFIGS.radarRead,
 };
 
-function getRateLimitConfig(pathname: string): RateLimitConfig | null {
+function getRateLimitConfig(method: string, pathname: string): RateLimitConfig | null {
+  const byMethod = METHOD_ROUTE_RATE_LIMITS[`${method.toUpperCase()} ${pathname}`];
+  if (byMethod) return byMethod;
   // Check exact matches first, then prefix matches
   for (const [route, config] of Object.entries(ROUTE_RATE_LIMITS)) {
     if (pathname === route || pathname.startsWith(route + '/')) {
@@ -109,21 +119,16 @@ export async function middleware(request: NextRequest) {
 
   // --- Rate Limiting: apply to all API routes except webhook and cron ---
   if (isApiRoute && !isWebhook && !isCron) {
-    const rateLimitConfig = getRateLimitConfig(request.nextUrl.pathname);
+    const rateLimitConfig = getRateLimitConfig(request.method, request.nextUrl.pathname);
     if (rateLimitConfig) {
       const forwarded = request.headers.get('x-forwarded-for');
       const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
 
-      // Prefer user ID from Supabase auth cookie for fairer rate limiting
-      // (avoids shared-IP collisions and rotating-IP bypasses)
-      let identifier = `ip:${ip}`;
-      try {
-        const authCookie = request.cookies.getAll().find(c => c.name.includes('auth-token') && !c.name.includes('.'));
-        if (authCookie?.value) {
-          const payload = JSON.parse(Buffer.from(authCookie.value.split('.')[1], 'base64url').toString());
-          if (payload.sub) identifier = `user:${payload.sub}`;
-        }
-      } catch { /* fall back to IP */ }
+      // Prefer the user id from the Supabase session cookie (chunked
+      // @supabase/ssr format handled in lib/auth/session-cookie) so a team
+      // behind one office NAT does not share one budget; fall back to IP.
+      const userId = userIdFromCookies(request.cookies.getAll());
+      const identifier = userId ? `user:${userId}` : `ip:${ip}`;
 
       try {
         const result = await checkRateLimit(identifier, request.nextUrl.pathname, rateLimitConfig);
@@ -218,8 +223,26 @@ export async function middleware(request: NextRequest) {
   // IMPORTANT: Do not run any Supabase methods between createServerClient
   // and supabase.auth.getUser(). Running queries may reset the auth state.
 
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser();
+  // Anonymous traffic (no Supabase auth cookie) has no session to refresh:
+  // skip the network round-trip entirely. Crawlers and most visitors land here.
+  const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token'));
+  if (!hasAuthCookie) return supabaseResponse;
+
+  // Refresh session if expired - required for Server Components.
+  // Sep 25 2026: Supabase stalled for ~25 minutes and every page returned
+  // 504 MIDDLEWARE_INVOCATION_TIMEOUT because this await had no bound.
+  // Cap it: on timeout the request proceeds without a refreshed session
+  // (server components re-check auth themselves), instead of taking the
+  // whole site down with the database.
+  const AUTH_REFRESH_TIMEOUT_MS = 4_000;
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('auth refresh timeout')), AUTH_REFRESH_TIMEOUT_MS)),
+    ]);
+  } catch (e) {
+    console.warn('[middleware] session refresh skipped:', e instanceof Error ? e.message : String(e));
+  }
 
   return supabaseResponse;
 }

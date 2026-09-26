@@ -44,6 +44,8 @@ export async function getRelevantDealsWithDB(
       .eq('is_synthetic', false)
       .or('is_canonical.is.null,is_canonical.eq.true')
       .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+      // Sep 25 2026: a 60–74 confidence row inserted for verifier review is not a comparable until verified.
+      .or('verification_status.eq.verified,confidence_score.is.null,confidence_score.gte.75')
       // Filter on TA in SQL first so older exact-match comps are not crowded out by recency
       .eq('therapeutic_area', therapeuticArea)
       .not('total_deal_value_usd', 'is', null)
@@ -118,6 +120,8 @@ export async function findComparableDealsWithDB(
       .eq('is_synthetic', false)
       .or('is_canonical.is.null,is_canonical.eq.true')
       .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+      // Sep 25 2026: a 60–74 confidence row inserted for verifier review is not a comparable until verified.
+      .or('verification_status.eq.verified,confidence_score.is.null,confidence_score.gte.75')
       // Filter on TA in SQL first so older exact-match comps are not crowded out by recency
       .eq('therapeutic_area', inputs.therapeuticArea)
       .not('total_deal_value_usd', 'is', null)
@@ -286,6 +290,8 @@ export async function findEnrichedComparableDeals(
     .eq('is_synthetic', false)
     .or('is_canonical.is.null,is_canonical.eq.true')
     .or('verification_status.is.null,verification_status.not.in.("rejected","flagged")')
+      // Sep 25 2026: a 60–74 confidence row inserted for verifier review is not a comparable until verified.
+      .or('verification_status.eq.verified,confidence_score.is.null,confidence_score.gte.75')
     // Filter on TA in SQL first (indexed). The relaxation ladder never widens
     // beyond TA, so this is lossless — and it means an older exact-match comp
     // is no longer pushed out by 500 more-recent deals from other TAs.

@@ -1,5 +1,5 @@
 /**
- * Asset Radar scoring v3 — model (pure TypeScript, no dependencies).
+ * Search & Evaluation scoring v3 — model (pure TypeScript, no dependencies).
  *
  * L2-regularised logistic regression with monotone sign constraints on the
  * documented features, class weights for the ~1-2 % positive rate, and a
