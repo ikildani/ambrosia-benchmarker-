@@ -44,6 +44,8 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [opinion, setOpinion] = useState('');
   const [showOpinion, setShowOpinion] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
   const building = r.status === 'generating' || (r.autoDraftStatus === 'requested' && r.status !== 'call_complete' && r.status !== 'delivered');
 
   // While a draft builds, refresh the row every few seconds; the build runs server-side
@@ -60,7 +62,7 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
       const res = await fetch('/api/admin/briefs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: r.id, action, ...extra }) });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) { setMsg(json.error || `Failed (${res.status})`); return; }
-      setMsg(action === 'build' ? (json.result?.note || 'Building.') : 'Saved.');
+      setMsg(action === 'build' ? (json.result?.note || 'Building.') : action === 'delete' ? 'Deleted.' : 'Saved.');
       router.refresh();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Failed');
@@ -95,10 +97,21 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
             {r.invoiceSentAt && !r.paidAt ? <button onClick={() => act('paid')} disabled={!!busy} className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800 disabled:opacity-50">Mark paid</button> : null}
             <button onClick={() => act('build')} disabled={!!busy || building} className={`rounded-md px-3 py-1.5 font-medium disabled:opacity-50 ${r.hasOpinion && !r.deliveredAt ? 'bg-teal-500 text-slate-950 hover:bg-teal-400' : 'border border-slate-700 text-slate-200 hover:bg-slate-800'}`}>{building || busy === 'build' ? 'Building…' : r.hasOpinion ? (r.deliveredAt ? 'Rebuild + resend' : 'Deliver') : (r.dataRoomUrl ? 'Rebuild draft' : 'Build draft')}</button>
             <button onClick={() => setShowOpinion(v => !v)} className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800">{r.hasOpinion ? 'Edit opinion' : 'Add opinion'}</button>
+            <button onClick={() => setShowDelete(v => !v)} className="rounded-md border border-rose-500/40 px-3 py-1.5 text-rose-300 hover:bg-rose-500/10">Delete</button>
           </div>
           {msg ? <p className="text-xs text-slate-400">{msg}</p> : null}
         </div>
       </div>
+      {showDelete ? (
+        <div className="mt-4 border-t border-slate-800 pt-4">
+          <p className="text-xs text-rose-300">Removes this request, its PDF and Excel, queued alerts and follow-ups, and the outcome-ledger prediction it registered. The data-room link stops working. This cannot be undone.</p>
+          <div className="mt-2 flex items-center gap-2">
+            <input value={confirmText} onChange={e => setConfirmText(e.target.value)} placeholder="Type DELETE" className="w-40 rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-rose-400" />
+            <button onClick={() => act('delete', { confirm: confirmText })} disabled={!!busy || confirmText !== 'DELETE'} className="rounded-md bg-rose-500 px-3 py-1.5 text-sm font-semibold text-slate-950 disabled:opacity-40">{busy === 'delete' ? 'Deleting…' : 'Delete permanently'}</button>
+            <button onClick={() => { setShowDelete(false); setConfirmText(''); }} className="text-sm text-slate-400">Cancel</button>
+          </div>
+        </div>
+      ) : null}
       {showOpinion ? (
         <div className="mt-4 border-t border-slate-800 pt-4">
           <label className="mb-1 block text-xs text-slate-500">Managing Partner opinion (1–3 short paragraphs, printed and signed on the brief). Saving does not deliver; press Deliver afterwards.</label>
