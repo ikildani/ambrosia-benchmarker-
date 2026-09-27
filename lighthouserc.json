@@ -25,14 +25,14 @@
         "categories:performance": [
           "error",
           {
-            "minScore": 0.3,
+            "minScore": 0.6,
             "aggregationMethod": "median-run"
           }
         ],
         "largest-contentful-paint": [
           "error",
           {
-            "maxNumericValue": 8000,
+            "maxNumericValue": 4000,
             "aggregationMethod": "median-run"
           }
         ],
@@ -50,12 +50,12 @@
             "aggregationMethod": "median-run"
           }
         ],
-        "errors-in-console": "off"
+        "errors-in-console": "warn"
       }
     },
     "upload": {
       "target": "temporary-public-storage"
     },
-    "_budget_note": "Two numbers matter: the GitHub runner's and Google's. The runner (4x CPU slowdown on a shared 2-vCPU VM, benchmarkIndex ~2100-2500) scores this site 15-30 points below a developer laptop and below PageSpeed Insights. On 26 Sep 2026 it gave home 36 / LCP 7.5 s, calculator 49 / 4.8 s, pro 56 / 3.2 s, companies 52 / 4.0 s while a laptop gave 67 / 3.5 s, 52 / 7.0 s, 72 / 2.4 s, 65 / 3.6 s. The error floors here are regression guards for the runner (perf >= 0.3, LCP <= 8 s, CLS <= 0.1); the product targets remain mobile >= 80 and LCP <= 2.5 s as measured by PageSpeed Insights. Raise the floors after each verified gain; never lower them."
+    "_budget_note": "Ratchet, 27 Sep 2026 after perf rounds 4-8: the GitHub runner now scores home 96 / LCP 2.0 s, pro 93, companies 92, calculator 70 / TBT 1.1 s. Floors are regression guards at the weakest page (perf >= 0.6, LCP <= 4 s, CLS <= 0.1; TBT warns at 800 ms). Raise minScore to 0.8 once the calculator's hydration weight (framer-motion form, financial engine on first load) is cut; never lower."
   }
 }
