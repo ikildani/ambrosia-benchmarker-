@@ -83,7 +83,12 @@ async function main() {
         const slot = done++;
         if (slot >= args.max) break;
         const r = await runIndicationTopup(sb, pk, ak, { timeBudgetMs: 240_000 });
-        if (r.status === 'none') { done = args.max; break; }
+        if (r.status === 'none') {
+          // Empty queue ends the run; a transient read error does not.
+          if (!r.errors.length) { done = args.max; break; }
+          console.warn(`[w${n}] queue read failed (${r.errors[0].slice(0, 80)}); retrying in 30s`);
+          done--; await new Promise(res => setTimeout(res, 30_000)); continue;
+        }
         inserted += r.dealsInserted; discovered += r.dealsDiscovered;
         console.log(`[w${n}] ${r.indication}: ${r.queriesRun} queries, ${r.dealsDiscovered} found, ${r.dealsInserted} inserted → ${r.status}${r.readinessAfter ? ` · ${r.readinessAfter.split(' · ')[1]}` : ''}${r.errors.length ? ` · ${r.errors[0].slice(0, 80)}` : ''}`);
       }
