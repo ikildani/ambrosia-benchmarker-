@@ -197,7 +197,7 @@ export const EXPECTED_RADAR_STAGES: { source: string; stage: string; label: stri
   { source: 'licensing_signals', stage: 'catalysts', label: 'Catalyst detector', critical: false },
   { source: 'licensing_signals', stage: 'company_financials', label: 'Company financials (SEC XBRL)', critical: false },
   { source: 'licensing_signals', stage: 'management_intent', label: 'Management intent classifier', critical: false },
-  { source: 'licensing_signals', stage: 'patents_assignee', label: 'PatentsView by assignee', critical: false },
+  { source: 'licensing_signals', stage: 'patents_assignee', label: 'USPTO ODP patents by applicant', critical: false },
   { source: 'licensing_signals', stage: 'score_backtest', label: 'Score backtest', critical: false },
   { source: 'deal_thesis', stage: '', label: 'Deal thesis generator', critical: true },
   { source: 'mandate_matcher', stage: '', label: 'Mandate matcher', critical: false },

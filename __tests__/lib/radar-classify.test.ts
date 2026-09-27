@@ -282,11 +282,15 @@ describe('classify-prompt: zod gate', () => {
     expect(ClassificationItemSchema.safeParse(item({ evidence: 'guess' as never })).success).toBe(false);
   });
 
-  it('rejects confidence outside 0-100 and over-long text', () => {
+  it('rejects confidence outside 0-100; over-long text is clipped, not rejected', () => {
     expect(ClassificationItemSchema.safeParse(item({ confidence: 101 })).success).toBe(false);
     expect(ClassificationItemSchema.safeParse(item({ confidence: 70.5 })).success).toBe(false);
-    expect(ClassificationItemSchema.safeParse(item({ moa_short: 'x'.repeat(81) })).success).toBe(false);
-    expect(ClassificationItemSchema.safeParse(item({ indication_specific: 'x'.repeat(61) })).success).toBe(false);
+    const clipped = ClassificationItemSchema.safeParse(item({ moa_short: 'x'.repeat(81), indication_specific: 'x'.repeat(61) }));
+    expect(clipped.success).toBe(true);
+    if (clipped.success) {
+      expect(clipped.data.moa_short).toHaveLength(80);
+      expect(clipped.data.indication_specific).toHaveLength(60);
+    }
   });
 });
 
@@ -791,5 +795,23 @@ describe('validateClassificationSample', () => {
     expect(sent.temperature).toBe(0);
     const log = ops.find(o => o.table === 'data_ingestion_log')!;
     expect((log.calls[0].args[0] as { parameters: { stage: string } }).parameters.stage).toBe('classify_validate');
+  });
+});
+
+describe('classify-prompt: zod gate clips over-long strings instead of rejecting the answer', () => {
+  it('keeps the classification and trims rationale, moa_short, target and indication to their caps', () => {
+    const long = item({
+      rationale: 'r'.repeat(300),
+      moa_short: 'm'.repeat(200),
+      target: 't'.repeat(100),
+      indication_specific: 'i'.repeat(120),
+    });
+    const parsed = ClassificationItemSchema.safeParse(long);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.rationale).toHaveLength(160);
+    expect(parsed.data.moa_short).toHaveLength(80);
+    expect(parsed.data.target).toHaveLength(40);
+    expect(parsed.data.indication_specific).toHaveLength(60);
   });
 });
