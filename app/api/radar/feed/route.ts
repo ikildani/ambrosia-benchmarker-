@@ -123,6 +123,7 @@ function applyFilters(query: Builder, f: RadarFilterState): Builder {
   if (f.trial_status.length) q = q.in('trial_status', f.trial_status);
   if (f.indication.length) q = q.in('indication_category', f.indication);
   if (f.target.length) q = q.in('target', f.target);
+  if (f.company.length) q = q.in('company_name', f.company);
   if (f.owner_type.length) q = q.in('owner_type', f.owner_type);
   if (f.ownership.length) q = q.in('ownership_status', f.ownership);
   const phases = resolvePhaseList(f);

@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronDownIcon, ChevronUpIcon, ChevronUpDownIcon } from '@heroicons/react/16/solid';
+import { ChevronDownIcon, ChevronUpIcon, ChevronUpDownIcon, FunnelIcon } from '@heroicons/react/16/solid';
 import { radarLabel } from '@/lib/radar/vocab';
 import type { FeedRow } from '@/lib/radar/client/api-types';
 import { DEFAULT_TABLE_COLUMNS, TABLE_COLUMNS, type SortDir, type SortKey, type TableColumn } from '@/lib/radar/client/filter-schema';
@@ -35,9 +35,13 @@ interface Props {
   loading?: boolean;
   /** Visible column keys in TABLE_COLUMNS order (defaults to DEFAULT_TABLE_COLUMNS). */
   columns?: readonly string[];
+  /** Toggle the company facet for a row's company (company-first browsing). */
+  onFilterCompany?: (companyName: string) => void;
+  /** Currently selected company facet values, to mark the active one. */
+  companyFilter?: readonly string[];
 }
 
-export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, onToggleCompare, height, loading, columns }: Props) {
+export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, onToggleCompare, height, loading, columns, onFilterCompany, companyFilter }: Props) {
   const router = useRouter();
   const visible = useMemo(() => {
     const wanted = new Set(columns ?? DEFAULT_TABLE_COLUMNS);
@@ -224,7 +228,16 @@ export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, o
               )}
             >
               {visible.map(col => (
-                <Cell key={col.key} col={col} row={row} inCompare={inCompare} compareFull={compareFull} onToggleCompare={onToggleCompare} />
+                <Cell
+                  key={col.key}
+                  col={col}
+                  row={row}
+                  inCompare={inCompare}
+                  compareFull={compareFull}
+                  onToggleCompare={onToggleCompare}
+                  onFilterCompany={onFilterCompany}
+                  companyActive={!!companyFilter?.includes(row.company_name)}
+                />
               ))}
             </div>
           );
@@ -240,7 +253,15 @@ function num(v: number | null | undefined): string {
   return v === null || v === undefined || Number.isNaN(Number(v)) ? '—' : String(Math.round(Number(v)));
 }
 
-function Cell({ col, row, inCompare, compareFull, onToggleCompare }: { col: TableColumn; row: FeedRow; inCompare: boolean; compareFull: boolean; onToggleCompare: (id: string) => void }) {
+function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompany, companyActive }: {
+  col: TableColumn;
+  row: FeedRow;
+  inCompare: boolean;
+  compareFull: boolean;
+  onToggleCompare: (id: string) => void;
+  onFilterCompany?: (companyName: string) => void;
+  companyActive?: boolean;
+}) {
   const right = col.align === 'right' ? 'text-right' : '';
   let body: ReactNode;
   switch (col.key) {
@@ -286,10 +307,25 @@ function Cell({ col, row, inCompare, compareFull, onToggleCompare }: { col: Tabl
       );
     case 'owner':
       return (
-        <div role="gridcell" className="min-w-0">
+        <div role="gridcell" className="group/owner min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="truncate">{row.company_name}</span>
             <CountryTag code={row.originator_country} />
+            {onFilterCompany && (
+              <button
+                type="button"
+                onClick={() => onFilterCompany(row.company_name)}
+                className={cn(
+                  'shrink-0 rounded p-0.5 text-neutral-400 hover:text-teal-700 dark:hover:text-teal-300',
+                  companyActive ? 'text-teal-700 opacity-100 dark:text-teal-300' : 'opacity-0 group-hover/owner:opacity-100 focus:opacity-100',
+                  FOCUS_RING,
+                )}
+                aria-label={companyActive ? `Stop filtering by ${row.company_name}` : `Only ${row.company_name}`}
+                title={companyActive ? `Stop filtering by ${row.company_name}` : `Only ${row.company_name}'s programs`}
+              >
+                <FunnelIcon className="h-3.5 w-3.5" aria-hidden />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
             <OwnerTypeChip type={row.owner_type} />

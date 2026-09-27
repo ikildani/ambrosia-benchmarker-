@@ -29,6 +29,7 @@ const RAIL_ORDER: MultiFacetKey[] = [
   'modality',
   'phase',
   'target',
+  'company',
   'partnership',
   'ownership',
   'owner_type',
@@ -56,8 +57,10 @@ function labelFor(key: MultiFacetKey, value: string): string {
     case 'trial_status':
       return trialStatusLabel(value);
     case 'target':
+    case 'company':
+      return value;
     case 'indication':
-      return key === 'indication' ? radarLabel(value) : value;
+      return radarLabel(value);
     case 'score_band':
       return value;
     default:

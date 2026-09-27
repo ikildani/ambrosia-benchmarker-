@@ -34,6 +34,7 @@ export const viewFiltersInputSchema = z
     trial_status: stringList.optional(),
     indication: stringList.optional(),
     target: stringList.optional(),
+    company: stringList.optional(),
     score_band: stringList.optional(),
     phase_min: z.string().max(40).nullable().optional(),
     phase_max: z.string().max(40).nullable().optional(),

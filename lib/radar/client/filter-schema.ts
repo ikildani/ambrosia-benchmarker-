@@ -83,6 +83,7 @@ export const MULTI_FACET_KEYS = [
   'trial_status',
   'indication',
   'target',
+  'company',
   'score_band',
 ] as const;
 export type MultiFacetKey = (typeof MULTI_FACET_KEYS)[number];
@@ -104,6 +105,8 @@ export interface RadarFilterState {
   indication: string[];
   /** Exact target strings as stored (no closed vocabulary; length-capped). */
   target: string[];
+  /** Exact clinical_assets.company_name values (company-first browsing; length-capped). */
+  company: string[];
   score_band: string[];
   phase_min: string | null;
   phase_max: string | null;
@@ -124,6 +127,7 @@ export const EMPTY_FILTERS: RadarFilterState = {
   trial_status: [],
   indication: [],
   target: [],
+  company: [],
   score_band: [],
   phase_min: null,
   phase_max: null,
@@ -268,6 +272,7 @@ const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_VALUES_PER_FACET = 30;
 const MAX_TARGET_LEN = 80;
+const MAX_COMPANY_LEN = 160;
 const MAX_Q_LEN = 100;
 
 /** Vocabulary list for a facet, or null when the facet is open-ended (indication, target). */
@@ -293,6 +298,8 @@ export function cleanFacetValues(key: MultiFacetKey, raw: readonly string[]): st
       if (!SLUG_RE.test(v)) continue;
     } else if (key === 'target') {
       if (v.length > MAX_TARGET_LEN || /[\u0000-\u001f\u007f]/.test(v)) continue;
+    } else if (key === 'company') {
+      if (v.length > MAX_COMPANY_LEN || /[\u0000-\u001f\u007f]/.test(v)) continue;
     }
     seen.add(v);
     out.push(v);
@@ -397,6 +404,7 @@ const URL_KEYS: Record<MultiFacetKey, string> = {
   trial_status: 'ts',
   indication: 'ind',
   target: 'tgt',
+  company: 'co',
   score_band: 'sb',
 };
 

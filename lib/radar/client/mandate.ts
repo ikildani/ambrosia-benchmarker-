@@ -87,6 +87,7 @@ export function unsavedFilterKeys(f: RadarFilterState): (keyof RadarFilterState)
   if (f.trial_status.length) out.push('trial_status');
   if (f.indication.length) out.push('indication');
   if (f.target.length) out.push('target');
+  if (f.company.length) out.push('company');
   if (f.score_band.length) out.push('score_band');
   // A non-contiguous phase pick collapses to its min..max range.
   if (f.phase.length && !f.phase_min && !f.phase_max) {

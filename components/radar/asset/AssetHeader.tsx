@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import type { AssetBrief } from './types';
 import { Pill, KV, ExternalLink, scoreTone } from './ui';
@@ -77,6 +78,12 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
                 Site <ArrowTopRightOnSquareIcon className="h-3 w-3" aria-hidden="true" />
               </ExternalLink>
             )}
+            <Link
+              href={`/radar?co=${encodeURIComponent(asset.company_name)}`}
+              className="ml-2 text-xs text-teal-700 underline decoration-teal-300 underline-offset-2 hover:text-teal-800 dark:text-teal-300 dark:decoration-teal-700 dark:hover:text-teal-200"
+            >
+              All {asset.company_name} programs
+            </Link>
           </p>
 
           <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Asset classification">
