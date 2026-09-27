@@ -4,7 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import AuthModal from '@/components/AuthModal';
+import dynamic from 'next/dynamic';
+
+// Loaded when opened: the modal carries the Supabase auth client (48 KB gz).
+const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 
 interface Company {
   id: string;

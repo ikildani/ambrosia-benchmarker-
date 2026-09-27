@@ -3,7 +3,10 @@
 import { useRouter } from 'next/navigation';
 import Calculator from '@/components/Calculator';
 import Header from '@/components/Header';
-import AuthModal from '@/components/AuthModal';
+import dynamic from 'next/dynamic';
+
+// Loaded when opened: the modal carries the Supabase auth client (48 KB gz).
+const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 import ExitIntentCapture from '@/components/ExitIntentCapture';
 import { useAuth } from '@/contexts/AuthContext';
 
