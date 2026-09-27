@@ -95,6 +95,8 @@ export interface TocEntry {
   title: string;
   page: number;
   description: string;
+  /** 'appendix' for the calculator-engine detail pages that follow the brief body. */
+  section?: 'body' | 'appendix';
 }
 
 export interface ReportMeta {

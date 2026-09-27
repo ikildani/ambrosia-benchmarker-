@@ -4,7 +4,7 @@
 import { pageHeader, pageFooter, COLORS, BRIEF_TITLE, escapeHtml } from '../helpers';
 import type { PDFReportData, ReportMeta, TocEntry } from '../types';
 
-const HIGHLIGHT = new Set(['The Decision', 'Valuation Bridge', 'Comparable Set', 'Buyer Map', 'Catalyst Calendar', 'Executive Dashboard']);
+const HIGHLIGHT = new Set(['The Decision', 'Valuation Bridge', 'Comparable Set', 'Buyer Map', 'Catalyst Calendar']);
 
 function tocRow(entry: TocEntry, first: boolean): string {
   const hi = HIGHLIGHT.has(entry.title);
@@ -22,10 +22,12 @@ function tocRow(entry: TocEntry, first: boolean): string {
 export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): string {
   const indication = data.result.labels.indication || data.inputs.indication;
   const asset = data.brief?.asset;
-  const entries = meta.tocEntries;
-  const half = Math.ceil(entries.length / 2);
-  const left = entries.slice(0, half);
-  const right = entries.slice(half);
+  const body = meta.tocEntries.filter(e => e.section !== 'appendix');
+  const appendix = meta.tocEntries.filter(e => e.section === 'appendix');
+  const half = Math.ceil(body.length / 2);
+  const left = body.slice(0, half);
+  const right = body.slice(half);
+  const aHalf = Math.ceil(appendix.length / 2);
 
   return `
     <div class="report-page">
@@ -35,7 +37,7 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
       <p style="font-size: 10px; color: ${COLORS.gray500}; line-height: 1.55; margin-bottom: 14px;">
         ${asset?.assetName ? `<strong style="color: ${COLORS.navy};">${escapeHtml(asset.assetName)}</strong> in ` : ''}<strong style="color: ${COLORS.navy};">${escapeHtml(indication)}</strong>.
         Start with <strong>The Decision</strong> (recommendation, counterparties, ask and floor), then the <strong>Valuation Bridge</strong> and the <strong>Comparable Set</strong> that support it.
-        Everything after that is evidence: buyers, landscape, negotiation, risk, and the cited appendix.
+        Everything after that is evidence: buyers, landscape, negotiation and diligence. The appendix carries the engine detail behind the same numbers and every comparable with its source.
       </p>
       <hr class="divider-thick" style="margin-bottom: 10px;">
 
@@ -43,6 +45,15 @@ export function renderTableOfContents(data: PDFReportData, meta: ReportMeta): st
         <div>${left.map((e, i) => tocRow(e, i === 0)).join('')}</div>
         <div>${right.map(e => tocRow(e, false)).join('')}</div>
       </div>
+
+      ${appendix.length ? `
+      <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid ${COLORS.gray200};">
+        <div style="font-size: 7px; font-weight: 700; color: ${COLORS.gray400}; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Appendix · engine detail and sources</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px;">
+          <div>${appendix.slice(0, aHalf).map(e => tocRow(e, false)).join('')}</div>
+          <div>${appendix.slice(aHalf).map(e => tocRow(e, false)).join('')}</div>
+        </div>
+      </div>` : ''}
 
       <hr class="divider-thick" style="margin-top: 10px;">
 

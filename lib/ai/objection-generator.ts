@@ -18,6 +18,10 @@ const MAX_ATTEMPTS = 2;
 export const FALLBACK_MODEL = 'deterministic-fallback';
 
 export interface ObjectionInput {
+  /** Figures ($M) the narrative may cite, with labels; anything else is a mismatch. */
+  allowedFigures?: Array<{ valueM: number; label: string }>;
+  /** Figures a previous attempt cited that are not in the decision set (retry only). */
+  disallowedFigures?: number[];
   asset: AssetProfile;
   decision: DecisionSummary;
   /** Plain-language summary of the comp set (n, medians, band). */
@@ -65,6 +69,9 @@ DECISION
 - Rationale: ${decision.rationale.map((r, i) => `(${i + 1}) ${r}`).join(' ')}
 - Confidence: ${decision.confidence} — ${decision.confidenceBasis}
 
+NUMBERS YOU MAY CITE (every dollar figure in your text must be one of these, rounded at most to two significant figures)
+${(input.allowedFigures ?? []).slice(0, 60).map(f => `- ${fmt(f.valueM)} — ${f.label}`).join('\n') || '- only the figures in DECISION above'}
+${input.disallowedFigures?.length ? `\nYOUR PREVIOUS DRAFT CITED FIGURES THAT ARE NOT IN THE DECISION SET AND WAS REJECTED: ${input.disallowedFigures.map(fmt).join(', ')}. Do not cite them.\n` : ''}
 COMPARABLES
 ${compSummary || 'No comparable summary supplied.'}
 

@@ -56,7 +56,8 @@ import { buildValuationBridge } from './valuation-bridge';
 import { buildInflectionPath } from './inflection';
 import { buildDecisionSummary } from './decision';
 import { buildDiligenceChecklist } from './diligence-checklist';
-import { generatePositioningObjections } from '@/lib/ai/objection-generator';
+import { generatePositioningObjections, buildFallbackObjections, FALLBACK_MODEL } from '@/lib/ai/objection-generator';
+import { allowedFigures, checkNarrative, fmtFigure } from './narrative-check';
 import { fmtM } from '@/lib/report/helpers';
 import { loadBriefAccuracyStatement } from '@/lib/outcomes/statements';
 
@@ -284,16 +285,27 @@ export async function buildBrief(input: BuildBriefInput): Promise<BuildBriefOutp
     buildDiligenceChecklist(asset, { ready: input.diligenceReady, gaps: input.diligenceGaps }),
   );
 
-  // 9. Positioning & objections (model call; falls back deterministically inside)
+  // 9. Positioning & objections (model call; falls back deterministically inside).
+  // The narrative may only cite figures the brief has registered; a draft that
+  // cites anything else is retried once with the offenders named, then replaced
+  // by the deterministic text so no page contradicts page three.
   if (brief.decision && !input.skipPositioning) {
-    brief.positioning = await step('positioning', notes, log, () =>
-      generatePositioningObjections({
-        asset,
-        decision: brief.decision!,
-        compSummary: summariseComps(brief),
-        buyerSummary: summariseBuyers(brief),
-      }),
-    );
+    brief.positioning = await step('positioning', notes, log, async () => {
+      const allowed = allowedFigures(brief);
+      const base = { asset, decision: brief.decision!, compSummary: summariseComps(brief), buyerSummary: summariseBuyers(brief), allowedFigures: allowed };
+      let pos = await generatePositioningObjections(base);
+      let check = checkNarrative(pos, allowed);
+      if (!check.ok && pos.model !== FALLBACK_MODEL) {
+        notes.push(`positioning: first draft cited ${check.mismatches.map(fmtFigure).join(', ')} (not in the decision set); retried.`);
+        pos = await generatePositioningObjections({ ...base, disallowedFigures: check.mismatches });
+        check = checkNarrative(pos, allowed);
+      }
+      if (!check.ok && pos.model !== FALLBACK_MODEL) {
+        notes.push(`positioning: retry still cited ${check.mismatches.map(fmtFigure).join(', ')}; deterministic text used instead.`);
+        pos = buildFallbackObjections(base);
+      }
+      return pos;
+    });
   }
 
   // 10. Coverage (honesty block)
