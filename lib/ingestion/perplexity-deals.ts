@@ -351,6 +351,8 @@ export async function runPerplexityDealDiscovery(
      * keep their own year windows; the indication top-up runner uses this.
      */
     extraQueries?: Record<string, string[]>;
+    /** Skip the 7-day mega-deal sweep (indication top-ups run several times a cycle; the cron's own run keeps it). */
+    skipSweep?: boolean;
   }
 ): Promise<{
   queries_run: number;
@@ -382,8 +384,8 @@ export async function runPerplexityDealDiscovery(
 
   try {
     console.log('[perplexity] Running mega-deal sweep for last 7 days...');
-    const { text: sweepText, citations: sweepCitations } = await queryPerplexityForDeals(megaDealQuery, perplexityApiKey);
-    result.queries_run++;
+    const { text: sweepText, citations: sweepCitations } = options?.skipSweep ? { text: '', citations: [] as string[] } : await queryPerplexityForDeals(megaDealQuery, perplexityApiKey);
+    if (!options?.skipSweep) result.queries_run++;
 
     if (sweepText && sweepText.length >= 50) {
       const sweepDeals = await extractDealsFromText(sweepText, 'multi_ta', anthropicApiKey, sweepCitations);
