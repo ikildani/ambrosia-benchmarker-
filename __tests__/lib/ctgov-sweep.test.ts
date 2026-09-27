@@ -182,6 +182,19 @@ describe('deriveOwnerType', () => {
     ['Dongmei Huang', 'OTHER', 'other'],
     ['Dongmei Huang', undefined, 'unknown'],
     ['Assistance Publique - Hôpitaux de Paris', 'OTHER', 'hospital'],
+    // Widened Sep 2026: sponsors that used to fall through to 'other'.
+    ['NYU Langone Health', 'OTHER', 'hospital'],
+    ['Gustave Roussy, Cancer Campus, Grand Paris', 'OTHER', 'hospital'],
+    ['Centre Leon Berard', 'OTHER', 'other'],
+    ['Sunnybrook Health Sciences Centre', 'OTHER', 'hospital'],
+    ['Cancer Research UK', 'OTHER', 'network'],
+    ['GBG Forschungs GmbH', 'OTHER', 'network'],
+    ['Fondazione Italiana Linfomi - ETS', 'OTHER', 'network'],
+    ['AIO-Studien-gGmbH', 'OTHER', 'network'],
+    ['London School of Hygiene and Tropical Medicine', 'OTHER', 'academic'],
+    ['Peter J. Ruane, M.D., Inc.', 'OTHER', 'other'],
+    ['Xequel Bio, Inc.', 'OTHER', 'other'],
+    ['Hefei TG ImmunoPharma Co., Ltd.', 'OTHER', 'industry'],
   ])('%s (%s) → %s', (name, cls, expected) => {
     expect(deriveOwnerType(name, cls)).toBe(expected);
   });

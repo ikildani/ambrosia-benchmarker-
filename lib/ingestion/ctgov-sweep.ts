@@ -278,11 +278,18 @@ export function isCroSponsor(name: string): boolean {
   return CRO_PATTERNS.some(re => re.test(n));
 }
 
-const HOSPITAL_RE = /\b(hospital|hospitals|hopital|hopitaux|hospices|clinic|clinics|clinique|clinica|medical cent(er|re)|health system|health network|infirmary|nhs|klinik|klinikum|ospedale|sjukhus|ziekenhuis|cancer cent(er|re)|assistance publique|charite|policlinico|krankenhaus)\b/;
-const ACADEMIC_RE = /\b(university|universite|universidad|universita|universitat|universiteit|universitas|college|school of medicine|medical school|academy|faculty|polytechnic|institut|institute|instituto|istituto|research cent(er|re)|graduate school)\b/;
-const GOVERNMENT_RE = /\b(ministry|national institutes?|department of|government|public health|centers for disease|veterans affairs|health authority|agency|national health|federal|state of|province|municipal|army|navy|air force|military)\b/;
-const NETWORK_RE = /\b(group|network|consortium|alliance|cooperative|foundation|society|association|trust|fund|charity|federation|organization|organisation|initiative|coalition|council)\b/;
-const INDUSTRY_NAME_RE = /\b(pharma|biopharma|therapeutics|biotech|biotechnology|biosciences|bioscience|biologics|biomedical|medicines|oncology|genomics|labs|technologies|lifesciences|life sciences|holdings|healthcare|biomed|medical|diagnostics|biopharmaceutics|vaccines|genetics)\b/;
+// Widened Sep 2026 (migration 142 carries the same rules in SQL for the
+// backfill): 5,943 LeadSponsorClass OTHER sponsors had fallen through to
+// 'other' (NYU Langone Health, Gustave Roussy Cancer Campus, UNICANCER,
+// Cancer Research UK, GBG Forschungs GmbH). normalizeSponsorName() has
+// already stripped accents, punctuation and trailing corporate-form tokens.
+const HOSPITAL_RE = /\b(hospital|hospitals|hopital|hopitaux|hospices|clinic|clinics|clinique|clinica|medical cent(er|re)|health system|health network|health services|health sciences cent(er|re)|health and services|langone health|health$|infirmary|nhs|klinik|klinikum|ospedale|sjukhus|ziekenhuis|cancer cent(er|re)|cancer campus|comprehensive cancer|assistance publique|charite|policlinico|krankenhaus|chu|centre hospitalier|centro hospitalar|onkologi\w*|oncologi\w*|oncology cent(er|re)|sanita|hospitalar)\b/;
+const ACADEMIC_RE = /\b(university|universite|universidad|universita|universitat|universiteit|universitas|college|school of medicine|medical school|school of|academy|academ\w*|faculty|polytechnic|institut|institute|instituto|istituto|research cent(er|re)|research institute|graduate school|campus)\b/;
+const GOVERNMENT_RE = /\b(ministry|national institutes?|department of|government|public health|centers for disease|veterans affairs|health authority|agency|national health|federal|state of|province|municipal|army|navy|air force|military|national cancer|national center)\b/;
+const NETWORK_RE = /\b(group|network|consortium|consorzio|alliance|cooperative|foundation|fondazione|fondation|stiftung|fundacion|fundacao|society|association|trust|fund|charity|federation|organization|organisation|initiative|coalition|council|studien|study group|forschung\w*|clinical trials? (group|unit)|trials (group|unit)|oncology group|cancer research uk|path)\b/;
+const INDUSTRY_NAME_RE = /\b(\w*pharma\w*|therapeutics?|biotech|biotechnology|biosciences?|biologics?|biological|biomedical|medicines|oncology|genomics|labs|technologies|lifesciences|life sciences|holdings|healthcare|biomed|medical|diagnostics|biopharmaceutics?|vaccines|genetics)\b/;
+/** Physician practices and research shops that carry industry-looking words but own nothing. */
+const NON_INDUSTRY_RE = /\b(md|associates|practice|research (inc|llc|ltd|gmbh)|clinical research|physician|surgeons|dental)\b/;
 
 /**
  * Owner type for a sponsor from its CT.gov LeadSponsorClass, with name
@@ -301,7 +308,7 @@ export function deriveOwnerType(name: string, leadSponsorClass: string | null | 
   if (ACADEMIC_RE.test(n)) return 'academic';
   if (GOVERNMENT_RE.test(n)) return 'government';
   if (NETWORK_RE.test(n)) return 'network';
-  if (INDUSTRY_NAME_RE.test(n)) return 'industry';
+  if (INDUSTRY_NAME_RE.test(n) && !NON_INDUSTRY_RE.test(n)) return 'industry';
   if (cls === 'INDIV') return 'other';
   return cls ? 'other' : 'unknown';
 }
