@@ -6,6 +6,7 @@
  * pricing models.
  */
 
+import { resolveEpidemiologyKey } from './epidemiology-aliases';
 import type { MarketSizeEstimate, EpidemiologyData } from './types';
 
 // Territory population and pricing data (inline to avoid JSON import issues)
@@ -220,6 +221,8 @@ export function getEpidemiologyData(
   if (epidemiologyDataset[indication]) {
     return epidemiologyDataset[indication];
   }
+  const aliased = resolveEpidemiologyKey(indication, epidemiologyDataset);
+  if (aliased) return epidemiologyDataset[aliased];
 
   if (typeof console !== 'undefined') {
     console.warn(

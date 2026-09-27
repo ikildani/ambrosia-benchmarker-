@@ -20,6 +20,7 @@ import { resolveTherapeuticArea, resolvePhase, resolveIndication } from './intak
 import { INDICATION_REGISTRY } from '@/lib/benchmarkPagesIndication';
 import { fetchDemandProfile, netPricePerYearUsd } from './terrain-demand';
 import epiData from '@/data/epidemiology.json';
+import { resolveEpidemiologyKey } from '@/lib/financial/epidemiology-aliases';
 
 export type ReadinessStatus = 'green' | 'amber' | 'red';
 
@@ -119,7 +120,9 @@ export async function computeReadiness(supabase: SupabaseClient, input: Readines
   });
 
   // 4. Price benchmark
-  const epi = (epiData as { indications: Record<string, { annualCostOfTherapy?: number }> }).indications[ind.key];
+  const epiTable = (epiData as { indications: Record<string, { annualCostOfTherapy?: number }> }).indications;
+  const epiKey = resolveEpidemiologyKey(ind.key, epiTable);
+  const epi = epiKey ? epiTable[epiKey] : undefined;
   const localPrice = epi?.annualCostOfTherapy ?? null;
   let terrainPrice: number | null = null;
   if (!input.skipTerrain) {
