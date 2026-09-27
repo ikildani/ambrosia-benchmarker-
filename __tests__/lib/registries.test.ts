@@ -40,7 +40,7 @@ import { mapHealthCanadaRecord, phaseFromTitle } from '@/lib/ingestion/registrie
 import { mapIrctXml } from '@/lib/ingestion/registries/irct';
 import { extractRebecCodes, extractRebecInternalId, mapRebecXml } from '@/lib/ingestion/registries/rebec';
 import { drksId, mapDrksHtml } from '@/lib/ingestion/registries/drks';
-import { mapJrctHtml } from '@/lib/ingestion/registries/jrct';
+import { mapJrctHtml, parseJrctListing, japaneseEraDateToIso, jrctListingUrl, phaseFromTitle } from '@/lib/ingestion/registries/jrct';
 import { mapCrisHtml } from '@/lib/ingestion/registries/cris';
 import { mapMfdsItem } from '@/lib/ingestion/registries/mfds';
 import { mapAnzctrXml } from '@/lib/ingestion/registries/anzctr';
@@ -947,5 +947,72 @@ describe('runRegistrySweep', () => {
     expect(result.unavailable).toMatch(/not implemented/);
     expect(result.pages).toBe(0);
     expect(calls.some(c => c.table === 'radar_sync_cursors' && c.op === 'upsert')).toBe(false);
+  });
+});
+
+
+describe('jRCT adapter (2026 page generation)', () => {
+  const HTML = `<table>
+  <tr><th>Date of registration</th><td>Sept. 25, 2026</td></tr>
+  <tr><th>Last modified on</th><td>Sept. 25, 2026</td></tr>
+  <tr><th>Trial ID</th><td>jRCT2071260091</td></tr>
+  <tr><th>Scientific Title</th><td>A Double-Blind, Placebo-Controlled, Multicenter, Randomized, Phase 2 Trial to Evaluate the Safety and Efficacy of Mezagitamab (TAK-079) in Kidney Transplant Recipients</td></tr>
+  <tr><th>Public Title</th><td>A Study of Mezagitamab in Adults With Late Antibody-Mediated Rejection (AMR) After a Kidney Transplant</td></tr>
+  <tr><th>Recruitment status</th><td>Pending</td></tr>
+  <tr><th>Actual date of first enrollment</th><td>Sept. 01, 2026</td></tr>
+  <tr><th>Study Type</th><td>Interventional</td></tr>
+  <tr><th>Countries of Recruitment（Except Japan）</th><td>United States/Germany/France/China</td></tr>
+  <tr><th>Health Condition(s) or Problem(s) Studied</th><td>Antibody-Mediated Rejection</td></tr>
+  <tr><th>Intervention(s)</th><td>Arm A: Mezagitamab + Placebo Participants will receive mezagitamab up to Week 24, followed by placebo up to Week 48.</td></tr>
+  <tr><th>Primary Outcome(s)</th><td>1. Number of Participants With TEAEs</td></tr>
+  <tr><th>Primary Sponsor</th><td>Takeda Pharmaceutical Company Limited</td></tr>
+  <tr><th>Secondary Sponsor</th><td></td></tr>
+  <tr><th>Secondary ID(s)</th><td>NCT07613359</td></tr>
+  <tr><th>Issuing Authority</th><td>ClinicalTrial.gov</td></tr>
+  <tr><th>Secondary ID(s)</th><td>2026-526239-20-00</td></tr>
+  </table>`;
+  const rec = mapJrctHtml({ id: 'jRCT2071260091', html: HTML });
+
+  it('infers the phase from the title, drug names from free text, and keeps Japan in the country list', () => {
+    expect(rec.phase).toBe('phase_2');
+    expect(rec.interventions.map(i => i.name)).toEqual(expect.arrayContaining(['TAK-079', 'Mezagitamab']));
+    expect(rec.interventions.every(i => i.role === 'experimental' && !/placebo/i.test(i.name))).toBe(true);
+    expect(rec.conditions).toEqual(['Antibody-Mediated Rejection']);
+    expect(rec.countries).toEqual(expect.arrayContaining(['JP', 'US', 'DE', 'FR', 'CN']));
+    expect(rec.countries[0]).toBe('JP');
+    expect(rec.sponsor_name).toBe('Takeda Pharmaceutical Company Limited');
+    expect(rec.sponsor_type).toBe('INDUSTRY');
+    expect(rec.secondary_ids).toEqual(expect.arrayContaining(['NCT07613359']));
+    expect(rec.first_registered).toBe('2026-09-25');
+    expect(rec.start_date).toBe('2026-09-01');
+  });
+
+  it('phaseFromTitle handles roman numerals and combined phases', () => {
+    expect(phaseFromTitle('A Phase I/II study of X')).toBe('Phase I/II');
+    expect(phaseFromTitle('Phase 3b extension')).toBe('Phase 3b');
+    expect(phaseFromTitle('An observational study')).toBeNull();
+  });
+});
+
+describe('jrct listing (Sep 2026 walker)', () => {
+  const ROW = `<table><tr><th>id</th></tr>
+  <tr> <td> jRCT2011260036</td> <td class="space">ONO-4915-02：一次性シェーグレン病患者を対象として...</td> <td class="space">シェーグレン病</td> <td>募集前</td> <td class="text-center" > 令和8年9月3日 </td> <td class="text-end"> <!-- mod start --> <a href="#" class="btn">閲覧</a> <!-- mod end --> </td> </tr>
+  <tr> <td> jRCT2031260376</td> <td class="space">Title two</td> <td class="space">Condition</td> <td>募集中</td> <td class="text-center"> 平成31年4月1日 </td> <td></td> </tr></table>`;
+
+  it('parses ids, status and Japanese-era publication dates from the results table', () => {
+    const rows = parseJrctListing(ROW);
+    expect(rows.map(r => r.id)).toEqual(['jRCT2011260036', 'jRCT2031260376']);
+    expect(rows[0]).toMatchObject({ status_raw: '募集前', published: '2026-09-03', condition: 'シェーグレン病' });
+    expect(rows[1].published).toBe('2019-04-01');
+  });
+
+  it('converts era dates and tolerates Western formats', () => {
+    expect(japaneseEraDateToIso('令和元年5月1日')).toBe('2019-05-01');
+    expect(japaneseEraDateToIso('2026/09/03')).toBe('2026-09-03');
+    expect(japaneseEraDateToIso('n/a')).toBeNull();
+  });
+
+  it('builds the token-free listing URL', () => {
+    expect(jrctListingUrl('3', 2)).toBe('https://jrct.mhlw.go.jp/search?searched=1&spec=3&page=2&sort=record_cert_date');
   });
 });
