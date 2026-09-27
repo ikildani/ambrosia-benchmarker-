@@ -195,6 +195,10 @@ describe('deriveOwnerType', () => {
     ['Peter J. Ruane, M.D., Inc.', 'OTHER', 'other'],
     ['Xequel Bio, Inc.', 'OTHER', 'other'],
     ['Hefei TG ImmunoPharma Co., Ltd.', 'OTHER', 'industry'],
+    ['Hamilton Health Sciences Corporation', 'OTHER', 'hospital'],
+    ['TriHealth Inc.', 'OTHER', 'hospital'],
+    ['PrECOG, LLC.', 'OTHER', 'network'],
+    ['ViiV Healthcare (GSK)', 'OTHER', 'industry'],
   ])('%s (%s) → %s', (name, cls, expected) => {
     expect(deriveOwnerType(name, cls)).toBe(expected);
   });
