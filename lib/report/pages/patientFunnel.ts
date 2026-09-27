@@ -19,8 +19,8 @@ const ASSUMPTIONS: Record<string, string> = {
 
 /** Row assumptions that differ by source; the funnel's SourceNote decides which set prints. */
 const PRICE_ASSUMPTION: Record<'local' | 'terrain', string> = {
-  local: 'Territory-adjusted net revenue per treated patient',
-  terrain: 'Base WAC of therapy-area comparables, net of gross-to-net (Terrain price benchmark)',
+  local: 'Net revenue per treated patient-year from the indication price table',
+  terrain: 'Terrain area price benchmark, net of gross-to-net (no indication price in the table)',
 };
 const SHARE_ASSUMPTION: Record<'local' | 'terrain', string> = {
   local: 'Competitive density and order of entry',
@@ -117,7 +117,7 @@ export function renderPatientFunnelPage(data: PDFReportData, meta: ReportMeta): 
               <td style="font-weight: 600; padding: 6px 12px;">Net price per patient-year</td>
               <td style="text-align: right; font-weight: 700; padding: 6px 12px;">${funnel.pricePerYearUsd ? `$${fmtInt(funnel.pricePerYearUsd)}` : '—'}</td>
               <td style="text-align: right; color: ${COLORS.gray500}; padding: 6px 12px;">—</td>
-              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">${escapeHtml(PRICE_ASSUMPTION[basis])}</td>
+              <td style="color: ${COLORS.gray600}; padding: 6px 12px;">${escapeHtml(PRICE_ASSUMPTION[funnel.priceBasis === 'terrain_area_benchmark' ? 'terrain' : funnel.priceBasis === 'indication_table' ? 'local' : basis])}</td>
             </tr>
             ${share ? `
             <tr>

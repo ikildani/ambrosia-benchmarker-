@@ -266,7 +266,13 @@ describe('buildPatientFunnel with a Terrain profile', () => {
       { label: 'Adherent', value: 1_468_800 },
       { label: 'Addressable', value: 734_400 },
     ]);
-    expect(f.pricePerYearUsd).toBe(42_000);
+    // Price comes from the indication table when it has one; Terrain's area
+    // benchmark is a placeholder and only used when the table is empty.
+    expect(f.pricePerYearUsd).toBe(28_000);
+    expect(f.priceBasis).toBe('indication_table');
+    const noTable = buildPatientFunnel(null, AS_OF, PROFILE)!;
+    expect(noTable.pricePerYearUsd).toBe(42_000);
+    expect(noTable.priceBasis).toBe('terrain_area_benchmark');
     expect(f.peakSalesM).toEqual({ low: 1428, median: 3428, high: 5143 });
     expect(f.peakShare!.median).toBe(0.12);
     expect(f.peakShare!.low).toBeCloseTo(0.12 * (1428 / 3428), 6);
@@ -276,7 +282,7 @@ describe('buildPatientFunnel with a Terrain profile', () => {
       source: TERRAIN_DEMAND_SOURCE,
       n: 6,
       asOf: '2026-09-25',
-      note: 'indication alzheimers; Solidus stores the slug and asOf only',
+      note: 'indication alzheimers; Solidus stores the slug and asOf only; price from the indication table',
     });
     // No Terrain figure other than what the page prints, and none of Terrain's names.
     expect(JSON.stringify(f)).not.toContain("Alzheimer's Disease");
@@ -399,9 +405,12 @@ describe('pages render with either source', () => {
     expect(html).toContain('n = 6');
     expect(html).toContain('indication alzheimers; Solidus stores the slug and asOf only');
     expect(html).toContain('Real-world adherence and persistence on therapy');
-    expect(html).toContain('Terrain price benchmark');
+    expect(html).toContain('indication price table');
     expect(html).toContain('$3.4B');
-    expect(html).toContain('$42,000');
+    expect(html).toContain('$28,000');
+    const noTable = renderPatientFunnelPage(reportData({ funnel: buildPatientFunnel(null, AS_OF, PROFILE)! }), meta);
+    expect(noTable).toContain('Terrain area price benchmark');
+    expect(noTable).toContain('$42,000');
     expect(html).toContain('Patients, US Only');
     expect(html).not.toContain('Solidus epidemiology model');
   });
@@ -410,7 +419,7 @@ describe('pages render with either source', () => {
     const f = buildPatientFunnel(market, AS_OF)!;
     const html = renderPatientFunnelPage(reportData({ funnel: f }), meta);
     expect(html).toContain('Source: Solidus epidemiology model');
-    expect(html).toContain('Territory-adjusted net revenue per treated patient');
+    expect(html).toContain('Net revenue per treated patient-year from the indication price table');
     expect(html).not.toContain('Terrain');
   });
 

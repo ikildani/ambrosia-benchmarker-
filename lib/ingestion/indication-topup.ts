@@ -95,6 +95,7 @@ export async function runIndicationTopup(
       therapeuticAreas: [ta],
       extraQueries: { [ta]: queries },
       timeBudgetMs,
+      skipSweep: true,
     });
     out.queriesRun = r.queries_run; out.dealsDiscovered = r.deals_discovered; out.dealsInserted = r.deals_inserted;
     out.errors.push(...r.errors.slice(0, 5));
@@ -107,7 +108,10 @@ export async function runIndicationTopup(
       out.readinessAfter = readinessSummary(after);
     } catch (e) { out.errors.push(`readiness after: ${e instanceof Error ? e.message : String(e)}`); }
 
-    const done = !after || !after.topUpRecommended || t.runs + 1 >= MAX_RUNS;
+    // New rows sit as pending until the verifier reaches them, so the card
+    // cannot move on the same run. A run that inserted anything is done; a
+    // second run is only worth it when the first found nothing.
+    const done = !after || !after.topUpRecommended || t.runs + 1 >= MAX_RUNS || out.dealsInserted > 0;
     out.status = done ? 'done' : 'retry';
     await supabase.from('brief_topups').update({
       status: done ? 'done' : 'pending',

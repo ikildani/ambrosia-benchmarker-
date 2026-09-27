@@ -1,14 +1,14 @@
 {
   "_metadata": {
     "version": "1.0",
-    "lastUpdated": "2026-02-25",
+    "lastUpdated": "2026-09-27",
     "sources": [
       "WHO Global Health Observatory",
       "IQVIA Institute",
       "GlobalData",
       "published epidemiology studies"
     ],
-    "notes": "All prevalence/incidence figures are per million GLOBAL population (not US-specific). US prevalence rates are typically 1.5-2x higher for metabolic/CV diseases. Age-stratified prevalence (e.g., Alzheimer's 65+) is substantially higher than population-level figures shown here. Costs are US list price estimates. Figures represent drug-eligible populations where applicable."
+    "notes": "All prevalence/incidence figures are per million GLOBAL population (not US-specific). US prevalence rates are typically 1.5-2x higher for metabolic/CV diseases. Age-stratified prevalence (e.g., Alzheimer's 65+) is substantially higher than population-level figures shown here. Costs are US list price estimates. Figures represent drug-eligible populations where applicable. Entries whose sources begin \"Analyst estimate (Sep 2026)\" were added to close registry gaps and should be reviewed before an indication brief is delivered."
   },
   "territories": {
     "global": {
@@ -54,7 +54,7 @@
     "us_japan": {
       "population": 463000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 0.80
+      "pricingIndexVsUS": 0.8
     },
     "canada": {
       "population": 41000000,
@@ -69,12 +69,12 @@
     "south_korea": {
       "population": 52000000,
       "currencyCode": "KRW",
-      "pricingIndexVsUS": 0.30
+      "pricingIndexVsUS": 0.3
     },
     "apac_ex_cj": {
       "population": 3200000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 0.10
+      "pricingIndexVsUS": 0.1
     },
     "latam": {
       "population": 660000000,
@@ -84,7 +84,7 @@
     "mena": {
       "population": 430000000,
       "currencyCode": "USD",
-      "pricingIndexVsUS": 0.20
+      "pricingIndexVsUS": 0.2
     }
   },
   "indications": {
@@ -4699,6 +4699,214 @@
       "sources": [
         "GLOBOCAN 2022",
         "Grail/Exact Sciences liquid biopsy data"
+      ]
+    },
+    "krasMutant": {
+      "prevalencePerMillion": 180,
+      "incidencePerMillion": 120,
+      "diagnosedPercent": 0.85,
+      "treatedPercent": 0.8,
+      "drugEligiblePercent": 0.5,
+      "annualCostOfTherapy": 200000,
+      "peakSalesRangeM": {
+        "low": 1500,
+        "median": 4000,
+        "high": 9000
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: KRAS mutation share across NSCLC (~25%), CRC (~40%), PDAC (~90%) from AACR GENIE; net price from Lumakras / Krazati WAC net of gross-to-net"
+      ]
+    },
+    "her2Low": {
+      "prevalencePerMillion": 120,
+      "incidencePerMillion": 60,
+      "diagnosedPercent": 0.8,
+      "treatedPercent": 0.85,
+      "drugEligiblePercent": 0.6,
+      "annualCostOfTherapy": 180000,
+      "peakSalesRangeM": {
+        "low": 2000,
+        "median": 5000,
+        "high": 10000
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: HER2-low ~55% of HR+ advanced breast cancer (DESTINY-Breast04 population); net price from Enhertu WAC net of gross-to-net"
+      ]
+    },
+    "msiHigh": {
+      "prevalencePerMillion": 60,
+      "incidencePerMillion": 40,
+      "diagnosedPercent": 0.7,
+      "treatedPercent": 0.85,
+      "drugEligiblePercent": 0.6,
+      "annualCostOfTherapy": 190000,
+      "peakSalesRangeM": {
+        "low": 800,
+        "median": 2000,
+        "high": 4500
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: MSI-H/dMMR ~4% of advanced solid tumours (Le et al. 2017; KEYNOTE-158); net price from pembrolizumab WAC net of gross-to-net"
+      ]
+    },
+    "niemannPickC": {
+      "prevalencePerMillion": 10,
+      "incidencePerMillion": 1,
+      "diagnosedPercent": 0.5,
+      "treatedPercent": 0.6,
+      "drugEligiblePercent": 0.6,
+      "annualCostOfTherapy": 300000,
+      "peakSalesRangeM": {
+        "low": 150,
+        "median": 400,
+        "high": 900
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: NPC ~1 in 100,000 live births (Vanier 2010); net price from Miplyffa / Aqneursa WAC net of gross-to-net"
+      ]
+    },
+    "myelofibrosis": {
+      "prevalencePerMillion": 15,
+      "incidencePerMillion": 3,
+      "diagnosedPercent": 0.8,
+      "treatedPercent": 0.75,
+      "drugEligiblePercent": 0.7,
+      "annualCostOfTherapy": 180000,
+      "peakSalesRangeM": {
+        "low": 800,
+        "median": 2000,
+        "high": 4000
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: MF prevalence ~1.5 per 100,000 (Moulard 2014); net price from Jakafi / Ojjaara WAC net of gross-to-net"
+      ]
+    },
+    "polycythemiaVera": {
+      "prevalencePerMillion": 220,
+      "incidencePerMillion": 10,
+      "diagnosedPercent": 0.7,
+      "treatedPercent": 0.7,
+      "drugEligiblePercent": 0.4,
+      "annualCostOfTherapy": 120000,
+      "peakSalesRangeM": {
+        "low": 500,
+        "median": 1200,
+        "high": 2500
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: PV prevalence ~22 per 100,000 (Moulard 2014); eligible = hydroxyurea-intolerant/resistant; net price from Besremi WAC net of gross-to-net"
+      ]
+    },
+    "acne": {
+      "prevalencePerMillion": 90000,
+      "incidencePerMillion": 20000,
+      "diagnosedPercent": 0.5,
+      "treatedPercent": 0.5,
+      "drugEligiblePercent": 0.15,
+      "annualCostOfTherapy": 2500,
+      "peakSalesRangeM": {
+        "low": 500,
+        "median": 1200,
+        "high": 2500
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: acne ~9% global prevalence (GBD 2019); eligible = moderate-to-severe on prescription therapy; branded topical / oral net price"
+      ]
+    },
+    "rosacea": {
+      "prevalencePerMillion": 50000,
+      "incidencePerMillion": 5000,
+      "diagnosedPercent": 0.4,
+      "treatedPercent": 0.5,
+      "drugEligiblePercent": 0.3,
+      "annualCostOfTherapy": 1800,
+      "peakSalesRangeM": {
+        "low": 300,
+        "median": 700,
+        "high": 1500
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: rosacea ~5% global prevalence (Gether 2018); branded topical net price"
+      ]
+    },
+    "prurigo": {
+      "prevalencePerMillion": 700,
+      "incidencePerMillion": 100,
+      "diagnosedPercent": 0.5,
+      "treatedPercent": 0.6,
+      "drugEligiblePercent": 0.5,
+      "annualCostOfTherapy": 40000,
+      "peakSalesRangeM": {
+        "low": 400,
+        "median": 1000,
+        "high": 2200
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: prurigo nodularis ~72 per 100,000 US adults (Huang 2020); net price from Dupixent / Nemluvio WAC net of gross-to-net"
+      ]
+    },
+    "ibsD": {
+      "prevalencePerMillion": 40000,
+      "incidencePerMillion": 5000,
+      "diagnosedPercent": 0.4,
+      "treatedPercent": 0.5,
+      "drugEligiblePercent": 0.25,
+      "annualCostOfTherapy": 8000,
+      "peakSalesRangeM": {
+        "low": 500,
+        "median": 1200,
+        "high": 2500
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: IBS-D ~4% (Rome IV pooled prevalence, Oka 2020); net price from Viberzi / Xifaxan WAC net of gross-to-net"
+      ]
+    },
+    "shortBowelSyndrome": {
+      "prevalencePerMillion": 30,
+      "incidencePerMillion": 3,
+      "diagnosedPercent": 0.7,
+      "treatedPercent": 0.6,
+      "drugEligiblePercent": 0.5,
+      "annualCostOfTherapy": 300000,
+      "peakSalesRangeM": {
+        "low": 300,
+        "median": 800,
+        "high": 1800
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: SBS with intestinal failure ~3 per 100,000 (Jeppesen 2014); net price from Gattex WAC net of gross-to-net"
+      ]
+    },
+    "microscopicColitis": {
+      "prevalencePerMillion": 1000,
+      "incidencePerMillion": 200,
+      "diagnosedPercent": 0.4,
+      "treatedPercent": 0.6,
+      "drugEligiblePercent": 0.4,
+      "annualCostOfTherapy": 6000,
+      "peakSalesRangeM": {
+        "low": 100,
+        "median": 300,
+        "high": 700
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: microscopic colitis ~100 per 100,000 (Tong 2015); budesonide-class net price"
+      ]
+    },
+    "gastroparesis": {
+      "prevalencePerMillion": 2500,
+      "incidencePerMillion": 250,
+      "diagnosedPercent": 0.3,
+      "treatedPercent": 0.5,
+      "drugEligiblePercent": 0.4,
+      "annualCostOfTherapy": 6000,
+      "peakSalesRangeM": {
+        "low": 300,
+        "median": 800,
+        "high": 1800
+      },
+      "sources": [
+        "Analyst estimate (Sep 2026), review before quoting: symptomatic gastroparesis ~0.25% (Jung 2009, adjusted for undiagnosed); branded prokinetic net price"
       ]
     }
   }

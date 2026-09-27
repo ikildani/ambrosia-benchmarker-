@@ -933,12 +933,22 @@ export function buildPatientFunnel(
   terrain?: TerrainDemandProfile | null,
   rnpv?: Pick<RNPVResult, 'peakSalesApplied'> | null,
 ): PatientFunnel | null {
+  // Price: the indication price table first. Terrain's price benchmark is an
+  // area-level placeholder today (every neurology indication reads $42K, every
+  // cardiovascular one $3K; 65 of 138 shared indications disagree with the
+  // table by more than 2x, Sep 27 2026), so it is a fallback only.
+  const tablePrice = market && Number.isFinite(market.annualRevenuePerPatient) && market.annualRevenuePerPatient > 0 ? Math.round(market.annualRevenuePerPatient) : null;
   if (terrain) {
     const fromTerrain = funnelFromTerrain(terrain);
-    // Terrain supplies the patient steps and price; the peak-sales number the
-    // brief prints stays the one the financial model actually ran with, so the
+    // Terrain supplies the patient steps; the peak-sales number the brief
+    // prints stays the one the financial model actually ran with, so the
     // funnel and the rNPV page cannot disagree (see the local branch below).
-    if (fromTerrain) return withAppliedPeak(fromTerrain, rnpv);
+    if (fromTerrain) {
+      const priced: PatientFunnel = tablePrice
+        ? { ...fromTerrain, pricePerYearUsd: tablePrice, priceBasis: 'indication_table', source: { ...fromTerrain.source, note: `${fromTerrain.source.note ?? ''}; price from the indication table${fromTerrain.pricePerYearUsd && Math.max(tablePrice, fromTerrain.pricePerYearUsd) / Math.min(tablePrice, fromTerrain.pricePerYearUsd) > 2 ? ` (Terrain's area benchmark of $${Math.round(fromTerrain.pricePerYearUsd / 1000)}K set aside)` : ''}`.replace(/^; /, '') } }
+        : { ...fromTerrain, priceBasis: 'terrain_area_benchmark' };
+      return withAppliedPeak(priced, rnpv);
+    }
   }
   if (!market || !market.patientFunnel || !market.peakSales) return null;
   const pf = market.patientFunnel;
@@ -988,6 +998,7 @@ export function buildPatientFunnel(
     territory: market.territory,
     steps,
     pricePerYearUsd,
+    priceBasis: pricePerYearUsd ? 'indication_table' : undefined,
     peakShare,
     peakSalesM,
     peakSalesBasis: useModel ? 'model' : 'market',
