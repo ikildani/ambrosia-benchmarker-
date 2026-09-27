@@ -10,8 +10,14 @@ interface LiveDealPreviewProps {
 function AnimatedCurrency({ value, className }: { value: string; className?: string }) {
   const prefersReducedMotion = useReducedMotion();
 
+  // suppressHydrationWarning: the value is computed by calculateDealTerms on
+  // both sides, but the server's calibration cache and the client's first
+  // render can disagree (static defaults vs Supabase-calibrated baselines).
+  // A text mismatch here made React re-render the calculator on the client
+  // and pushed its LCP to ~3.7 s (27 Sep 2026). The server text stays until
+  // the next state change, which is the correct, calibrated value anyway.
   if (prefersReducedMotion) {
-    return <span className={className}>{value}</span>;
+    return <span className={className} suppressHydrationWarning>{value}</span>;
   }
 
   return (
@@ -19,6 +25,7 @@ function AnimatedCurrency({ value, className }: { value: string; className?: str
       <motion.span
         key={value}
         className={className}
+        suppressHydrationWarning
         initial={{ y: 12, opacity: 0, filter: 'blur(4px)' }}
         animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
         exit={{ y: -12, opacity: 0, filter: 'blur(4px)' }}
