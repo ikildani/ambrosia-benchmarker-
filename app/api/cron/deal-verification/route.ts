@@ -14,6 +14,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { logCronRun } from '@/lib/cron-utils';
 import { verifyPendingDeals } from '@/lib/ingestion/deal-verifier';
+import { checkDealStatuses, type DealStatusResult } from '@/lib/ingestion/deal-status';
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
 import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 import { runOutcomePhase } from '@/lib/outcomes/cron';
@@ -96,9 +97,27 @@ export async function GET(request: NextRequest) {
   const backfillParam = Number(params.get('sourceBackfill'));
   const sourceBackfillSlots = params.has('sourceBackfill') && Number.isFinite(backfillParam) && backfillParam >= 0 ? Math.min(50, backfillParam) : 15;
 
+  // Deal-status pass: is each cited precedent still in force? Weekly on the
+  // first run after 02:00 UTC on Mondays, or on demand with ?dealStatus=N.
+  // Comps used in recent briefs go first. It takes at most half the budget.
+  const statusParam = Number(params.get('dealStatus'));
+  const nowUtc = new Date();
+  const weeklyWindow = nowUtc.getUTCDay() === 1 && nowUtc.getUTCHours() === 2 && nowUtc.getUTCMinutes() < 20;
+  const statusSlots = params.has('dealStatus') && Number.isFinite(statusParam) && statusParam > 0 ? Math.min(60, statusParam) : weeklyWindow ? 40 : 0;
+  let statusResult: DealStatusResult | null = null;
+  const passStart = Date.now();
+  if (statusSlots > 0) {
+    try {
+      statusResult = await checkDealStatuses(supabase, perplexityApiKey, anthropicApiKey, { maxDeals: statusSlots, timeBudgetMs: 120_000 });
+      console.log(`[deal-status] checked ${statusResult.checked}, updated ${statusResult.updated}`, statusResult.byStatus);
+    } catch (e) {
+      console.error('[deal-status] failed:', e instanceof Error ? e.message : e);
+    }
+  }
+
   const result = await verifyPendingDeals(supabase, perplexityApiKey, anthropicApiKey, {
     maxDeals: 50,
-    timeBudgetMs: 250_000,
+    timeBudgetMs: Math.max(60_000, 250_000 - (Date.now() - passStart)),
     priorityTAs,
     // Fill source_url on already-verified deals with leftover budget (URL-only, verdict untouched)
     sourceBackfillSlots,
@@ -159,7 +178,7 @@ export async function GET(request: NextRequest) {
     processed: result.verified + result.flagged,
     inserted: result.verified,
     errors: result.errors,
-    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped },
+    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped, dealStatus: statusResult ? { checked: statusResult.checked, updated: statusResult.updated, byStatus: statusResult.byStatus, errors: statusResult.errors.length } : null },
     notes: result.regressions > 0 ? `BACKTEST: ${result.regressions} previously verified row(s) no longer hold` : undefined,
   });
 

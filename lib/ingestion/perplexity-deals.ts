@@ -345,6 +345,12 @@ export async function runPerplexityDealDiscovery(
      * query over successive runs. Default 0 (the first queries, as before).
      */
     queryOffset?: number;
+    /**
+     * Caller-supplied query lists keyed by therapeutic area, used in place of
+     * the built-in list for that area. All of them run (no per-area cap) and
+     * keep their own year windows; the indication top-up runner uses this.
+     */
+    extraQueries?: Record<string, string[]>;
   }
 ): Promise<{
   queries_run: number;
@@ -477,11 +483,13 @@ export async function runPerplexityDealDiscovery(
   for (const ta of tas) {
     if (Date.now() - startTime > timeBudget) break;
 
-    const queries = TA_DISCOVERY_QUERIES[ta];
+    const extra = options?.extraQueries?.[ta];
+    const queries = extra ?? TA_DISCOVERY_QUERIES[ta];
     if (!queries) continue;
 
-    const keepYears = HISTORICAL_QUERY_KEYS.has(ta);
-    for (const query of rotateQueries(queries, options?.queryOffset ?? 0).slice(0, maxQueriesPerTA)) {
+    const keepYears = HISTORICAL_QUERY_KEYS.has(ta) || !!extra;
+    const runList = extra ? extra : rotateQueries(queries, options?.queryOffset ?? 0).slice(0, maxQueriesPerTA);
+    for (const query of runList) {
       if (Date.now() - startTime > timeBudget) break;
 
       try {
