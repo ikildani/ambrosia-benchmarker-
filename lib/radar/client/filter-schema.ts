@@ -163,6 +163,56 @@ export const SORT_COLUMNS: Record<SortKey, { column: string; kind: 'number' | 't
 
 export type ViewMode = 'table' | 'cards';
 
+// ── Table columns ─────────────────────────────────────────────────────────
+// The table renders exactly the columns in `ui.columns`, in this order. Three
+// are always on (compare, score, asset). Widths are CSS grid tracks; minPx
+// sizes the horizontal scroll container.
+
+export interface TableColumn {
+  key: string;
+  label: string;
+  /** Short description for the column chooser. */
+  hint?: string;
+  width: string;
+  minPx: number;
+  sort?: SortKey;
+  always?: boolean;
+  align?: 'left' | 'right';
+}
+
+export const TABLE_COLUMNS: readonly TableColumn[] = [
+  { key: 'compare', label: 'Compare', width: '40px', minPx: 40, always: true },
+  { key: 'score', label: 'Score', hint: 'Licensing intent with peer percentile', width: '120px', minPx: 120, sort: 'score', always: true },
+  { key: 'asset', label: 'Asset', width: 'minmax(200px,1.5fr)', minPx: 200, sort: 'asset', always: true },
+  { key: 'owner', label: 'Owner', hint: 'Company, country and owner type', width: 'minmax(180px,1.2fr)', minPx: 180, sort: 'owner' },
+  { key: 'phase', label: 'Phase', width: '64px', minPx: 64, sort: 'phase' },
+  { key: 'origin', label: 'Source', hint: 'Trial registry or company disclosure', width: '104px', minPx: 104 },
+  { key: 'modality', label: 'Modality', width: '100px', minPx: 100, sort: 'modality' },
+  { key: 'ta', label: 'TA / indication', width: 'minmax(180px,1.3fr)', minPx: 180, sort: 'ta' },
+  { key: 'target', label: 'Target', width: 'minmax(110px,0.8fr)', minPx: 110, sort: 'target' },
+  { key: 'rights', label: 'Rights available', width: '120px', minPx: 120 },
+  { key: 'catalyst', label: 'Next catalyst', width: '108px', minPx: 108 },
+  { key: 'confidence', label: 'Confidence', hint: 'Evidence coverage behind the score', width: '84px', minPx: 84, sort: 'confidence', align: 'right' },
+  { key: 'readiness', label: 'Readiness', hint: 'Deal readiness (transactability)', width: '84px', minPx: 84, sort: 'readiness', align: 'right' },
+  { key: 'heat', label: 'Heat', hint: 'Competitive heat in the indication', width: '72px', minPx: 72, sort: 'heat', align: 'right' },
+  { key: 'trials', label: 'Trials', hint: 'Registered trials and enrollment', width: '88px', minPx: 88, align: 'right' },
+  { key: 'updated', label: 'Updated', width: '92px', minPx: 92, sort: 'updated' },
+];
+
+export const DEFAULT_TABLE_COLUMNS: readonly string[] = [
+  'compare', 'score', 'asset', 'owner', 'phase', 'modality', 'ta', 'target', 'rights', 'catalyst', 'updated',
+];
+
+/** Known keys only, in canonical order, with the always-on columns forced in. */
+export function cleanColumns(raw: readonly string[]): string[] {
+  const wanted = new Set(raw.map(k => k.trim()));
+  return TABLE_COLUMNS.filter(c => c.always || wanted.has(c.key)).map(c => c.key);
+}
+
+export function sameColumns(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((k, i) => k === b[i]);
+}
+
 export interface RadarUiState {
   view: ViewMode;
   sort: SortKey;
@@ -171,6 +221,10 @@ export interface RadarUiState {
   after: string | null;
   /** Selected mandate id, or null for "all assets". */
   mandate: string | null;
+  /** Selected saved view id (radar_saved_views), or null. */
+  view_id: string | null;
+  /** Visible table columns, canonical order (TABLE_COLUMNS). */
+  columns: string[];
   /** Asset ids in the compare tray, max COMPARE_LIMIT. */
   compare: string[];
 }
@@ -185,6 +239,8 @@ export const DEFAULT_UI: RadarUiState = {
   dir: 'desc',
   after: null,
   mandate: null,
+  view_id: null,
+  columns: [...DEFAULT_TABLE_COLUMNS],
   compare: [],
 };
 
@@ -363,6 +419,8 @@ export function parseUi(params: URLSearchParams): RadarUiState {
   const dir: SortDir = dirRaw === 'asc' || dirRaw === 'desc' ? dirRaw : SORT_COLUMNS[sort].defaultDir;
   const viewRaw = params.get('view');
   const mandateRaw = params.get('m');
+  const viewIdRaw = params.get('v');
+  const colsRaw = params.get('cols');
   const after = params.get('after');
   const compare = Array.from(new Set(params.getAll('cmp').filter(isUuidLike))).slice(0, COMPARE_LIMIT);
   return {
@@ -371,6 +429,8 @@ export function parseUi(params: URLSearchParams): RadarUiState {
     dir,
     after: after && /^[A-Za-z0-9_-]{1,512}$/.test(after) ? after : null,
     mandate: mandateRaw && isUuidLike(mandateRaw) ? mandateRaw : null,
+    view_id: viewIdRaw && isUuidLike(viewIdRaw) ? viewIdRaw : null,
+    columns: colsRaw ? cleanColumns(colsRaw.split(',')) : [...DEFAULT_TABLE_COLUMNS],
     compare,
   };
 }
@@ -394,6 +454,8 @@ export function serializeRadarState(state: RadarState): URLSearchParams {
   if (ui.dir !== SORT_COLUMNS[ui.sort].defaultDir) p.set('dir', ui.dir);
   if (ui.view !== DEFAULT_UI.view) p.set('view', ui.view);
   if (ui.mandate) p.set('m', ui.mandate);
+  if (ui.view_id) p.set('v', ui.view_id);
+  if (!sameColumns(ui.columns, DEFAULT_TABLE_COLUMNS)) p.set('cols', ui.columns.join(','));
   if (ui.after) p.set('after', ui.after);
   for (const id of ui.compare) p.append('cmp', id);
   return p;

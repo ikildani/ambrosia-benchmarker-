@@ -21,6 +21,8 @@ import type {
   FacetsResponse,
   MandatesResponse,
   RadarMandate,
+  RadarSavedView,
+  SavedViewsResponse,
   SearchSuggestResponse,
   SearchSuggestion,
   SearchParseResponse,
@@ -197,6 +199,82 @@ export function useMandates(enabled = true) {
   );
 
   return { mandates: data?.mandates ?? null, status, error, saving, refresh, create, update, remove };
+}
+
+// ── Saved views ───────────────────────────────────────────────────────────
+
+const VIEWS_URL = '/api/radar/views';
+
+export interface SavedViewInput {
+  name?: string;
+  description?: string | null;
+  filters?: Partial<RadarFilterState>;
+  sort?: RadarUiState['sort'];
+  dir?: RadarUiState['dir'];
+  view_mode?: RadarUiState['view'];
+  columns?: string[];
+  is_default?: boolean;
+  shared?: boolean;
+}
+
+export function useSavedViews(enabled = true) {
+  const [nonce, setNonce] = useState(0);
+  const url = enabled ? `${VIEWS_URL}?v=${nonce}` : null;
+  const { data, status, error } = useAbortableGet<SavedViewsResponse>(url, { keepPrevious: true, ttlMs: 0 });
+  const [saving, setSaving] = useState(false);
+
+  const refresh = useCallback(() => {
+    invalidateRadarCache(VIEWS_URL);
+    setNonce(n => n + 1);
+  }, []);
+
+  const create = useCallback(
+    async (input: SavedViewInput): Promise<RadarSavedView> => {
+      setSaving(true);
+      try {
+        const res = await radarSend<{ view: RadarSavedView }>(VIEWS_URL, 'POST', input);
+        refresh();
+        return res.view;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [refresh],
+  );
+
+  const update = useCallback(
+    async (id: string, input: SavedViewInput): Promise<RadarSavedView> => {
+      setSaving(true);
+      try {
+        const res = await radarSend<{ view: RadarSavedView }>(`${VIEWS_URL}/${id}`, 'PATCH', input);
+        refresh();
+        return res.view;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [refresh],
+  );
+
+  const remove = useCallback(
+    async (id: string): Promise<void> => {
+      setSaving(true);
+      try {
+        await radarSend<unknown>(`${VIEWS_URL}/${id}`, 'DELETE');
+        refresh();
+      } finally {
+        setSaving(false);
+      }
+    },
+    [refresh],
+  );
+
+  /** Fire-and-forget usage stamp; never blocks navigation. */
+  const markUsed = useCallback((id: string) => {
+    radarSend<unknown>(`${VIEWS_URL}/${id}`, 'POST', {}).catch(() => undefined);
+  }, []);
+
+  return { views: data?.views ?? null, teamId: data?.team_id ?? null, status, error, saving, refresh, create, update, remove, markUsed };
 }
 
 // ── Search ────────────────────────────────────────────────────────────────

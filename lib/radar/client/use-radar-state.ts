@@ -20,6 +20,7 @@ import {
   SORT_COLUMNS,
   COMPARE_LIMIT,
   MULTI_FACET_KEYS,
+  cleanColumns,
   type RadarState,
   type RadarFilterState,
   type MultiFacetKey,
@@ -42,6 +43,9 @@ export type RadarAction =
   | { type: 'set_view'; view: ViewMode }
   | { type: 'set_page'; after: string | null }
   | { type: 'select_mandate'; id: string | null; filters: RadarFilterState | null }
+  /** Apply a saved view: its filters, sort, table/cards and columns replace the current state. */
+  | { type: 'select_view'; id: string | null; filters: RadarFilterState | null; sort?: SortKey; dir?: SortDir; view?: ViewMode; columns?: string[] }
+  | { type: 'set_columns'; columns: string[] }
   | { type: 'toggle_compare'; id: string }
   | { type: 'set_compare'; ids: string[] };
 
@@ -102,8 +106,27 @@ export function radarReducer(state: RadarState, action: RadarAction): RadarState
     case 'select_mandate':
       return {
         filters: action.filters ?? EMPTY_FILTERS,
-        ui: { ...state.ui, mandate: action.id, after: null, sort: DEFAULT_UI.sort, dir: DEFAULT_UI.dir },
+        ui: { ...state.ui, mandate: action.id, view_id: null, after: null, sort: DEFAULT_UI.sort, dir: DEFAULT_UI.dir },
       };
+    case 'select_view': {
+      if (!action.id) return { filters: EMPTY_FILTERS, ui: { ...state.ui, view_id: null, mandate: null, after: null } };
+      const sort = action.sort ?? DEFAULT_UI.sort;
+      return {
+        filters: action.filters ?? EMPTY_FILTERS,
+        ui: {
+          ...state.ui,
+          view_id: action.id,
+          mandate: null,
+          after: null,
+          sort,
+          dir: action.dir ?? SORT_COLUMNS[sort].defaultDir,
+          view: action.view ?? state.ui.view,
+          columns: action.columns ? cleanColumns(action.columns) : state.ui.columns,
+        },
+      };
+    }
+    case 'set_columns':
+      return { ...state, ui: { ...state.ui, columns: cleanColumns(action.columns) } };
     case 'toggle_compare': {
       const has = state.ui.compare.includes(action.id);
       if (!has && state.ui.compare.length >= COMPARE_LIMIT) return state;

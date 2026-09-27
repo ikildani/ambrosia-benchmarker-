@@ -50,6 +50,8 @@ export type FeedRow = Pick<
   | 'last_scored_at'
   | 'nct_ids'
   | 'drug_master_id'
+  | 'asset_origin'
+  | 'stage_detail'
 > & {
   /** companies.owner_type joined through company_id; 'unknown' when the company is missing. */
   owner_type: OwnerType;
@@ -146,6 +148,33 @@ export interface RadarMandate {
 
 export interface MandatesResponse {
   mandates: RadarMandate[];
+}
+
+/** radar_saved_views (migration 140): the whole feed screen under a name. */
+export interface RadarSavedView {
+  id: string;
+  user_id: string;
+  team_id: string | null;
+  name: string;
+  description: string | null;
+  /** RadarFilterState as stored (already sanitised by the route). */
+  filters: Partial<import('./filter-schema').RadarFilterState>;
+  sort: import('./filter-schema').SortKey;
+  dir: 'asc' | 'desc';
+  view_mode: 'table' | 'cards';
+  columns: string[];
+  is_default: boolean;
+  use_count: number;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+  /** Owned by the caller (editable). Shared views from teammates are read-only. */
+  is_mine: boolean;
+}
+
+export interface SavedViewsResponse {
+  views: RadarSavedView[];
+  team_id: string | null;
 }
 
 export interface CompareFactor {

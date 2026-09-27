@@ -31,6 +31,9 @@ import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, Pill, SectionLabel, Spinner, cn
 interface Props {
   /** Starting filters (from the current view, or the mandate being edited). */
   initial?: RadarFilterState;
+  /** Prefilled name / description (templates). */
+  initialName?: string;
+  initialDescription?: string | null;
   mandate?: RadarMandate | null;
   submitLabel?: string;
   saving?: boolean;
@@ -44,13 +47,13 @@ interface Props {
 const COUNTRY_PRIMARY = RADAR_COUNTRY_OPTIONS.slice(0, 12);
 const COUNTRY_MORE = RADAR_COUNTRY_OPTIONS.slice(12);
 
-export function MandateForm({ initial, mandate, submitLabel = 'Save mandate', saving, error, onSubmit, onCancel, onPreview }: Props) {
+export function MandateForm({ initial, initialName, initialDescription, mandate, submitLabel = 'Save mandate', saving, error, onSubmit, onCancel, onPreview }: Props) {
   const start = useMemo<RadarFilterState>(() => {
     if (mandate) return mandateToFilters(mandate);
     return initial ?? { ...EMPTY_FILTERS, partnership: ['unpartnered', 'partially_partnered'] };
   }, [initial, mandate]);
 
-  const [name, setName] = useState(mandate?.name ?? '');
+  const [name, setName] = useState(mandate?.name ?? initialName ?? '');
   const [filters, setFilters] = useState<RadarFilterState>(start);
   const [notifyEmail, setNotifyEmail] = useState(mandate?.notify_email ?? false);
   const [notifyInApp, setNotifyInApp] = useState(mandate?.notify_in_app ?? true);
@@ -86,7 +89,7 @@ export function MandateForm({ initial, mandate, submitLabel = 'Save mandate', sa
       notify_email: notifyEmail,
       notify_in_app: notifyInApp,
       digest_frequency: digest,
-      description: mandate?.description ?? null,
+      description: mandate?.description ?? initialDescription ?? null,
     });
     await onSubmit(fields, filters);
   };
