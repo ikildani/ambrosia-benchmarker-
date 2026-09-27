@@ -279,12 +279,14 @@ export async function verifyPendingDeals(
   // could not be saved (citation rule, constraint), re-picking it by value
   // every run burns the whole budget on the same rows (found Sep 27 2026: the
   // cron reported ~23 verified per run for two days while pending never moved).
+  // verify_attempted_at (migration 139) is the stamp; updated_at is bumped by
+  // any update (dedupe recompute, alerts) and cannot mean "last attempt".
   const attemptedCutoff = new Date(Date.now() - 12 * 3_600_000).toISOString();
   const { data: discoveryDeals } = await supabase
     .from('deals')
     .select(DEAL_COLUMNS)
     .eq('verification_status', 'pending')
-    .or(`updated_at.is.null,updated_at.lt.${attemptedCutoff}`)
+    .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${attemptedCutoff}`)
     .in('phase_at_signing', ['discovery', 'preclinical'])
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(Math.ceil(maxDeals * 0.3));
@@ -295,7 +297,7 @@ export async function verifyPendingDeals(
     .from('deals')
     .select(DEAL_COLUMNS)
     .eq('verification_status', 'pending')
-    .or(`updated_at.is.null,updated_at.lt.${attemptedCutoff}`)
+    .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${attemptedCutoff}`)
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(maxDeals);
 
@@ -334,7 +336,7 @@ export async function verifyPendingDeals(
       .eq('verification_status', 'flagged')
       .or('is_synthetic.is.null,is_synthetic.eq.false')
       .in('phase_at_signing', ['discovery', 'preclinical'])
-      .lt('updated_at', retryCutoff)
+      .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${retryCutoff}`)
       .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
       .limit(earlySlots * 2);
     pushReverifiable(earlyFlagged, earlySlots);
@@ -346,7 +348,7 @@ export async function verifyPendingDeals(
         .select(DEAL_COLUMNS)
         .eq('verification_status', 'flagged')
         .or('is_synthetic.is.null,is_synthetic.eq.false')
-        .lt('updated_at', retryCutoff)
+        .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${retryCutoff}`)
         .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
         .limit(remainingSlots * 2 + earlySlots);
       pushReverifiable(flaggedDeals, remainingSlots);
@@ -459,7 +461,7 @@ export async function verifyPendingDeals(
         // Not enough data to verify — leave the verdict alone. A flagged row is
         // re-stamped so the retry queue rotates instead of re-picking it every run.
         if (deal.verification_status === 'flagged') {
-          await supabase.from('deals').update({ updated_at: new Date().toISOString() }).eq('id', deal.id);
+          await supabase.from('deals').update({ verify_attempted_at: new Date().toISOString() }).eq('id', deal.id);
         }
         result.unchanged++;
         continue;
@@ -578,6 +580,7 @@ Rules:
 
       // 2f-g. Update deal based on status
       const updates: Record<string, unknown> = {
+        verify_attempted_at: new Date().toISOString(),
         verification_status: verification.status,
         verification_notes: sourceNote
           ? appendVerificationNote(verification.reason, sourceNote)
@@ -677,7 +680,7 @@ Rules:
         result.errors.push(`${deal.licensor_name}/${deal.licensee_name}: verdict ${verification.status} not saved: ${saveErr.message.slice(0, 160)}`);
         if (verification.status === 'verified' && wasFlagged) result.reverified--;
         await supabase.from('deals').update({
-          updated_at: new Date().toISOString(),
+          verify_attempted_at: new Date().toISOString(),
           verification_notes: appendVerificationNote(deal.verification_notes, `verifier: ${verification.status} verdict not saved (${saveErr.message.slice(0, 120)})`),
         }).eq('id', deal.id);
         result.unchanged++;
