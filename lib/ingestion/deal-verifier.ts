@@ -673,7 +673,17 @@ Rules:
 
       }
 
-      const { error: saveErr } = await supabase.from('deals').update(updates).eq('id', deal.id);
+      let { error: saveErr } = await supabase.from('deals').update(updates).eq('id', deal.id);
+      if (saveErr && saveErr.code === '23505') {
+        // The corrections (date, parties, asset, money) collide with a row that
+        // already holds them: this row is a duplicate of it. Keep the verdict
+        // and the citation, drop the corrections, and let the dedupe recompute
+        // rank the pair; the note says what happened.
+        const keep: Record<string, unknown> = {};
+        for (const k of ['verify_attempted_at', 'verification_status', 'verified', 'verification_notes', 'source_url', 'press_release_url', 'raw_text_excerpt', 'confidence_score', 'terms_disclosed']) if (k in updates) keep[k] = updates[k];
+        keep.verification_notes = appendVerificationNote(String(keep.verification_notes ?? ''), 'corrections not applied: they match an existing row (likely duplicate; dedupe recompute will rank the pair)');
+        ({ error: saveErr } = await supabase.from('deals').update(keep).eq('id', deal.id));
+      }
       if (saveErr) {
         // Never count a verdict that did not land; stamp the row so the pick
         // query moves on, and keep the reason where the operator can see it.
