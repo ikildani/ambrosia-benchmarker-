@@ -9,6 +9,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { archiveScores } from '@/lib/score-archive';
 import { OWNERSHIP_EXCLUDED_IN, isOwnershipHiddenByDefault } from '@/lib/radar/ownership';
 import { modalitiesMatch, phaseKey } from '@/lib/comparables/match-normalize';
 import { phaseRank as sharedPhaseRank } from '@/lib/comparable-scoring';
@@ -169,6 +170,9 @@ function matchAssetToMandate(asset: Asset, mandate: Mandate): { matches: boolean
 
   return { matches: true, reasons };
 }
+
+/** score_archive model_version for mandate matches; bump when computeMatchScore changes. */
+export const MANDATE_MATCH_MODEL_VERSION = 'mandate-match-1';
 
 function computeMatchScore(asset: Asset, reasons: string[]): number {
   let score = 0;
@@ -376,6 +380,22 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
         errors.push(`Match insert error for mandate ${mandate.id}: ${insertError.message}`);
       } else {
         matchesCreated += newMatches.length;
+
+        // Score archive (migration 139). The mandate is the client's own
+        // criteria, so only its hash is kept; the asset is public.
+        const archived = await archiveScores(supabase, newMatches.map(m => ({
+          product: 'solidus' as const,
+          scoreType: 'radar.mandate_match',
+          modelVersion: MANDATE_MATCH_MODEL_VERSION,
+          origin: 'platform' as const,
+          entityType: 'asset' as const,
+          entityId: m.asset_id,
+          sourceTable: 'radar_mandate_matches',
+          confidential: true,
+          inputs: { mandate_id: m.mandate_id },
+          output: { match_score: m.match_score, match_reasons: m.match_reasons },
+        })));
+        if (archived.rejected > 0) errors.push(`score_archive: ${archived.rejected} mandate matches not archived (${archived.errors[0] ?? 'unknown'})`);
 
         // Update mandate stats
         const { error: statsError } = await supabase

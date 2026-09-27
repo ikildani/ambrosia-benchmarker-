@@ -43,6 +43,7 @@ import {
 import { findPartnerMatches, type MatchInput, type PartnerMatch } from '@/lib/services/partner-matching';
 import staticBenchmarks from '@/data/benchmarks.json';
 import { logRadarRun, deriveRunStatus } from './run-log';
+import { archiveScores, type ScoreArchiveEntry } from '@/lib/score-archive';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -932,6 +933,31 @@ function isMissingColumnError(err: { code?: string; message?: string } | null): 
   return /column|schema cache/i.test(err.message || '');
 }
 
+/** score_archive model_version for theses; bump when generateThesis changes what it predicts. */
+export const DEAL_THESIS_MODEL_VERSION = 'deal-thesis-1';
+
+/** One score_archive entry per written thesis: the predicted terms and acquirers as upserted. */
+export function thesisArchiveEntry(asset: ThesisAsset, row: Record<string, unknown>): ScoreArchiveEntry {
+  const { asset_id: _assetId, company_name: _company, asset_name: _asset, generated_at: _g, updated_at: _u, calculator_inputs, comp_deal_ids, ...output } = row;
+  return {
+    product: 'solidus',
+    scoreType: 'radar.deal_thesis',
+    modelVersion: DEAL_THESIS_MODEL_VERSION,
+    origin: 'platform',
+    entityType: 'asset',
+    entityId: asset.id,
+    entityLabel: `${asset.company_name} — ${asset.asset_name}`,
+    therapeuticArea: asset.therapeutic_area,
+    phase: asset.phase,
+    modality: asset.modality,
+    indication: asset.indication_specific || asset.indication_category || null,
+    sourceTable: 'radar_deal_theses',
+    sourceId: asset.id,
+    inputs: { comp_deal_ids: comp_deal_ids ?? null, calculator_inputs: calculator_inputs ?? null },
+    output,
+  };
+}
+
 /**
  * One upsert row. Every key is always present (null when unknown) so a batch
  * is key-uniform — PostgREST rejects bulk rows with differing key sets.
@@ -1348,6 +1374,8 @@ export async function generateDealTheses(
       return;
     }
     assetsProcessed += written;
+    const archived = await archiveScores(supabase, batch.map(b => thesisArchiveEntry(b.asset, b.row)));
+    if (archived.rejected > 0) errors.push(`score_archive: ${archived.rejected} theses not archived (${archived.errors[0] ?? 'unknown'})`);
     for (const { asset, thesis } of batch) {
       if (asset.thesis_generated_at) refreshed++; else generated++;
       if (thesis.insufficientComps) insufficientComps++; else thesesWithTerms++;

@@ -28,6 +28,7 @@ import { phaseRank as sharedPhaseRank } from '@/lib/comparable-scoring';
 import { radarPhaseToDb } from './deal-thesis';
 import { deriveTA } from './asset-universe';
 import { logRadarRun, deriveRunStatus } from './run-log';
+import { archiveScores } from '@/lib/score-archive';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -100,6 +101,9 @@ interface PortfolioGap {
   /** Therapeutic areas (asset-universe vocabulary) the gap should be filled from. */
   targetTAs: string[];
 }
+
+/** score_archive model_version for opportunities; bump when scoreOpportunity changes. */
+export const DEAL_CREATOR_MODEL_VERSION = 'deal-creator-1';
 
 interface ProposedDeal {
   assetId: string;
@@ -638,6 +642,7 @@ async function persistOpportunities(
   errors: string[],
 ): Promise<number> {
   let upserted = 0;
+  const written: ProposedDeal[] = [];
 
   for (const deal of deals) {
     if (deal.opportunityScore < 25) continue;
@@ -672,8 +677,27 @@ async function persistOpportunities(
       }, { onConflict: 'asset_id,acquirer_company_id' });
 
     if (error) errors.push(`Opportunity upsert error ${deal.acquirerName}/${deal.assetName}: ${error.message}`);
-    else upserted++;
+    else {
+      upserted++;
+      written.push(deal);
+    }
   }
+
+  // Score archive (migration 139): every opportunity as scored today.
+  const archived = await archiveScores(supabase, written.map(({ rationale: _r, gapDetail: _g, compDealIds, ...scores }) => ({
+    product: 'solidus' as const,
+    scoreType: 'radar.deal_opportunity',
+    modelVersion: DEAL_CREATOR_MODEL_VERSION,
+    origin: 'platform' as const,
+    entityType: 'asset' as const,
+    entityId: scores.assetId,
+    entityLabel: `${scores.assetCompanyName} — ${scores.assetName} × ${scores.acquirerName}`,
+    sourceTable: 'radar_deal_opportunities',
+    sourceId: `${scores.assetId}:${scores.acquirerCompanyId}`,
+    inputs: { comp_deal_ids: compDealIds },
+    output: scores,
+  })));
+  if (archived.rejected > 0) errors.push(`score_archive: ${archived.rejected} opportunities not archived (${archived.errors[0] ?? 'unknown'})`);
 
   return upserted;
 }
