@@ -13,21 +13,27 @@ import { AdjustmentsHorizontalIcon, ArrowsUpDownIcon, BookmarkSquareIcon, LinkIc
 import {
   FEED_PAGE_SIZE,
   COMPARE_LIMIT,
+  DEFAULT_TABLE_COLUMNS,
+  DEFAULT_UI,
   SORT_KEYS,
+  cleanColumns,
   filtersFingerprint,
   isEmptyFilters,
   countActiveFilters,
+  sameColumns,
   type MultiFacetKey,
   type RadarFilterState,
   type SortKey,
 } from '@/lib/radar/client/filter-schema';
 import { useRadarState } from '@/lib/radar/client/use-radar-state';
-import { useFacets, useFeed, useIsDesktop, useMandates, usePrefersReducedMotion } from '@/lib/radar/client/hooks';
+import { useFacets, useFeed, useIsDesktop, useMandates, usePrefersReducedMotion, useSavedViews } from '@/lib/radar/client/hooks';
 import { mandateToFilters, type MandateFields } from '@/lib/radar/client/mandate';
+import { viewColumns, viewIsDirty, viewSummary, viewToFilters } from '@/lib/radar/client/saved-view';
 import { fmtEstimate } from '@/lib/radar/client/format';
-import type { RadarMandate, SearchParseResponse } from '@/lib/radar/client/api-types';
+import type { RadarMandate, RadarSavedView, SearchParseResponse } from '@/lib/radar/client/api-types';
 import { AssetTable } from './AssetTable';
 import { AssetCards } from './AssetCards';
+import { ColumnChooser } from './ColumnChooser';
 import { CompareTray } from './CompareDrawer';
 import { FacetDrawer, FacetRail } from './FacetRail';
 import { CardsSkeleton, EmptyState, ErrorState, TableSkeleton } from './FeedStates';
@@ -37,6 +43,7 @@ import { MandateForm } from './MandateForm';
 import { MandateSwitcher } from './MandateSwitcher';
 import { Pagination } from './Pagination';
 import { SearchBox } from './SearchBox';
+import { SaveViewDialog, ViewSwitcher, type SaveViewInput } from './ViewSwitcher';
 import { BTN_GHOST, BTN_SECONDARY, FOCUS_RING, PANEL, Pill, cn } from './ui';
 
 const SORT_LABELS: Record<SortKey, string> = {
@@ -54,6 +61,8 @@ const SORT_LABELS: Record<SortKey, string> = {
 };
 
 const BROWSE_ALL_KEY = 'radar:browse-all';
+/** The viewer's preferred table columns (per browser); a saved view or ?cols= wins over it. */
+const COLUMNS_KEY = 'radar:columns';
 
 type MandateDialog = { mode: 'create'; initial: RadarFilterState } | { mode: 'edit'; mandate: RadarMandate } | null;
 
@@ -66,6 +75,63 @@ export function RadarShell() {
   const mandates = mandatesApi.mandates ?? [];
   const selectedMandate = ui.mandate ? mandates.find(m => m.id === ui.mandate) ?? null : null;
 
+  const viewsApi = useSavedViews(true);
+  const views = viewsApi.views ?? [];
+  const selectedView = ui.view_id ? views.find(v => v.id === ui.view_id) ?? null : null;
+  const defaultView = views.find(v => v.is_mine && v.is_default) ?? null;
+  const viewDirty = selectedView ? viewIsDirty(selectedView, filters, ui) : false;
+
+  const applyView = useCallback(
+    (v: RadarSavedView, history: 'push' | 'replace' = 'push') => {
+      dispatch(
+        { type: 'select_view', id: v.id, filters: viewToFilters(v), sort: v.sort, dir: v.dir, view: v.view_mode, columns: viewColumns(v) },
+        history,
+      );
+      viewsApi.markUsed(v.id);
+    },
+    [dispatch, viewsApi],
+  );
+
+  // Untouched URL: the default view (if any) opens, once per page load.
+  const urlUntouched = isEmptyFilters(filters) && !ui.mandate && !ui.view_id && ui.sort === DEFAULT_UI.sort && sameColumns(ui.columns, DEFAULT_TABLE_COLUMNS);
+  const defaultApplied = useRef(false);
+  useEffect(() => {
+    if (defaultApplied.current || viewsApi.status !== 'ready') return;
+    defaultApplied.current = true;
+    if (defaultView && urlUntouched) applyView(defaultView, 'replace');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when the view list first arrives
+  }, [viewsApi.status]);
+
+  // A link that carries only ?v=<id> hydrates the view once the list arrives.
+  useEffect(() => {
+    if (selectedView && isEmptyFilters(filters) && !viewDirty) return;
+    if (selectedView && isEmptyFilters(filters)) applyView(selectedView, 'replace');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the selected view resolves
+  }, [selectedView?.id]);
+
+  // Viewer's preferred columns (localStorage) when the URL does not say otherwise.
+  useEffect(() => {
+    if (!sameColumns(ui.columns, DEFAULT_TABLE_COLUMNS) || ui.view_id) return;
+    try {
+      const stored = window.localStorage.getItem(COLUMNS_KEY);
+      if (!stored) return;
+      const cols = cleanColumns(stored.split(','));
+      if (!sameColumns(cols, DEFAULT_TABLE_COLUMNS)) dispatch({ type: 'set_columns', columns: cols }, 'replace');
+    } catch {
+      // storage unavailable
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+  const setColumns = (cols: string[]) => {
+    dispatch({ type: 'set_columns', columns: cols }, 'replace');
+    try {
+      if (sameColumns(cols, DEFAULT_TABLE_COLUMNS)) window.localStorage.removeItem(COLUMNS_KEY);
+      else window.localStorage.setItem(COLUMNS_KEY, cols.join(','));
+    } catch {
+      // storage unavailable
+    }
+  };
+
   // First run: no saved mandates, no state in the URL, not dismissed.
   const [browseAll, setBrowseAll] = useState(true);
   useEffect(() => {
@@ -76,7 +142,8 @@ export function RadarShell() {
     }
   }, []);
   const firstRun =
-    mandatesApi.status === 'ready' && mandates.length === 0 && !ui.mandate && isEmptyFilters(filters) && !browseAll;
+    mandatesApi.status === 'ready' && mandates.length === 0 && !ui.mandate && !ui.view_id && isEmptyFilters(filters) && !browseAll
+    && (viewsApi.status !== 'ready' || !defaultView);
 
   // A link that carries only ?m=<id> hydrates the mandate's filters once the mandate list arrives.
   useEffect(() => {
@@ -122,6 +189,50 @@ export function RadarShell() {
   const [mandateDialog, setMandateDialog] = useState<MandateDialog>(null);
   const [mandateError, setMandateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewError, setViewError] = useState<string | null>(null);
+
+  const currentViewInput = () => ({
+    filters,
+    sort: ui.sort,
+    dir: ui.dir,
+    view_mode: ui.view,
+    columns: ui.columns,
+  });
+  const saveView = async (input: SaveViewInput) => {
+    setViewError(null);
+    try {
+      const v = await viewsApi.create({ ...currentViewInput(), ...input });
+      setViewDialogOpen(false);
+      dispatch({ type: 'select_view', id: v.id, filters, sort: ui.sort, dir: ui.dir, view: ui.view, columns: ui.columns }, 'replace');
+    } catch (err) {
+      setViewError(err instanceof Error ? err.message : 'Could not save the view');
+    }
+  };
+  const updateView = async (v: RadarSavedView) => {
+    setViewError(null);
+    try {
+      await viewsApi.update(v.id, currentViewInput());
+    } catch (err) {
+      setViewError(err instanceof Error ? err.message : 'Could not update the view');
+    }
+  };
+  const setDefaultView = async (v: RadarSavedView, isDefault: boolean) => {
+    try {
+      await viewsApi.update(v.id, { is_default: isDefault });
+    } catch (err) {
+      setViewError(err instanceof Error ? err.message : 'Could not change the default view');
+    }
+  };
+  const deleteView = async (v: RadarSavedView) => {
+    if (!window.confirm(`Delete view "${v.name}"?`)) return;
+    try {
+      await viewsApi.remove(v.id);
+      if (ui.view_id === v.id) dispatch({ type: 'select_view', id: null, filters: null });
+    } catch (err) {
+      setViewError(err instanceof Error ? err.message : 'Could not delete the view');
+    }
+  };
 
   const saveMandate = useCallback(
     async (fields: MandateFields, formFilters: RadarFilterState) => {
@@ -236,6 +347,26 @@ export function RadarShell() {
             {ui.mandate && !selectedMandate && mandatesApi.status === 'ready' && (
               <span className="text-xs text-amber-700 dark:text-amber-300">That mandate no longer exists</span>
             )}
+            {viewsApi.status !== 'error' && (
+              <ViewSwitcher
+                views={views}
+                selectedId={ui.view_id}
+                dirty={viewDirty}
+                saving={viewsApi.saving}
+                onSelect={v => (v ? applyView(v) : dispatch({ type: 'select_view', id: null, filters: null }))}
+                onSaveNew={() => {
+                  setViewError(null);
+                  setViewDialogOpen(true);
+                }}
+                onUpdate={updateView}
+                onSetDefault={setDefaultView}
+                onDelete={deleteView}
+              />
+            )}
+            {ui.view_id && !selectedView && viewsApi.status === 'ready' && (
+              <span className="text-xs text-amber-700 dark:text-amber-300">That saved view no longer exists</span>
+            )}
+            {viewError && !viewDialogOpen && <span className="text-xs text-amber-700 dark:text-amber-300">{viewError}</span>}
           </div>
           <div className="flex items-center gap-1.5">
             <button
@@ -315,6 +446,7 @@ export function RadarShell() {
                   Filters{activeCount > 0 ? ` (${activeCount})` : ''}
                 </button>
                 {!showTable && <SortMenu sort={ui.sort} dir={ui.dir} onChange={(s, d) => dispatch({ type: 'set_sort', sort: s, dir: d })} />}
+                {showTable && <ColumnChooser columns={ui.columns} onChange={setColumns} />}
               </div>
             </div>
 
@@ -340,6 +472,7 @@ export function RadarShell() {
                 onToggleCompare={id => dispatch({ type: 'toggle_compare', id }, 'replace')}
                 height={tableHeight}
                 loading={loading}
+                columns={ui.columns}
               />
             ) : (
               <AssetCards
@@ -369,6 +502,16 @@ export function RadarShell() {
       </div>
 
       <FacetDrawer open={facetDrawerOpen} onClose={() => setFacetDrawerOpen(false)} {...railProps} />
+
+      <SaveViewDialog
+        open={viewDialogOpen}
+        canShare={!!viewsApi.teamId}
+        saving={viewsApi.saving}
+        error={viewError}
+        summary={viewSummary(filters, ui, SORT_LABELS[ui.sort])}
+        onClose={() => setViewDialogOpen(false)}
+        onSave={saveView}
+      />
 
       <CompareTray
         ids={ui.compare}
