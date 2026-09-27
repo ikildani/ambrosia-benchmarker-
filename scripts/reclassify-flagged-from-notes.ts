@@ -10,7 +10,8 @@
  *   npx tsx scripts/reclassify-flagged-from-notes.ts --limit 500 --apply
  *
  * Skips: auto-flagged outliers, "TA auto-classified" notes (not a verification),
- * notes that say no evidence / does not exist / fabricated.
+ * notes that say no evidence / does not exist / fabricated, and rows without a
+ * citation (the database will not accept 'verified' for them).
  */
 import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
@@ -38,6 +39,10 @@ async function main() {
     .select('id, licensor_name, licensee_name, asset_name, upfront_usd, total_deal_value_usd, milestones_total_usd, announced_date, phase_at_signing, verification_notes, confidence_score')
     .eq('verification_status', 'flagged').eq('is_synthetic', false).not('is_canonical', 'is', false)
     .not('verification_notes', 'is', null)
+    // The database refuses 'verified' without a citation (primary-sourced rule), so
+    // only cited rows are candidates here; uncited ones need the verifier's web
+    // search to attach a source first.
+    .or('source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null')
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(args.limit * 2);
   if (error) throw new Error(error.message);

@@ -5,7 +5,7 @@
  * → HTML → PDF via local Chrome.
  *
  * Usage:
- *   npx tsx scripts/generate-brief-v3.ts [--out /path/to/dir] [--skip-ai] [--indication alzheimers]
+ *   npx tsx scripts/generate-brief-v3.ts [--out /path/to/dir] [--skip-ai] [--indication alzheimers] [--watermark SAMPLE]
  *
  * Reads .env.local (Supabase service role, ANTHROPIC_API_KEY). Read-only against
  * the database. Writes brief-v3.html and brief-v3.pdf to --out (default ./tmp).
@@ -36,6 +36,19 @@ const args = process.argv.slice(2);
 const arg = (k: string, d?: string) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 const OUT_DIR = arg('--out', path.join(process.cwd(), 'tmp'))!;
 const SKIP_AI = args.includes('--skip-ai');
+/** Diagonal text on every page (e.g. SAMPLE) for copies that leave the building without a client. */
+const WATERMARK = arg('--watermark');
+
+function withWatermark(html: string, text: string | undefined): string {
+  if (!text) return html;
+  const safe = text.replace(/[^A-Za-z0-9 ]/g, '').toUpperCase().slice(0, 24);
+  const css = `<style>
+    .report-page::after { content: '${safe}'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-family: Inter, system-ui, sans-serif; font-size: 150px; font-weight: 800; letter-spacing: 0.22em; color: #0f766e; opacity: 0.075;
+      transform: rotate(-28deg); pointer-events: none; z-index: 50; }
+  </style>`;
+  return html.includes('</head>') ? html.replace('</head>', `${css}</head>`) : css + html;
+}
 
 const CHROME = process.env.CHROME_PATH
   || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -127,7 +140,7 @@ async function main() {
     brief: built.brief,
   };
 
-  const html = generateReportHTML(pdfData);
+  const html = withWatermark(generateReportHTML(pdfData), WATERMARK);
   const htmlPath = path.join(OUT_DIR, 'brief-v3.html');
   fs.writeFileSync(htmlPath, html);
   fs.writeFileSync(path.join(OUT_DIR, 'brief-v3.data.json'), JSON.stringify({ brief: built.brief, notes: built.notes }, null, 2));
