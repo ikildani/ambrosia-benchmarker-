@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runPerplexityDealDiscovery } from '@/lib/ingestion/perplexity-deals';
+import { runIndicationTopup, type TopupRunResult } from '@/lib/ingestion/indication-topup';
 import { logCronRun, reclassifyOtherDeals, updateCompanyStats } from '@/lib/cron-utils';
 import { notifyHighValueDeal } from '@/lib/slack/notify';
 import { runCronIntelligence, collectUserDemandSignals, getCronIntelligenceBus } from '@/lib/cron-intelligence';
@@ -108,10 +109,22 @@ export async function GET(request: NextRequest) {
     // Non-fatal: demand signals may not exist yet
   }
 
+  // Intake top-ups first: one indication-scoped run per cycle, from the queue
+  // the readiness check fills. It takes up to half the budget; the area
+  // rotation gets the rest.
+  const cycleStart = Date.now();
+  let topup: TopupRunResult | null = null;
+  try {
+    topup = await runIndicationTopup(supabase, perplexityApiKey, anthropicApiKey, { timeBudgetMs: 120_000 });
+    if (topup.status !== 'none') console.log(`[perplexity] top-up ${topup.indication}: ${topup.queriesRun} queries, ${topup.dealsInserted} inserted → ${topup.status}`);
+  } catch (e) {
+    console.error('[perplexity] top-up failed:', e instanceof Error ? e.message : e);
+  }
+
   const result = await runPerplexityDealDiscovery(supabase, perplexityApiKey, anthropicApiKey, {
     therapeuticAreas: currentTAs,
     maxQueriesPerTA: 2,
-    timeBudgetMs: 240_000,
+    timeBudgetMs: Math.max(60_000, 240_000 - (Date.now() - cycleStart)),
     recencyDays: 45,
     // Start each list two queries further along on every full pass of the rotation
     // (about 40 hours at one run per 4 hours), so lists longer than two queries (the
@@ -155,7 +168,7 @@ export async function GET(request: NextRequest) {
   await supabase.from('data_ingestion_log').insert({
     source: 'perplexity_discovery',
     run_type: 'cron',
-    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta, demandDriven, skipBreakdown: result.skipped },
+    parameters: { therapeuticAreas: currentTAs, byTA: result.by_ta, demandDriven, skipBreakdown: result.skipped, topup: topup && topup.status !== 'none' ? { indication: topup.indication, requestId: topup.requestId, status: topup.status, inserted: topup.dealsInserted, readinessAfter: topup.readinessAfter } : null },
     records_fetched: result.queries_run,
     records_processed: result.deals_discovered,
     records_inserted: result.deals_inserted,

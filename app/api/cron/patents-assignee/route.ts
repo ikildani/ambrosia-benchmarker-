@@ -1,18 +1,20 @@
 /**
  * Cron: Patents by Assignee (Search & Evaluation, Phase 3 Workstream C)
  *
- * PatentsView v1 search by assignee organization for every industry-owned
- * company with a Phase 1+ asset; writes company_patents and links patents to
+ * USPTO Open Data Portal application search by first applicant for every
+ * industry-owned company with a Phase 1+ asset; writes company_patents
+ * (applications and grants, keyed by application number) and links them to
  * drug_master through drug_aliases (lib/ingestion/patents-assignee.ts).
  * radar_patent_velocity (migration 114) is the rolling 12-month view.
  *
  * Suggested schedule: every 2 hours at :40 (`40 star-slash-2 * * *`), 30
- * companies per run (45 req/min cap; ~1-3 requests per company). Roughly
+ * companies per run (~1-3 requests per company, 1.4 s apart). Roughly
  * 10k industry companies -> one full pass in ~28 days; re-visits only pull
- * patents granted since the last pass.
+ * applications filed since the last pass.
  *
  * Query params (optional): ?limit=30
- * Env: PATENTSVIEW_API_KEY (without it the run logs a skip and exits 200).
+ * Env: PATENTSVIEW_API_KEY or USPTO_ODP_API_KEY (without one the run logs a
+ * skip and exits 200).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -84,7 +86,7 @@ export async function GET(request: NextRequest) {
         linked_to_drug: result.linked,
         cursor: result.cursor,
         timed_out: result.timedOut,
-        api_key_set: Boolean(process.env.PATENTSVIEW_API_KEY),
+        api_key_set: Boolean(process.env.PATENTSVIEW_API_KEY || process.env.USPTO_ODP_API_KEY),
       },
       notes: result.skipped ?? undefined,
     });

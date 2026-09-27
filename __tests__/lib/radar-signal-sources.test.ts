@@ -45,13 +45,13 @@ import {
 
 import {
   assigneeQueryName,
-  buildPatentsViewQuery,
+  buildOdpQuery,
   cpcCodesOf,
   isPharmaCpc,
   linkPatentToDrug,
   patentAliasKeys,
   toPatentRow,
-  type PatentsViewPatent,
+  type OdpApplication,
 } from '@/lib/ingestion/patents-assignee';
 
 import {
@@ -447,35 +447,58 @@ describe('patents-assignee', () => {
     expect(keys.some(k => k.startsWith('nct'))).toBe(false);
   });
 
-  it('filters by pharma CPC prefixes and builds rows with a Google Patents URL', () => {
-    const p: PatentsViewPatent = {
-      patent_id: '11000001',
-      patent_title: 'Compositions comprising ACM-101',
-      patent_date: '2025-02-04',
-      patent_abstract: 'An ADC.',
-      application: [{ filing_date: '2022-06-01' }],
-      assignees: [{ assignee_organization: 'Acme Therapeutics, Inc.' }],
-      cpc_current: [{ cpc_group_id: 'A61K47/68' }, { cpc_group_id: 'C07K16/28' }],
+  it('filters by pharma CPC prefixes and builds rows keyed by application number', () => {
+    const granted: OdpApplication = {
+      applicationNumberText: '17123456',
+      applicationMetaData: {
+        inventionTitle: 'Compositions comprising ACM-101',
+        filingDate: '2022-06-01',
+        grantDate: '2025-02-04',
+        patentNumber: '11000001',
+        firstApplicantName: 'Acme Therapeutics, Inc.',
+        cpcClassificationBag: ['A61K  47/68', 'C07K  16/28', 'A61K  47/68'],
+        applicationStatusDescriptionText: 'Patented Case',
+      },
     };
-    expect(cpcCodesOf(p)).toEqual(['A61K47/68', 'C07K16/28']);
-    expect(isPharmaCpc(cpcCodesOf(p))).toBe(true);
+    expect(cpcCodesOf(granted)).toEqual(['A61K47/68', 'C07K16/28']);
+    expect(isPharmaCpc(cpcCodesOf(granted))).toBe(true);
     expect(isPharmaCpc(['G06F17/00'])).toBe(false);
-    const row = toPatentRow(p, COMPANY_ID, 'drug-code', new Date('2025-09-01T00:00:00Z'));
+    const row = toPatentRow(granted, COMPANY_ID, 'drug-code', new Date('2025-09-01T00:00:00Z'));
     expect(row).toMatchObject({
-      company_id: COMPANY_ID, patent_id: '11000001', filing_date: '2022-06-01', grant_date: '2025-02-04',
-      assignee_raw: 'Acme Therapeutics, Inc.', drug_master_id: 'drug-code', source: 'patentsview',
+      company_id: COMPANY_ID, patent_id: '17123456', filing_date: '2022-06-01', grant_date: '2025-02-04',
+      assignee_raw: 'Acme Therapeutics, Inc.', drug_master_id: 'drug-code', source: 'uspto_odp', abstract: null,
       source_url: 'https://patents.google.com/patent/US11000001',
     });
+
+    const pending: OdpApplication = {
+      applicationNumberText: '18999999',
+      applicationMetaData: {
+        inventionTitle: 'Methods of treating with acmelizumab',
+        filingDate: '2025-03-10',
+        grantDate: null,
+        patentNumber: null,
+        firstApplicantName: 'Acme Therapeutics, Inc.',
+        cpcClassificationBag: ['A61P  35/00'],
+        applicationStatusDescriptionText: 'Docketed New Case - Ready for Examination',
+      },
+    };
+    const pendingRow = toPatentRow(pending, COMPANY_ID, null, new Date('2025-09-01T00:00:00Z'));
+    expect(pendingRow.grant_date).toBeNull();
+    expect(pendingRow.source_url).toBe('https://patentcenter.uspto.gov/applications/18999999');
   });
 
-  it('strips legal suffixes for the assignee query and filters filings from 2015', () => {
+  it('strips legal suffixes for the applicant query and filters filings from 2015', () => {
     expect(assigneeQueryName('Acme Therapeutics, Inc.')).toBe('Acme Therapeutics');
     expect(assigneeQueryName('Hutchison MediPharma Co., Ltd.')).toBe('Hutchison MediPharma');
     expect(assigneeQueryName('BioNTech SE')).toBe('BioNTech');
-    const q = buildPatentsViewQuery('Acme Therapeutics', { sinceGrantDate: '2025-01-01' }) as { _and: Record<string, unknown>[] };
-    expect(q._and[0]).toEqual({ _gte: { 'application.filing_date': '2015-01-01' } });
-    expect(q._and[1]).toEqual({ _begins: { 'assignees.assignee_organization': 'Acme Therapeutics' } });
-    expect(q._and[2]).toEqual({ _gte: { patent_date: '2025-01-01' } });
+    expect(buildOdpQuery('Acme Therapeutics')).toBe(
+      'applicationMetaData.firstApplicantName:"Acme Therapeutics" AND applicationMetaData.filingDate:[2015-01-01 TO *]',
+    );
+    // Incremental runs start from the newest filing seen; dates before the floor fall back to it.
+    expect(buildOdpQuery('Acme Therapeutics', { sinceFilingDate: '2025-01-01' })).toContain('filingDate:[2025-01-01 TO *]');
+    expect(buildOdpQuery('Acme Therapeutics', { sinceFilingDate: '2009-01-01' })).toContain('filingDate:[2015-01-01 TO *]');
+    // Quotes inside a company name cannot break out of the phrase.
+    expect(buildOdpQuery('Acme "Bio" Therapeutics')).toContain('firstApplicantName:"Acme Bio Therapeutics"');
   });
 });
 
