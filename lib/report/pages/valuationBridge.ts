@@ -62,7 +62,7 @@ export function renderValuationBridgePage(data: PDFReportData, meta: ReportMeta)
     </tr>`;
   }).join('');
 
-  const askTag = (basis: 'headline' | 'comps') => basis === 'comps' ? 'comps median' : 'headline mid';
+  const askTag = (basis: 'headline' | 'comps' | 'comps_p75_cap') => basis === 'comps_p75_cap' ? 'comps 75th pct (cap)' : basis === 'comps' ? 'comps median' : 'headline mid';
 
   return `
     <div class="report-page">

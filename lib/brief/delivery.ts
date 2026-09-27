@@ -12,7 +12,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { envelope, stepper, button, signature, p, esc } from '@/lib/email/brief-template';
 
-export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 30;
+/** Delivery-email direct links: 7 days. The data-room page mints fresh links on every visit. */
+export const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
 export const SITE_URL = 'https://solidus.ambrosiaventures.co';
 
 /** Columns the delivery layer reads from benchmark_requests. */
@@ -88,7 +89,7 @@ export function buildDeliveryEmail(row: BriefDeliveryRow, links: BriefLinks): { 
     ${p(`The Deal Intelligence Brief for <strong>${esc(what)}</strong> is ready${pages ? ` (${pages})` : ''}. I have read it and signed the recommendation on page three.`)}
     ${room ? button('Open your data room', room) : ''}
     ${room ? p(`That link is your private data room. It holds the PDF, the Excel with the data behind every figure, and the status of the call as it is scored. It issues fresh download links each time you open it. Please keep it to the team that needs the number.`, { muted: true }) : ''}
-    ${links.pdfUrl ? p(`Direct links, valid 30 days: <a href="${esc(links.pdfUrl)}" style="color:#0f766e;">PDF</a>${links.excelUrl ? ` · <a href="${esc(links.excelUrl)}" style="color:#0f766e;">Excel</a>` : ''}.`, { muted: true }) : ''}
+    ${links.pdfUrl ? p(`Direct links, valid 7 days: <a href="${esc(links.pdfUrl)}" style="color:#0f766e;">PDF</a>${links.excelUrl ? ` · <a href="${esc(links.excelUrl)}" style="color:#0f766e;">Excel</a>` : ''}.`, { muted: true }) : ''}
     ${p(`<strong>How to read it.</strong> Start with page three: the recommendation, the ask, the floor and the walk-away, and who to open with. Page four says how that call will be scored. The valuation bridge and the cited comparable set show where the number comes from. The term sheet, buyer map, catalyst calendar, objections and diligence list follow. Every figure that appears on more than one page comes from one place, and the Excel opens on the same decision.`)}
     ${stepper([
       { title: 'Intake', body: 'Received.', done: true },

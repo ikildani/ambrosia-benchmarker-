@@ -128,18 +128,40 @@ function pickLevers(asset: AssetProfile, buyerMap: BuyerMap | null | undefined, 
   return levers.slice(0, 3);
 }
 
-function buildTimeline(asset: AssetProfile): Array<{ week: string; step: string }> {
+/**
+ * Process timeline. When a go-to-market window exists the weeks are dated
+ * from its start and the signing step says whether it lands inside the window;
+ * without one the weeks are relative.
+ */
+function buildTimeline(asset: AssetProfile, window?: { start: string; end: string } | null, asOf?: string): Array<{ week: string; step: string }> {
   const bucket = phaseBucket(asset.phase);
   const late = bucket === 'phase_3';
   const mid = bucket === 'phase_2';
-  return [
-    { week: 'Week 1', step: 'Data room open; diligence gaps closed; non-confidential deck final' },
-    { week: 'Week 2', step: 'CDA and non-confidential package to the lead; tension buyers briefed' },
-    { week: 'Week 3–4', step: 'Management presentations and confidential data room access' },
-    { week: late ? 'Week 5–7' : 'Week 5–6', step: 'Term sheets requested; ask, floor and walk-away held' },
-    { week: late ? 'Week 8–12' : mid ? 'Week 8–11' : 'Week 8–10', step: `Confirmatory diligence${late ? ' including CMC audit and regulatory file review' : mid ? ' including CMC and clinical file review' : ''}` },
-    { week: late ? 'Week 14–20' : mid ? 'Week 13–17' : 'Week 12–16', step: 'Definitive agreement negotiated and signed' },
+  const rows: Array<{ from: number; to: number; step: string }> = [
+    { from: 1, to: 1, step: 'Data room open; diligence gaps closed; non-confidential deck final' },
+    { from: 2, to: 2, step: 'CDA and non-confidential package to the lead; tension buyers briefed' },
+    { from: 3, to: 4, step: 'Management presentations and confidential data room access' },
+    { from: 5, to: late ? 7 : 6, step: 'Term sheets requested; ask, floor and walk-away held' },
+    { from: 8, to: late ? 12 : mid ? 11 : 10, step: `Confirmatory diligence${late ? ' including CMC audit and regulatory file review' : mid ? ' including CMC and clinical file review' : ''}` },
+    { from: late ? 14 : mid ? 13 : 12, to: late ? 20 : mid ? 17 : 16, step: 'Definitive agreement negotiated and signed' },
   ];
+  const startIso = window?.start && asOf && window.start > asOf ? window.start : asOf ?? window?.start ?? null;
+  const start = startIso ? new Date(startIso) : null;
+  if (!start || Number.isNaN(start.getTime())) return rows.map(r => ({ week: r.from === r.to ? `Week ${r.from}` : `Week ${r.from}–${r.to}`, step: r.step }));
+  const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const dateAt = (week: number) => new Date(start.getTime() + (week - 1) * 7 * 86_400_000);
+  const out = rows.map(r => ({ week: r.from === r.to ? `Week ${r.from} · ${fmt(dateAt(r.from))}` : `Week ${r.from}–${r.to} · ${fmt(dateAt(r.from))}`, step: r.step }));
+  if (window?.end) {
+    const signBy = dateAt(rows[rows.length - 1].to);
+    const end = new Date(window.end);
+    if (!Number.isNaN(end.getTime())) {
+      const last = out[out.length - 1];
+      last.step = signBy.getTime() <= end.getTime()
+        ? `${last.step}; lands ${fmt(signBy)}, inside the window that closes ${fmt(end)}`
+        : `${last.step}; at this pace signing lands ${fmt(signBy)}, after the window closes ${fmt(end)}: compress diligence or open with two leads in parallel`;
+    }
+  }
+  return out;
 }
 
 function royaltyRange(result: CalculationResult): Range3 | null {
@@ -281,7 +303,7 @@ export function buildDecisionSummary(input: DecisionInput): DecisionSummary {
     walkAwayUpfrontM,
     levers: pickLevers(asset, buyerMap, input.client),
     wouldChangeView,
-    timeline: buildTimeline(asset),
+    timeline: buildTimeline(asset, input.catalystWindow ?? null, input.asOf),
     confidence,
     confidenceBasis,
   };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import { verifyAdminAuth } from '@/lib/admin-auth';
 import { createServiceClient } from '@/lib/supabase/server';
+import { deleteBriefRequest } from '@/lib/brief/delete-request';
 
 /**
  * Admin actions on Deal Intelligence Brief requests.
@@ -14,6 +15,9 @@ import { createServiceClient } from '@/lib/supabase/server';
  *     Mark the invoice as sent (payment_status stays pending until paid).
  *   POST { requestId, action: 'paid' }
  *     Mark the invoice paid.
+ *   POST { requestId, action: 'delete', confirm: 'DELETE' }
+ *     Remove the request, its files, alerts, follow-ups and its ledger
+ *     prediction. For test intakes and client deletion requests.
  *
  * Auth: admin email session or ADMIN_API_KEY bearer (verifyAdminAuth).
  */
@@ -24,7 +28,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   const denied = await verifyAdminAuth(request);
   if (denied) return denied;
-  let body: { requestId?: string; action?: string; text?: string; reviewer?: string };
+  let body: { requestId?: string; action?: string; text?: string; reviewer?: string; confirm?: string };
   try { body = await request.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
   const { requestId, action } = body;
   if (!requestId || !action) return NextResponse.json({ error: 'requestId and action required' }, { status: 400 });
@@ -65,6 +69,12 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.from('benchmark_requests').update(patch).eq('id', requestId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
+  }
+
+  if (action === 'delete') {
+    if (body.confirm !== 'DELETE') return NextResponse.json({ error: 'Type DELETE to confirm' }, { status: 400 });
+    const report = await deleteBriefRequest(supabase, requestId);
+    return NextResponse.json({ ok: report.errors.length === 0 && report.requestRemoved, report }, { status: report.errors.length ? 207 : 200 });
   }
 
   return NextResponse.json({ error: `Unknown action ${action}` }, { status: 400 });

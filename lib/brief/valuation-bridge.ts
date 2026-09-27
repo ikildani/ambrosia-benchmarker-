@@ -8,6 +8,11 @@
  * Anchoring policy (seller-side brief; printed on the page as `policy`):
  *  - Ask   = the greater of the calibrated headline mid and the comparable-set
  *            median (outliers removed), on each basis (total, upfront).
+ *  - Cap   = when the risk-adjusted NPV is not informative (at or below zero)
+ *            and the comparable set has at least COMPS_CAP_MIN_N rows, the ask
+ *            is capped at the comps 75th percentile on each basis. At that
+ *            stage the only evidence a buyer accepts is what others paid; the
+ *            calibrated headline still sets the top of the printed range.
  *  - Floor = the greater of the headline low and the comps 25th percentile,
  *            never above the ask.
  *  - Walk-away upfront = WALK_AWAY_SHARE_OF_FLOOR × floor upfront.
@@ -36,9 +41,12 @@ import type { ValuationBridge, BridgeBar, CompSet, CompStats } from './types';
 
 export const RNPV_FALLBACK_BAND = 0.25;
 export const WALK_AWAY_SHARE_OF_FLOOR = 0.8;
+/** Comparable rows needed before the 75th percentile is trusted as a cap. */
+export const COMPS_CAP_MIN_N = 10;
 
 export const BRIDGE_POLICY =
-  'Ask = the greater of the calibrated headline mid and the comparable-set median (outliers removed); ' +
+  'Ask = the greater of the calibrated headline mid and the comparable-set median (outliers removed), ' +
+  `capped at the comps 75th percentile when the risk-adjusted NPV cannot anchor a value and the set has ${COMPS_CAP_MIN_N} or more rows; ` +
   'floor = the greater of the headline low and the comps 25th percentile; ' +
   `walk-away = ${Math.round(WALK_AWAY_SHARE_OF_FLOOR * 100)}% of the floor upfront. ` +
   'Methods that do not produce a value at this stage are listed but not used.';
@@ -103,6 +111,8 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
   let compsUpfrontP25: number | null = null;
   let compsTotalP50: number | null = null;
   let compsUpfrontP50: number | null = null;
+  let compsTotalP75: number | null = null;
+  let compsUpfrontP75: number | null = null;
   let compsN = 0;
   if (compSet && compSet.stats) {
     const stats = pickStats(compSet);
@@ -111,6 +121,7 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
     if (stats.total && stats.n > 0) {
       compsTotalP25 = stats.total.p25;
       compsTotalP50 = stats.total.p50;
+      compsTotalP75 = stats.total.p75;
       bars.push({
         key: 'comps_total',
         label: 'Comparable deals (total)',
@@ -125,6 +136,7 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
     if (stats.upfront && stats.n > 0) {
       compsUpfrontP25 = stats.upfront.p25;
       compsUpfrontP50 = stats.upfront.p50;
+      compsUpfrontP75 = stats.upfront.p75;
       bars.push({
         key: 'comps_upfront',
         label: 'Comparable deals (upfront)',
@@ -244,6 +256,13 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
     totalM: askTotalFromComps ? roundSensible(compsTotalP50!) : terms.totalDealValue.median,
     upfrontM: askUpfrontFromComps ? roundSensible(compsUpfrontP50!) : terms.upfront.median,
   };
+  // Cap: with no informative rNPV the comparable set is the only evidence a
+  // buyer will accept, so the ask cannot sit above its 75th percentile.
+  const capApplies = !rnpvInformative && compsN >= COMPS_CAP_MIN_N;
+  const capTotal = capApplies && compsTotalP75 != null && ask.totalM > compsTotalP75;
+  const capUpfront = capApplies && compsUpfrontP75 != null && ask.upfrontM > compsUpfrontP75;
+  if (capTotal) ask.totalM = roundSensible(compsTotalP75!);
+  if (capUpfront) ask.upfrontM = roundSensible(compsUpfrontP75!);
   const floor = {
     totalM: compsTotalP25 != null ? Math.max(terms.totalDealValue.low, roundSensible(compsTotalP25)) : terms.totalDealValue.low,
     upfrontM: compsUpfrontP25 != null ? Math.max(terms.upfront.low, roundSensible(compsUpfrontP25)) : terms.upfront.low,
@@ -255,11 +274,11 @@ export function buildValuationBridge(input: ValuationBridgeInput): ValuationBrid
   const walkAwayUpfront = roundSensible(floor.upfrontM * WALK_AWAY_SHARE_OF_FLOOR);
 
   const askBasis = {
-    total: askTotalFromComps ? 'comps' as const : 'headline' as const,
-    upfront: askUpfrontFromComps ? 'comps' as const : 'headline' as const,
+    total: capTotal ? 'comps_p75_cap' as const : askTotalFromComps ? 'comps' as const : 'headline' as const,
+    upfront: capUpfront ? 'comps_p75_cap' as const : askUpfrontFromComps ? 'comps' as const : 'headline' as const,
   };
 
-  const reconciliation = buildReconciliation(bars, ask, floor, askBasis, compsTotalP50, compsN, rnpvNote);
+  const reconciliation = buildReconciliation(bars, ask, floor, askBasis, compsTotalP50, compsN, rnpvNote, capApplies ? { total: compsTotalP75, upfront: compsUpfrontP75 } : null);
 
   return {
     asOf,
@@ -288,6 +307,7 @@ function buildReconciliation(
   compsTotalP50: number | null,
   compsN: number,
   rnpvNote: string | null,
+  cap: { total: number | null; upfront: number | null } | null = null,
 ): string {
   const sentences: string[] = [];
   const headline = bars.find(b => b.key === 'headline');
@@ -319,12 +339,18 @@ function buildReconciliation(
 
   if (rnpvNote) sentences.push(rnpvNote);
 
-  const totalSrc = askBasis.total === 'comps' ? 'the comparable-set median' : 'the calibrated headline mid';
-  const upfrontSrc = askBasis.upfront === 'comps' ? 'the comparable-set median' : 'the calibrated headline mid';
+  const src = (b: ValuationBridge['askBasis']['total']) => b === 'comps_p75_cap' ? 'the comparable-set 75th percentile' : b === 'comps' ? 'the comparable-set median' : 'the calibrated headline mid';
+  const totalSrc = src(askBasis.total);
+  const upfrontSrc = src(askBasis.upfront);
   const askSrc = totalSrc === upfrontSrc ? totalSrc : `${totalSrc} on total value and ${upfrontSrc} on upfront`;
   sentences.push(
     `The ask is set at ${askSrc}: ${fmt(ask.totalM)} total and ${fmt(ask.upfrontM)} upfront, with the floor at ${fmt(floor.totalM)} total and ${fmt(floor.upfrontM)} upfront (the greater of the headline low and the comps 25th percentile).`,
   );
+  if (askBasis.total === 'comps_p75_cap' || askBasis.upfront === 'comps_p75_cap') {
+    sentences.push(
+      `With the risk-adjusted NPV unable to anchor a value at this stage, the comparable set is the only evidence a buyer will accept, so the ask is capped at its 75th percentile${cap?.upfront != null && askBasis.upfront === 'comps_p75_cap' ? ` (${fmt(cap.upfront)} upfront)` : ''}; the calibrated headline above it is printed as the top of the range, not as the ask.`,
+    );
+  }
 
   return sentences.join(' ');
 }
