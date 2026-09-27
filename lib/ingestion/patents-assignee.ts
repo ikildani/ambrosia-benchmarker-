@@ -1,17 +1,24 @@
 /**
- * Patents by assignee for every originator (Search & Evaluation, Phase 3 Workstream C).
- * Writes `company_patents` (migration 114); `radar_patent_velocity` is the
- * rolling 12-month view over it.
+ * Patents by applicant for every originator (Search & Evaluation, Phase 3 Workstream C).
+ * Writes `company_patents` (migration 114, source widened in 128);
+ * `radar_patent_velocity` is the rolling 12-month view over it.
  *
- * Source: PatentsView search API v1 (https://search.patentsview.org/api/v1/patent/),
- * queried by assignee organization for industry-owned companies with at least
- * one Phase 1+ asset, filings 2015+, CPC A61K / A61P / C07 / C12N. Requires
- * env PATENTSVIEW_API_KEY (45 requests/minute). Without the key the run logs
+ * Source: USPTO Open Data Portal patent application search
+ * (https://api.uspto.gov/api/v1/patent/applications/search). PatentsView's
+ * own search API was retired into ODP in 2026; the old host no longer
+ * resolves. Queried by first applicant name for industry-owned companies
+ * with at least one Phase 1+ asset, filings 2015+, CPC A61K / A61P / C07 /
+ * C12N. Published applications count as well as grants, which is what the
+ * velocity feature wants (grants lag filings by two to three years).
+ *
+ * Requires env PATENTSVIEW_API_KEY (an ODP key from data.uspto.gov/apikey,
+ * ID.me-verified account) or USPTO_ODP_API_KEY. Without a key the run logs
  * "skipped: PATENTSVIEW_API_KEY not set" and exits cleanly.
  *
  * Drug linking: development codes (lib/radar/drug-name.ts extractCodeNames)
- * and INN-looking words from the title/abstract are normalized with
- * normalizeKey and looked up in drug_aliases.alias_normalized.
+ * and INN-looking words from the title are normalized with normalizeKey and
+ * looked up in drug_aliases.alias_normalized. ODP's search payload carries no
+ * abstract.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -23,12 +30,24 @@ import { extractCodeNames, looksLikeInn, normalizeKey } from '@/lib/radar/drug-n
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════
 
-export const PATENTSVIEW_SEARCH_URL = 'https://search.patentsview.org/api/v1/patent/';
+export const ODP_SEARCH_URL = 'https://api.uspto.gov/api/v1/patent/applications/search';
+/** Kept for callers that still import the old name. */
+export const PATENTSVIEW_SEARCH_URL = ODP_SEARCH_URL;
 export const PATENT_FILING_FLOOR = '2015-01-01';
 export const PATENT_CPC_PREFIXES = ['A61K', 'A61P', 'C07', 'C12N'] as const;
+export const ODP_FIELDS = [
+  'applicationNumberText',
+  'applicationMetaData.inventionTitle',
+  'applicationMetaData.filingDate',
+  'applicationMetaData.grantDate',
+  'applicationMetaData.patentNumber',
+  'applicationMetaData.firstApplicantName',
+  'applicationMetaData.cpcClassificationBag',
+  'applicationMetaData.applicationStatusDescriptionText',
+] as const;
 
 const SYNC_SOURCE = 'patents_assignee';
-const MIN_REQUEST_GAP_MS = 1_400; // 45/min with headroom
+const MIN_REQUEST_GAP_MS = 1_400; // ODP publishes no limit; stay well under 1 req/s
 const DEFAULT_TIME_BUDGET_MS = 240_000;
 const DEFAULT_COMPANY_LIMIT = 30;
 const PAGE_SIZE = 100;
@@ -39,21 +58,24 @@ const PHASE_1_PLUS = ['phase_1', 'phase_1_2', 'phase_2', 'phase_2_3', 'phase_3',
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════
 
-export interface PatentsViewPatent {
-  patent_id: string;
-  patent_title?: string;
-  patent_date?: string;
-  patent_abstract?: string;
-  application?: Array<{ filing_date?: string }> | { filing_date?: string };
-  assignees?: Array<{ assignee_organization?: string | null }>;
-  cpc_current?: Array<{ cpc_group_id?: string; cpc_subclass_id?: string; cpc_group?: string }>;
+/** One record of ODP's patentFileWrapperDataBag, limited to the fields we request. */
+export interface OdpApplication {
+  applicationNumberText: string;
+  applicationMetaData?: {
+    inventionTitle?: string | null;
+    filingDate?: string | null;
+    grantDate?: string | null;
+    patentNumber?: string | null;
+    firstApplicantName?: string | null;
+    cpcClassificationBag?: string[] | null;
+    applicationStatusDescriptionText?: string | null;
+  };
 }
 
-export interface PatentsViewResponse {
-  error?: boolean;
+export interface OdpSearchResponse {
   count?: number;
-  total_hits?: number;
-  patents?: PatentsViewPatent[];
+  patentFileWrapperDataBag?: OdpApplication[];
+  message?: string;
 }
 
 export interface CompanyPatentRow {
@@ -66,7 +88,7 @@ export interface CompanyPatentRow {
   cpc_codes: string[];
   abstract: string | null;
   drug_master_id: string | null;
-  source: 'patentsview';
+  source: 'uspto_odp';
   source_url: string;
   fetched_at: string;
 }
@@ -85,7 +107,7 @@ export interface PatentsAssigneeRunResult {
 }
 
 interface CursorState extends Record<string, unknown> {
-  /** company_id -> latest grant date seen. */
+  /** company_id -> latest filing date seen (ODP rows include pending applications). */
   byCompany?: Record<string, string>;
 }
 
@@ -106,21 +128,23 @@ export function isPharmaCpc(codes: string[]): boolean {
   return codes.some(c => PATENT_CPC_PREFIXES.some(p => c.toUpperCase().startsWith(p)));
 }
 
-export function cpcCodesOf(p: PatentsViewPatent): string[] {
+/** CPC codes as ODP prints them ("A61K  38/193") normalized to "A61K38/193". */
+export function cpcCodesOf(p: OdpApplication): string[] {
   const out = new Set<string>();
-  for (const c of p.cpc_current ?? []) {
-    const code = c.cpc_group_id ?? c.cpc_group ?? c.cpc_subclass_id;
-    if (code) out.add(String(code).trim());
+  for (const c of p.applicationMetaData?.cpcClassificationBag ?? []) {
+    const code = String(c ?? '').replace(/\s+/g, '').trim();
+    if (code) out.add(code);
   }
   return [...out];
 }
 
-export function filingDateOf(p: PatentsViewPatent): string | null {
-  const app = p.application;
-  if (!app) return null;
-  const first = Array.isArray(app) ? app[0] : app;
-  const d = first?.filing_date;
+export function filingDateOf(p: OdpApplication): string | null {
+  const d = p.applicationMetaData?.filingDate;
   return d ? String(d).slice(0, 10) : null;
+}
+
+export function titleOf(p: OdpApplication): string | null {
+  return p.applicationMetaData?.inventionTitle?.trim() || null;
 }
 
 /**
@@ -159,36 +183,55 @@ export function linkPatentToDrug(
   return best ? best.drug_id : null;
 }
 
+/**
+ * One row per application. patent_id is the application number (stable
+ * across publication and grant); the URL points at the granted patent when
+ * there is one, else at Patent Center for the application.
+ */
 export function toPatentRow(
-  p: PatentsViewPatent,
+  p: OdpApplication,
   companyId: string,
   drugMasterId: string | null,
   now = new Date(),
 ): CompanyPatentRow {
+  const m = p.applicationMetaData ?? {};
   const cpc = cpcCodesOf(p);
+  const patentNumber = m.patentNumber ? String(m.patentNumber).replace(/^US/i, '') : null;
   return {
     company_id: companyId,
-    patent_id: String(p.patent_id),
-    title: p.patent_title?.trim() || null,
-    assignee_raw: p.assignees?.map(a => a.assignee_organization).filter(Boolean).join('; ') || null,
+    patent_id: String(p.applicationNumberText),
+    title: titleOf(p),
+    assignee_raw: m.firstApplicantName?.trim() || null,
     filing_date: filingDateOf(p),
-    grant_date: p.patent_date ? String(p.patent_date).slice(0, 10) : null,
+    grant_date: m.grantDate ? String(m.grantDate).slice(0, 10) : null,
     cpc_codes: cpc.slice(0, 40),
-    abstract: p.patent_abstract ? p.patent_abstract.slice(0, 5000) : null,
+    abstract: null,
     drug_master_id: drugMasterId,
-    source: 'patentsview',
-    source_url: `https://patents.google.com/patent/US${String(p.patent_id).replace(/^US/i, '')}`,
+    source: 'uspto_odp',
+    source_url: patentNumber
+      ? `https://patents.google.com/patent/US${patentNumber}`
+      : `https://patentcenter.uspto.gov/applications/${encodeURIComponent(String(p.applicationNumberText))}`,
     fetched_at: now.toISOString(),
   };
 }
 
+/** Escape the characters Lucene treats specially inside a quoted phrase. */
+function lucenePhrase(s: string): string {
+  return `"${s.replace(/["\\]/g, ' ').replace(/\s+/g, ' ').trim()}"`;
+}
+
+/**
+ * ODP query (Lucene syntax): first applicant phrase, filings from the floor
+ * or from the last filing date seen for this company.
+ */
+export function buildOdpQuery(applicant: string, opts: { sinceFilingDate?: string | null } = {}): string {
+  const from = opts.sinceFilingDate && opts.sinceFilingDate > PATENT_FILING_FLOOR ? opts.sinceFilingDate : PATENT_FILING_FLOOR;
+  return `applicationMetaData.firstApplicantName:${lucenePhrase(applicant)} AND applicationMetaData.filingDate:[${from} TO *]`;
+}
+
+/** @deprecated PatentsView's own API is retired; kept so old imports still type-check. */
 export function buildPatentsViewQuery(assignee: string, opts: { sinceGrantDate?: string | null } = {}): Record<string, unknown> {
-  const and: Record<string, unknown>[] = [
-    { _gte: { 'application.filing_date': PATENT_FILING_FLOOR } },
-    { _begins: { 'assignees.assignee_organization': assignee } },
-  ];
-  if (opts.sinceGrantDate) and.push({ _gte: { patent_date: opts.sinceGrantDate } });
-  return { _and: and };
+  return { q: buildOdpQuery(assignee, { sinceFilingDate: opts.sinceGrantDate }) };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -202,36 +245,42 @@ async function throttle(): Promise<void> {
   lastRequestAt = Date.now();
 }
 
+/**
+ * Newest filings first, offset-paged, at most maxPages × PAGE_SIZE per call.
+ * A 403 means the key is not accepted (not ID.me-verified or not activated)
+ * and is surfaced as such rather than as a silent empty result.
+ */
 export async function fetchPatentsForAssignee(
   apiKey: string,
-  assignee: string,
-  opts: { sinceGrantDate?: string | null; maxPages?: number } = {},
-): Promise<PatentsViewPatent[]> {
-  const out: PatentsViewPatent[] = [];
-  let after: string | null = null;
+  applicant: string,
+  opts: { sinceFilingDate?: string | null; maxPages?: number } = {},
+): Promise<OdpApplication[]> {
+  const out: OdpApplication[] = [];
   for (let page = 0; page < (opts.maxPages ?? MAX_PAGES_PER_COMPANY); page++) {
     await throttle();
-    const body: Record<string, unknown> = {
-      q: buildPatentsViewQuery(assignee, opts),
-      f: ['patent_id', 'patent_title', 'patent_date', 'patent_abstract', 'application.filing_date', 'assignees.assignee_organization', 'cpc_current.cpc_group_id'],
-      o: after ? { size: PAGE_SIZE, after } : { size: PAGE_SIZE },
-      s: [{ patent_id: 'asc' }],
-    };
-    const res = await fetchWithTimeout(PATENTSVIEW_SEARCH_URL, {
-      method: 'POST',
-      headers: { 'X-Api-Key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
+    const params = new URLSearchParams({
+      q: buildOdpQuery(applicant, opts),
+      limit: String(PAGE_SIZE),
+      offset: String(page * PAGE_SIZE),
+      sort: 'applicationMetaData.filingDate desc',
+      fields: ODP_FIELDS.join(','),
+    });
+    const res = await fetchWithTimeout(`${ODP_SEARCH_URL}?${params}`, {
+      method: 'GET',
+      headers: { 'X-API-KEY': apiKey, Accept: 'application/json' },
       timeoutMs: 30_000,
       retries: 1,
     });
     if (res.status === 404) return out;
-    if (!res.ok) throw new Error(`PatentsView ${res.status} for "${assignee}"`);
-    const data = (await res.json()) as PatentsViewResponse;
-    if (data.error) throw new Error(`PatentsView error payload for "${assignee}"`);
-    const patents = data.patents ?? [];
-    out.push(...patents);
-    if (patents.length < PAGE_SIZE) break;
-    after = String(patents[patents.length - 1].patent_id);
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`USPTO ODP ${res.status}: API key rejected (needs an ID.me-verified USPTO.gov account; see data.uspto.gov/apikey)`);
+    }
+    if (!res.ok) throw new Error(`USPTO ODP ${res.status} for "${applicant}"`);
+    const data = (await res.json()) as OdpSearchResponse;
+    const apps = data.patentFileWrapperDataBag ?? [];
+    out.push(...apps);
+    if (apps.length < PAGE_SIZE) break;
+    if (typeof data.count === 'number' && out.length >= data.count) break;
   }
   return out;
 }
@@ -300,7 +349,7 @@ export async function runPatentsAssignee(
     companiesProcessed: 0, patentsFetched: 0, patentsUpserted: 0, linked: 0, failed: 0,
     errors, timedOut: false, durationMs: 0, cursor: null, skipped: null,
   };
-  const apiKey = process.env.PATENTSVIEW_API_KEY?.trim();
+  const apiKey = (process.env.PATENTSVIEW_API_KEY ?? process.env.USPTO_ODP_API_KEY)?.trim();
   if (!apiKey) {
     result.skipped = 'skipped: PATENTSVIEW_API_KEY not set';
     console.warn(`[patents-assignee] ${result.skipped}`);
@@ -330,15 +379,16 @@ export async function runPatentsAssignee(
     if (queryName.length < 4) continue;
     result.companiesProcessed++;
     try {
+      // Incremental: only filings on or after the newest one seen last time.
       const since = state.byCompany?.[c.id] ?? null;
-      const patents = await fetchPatentsForAssignee(apiKey, queryName, { sinceGrantDate: since });
+      const patents = await fetchPatentsForAssignee(apiKey, queryName, { sinceFilingDate: since });
       const pharma = patents.filter(p => isPharmaCpc(cpcCodesOf(p)));
       result.patentsFetched += pharma.length;
       if (pharma.length === 0) continue;
 
       // Alias lookup for drug linking, one query per company.
       const keys = new Set<string>();
-      for (const p of pharma) for (const k of patentAliasKeys(p.patent_title, p.patent_abstract)) keys.add(k);
+      for (const p of pharma) for (const k of patentAliasKeys(titleOf(p), null)) keys.add(k);
       const lookup = new Map<string, { drug_id: string; alias_type: string }>();
       const keyList = [...keys];
       for (let i = 0; i < keyList.length; i += 200) {
@@ -354,7 +404,7 @@ export async function runPatentsAssignee(
       }
 
       const rows = pharma.map(p => {
-        const drugId = linkPatentToDrug(p.patent_title, p.patent_abstract, lookup);
+        const drugId = linkPatentToDrug(titleOf(p), null, lookup);
         if (drugId) result.linked++;
         return toPatentRow(p, c.id, drugId, now);
       });
@@ -363,8 +413,8 @@ export async function runPatentsAssignee(
         if (error) { result.failed++; errors.push(`${c.name}: upsert ${error.message}`); break; }
         result.patentsUpserted += Math.min(200, rows.length - i);
       }
-      const latestGrant = pharma.map(p => p.patent_date ?? '').filter(Boolean).sort().pop();
-      if (latestGrant) state.byCompany![c.id] = latestGrant.slice(0, 10);
+      const latestFiling = pharma.map(p => filingDateOf(p) ?? '').filter(Boolean).sort().pop();
+      if (latestFiling) state.byCompany![c.id] = latestFiling;
     } catch (err) {
       result.failed++;
       errors.push(`${c.name}: ${err instanceof Error ? err.message : String(err)}`);
