@@ -16,7 +16,15 @@ const STATUS_TONE: Record<string, string> = {
   suspended: 'text-amber-700 dark:text-amber-400',
 };
 
-export function TrialsTable({ trials, catalysts }: { trials: TrialRow[]; catalysts: CatalystRow[] }) {
+export interface DisclosureSummary {
+  source_type: string | null;
+  url: string | null;
+  date: string | null;
+  excerpt: string | null;
+  stage_detail: string | null;
+}
+
+export function TrialsTable({ trials, catalysts, disclosure }: { trials: TrialRow[]; catalysts: CatalystRow[]; disclosure?: DisclosureSummary | null }) {
   const [page, setPage] = useState(1);
   const pages = Math.max(1, Math.ceil(trials.length / PAGE));
   const rows = useMemo(() => trials.slice((page - 1) * PAGE, page * PAGE), [trials, page]);
@@ -41,7 +49,22 @@ export function TrialsTable({ trials, catalysts }: { trials: TrialRow[]; catalys
         </div>
       )}
 
-      {trials.length === 0 ? (
+      {trials.length === 0 && disclosure?.excerpt ? (
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm dark:border-neutral-800 dark:bg-neutral-900/40">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+            Company disclosure{disclosure.stage_detail && disclosure.stage_detail !== 'preclinical' ? ` · ${disclosure.stage_detail.replace(/_/g, ' ')}` : ''}
+          </p>
+          <blockquote className="mt-2 border-l-2 border-neutral-300 pl-3 italic text-neutral-800 dark:border-neutral-600 dark:text-neutral-200">
+            “{disclosure.excerpt}”
+          </blockquote>
+          <p className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
+            {disclosure.url
+              ? <a href={disclosure.url} target="_blank" rel="noopener noreferrer" className="underline decoration-neutral-400 underline-offset-2 hover:text-neutral-900 dark:hover:text-neutral-100">{disclosure.source_type ?? 'SEC filing'}{disclosure.date ? `, filed ${disclosure.date}` : ''}</a>
+              : <span>{disclosure.source_type ?? 'Company disclosure'}{disclosure.date ? `, ${disclosure.date}` : ''}</span>}
+            {' · '}No trial registered yet; the program appears here because the company disclosed it.
+          </p>
+        </div>
+      ) : trials.length === 0 ? (
         <EmptyState title="No registry trials linked" detail="The universe indexer links trials by NCT id; none are attached to this asset yet." />
       ) : (
         <>

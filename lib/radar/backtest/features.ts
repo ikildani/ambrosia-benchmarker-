@@ -324,6 +324,7 @@ const BD_PRESS_RE = /\b(chief business officer|business development|licensing|co
 const HIGH_VALUE_DESIGNATIONS = ['breakthrough', 'fast_track', 'fast track', 'priority_review', 'priority review', 'orphan', 'rmat', 'prime'];
 const EAST_ASIA = new Set(['china', 'japan', 'south_korea']);
 const PHASE_RANK: Record<string, number> = {
+  preclinical: 0,
   early_phase1: 1, early_phase_1: 1,
   phase1: 2, phase_1: 2,
   phase1_phase2: 3, phase_1_2: 3,

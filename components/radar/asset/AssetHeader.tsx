@@ -6,6 +6,7 @@ import { Pill, KV, ExternalLink, scoreTone } from './ui';
 import { label, fmtAge, fmtDate, territoryLabel, signedPts } from './format';
 import {
   LOW_POWER_NOTE,
+  PRECLINICAL_RANK_NOTE,
   baseRateMultiple,
   percentileLabel,
   probabilityLabel,
@@ -55,6 +56,8 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
   const aliases = (asset.asset_aliases || []).filter(a => a && a !== asset.asset_name).slice(0, 4);
   const tone = scoreTone(score.score);
   const designations = asset.regulatory_designations || [];
+  const disclosed = asset.asset_origin === 'filing' || !!asset.disclosure_url;
+  const preclinical = asset.phase === 'preclinical';
 
   return (
     <header className="border-b border-neutral-200 pb-5 dark:border-neutral-800">
@@ -77,7 +80,9 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
           </p>
 
           <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Asset classification">
-            <Pill tone="amber">{label(asset.phase)}</Pill>
+            <Pill tone={preclinical ? 'sky' : 'amber'} title={preclinical ? 'Company-disclosed preclinical program (no registered trial yet)' : undefined}>
+              {preclinical && asset.stage_detail && asset.stage_detail !== 'preclinical' ? `Preclinical · ${label(asset.stage_detail)}` : label(asset.phase)}
+            </Pill>
             <Pill>{label(asset.modality)}</Pill>
             <Pill>{label(asset.therapeutic_area)}</Pill>
             {(asset.indication_specific || asset.indication_category) && (
@@ -123,6 +128,7 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
                   <p className="font-medium text-neutral-800 dark:text-neutral-200">{pct ?? unrankedReason(p)}</p>
                   {prob && <p className="text-neutral-500 dark:text-neutral-400">{prob}{mult ? ` · ${mult}` : ''}</p>}
                   {p.low_power && <p className="text-amber-700 dark:text-amber-400">{LOW_POWER_NOTE}</p>}
+                  {preclinical && pct && <p className="text-neutral-500 dark:text-neutral-400">{PRECLINICAL_RANK_NOTE}</p>}
                 </div>
               );
             })()}
@@ -170,13 +176,27 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
             </>
           ) : <span className="text-neutral-500 dark:text-neutral-400">{asset.drug_resolution_status === 'ambiguous' ? 'Ambiguous match' : 'Unresolved'}</span>}
         </KV>
-        <KV label="Program" mono>
-          {asset.trial_count ?? 0} trials · {(asset.enrollment_total ?? 0).toLocaleString('en-US')} enrolled
-          {asset.lead_nct_id && <span className="block text-xs"><ExternalLink href={`https://clinicaltrials.gov/study/${asset.lead_nct_id}`}>{asset.lead_nct_id}</ExternalLink></span>}
+        <KV label={disclosed && (asset.trial_count ?? 0) === 0 ? 'Disclosed in' : 'Program'} mono>
+          {disclosed && (asset.trial_count ?? 0) === 0 ? (
+            <>
+              {asset.disclosure_url
+                ? <ExternalLink href={asset.disclosure_url}>{asset.disclosure_source_type ?? 'SEC filing'} · {fmtDate(asset.disclosure_date)}</ExternalLink>
+                : <span>{asset.disclosure_source_type ?? 'Company disclosure'} · {fmtDate(asset.disclosure_date)}</span>}
+              <span className="block text-xs text-neutral-500 dark:text-neutral-400">No registered trial yet</span>
+            </>
+          ) : (
+            <>
+              {asset.trial_count ?? 0} trials · {(asset.enrollment_total ?? 0).toLocaleString('en-US')} enrolled
+              {asset.lead_nct_id && <span className="block text-xs"><ExternalLink href={`https://clinicaltrials.gov/study/${asset.lead_nct_id}`}>{asset.lead_nct_id}</ExternalLink></span>}
+              {disclosed && asset.disclosure_url && (
+                <span className="block text-xs"><ExternalLink href={asset.disclosure_url}>Also in {asset.disclosure_source_type ?? 'SEC filing'} {fmtDate(asset.disclosure_date)}</ExternalLink></span>
+              )}
+            </>
+          )}
         </KV>
         <KV label="Freshness">
-          <span className="block text-xs" title={`Registry ${fmtDate(freshness.last_update_date)} · scored ${fmtDate(freshness.last_scored_at)} · enriched ${fmtDate(freshness.last_enriched_at)}`}>
-            Registry {fmtAge(freshness.last_update_date)}
+          <span className="block text-xs" title={`${disclosed && (asset.trial_count ?? 0) === 0 ? 'Filing' : 'Registry'} ${fmtDate(freshness.last_update_date)} · scored ${fmtDate(freshness.last_scored_at)} · enriched ${fmtDate(freshness.last_enriched_at)}`}>
+            {disclosed && (asset.trial_count ?? 0) === 0 ? `Filing ${fmtAge(asset.disclosed_last_seen_at ?? asset.disclosure_date)}` : `Registry ${fmtAge(freshness.last_update_date)}`}
           </span>
           <span className="block text-xs">Scored {fmtAge(freshness.last_scored_at)}</span>
           <span className="block text-xs">Enriched {fmtAge(freshness.last_enriched_at)}</span>

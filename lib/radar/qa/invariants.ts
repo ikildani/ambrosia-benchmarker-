@@ -123,6 +123,21 @@ export interface QaPipelineStats {
   cron_failures_7d: { source: string; stage: string; failed: number; last_failed_at: string; sample_error: string | null }[];
 }
 
+/** radar_qa_preclinical_stats (migration 139): company-disclosed programs. */
+export interface QaPreclinicalStats {
+  filing_assets: number;
+  preclinical_assets: number;
+  filing_without_citation: number;
+  filing_with_score_rank: number;
+  filing_stale_18m: number;
+  filing_not_in_latest_filing: number;
+  companies_covered: number;
+  companies_eligible: number;
+  disclosures_total: number;
+  disclosures_unmatched_clinical: number;
+  sample_without_citation: string[];
+}
+
 export interface QaStats {
   collected_at: string;
   universe: QaUniverseStats;
@@ -130,6 +145,8 @@ export interface QaStats {
   thesis: QaThesisStats;
   score: QaScoreStats;
   pipeline: QaPipelineStats;
+  /** Optional until migration 139 is applied everywhere; absent = checks skipped. */
+  preclinical?: QaPreclinicalStats | null;
   /** RPCs that failed; each becomes a blocker finding (the gate cannot be evaluated). */
   errors: string[];
 }
@@ -154,6 +171,10 @@ export interface InvariantsRunResult {
 export const QA_THRESHOLDS = {
   /** Vocabulary violations above this share of the universe are a blocker; any violation is major. */
   vocab_blocker_share_pct: 1,
+  /** Filing-origin assets whose newest supporting filing is older than 18 months. */
+  filing_stale_major_pct: 20,
+  /** Share of industry SEC filers whose latest annual report has been read for programs. */
+  preclinical_coverage_min_pct: 90,
   industry_phase_missing_major_pct: 10,
   industry_phase_missing_blocker_pct: 25,
   classification_coverage_min_pct: 95,
@@ -193,6 +214,7 @@ export const EXPECTED_RADAR_STAGES: { source: string; stage: string; label: stri
   { source: 'asset_universe', stage: 'drug_resolve', label: 'Drug master resolver', critical: false },
   { source: 'asset_universe', stage: 'partnership_refresh', label: 'Partnership refresh', critical: true },
   { source: 'asset_universe', stage: 'classify', label: 'Asset classification', critical: true },
+  { source: 'asset_universe', stage: 'preclinical_pipeline', label: 'Preclinical programs from SEC filings', critical: false },
   { source: 'licensing_signals', stage: '', label: 'Licensing intent scoring', critical: true },
   { source: 'licensing_signals', stage: 'catalysts', label: 'Catalyst detector', critical: false },
   { source: 'licensing_signals', stage: 'company_financials', label: 'Company financials (SEC XBRL)', critical: false },
@@ -373,13 +395,27 @@ export async function collectQaStats(supabase: SupabaseClient, opts: { now?: () 
     }
   };
 
-  const [universeRaw, thesisRaw, scoreRaw, pipelineRaw] = await Promise.all([
+  const [universeRaw, thesisRaw, scoreRaw, pipelineRaw, preclinicalRaw] = await Promise.all([
     rpc<Record<string, unknown>>('radar_qa_universe_stats', {
       p_vocab: { phase: PHASE_VOCAB_WITH_PLACEHOLDERS, territories: [...TERRITORY_VOCAB] },
     }),
     rpc<Record<string, unknown>>('radar_qa_thesis_stats', {}),
     rpc<Record<string, unknown>>('radar_qa_score_stats', { p_days: 14 }),
     rpc<Record<string, unknown>>('radar_qa_pipeline_stats', {}),
+    // Optional until migration 139 is applied: a missing function is not a gate failure.
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc('radar_qa_preclinical_stats', {});
+        if (error) {
+          if (!/does not exist|could not find/i.test(error.message)) errors.push(`radar_qa_preclinical_stats: ${error.message}`);
+          return null;
+        }
+        return (data ?? null) as Record<string, unknown> | null;
+      } catch (err) {
+        errors.push(`radar_qa_preclinical_stats: ${err instanceof Error ? err.message : String(err)}`);
+        return null;
+      }
+    })(),
   ]);
 
   const vocab: Record<string, VocabStat> = {};
@@ -402,7 +438,24 @@ export async function collectQaStats(supabase: SupabaseClient, opts: { now?: () 
     thesis: normalizeThesisStats(thesisRaw),
     score: normalizeScoreStats(scoreRaw),
     pipeline: normalizePipelineStats(pipelineRaw),
+    preclinical: preclinicalRaw ? normalizePreclinicalStats(preclinicalRaw) : null,
     errors,
+  };
+}
+
+export function normalizePreclinicalStats(r: Record<string, unknown>): QaPreclinicalStats {
+  return {
+    filing_assets: n(r.filing_assets),
+    preclinical_assets: n(r.preclinical_assets),
+    filing_without_citation: n(r.filing_without_citation),
+    filing_with_score_rank: n(r.filing_with_score_rank),
+    filing_stale_18m: n(r.filing_stale_18m),
+    filing_not_in_latest_filing: n(r.filing_not_in_latest_filing),
+    companies_covered: n(r.companies_covered),
+    companies_eligible: n(r.companies_eligible),
+    disclosures_total: n(r.disclosures_total),
+    disclosures_unmatched_clinical: n(r.disclosures_unmatched_clinical),
+    sample_without_citation: Array.isArray(r.sample_without_citation) ? (r.sample_without_citation as unknown[]).map(String).slice(0, 20) : [],
   };
 }
 
@@ -751,6 +804,43 @@ export function evaluateInvariants(stats: QaStats, opts: EvaluateOptions = {}): 
     details: { missing: missing.map(m => ({ source: m.source, stage: m.stage, label: m.label, critical: m.critical })), seen: p.stages },
     group: 'pipeline',
   }));
+
+  // ── Company-disclosed preclinical programs (migration 139) ──────────
+  const pc = stats.preclinical;
+  if (pc) {
+    out.push(result({
+      check_name: 'filing_assets_cited',
+      severity: 'blocker',
+      passed: pc.filing_without_citation === 0,
+      expected: 'every filing-origin asset carries disclosure_url, disclosure_date and a verbatim excerpt',
+      observed: `${pc.filing_without_citation} of ${pc.filing_assets} uncited`,
+      count: pc.filing_without_citation,
+      failing_ids: pc.sample_without_citation,
+      group: 'coverage',
+    }));
+    const stalePct = pct(pc.filing_stale_18m, pc.filing_assets);
+    out.push(result({
+      check_name: 'filing_assets_fresh_18m',
+      severity: 'major',
+      passed: pc.filing_assets === 0 || stalePct <= T.filing_stale_major_pct,
+      expected: `≤ ${T.filing_stale_major_pct}% of filing-origin assets last seen in a filing older than 18 months`,
+      observed: `${pc.filing_stale_18m} of ${pc.filing_assets} (${fmtPct(stalePct)})`,
+      count: pc.filing_stale_18m,
+      details: { not_in_latest_filing: pc.filing_not_in_latest_filing },
+      group: 'freshness',
+    }));
+    const coveragePct = pct(pc.companies_covered, pc.companies_eligible);
+    out.push(result({
+      check_name: 'preclinical_filer_coverage',
+      severity: 'major',
+      passed: coveragePct >= T.preclinical_coverage_min_pct,
+      expected: `≥ ${T.preclinical_coverage_min_pct}% of industry SEC filers have had a filing read`,
+      observed: `${pc.companies_covered} of ${pc.companies_eligible} (${fmtPct(coveragePct)}) · ${pc.preclinical_assets} preclinical assets · ${pc.disclosures_unmatched_clinical} unmatched clinical disclosures`,
+      count: Math.max(0, pc.companies_eligible - pc.companies_covered),
+      details: { share_pct: coveragePct, preclinical_assets: pc.preclinical_assets, disclosures_total: pc.disclosures_total },
+      group: 'coverage',
+    }));
+  }
 
   const worstFailure = p.cron_failures_7d.reduce((m, f) => Math.max(m, n(f.failed)), 0);
   const totalFailures = p.cron_failures_7d.reduce((m, f) => m + n(f.failed), 0);
