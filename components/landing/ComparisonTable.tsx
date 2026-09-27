@@ -1,6 +1,5 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
+// Server component (Sep 2026): the fade-in used to be an IntersectionObserver gate
+// that kept these cards at opacity 0 until hydration. CSS animation instead.
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const comparisonRows = [
@@ -13,18 +12,6 @@ const comparisonRows = [
 ];
 
 export default function ComparisonTable() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section className="py-10 sm:py-14 lg:py-18 px-4 xl:px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
       <div className="max-w-3xl xl:max-w-4xl mx-auto">
@@ -38,10 +25,9 @@ export default function ComparisonTable() {
         </div>
 
         <div
-          ref={sectionRef}
           className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-soft overflow-hidden
                      motion-safe:transition-all motion-safe:duration-700
-                     ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                     animate-rise`}
         >
           {/* Desktop table */}
           <div className="hidden sm:block">

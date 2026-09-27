@@ -1023,3 +1023,7 @@ html, body { overflow-x: clip; }
 @media (max-width: 767px) {
   html.has-consent-bar .bottom-dock { bottom: 4.5rem; }
 }
+
+/* Below-the-fold sections: the browser skips their style/layout/paint until they
+   are near the viewport. contain-intrinsic-size keeps the scrollbar honest. */
+.cv-auto { content-visibility: auto; contain-intrinsic-size: auto 900px; }

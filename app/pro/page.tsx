@@ -270,7 +270,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             PRODUCT SHOWCASE — 3 hero features with mockups
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04]">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-white">See What Pro Unlocks</h2>
@@ -425,7 +425,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             ALL 14 ENGINES — compact grid
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04] bg-[#080d16]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04] bg-[#080d16]">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl font-bold text-white">14 Engines. One Platform.</h2>
@@ -539,7 +539,7 @@ export default function ProPage() {
           .btc-bar-animate-d3 { animation-delay: 0.5s; }
           .btc-bar-animate-d4 { animation-delay: 0.65s; }
         `}} />
-        <section className="py-24 px-4 border-t border-white/[0.04] relative overflow-hidden">
+        <section className="cv-auto py-24 px-4 border-t border-white/[0.04] relative overflow-hidden">
           {/* Background effects */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_20%_50%,rgba(13,148,136,0.06),transparent)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_50%,rgba(99,102,241,0.06),transparent)]" />
@@ -895,7 +895,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             SOCIAL PROOF — who uses Pro
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04]">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-xs font-bold text-teal-400/70 tracking-[0.15em] uppercase mb-4">Trusted by dealmakers</p>
             <h2 className="text-3xl font-bold text-white mb-4">50+ biopharma professionals use Pro</h2>
@@ -941,7 +941,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             FREE vs PRO — comparison table
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04]">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-white">Free vs Pro</h2>
@@ -976,7 +976,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             TEAM TIER — multi-seat CTA (A+ redesign)
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-24 px-4 border-t border-white/[0.04]">
+        <section className="cv-auto py-24 px-4 border-t border-white/[0.04]">
           <div className="max-w-6xl mx-auto">
             {/* Section header */}
             <div className="text-center mb-14">
@@ -1040,7 +1040,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             WHO USES PRO
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04] bg-[#080d16]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04] bg-[#080d16]">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl font-bold text-white">Built for the People Making the Decisions</h2>
@@ -1067,7 +1067,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             FAQ
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04]">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-3xl font-bold text-white text-center mb-12">Questions</h2>
             <div className="space-y-3">
@@ -1087,7 +1087,7 @@ export default function ProPage() {
         {/* ═══════════════════════════════════════════════════════════════════
             BOTTOM CTA
         ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 px-4 border-t border-white/[0.04] bg-gradient-to-b from-[#0a0f1a] to-[#0d1420]">
+        <section className="cv-auto py-20 px-4 border-t border-white/[0.04] bg-gradient-to-b from-[#0a0f1a] to-[#0d1420]">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white">
               Stop guessing. Start benchmarking.

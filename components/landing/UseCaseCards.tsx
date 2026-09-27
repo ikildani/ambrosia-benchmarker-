@@ -1,6 +1,5 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
+// Server component (Sep 2026): the fade-in used to be an IntersectionObserver gate
+// that kept these cards at opacity 0 until hydration. CSS animation instead.
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const useCases = [
@@ -59,18 +58,6 @@ const useCases = [
 ];
 
 export default function UseCaseCards() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold: 0.15 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section className="py-16 sm:py-20 lg:py-24 xl:py-28 px-4 xl:px-6 bg-gradient-to-b from-slate-50/50 to-white dark:from-slate-800/50 dark:to-slate-900 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
@@ -89,7 +76,7 @@ export default function UseCaseCards() {
           </p>
         </div>
 
-        <div ref={sectionRef} className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
           {useCases.map((useCase, idx) => (
             <div
               key={useCase.title}
@@ -98,8 +85,8 @@ export default function UseCaseCards() {
                          p-6 sm:p-8 xl:p-10 shadow-soft hover:shadow-soft-lg
                          motion-safe:transition-all motion-safe:duration-700
                          hover:-translate-y-2 hover:border-teal-200 dark:hover:border-teal-500/50
-                         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-              style={{ transitionDelay: isVisible ? `${idx * 150}ms` : '0ms' }}
+                         animate-rise`}
+              style={{ animationDelay: `${idx * 120}ms` }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-soft group-hover:scale-110 group-hover:shadow-glow transition-all duration-300">
