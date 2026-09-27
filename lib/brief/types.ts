@@ -288,6 +288,8 @@ export interface PatientFunnel {
   peakSalesM: Range3;
   /** Where peakSalesM comes from: the financial model's applied figure, or the market estimate when no model ran. */
   peakSalesBasis: 'model' | 'market';
+  /** Where pricePerYearUsd comes from: the indication price table, or Terrain's area benchmark as a fallback. */
+  priceBasis?: 'indication_table' | 'terrain_area_benchmark';
 }
 
 export interface Landscape {
