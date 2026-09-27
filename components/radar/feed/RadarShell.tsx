@@ -406,6 +406,7 @@ export function RadarShell() {
             value={filters.q}
             onApplyText={q => dispatch({ type: 'set_q', q })}
             onToggleTarget={t => dispatch({ type: 'toggle_facet', key: 'target', value: t })}
+            onToggleCompany={c => dispatch({ type: 'toggle_facet', key: 'company', value: c })}
             onParsed={onParsed}
           />
         </div>
@@ -473,6 +474,8 @@ export function RadarShell() {
                 height={tableHeight}
                 loading={loading}
                 columns={ui.columns}
+                onFilterCompany={c => dispatch({ type: 'toggle_facet', key: 'company', value: c })}
+                companyFilter={filters.company}
               />
             ) : (
               <AssetCards

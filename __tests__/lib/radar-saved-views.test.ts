@@ -131,9 +131,18 @@ describe('server-side view schema', () => {
     expect(savedViewFieldsSchema.safeParse({ name: 'x', columns: ['heat', 'junk'] }).success).toBe(true);
     const ok = savedViewFieldsSchema.parse({ name: 'x', columns: ['heat', 'junk'] });
     expect(ok.columns).toEqual(['compare', 'score', 'asset', 'heat']);
-    expect(savedViewFieldsSchema.safeParse({ filters: { company: ['x'] } }).success).toBe(false);
+    expect(savedViewFieldsSchema.safeParse({ filters: { sponsor: ['x'] } }).success).toBe(false);
     expect(savedViewFieldsSchema.safeParse({ sort: 'nonsense' }).success).toBe(false);
     expect(savedViewFieldsSchema.safeParse({ view_mode: 'grid' }).success).toBe(false);
+  });
+});
+
+describe('company facet', () => {
+  it('round-trips exact company names through the URL and drops control characters', () => {
+    const qs = serializeRadarState({ filters: { ...EMPTY_FILTERS, company: ['Arcus Biosciences', 'bad\u0001name'] }, ui: DEFAULT_UI });
+    expect(qs.getAll('co')).toEqual(['Arcus Biosciences', 'bad\u0001name']);
+    expect(parseRadarState(qs).filters.company).toEqual(['Arcus Biosciences']);
+    expect(sanitizeViewFilters({ company: ['Arcus Biosciences'] }).company).toEqual(['Arcus Biosciences']);
   });
 });
 

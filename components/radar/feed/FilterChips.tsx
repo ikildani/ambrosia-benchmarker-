@@ -14,6 +14,7 @@ function valueLabel(key: keyof RadarFilterState, value: string): string {
       return trialStatusLabel(value);
     case 'target':
     case 'indication':
+    case 'company':
       return value;
     case 'score_band':
       return `Score ${value}`;

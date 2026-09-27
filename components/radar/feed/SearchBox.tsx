@@ -21,6 +21,8 @@ interface Props {
   value: string;
   onApplyText: (q: string) => void;
   onToggleTarget: (target: string) => void;
+  /** Company suggestion picked: filter the feed to that company (exact company_name). */
+  onToggleCompany?: (company: string) => void;
   onParsed: (res: SearchParseResponse) => void;
 }
 
@@ -44,7 +46,7 @@ function looksLikeSentence(text: string): boolean {
   return text.trim().split(/\s+/).length >= 3;
 }
 
-export function SearchBox({ value, onApplyText, onToggleTarget, onParsed }: Props) {
+export function SearchBox({ value, onApplyText, onToggleTarget, onToggleCompany, onParsed }: Props) {
   const router = useRouter();
   const [text, setText] = useState(value);
   const { suggestions, loading, paused } = useTypeahead(text);
@@ -87,6 +89,13 @@ export function SearchBox({ value, onApplyText, onToggleTarget, onParsed }: Prop
         setText('');
         break;
       case 'company':
+        if (onToggleCompany) {
+          onToggleCompany(s.label);
+          setText('');
+        } else {
+          onApplyText(s.label);
+        }
+        break;
       case 'indication':
         onApplyText(s.label);
         break;
