@@ -1,0 +1,237 @@
+# Hand-checked same-company groups, Sep 26 2026 (Issa: "what are you going to do about the 337 same company groups?").
+# One group per line; items are companies.id prefixes (8+ hex chars) or name:<exact companies.name>.
+# scripts/build-same-company-groups.ts resolves them to ids (canonical rows only) for merge-same-company-rows.ts --extra.
+# Kept apart on purpose: Voyager Pharmaceutical/Therapeutics, Catalyst Biosciences/Pharmaceuticals, Exact Sciences/EXACT Therapeutics,
+# Bicycle Therapeutics/Health, Samsung Biologics/Pharmaceutical, Point Biomedical/Biopharma/Therapeutics, Hawaii Pacific Health/Hawaii Biotech,
+# Hyundai Bioscience/Pharmaceutical, Daewoong Bio, Kelun-Biotech, Prometheus Labs/Biosciences, Quanta, Targeted, Cosmo, Direct, Northern,
+# Critical, Cornerstone, Elixir, Island, Aspire, Convergent, Grace, Nordic, Grand, Osprey, Westlake, Sirius, Phenomix, Entera, Translational,
+# Ventus, Skyline, Huahui, Sound? (same CIK → folded), JW Therapeutics (China) vs JW Pharmaceutical (Korea), Quotient, Beacon Therapeutics (US),
+# Department of Health (UK vs Taiwan), Rongchang Pharmaceutical vs RemeGen, Allergan generics business, Cook reproductive business.
+000093cc || 4102cab4
+ed792085 || name:Summit Therapeutics
+0261ffff || 250e44ba
+02c24b0f || name:Hamad Medical Corporation
+0447602b || name:SciClone Pharmaceuticals
+62508dc8 || 06af048c || 3e6116e7 || 4ecd4ce8 || ac24b0af
+08d229c3 || 233a7e63 || 4cb8644b || name:Hannover Medical School
+131cd08d || name:Qilu Pharmaceutical
+99e3c6f4 || 2d74bb10 || b56fed1a || name:Universidade Federal de São Paulo - UNIFESP
+ae73872a || e14a2b3a || name:Serum Institute of India
+11234324 || name:Lundbeck
+7a0fddf7 || name:University of Milan
+e56eff24 || name:GlaxoSmithKline (GSK)
+ff906eff || name:Hospital Clinic of Barcelona
+42e5a4f4 || 4f48662c || 5945fdfd || 15cb8f37 || f889b0a9
+d6a0612b || eae34ebc || name:Pfizer
+177fd6a3 || name:Kashan University of Medical Sciences
+2740ddf2 || name:Sir Mortimer B. Davis Jewish General Hospital
+1845e4cf || name:Polaris Pharmaceuticals || name:Polaris Group
+1887d9f0 || name:Acadia Pharmaceuticals
+1f9ca656 || name:Passage Bio
+2cca3b60 || name:Geron
+31e0be7b || name:Cartesian Therapeutics
+be6c48af || name:Sirnaomics
+d948344d || name:Cabaletta Bio
+196657b7 || name:Vega Therapeutics
+ddf8dd8e || name:Necmettin Erbakan University
+c9d6d012 || name:Institute for Clinical and Experimental Medicine
+5cf09ed4 || 1a16c8cf || 456b1f5f || bf694630
+1abe4afb || c2fb4384 || name:Tabriz University of Medical Sciences
+52b95f18 || name:Dalhousie University
+a7475769 || name:Vifor Pharma
+1d1075e6 || name:Universidade Federal de Alagoas
+3ea8147f || da69ad95 || name:Kenya Medical Research Institute
+5496dd88 || 1f3f39a9 || 243b0c28 || 363421a2 || 3ff65cec || 515300f2 || 71730f7a || 75aeb532 || 914ea2ab || a82ffbc4 || b2b6eeee || b7144604 || c1121a58 || eced6ed5 || fda9920c
+1fdf6074 || c580e11a || 4ece43dc || 8411c2dd || a1e3b6e7
+216aab69 || name:University Hospital of Canary Islands
+5cf198b4 || name:Iran University of Medical Sciences
+5873d124 || name:European Group for Research in Schizophrenia
+242ec3c9 || name:Federal University of Pernambuco
+98c9e750 || name:Pharmanovia || name:Atnahs Pharma UK Ltd
+24674ffe || name:IMV Inc. || name:ImmunoVaccine Technologies
+24c1a117 || name:Darou Darman Pars
+8a6deb35 || name:Uganda Malaria Surveillance Project
+257230b2 || name:Physician's Services Incorporated Foundation
+ae265f50 || name:Isofol Medical AB || name:Isofol Medical
+46c60742 || name:Moberg Pharma AB || name:Moberg Pharma
+ec46605d || name:Cinclus Pharma Holding AB || name:Cinclus Pharma
+4660a6b3 || name:Ilya Pharma AB || name:Ilya Pharma
+8bc95d53 || name:Guard Therapeutics International AB || name:Guard Therapeutics
+6ad84a58 || name:SpectraCure AB || name:SpectraCure
+7fe760a4 || name:NanoEcho AB || name:NanoEcho
+c67fdaf0 || name:Swedish Orphan Biovitrum AB || name:Swedish Orphan Biovitrum || name:Sobi
+b4615900 || name:Amgen
+26b8b182 || name:Centre hospitalier de l'Université de Montréal
+2783eb71 || name:Ifakara Health Institute
+bde6f4e6 || name:Helsinki University Central Hospital
+298a955b || name:CooperSurgical
+ce3eed24 || name:Huadong Medicine
+30f39573 || d86da5e6 || name:University of Malaya
+311babe8 || name:Roivant Sciences
+3172d358 || name:Hamdard University
+499ad2f2 || name:University Hospital Ulm
+32cf022c || ded9a64b || ff03038c || name:Telix Pharmaceuticals
+32cf4396 || name:Celgene || name:Celgene Corporation
+33ab7651 || name:Royal Tropical Institute
+3622172b || name:Childrens Hospital Of Eastern Ontario Research Institute
+3efce6e3 || name:Evotec
+afd6360d || name:Chia Tai Tianqing
+6e677ebc || name:University Hospital Regensburg
+b9275fc0 || name:Taichung Veterans General Hospital
+4b0f8928 || 91d2fa67 || name:National Institute for Public Health and the Environment
+c435c5df || name:NHS Blood and Transplant
+4e167998 || name:King Faisal Specialist Hospital and Research Center || name:King Faisal Specialist Hospital & Research Centre
+df7553ea || name:Wageningen University
+c2489cc4 || name:AskBio || name:Asklepios Biopharmaceutical
+54e3526a || name:CARsgen Therapeutics
+545f20db || name:University of Zambia
+5512cf05 || name:University Medical Centre Maribor
+5595298b || e6c3950a
+5824177c || f0257df1 || name:Yonsei University College of Medicine
+5915d728 || name:AbbVie
+5a4d9c6f || 88dd8866 || name:German Research Foundation
+5b086340 || name:Al-Hayat National Hospital
+c2028391 || name:Stockholm South General Hospital || name:Södersjukhuset
+5e8d7101 || name:J-Pharma
+61e39d30 || name:TCR2 Therapeutics
+64ccb4c8 || name:European Institute of Oncology
+681fd863 || ce3b60cc || name:Tehran University of Medical Sciences
+6aef865a || name:Millennium Pharmaceuticals
+7730ebe8 || name:University Hospital Heidelberg
+98d2edd1 || a3557535 || name:Foundation For The Study Of Nanoneuroscience And Neuroregeneration
+72a41262 || name:Morphic Therapeutic
+79ba741e || name:Drug Farm
+9507ee17 || name:Institute for the Study of Aging
+d740a4a7 || name:University Hospital Centre Zagreb
+7a473f3b || name:Mexican Social Security Institute
+b3628c65 || name:Neumora Therapeutics
+98eb4914 || name:German CLL Study Group
+9c18a60a || name:Charité - University Medicine Berlin || name:Charité – Universitätsmedizin Berlin
+9c52b452 || name:University of Alexandria || name:Alexandria University
+ec084272 || name:National Institute for Medical Research Development
+f70fe55f || name:Centre for Addiction and Mental Health
+ad687f02 || name:Foundation for Liver Research
+ac20e78a || name:Swedish Institute for Infectious Disease Control
+e323cdbd || name:Longevity Biotech
+b11374f4 || name:Hospital Donostia
+d6201b92 || name:Swiss National Science Foundation
+b5594eb1 || name:Dutch Childhood Oncology Group
+b69edbbd || name:United Kingdom Children's Cancer Study Group
+bfa97956 || name:US WorldMeds
+c4683127 || name:3SBio / Shenyang Sunshine
+df08b8ab || name:The Egyptian IVF-ET Center || name:Egyptian IVF-ET Center
+ee544437 || name:Shahid Beheshti University of Medical Sciences
+e4850259 || name:Icosavax
+dde0a139 || name:Chinook Therapeutics
+eec54fd0 || name:University Hospital Basel
+# descriptor conflicts judged the same organisation
+000d2fb8 || 61728fff
+00519bdf || 33797994 || 895d8caf || acd91305
+011bfbc2 || 1caeb60c || 1d383e22 || 57ddcc4f || 5abef4cc || 631b90d8 || 7e2b6dfc
+02566bdc || 2ab685ec || 978ad928
+02a51f21 || 0f1b7716
+04520e28 || 37d032db
+0453d37f || 1a2cd615 || 1c9530ce || 212af58c || 5382a083 || 98c10740 || 9becde89 || a5629a11 || a85b620e || f9b6fbf8
+6e82ade0 || fd974842
+05708d9d || 703775e6
+07a27132 || 2e7b1964
+0c324d19 || 3ff809fe
+11697ba9 || a0186678
+13e3bfb8 || 837fb344
+158b3fac || 1c3b594d || 7f0b4b75 || aa84533f || f14f1bc8
+1aa7a32c || 1ede34b5
+1cb09029 || 5a865bac || 7465b2e9 || fb443bfa
+1f7ab1f9 || 5d635c59 || f4d34276
+20fee9e6 || 34f58796
+21747030 || 87168834 || d88e595c
+21a92481 || c3e85e31
+2345b950 || 69e41375
+25b22bf5 || 698ffaca || a7ad8061 || c08dc301
+2647e8e0 || 415b0f90 || d3a799f3
+278ad779 || 521eaef3 || fff01cf7
+27d35b80 || 744dce4b
+27d71a8d || e4c37fa1 || ff3a209d
+28588b19 || 2bc98b07
+2e455844 || 3af222b2 || 431730c0 || 44b31d10 || 57f32792 || 610bc335 || 76d17503 || 7d1d9dab || 862e54ab || ffceacd2
+2f20ddc9 || 7dad443e
+31f55e18 || ff75fe59
+35e39050 || f5b5272d
+3767edd9 || 723bd9af
+37d758b6 || 5eb90924 || 8bde1b6d
+3b5a0de2 || 9a5c7104 || f6aa8616
+3c12022b || 57dd1cd4
+3e975ca5 || 9b0c1881
+3ea70126 || e6160bc6
+40f56130 || 6610edd5
+43029651 || 47cc1acb || 51a72389 || 5955b9ee || 69cf5c25
+4327d5f4 || fbe3fd95
+4518802a || b256678a || fed12e07
+456bbe2a || 65cc03ed
+46ea465f || 4f9f13ff || 6c61ee33
+49191d97 || 4b3357ea || 5b3a1679 || fa793975
+7055f53d || 874b5d50 || ac7b5e87 || c46d541f
+4d43e228 || 5238342b || 871004d2
+54dd3991 || 63e3a715 || 9741b42e
+5720f768 || 8b821632
+5721d9dc || ab5fa8cd
+5b6b7a12 || 8f927c40
+5da2ed69 || 96841af0 || b7f91115
+5ed89036 || b3528194
+5f01ba92 || d392e6c9
+601cb554 || 63d798fa || 8f32322a || a8896d1b || f233f2af
+651dc076 || e075e56c
+6cc2718d || 8caa20ad || fa35ba6b
+723f2237 || aeac1b24
+8257e0e7 || d80578a6
+85f1f3f3 || af2d1ba5
+873dee40 || cfb02bae
+8773519c || 9b330e1b || d0e0dc36 || efcbc190 || faa29b7a
+8ad8ae33 || bf997cf7
+96f8553a || db968574
+9cf58e6d || a402733b
+9f9d7767 || fc77c889
+a05a6d09 || dda9db76
+a4a2a4dd || df06eb33
+ad4ddfd2 || fe77bbf9
+ae9e28b3 || c4cf1838
+d9855126 || f98e2f92
+# country / cik conflicts judged the same organisation (bad registry country or parent-vs-subsidiary filer)
+004a0801 || 2749715b || 663203c2 || ae33a20b || caf4e856
+01f10bbf || 06aaa1be || 521851d8 || 7416c3be || 8b7f6a3c || 9fb278dc || c791dd8b || d5c6b0b4 || e53a2551
+033e4b4d || 5d35f205 || 7350d39d || 7d0c4088 || b65bbc29
+0733858f || 34450eca || 420fec8a || 78bae629 || a8ef7536
+09e70048 || 261c1473 || a23a1cd4
+0eca6b28 || e8e9cce8
+10027ea1 || 4df4b9df || ec73723d
+1c031eda || 926fe70b || c582c64a
+1fd620e0 || 94777e72 || d56e8237 || fd38761e
+211d0505 || 2d5f5da5 || 332ee616 || 61073b6c || 6c011ee3 || 9f5be17f || c10472a9 || d3fcf555
+21804925 || 6d2fe131 || 749a661e || 8321bcd1 || a28c5ae6 || c89bfcff
+23e035b5 || ec7622dc
+2a89bf6e || 61f72e87 || 89265770 || 9e0027d5 || f8e2e211
+3accf2ff || a13ff2fc
+3b4d4979 || af9ca9ec
+3e9abb90 || aaba0a97 || d4e3b071 || e36a5f56
+3f112649 || 64583adf
+4102df5b || 4b375af4 || b4fea051
+4531af7e || d4f828f7
+4703fe16 || 58f95306 || 7301affe || b05806bd || e2ccd3fb || e4e6df5e || eb721a0a
+94d4ade4 || cc16936a || dbdec4db
+9c64c2d7 || e9dcc0e7 || ee9d43d8 || efc49a03
+acad98c9 || b1a55f71 || dc3e0f50
+6509bdbe || 76ac0b4b
+22a115a5 || 29123ef3
+3ae3ca2b || 3e0d3c9e || 53a7cd9b || 6acfa099 || 87830e06 || 8c525842 || c33da94c || c504507f || de4a22a2
+0e0c8ac8 || 37ff0a76 || 58d3a4b9 || 6e325510 || c67a737a || d04967a0
+11e163a9 || 9b965dd4 || d405f29f
+122eb81f || 1d6b14d8 || 3a328ab0 || 498c8a9d || eb31e71b
+123c5230 || 9c228829 || d641e634
+169cd82b || 8d4ed227 || c3abaab7
+18b4b6be || cb56932b
+2985e653 || b3a95418
+2a1bd295 || f57f58b3
+34deed11 || b08ef70b
+5e49eb72 || 6eee3c12
+7cc9aa50 || a6eb1c91 || d6b4e29a
+66da8e2b || 923674b0
+c357f545 || e95d4905

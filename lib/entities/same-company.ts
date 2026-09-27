@@ -104,6 +104,8 @@ const INSTITUTION_OWNER = new Set(['academic', 'hospital', 'government', 'networ
 const INSTITUTION_RE =
   /\b(hospital|hospitals|hospice|infirmary|clinic|university|universit[àáäéè]t?\w*|universidad\w*|universit[ée]|college|school|faculty|institute|institut\w*|instituto|ministry|council|commission|foundation|fundaci[oó]n|fondazione|stiftung|society|association|academy|agency|department|government|nhs|trust|register|registry|consortium|cooperative|study group|research group|oncology group|trials? group|cancer trials|centers? for|centre for|center of|centre of|medical cent(er|re)|health (system|service|services|network|authority|board)|krankenhaus|klinik\w*|ospedale|policlinico|h[ôo]pital|hospices|sjukhus|ziekenhuis)\b/i;
 
+const LEGAL_IN_BRACKETS = new Set(['publ', 'pty', 'ltd', 'limited', 'inc', 'plc', 'llc', 'pvt', 'private', 'co', 'corp', 'gmbh', 'ag', 'sa', 'srl', 'spa', 'bv', 'nv', 'ab', 'as', 'kk', 'pte', 'sdn', 'bhd', 'ltda', 'sas']);
+
 /** Rows that are placeholders, not organisations. */
 const PLACEHOLDER_RE = /^(undisclosed|confidential|individual sponsor|not applicable|unknown|n\/a|various|multiple|none|tbd|other|no sponsor|sponsor not)\b/i;
 
@@ -159,6 +161,19 @@ const PARENT_TAGS = new Set([
 const COUNTRY_DIVISION = new Set(['japan', 'china', 'usa', 'uk', 'europe']);
 const CODE_TAG = /^(ref|protocol|study|trial|no|nr|code)\b|^[a-z]{0,4}\s?\d|\d{3,}/;
 
+/** "(HPA)" next to "Health Protection Agency", "(AMC)" next to "Academic Medical Center": the name's own initials, not a tag. */
+function isInitialismOf(tag: string, stemTokens: readonly string[]): boolean {
+  const t = tag.replace(/[^a-z0-9]/g, '');
+  if (t.length < 2 || t.length > 8 || !stemTokens.length) return false;
+  const initials = stemTokens.map(w => w[0]).join('');
+  const significant = stemTokens.filter(w => !['of', 'the', 'and', 'for', 'de', 'la', 'le', 'du', 'des', 'di', 'da', 'del', 'y', 'e', 'in', 'on', 'at'].includes(w)).map(w => w[0]).join('');
+  if (t === initials || t === significant) return true;
+  // Multi-part tags like "upv ehu" or "amc vumc": every part is an initialism candidate or ≤ 5 letters of caps in the source.
+  const parts = tag.split(/[^a-z0-9]+/).filter(Boolean);
+  if (parts.length > 1 && parts.every(p => p.length <= 5)) return true;
+  return false;
+}
+
 export interface SameCompanyParts {
   /** Identity after every removal; '' when nothing distinctive is left. */
   stem: string;
@@ -209,8 +224,15 @@ export function sameCompanyParts(raw: string | null | undefined, opts: PartsOpti
     ({ stem: s0, markers } = splitNameMarkers(raw));
   }
 
+  const stemTokensForTags = s0.split(' ').filter(Boolean);
   for (const m of markers) {
     if (COUNTRY_DIVISION.has(m) || AFFILIATE.has(m) || LEADING_REGION.has(m)) { out.affiliate = true; out.countryTag = out.countryTag ?? (COUNTRY_ALIAS[m] ?? m); continue; }
+    // "(UK & Ireland)", "(South Africa)", "(Germany, Austria)": every word a country/region word → affiliate.
+    const words = m.split(' ').filter(Boolean);
+    if (words.length && words.every(w => AFFILIATE.has(w) || COUNTRY_DIVISION.has(w) || LEADING_REGION.has(w) || ['and', 'the', 'of', 'south', 'north', 'east', 'west', 'central', 'latin', 'middle'].includes(w))) { out.affiliate = true; out.countryTag = out.countryTag ?? m; continue; }
+    if (isInitialismOf(m, stemTokensForTags)) continue;
+    // "(Pty)", "(Ltd)", "(Inc.)": a legal form in brackets.
+    if (words.length && words.every(w => LEGAL_IN_BRACKETS.has(w))) continue;
     if (DIVISION_MARKERS.includes(m)) { out.excluded = 'division'; continue; }
     if (m in KNOWN_SUBSIDIARIES) { out.excluded = 'subsidiary'; continue; }
     if (CODE_TAG.test(m) || PARENT_TAGS.has(m)) continue;
@@ -368,9 +390,10 @@ export function planSameCompanyMerges(rows: readonly MergeCompanyRow[], opts: Sa
     rs.map(r => ({ id: r.id, name: r.name, descriptors: parts.get(r.id)?.descriptors ?? [], ticker: tickerOf(r), cik: cikOf(r) }));
 
   const makePlan = (stem: string, members: MergeCompanyRow[], reasonNote: string): void => {
-    // Best-populated row wins, but a national affiliate never survives over a parent-named row.
+    // Best-populated row wins, but a clean parent name (no affiliate word, no tag, no brackets) beats a variant.
     const ranked = rankCanonical(members, refs);
-    const canonical = ranked.find(r => !parts.get(r.id)?.affiliate) ?? ranked[0];
+    const clean = (r: MergeCompanyRow) => { const p = parts.get(r.id); return !!p && !p.affiliate && !p.tagged.length && !/[()\[\]]/.test(r.name); };
+    const canonical = ranked.find(clean) ?? ranked.find(r => !parts.get(r.id)?.affiliate) ?? ranked[0];
     const others = ranked.filter(r => r.id !== canonical.id);
     const merged: MergedRowPlan[] = others.map(r => ({
       id: r.id,
