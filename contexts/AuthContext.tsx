@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { isProEmailClient } from '@/lib/config/authorized-emails.client';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { getSupabaseClient, hasLocalSession, isSupabaseConfigured, type LazySupabaseClient } from '@/lib/supabase/lazy';
 import { syncUsageFromDatabase } from '@/lib/usage';
 import { captureClientError } from '@/lib/sentry-client';
 import type { UserTier, TeamContext, TeamRole, PortfolioSubTier } from '@/types/tier';
@@ -189,10 +189,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Listen to Supabase auth state changes (for OAuth, etc.)
-    if (isSupabaseConfigured()) {
-      const supabase = createClient();
-      if (supabase) {
-        let isMounted = true;
+    // Anonymous visitors (no local session trace) never load the Supabase client
+    // at startup: it is 48 KB compressed and ~300 ms of phone main-thread time.
+    // The client loads on sign-in instead (see signIn below and AuthModal).
+    if (isSupabaseConfigured() && hasLocalSession()) {
+      let isMounted = true;
+      let teardown: (() => void) | null = null;
+      void getSupabaseClient().then((supabase) => {
+        if (!supabase || !isMounted) { setIsLoading(false); return; }
 
         // Check current session with a timeout to prevent infinite loading
         let sessionTimedOut = false;
@@ -403,18 +407,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        return () => {
-          isMounted = false;
+        teardown = () => {
           subscription.unsubscribe();
           document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-      }
+      });
+      return () => {
+        isMounted = false;
+        teardown?.();
+      };
     }
 
     setIsLoading(false);
   }, []);
 
-  const fetchTeamContext = useCallback(async (supabase: ReturnType<typeof createClient>, userId: string, teamId: string) => {
+  const fetchTeamContext = useCallback(async (supabase: LazySupabaseClient | null, userId: string, teamId: string) => {
     setIsTeamLoading(true);
     try {
       const [teamResult, memberResult] = await Promise.all([
@@ -442,6 +449,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback((email: string, name: string, userData?: Partial<User>) => {
+    // Fresh device: the startup Supabase listener was skipped (no local session),
+    // so confirm the tier from the database now that a session exists.
+    void getSupabaseClient().then(async (sb) => {
+      if (!sb) return;
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session?.user) return;
+        const { data: profile } = await sb.from('user_profiles').select('tier, team_id, pro_expires_at').eq('id', session.user.id).single();
+        let effectiveTier = profile?.tier as UserTier | undefined;
+        if (effectiveTier === 'pro' && profile?.pro_expires_at && new Date(profile.pro_expires_at).getTime() < Date.now()) effectiveTier = 'free';
+        if (effectiveTier && effectiveTier !== 'free') {
+          setTierState(effectiveTier);
+          localStorage.setItem('user_tier', effectiveTier);
+        }
+        syncUsageFromDatabase(session.user.id).catch(console.error);
+      } catch {
+        // localStorage hint / email allowlist below still apply
+      }
+    });
     // Check for cached profile data for this email
     const emailKey = `profile_cache_${email.toLowerCase().trim()}`;
     const cachedProfile = localStorage.getItem(emailKey);
@@ -513,7 +539,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Sign out from Supabase — use scope: 'global' to invalidate all sessions
     if (isSupabaseConfigured()) {
-      const supabase = createClient();
+      const supabase = await getSupabaseClient();
       if (supabase) {
         try {
           const { error } = await supabase.auth.signOut({ scope: 'global' });

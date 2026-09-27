@@ -7,7 +7,10 @@
  * Before this, those routes rendered with no navigation at all on phones.
  */
 import Header from '@/components/Header';
-import AuthModal from '@/components/AuthModal';
+import dynamic from 'next/dynamic';
+
+// Loaded when opened: the modal carries the Supabase auth client (48 KB gz).
+const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function SiteHeaderAuto() {

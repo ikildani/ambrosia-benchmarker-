@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { getSupabaseClient, hasLocalSession, isSupabaseConfigured, type LazySupabaseClient } from '@/lib/supabase/lazy';
 import type { User } from '@supabase/supabase-js';
 
 const ANONYMOUS_ID_KEY = 'ambrosia_anonymous_id';
@@ -29,59 +29,64 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
   const supabaseEnabled = isSupabaseConfigured();
 
-  // Initialize auth state
+  // Initialize auth state. The Supabase client is loaded lazily and only when
+  // this browser shows a trace of a session; anonymous visitors pay nothing.
   useEffect(() => {
-    // Skip if Supabase is not configured
-    if (!supabaseEnabled || !supabase) {
+    if (!supabaseEnabled || !hasLocalSession()) {
       setIsLoading(false);
       return;
     }
+    let active = true;
+    let unsubscribe: (() => void) | null = null;
 
-    // Get initial session
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-      } catch (err) {
-        console.error('Auth initialization error:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    void getSupabaseClient().then((supabase) => {
+      if (!supabase || !active) { setIsLoading(false); return; }
 
-    initAuth();
+      // Get initial session
+      const initAuth = async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (active) setUser(session?.user ?? null);
+        } catch (err) {
+          console.error('Auth initialization error:', err);
+        } finally {
+          if (active) setIsLoading(false);
+        }
+      };
+      initAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          setUser(session?.user ?? null);
 
-        // On sign in, ensure profile exists then link anonymous data
-        // Use mutex to prevent race conditions from rapid auth events
-        if (event === 'SIGNED_IN' && session?.user && !isProcessingAuthChange) {
-          isProcessingAuthChange = true;
-          try {
-            await ensureUserProfile(session.user);
-            await linkAnonymousData(session.user.id);
-          } catch (err) {
-            console.error('[Auth] Post-signin setup failed:', err);
-          } finally {
-            isProcessingAuthChange = false;
+          // On sign in, ensure profile exists then link anonymous data
+          // Use mutex to prevent race conditions from rapid auth events
+          if (event === 'SIGNED_IN' && session?.user && !isProcessingAuthChange) {
+            isProcessingAuthChange = true;
+            try {
+              await ensureUserProfile(supabase, session.user);
+              await linkAnonymousData(session.user.id);
+            } catch (err) {
+              console.error('[Auth] Post-signin setup failed:', err);
+            } finally {
+              isProcessingAuthChange = false;
+            }
           }
         }
-      }
-    );
+      );
+      unsubscribe = () => subscription.unsubscribe();
+    });
 
     return () => {
-      subscription.unsubscribe();
+      active = false;
+      unsubscribe?.();
     };
   }, [supabaseEnabled]);
 
-  const ensureUserProfile = async (user: User) => {
-    if (!supabase) return;
+  const ensureUserProfile = async (supabase: LazySupabaseClient, user: User) => {
 
     // Create user profile if it doesn't exist (for OAuth users)
     const { error } = await supabase.from('user_profiles').upsert({
@@ -127,6 +132,7 @@ export function useAuth() {
 
   const signUp = useCallback(
     async (data: SignUpData): Promise<{ success: boolean; error?: string }> => {
+      const supabase = await getSupabaseClient();
       if (!supabase) {
         return { success: false, error: 'Supabase not configured' };
       }
@@ -192,6 +198,7 @@ export function useAuth() {
 
   const signIn = useCallback(
     async (data: SignInData): Promise<{ success: boolean; error?: string }> => {
+      const supabase = await getSupabaseClient();
       if (!supabase) {
         return { success: false, error: 'Supabase not configured' };
       }
@@ -232,6 +239,7 @@ export function useAuth() {
   );
 
   const signOut = useCallback(async (): Promise<void> => {
+    const supabase = await getSupabaseClient();
     if (!supabase) return;
 
     setIsLoading(true);
@@ -243,7 +251,7 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   const updateProfile = useCallback(
     async (updates: {
@@ -253,6 +261,7 @@ export function useAuth() {
       company_type?: string;
       consent_marketing?: boolean;
     }): Promise<{ success: boolean; error?: string }> => {
+      const supabase = await getSupabaseClient();
       if (!supabase) {
         return { success: false, error: 'Supabase not configured' };
       }
@@ -276,10 +285,11 @@ export function useAuth() {
         return { success: false, error: message };
       }
     },
-    [user, supabase]
+    [user]
   );
 
   const getUserProfile = useCallback(async () => {
+    const supabase = await getSupabaseClient();
     if (!supabase || !user) return null;
 
     const { data, error } = await supabase
@@ -294,7 +304,7 @@ export function useAuth() {
     }
 
     return data;
-  }, [user, supabase]);
+  }, [user]);
 
   return {
     user,
