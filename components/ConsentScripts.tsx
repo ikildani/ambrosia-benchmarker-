@@ -60,24 +60,19 @@ export default function ConsentScripts() {
     return () => window.removeEventListener(CONSENT_EVENT, onChange);
   }, []);
 
-  // Hold the tags until the browser has gone idle after load (or 6 s at most).
-  // gtag.js alone is 190 KB and 250 ms of main-thread time on a phone; behind
-  // idle it no longer competes with hydration for the interactivity window.
+  // Hold the tags until the visitor interacts (scroll, tap, key) or 8 s after
+  // load, whichever comes first. gtag.js is 190 KB and ~250-700 ms of main
+  // thread on a phone; behind first interaction it never competes with
+  // hydration or with the interactivity window. Vercel Analytics still counts
+  // every visit, so bounces under 8 s are not lost from the funnel.
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let done = false;
     const go = () => { if (!done) { done = true; setReady(true); } };
-    const afterLoad = () => {
-      if ('requestIdleCallback' in window) {
-        (window as Window & { requestIdleCallback: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback(go, { timeout: 4000 });
-      } else {
-        setTimeout(go, 2500);
-      }
-    };
-    if (document.readyState === 'complete') afterLoad();
-    else window.addEventListener('load', afterLoad, { once: true });
-    const cap = setTimeout(go, 6000);
-    return () => { clearTimeout(cap); window.removeEventListener('load', afterLoad); };
+    const events: Array<keyof WindowEventMap> = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
+    events.forEach((e) => window.addEventListener(e, go, { once: true, passive: true }));
+    const cap = setTimeout(go, 8000);
+    return () => { clearTimeout(cap); events.forEach((e) => window.removeEventListener(e, go)); };
   }, []);
 
   const granted = consent === 'accepted';

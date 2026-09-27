@@ -14,20 +14,18 @@ export default function LazySentry() {
     window.addEventListener('error', onError);
     window.addEventListener('unhandledrejection', onRejection);
 
+    // Load on the first interaction or 12 s after load, whichever first; an
+    // error before then loads it immediately (captureClientError). Idle-based
+    // loading landed inside the interactivity window on phones.
     let done = false;
     const go = () => { if (!done) { done = true; void loadSentry(); } };
-    const afterLoad = () => {
-      const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
-      if (w.requestIdleCallback) w.requestIdleCallback(go, { timeout: 4000 });
-      else setTimeout(go, 2500);
-    };
-    if (document.readyState === 'complete') afterLoad();
-    else window.addEventListener('load', afterLoad, { once: true });
-    const cap = setTimeout(go, 6000);
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'touchstart'];
+    events.forEach((e) => window.addEventListener(e, go, { once: true, passive: true }));
+    const cap = setTimeout(go, 12000);
 
     return () => {
       clearTimeout(cap);
-      window.removeEventListener('load', afterLoad);
+      events.forEach((e) => window.removeEventListener(e, go));
       window.removeEventListener('error', onError);
       window.removeEventListener('unhandledrejection', onRejection);
     };

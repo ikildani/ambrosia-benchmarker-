@@ -10,6 +10,7 @@ import LiveDemo from '@/components/landing/LiveDemo';
 import { DEMO_DEFAULT, type DemoResult } from '@/components/landing/live-demo-shared';
 import CoverageSection from '@/components/landing/CoverageSection';
 import { HomeMiddle, HomeGuides, HomeAbout } from '@/components/landing/HomeSections';
+import { renderStatic } from '@/lib/render-static';
 import PricingIsland from '@/components/landing/PricingIsland';
 
 /** Default live-demo scenario, computed on the server so the widget paints with real numbers and no engine download. */
@@ -69,17 +70,26 @@ export default async function HomePage() {
     modalities: modalityOptions.map((g) => ({ group: g.group, options: g.options.map((o) => ({ value: o.value, label: o.label })) })),
     indications: indicationOptions.map((g) => ({ group: g.group, options: g.options.map((o) => ({ value: o.value, label: o.label })) })),
   };
+  // Below-the-fold marketing sections are static: render them to one HTML string
+  // each (no hydration, one flight entry instead of ~1,000 serialised elements)
+  // and let the browser skip their layout until they scroll near (.cv-auto).
+  const [coverageHtml, middleHtml, guidesHtml, aboutHtml] = await Promise.all([
+    renderStatic(<CoverageSection stats={coverage} />),
+    renderStatic(<HomeMiddle dealCount={dealCount} />),
+    renderStatic(<HomeGuides dealCount={dealCount} />),
+    renderStatic(<HomeAbout />),
+  ]);
   return (
     <main id="main-content" className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
       <SiteHeaderAuto />
       <HomeHero dealCount={dealCount} />
       <LiveDemo initial={demoInitial()} modalities={demoOptions.modalities} indications={demoOptions.indications} />
-      <CoverageSection stats={coverage} />
-      <HomeMiddle dealCount={dealCount} />
-      <PricingIsland />
-      <HomeGuides dealCount={dealCount} />
-      <FAQSection />
-      <HomeAbout />
+      <div className="cv-auto" dangerouslySetInnerHTML={{ __html: coverageHtml }} />
+      <div className="cv-auto" dangerouslySetInnerHTML={{ __html: middleHtml }} />
+      <div className="cv-auto"><PricingIsland /></div>
+      <div className="cv-auto" dangerouslySetInnerHTML={{ __html: guidesHtml }} />
+      <div className="cv-auto"><FAQSection /></div>
+      <div className="cv-auto" dangerouslySetInnerHTML={{ __html: aboutHtml }} />
       <ExitIntentCapture />
     </main>
   );

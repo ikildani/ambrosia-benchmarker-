@@ -102,7 +102,7 @@ export default async function CompaniesPage() {
           </p>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-12">
+        <section className="cv-auto mx-auto max-w-6xl px-4 sm:px-6 pb-12">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {companies.map((company) => (
               <Link

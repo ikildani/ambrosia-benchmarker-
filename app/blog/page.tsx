@@ -263,7 +263,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
 
         {/* Recent Posts Grid */}
         {recentPosts.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <section className="cv-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-8">
               {activeCategory ? `${activeCategory} articles` : 'Recent Articles'}{totalPages > 1 ? ` · page ${page} of ${totalPages}` : ''}
             </h2>

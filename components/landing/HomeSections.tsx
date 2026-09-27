@@ -1,10 +1,9 @@
 // Server components: the marketing sections below the fold. They used to live
 // inside a 1,000-line client component and were hydrated on every visit; now
-// they are HTML with no JavaScript attached.
-import Link from 'next/link';
+// they are HTML with no JavaScript attached. Rendered to a string by
+// lib/render-static, so only plain elements here: <a> not next/link, <img> not next/image.
 import { Check, ArrowRight } from 'lucide-react';
 import { PRICING, ENGINE_COUNT } from '@/lib/config/constants';
-import AmbrosiaLogo from '@/components/AmbrosiaLogo';
 import UseCaseCards from '@/components/landing/UseCaseCards';
 import ComparisonTable from '@/components/landing/ComparisonTable';
 
@@ -79,7 +78,7 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
 
           {/* CTA */}
           <div className="text-center mt-8 sm:mt-10 lg:mt-12">
-            <Link
+            <a
               href="/calculator"
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl
                        shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/15 transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto text-sm sm:text-base"
@@ -88,7 +87,7 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -217,7 +216,7 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
           </div>
 
           <div className="text-center">
-            <Link
+            <a
               href="/calculator"
               className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-slate-900/15 hover:shadow-2xl hover:shadow-slate-900/20 transition-all duration-300 hover:-translate-y-1 text-sm sm:text-base"
             >
@@ -225,7 +224,7 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -371,7 +370,7 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
           </div>
           <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             {/* Deal Intelligence Brief */}
-            <Link
+            <a
               href="/brief"
               className="group relative bg-gradient-to-b from-teal-500/[0.03] to-[#0d1420] border border-teal-500/20 rounded-2xl p-7 hover:border-teal-500/40 transition-all duration-300 hover:-translate-y-1"
             >
@@ -396,10 +395,10 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-teal-400 group-hover:text-teal-300 transition-colors">
                 Configure Brief <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </span>
-            </Link>
+            </a>
 
             {/* Pro */}
-            <Link
+            <a
               href="/pro"
               className="group relative bg-gradient-to-b from-teal-500/[0.04] to-[#0d1420] border border-teal-500/20 rounded-2xl p-8 hover:border-teal-500/40 transition-all duration-300 hover:-translate-y-1"
             >
@@ -426,7 +425,7 @@ export function HomeMiddle({ dealCount }: { dealCount: string }) {
               <span className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-400 group-hover:text-teal-300 transition-colors">
                 View Pro details <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </span>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -459,7 +458,7 @@ export function HomeGuides({ dealCount }: { dealCount: string }) {
               { href: '/guides/how-to-value-biotech-deal', title: 'How to Value a Biotech Deal', desc: 'Step-by-step using comparables, rNPV, and Monte Carlo simulation', tag: 'Valuation' },
               { href: '/guides/monte-carlo-biotech-valuation', title: 'Monte Carlo Biotech Valuation', desc: '10,000-iteration stochastic modeling with correlated variables and phase-dependent risk', tag: 'Methodology' },
             ].map(guide => (
-              <Link
+              <a
                 key={guide.href}
                 href={guide.href}
                 className="group bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 hover:bg-white/[0.06] hover:border-teal-500/30 transition-all duration-300"
@@ -467,13 +466,13 @@ export function HomeGuides({ dealCount }: { dealCount: string }) {
                 <span className="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 rounded mb-3">{guide.tag}</span>
                 <h3 className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors mb-2">{guide.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">{guide.desc}</p>
-              </Link>
+              </a>
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link href="/guides" className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors">
+            <a href="/guides" className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors">
               View all guides →
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -529,7 +528,7 @@ export function HomeAbout() {
         <div className="max-w-6xl xl:max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 sm:gap-8 pb-8 sm:pb-12 border-b border-navy-800">
             <div className="flex items-center">
-              <AmbrosiaLogo variant="reversed" height={32} />
+              <img src="/logo-white.png" alt="Ambrosia Ventures" width={154} height={32} loading="lazy" decoding="async" />
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm">
               {[
@@ -557,14 +556,14 @@ export function HomeAbout() {
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300" />
                   </a>
                 ) : (
-                  <Link
+                  <a
                     key={idx}
                     href={link.href}
                     className="hover:text-blue-400 transition-colors duration-300 relative group"
                   >
                     {link.label}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300" />
-                  </Link>
+                  </a>
                 )
               ))}
             </nav>
@@ -593,9 +592,9 @@ export function HomeAbout() {
                 <p className="text-xs text-neutral-400 leading-relaxed">
                   <strong className="text-neutral-300">Consult Professionals:</strong> Before making any business decisions,
                   consult qualified financial advisors, legal counsel, and industry experts familiar with your specific situation.
-                  <Link href="/terms" className="text-blue-400 hover:text-blue-300 ml-1 underline">Terms</Link>
+                  <a href="/terms" className="text-blue-400 hover:text-blue-300 ml-1 underline">Terms</a>
                   {' '}&bull;{' '}
-                  <Link href="/privacy" className="text-blue-400 hover:text-blue-300 underline">Privacy</Link>
+                  <a href="/privacy" className="text-blue-400 hover:text-blue-300 underline">Privacy</a>
                 </p>
               </div>
             </div>
