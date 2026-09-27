@@ -58,6 +58,12 @@ describe('isSameCompanyName', () => {
     ['Immune Response BioPharma, Inc.', 'The Immune Response Corporation'],
     ['University of Oxford', 'University of Oxford (UK)'],
     ['Karolinska Institutet', 'Karolinska Institutet (Sweden)'],
+    ['Health Protection Agency (HPA) (UK)', 'Health Protection Agency (HPA)'],
+    ['Academic Medical Center (AMC) (The Netherlands)', 'Academic Medical Center'],
+    ['University of the Basque Country (UPV/EHU)', 'University of the Basque Country'],
+    ['Novo Nordisk Limited (UK & Ireland)', 'Novo Nordisk'],
+    ['Sanofi Aventis South Africa (Pty) Ltd (South Africa)', 'Sanofi Aventis'],
+    ['Moberg Pharma AB (publ)', 'Moberg Pharma'],
   ])('%s is %s', (a, b) => {
     expect(isSameCompanyName(a, b)).toBe(true);
   });
@@ -90,6 +96,8 @@ describe('isSameCompanyName', () => {
     ['Department of Health (UK)', 'Department of Health (Taiwan)'],
     ['Centers for Disease Control and Prevention', 'Centers for Disease Control and Prevention, China'],
     ['Malaria Consortium', 'Malaria Consortium, UK'],
+    ['Summit Therapeutics', 'Summit (Oxford) Limited'],
+    ['Cook Medical', 'Cook Medical (reproductive health business)'],
     ['Individual Sponsor (Denmark)', 'Individual Sponsor (Germany)'],
   ])('%s is not %s', (a, b) => {
     expect(isSameCompanyName(a, b)).toBe(false);
@@ -198,6 +206,12 @@ describe('planSameCompanyMerges', () => {
     expect(r.review[0]?.reason).toBe('country_conflict');
     const ok = planSameCompanyMerges([row('a', 'University of Oxford', { owner_type: 'academic' }), row('b', 'University of Oxford (UK)', { owner_type: 'academic' })]);
     expect(ok.plans).toHaveLength(1);
+  });
+
+  it('a bracket-free name beats a better-populated tagged variant as canonical', () => {
+    const rows = [row('a', 'Cartesian (Proprietary)', { data_quality_score: 90, deals_last_24mo: 5 }), row('b', 'Cartesian Therapeutics', { data_quality_score: 10 })];
+    const r = planSameCompanyMerges(rows, { extraGroups: [['a', 'b']] });
+    expect(r.plans[0].canonicalId).toBe('b');
   });
 
   it('different HQ countries among non-affiliate rows go to review', () => {

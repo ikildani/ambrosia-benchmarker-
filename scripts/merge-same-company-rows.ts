@@ -117,7 +117,10 @@ async function main() {
   const csv = ['key,canonical_id,canonical_name,merged_id,merged_name,merged_refs,affiliate'];
   for (const p of plans) for (const m of p.merged) csv.push([p.key, p.canonicalId, p.canonicalName, m.id, m.name, m.referenceCount, ''].map(csvCell).join(','));
   writeFileSync('tmp/same-company-plans.csv', csv.join('\n') + '\n');
-  log.info('Report: tmp/same-company-report.md, tmp/same-company-plans.csv');
+  const rev = ['stem,reason,detail,row_id,name,descriptors,ticker,cik'];
+  for (const r of result.review) for (const x of r.rows) rev.push([r.stem, r.reason, r.detail, x.id, x.name, x.descriptors.join(' '), x.ticker ?? '', x.cik ?? ''].map(csvCell).join(','));
+  writeFileSync('tmp/same-company-review.csv', rev.join('\n') + '\n');
+  log.info('Report: tmp/same-company-report.md, tmp/same-company-plans.csv, tmp/same-company-review.csv');
 
   if (!args.apply) { log.info('dry run — nothing written'); return; }
   assertApplyGuards({ apply: args.apply, runId: args.runId, env: process.env });
