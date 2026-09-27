@@ -94,6 +94,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Apply the stored/system theme before first paint (no flash, no layout-level re-render). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark');}}catch(e){}})();",
+          }}
+        />
         <link rel="alternate" type="application/rss+xml" title="Ambrosia Ventures" href="/feed.xml" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />

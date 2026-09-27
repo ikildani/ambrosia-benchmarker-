@@ -57,10 +57,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('theme', newTheme);
   };
 
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always render the provider. Returning a bare fragment before mount and a
+  // Context.Provider after it changed the root element type, and React
+  // responded by unmounting and re-creating the entire application subtree on
+  // every page load (header, page, footer: measured on /, /calculator, /pro on
+  // 27 Sep 2026). That doubled the main-thread work of every page and pushed
+  // the calculator's LCP to ~5 s. The `dark` class itself is applied before
+  // first paint by the inline script in app/layout.tsx; the effect above keeps
+  // it in sync afterwards.
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
       {children}
