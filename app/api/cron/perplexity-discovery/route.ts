@@ -136,6 +136,9 @@ export async function GET(request: NextRequest) {
   // Post-processing
   if (result.deals_inserted > 0) {
     await reclassifyOtherDeals(supabase);
+    // New rows are non-canonical until recompute_deal_dedupe() ranks them in their dedupe group.
+    const { error: recomputeErr } = await supabase.rpc('recompute_deal_dedupe');
+    if (recomputeErr) console.error('[perplexity] recompute_deal_dedupe failed:', recomputeErr.message);
     await updateCompanyStats(supabase, result.deals_inserted * 2);
 
     // Alert on high-value deals (any source type from this run)

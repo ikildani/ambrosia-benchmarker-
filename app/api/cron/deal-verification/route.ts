@@ -128,6 +128,15 @@ export async function GET(request: NextRequest) {
   const acceptResult = await autoAcceptVerifiedDeals(supabase);
   const rejectResult = await autoRejectLowConfidenceDeals(supabase);
 
+  // Canonical recompute: deals.is_canonical defaults to false and only
+  // recompute_deal_dedupe() promotes the best row of each dedupe group. Nothing
+  // called it after Sep 25 2026, so 2,300 rows (911 verified) sat outside the
+  // comparable pool. Run it whenever a verdict changed.
+  if (result.verified + result.reverified + result.flagged + acceptResult.fixed > 0 || (statusResult?.updated ?? 0) > 0) {
+    const { error: recomputeErr } = await supabase.rpc('recompute_deal_dedupe');
+    if (recomputeErr) console.error('[deal-verification] recompute_deal_dedupe failed:', recomputeErr.message);
+  }
+
   // Notify Slack if any deals were flagged
   if (result.flagged > 0) {
     // Fetch the flagged deals for the notification
