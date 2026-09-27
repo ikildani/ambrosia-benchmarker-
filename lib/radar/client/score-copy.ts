@@ -55,6 +55,10 @@ export function unrankedReason(p: ScorePresentation): string {
   return 'Not ranked: outside the core universe (partnered, approved, or not an owned program)';
 }
 
+/** One line under a preclinical asset's rank: peers are other disclosed preclinical programs. */
+export const PRECLINICAL_RANK_NOTE =
+  'Ranked against other company-disclosed preclinical programs; the probability is calibrated on clinical-stage deals.';
+
 function fmtPct(x: number, digits = 1): string {
   const v = 100 * x;
   if (v < 0.05) return '<0.1%';

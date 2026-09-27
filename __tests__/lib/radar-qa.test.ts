@@ -317,6 +317,8 @@ describe('runInvariants: persistence', () => {
         if (name === 'radar_qa_thesis_stats') return { data: healthy.thesis };
         if (name === 'radar_qa_score_stats') return { data: healthy.score };
         if (name === 'radar_qa_pipeline_stats') return { data: healthy.pipeline };
+        // Migration 139 stats are optional; null skips the preclinical checks.
+        if (name === 'radar_qa_preclinical_stats') return { data: null };
         if (name === 'radar_qa_vocab_violations') return { data: { violations: 0, samples: [] } };
         return { error: { message: 'unknown rpc' } };
       },

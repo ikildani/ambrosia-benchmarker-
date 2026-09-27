@@ -113,7 +113,17 @@ export function AssetBriefPage({ brief, viewer }: { brief: AssetBrief; viewer: B
                   <PredictedTerms terms={brief.terms} asset={brief.asset} />
                 </TabPanel>
                 <TabPanel className="space-y-6 focus:outline-none" unmount={false}>
-                  <TrialsTable trials={brief.trials} catalysts={brief.catalysts} />
+                  <TrialsTable
+                    trials={brief.trials}
+                    catalysts={brief.catalysts}
+                    disclosure={brief.asset.disclosure_excerpt ? {
+                      source_type: brief.asset.disclosure_source_type ?? null,
+                      url: brief.asset.disclosure_url ?? null,
+                      date: brief.asset.disclosure_date ?? null,
+                      excerpt: brief.asset.disclosure_excerpt,
+                      stage_detail: brief.asset.stage_detail ?? null,
+                    } : null}
+                  />
                 </TabPanel>
                 <TabPanel className="space-y-6 focus:outline-none" unmount={false}>
                   <Landscape intel={brief.intel} acquirers={brief.acquirers} thesis={brief.terms.thesis} />

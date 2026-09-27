@@ -50,6 +50,7 @@ export const RADAR_MODALITY_OPTIONS: VocabOption[] = [
 
 /** Values match the company_trials / clinical_assets phase slugs. Ordered by development stage. */
 export const RADAR_PHASE_OPTIONS: VocabOption[] = [
+  { value: 'preclinical', label: 'Preclin', longLabel: 'Preclinical (company-disclosed)' },
   { value: 'early_phase_1', label: 'P1 Early', longLabel: 'Early Phase 1' },
   { value: 'phase_1', label: 'P1', longLabel: 'Phase 1' },
   { value: 'phase_1_2', label: 'P1/2', longLabel: 'Phase 1/2' },
@@ -70,6 +71,26 @@ export const RADAR_PHASE_RANK: Record<string, number> = Object.fromEntries(
  * counts them before this default is applied (migration 125).
  */
 export const RADAR_PHASE_DEFAULT_EXCLUDED: readonly string[] = ['phase_4'];
+
+/** Phases that come from a trial registry; everything else is company-disclosed. */
+export const RADAR_CLINICAL_PHASES: readonly string[] = RADAR_PHASE_OPTIONS.map(o => o.value).filter(v => v !== 'preclinical');
+
+/** clinical_assets.stage_detail (migration 139): preclinical sub-stage as disclosed. */
+export const RADAR_STAGE_DETAIL_OPTIONS: VocabOption[] = [
+  { value: 'discovery', label: 'Discovery' },
+  { value: 'lead_optimization', label: 'Lead opt', longLabel: 'Lead optimization' },
+  { value: 'ind_enabling', label: 'IND-enabling', longLabel: 'IND-enabling studies' },
+  { value: 'preclinical', label: 'Preclinical', longLabel: 'Preclinical (sub-stage not stated)' },
+];
+
+/** clinical_assets.asset_origin (migration 139): where the row came from. */
+export const RADAR_ASSET_ORIGIN_OPTIONS: VocabOption[] = [
+  { value: 'registry', label: 'Registry', longLabel: 'Trial registry' },
+  { value: 'filing', label: 'SEC filing', longLabel: 'Company SEC filing (10-K / 20-F / S-1)' },
+  { value: 'pipeline_page', label: 'Pipeline page', longLabel: 'Company pipeline page' },
+  { value: 'press', label: 'Press', longLabel: 'Press release' },
+  { value: 'user', label: 'User', longLabel: 'Added by a user' },
+];
 
 export const RADAR_PARTNERSHIP_OPTIONS: VocabOption[] = [
   { value: 'unpartnered', label: 'Unpartnered', longLabel: 'Unpartnered (no evidence found)' },
@@ -100,6 +121,7 @@ export const RADAR_PARTNERSHIP_BASIS_OPTIONS: VocabOption[] = [
   { value: 'press', label: 'Press release' },
   { value: 'trial_collaborator', label: 'Trial collaborator' },
   { value: 'drug_owner', label: 'Drug ownership record' },
+  { value: 'filing', label: 'SEC filing' },
   { value: 'no_evidence', label: 'No evidence found' },
 ];
 
@@ -155,6 +177,8 @@ const LABEL_INDEX: Record<string, string> = Object.fromEntries(
     ...RADAR_PARTNERSHIP_OPTIONS,
     ...RADAR_OWNERSHIP_OPTIONS,
     ...RADAR_PARTNERSHIP_BASIS_OPTIONS,
+    ...RADAR_STAGE_DETAIL_OPTIONS,
+    ...RADAR_ASSET_ORIGIN_OPTIONS,
     ...RADAR_REGION_OPTIONS,
     ...RADAR_COUNTRY_OPTIONS,
   ].map(o => [o.value, o.longLabel ?? o.label]),

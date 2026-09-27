@@ -260,7 +260,7 @@ export const PHASE_PRIOR: Readonly<Record<string, number>> = Object.freeze({
   'phase1_phase2': 0.90,   'phase_1_2': 0.90,
   'phase3': 0.90,          'phase_3': 0.90,
   'phase1': 0.80,          'phase_1': 0.80,
-  'early_phase1': 0.70,
+  'early_phase1': 0.70,    'early_phase_1': 0.70,
   'phase4': 0.60,          'phase_4': 0.60,
   'approved': 0.50,
   'preclinical': 0.50,
