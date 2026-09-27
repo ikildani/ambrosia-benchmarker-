@@ -275,10 +275,18 @@ export async function verifyPendingDeals(
   // verified vs 29% for preclinical) then highest value. The two-pass
   // approach ensures early-stage deals get verified without starving
   // high-value deals from the queue.
+  // A pending row attempted in the last 12 hours is skipped: if its verdict
+  // could not be saved (citation rule, constraint), re-picking it by value
+  // every run burns the whole budget on the same rows (found Sep 27 2026: the
+  // cron reported ~23 verified per run for two days while pending never moved).
+  // verify_attempted_at (migration 139) is the stamp; updated_at is bumped by
+  // any update (dedupe recompute, alerts) and cannot mean "last attempt".
+  const attemptedCutoff = new Date(Date.now() - 12 * 3_600_000).toISOString();
   const { data: discoveryDeals } = await supabase
     .from('deals')
     .select(DEAL_COLUMNS)
     .eq('verification_status', 'pending')
+    .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${attemptedCutoff}`)
     .in('phase_at_signing', ['discovery', 'preclinical'])
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(Math.ceil(maxDeals * 0.3));
@@ -289,6 +297,7 @@ export async function verifyPendingDeals(
     .from('deals')
     .select(DEAL_COLUMNS)
     .eq('verification_status', 'pending')
+    .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${attemptedCutoff}`)
     .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
     .limit(maxDeals);
 
@@ -327,7 +336,7 @@ export async function verifyPendingDeals(
       .eq('verification_status', 'flagged')
       .or('is_synthetic.is.null,is_synthetic.eq.false')
       .in('phase_at_signing', ['discovery', 'preclinical'])
-      .lt('updated_at', retryCutoff)
+      .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${retryCutoff}`)
       .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
       .limit(earlySlots * 2);
     pushReverifiable(earlyFlagged, earlySlots);
@@ -339,7 +348,7 @@ export async function verifyPendingDeals(
         .select(DEAL_COLUMNS)
         .eq('verification_status', 'flagged')
         .or('is_synthetic.is.null,is_synthetic.eq.false')
-        .lt('updated_at', retryCutoff)
+        .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${retryCutoff}`)
         .order('total_deal_value_usd', { ascending: false, nullsFirst: false })
         .limit(remainingSlots * 2 + earlySlots);
       pushReverifiable(flaggedDeals, remainingSlots);
@@ -452,7 +461,7 @@ export async function verifyPendingDeals(
         // Not enough data to verify — leave the verdict alone. A flagged row is
         // re-stamped so the retry queue rotates instead of re-picking it every run.
         if (deal.verification_status === 'flagged') {
-          await supabase.from('deals').update({ updated_at: new Date().toISOString() }).eq('id', deal.id);
+          await supabase.from('deals').update({ verify_attempted_at: new Date().toISOString() }).eq('id', deal.id);
         }
         result.unchanged++;
         continue;
@@ -571,6 +580,7 @@ Rules:
 
       // 2f-g. Update deal based on status
       const updates: Record<string, unknown> = {
+        verify_attempted_at: new Date().toISOString(),
         verification_status: verification.status,
         verification_notes: sourceNote
           ? appendVerificationNote(verification.reason, sourceNote)
@@ -605,6 +615,17 @@ Rules:
         updates.verified = false;
         updates.verification_notes = appendVerificationNote(String(updates.verification_notes ?? ''), `BACKTEST ${new Date().toISOString().slice(0, 10)}: previously verified, now ${verification.status}`);
         result.regressions++;
+      }
+
+      // The database refuses 'verified' without a citation (primary-sourced rule).
+      // A deal the web confirms but cannot cite is flagged with that reason so the
+      // source backfill can pick it up, instead of failing the update silently.
+      const cited = !!(deal.source_url || deal.press_release_url || sourcePatch.source_url);
+      if (verification.status === 'verified' && !cited) {
+        updates.verification_status = 'flagged';
+        updates.verified = false;
+        updates.verification_notes = appendVerificationNote(String(updates.verification_notes ?? ''), 'exists per web search but no primary source found; needs a citation before it can count');
+        verification.status = 'flagged';
       }
 
       if (verification.status === 'verified') {
@@ -650,15 +671,33 @@ Rules:
           if (c > existing) updates.confidence_score = c;
         }
 
-        result.verified++;
-      } else if (verification.status === 'flagged') {
-        result.flagged++;
-      } else {
-        // rejected
-        result.flagged++; // count in flagged for reporting purposes
       }
 
-      await supabase.from('deals').update(updates).eq('id', deal.id);
+      let { error: saveErr } = await supabase.from('deals').update(updates).eq('id', deal.id);
+      if (saveErr && saveErr.code === '23505') {
+        // The corrections (date, parties, asset, money) collide with a row that
+        // already holds them: this row is a duplicate of it. Keep the verdict
+        // and the citation, drop the corrections, and let the dedupe recompute
+        // rank the pair; the note says what happened.
+        const keep: Record<string, unknown> = {};
+        for (const k of ['verify_attempted_at', 'verification_status', 'verified', 'verification_notes', 'source_url', 'press_release_url', 'raw_text_excerpt', 'confidence_score', 'terms_disclosed']) if (k in updates) keep[k] = updates[k];
+        keep.verification_notes = appendVerificationNote(String(keep.verification_notes ?? ''), 'corrections not applied: they match an existing row (likely duplicate; dedupe recompute will rank the pair)');
+        ({ error: saveErr } = await supabase.from('deals').update(keep).eq('id', deal.id));
+      }
+      if (saveErr) {
+        // Never count a verdict that did not land; stamp the row so the pick
+        // query moves on, and keep the reason where the operator can see it.
+        result.errors.push(`${deal.licensor_name}/${deal.licensee_name}: verdict ${verification.status} not saved: ${saveErr.message.slice(0, 160)}`);
+        if (verification.status === 'verified' && wasFlagged) result.reverified--;
+        await supabase.from('deals').update({
+          verify_attempted_at: new Date().toISOString(),
+          verification_notes: appendVerificationNote(deal.verification_notes, `verifier: ${verification.status} verdict not saved (${saveErr.message.slice(0, 120)})`),
+        }).eq('id', deal.id);
+        result.unchanged++;
+        continue;
+      }
+      if (verification.status === 'verified') result.verified++;
+      else result.flagged++; // flagged and rejected both count here for reporting
 
       // Rate limit between API calls
       await new Promise(r => setTimeout(r, 2000));
