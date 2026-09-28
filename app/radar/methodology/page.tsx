@@ -15,6 +15,7 @@ import { loadMethodologySummary, type MethodologySummary } from '@/lib/radar/bac
 import { FACTOR_WEIGHTS } from '@/lib/radar/signal-detection';
 import { CalibrationChart } from './CalibrationChart';
 import { RadarPageFrame } from '@/components/radar/RadarPageFrame';
+import { RadarSubNav } from '@/components/radar/RadarSubNav';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -132,11 +133,8 @@ export default async function RadarMethodologyPage() {
     <RadarPageFrame>
     <main className="min-h-screen bg-white pt-16 text-neutral-800 dark:bg-neutral-950 dark:text-neutral-200 sm:pt-20">
       <div className="border-b border-neutral-200 dark:border-neutral-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-xs">
-          <Link href="/radar" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100">
-            Search & Evaluation
-          </Link>
-          <span className="text-neutral-400 dark:text-neutral-500">Methodology</span>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+          <RadarSubNav current="methodology" />
         </div>
       </div>
 

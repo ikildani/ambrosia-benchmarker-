@@ -1,7 +1,8 @@
 'use client';
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { CheckIcon, ChevronUpDownIcon, PencilSquareIcon, PlusIcon, SparklesIcon } from '@heroicons/react/20/solid';
+import Link from 'next/link';
+import { CheckIcon, ChevronUpDownIcon, InboxStackIcon, PencilSquareIcon, PlusIcon, SparklesIcon } from '@heroicons/react/20/solid';
 import { radarLabel } from '@/lib/radar/vocab';
 import type { RadarMandate } from '@/lib/radar/client/api-types';
 import { mandateSummary } from '@/lib/radar/client/mandate';
@@ -81,6 +82,11 @@ export function MandateSwitcher({ mandates, selectedId, onSelect, onEdit, onNew,
         <button type="button" onClick={() => onEdit(selected)} className={cn(BTN_GHOST, 'p-2')} aria-label={`Edit mandate ${selected.name}`} title="Edit mandate">
           <PencilSquareIcon className="h-4 w-4" aria-hidden />
         </button>
+      )}
+      {selected && (
+        <Link href={`/radar/mandates/${selected.id}`} className={cn(BTN_GHOST, 'p-2')} aria-label={`Matches for ${selected.name}`} title="Matches">
+          <InboxStackIcon className="h-4 w-4" aria-hidden />
+        </Link>
       )}
       {onNewFromTemplate && (
         <Menu as="div" className="relative">
