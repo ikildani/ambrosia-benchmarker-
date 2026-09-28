@@ -65,6 +65,12 @@ jest.mock('@/lib/sentry-api', () => ({
   captureApiError: jest.fn(),
 }));
 
+// Tier comes from the session only (never from ?user_id=).
+const mockGetAuthenticatedUser = jest.fn();
+jest.mock('@/lib/auth-helpers', () => ({
+  getAuthenticatedUser: (...args: unknown[]) => mockGetAuthenticatedUser(...args),
+}));
+
 // Import after mocking
 import { GET } from '@/app/api/pulse/route';
 
@@ -73,6 +79,7 @@ describe('/api/pulse', () => {
     jest.clearAllMocks();
     fromCallIndex = 0;
     fromChains = [];
+    mockGetAuthenticatedUser.mockResolvedValue(null);
   });
 
   describe('GET', () => {
@@ -144,6 +151,7 @@ describe('/api/pulse', () => {
       (dealsChain2.limit as jest.Mock).mockResolvedValueOnce({ data: dealData, error: null });
 
       fromChains = [profileChain, snapshotChain2, dealsChain2];
+      mockGetAuthenticatedUser.mockResolvedValueOnce({ id: 'user-1' });
 
       const response = await GET(request);
       const data = await response.json();
@@ -154,6 +162,38 @@ describe('/api/pulse', () => {
       expect(data.is_pro).toBe(true);
       expect(data.snapshot.avg_upfront_usd).toBe(50000000);
       expect(data.deals).toHaveLength(1);
+    });
+
+    it('does not grant Pro from a ?user_id= param without a session', async () => {
+      const snapshotChain = createChain();
+      (snapshotChain.single as jest.Mock).mockResolvedValueOnce({
+        data: { id: 'snap-1', snapshot_date: '2026-03-01', avg_upfront_usd: 50000000, total_upfront_usd: 1, notable_deals: [], modality_breakdown: {}, therapeutic_area_breakdown: {}, phase_breakdown: {} },
+        error: null,
+      });
+      const dealsChain = createChain();
+      (dealsChain.limit as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
+      fromChains = [snapshotChain, dealsChain];
+
+      const response = await GET(new NextRequest('http://localhost/api/pulse?user_id=some-pro-user-id'));
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.is_pro).toBe(false);
+      expect(data.snapshot.avg_upfront_usd).toBeNull();
+    });
+
+    it('excludes rejected, flagged and non-canonical deals from the live list', async () => {
+      const snapshotChain = createChain();
+      (snapshotChain.single as jest.Mock).mockResolvedValueOnce({ data: { id: 'snap-1', snapshot_date: '2026-03-01', modality_breakdown: {}, therapeutic_area_breakdown: {}, phase_breakdown: {} }, error: null });
+      const dealsChain = createChain();
+      (dealsChain.limit as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
+      fromChains = [snapshotChain, dealsChain];
+
+      await GET(new NextRequest('http://localhost/api/pulse'));
+
+      const notArgs = (dealsChain.not as jest.Mock).mock.calls;
+      expect(notArgs).toContainEqual(['verification_status', 'in', '("rejected","flagged")']);
+      expect(notArgs).toContainEqual(['is_canonical', 'is', false]);
     });
 
     it('should gate financial data for free users', async () => {

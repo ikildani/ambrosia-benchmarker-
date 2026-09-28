@@ -80,7 +80,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
 
         if (!pulseRes.ok) {
           if (pulseRes.status === 404) {
-            setError('No market data available yet. Check back after Monday.');
+            setError('No market data available yet. Check back after Wednesday.');
             return;
           }
           throw new Error('Failed to fetch pulse data');
@@ -140,7 +140,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
         </div>
         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Your First Pulse is Coming</h3>
         <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
-          Market intelligence snapshots are generated every Monday at 7 AM ET.
+          Market intelligence snapshots are generated every Wednesday.
           Check back after the next update for deal activity, benchmark shifts, and modality trends.
         </p>
         <div className="flex items-center justify-center gap-2 text-sm text-slate-900 dark:text-white font-medium">
@@ -153,8 +153,14 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
     );
   }
 
-  const snapshotDate = snapshot.snapshot_date
-    ? new Date(snapshot.snapshot_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  // snapshot_date is a calendar date (YYYY-MM-DD) marking the END of a 7-day window.
+  // Parse it as a local date so US time zones don't show the previous day.
+  const snapshotEnd = snapshot.snapshot_date ? new Date(`${snapshot.snapshot_date}T00:00:00`) : null;
+  const snapshotDate = snapshotEnd
+    ? snapshotEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
+  const snapshotWindow = snapshotEnd
+    ? `${new Date(snapshotEnd.getTime() - 7 * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${snapshotEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
     : null;
 
   return (
@@ -167,7 +173,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>Week of {snapshotDate}</span>
+              <span>Week of {snapshotWindow}</span>
             </>
           )}
         </div>
@@ -225,11 +231,7 @@ export default function MarketPulse({ isPro, userId, week, onUpgrade }: MarketPu
       <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         {snapshotDate ? `Data as of ${snapshotDate}` : 'Data last updated March 2026'}
         {' '}&middot;{' '}
-        {totalDeals > 0 ? `${totalDeals.toLocaleString()}` : '350+'} curated deals across{' '}
-        {snapshot?.therapeutic_area_breakdown
-          ? Object.keys(snapshot.therapeutic_area_breakdown).length
-          : 12}{' '}
-        therapeutic areas &middot; Refreshed weekly
+        {totalDeals.toLocaleString()} verified deal{totalDeals === 1 ? '' : 's'} in the last 14 days &middot; Refreshed weekly
       </p>
     </div>
   );

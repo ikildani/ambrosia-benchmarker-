@@ -42,36 +42,106 @@ export interface WeeklySnapshot {
   trial_updates: TrialUpdates;
 }
 
-export async function generateWeeklySnapshot(supabase: SupabaseClient): Promise<WeeklySnapshot | null> {
-  const now = new Date();
+/** Rows a user-facing surface may count: the same filter as applyDealQualityFilter (lib/entities/resolve.ts). */
+const DEAL_QUALITY = {
+  notInStatus: '("rejected","flagged")',
+} as const;
+
+/**
+ * One modality key per modality: the corpus mixes camelCase and snake_case
+ * (smallMolecule / small_molecule), which split every breakdown and sparkline.
+ */
+export function canonicalModality(m: string | null | undefined): string {
+  if (!m) return 'unknown';
+  return m.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+}
+
+/** Pseudo-TAs used for routing (_codev_deals, _china_deals ...) are not therapeutic areas. */
+function canonicalTA(ta: string | null | undefined): string {
+  if (!ta || ta.startsWith('_')) return 'other';
+  return ta;
+}
+
+function partyKey(name: string | null | undefined): string {
+  return (name ?? '')
+    .toLowerCase()
+    .replace(/\b(inc|ltd|llc|plc|sa|ag|co|corp|corporation|limited|gmbh|pharmaceuticals?|pharma|therapeutics|biosciences?|biotech(nology)?|group|holdings?)\b\.?/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Canonical duplicates survive the quality filter (same deal ingested under two spellings,
+ * or with licensor and licensee reversed). Collapse them: dedupe_group_id when set, otherwise
+ * the unordered party pair plus asset. Keeps the row with the most disclosed terms.
+ */
+export function collapseDuplicateDeals<T extends Record<string, unknown>>(deals: T[]): T[] {
+  const byKey = new Map<string, T>();
+  for (const d of deals) {
+    const parties = [partyKey(d.licensor_name as string), partyKey(d.licensee_name as string)].sort().join('|');
+    const asset = partyKey(d.asset_name as string);
+    const key = (d.dedupe_group_id as string | null) || `${parties}|${asset}`;
+    const prev = byKey.get(key);
+    const score = (x: T) => (x.upfront_usd != null ? 2 : 0) + (x.total_deal_value_usd != null ? 1 : 0);
+    if (!prev || score(d) > score(prev)) byKey.set(key, d);
+  }
+  return [...byKey.values()];
+}
+
+/**
+ * Build (and upsert) the weekly snapshot for the 7 days ending on `weekEnd` (default: now).
+ * Pass an earlier `weekEnd` to recompute a past week once late-ingested deals arrive.
+ */
+export async function generateWeeklySnapshot(
+  supabase: SupabaseClient,
+  opts: { weekEnd?: Date } = {},
+): Promise<WeeklySnapshot | null> {
+  const now = opts.weekEnd ?? new Date();
   const snapshotDate = now.toISOString().split('T')[0];
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  // Fetch this week's deals and trailing 90-day deals in parallel
+  // Fetch this week's deals and trailing 90-day deals in parallel.
+  // R68 + quality filter: no synthetic, non-canonical, rejected or flagged rows in user digests.
   const [thisWeekResult, trailingResult, trialUpdatesResult] = await Promise.all([
     supabase
       .from('deals')
       .select('*')
-      .eq('is_synthetic', false)  // R68: exclude 845 flagged fakes from user digests
+      .eq('is_synthetic', false)
+      .not('is_canonical', 'is', false)
+      .not('verification_status', 'in', DEAL_QUALITY.notInStatus)
       .gte('announced_date', weekAgo)
+      .lte('announced_date', snapshotDate)
       .order('upfront_usd', { ascending: false, nullsFirst: false }),
 
     supabase
       .from('deals')
-      .select('modality, therapeutic_area, phase_at_signing, upfront_usd, total_deal_value_usd')
-      .eq('is_synthetic', false)  // R68
+      .select('licensor_name, licensee_name, asset_name, dedupe_group_id, modality, therapeutic_area, phase_at_signing, upfront_usd, total_deal_value_usd')
+      .eq('is_synthetic', false)
+      .not('is_canonical', 'is', false)
+      .not('verification_status', 'in', DEAL_QUALITY.notInStatus)
       .gte('announced_date', ninetyDaysAgo)
       .lt('announced_date', weekAgo),
 
     supabase
       .from('company_trials')
       .select('status')
-      .gte('last_update_posted', weekAgo),
+      .gte('last_update_posted', weekAgo)
+      .lte('last_update_posted', snapshotDate),
   ]);
 
-  const thisWeekDeals = thisWeekResult.data || [];
-  const trailingDeals = trailingResult.data || [];
+  // A failed query must not publish a zero-deal week.
+  if (thisWeekResult.error) throw new Error(`weekly snapshot: deals query failed: ${thisWeekResult.error.message}`);
+  if (trailingResult.error) throw new Error(`weekly snapshot: trailing deals query failed: ${trailingResult.error.message}`);
+
+  const normalize = <T extends Record<string, unknown>>(rows: T[]) =>
+    collapseDuplicateDeals(rows).map((d) => ({
+      ...d,
+      modality: canonicalModality(d.modality as string),
+      therapeutic_area: canonicalTA(d.therapeutic_area as string),
+    }));
+  const thisWeekDeals = normalize((thisWeekResult.data || []) as Array<Record<string, unknown>>)
+    .sort((a, b) => ((b.upfront_usd as number) ?? -1) - ((a.upfront_usd as number) ?? -1)) as Array<Record<string, any>>;
+  const trailingDeals = normalize((trailingResult.data || []) as Array<Record<string, unknown>>);
   const trialChanges = trialUpdatesResult.data || [];
 
   // Calculate new deals count and financials
@@ -91,7 +161,7 @@ export async function generateWeeklySnapshot(supabase: SupabaseClient): Promise<
 
   // Notable deals — top 5 by upfront
   const notableDeals: NotableDeal[] = thisWeekDeals
-    .filter((d) => d.upfront_usd != null)
+    .filter((d) => d.upfront_usd != null && d.upfront_usd > 0)
     .slice(0, 5)
     .map((d) => ({
       id: d.id,

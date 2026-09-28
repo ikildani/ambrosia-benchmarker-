@@ -45,6 +45,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to generate snapshot' }, { status: 500 });
     }
 
+    // Step 1b: deals are ingested days after announcement, so a week's snapshot is
+    // incomplete when first written. Recompute the previous five stored weeks on
+    // their own dates so the Pulse history catches up. No emails for these.
+    const { data: priorWeeks } = await supabase
+      .from('market_snapshots')
+      .select('snapshot_date')
+      .eq('snapshot_type', 'weekly')
+      .lt('snapshot_date', snapshot.snapshot_date)
+      .order('snapshot_date', { ascending: false })
+      .limit(5);
+    for (const w of priorWeeks ?? []) {
+      try {
+        await generateWeeklySnapshot(supabase, { weekEnd: new Date(`${w.snapshot_date}T12:00:00Z`) });
+      } catch (e) {
+        console.error(`[weekly-digest] recompute ${w.snapshot_date} failed:`, e);
+      }
+    }
+
     // Step 2: Fetch Pro users who want the weekly digest
     const { data: proUsers, error: usersError } = await supabase
       .from('user_profiles')

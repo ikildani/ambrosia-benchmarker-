@@ -87,7 +87,9 @@ export function formatDealCount(count: number): string {
 // re-sourcing backlog, not a count. Grows as the re-sourcing job and the exchange adapters run. The GITHUB_TOKEN behind the
 // auto-updater died on 2026-09-16, so the site showed 1,400+ against 1,900+ real rows. Server
 // pages now read lib/deal-stats.ts; this constant is the fallback and the client-side copy.
-export const LIVE_DEAL_COUNT = 326;
+// 2026-09-28: set by hand to the live primary-sourced count (1,959) while the updater token is dead;
+// client components and fallbacks printed "300+" from the stale 326.
+export const LIVE_DEAL_COUNT = 1959;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),

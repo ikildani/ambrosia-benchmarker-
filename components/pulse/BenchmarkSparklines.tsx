@@ -93,7 +93,7 @@ export default function BenchmarkSparklines({ snapshots, isPro, onUpgrade }: Ben
 
   for (const modality of MODALITIES_TO_TRACK) {
     modalityData[modality] = ordered.map((s) => ({
-      date: new Date(s.snapshot_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: new Date(`${s.snapshot_date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       avg_upfront: s.modality_breakdown?.[modality]?.avg_upfront ?? null,
     }));
   }
