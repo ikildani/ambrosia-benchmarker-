@@ -32,13 +32,15 @@ alert, email or report.
 A flagged deal is not parked for a human. It is fixed, and the owner gets a report of
 what was flagged and how it was fixed.
 
-- `/api/cron/flag-fixer` (hourly, lib/ingestion/flag-fixer.ts) takes flagged deals and
+- The flag-fixer (lib/ingestion/flag-fixer.ts) runs hourly inside the `deal-verification` cron's :40 pass
+  (on demand: `/api/cron/flag-fixer`). It takes flagged deals and
   finds the primary document: SEC or exchange filing, newswire, or the company's own site.
   It extracts the terms, which must be quoted verbatim from the fetched text, and then either:
   - corrects the row from that document, cites it and sets `verified`; or
   - rejects the row as a duplicate of the verified, cited row that already holds the deal; or
   - leaves it flagged as unresolved when no primary document exists.
-- `/api/cron/deal-fix-report` (daily 12:50 UTC) emails `ADMIN_NOTIFICATION_EMAIL` the
+- The daily report rides on `api-credit-check` at 12:20 UTC (on demand: `/api/cron/deal-fix-report`,
+  `?dry=1` for HTML). It emails `ADMIN_NOTIFICATION_EMAIL` the
   fixes (field before -> after, with the source link), duplicates removed, rejections
   and unresolved deals. The source of truth is `remediation_log` with `cron_source = 'flag_fixer'`.
 - Never correct a deal from web-search prose or the verifier's notes alone. The
@@ -60,6 +62,11 @@ Unique indexes to watch when correcting a row:
 - `idx_deals_dedup` on (licensor, licensee, total) for non-synthetic rows. Rejected rows
   count too, so correct whichever row of the pair will not collide.
 - `unique_deal` on (licensor, licensee, asset, date).
+
+## vercel.json is at Vercel's 100-cron cap
+
+A new cron entry fails the deploy. New scheduled work rides on an existing cron: see
+`deal-verification` (outcomes, flag-fixer) and `api-credit-check` (inflow check, flag-fix report).
 
 ## Migrations
 

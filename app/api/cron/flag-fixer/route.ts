@@ -6,7 +6,9 @@
  * or leaves it flagged as unresolved. Every outcome lands in remediation_log and
  * the daily deal-fix report emails it to the owner.
  *
- * Schedule: hourly. ?max=N (<= 20) and ?ids=a,b run a specific batch.
+ * Not in vercel.json (100-cron cap): the scheduled pass runs inside
+ * /api/cron/deal-verification on its :40 run. This route is for on-demand
+ * batches: ?max=N (<= 20) and ?ids=a,b.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';

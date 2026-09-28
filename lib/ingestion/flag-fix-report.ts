@@ -4,6 +4,7 @@
  * a duplicate or rejected, and what is still unresolved.
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { sendEmail } from '../email/client';
 import { FLAG_FIXER_SOURCE } from './flag-fixer';
 
 export interface ReportRow {
@@ -91,4 +92,21 @@ export async function collectFlagFixReport(supabase: SupabaseClient, since: stri
     rejected: all.filter(r => r.issue_type === 'auto_reject'),
     unresolved: all.filter(r => r.issue_type === 'flagged_unresolved'),
   };
+}
+
+/**
+ * Build and email the report for the last `hours`. Nothing handled and nothing
+ * newly flagged: no email. Runs daily from the hourly api-credit-check cron
+ * (vercel.json is at Vercel's 100-cron cap) and on demand via /api/cron/deal-fix-report.
+ */
+export async function sendFlagFixReport(supabase: SupabaseClient, hours = 24): Promise<{ sent: boolean; error?: string; report: FlagFixReport; html: string }> {
+  const since = new Date(Date.now() - hours * 3_600_000).toISOString();
+  const report = await collectFlagFixReport(supabase, since);
+  const html = buildFlagFixReportHtml(report);
+  const handled = report.fixed.length + report.duplicates.length + report.rejected.length + report.unresolved.length;
+  if (handled === 0 && report.newlyFlagged === 0) return { sent: false, error: 'nothing to report', report, html };
+  const to = process.env.ADMIN_NOTIFICATION_EMAIL || 'ikildani@ambrosiaventures.co';
+  const subject = `Deal data: ${report.fixed.length} fixed, ${report.duplicates.length} duplicates removed, ${report.unresolved.length} unresolved`;
+  const res = await sendEmail({ to, subject, html });
+  return { sent: res.success, error: res.success ? undefined : res.error, report, html };
 }

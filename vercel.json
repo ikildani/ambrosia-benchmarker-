@@ -167,14 +167,6 @@
       "schedule": "*/20 * * * *"
     },
     {
-      "path": "/api/cron/flag-fixer",
-      "schedule": "40 * * * *"
-    },
-    {
-      "path": "/api/cron/deal-fix-report",
-      "schedule": "50 12 * * *"
-    },
-    {
       "path": "/api/cron/re-extract-pending",
       "schedule": "0 7 * * *"
     },

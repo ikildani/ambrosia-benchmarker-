@@ -12,9 +12,12 @@ import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { classifyCreditErrors, shouldAlert, buildCreditAlert, type AlertState, type Vendor } from '@/lib/ingestion/credit-sentinel';
 import { runDealInflowCheck, type InflowReport } from '@/lib/ingestion/inflow-check';
+import { sendFlagFixReport } from '@/lib/ingestion/flag-fix-report';
 
 /** UTC hour at which the hourly sentinel also runs the daily deal-inflow check. */
 const INFLOW_CHECK_UTC_HOUR = 13;
+/** UTC hour at which it also emails the owner the daily flag-and-fix report (12:20 UTC = 08:20 ET). */
+const FLAG_FIX_REPORT_UTC_HOUR = 12;
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -98,5 +101,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, outages, alerted, recovered, checkedRuns: rows?.length ?? 0, inflow });
+  // Daily flag-and-fix report to the owner, same ride-along reason. ?flagFixReport=true sends now.
+  let flagFixReport: { sent: boolean; error?: string } | null = null;
+  if (request.nextUrl.searchParams.get('flagFixReport') === 'true' || now.getUTCHours() === FLAG_FIX_REPORT_UTC_HOUR) {
+    try {
+      const r = await sendFlagFixReport(supabase, 24);
+      flagFixReport = { sent: r.sent, error: r.error };
+    } catch (e) {
+      console.error('[api-credit-check] flag-fix report failed (non-fatal):', e);
+    }
+  }
+
+  return NextResponse.json({ ok: true, outages, alerted, recovered, checkedRuns: rows?.length ?? 0, inflow, flagFixReport });
 }
