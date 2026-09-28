@@ -47,7 +47,7 @@ const FAQ_ITEMS = [
   {
     question: 'Can Solidus and Cortellis be used together?',
     answer:
-      'Yes, and many sophisticated pharma BD teams do exactly this. Cortellis provides the upstream pipeline intelligence, regulatory context, and patent landscape data. Solidus provides the downstream deal economics — valuation models, competitive dynamics, partner matching, and negotiation analytics. Together they cover the full deal evaluation workflow from target identification through term sheet negotiation.',
+      'Yes, and many sophisticated pharma BD teams do exactly this. Cortellis provides the deepest regulatory context, patent landscapes and curated pipeline records. Solidus provides the deal economics — valuation models, competitive dynamics, partner matching, negotiation analytics — and, with Search & Evaluation, a registry-derived pipeline view with a licensing-intent score and predicted terms per asset. Together they cover the full deal evaluation workflow from target identification through term sheet negotiation.',
   },
 ];
 
@@ -62,7 +62,9 @@ const FEATURES = [
   { feature: 'Pharma Intent Scoring', solidus: true, competitor: false },
   { feature: 'Deal Waterfall Analysis', solidus: true, competitor: false },
   { feature: 'Real-time Deal Benchmarking', solidus: true, competitor: false },
-  { feature: 'Pipeline Intelligence (global)', solidus: false, competitor: true },
+  { feature: 'Pipeline Intelligence (registry-derived, 100 countries)', solidus: true, competitor: true },
+  { feature: 'Licensing-Intent Score per Asset (backtested, evidence shown)', solidus: true, competitor: false },
+  { feature: 'Predicted Deal Terms per Asset (comps shown)', solidus: true, competitor: false },
   { feature: 'Regulatory & Clinical Trial Data', solidus: false, competitor: true },
   { feature: 'Patent Analytics', solidus: false, competitor: true },
   { feature: 'Contract-Level Document Access', solidus: false, competitor: true },
@@ -214,9 +216,9 @@ export default function CortellisComparePage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {[
             {
-              title: 'Deal Economics, Not Pipeline Data',
+              title: 'Deal Economics First, Pipeline Data as Evidence',
               description:
-                'Cortellis maps pipelines, regulatory milestones, and patent landscapes. Solidus analyzes the deal terms themselves — what comparable transactions paid in upfronts, how milestone structures break down by type, what royalty rates look like by therapeutic area and phase, and how competitive dynamics affect deal leverage.',
+                'Cortellis maps pipelines, regulatory milestones, and patent landscapes with a curation team behind them. Solidus analyzes the deal terms themselves — what comparable transactions paid in upfronts, how milestone structures break down by type, what royalty rates look like by therapeutic area and phase — and uses registry-derived pipeline data as the evidence behind each asset\'s licensing-intent score and predicted terms.',
             },
             {
               title: '21 Integrated Analytical Engines',

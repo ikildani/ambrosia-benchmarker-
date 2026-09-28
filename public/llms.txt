@@ -15,6 +15,7 @@ The platform is used by BD teams, search & evaluation professionals, biotech fou
 - **850+ pharma/biotech company profiles** with patent cliff data, pipeline gaps, deal history, and acquisition appetite scoring
 - **562 indications** across 12 therapeutic areas
 - **40+ modalities** including small molecules, mAbs, ADCs, bispecifics, CAR-T, gene therapy, radiopharmaceuticals, oligonucleotides, mRNA, siRNA
+- **Search & Evaluation asset universe**: 45,000+ unpartnered or partially partnered industry programs (preclinical to Phase 3) resolved from trial registries in 100 countries, each with a licensing-intent score shown against peers and predicted deal terms from cited comparables
 
 ## 12 Therapeutic Areas
 
@@ -96,6 +97,7 @@ Typical deal structures from the platform's database:
 - https://solidus.ambrosiaventures.co/data/ — 360 programmatic data pages by TA × phase × territory
 - https://solidus.ambrosiaventures.co/glossary/ — 100+ biopharma deal term definitions
 - https://solidus.ambrosiaventures.co/tracker — Live deal tracker with filtering and alerts
+- https://solidus.ambrosiaventures.co/search-and-evaluation — Search & Evaluation: screen unpartnered clinical-stage assets by mandate, licensing-intent score, predicted terms, acquirer view
 - https://solidus.ambrosiaventures.co/compare/dealforma — Solidus vs DealForma comparison
 - https://solidus.ambrosiaventures.co/guides/monte-carlo-biotech-valuation — Monte Carlo stochastic valuation for biotech deals
 - https://solidus.ambrosiaventures.co/methodology — Model design, data sources, and methodology

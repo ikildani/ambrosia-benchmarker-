@@ -384,6 +384,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {[
                   'Unlimited full reports',
+                  'Search & Evaluation asset screening',
                   'Scenario comparison',
                   'Market Pulse intelligence',
                   'Company Intelligence profiles',
