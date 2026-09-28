@@ -54,6 +54,9 @@ export interface OwnershipEvidence {
   owner_role?: string;
   arms?: { experimental?: number; comparator?: number; unknown?: number };
   matched_interventions?: number;
+  /** Migration 143: the company's own code series decided ownership. */
+  code_prefix?: string;
+  code_prefix_originators?: number;
 }
 
 export interface ClinicalAssetRow {

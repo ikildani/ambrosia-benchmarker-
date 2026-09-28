@@ -40,9 +40,15 @@ export interface OwnershipInput {
   ownerRole: 'licensee' | 'co_developer' | null;
   /** Arm roles of the company's trial_interventions rows that name this asset. */
   armRoles: readonly ArmRole[];
+  /** clinical_assets.asset_name (migration 143 name rules). */
+  assetName?: string | null;
+  /** Other originator programs of the same company sharing this asset's code prefix (migration 143). */
+  codePrefixOriginators?: number;
 }
 
 export type OwnershipRule =
+  | 'comparator_named'
+  | 'code_prefix_match'
   | 'originator_match'
   | 'drug_owner_role'
   | 'marketed_other'
@@ -58,19 +64,43 @@ export interface OwnershipResult {
   evidence: OwnershipEvidence;
 }
 
+/** "Comparators: simvastatin and ezetimibe", "Placebo", "Standard of care": the row names a comparator, not a program. */
+export const COMPARATOR_NAME_RE = /^(comparators?\b|placebo\b|standard[- ]of[- ]care|soc\b|control\b|vehicle\b|sham\b|best supportive care|no intervention|usual care|background therapy)/i;
+
+export function isComparatorNamed(name: string | null | undefined): boolean {
+  return COMPARATOR_NAME_RE.test(name ?? '');
+}
+
+/** "JDQ443" -> "JDQ", "CP-742,033" -> "CP", "Dotinurad" -> null. Mirrors radar_code_prefix(). */
+export function codePrefixOf(name: string | null | undefined): string | null {
+  if (!name) return null;
+  let m = /^([A-Za-z]{2,6})[- ]?[0-9]{2,6}[A-Za-z]?$/.exec(name);
+  if (m) return m[1].toUpperCase();
+  m = /^([A-Za-z]{2,6})-[0-9]{2,4},[0-9]{3}$/.exec(name);
+  return m ? m[1].toUpperCase() : null;
+}
+
+/** How many other originator programs a company needs in a code series before the series is trusted. */
+export const CODE_PREFIX_MIN_ORIGINATORS = 2;
+
 /**
  * First matching rule wins. Mirrors the CASE in radar_apply_ownership():
+ *   comparator_named     the row is named after a comparator or placebo
  *   originator_match     trusted originator is this company
  *   drug_owner_role      drug_owners records this company as licensee / co-developer
  *   marketed_other       trusted originator is another company and the drug is
  *                        phase_4 here or approved anywhere
  *   comparator           trusted originator is another company and the drug never
  *                        sits in one of this company's experimental arms
+ *   code_prefix_match    the asset is a development code in a series that already
+ *                        names >= 2 of this company's originator programs; the
+ *                        company's own naming beats a foreign drug_master originator
  *   originator_mismatch  trusted originator is another company but the drug is in
  *                        an experimental arm here: a possible licensee with no deal
  *                        on record, left visible as 'unknown'
  *   arm_comparator       no trusted originator; every matched arm is a comparator
  *   sponsor_default      no trusted originator; at least one experimental arm
+ *   code_prefix_match    (again) no arms, but the code series is the company's own
  *   no_arm_evidence      nothing matched
  */
 export function deriveOwnership(input: OwnershipInput): OwnershipResult {
@@ -81,10 +111,14 @@ export function deriveOwnership(input: OwnershipInput): OwnershipResult {
   const comparator = input.armRoles.filter(r => (COMPARATOR_ARM_ROLES as readonly string[]).includes(r)).length;
   const unknownArms = input.armRoles.filter(r => r === 'unknown').length;
   const matched = input.armRoles.length;
+  const codePrefix = codePrefixOf(input.assetName);
+  const seriesOwned = codePrefix !== null && (input.codePrefixOriginators ?? 0) >= CODE_PREFIX_MIN_ORIGINATORS;
 
   let rule: OwnershipRule;
   let status: OwnershipStatus;
-  if (trustedOriginator && drug!.originatorCompanyId === input.companyId) {
+  if (isComparatorNamed(input.assetName)) {
+    rule = 'comparator_named'; status = 'comparator_or_background';
+  } else if (trustedOriginator && drug!.originatorCompanyId === input.companyId) {
     rule = 'originator_match'; status = 'originator';
   } else if (input.ownerRole) {
     rule = 'drug_owner_role'; status = input.ownerRole;
@@ -92,12 +126,16 @@ export function deriveOwnership(input: OwnershipInput): OwnershipResult {
     rule = 'marketed_other'; status = 'marketed_other';
   } else if (trustedOriginator && experimental === 0) {
     rule = 'comparator'; status = 'comparator_or_background';
+  } else if (trustedOriginator && seriesOwned) {
+    rule = 'code_prefix_match'; status = 'originator';
   } else if (trustedOriginator) {
     rule = 'originator_mismatch'; status = 'unknown';
   } else if (matched > 0 && experimental === 0 && comparator > 0) {
     rule = 'arm_comparator'; status = 'comparator_or_background';
   } else if (experimental > 0) {
     rule = 'sponsor_default'; status = 'originator';
+  } else if (seriesOwned) {
+    rule = 'code_prefix_match'; status = 'originator';
   } else {
     rule = 'no_arm_evidence'; status = 'unknown';
   }
@@ -114,6 +152,10 @@ export function deriveOwnership(input: OwnershipInput): OwnershipResult {
     if (drug.maxPhase) evidence.max_phase = drug.maxPhase;
   }
   if (input.ownerRole) evidence.owner_role = input.ownerRole;
+  if (rule === 'code_prefix_match') {
+    evidence.code_prefix = codePrefix ?? undefined;
+    evidence.code_prefix_originators = input.codePrefixOriginators;
+  }
   return { status, rule, evidence };
 }
 

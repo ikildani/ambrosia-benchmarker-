@@ -3,7 +3,7 @@
  * The cases below are the production shapes from the Sep 25 2026 audit.
  */
 
-import { deriveOwnership, isOwnershipHiddenByDefault, OWNERSHIP_EXCLUDED_IN, type OwnershipInput } from '@/lib/radar/ownership';
+import { codePrefixOf, deriveOwnership, isComparatorNamed, isOwnershipHiddenByDefault, OWNERSHIP_EXCLUDED_IN, type OwnershipInput } from '@/lib/radar/ownership';
 
 const MERCK = 'c-merck';
 const SCHOLAR = 'c-scholar';
@@ -92,6 +92,49 @@ describe('deriveOwnership', () => {
   it('no originator, no matched arms (legacy row, unknown arms): unknown', () => {
     expect(deriveOwnership(input({ armRoles: [] })).rule).toBe('no_arm_evidence');
     expect(deriveOwnership(input({ armRoles: ['unknown', 'unknown'] })).status).toBe('unknown');
+  });
+
+  it('a row named after a comparator is comparator_or_background whatever drug_master says (migration 143)', () => {
+    const r = deriveOwnership(input({
+      companyId: MERCK,
+      assetName: 'Comparators: simvastatin and ezetimibe',
+      drug: { id: 'd1', originatorCompanyId: MERCK, confidence: 95, maxPhase: 'approved' },
+      armRoles: ['unknown'],
+    }));
+    expect(r.rule).toBe('comparator_named');
+    expect(r.status).toBe('comparator_or_background');
+    expect(isComparatorNamed('Placebo')).toBe(true);
+    expect(isComparatorNamed('Standard of Care')).toBe(true);
+    expect(isComparatorNamed('Controlled-release ABC-123')).toBe(false);
+    expect(isComparatorNamed('Socazolimab')).toBe(false);
+  });
+
+  it("the company's own code series beats a foreign originator and no-arm rows (migration 143)", () => {
+    // Novartis JDQ443 with drug_master pointing at another company: the JDQ series is Novartis's.
+    const foreign = deriveOwnership(input({
+      companyId: 'c-novartis',
+      assetName: 'JDQ443',
+      drug: { id: 'd1', originatorCompanyId: BIOGEN, confidence: 90, maxPhase: 'phase_3' },
+      armRoles: ['experimental'],
+      codePrefixOriginators: 4,
+    }));
+    expect(foreign.rule).toBe('code_prefix_match');
+    expect(foreign.status).toBe('originator');
+    expect(foreign.evidence.code_prefix).toBe('JDQ');
+    expect(foreign.evidence.code_prefix_originators).toBe(4);
+    // Pfizer CP-742,033 with unknown arms only.
+    const noArms = deriveOwnership(input({ companyId: 'c-pfizer', assetName: 'CP-742,033', armRoles: ['unknown'], codePrefixOriginators: 12 }));
+    expect(noArms.rule).toBe('code_prefix_match');
+    // One sibling is not a series; an INN is never a code.
+    expect(deriveOwnership(input({ assetName: 'NB002', armRoles: ['unknown'], codePrefixOriginators: 1 })).rule).toBe('no_arm_evidence');
+    expect(deriveOwnership(input({ assetName: 'Dotinurad', armRoles: ['unknown'], codePrefixOriginators: 9 })).rule).toBe('no_arm_evidence');
+    expect(codePrefixOf('JDQ443')).toBe('JDQ');
+    expect(codePrefixOf('CP-742,033')).toBe('CP');
+    expect(codePrefixOf('TAK 079')).toBe('TAK');
+    expect(codePrefixOf('Dotinurad')).toBeNull();
+    // A trusted originator that IS the company still wins, and marketed_other still beats the series.
+    expect(deriveOwnership(input({ companyId: MERCK, assetName: 'MK-1234', drug: { id: 'd', originatorCompanyId: MERCK, confidence: 90, maxPhase: null }, codePrefixOriginators: 5 })).rule).toBe('originator_match');
+    expect(deriveOwnership(input({ assetName: 'AB-123', phase: 'phase_4', drug: { id: 'd', originatorCompanyId: BIOGEN, confidence: 90, maxPhase: 'approved' }, armRoles: ['experimental'], codePrefixOriginators: 5 })).rule).toBe('marketed_other');
   });
 
   it('evidence omits drug fields when there is no drug', () => {

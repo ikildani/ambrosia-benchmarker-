@@ -1,10 +1,11 @@
 'use client';
 
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
-import { CheckIcon, ChevronUpDownIcon, PencilSquareIcon, PlusIcon } from '@heroicons/react/20/solid';
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import { CheckIcon, ChevronUpDownIcon, PencilSquareIcon, PlusIcon, SparklesIcon } from '@heroicons/react/20/solid';
 import { radarLabel } from '@/lib/radar/vocab';
 import type { RadarMandate } from '@/lib/radar/client/api-types';
 import { mandateSummary } from '@/lib/radar/client/mandate';
+import { MANDATE_TEMPLATES, type MandateTemplate } from '@/lib/radar/client/mandate-templates';
 import { BTN_GHOST, FOCUS_RING, cn } from './ui';
 
 const ALL = '__all__';
@@ -15,10 +16,12 @@ interface Props {
   onSelect: (id: string | null) => void;
   onEdit: (m: RadarMandate) => void;
   onNew: () => void;
+  /** Start a new mandate from a buyer-archetype template. */
+  onNewFromTemplate?: (t: MandateTemplate) => void;
 }
 
 /** Mandate picker (Headless Listbox). "All assets" is always the first option. */
-export function MandateSwitcher({ mandates, selectedId, onSelect, onEdit, onNew }: Props) {
+export function MandateSwitcher({ mandates, selectedId, onSelect, onEdit, onNew, onNewFromTemplate }: Props) {
   const selected = mandates.find(m => m.id === selectedId) ?? null;
   const value = selected ? selected.id : ALL;
 
@@ -78,6 +81,24 @@ export function MandateSwitcher({ mandates, selectedId, onSelect, onEdit, onNew 
         <button type="button" onClick={() => onEdit(selected)} className={cn(BTN_GHOST, 'p-2')} aria-label={`Edit mandate ${selected.name}`} title="Edit mandate">
           <PencilSquareIcon className="h-4 w-4" aria-hidden />
         </button>
+      )}
+      {onNewFromTemplate && (
+        <Menu as="div" className="relative">
+          <MenuButton className={cn(BTN_GHOST, 'p-2')} aria-label="New mandate from a template" title="Templates">
+            <SparklesIcon className="h-4 w-4" aria-hidden />
+          </MenuButton>
+          <MenuItems anchor="bottom start" className="z-40 mt-1 w-80 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 [--anchor-max-height:24rem]">
+            <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Start from a template</p>
+            {MANDATE_TEMPLATES.map(t => (
+              <MenuItem key={t.id}>
+                <button type="button" onClick={() => onNewFromTemplate(t)} className="flex w-full cursor-pointer flex-col items-start rounded-lg px-2.5 py-2 text-left text-sm text-neutral-800 data-[focus]:bg-neutral-100 dark:text-neutral-200 dark:data-[focus]:bg-neutral-800">
+                  <span className="font-medium">{t.name}</span>
+                  <span className="text-xs text-neutral-600 dark:text-neutral-400">{t.audience}</span>
+                </button>
+              </MenuItem>
+            ))}
+          </MenuItems>
+        </Menu>
       )}
     </div>
   );
