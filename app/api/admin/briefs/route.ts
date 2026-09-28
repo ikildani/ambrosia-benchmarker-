@@ -2,6 +2,8 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { verifyAdminAuth } from '@/lib/admin-auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { deleteBriefRequest } from '@/lib/brief/delete-request';
+import { createBriefInvoice } from '@/lib/brief/invoice';
+import Stripe from 'stripe';
 
 /**
  * Admin actions on Deal Intelligence Brief requests.
@@ -11,8 +13,12 @@ import { deleteBriefRequest } from '@/lib/brief/delete-request';
  *     the result is a draft; with one it is delivered and emailed.
  *   POST { requestId, action: 'opinion', text, reviewer? }
  *     Store the Managing Partner opinion. Delivery still requires a 'build'.
+ *   POST { requestId, action: 'invoice_send' }
+ *     Create and email a Stripe-hosted invoice for the brief (card, bank
+ *     debit, and the wire / ACH details from BRIEF_WIRE_INSTRUCTIONS in the
+ *     footer). The webhook marks the row paid.
  *   POST { requestId, action: 'invoice_sent' }
- *     Mark the invoice as sent (payment_status stays pending until paid).
+ *     Mark an invoice sent by hand (payment_status stays pending until paid).
  *   POST { requestId, action: 'paid' }
  *     Mark the invoice paid.
  *   POST { requestId, action: 'delete', confirm: 'DELETE' }
@@ -62,6 +68,17 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.from('benchmark_requests').update({ mp_opinion: text, mp_reviewer: body.reviewer?.trim() || 'Issa Kildani, Managing Partner', mp_reviewed_at: now }).eq('id', requestId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
+  }
+
+  if (action === 'invoice_send') {
+    const key = process.env.STRIPE_SECRET_KEY?.trim();
+    if (!key) return NextResponse.json({ error: 'STRIPE_SECRET_KEY not configured' }, { status: 500 });
+    try {
+      const result = await createBriefInvoice(new Stripe(key), supabase, requestId);
+      return NextResponse.json({ ok: true, result });
+    } catch (e) {
+      return NextResponse.json({ error: e instanceof Error ? e.message : 'invoice failed' }, { status: 502 });
+    }
   }
 
   if (action === 'invoice_sent' || action === 'paid') {
