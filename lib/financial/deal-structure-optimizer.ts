@@ -244,8 +244,15 @@ export function optimizeDealStructure(
   const profile = resolveProfile(rnpvInput, preferences);
 
   // ── 1. Project phase-appropriate deal types ──
+  // Engine phase keys (phase1, phase2, ...) are what RNPVInput carries; the underscore
+  // spellings are kept for callers passing deals-table phases. Missing the engine keys
+  // made every clinical phase fall back to rank 1, so Phase 2+ assets never saw
+  // acquisition or co-development alternatives.
   const PHASE_ORDER: Record<string, number> = {
-    discovery: 0, preclinical: 1, phase_1: 2, phase_1_2: 2, phase_2: 3, phase_2_3: 3, phase_3: 4, nda_filed: 5, approved: 5,
+    discovery: 0, preclinical: 1,
+    phase1: 2, phase1_2: 2, phase2: 3, phase2_3: 3, phase3: 4,
+    phase_1: 2, phase_1_2: 2, phase_2: 3, phase_2_3: 3, phase_3: 4,
+    nda_filed: 5, approved: 5,
   };
   const phaseRank = PHASE_ORDER[rnpvInput.phase] ?? 1;
   const applicableTypes = ALL_DEAL_TYPES.filter(dt => {
