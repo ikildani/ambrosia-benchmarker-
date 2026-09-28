@@ -174,6 +174,24 @@ export interface DiscoverySkips {
  * "2024-2026") made Perplexity return the well-known deals of each era, all
  * of which are already in the table, so every candidate died as a duplicate.
  */
+/**
+ * Normalise a model-supplied announced date to YYYY-MM-DD. Perplexity and the
+ * extractor return year-only ("2025") and month-only ("2026-09") strings often
+ * enough that the mega-deal sweep insert failed on
+ * `invalid input syntax for type date "2026-09"` (Sep 2026). Year-only → mid-year,
+ * month-only → the 15th, anything unparseable or missing → `today`, future → `today`.
+ */
+export function normalizeAnnouncedDate(raw: string | null | undefined, today: string = new Date().toISOString().split('T')[0]): string {
+  let d = (raw ?? '').trim();
+  if (/^\d{4}$/.test(d)) d += '-06-15';
+  else if (/^\d{4}-\d{2}$/.test(d)) d += '-15';
+  else if (/^\d{4}-\d{2}-\d{2}/.test(d)) d = d.slice(0, 10);
+  else d = '';
+  if (!d || Number.isNaN(Date.parse(d))) d = today;
+  if (d > today) d = today;
+  return d;
+}
+
 export function withRecencyWindow(query: string, sinceIso: string, days: number): string {
   const stripped = query
     // "2022-2025", "2023 to 2026", "2024–2026"
@@ -452,8 +470,10 @@ export async function runPerplexityDealDiscovery(
               modality: deal.modality || 'smallMolecule',
               phase_at_signing: deal.phase || 'unknown',
               territory: deal.territory || 'global',
-              announced_date: deal.announced_date || new Date().toISOString().split('T')[0],
-              source_type: 'perplexity_sweep',
+              announced_date: normalizeAnnouncedDate(deal.announced_date),
+              // 'perplexity_sweep' is not in deals_source_type_check; every sweep insert failed
+              // on it (Iambic/AbbVie, Genentech/Earendil, Codagenix/Vaxthera… re-failed each run).
+              source_type: 'perplexity_discovery',
               source_url: sourceUrl,
               press_release_url: sourceUrl && isPressReleaseUrl(sourceUrl) ? sourceUrl : null,
               raw_text_excerpt: extractAuditExcerpt(sweepText, deal.licensee, 600) || null,
@@ -531,14 +551,7 @@ export async function runPerplexityDealDiscovery(
             const licenseeId = await findOrCreateCompany(supabase, deal.licensee, true);
             const derivedTA = deriveTherapeuticArea(deal.indication) || ta;
 
-            // Normalize announced_date
-            const today = new Date().toISOString().split('T')[0];
-            let announcedDate = deal.announced_date;
-            if (announcedDate && announcedDate.length === 4) announcedDate += '-06-15'; // Year-only: use mid-year estimate
-            if (announcedDate && announcedDate.length === 7) announcedDate += '-15'; // Month-only: use 15th
-            if (!announcedDate) announcedDate = today; // Use today if no date available
-            // Clamp future dates to today
-            if (announcedDate && announcedDate > today) announcedDate = today;
+            const announcedDate = normalizeAnnouncedDate(deal.announced_date);
 
             const sourceUrl = resolveDiscoveredSourceUrl(deal, citations);
 
