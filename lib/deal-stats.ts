@@ -12,6 +12,8 @@
  * real rows — a regulator/exchange filing id, an issuer release URL, or a URL
  * from a primary pipeline. The site promises no secondary data; rows without
  * such a citation are a re-sourcing backlog and are not counted.
+ * Sep 28 2026: also excludes duplicate (is_canonical=false), rejected and flagged
+ * rows — 1,966 → 1,447 on that date.
  */
 import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -50,18 +52,22 @@ const FALLBACK: LiveDealStats = {
 
 async function queryLiveDealStats(): Promise<LiveDealStats> {
   const supabase = createServiceClient();
-  const real = supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false);
+  // Quality filter (applyDealQualityFilter, inlined for typing): no synthetic,
+  // duplicate (non-canonical), rejected or flagged rows in any public count.
+  const quality = () => supabase.from('deals').select('*', { count: 'exact', head: true })
+    .eq('is_synthetic', false)
+    .not('is_canonical', 'is', false)
+    .not('verification_status', 'in', '(rejected,flagged)');
   const [total, verified, cited, tas, sources, countries, years, newest] = await Promise.all([
-    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or("source_filing_id.not.is.null,press_release_url.not.is.null,and(source_url.not.is.null,source_type.in.(sec_8k,sec_6k,sec_10k,sec_10q,hkex,tdnet,asx,cninfo,mfn,dart,press_release))"),
-    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).eq('verification_status', 'verified'),
-    supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_synthetic', false).or('source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null'),
+    quality().or("source_filing_id.not.is.null,press_release_url.not.is.null,and(source_url.not.is.null,source_type.in.(sec_8k,sec_6k,sec_10k,sec_10q,hkex,tdnet,asx,cninfo,mfn,dart,press_release))"),
+    quality().eq('verification_status', 'verified'),
+    quality().or('source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null'),
     supabase.rpc('count_distinct_deal_column', { p_column: 'therapeutic_area' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
     supabase.rpc('count_distinct_deal_column', { p_column: 'source_type' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
     supabase.rpc('count_distinct_deal_column', { p_column: 'licensor_country' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
     supabase.from('deals').select('announced_date').eq('is_synthetic', false).gte('announced_date', '2010-01-01').order('announced_date', { ascending: true }).limit(1).maybeSingle(),
     supabase.from('deals').select('created_at').eq('is_synthetic', false).order('created_at', { ascending: false }).limit(1).maybeSingle(),
   ]);
-  void real;
   if (total.error || total.count == null) throw new Error(total.error?.message ?? 'count failed');
   const now = new Date().getUTCFullYear();
   const earliest = years.data?.announced_date ? Number(String(years.data.announced_date).slice(0, 4)) : 2017;
@@ -80,7 +86,7 @@ async function queryLiveDealStats(): Promise<LiveDealStats> {
   };
 }
 
-const cached = unstable_cache(queryLiveDealStats, ['live-deal-stats-v1'], { revalidate: 900, tags: ['deal-stats'] });
+const cached = unstable_cache(queryLiveDealStats, ['live-deal-stats-v2'], { revalidate: 900, tags: ['deal-stats'] });
 
 /** Cached 15 minutes; never throws — falls back to the compile-time constant. */
 export async function getLiveDealStats(): Promise<LiveDealStats> {

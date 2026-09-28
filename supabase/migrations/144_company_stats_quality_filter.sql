@@ -10,8 +10,17 @@
 --   is_synthetic = false AND is_canonical IS NOT FALSE
 --   AND coalesce(verification_status,'') NOT IN ('rejected','flagged')
 --
--- Rollback: re-create the previous function bodies (saved at the bottom of this file) and
---   DROP TRIGGER deal_changed_company_stats ON deals; the INSERT trigger is unchanged.
+-- Rollback: re-create the previous function bodies (saved at the bottom of this file),
+--   DROP TRIGGER deal_changed_company_stats ON deals (the INSERT trigger is unchanged), and
+--   UPDATE companies c SET <cols> = b.<cols> FROM companies_stats_backup_20260928 b WHERE b.id = c.id.
+
+-- ── Backup of every column this migration rewrites (restore source for rollback) ──
+CREATE TABLE IF NOT EXISTS public.companies_stats_backup_20260928 AS
+SELECT id, deals_last_12mo, deals_last_24mo, avg_upfront_usd, median_upfront_usd, last_deal_date,
+       last_deal_modality, modalities_active, indications_active, phase_preference_min,
+       phase_preference_max, data_quality_score, updated_at
+FROM public.companies;
+ALTER TABLE public.companies_stats_backup_20260928 ENABLE ROW LEVEL SECURITY;
 
 -- ── Stats ────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.update_company_deal_stats(p_company_id uuid)
