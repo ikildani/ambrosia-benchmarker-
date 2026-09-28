@@ -580,8 +580,9 @@ export async function runRegistrySweep(
   const cache = new Map<string, ResolvedCompany | null>();
   const maxPages = opts.maxPages ?? 1000;
 
+  let idleCursor: string | null | undefined;
   while (result.pages < maxPages) {
-    if (Date.now() - started > opts.budgetMs) {
+    if (Date.now() - started > opts.budgetMs || opts.signal?.aborted) {
       result.timedOut = true;
       break;
     }
@@ -608,6 +609,16 @@ export async function runRegistrySweep(
       result.companiesCreated += ingest.companiesCreated;
       result.errors.push(...ingest.errors);
       for (const c of ingest.droppedColumns) if (!result.droppedColumns.includes(c)) result.droppedColumns.push(c);
+    }
+    // A page with no records that leaves the cursor where it was is not progress
+    // (an aborted fetch, a rate-limited registry): stop instead of spinning to maxPages.
+    if (page.records.length === 0 && !page.done && page.nextCursor === cursor) {
+      if (idleCursor === cursor) {
+        result.warnings.push(`${adapter.registry}: no progress at cursor ${cursor ?? 'null'}; stopping this run`);
+        result.timedOut = true;
+        break;
+      }
+      idleCursor = cursor;
     }
     cursor = page.nextCursor;
     if (page.done) {
