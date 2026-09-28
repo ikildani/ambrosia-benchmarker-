@@ -84,7 +84,15 @@ export async function GET(request: NextRequest) {
     if (typeof cfg.webhook_url === 'string') cfg.webhook_url = cfg.webhook_url.replace(/(services\/[^/]+\/[^/]+\/).+$/, '$1••••');
     return { ...r, config: cfg };
   });
-  return NextResponse.json({ rules, kinds: ALERT_KINDS, hasProAccess: auth.hasProAccess });
+  // Names for the assets rules are pinned to, so the Alerts page can say
+  // "Score crosses 70 · Asset X" instead of showing a UUID.
+  const pinnedIds = Array.from(new Set(rules.map(r => r.config.asset_id).filter((v): v is string => typeof v === 'string' && isUuid(v))));
+  const assetNames: Record<string, string> = {};
+  if (pinnedIds.length > 0) {
+    const { data: assets } = await supabase.from('clinical_assets').select('id, asset_name').in('id', pinnedIds.slice(0, 100));
+    for (const a of (assets || []) as { id: string; asset_name: string }[]) assetNames[a.id] = a.asset_name;
+  }
+  return NextResponse.json({ rules, kinds: ALERT_KINDS, hasProAccess: auth.hasProAccess, asset_names: assetNames });
 }
 
 const markReadSchema = z.object({ ids: z.array(uuidSchema).min(1).max(100) });
