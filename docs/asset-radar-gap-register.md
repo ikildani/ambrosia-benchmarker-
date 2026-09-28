@@ -160,3 +160,24 @@ Still open for preclinical: private companies (pipeline pages need the off-Verce
 - **Owner-type retype** (Sep 27, migration 142, applied): 653 deal-ingestion companies with an industry `company_type` but `owner_type = 'unknown'` (Jiangsu Hengrui, Innovent, Alexion, Chiesi, Ono, Organon…) → industry; widened sponsor-name heuristics moved 812 more corporate sponsors to industry and 553 LeadSponsorClass OTHER sponsors to hospital / academic / network / government. A trigger now derives owner_type from company_type for future deal-created companies. Every change is in `radar_owner_type_retype_log`. `deriveOwnerType()` in ctgov-sweep.ts carries the same widened patterns.
 - **jRCT (Japan) walker rebuilt** (Sep 27): the id-space walk had stored 1 trial in three weeks (ids are sparse; lanes died after 25 misses). The adapter now pages the token-free results listing `search?searched=1&spec=3|7&page=N&sort=record_cert_date` (spec 3 = company-sponsored IND trials, 4,188 rows; spec 7 = investigator-initiated), caches each 50-row listing in the cursor (the listing takes ~30 s to render), and reads the English detail pages. The 2026 detail layout has no Phase row and free-text interventions, so phase comes from the title and drug names from codes/INN-looking words in the text; Japan is always in the country list. Verified live (Takeda TAK-079 Phase 2, argenx ARGX-121). At the sweep cadence (~50 records per run, every ~6 h) the first pass takes ~3 weeks; a one-off local backfill finishes in ~2 h.
 - **Ownership name rules** (Sep 27, migration 143, applied): `comparator_named` (rows literally named "Comparators: …", "Placebo", "Standard of care" → comparator_or_background, 197 in the first batch) and `code_prefix_match` (a development code in a series that already names ≥ 2 of the company's originator programs → originator, beats a foreign drug_master originator). Inside `radar_apply_ownership()` and mirrored in `lib/radar/ownership.ts`; the 8.7k unknown / comparator-named rows were re-evaluated. Still unknown after the pass: originator_mismatch rows (a foreign originator with the drug in this company's experimental arm, i.e. likely licensees with no deal on record) and no-arm legacy rows.
+
+## Sep 28 2026: section pages (watchlist, alerts, mandate matches, acquirers)
+
+Branch feat/radar-credibility, migration 144.
+
+- Four routes that had APIs but no page now have one: `/radar/watchlist`,
+  `/radar/alerts`, `/radar/mandates/[id]`, `/radar/acquirers`. A shared
+  sub-nav (Feed · Watchlist · Alerts · Acquirers · Methodology) sits on every
+  Radar surface.
+- `radar_unread_match_counts` was absent from production, so the "N new"
+  badge could never show; 144 recreates it. `PATCH /api/radar/mandates/:id/matches`
+  marks matches read / saved / dismissed; opening the matches page marks them read.
+- Acquirer view: stored `radar_deal_opportunities` were 56% Phase 4 in the
+  last three days; the read side now applies the feed's default exclusions
+  and the deal creator stops proposing Phase 4. Leaderboard groups by company
+  id (names vary by run). Existing rows are not rewritten; the generator's
+  next runs replace them over time.
+- Still open: site NotificationBell does not merge Radar events; acquirer
+  names in `companies` need the Chinese-name duplicate cleanup before the
+  leaderboard reads cleanly (e.g. "SmithKline Beecham Corporation and Glaxo
+  Group Limited (GSK)").
