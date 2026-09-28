@@ -1,7 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { hasProAccess } from '@/types/tier';
 
+/**
+ * Gate for statically generated SEO pages (/benchmarks/[slug], /data/[slug]).
+ *
+ * The server render always emits the gated version so crawlers and anonymous
+ * visitors see the upgrade CTA. On the client, once AuthContext has resolved
+ * the signed-in user's tier, Pro / Report / Portfolio users get the children
+ * rendered in full. Free users (and the pre-hydration render) keep the gate.
+ */
 export function ProGate({
   children,
   title = 'Full Analysis Available with Pro',
@@ -12,6 +22,12 @@ export function ProGate({
   description?: string;
   pageSlug?: string;
 }) {
+  const { tier } = useAuth();
+
+  if (hasProAccess(tier)) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="relative">
       {/* Blurred content preview */}
