@@ -124,7 +124,9 @@ export function rebuildDecision(args: {
 
 async function sourceCounts(supabase: SupabaseClient): Promise<SourceCounts> {
   const count = async (table: string): Promise<number> => {
-    const { count: n, error } = await supabase.from(table).select('id', { count: 'exact', head: true });
+    // '*' not 'id': radar_score_label_events has no id column, and a head
+    // count on a missing column fails with an empty message.
+    const { count: n, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
     if (error) throw new Error(`${table} count: ${error.message}`);
     return n ?? 0;
   };
@@ -709,11 +711,13 @@ async function runTrainPhase(
   const sample = [...outcome.testPredictions].sort((a, b) => b.prediction - a.prediction).slice(0, 2000);
   const positives = new Set(rows.filter(r => r.as_of >= TEST_FROM && r.label === 1).map(r => `${r.asset_id}:${r.as_of}`));
   for (const p of outcome.testPredictions) if (positives.has(`${p.asset_id}:${p.as_of}`) && !sample.includes(p)) sample.push(p);
+  // UPDATE in place (RPC, migration 144): a partial upsert fails the NOT NULL
+  // check on `features` before ON CONFLICT is considered.
   for (const batch of chunk(sample, 500)) {
-    const { error } = await supabase.from('radar_score_snapshots').upsert(
-      batch.map(p => ({ asset_id: p.asset_id, as_of: p.as_of, feature_version: state.feature_version, prediction: Math.round(p.prediction * 1e6) / 1e6, prediction_model: version })),
-      { onConflict: 'asset_id,as_of,feature_version', ignoreDuplicates: false },
-    );
+    const { error } = await supabase.rpc('radar_snapshot_set_predictions', {
+      rows: batch.map(p => ({ asset_id: p.asset_id, as_of: p.as_of, feature_version: state.feature_version, prediction: Math.round(p.prediction * 1e6) / 1e6 })),
+      model_version: version,
+    });
     if (error) { errors.push(`prediction sample: ${error.message}`); break; }
   }
 

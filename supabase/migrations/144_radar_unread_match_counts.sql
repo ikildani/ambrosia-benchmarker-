@@ -23,3 +23,26 @@ $$ LANGUAGE sql STABLE;
 CREATE INDEX IF NOT EXISTS idx_mandate_matches_mandate_user_open
   ON radar_mandate_matches (mandate_id, user_id, matched_at DESC)
   WHERE is_dismissed = false;
+
+-- Backtest bookkeeping: the train phase stores a sample of raw test
+-- predictions on radar_score_snapshots. It used a partial upsert, which
+-- Postgres rejects before the ON CONFLICT clause runs (features is NOT NULL),
+-- so every train run logged "prediction sample: null value in column
+-- features". Update in place from a jsonb array instead.
+CREATE OR REPLACE FUNCTION radar_snapshot_set_predictions(rows JSONB, model_version TEXT)
+RETURNS INTEGER AS $$
+  WITH p AS (
+    SELECT (r->>'asset_id')::uuid AS asset_id,
+           (r->>'as_of')::date AS as_of,
+           r->>'feature_version' AS feature_version,
+           (r->>'prediction')::numeric AS prediction
+    FROM jsonb_array_elements(rows) r
+  ), u AS (
+    UPDATE radar_score_snapshots s
+       SET prediction = p.prediction, prediction_model = model_version
+      FROM p
+     WHERE s.asset_id = p.asset_id AND s.as_of = p.as_of AND s.feature_version = p.feature_version
+    RETURNING 1
+  )
+  SELECT COUNT(*)::integer FROM u;
+$$ LANGUAGE sql;
