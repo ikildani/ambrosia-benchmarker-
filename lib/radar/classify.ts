@@ -80,6 +80,15 @@ export const MAX_OUTPUT_TOKENS = 8192;
 
 /** Below this the model's suggestion is parked in classification_evidence and nothing is written. */
 export const CONFIDENCE_WRITE_MIN = 60;
+/**
+ * 40-59: the model could place the asset (area, indication, modality) but not
+ * its target or mechanism from registry text alone. Those fields are filled
+ * where empty and the row is classified with a low_confidence flag; target
+ * and mechanism stay parked in the suggestion. Below 40 the whole answer is
+ * parked and retried when new evidence arrives (Sep 28 2026: 9,024 rows sat
+ * in needs_review, two thirds of them at 40-59).
+ */
+export const CONFIDENCE_LOW_MIN = 40;
 /** At or above this a heuristic (ingester-derived) value may be replaced. */
 export const CONFIDENCE_OVERWRITE_MIN = 85;
 /** drug_master rows at or above this confidence are reused without a model call. */
@@ -239,6 +248,8 @@ export interface ClassificationEvidence {
   fields: Record<string, FieldEvidence>;
   suggestion?: ClassificationItem | Record<string, unknown>;
   reason?: 'low_confidence' | 'schema_violation' | 'non_drug' | 'placebo_or_generic' | 'model_error';
+  /** Confidence 40-59: area/indication/modality written, target and mechanism parked in `suggestion`. */
+  low_confidence?: boolean;
   drug_master_id?: string;
   [key: string]: unknown;
 }
@@ -670,7 +681,7 @@ export function planAssetPatch(
     updated_at: nowIso,
   };
 
-  if (item.confidence < CONFIDENCE_WRITE_MIN) {
+  if (item.confidence < CONFIDENCE_LOW_MIN) {
     base.classification_status = 'needs_review';
     base.classification_evidence.reason = 'low_confidence';
     base.classification_evidence.suggestion = item;
@@ -681,6 +692,12 @@ export function planAssetPatch(
   const conf = item.confidence;
   const fields = base.classification_evidence.fields;
   const dmTrusted = !!dm && dm.confidence >= DRUG_MASTER_MIN_CONFIDENCE;
+  const lowConfidence = conf < CONFIDENCE_WRITE_MIN;
+  if (lowConfidence) {
+    base.classification_evidence.reason = 'low_confidence';
+    base.classification_evidence.low_confidence = true;
+    base.classification_evidence.suggestion = item;
+  }
 
   // therapeutic_area / indication_category: fill NULL; overwrite heuristic only at >= 85.
   const ta = decideField({
@@ -715,25 +732,28 @@ export function planAssetPatch(
   fields.modality = mod.evidence;
   if (mod.write) base.modality = mod.write;
 
-  // target / target_class / mechanism / moa_short: written whenever confidence >= 60 and non-null.
-  const targetProposed = dmTrusted && dm!.target ? dm!.target : item.target;
-  const targetSource: 'model' | 'drug_master' = dmTrusted && dm!.target ? 'drug_master' : 'model';
-  fields.target = { value: targetProposed, prior: asset.target, source: targetSource, action: targetProposed == null ? 'unchanged' : asset.target == null ? 'filled' : asset.target === targetProposed ? 'confirmed' : locked ? 'kept' : 'overwritten' };
-  if (targetProposed && !(locked && asset.target)) base.target = targetProposed;
+  // target / target_class / mechanism / moa_short: written whenever confidence >= 60 and non-null;
+  // at 40-59 they stay parked in the suggestion (registry text rarely settles a target).
+  if (!lowConfidence) {
+    const targetProposed = dmTrusted && dm!.target ? dm!.target : item.target;
+    const targetSource: 'model' | 'drug_master' = dmTrusted && dm!.target ? 'drug_master' : 'model';
+    fields.target = { value: targetProposed, prior: asset.target, source: targetSource, action: targetProposed == null ? 'unchanged' : asset.target == null ? 'filled' : asset.target === targetProposed ? 'confirmed' : locked ? 'kept' : 'overwritten' };
+    if (targetProposed && !(locked && asset.target)) base.target = targetProposed;
 
-  const tc = item.target_class ?? 'unknown';
-  fields.target_class = { value: tc, prior: asset.target_class ?? null, source: 'model', action: asset.target_class == null ? 'filled' : asset.target_class === tc ? 'confirmed' : 'overwritten' };
-  base.target_class = tc;
+    const tc = item.target_class ?? 'unknown';
+    fields.target_class = { value: tc, prior: asset.target_class ?? null, source: 'model', action: asset.target_class == null ? 'filled' : asset.target_class === tc ? 'confirmed' : 'overwritten' };
+    base.target_class = tc;
 
-  if (item.moa_short) {
-    fields.moa_short = { value: item.moa_short, prior: asset.moa_short ?? null, source: 'model', action: asset.moa_short == null ? 'filled' : 'overwritten' };
-    base.moa_short = item.moa_short;
-    const mechProposed = dmTrusted && dm!.mechanism ? dm!.mechanism.slice(0, 200) : item.moa_short;
-    fields.mechanism = { value: mechProposed, prior: asset.mechanism, source: dmTrusted && dm!.mechanism ? 'drug_master' : 'model', action: asset.mechanism == null ? 'filled' : locked ? 'kept' : 'overwritten' };
-    if (!(locked && asset.mechanism)) base.mechanism = mechProposed;
+    if (item.moa_short) {
+      fields.moa_short = { value: item.moa_short, prior: asset.moa_short ?? null, source: 'model', action: asset.moa_short == null ? 'filled' : 'overwritten' };
+      base.moa_short = item.moa_short;
+      const mechProposed = dmTrusted && dm!.mechanism ? dm!.mechanism.slice(0, 200) : item.moa_short;
+      fields.mechanism = { value: mechProposed, prior: asset.mechanism, source: dmTrusted && dm!.mechanism ? 'drug_master' : 'model', action: asset.mechanism == null ? 'filled' : locked ? 'kept' : 'overwritten' };
+      if (!(locked && asset.mechanism)) base.mechanism = mechProposed;
+    }
+
+    if (dm) base.classification_evidence.drug_master_id = asset.drug_master_id ?? undefined;
   }
-
-  if (dm) base.classification_evidence.drug_master_id = asset.drug_master_id ?? undefined;
   return base;
 }
 

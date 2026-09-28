@@ -25,6 +25,7 @@ import {
 import {
   CONFIDENCE_OVERWRITE_MIN,
   CONFIDENCE_WRITE_MIN,
+  CONFIDENCE_LOW_MIN,
   RequestBudget,
   RequestCapError,
   buildRequestParams,
@@ -350,16 +351,31 @@ describe('preClassify', () => {
 // ═══════════════════════════════════════════════════════════════════════
 
 describe('planAssetPatch: write policy', () => {
-  it('confidence below 60 parks the suggestion and touches no data column', () => {
-    const p = planAssetPatch(asset(), item({ confidence: CONFIDENCE_WRITE_MIN - 1 }), 'claude-sonnet-5', NOW_ISO);
+  it('confidence below 40 parks the suggestion and touches no data column', () => {
+    const p = planAssetPatch(asset(), item({ confidence: CONFIDENCE_LOW_MIN - 1 }), 'claude-sonnet-5', NOW_ISO);
     expect(p.classification_status).toBe('needs_review');
     expect(p.classification_evidence.reason).toBe('low_confidence');
     expect(p.classification_evidence.suggestion).toMatchObject({ therapeutic_area: 'oncology' });
     for (const col of ['therapeutic_area', 'modality', 'indication_category', 'indication_specific', 'target', 'target_class', 'mechanism', 'moa_short']) {
       expect(p).not.toHaveProperty(col);
     }
-    expect(p.classification_confidence).toBe(59);
+    expect(p.classification_confidence).toBe(39);
     expect(p.classification_model).toBe('claude-sonnet-5');
+  });
+
+  it('confidence 40-59 classifies with a low_confidence flag: fills area, indication and modality, never target or mechanism', () => {
+    const p = planAssetPatch(asset(), item({ confidence: CONFIDENCE_WRITE_MIN - 1 }), 'claude-sonnet-5', NOW_ISO);
+    expect(p.classification_status).toBe('classified');
+    expect(p.classification_evidence.reason).toBe('low_confidence');
+    expect(p.classification_evidence.low_confidence).toBe(true);
+    expect(p.classification_evidence.suggestion).toMatchObject({ target: 'PD-1' });
+    expect(p.therapeutic_area).toBe('oncology');
+    expect(p.modality).toBe('antibody');
+    expect(p.indication_category).toBe('solid_tumor');
+    expect(p.indication_specific).toBe('non-small cell lung cancer');
+    for (const col of ['target', 'target_class', 'mechanism', 'moa_short']) {
+      expect(p).not.toHaveProperty(col);
+    }
   });
 
   it('fills NULL columns at 60-84 and writes target fields', () => {
@@ -624,7 +640,7 @@ describe('classifyAssetsBatch', () => {
   it('skips non-drugs without a model call, classifies the rest, and logs tokens and cost', async () => {
     const queue = [asset({ id: 'a1' }), asset({ id: 'p1', asset_name: 'Placebo' }), asset({ id: 'a2', asset_name: 'ACM-202', asset_aliases: [] })];
     const { client: supabase, ops } = stubSupabase(e2eHandler(queue));
-    const client = stubClient([message([item({ asset_id: 'a1' }), item({ asset_id: 'a2', confidence: 40 })])]);
+    const client = stubClient([message([item({ asset_id: 'a1' }), item({ asset_id: 'a2', confidence: 30 })])]);
 
     const result = await classifyAssetsBatch(supabase, { client, limit: 10, batchSize: 20, now: () => NOW_MS, sleep: async () => {} });
 
