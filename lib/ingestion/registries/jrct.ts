@@ -307,7 +307,10 @@ export const jrctAdapter: RegistryAdapter<JrctRaw> = {
       c.lane + 1 < JRCT_SPECS.length ? { lane: c.lane + 1, page: 1, idx: 0, sweepStartedAt: c.sweepStartedAt } : null;
 
     while (records.length < limit) {
-      if (opts.signal?.aborted) break;
+      if (opts.signal?.aborted) {
+        warnings.push('jRCT: run aborted before the page finished');
+        break;
+      }
       const spec = JRCT_SPECS[c.lane];
       let rows = c.rows;
       if (!rows) {
