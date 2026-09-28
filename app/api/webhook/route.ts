@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError, maskEmail } from '@/lib/sentry-api';
-import { sendAdminSubscriptionNotification, sendUpgradeConfirmation } from '@/lib/email/client';
+import { sendAdminSubscriptionNotification, sendUpgradeConfirmation, sendEmail } from '@/lib/email/client';
 import { notifyProSubscription, notifyTrialStarted, notifyReportPurchase, notifyPaymentFailed } from '@/lib/slack/notify';
+import { markBriefInvoicePaid, BRIEF_INVOICE_METADATA_KEY } from '@/lib/brief/invoice';
 
 // Stripe Webhook Handler
 // To enable webhooks:
@@ -368,6 +369,22 @@ export async function POST(request: NextRequest) {
         const invoiceCustomerId = invoice.customer as string;
         const invoiceEmail = invoice.customer_email ? invoice.customer_email.trim().toLowerCase() : null;
         const invoiceSubId = (invoice as unknown as { subscription: string | null }).subscription;
+
+        // ─── Deal Intelligence Brief invoice (lib/brief/invoice.ts) ───
+        if (invoice.metadata?.[BRIEF_INVOICE_METADATA_KEY]) {
+          try {
+            const briefRequestId = await markBriefInvoicePaid(supabase, invoice);
+            console.log(`Brief invoice paid: ${invoice.id} → request ${briefRequestId}`);
+            await sendEmail({
+              to: 'ikildani@ambrosiaventures.co',
+              subject: `Brief invoice paid: ${invoice.number ?? invoice.id} — $${(invoice.amount_paid / 100).toLocaleString()}`,
+              html: `<p>Invoice <strong>${invoice.number ?? invoice.id}</strong> for the Deal Intelligence Brief was paid (${invoiceEmail ?? 'unknown payer'}, $${(invoice.amount_paid / 100).toLocaleString()}). The request is marked paid in <a href="https://solidus.ambrosiaventures.co/admin/briefs">/admin/briefs</a>; schedule the 15-minute call.</p>`,
+            }).catch(() => undefined);
+          } catch (e) {
+            console.error('[webhook] brief invoice mark-paid failed:', e instanceof Error ? e.message : e);
+          }
+          break; // ours — not a Pro engagement or a subscription
+        }
 
         // ─── R72: One-time invoice Pro activation (3-month engagements) ───
         // If this is a non-subscription invoice (no sub ID) with engagement

@@ -26,6 +26,8 @@ export interface BriefRequestView {
   intakePath: string | null;
   adminNotesHead: string | null;
   readiness: { overall: string; topUp: boolean; lines: Array<{ label: string; value: string; status: string; detail: string }> } | null;
+  invoiceNumber: string | null;
+  invoiceUrl: string | null;
 }
 
 const DOT: Record<string, string> = { green: 'bg-teal-400', amber: 'bg-amber-400', red: 'bg-rose-400' };
@@ -65,7 +67,7 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
       const res = await fetch('/api/admin/briefs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: r.id, action, ...extra }) });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) { setMsg(json.error || `Failed (${res.status})`); return; }
-      setMsg(action === 'build' ? (json.result?.note || 'Building.') : action === 'delete' ? 'Deleted.' : 'Saved.');
+      setMsg(action === 'build' ? (json.result?.note || 'Building.') : action === 'delete' ? 'Deleted.' : action === 'invoice_send' ? `Invoice ${json.result?.number ?? ''} ${json.result?.alreadyExisted ? 'already existed' : 'sent by Stripe'}.` : 'Saved.');
       router.refresh();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Failed');
@@ -81,7 +83,8 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_TONE[r.status] ?? 'bg-slate-700 text-slate-200'}`}>{stage}</span>
             {r.autoDraftStatus === 'failed' ? <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-rose-200">auto-draft failed</span> : null}
-            <span className={`rounded-full px-2.5 py-0.5 text-[11px] ${r.paidAt ? 'bg-teal-500/15 text-teal-200' : r.invoiceSentAt ? 'bg-amber-500/15 text-amber-200' : 'bg-slate-800 text-slate-400'}`}>{r.paidAt ? `Paid ${fmt(r.paidAt)}` : r.invoiceSentAt ? `Invoice sent ${fmt(r.invoiceSentAt)}` : 'Invoice to send'}</span>
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] ${r.paidAt ? 'bg-teal-500/15 text-teal-200' : r.invoiceSentAt ? 'bg-amber-500/15 text-amber-200' : 'bg-slate-800 text-slate-400'}`}>{r.paidAt ? `Paid ${fmt(r.paidAt)}` : r.invoiceSentAt ? `Invoice ${r.invoiceNumber ?? ''} sent ${fmt(r.invoiceSentAt)}` : 'Invoice to send'}</span>
+            {r.invoiceUrl ? <a href={r.invoiceUrl} target="_blank" rel="noreferrer" className="text-[11px] text-teal-300 hover:underline">View invoice</a> : null}
             <span className="text-[11px] text-slate-500">{fmt(r.createdAt)} · {r.intakePath ?? '—'}</span>
           </div>
           <h3 className="mt-2 text-base font-semibold text-slate-50">{r.assetLabel}</h3>
@@ -107,7 +110,8 @@ export function BriefRequestRow({ r }: { r: BriefRequestView }) {
             {r.excelUrl ? <a href={r.excelUrl} target="_blank" rel="noreferrer" className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800">Excel</a> : null}
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            {!r.invoiceSentAt ? <button onClick={() => act('invoice_sent')} disabled={!!busy} className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800 disabled:opacity-50">Mark invoice sent</button> : null}
+            {!r.invoiceSentAt ? <button onClick={() => act('invoice_send')} disabled={!!busy} className="rounded-md bg-slate-100 px-3 py-1.5 font-medium text-slate-950 hover:bg-white disabled:opacity-50">{busy === 'invoice_send' ? 'Sending…' : 'Send invoice'}</button> : null}
+            {!r.invoiceSentAt ? <button onClick={() => act('invoice_sent')} disabled={!!busy} className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-400 hover:bg-slate-800 disabled:opacity-50" title="Use when you invoiced by hand outside Stripe">Sent by hand</button> : null}
             {r.invoiceSentAt && !r.paidAt ? <button onClick={() => act('paid')} disabled={!!busy} className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800 disabled:opacity-50">Mark paid</button> : null}
             <button onClick={() => act('build')} disabled={!!busy || building} className={`rounded-md px-3 py-1.5 font-medium disabled:opacity-50 ${r.hasOpinion && !r.deliveredAt ? 'bg-teal-500 text-slate-950 hover:bg-teal-400' : 'border border-slate-700 text-slate-200 hover:bg-slate-800'}`}>{building || busy === 'build' ? 'Building…' : r.hasOpinion ? (r.deliveredAt ? 'Rebuild + resend' : 'Deliver') : (r.dataRoomUrl ? 'Rebuild draft' : 'Build draft')}</button>
             <button onClick={() => setShowOpinion(v => !v)} className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800">{r.hasOpinion ? 'Edit opinion' : 'Add opinion'}</button>
