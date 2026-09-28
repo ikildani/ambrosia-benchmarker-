@@ -40,9 +40,15 @@ jest.mock('@/lib/rate-limit', () => ({
 const mockPortalSessionCreate = jest.fn();
 const mockCustomersList = jest.fn();
 
+const mockPortalConfigCreate = jest.fn();
+
 jest.mock('stripe', () => {
-  return jest.fn().mockImplementation(() => ({
+  const StripeMock = jest.fn().mockImplementation(() => ({
     billingPortal: {
+      // The route creates a portal configuration (cancellation enabled) before the session.
+      configurations: {
+        create: mockPortalConfigCreate,
+      },
       sessions: {
         create: mockPortalSessionCreate,
       },
@@ -51,6 +57,9 @@ jest.mock('stripe', () => {
       list: mockCustomersList,
     },
   }));
+  // The route's catch block checks `error instanceof Stripe.errors.StripeError`.
+  Object.assign(StripeMock, { errors: { StripeError: class StripeError extends Error {} } });
+  return StripeMock;
 });
 
 // Import after mocking
@@ -135,6 +144,7 @@ describe('/api/billing/portal', () => {
         data: { stripe_customer_id: 'cus_abc123', email: 'test@example.com' },
         error: null,
       });
+      mockPortalConfigCreate.mockResolvedValueOnce({ id: 'bpc_test123' });
       mockPortalSessionCreate.mockResolvedValueOnce({
         url: 'https://billing.stripe.com/session/test123',
       });
@@ -148,7 +158,8 @@ describe('/api/billing/portal', () => {
       expect(data.url).toBe('https://billing.stripe.com/session/test123');
       expect(mockPortalSessionCreate).toHaveBeenCalledWith({
         customer: 'cus_abc123',
-        return_url: 'https://test.example.com',
+        return_url: 'https://test.example.com/dashboard',
+        configuration: 'bpc_test123',
       });
     });
   });

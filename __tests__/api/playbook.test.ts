@@ -25,6 +25,9 @@ const mockSupabase = {
 
 jest.mock('@/lib/supabase/server', () => ({
   createServiceClient: () => mockSupabase,
+  // Cookie session (checked first by getAuthenticatedUser): no user, so the
+  // Bearer-token fallback runs. Without this the helper threw and never reached it.
+  createServerClient: async () => ({ auth: { getUser: async () => ({ data: { user: null }, error: null }) } }),
 }));
 
 jest.mock('@/lib/ai/playbook-generator', () => ({

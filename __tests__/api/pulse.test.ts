@@ -20,6 +20,7 @@ function createChain(overrides: Record<string, unknown> = {}) {
     insert: jest.fn().mockReturnThis(),
     delete: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
+    neq: jest.fn().mockReturnThis(),
     gte: jest.fn().mockReturnThis(),
     lte: jest.fn().mockReturnThis(),
     not: jest.fn().mockReturnThis(),
@@ -32,6 +33,7 @@ function createChain(overrides: Record<string, unknown> = {}) {
   (chain.insert as jest.Mock).mockReturnValue(chain);
   (chain.delete as jest.Mock).mockReturnValue(chain);
   (chain.eq as jest.Mock).mockReturnValue(chain);
+  (chain.neq as jest.Mock).mockReturnValue(chain);
   (chain.gte as jest.Mock).mockReturnValue(chain);
   (chain.lte as jest.Mock).mockReturnValue(chain);
   (chain.not as jest.Mock).mockReturnValue(chain);

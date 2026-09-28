@@ -10,6 +10,17 @@
 
 import { NextRequest } from 'next/server';
 
+// The widget reads the live corpus count; pin it so the test doesn't depend on the database.
+jest.mock('@/lib/deal-stats', () => ({
+  getLiveDealStats: jest.fn().mockResolvedValue({
+    totalDeals: 1959,
+    totalDealsDisplay: '1,900+',
+    therapeuticAreas: 12,
+    lastAddedAt: '2026-09-28T00:00:00.000Z',
+    fallback: false,
+  }),
+}));
+
 import { GET } from '@/app/api/embed/stats/route';
 
 describe('/api/embed/stats', () => {
@@ -21,10 +32,11 @@ describe('/api/embed/stats', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.total_deals).toBe(500);
-      expect(data.avg_upfront_oncology).toBe(45);
-      expect(data.avg_upfront_rare_disease).toBe(35);
-      expect(data.modalities_covered).toBe(15);
+      expect(data.total_deals).toBe(1959);
+      expect(data.therapeutic_areas).toBe(12);
+      expect(data.avg_upfront_oncology_phase2).toBe(95);
+      expect(data.modalities_covered).toBe(25);
+      expect(data.last_updated).toBe('2026-09-28');
       expect(data.source).toBe('Ambrosia Ventures');
       expect(data.source_url).toBe('https://solidus.ambrosiaventures.co');
       expect(data.last_updated).toBeDefined();

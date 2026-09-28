@@ -62,6 +62,17 @@ describe('deal-flow-forecast', () => {
   // Forecast Generation
   // ============================================================
   describe('forecast generation', () => {
+    // The service excludes the *current* calendar quarter as partial. The static
+    // historical series ends in Q1 2026, so pin "now" inside that quarter; otherwise
+    // the expected start quarter drifts with the wall clock.
+    beforeAll(() => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'queueMicrotask', 'hrtime', 'performance'] });
+      jest.setSystemTime(new Date('2026-02-15T12:00:00Z'));
+    });
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should generate exactly 4 forecast quarters', async () => {
       const result = await forecastDealFlow('oncology');
 

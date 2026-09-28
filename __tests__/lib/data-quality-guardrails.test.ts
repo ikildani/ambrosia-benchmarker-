@@ -74,6 +74,7 @@ const VALID_DEAL_TYPES = [
   'codevelopment',
   'option',
   'collaboration',
+  'reformulation', // 505(b)(2) deals; a DealType in lib/calculations.ts
 ] as const;
 
 const PHASE_ORDER = [

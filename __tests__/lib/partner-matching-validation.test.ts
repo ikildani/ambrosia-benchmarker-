@@ -1114,9 +1114,12 @@ describe('COMPARABLE_DEALS data quality', () => {
     }
   });
 
-  test('every deal has a valid year (2017-2026)', () => {
+  test('every deal has a valid year (2017-2026; reformulation precedents from 2012)', () => {
     for (const deal of COMPARABLE_DEALS) {
-      expect(deal.year).toBeGreaterThanOrEqual(2017);
+      // 505(b)(2) reformulation benchmarks are a small, sourced set whose defining
+      // precedents (BELBUCA, INBRIJA, NARCAN, BENDEKA, Zohydro) predate 2017.
+      const floor = deal.dealType === 'reformulation' ? 2012 : 2017;
+      expect(deal.year).toBeGreaterThanOrEqual(floor);
       expect(deal.year).toBeLessThanOrEqual(2026);
     }
   });

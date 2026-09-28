@@ -16,11 +16,15 @@ const mockSupabase = {
   from: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
   eq: jest.fn().mockReturnThis(),
+  neq: jest.fn().mockReturnThis(),
+  not: jest.fn().mockReturnThis(),
   is: jest.fn().mockReturnThis(),
   ilike: jest.fn().mockReturnThis(),
   contains: jest.fn().mockReturnThis(),
   order: jest.fn().mockReturnThis(),
   range: jest.fn(),
+  // Stats on the first unfiltered page come from the company_type_counts RPC.
+  rpc: jest.fn(() => ({ select: jest.fn().mockResolvedValue({ data: null, error: null }) })),
 };
 
 jest.mock('@/lib/supabase/server', () => ({
