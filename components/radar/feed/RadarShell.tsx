@@ -28,6 +28,7 @@ import {
 import { useRadarState } from '@/lib/radar/client/use-radar-state';
 import { useFacets, useFeed, useIsDesktop, useMandates, usePrefersReducedMotion, useSavedViews } from '@/lib/radar/client/hooks';
 import { mandateToFilters, type MandateFields } from '@/lib/radar/client/mandate';
+import type { MandateTemplate } from '@/lib/radar/client/mandate-templates';
 import { viewColumns, viewIsDirty, viewSummary, viewToFilters } from '@/lib/radar/client/saved-view';
 import { fmtEstimate } from '@/lib/radar/client/format';
 import type { RadarMandate, RadarSavedView, SearchParseResponse } from '@/lib/radar/client/api-types';
@@ -64,7 +65,10 @@ const BROWSE_ALL_KEY = 'radar:browse-all';
 /** The viewer's preferred table columns (per browser); a saved view or ?cols= wins over it. */
 const COLUMNS_KEY = 'radar:columns';
 
-type MandateDialog = { mode: 'create'; initial: RadarFilterState } | { mode: 'edit'; mandate: RadarMandate } | null;
+type MandateDialog =
+  | { mode: 'create'; initial: RadarFilterState; template?: MandateTemplate }
+  | { mode: 'edit'; mandate: RadarMandate }
+  | null;
 
 export function RadarShell() {
   const { filters, ui, dispatch, href } = useRadarState();
@@ -342,6 +346,10 @@ export function RadarShell() {
                   setMandateError(null);
                   setMandateDialog({ mode: 'create', initial: filters });
                 }}
+                onNewFromTemplate={t => {
+                  setMandateError(null);
+                  setMandateDialog({ mode: 'create', initial: t.filters, template: t });
+                }}
               />
             )}
             {ui.mandate && !selectedMandate && mandatesApi.status === 'ready' && (
@@ -534,9 +542,15 @@ export function RadarShell() {
                 <DialogPanel className="w-full max-w-3xl rounded-t-2xl border border-neutral-200 bg-white p-5 shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 sm:rounded-2xl sm:p-6">
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
-                      <DialogTitle className="text-base font-semibold">{mandateDialog?.mode === 'edit' ? `Edit ${mandateDialog.mandate.name}` : 'Save as mandate'}</DialogTitle>
+                      <DialogTitle className="text-base font-semibold">
+                        {mandateDialog?.mode === 'edit' ? `Edit ${mandateDialog.mandate.name}` : mandateDialog?.mode === 'create' && mandateDialog.template ? `New mandate: ${mandateDialog.template.name}` : 'Save as mandate'}
+                      </DialogTitle>
                       <p className="mt-0.5 text-xs text-neutral-600 dark:text-neutral-400">
-                        {mandateDialog?.mode === 'edit' ? 'Changes apply to future matching runs.' : 'The current filters become a saved mandate you can switch to and get notified about.'}
+                        {mandateDialog?.mode === 'edit'
+                          ? 'Changes apply to future matching runs.'
+                          : mandateDialog?.mode === 'create' && mandateDialog.template
+                            ? `${mandateDialog.template.description} Adjust anything before saving.`
+                            : 'The current filters become a saved mandate you can switch to and get notified about.'}
                       </p>
                     </div>
                     <button type="button" onClick={() => setMandateDialog(null)} aria-label="Close" className={cn(BTN_GHOST, 'p-1.5')}>
@@ -545,8 +559,10 @@ export function RadarShell() {
                   </div>
                   {mandateDialog && (
                     <MandateForm
-                      key={mandateDialog.mode === 'edit' ? mandateDialog.mandate.id : 'create'}
+                      key={mandateDialog.mode === 'edit' ? mandateDialog.mandate.id : `create-${mandateDialog.template?.id ?? 'blank'}`}
                       initial={mandateDialog.mode === 'create' ? mandateDialog.initial : undefined}
+                      initialName={mandateDialog.mode === 'create' ? mandateDialog.template?.name : undefined}
+                      initialDescription={mandateDialog.mode === 'create' ? mandateDialog.template?.description ?? null : undefined}
                       mandate={mandateDialog.mode === 'edit' ? mandateDialog.mandate : null}
                       submitLabel={mandateDialog.mode === 'edit' ? 'Save changes' : 'Save mandate'}
                       saving={mandatesApi.saving}
