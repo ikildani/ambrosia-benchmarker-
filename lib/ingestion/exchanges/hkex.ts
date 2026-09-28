@@ -117,9 +117,18 @@ export async function fetchHkexPdfText(url: string): Promise<{ ok: boolean; stat
   if (!res.ok) return { ok: false, status: res.status, text: '' };
   const buf = new Uint8Array(await res.arrayBuffer());
   const { extractText, getDocumentProxy } = await import('unpdf');
-  const pdf = await getDocumentProxy(buf);
-  const { text } = await extractText(pdf, { mergePages: true });
-  return { ok: true, status: res.status, text: String(text).replace(/\s+/g, ' ').trim() };
+  try {
+    const pdf = await getDocumentProxy(buf);
+    const { text } = await extractText(pdf, { mergePages: true });
+    return { ok: true, status: res.status, text: String(text).replace(/\s+/g, ' ').trim() };
+  } catch (e) {
+    // A malformed announcement PDF (InvalidPDFException on ids 10551480, 10847254 in
+    // Sep 2026) used to throw out of processHkexAnnouncement, count as an extraction
+    // error and be retried on every rescan of the window. Treat it like an
+    // unavailable document: counted, skipped, no model call.
+    console.warn(`[hkex] unreadable PDF ${url}: ${String(e).slice(0, 120)}`);
+    return { ok: false, status: 422, text: '' };
+  }
 }
 
 export interface HkexRunOptions {
