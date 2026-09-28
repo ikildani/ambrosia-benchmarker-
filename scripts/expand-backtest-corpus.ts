@@ -1,7 +1,7 @@
 /**
  * Expand Backtest Corpus from Supabase (R25 — 2026-04-13)
  *
- * Pulls verified deals from the production `deals` table and emits a
+ * Pulls verified, cited deals from the production `deals_verified` view and emits a
  * TypeScript file `data/comparable-deals-supabase.ts` that exports
  * `SUPABASE_COMPARABLE_DEALS` in the ExtendedComparableDeal shape.
  *
@@ -11,6 +11,14 @@
  *
  * Usage:
  *   npx tsx scripts/expand-backtest-corpus.ts
+ *   npx tsx scripts/expand-backtest-corpus.ts --from-json rows.json   (rows exported
+ *     from the same query, for environments without the service key)
+ *
+ * Sep 28 2026: the April corpus read `deals` with verified OR confidence >= 85.
+ * Against today's quality rule only 78 of its 541 rows survived (282 flagged,
+ * 96 rejected, 137 duplicates, 40 synthetic). The source is now
+ * `deals_verified` (no synthetic, duplicate, rejected or flagged rows),
+ * restricted to verification_status = 'verified' with a primary citation.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -20,14 +28,8 @@ import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  throw new Error('Missing SUPABASE credentials in .env.local');
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+const fromJsonIdx = process.argv.indexOf('--from-json');
+const FROM_JSON = fromJsonIdx > -1 ? process.argv[fromJsonIdx + 1] : null;
 
 interface SupabaseDeal {
   id: string;
@@ -80,7 +82,13 @@ function sanitizeString(s: string | null | undefined): string {
   return (s ?? '').replace(/`/g, "'").replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-async function main() {
+async function fetchRows(): Promise<SupabaseDeal[]> {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    throw new Error('Missing SUPABASE credentials in .env.local (or pass --from-json)');
+  }
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   console.log('Fetching deals from Supabase...');
 
   // Paginate through all qualifying deals via .range() — Supabase PostgREST
@@ -92,23 +100,15 @@ async function main() {
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     const { data, error } = await supabase
-      .from('deals')
+      .from('deals_verified')
       .select(
         'id, licensor_name, licensee_name, modality, phase_at_signing, indication_category, indication_specific, territory, therapeutic_area, deal_type, upfront_usd, total_deal_value_usd, milestones_total_usd, royalty_low_pct, royalty_high_pct, announced_date, verified, is_synthetic, confidence_score, source_type, source_url, asset_name',
       )
       .gt('upfront_usd', 0)
       .gt('total_deal_value_usd', 0)
-      .eq('is_synthetic', false)
-      // R72 (2026-04-16): Expanded from verified-only to verified + high-
-      // quality pending. Background audit of 2,705 deals showed:
-      //   - confidence < 80: 100% fabrication rate in sample
-      //   - confidence 80-84: borderline (55 deals, some real)
-      //   - confidence >= 85: predominantly real in sample
-      // Filter: verified=true OR (pending + confidence >= 85).
-      // Bare-target-name and TARGET-NNN patterns filtered downstream
-      // by the fabrication validator. ~967 deals pass this filter.
-      .or('verified.eq.true,confidence_score.gte.85')
-      .neq('verification_status', 'rejected')
+      // Verified against a primary citation only (see header).
+      .eq('verification_status', 'verified')
+      .or('source_url.not.is.null,press_release_url.not.is.null,source_filing_id.not.is.null')
       .in('phase_at_signing', ['phase_1', 'phase_2', 'phase_3', 'preclinical', 'approved'])
       .in('deal_type', ['license', 'licensing', 'co_development', 'codevelopment', 'collaboration', 'acquisition', 'option'])
       .gte('announced_date', '2020-01-01')
@@ -122,7 +122,13 @@ async function main() {
     all.push(...(data as SupabaseDeal[]));
     if (data.length < PAGE_SIZE) break;
   }
-  const data = all;
+  return all;
+}
+
+async function main() {
+  const data: SupabaseDeal[] = FROM_JSON
+    ? JSON.parse(fs.readFileSync(FROM_JSON, 'utf8'))
+    : await fetchRows();
 
   console.log(`Fetched ${data.length} raw rows`);
 
@@ -174,10 +180,10 @@ async function main() {
  * GENERATED FILE — do not edit by hand.
  * Regenerate via: npx tsx scripts/expand-backtest-corpus.ts
  *
- * Source: production deals table (Supabase project 'Calculator Benchmark',
- * id=mnzoulengniofgkwtfbo). Filtered to verified/non-synthetic deals with
- * disclosed upfront + total value, announced 2020+, recognizable phase and
- * deal type. De-duplicated on (licensor, licensee, year, upfront).
+ * Source: production deals_verified view (Supabase project 'Calculator Benchmark',
+ * id=mnzoulengniofgkwtfbo). verification_status = 'verified' with a primary
+ * citation, disclosed upfront + total value, announced 2020+, recognizable
+ * phase and deal type. De-duplicated on (licensor, licensee, year, upfront).
  *
  * Generated: ${new Date().toISOString()}
  * Row count: ${valid.length}
