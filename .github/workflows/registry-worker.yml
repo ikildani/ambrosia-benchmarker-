@@ -1,0 +1,60 @@
+name: Registry worker (browser)
+
+# Registries that answer plain fetches with a JavaScript challenge cannot run
+# in the Vercel cron. This job drives a real Chromium through Playwright,
+# obtains the challenge cookie, then reads listing and detail pages through
+# the browser context and upserts through the same company_trials path the
+# Vercel sweep uses (lib/ingestion/registries runRegistrySweep). Cursors live
+# in radar_sync_cursors, so every run resumes where the last one stopped and
+# the run is logged to data_ingestion_log like any other registry sweep.
+#
+# Registries: cde (China CDE drug trial registry). ChiCTR is blocked by an
+# anti-bot layer even in a browser and CTRI needs a CAPTCHA; both stay off.
+#
+# Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      registry:
+        description: 'Registry to sweep'
+        default: 'cde'
+        type: choice
+        options: [cde]
+      minutes:
+        description: 'Time budget in minutes'
+        default: '40'
+        type: string
+
+concurrency:
+  group: registry-worker-${{ github.event.inputs.registry || 'cde' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    name: Sweep ${{ github.event.inputs.registry || 'cde' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Sweep
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REGISTRY_WORKER_RUNTIME: github-actions
+        run: |
+          NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/registry-worker.ts \
+            --registry "${{ github.event.inputs.registry || 'cde' }}" \
+            --minutes "${{ github.event.inputs.minutes || '40' }}"

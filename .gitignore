@@ -44,3 +44,7 @@ next-env.d.ts
 
 # local brief renders
 tmp/
+
+# local one-off scripts
+.jrct-backfill.ts
+.probe-*.ts

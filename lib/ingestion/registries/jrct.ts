@@ -32,6 +32,7 @@
  */
 
 import type { FetchPageOptions, FetchPageResult, RegistryAdapter, RegistryRecord, RegistryIntervention } from './types';
+import { RegistryUnavailableError } from './types';
 import { extractCodeNames, isPlaceboOrGeneric, looksLikeInn } from '@/lib/radar/drug-name';
 import {
   classifySponsorClass,
@@ -276,8 +277,8 @@ export const jrctAdapter: RegistryAdapter<JrctRaw> = {
   capability: 'api',
   transport: 'html',
   verified: 'verified',
-  rateLimitMs: 600,
-  defaultLimit: 50,
+  rateLimitMs: 1_500,
+  defaultLimit: 40,
   estimatedReach: 5_700,
   urls: {
     search: 'https://jrct.mhlw.go.jp/search',
@@ -313,6 +314,13 @@ export const jrctAdapter: RegistryAdapter<JrctRaw> = {
         try {
           // The listing is server-rendered on demand and takes ~30 s; one listing covers 50 records, so it is cached in the cursor.
           const res = await registryFetch(jrctListingUrl(spec, c.page), { signal: opts.signal, timeoutMs: 75_000, retries: 1 });
+          if (res.status === 403 || res.status === 429 || res.status === 503) {
+            // MHLW rate-limits bursts (seen Sep 28 2026 after ~60 detail pages at 600 ms): stop this run
+            // instead of hammering; the next sweep slot resumes from the cursor.
+            if (records.length === 0) throw new RegistryUnavailableError('jrct', `listing HTTP ${res.status}; backing off until the next sweep`);
+            warnings.push(`jRCT listing spec=${spec} page=${c.page}: HTTP ${res.status}; stopping early`);
+            break;
+          }
           if (!res.ok) {
             warnings.push(`jRCT listing spec=${spec} page=${c.page}: HTTP ${res.status}`);
             break;
@@ -337,6 +345,12 @@ export const jrctAdapter: RegistryAdapter<JrctRaw> = {
         if (since !== null && published !== null && published < since) break;
         try {
           const res = await registryFetch(`${BASE()}/en-latest-detail/${id}`, { signal: opts.signal, timeoutMs: 25_000, retries: 0 });
+          if (res.status === 403 || res.status === 429 || res.status === 503) {
+            // Rate-limited mid-page: keep the cursor on this row and end the run.
+            if (records.length === 0) throw new RegistryUnavailableError('jrct', `detail HTTP ${res.status}; backing off until the next sweep`);
+            warnings.push(`jRCT ${id}: HTTP ${res.status}; stopping early`);
+            return { records, nextCursor: JSON.stringify(c), done: false, warnings };
+          }
           const html = res.ok ? await res.text() : '';
           if (res.ok && html.includes(id) && /Trial ID/.test(html)) {
             records.push(mapJrctHtml({ id, html }));

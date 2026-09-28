@@ -1,6 +1,6 @@
 # Search & Evaluation: off-Vercel registry worker (China, India, and other challenge-gated registries)
 
-**Status:** proposal, Sep 28 2026. Needs Issa's call on where it runs.
+**Status:** built Sep 28 2026 (Issa chose GitHub Actions). CDE live; ChiCTR and CTRI deferred, see "Findings".
 
 ## Why
 
@@ -40,3 +40,10 @@ Roughly 8,000 to 15,000 additional industry assets from Chinese originators with
 ## Decision needed
 
 Which runtime (GitHub Actions first is the recommendation), and whether to add CTRI in the first pass or after China lands.
+
+## Findings from the build (Sep 28 2026)
+
+- **CDE works** from a stealth headless Chromium (full `chromium` channel, `--disable-blink-features=AutomationControlled`, `navigator.webdriver` hidden, zh-CN locale): the home page passes the WAF challenge, the search form submit yields the listing, and POSTs made *inside the page* (`page.evaluate(fetch(...))`) succeed indefinitely at ~0.4 s each. POSTs through the browser context's request API get a 202 challenge after two requests, so the worker uses in-page fetch. Listing: 20 rows/page, `rule=CTR&sort=desc` (newest registration first), detail via `id` + `ckm_index`. Parsers: `lib/ingestion/registries/browser/cde-pages.ts`; fetcher: `cde-fetch.ts`; worker: `scripts/registry-worker.ts`; workflow: `.github/workflows/registry-worker.yml` (every 3 h, 40 min, ~1,500 records per run at 1.5 s pacing → the ~24,000 registrations in about a week, then incremental by 首次公示信息日期).
+- **ChiCTR is blocked** even in the browser: Alibaba's anti-bot layer (`antidom.js`) returns a 405 "request blocked" page for `searchproj.html` in an automated session while the home page renders. Deferred; would need a residential-proxy browser or a data vendor.
+- **CTRI** needs a CAPTCHA to search. Deferred.
+- **jRCT** rate-limits bursts: a local backfill at 0.6 s pacing was answered with HTTP 403 on both listing and detail after ~60 records (Sep 28 00:56 UTC, still 403 an hour later). The adapter now stops the run on 403/429 and the pace is 1.5 s; the Vercel sweep (different egress) resumes from the cursor.
