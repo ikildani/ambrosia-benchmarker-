@@ -79,10 +79,10 @@ A new cron entry fails the deploy. New scheduled work rides on an existing cron:
 
 | Area | Owner (branch / PR) | Status (2026-09-28) |
 |---|---|---|
-| Deal quality: competitor alert, Market Pulse, company pages, headline count, `deals_verified` view, company stats | `claude/lsx-email-deliverability-g58r36` / PR #70 | Migrations 146 and 147 applied to production; code awaiting merge |
+| Deal quality: competitor alert, Market Pulse, company pages, headline count, `deals_verified` view, company stats | PR #70 | Merged 2026-09-28; migrations 146 and 147 in production |
 | Surfaces still reading `deals` with an inline filter: lib/brief/buyer-map.ts, lib/brief/comp-set.ts, lib/outcomes/resolver.ts, lib/ingestion/deal-status.ts, callers of `applyDealQualityFilter` | unowned | Filter is correct; move to `deals_verified` when next touched |
-| Flag-and-fix cron + daily report | PR #70 | Code in review; 25-deal manual pilot researched, awaiting owner go-ahead to write |
-| rNPV backtest calibration (2/20 within ±35%), red on main | needs owner decision | Thresholds deliberately unchanged. The comparison is risk-adjusted model value vs unrisked headline "up to" totals; see PR #70 notes |
-| Backtest corpus (data/comparable-deals-supabase.ts, generated 2026-04-17) | unowned | Only 78 of its 541 DB rows pass today's quality filter; regenerate from `deals_verified` before trusting /accuracy |
+| Flag-and-fix cron + daily report | PR #70 | Merged 2026-09-28. 25-deal manual pilot applied: 19 fixed from primary sources, 40 duplicates rejected (backup `deals_backup_pilot_20260928`). ~790 flagged rows left for the cron |
+| rNPV backtest calibration | `claude/lsx-email-deliverability-g58r36` (follow-up PR) | Engine exposes `impliedDealValue.headlineTotal`; the 20-deal test compares it with disclosed headlines and scores single-asset deals (6/13 within ±35%). Engine multipliers untouched |
+| Backtest corpus (data/comparable-deals-supabase.ts) | follow-up PR | Regenerated 2026-09-28 from `deals_verified` (verified + cited): 841 deals. Honest accuracy dropped: core ±50% 32.2% -> 27.8%, median signed error -17% -> +46% (engine now over-predicts upfronts). Recalibration is the next job |
 | Radar sections, migrations 144–145 | `feat/radar-credibility` / PR #69 | Open |
 | Older deal-integrity work | `feat/deal-data-integrity` / PR #7 | Open since 2026-09-17; overlaps the rule above, rebase before merging |
