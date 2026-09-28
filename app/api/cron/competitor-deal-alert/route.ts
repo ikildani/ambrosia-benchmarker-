@@ -158,14 +158,10 @@ export async function GET(request: NextRequest) {
 
     // ── 1. Find deals announced in the last 7 days (both announced + ingested recently) ──
     // R68: exclude rejected and flagged rows and non-canonical duplicates — don't alert subscribers about fake,
-    // unverified-bad or double-counted deals. Same filter as applyDealQualityFilter (lib/entities/resolve.ts),
-    // inlined because the generic helper overflows type instantiation on this typed query.
+    // unverified-bad or double-counted deals. deals_verified applies that filter in the database.
     const { data: newDeals, error: dealsError } = await supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('id, licensor_name, licensee_name, therapeutic_area, modality, indication_specific, upfront_usd, total_deal_value_usd, announced_date, asset_name')
-      .eq('is_synthetic', false)
-      .not('is_canonical', 'is', false)
-      .not('verification_status', 'in', '("rejected","flagged")')
       .gte('announced_date', sevenDaysAgo)
       .gte('created_at', sevenDaysAgoTs)
       .not('therapeutic_area', 'is', null)

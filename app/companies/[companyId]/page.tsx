@@ -196,12 +196,9 @@ async function getCompanySEOData(companyId: string) {
     // R68: exclude is_synthetic=true so 845 flagged fakes stay off
     // company-detail pages shown to BD users.
     supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct, terms_disclosed')
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-      .eq('is_synthetic', false)
-      .not('is_canonical', 'is', false)  // quality filter: no duplicate rows
-      .not('verification_status', 'in', '("rejected","flagged")')
       .gte('announced_date', oneYearAgo)
       .order('announced_date', { ascending: false })
       .limit(20),
@@ -217,12 +214,9 @@ async function getCompanySEOData(companyId: string) {
 
     // 3-year deal count for trend (R68: filter flagged fakes)
     supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('announced_date, modality, indication_category, therapeutic_area')
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-      .eq('is_synthetic', false)
-      .not('is_canonical', 'is', false)  // quality filter: no duplicate rows
-      .not('verification_status', 'in', '("rejected","flagged")')
       .gte('announced_date', threeYearsAgo),
   ]);
 

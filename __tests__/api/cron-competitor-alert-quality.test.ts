@@ -2,8 +2,8 @@
  * The competitor-deal-alert cron must never email subscribers about a deal
  * the verifier rejected or flagged, or about a non-canonical duplicate row.
  *
- * The deals query must carry the shared quality filter (applyDealQualityFilter)
- * and, when that filtered query returns nothing, no alert email may go out.
+ * The deals query must read the deals_verified view (migration 147) and, when
+ * that returns nothing, no alert email may go out.
  */
 
 import { NextRequest } from 'next/server';
@@ -58,12 +58,10 @@ describe('competitor-deal-alert applies the deal quality filter', () => {
     const res = await GET(cronRequest());
     expect(res.status).toBe(200);
 
-    const notCalls = supa.calls.filter((c) => c.method === 'not').map((c) => c.args);
-    expect(notCalls).toContainEqual(['verification_status', 'in', '("rejected","flagged")']);
-    expect(notCalls).toContainEqual(['is_canonical', 'is', false]);
-
-    const eqCalls = supa.calls.filter((c) => c.method === 'eq').map((c) => c.args);
-    expect(eqCalls).toContainEqual(['is_synthetic', false]);
+    // New deals come from the quality-filtered view, never the raw deals table.
+    const tables = supa.calls.filter((c) => c.method === 'from').map((c) => c.args[0]);
+    expect(tables).toContain('deals_verified');
+    expect(tables).not.toContain('deals');
 
     expect(mockSendEmail).not.toHaveBeenCalled();
   });

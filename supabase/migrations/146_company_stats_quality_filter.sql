@@ -1,4 +1,4 @@
--- 144: company deal stats count only quality deals, follow merges, and stay current.
+-- 146: company deal stats count only quality deals, follow merges, and stay current.
 --
 -- Why (Sep 28 2026 audit): update_company_deal_stats counted every deals row where the
 -- company was licensee, including synthetic, non-canonical (duplicate), rejected and flagged

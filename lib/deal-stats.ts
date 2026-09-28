@@ -52,12 +52,9 @@ const FALLBACK: LiveDealStats = {
 
 async function queryLiveDealStats(): Promise<LiveDealStats> {
   const supabase = createServiceClient();
-  // Quality filter (applyDealQualityFilter, inlined for typing): no synthetic,
-  // duplicate (non-canonical), rejected or flagged rows in any public count.
-  const quality = () => supabase.from('deals').select('*', { count: 'exact', head: true })
-    .eq('is_synthetic', false)
-    .not('is_canonical', 'is', false)
-    .not('verification_status', 'in', '(rejected,flagged)');
+  // deals_verified (migration 147): no synthetic, duplicate (non-canonical),
+  // rejected or flagged rows in any public count.
+  const quality = () => supabase.from('deals_verified').select('*', { count: 'exact', head: true });
   const [total, verified, cited, tas, sources, countries, years, newest] = await Promise.all([
     quality().or("source_filing_id.not.is.null,press_release_url.not.is.null,and(source_url.not.is.null,source_type.in.(sec_8k,sec_6k,sec_10k,sec_10q,hkex,tdnet,asx,cninfo,mfn,dart,press_release))"),
     quality().eq('verification_status', 'verified'),
@@ -65,8 +62,8 @@ async function queryLiveDealStats(): Promise<LiveDealStats> {
     supabase.rpc('count_distinct_deal_column', { p_column: 'therapeutic_area' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
     supabase.rpc('count_distinct_deal_column', { p_column: 'source_type' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
     supabase.rpc('count_distinct_deal_column', { p_column: 'licensor_country' }).then(r => r, () => ({ data: null, error: { message: 'rpc missing' } })),
-    supabase.from('deals').select('announced_date').eq('is_synthetic', false).gte('announced_date', '2010-01-01').order('announced_date', { ascending: true }).limit(1).maybeSingle(),
-    supabase.from('deals').select('created_at').eq('is_synthetic', false).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('deals_verified').select('announced_date').gte('announced_date', '2010-01-01').order('announced_date', { ascending: true }).limit(1).maybeSingle(),
+    supabase.from('deals_verified').select('created_at').order('created_at', { ascending: false }).limit(1).maybeSingle(),
   ]);
   if (total.error || total.count == null) throw new Error(total.error?.message ?? 'count failed');
   const now = new Date().getUTCFullYear();

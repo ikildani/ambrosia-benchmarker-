@@ -42,11 +42,6 @@ export interface WeeklySnapshot {
   trial_updates: TrialUpdates;
 }
 
-/** Rows a user-facing surface may count: the same filter as applyDealQualityFilter (lib/entities/resolve.ts). */
-const DEAL_QUALITY = {
-  notInStatus: '("rejected","flagged")',
-} as const;
-
 /**
  * One modality key per modality: the corpus mixes camelCase and snake_case
  * (smallMolecule / small_molecule), which split every breakdown and sparkline.
@@ -104,21 +99,15 @@ export async function generateWeeklySnapshot(
   // R68 + quality filter: no synthetic, non-canonical, rejected or flagged rows in user digests.
   const [thisWeekResult, trailingResult, trialUpdatesResult] = await Promise.all([
     supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('*')
-      .eq('is_synthetic', false)
-      .not('is_canonical', 'is', false)
-      .not('verification_status', 'in', DEAL_QUALITY.notInStatus)
       .gte('announced_date', weekAgo)
       .lte('announced_date', snapshotDate)
       .order('upfront_usd', { ascending: false, nullsFirst: false }),
 
     supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('licensor_name, licensee_name, asset_name, dedupe_group_id, modality, therapeutic_area, phase_at_signing, upfront_usd, total_deal_value_usd')
-      .eq('is_synthetic', false)
-      .not('is_canonical', 'is', false)
-      .not('verification_status', 'in', DEAL_QUALITY.notInStatus)
       .gte('announced_date', ninetyDaysAgo)
       .lt('announced_date', weekAgo),
 

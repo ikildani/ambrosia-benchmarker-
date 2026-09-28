@@ -91,13 +91,8 @@ export async function GET(request: NextRequest) {
       snapshotQuery.single(),
 
       supabase
-        .from('deals')
+        .from('deals_verified')  // quality-filtered view (migration 147)
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type, verification_status, dedupe_group_id')
-        // Same quality filter as every other product surface (applyDealQualityFilter):
-        // no synthetic, non-canonical (duplicate), rejected or flagged rows.
-        .eq('is_synthetic', false)
-        .not('is_canonical', 'is', false)
-        .not('verification_status', 'in', '("rejected","flagged")')
         .gte('announced_date', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .lte('announced_date', new Date().toISOString().split('T')[0])
         .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")')

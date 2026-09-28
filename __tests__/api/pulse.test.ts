@@ -191,9 +191,10 @@ describe('/api/pulse', () => {
 
       await GET(new NextRequest('http://localhost/api/pulse'));
 
-      const notArgs = (dealsChain.not as jest.Mock).mock.calls;
-      expect(notArgs).toContainEqual(['verification_status', 'in', '("rejected","flagged")']);
-      expect(notArgs).toContainEqual(['is_canonical', 'is', false]);
+      // The live list reads the quality-filtered view, never the raw deals table.
+      const tables = (mockSupabase.from as jest.Mock).mock.calls.map((c) => c[0]);
+      expect(tables).toContain('deals_verified');
+      expect(tables).not.toContain('deals');
     });
 
     it('should gate financial data for free users', async () => {
