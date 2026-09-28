@@ -120,7 +120,9 @@ export function coverageRowsFromStats(stats: QaStats | null | undefined, checks:
     passed: check ? (passedBy.get(check) ?? null) : null,
   });
   return [
-    row('Industry assets classified or skipped', u.classification.classified + u.classification.skipped, u.industry_assets, 95, 'classification_coverage'),
+    u.core_classification
+      ? row('Core-universe assets classified or skipped', u.core_classification.classified + u.core_classification.skipped, u.core_classification.total, 95, 'classification_coverage')
+      : row('Industry assets classified or skipped', u.classification.classified + u.classification.skipped, u.industry_assets, 95, 'classification_coverage'),
     row('Classified industry Phase 2+ with target', u.target_p2plus.with_target, u.target_p2plus.classified, 60, 'target_coverage_phase2plus'),
     row('Industry assets drug-resolved', u.drug_resolution.resolved, u.industry_assets, 55, 'drug_resolution_coverage'),
     row('Assets partnership-checked', u.partnership.checked, u.total_assets, 99, 'partnership_checked_coverage'),
