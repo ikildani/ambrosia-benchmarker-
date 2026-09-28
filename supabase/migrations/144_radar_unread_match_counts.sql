@@ -46,3 +46,15 @@ RETURNS INTEGER AS $$
   )
   SELECT COUNT(*)::integer FROM u;
 $$ LANGUAGE sql;
+
+-- Launch email ledger (scripts/radar-launch-email.ts): one row per recipient
+-- per wave, so a re-run never sends twice and the day-7 nudge can find who
+-- got the day-0 note.
+CREATE TABLE IF NOT EXISTS radar_launch_email_sends (
+  email TEXT NOT NULL,
+  wave TEXT NOT NULL CHECK (wave IN ('day0', 'day7')),
+  user_id UUID,
+  sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  message_id TEXT,
+  PRIMARY KEY (email, wave)
+);
