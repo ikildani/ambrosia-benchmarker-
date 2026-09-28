@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
       .not('name', 'ilike', '%FDA%Approval%')
       .not('name', 'ilike', '%FDA%sNDA%')
       .not('name', 'ilike', '%EMA%Approval%')
-      .neq('company_type', 'regulatory');
+      // .neq alone also dropped every company with a NULL type (most of the corpus).
+      .or('company_type.is.null,company_type.neq.regulatory')
+      .is('merged_into', null);
 
     // Apply name search
     if (q && q.length >= 2) {

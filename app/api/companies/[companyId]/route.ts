@@ -65,6 +65,8 @@ export async function GET(
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
         .eq('is_synthetic', false)
+        .not('is_canonical', 'is', false)  // quality filter: no duplicate rows
+        .not('verification_status', 'in', '("rejected","flagged")')
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(50),
@@ -83,6 +85,8 @@ export async function GET(
         .select('announced_date, modality, upfront_usd, indication_category')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
         .eq('is_synthetic', false)
+        .not('is_canonical', 'is', false)  // quality filter: no duplicate rows
+        .not('verification_status', 'in', '("rejected","flagged")')
         .gte('announced_date', threeYearsAgo)
         .order('announced_date', { ascending: true }),
     ]);
@@ -195,6 +199,8 @@ export async function GET(
         .select('licensee_id, licensor_id, modality')
         .or(topPeerIds.map(id => `licensee_id.eq.${id},licensor_id.eq.${id}`).join(','))
         .eq('is_synthetic', false)  // R68
+        .not('is_canonical', 'is', false)  // quality filter: no duplicate rows
+        .not('verification_status', 'in', '("rejected","flagged")')
         .gte('announced_date', oneYearAgo);
 
       if (peerDeals) {
@@ -243,6 +249,8 @@ export async function GET(
         .from('deals')
         .select('upfront_usd')
         .eq('is_synthetic', false)  // R68
+        .not('is_canonical', 'is', false)  // quality filter: no duplicate rows
+        .not('verification_status', 'in', '("rejected","flagged")')
         .gte('announced_date', oneYearAgo)
         .not('upfront_usd', 'is', null)
         .gt('upfront_usd', 0);
