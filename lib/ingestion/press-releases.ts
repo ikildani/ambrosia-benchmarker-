@@ -584,7 +584,7 @@ function isPotentialDeal(item: RSSItem, keywords: string[]): boolean {
 
 // === Full Article Fetching ===
 
-async function fetchArticleContent(url: string): Promise<string> {
+export async function fetchArticleContent(url: string): Promise<string> {
   try {
     const response = await fetchWithUaFallback(url, 'text/html', 15_000);
     if (!response.ok) return '';
@@ -617,7 +617,7 @@ async function fetchArticleContent(url: string): Promise<string> {
 
 // === Deal Extraction (reuses SEC EDGAR pattern) ===
 
-async function extractDealFromArticle(
+export async function extractDealFromArticle(
   title: string,
   content: string,
   source: string,
@@ -904,102 +904,7 @@ export async function runPressReleaseIngestion(
             }
             dealsExtracted++;
 
-            // Find or create companies
-            const { findOrCreateCompany, deriveTherapeuticArea } = await import('./sec-edgar');
-            const { classifyAndEnrichDeal, classifyCompanyCountry } = await import('./company-geography');
-                        const licensorId = dryRun ? null : await findOrCreateCompany(supabase, deal.licensor, false);
-            const licenseeId = dryRun ? null : await findOrCreateCompany(supabase, deal.licensee, true);
-            const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
-            const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
-
-            // Update company HQ if not already set
-            if (licensorId) {
-              const licGeo = classifyCompanyCountry(deal.licensor);
-              if (licGeo.confidence !== 'low') {
-                await supabase.from('companies').update({
-                  headquarters_country: licGeo.country, headquarters_region: licGeo.region,
-                }).eq('id', licensorId).is('headquarters_country', null);
-              }
-            }
-            if (licenseeId) {
-              const licnGeo = classifyCompanyCountry(deal.licensee);
-              if (licnGeo.confidence !== 'low') {
-                await supabase.from('companies').update({
-                  headquarters_country: licnGeo.country, headquarters_region: licnGeo.region,
-                }).eq('id', licenseeId).is('headquarters_country', null);
-              }
-            }
-
-            // Parse pub date (fallback to today if RSS item has no date)
-            let announcedDate: string = new Date().toISOString().split('T')[0];
-            try {
-              const d = new Date(item.pubDate);
-              if (!isNaN(d.getTime())) announcedDate = d.toISOString().split('T')[0];
-            } catch { /* ignore */ }
-
-                        const insertResult = await insertCitedDeal(supabase, {
-              sourceType: 'press_release',
-              sourceUrl: item.link,
-              sourceFilingId: guid,
-              extractionModel: 'claude-opus-4-6',
-              row: {
-              licensor_name: deal.licensor,
-              licensor_id: licensorId,
-              licensee_name: deal.licensee,
-              licensee_id: licenseeId,
-              licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
-              licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
-              licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
-              licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
-              cross_border: geo.cross_border,
-              deal_corridor: geo.deal_corridor,
-              asset_name: deal.asset_name,
-              asset_description: deal.asset_description,
-              modality: deal.modality,
-              indication_category: deal.indication_category,
-              indication_specific: deal.indication_specific,
-              target: deal.target,
-              mechanism_of_action: deal.mechanism_of_action,
-              phase_at_signing: deal.phase_at_signing,
-              territory: deal.territory,
-              territories_included: deal.territories_included || [],
-              exclusivity: deal.exclusivity,
-              deal_type: deal.deal_type,
-              upfront_usd: deal.upfront_usd,
-              milestones_total_usd: deal.milestones_total_usd,
-              milestones_development_usd: deal.milestones_development_usd,
-              milestones_regulatory_usd: deal.milestones_regulatory_usd,
-              milestones_commercial_usd: deal.milestones_commercial_usd,
-              royalty_low_pct: normalizeRoyaltyPct(deal.royalty_low_pct),
-              royalty_high_pct: normalizeRoyaltyPct(deal.royalty_high_pct),
-              total_deal_value_usd: deal.total_deal_value_usd,
-              equity_investment_usd: deal.equity_investment_usd,
-              includes_manufacturing: deal.includes_manufacturing,
-              includes_co_development: deal.includes_co_development,
-              includes_co_promotion: deal.includes_co_promotion,
-              option_exercise_fee: deal.option_exercise_fee,
-              // Rich term fields
-              milestone_details: deal.milestone_details || [],
-              sales_milestones: deal.sales_milestones || [],
-              research_funding_usd: deal.research_funding_usd,
-              profit_share_pct: deal.profit_share_pct,
-              cost_share_ratio: deal.cost_share_ratio,
-              opt_in_rights: deal.opt_in_rights,
-              opt_in_stage: deal.opt_in_stage,
-              regulatory_designations: deal.regulatory_designations || [],
-              term_years: deal.term_years,
-              sublicense_rights: deal.sublicense_rights,
-              rights_retained: deal.rights_retained,
-              indications_licensed: deal.indications_licensed,
-              includes_diagnostics: deal.includes_diagnostics || false,
-              announced_date: announcedDate,
-                            terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
-              confidence_score: deal.confidence_score,
-              extraction_notes: `Source: ${source.name}.${needsReview ? ` Confidence ${deal.confidence_score}: needs verifier review.` : ''} ${deal.extraction_notes || ''}`.trim(),
-              therapeutic_area: therapeuticArea,
-              raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
-              },
-            }, { dryRun });
+            const insertResult = await persistExtractedPressDeal(supabase, { deal, content, link: item.link, guid, pubDate: item.pubDate, sourceName: source.name, needsReview, dryRun });
             if (insertResult.outcome === 'inserted') {
               dealsInserted++;
               funnel.count(dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`);
@@ -1168,4 +1073,112 @@ export async function runPressReleaseBackfill(
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Map an extracted press-release deal onto the deals table and insert it through the
+ * cited-insert door. Shared by the RSS ingestion above and the wire-archive walker
+ * (lib/ingestion/wire-archive.ts) so both paths carry identical field handling.
+ */
+export async function persistExtractedPressDeal(
+  supabase: SupabaseClient,
+  args: { deal: ExtractedDeal; content: string; link: string; guid: string; pubDate: string; sourceName: string; needsReview: boolean; dryRun: boolean },
+): Promise<import('./insert-deal').CitedDealInsertResult> {
+  const { deal, content, link, guid, pubDate, sourceName, needsReview, dryRun } = args;
+  // Find or create companies
+  const { findOrCreateCompany, deriveTherapeuticArea } = await import('./sec-edgar');
+  const { classifyAndEnrichDeal, classifyCompanyCountry } = await import('./company-geography');
+              const licensorId = dryRun ? null : await findOrCreateCompany(supabase, deal.licensor, false);
+  const licenseeId = dryRun ? null : await findOrCreateCompany(supabase, deal.licensee, true);
+  const therapeuticArea = deriveTherapeuticArea(deal.indication_category);
+  const geo = classifyAndEnrichDeal(deal.licensor, deal.licensee);
+
+  // Update company HQ if not already set
+  if (licensorId) {
+    const licGeo = classifyCompanyCountry(deal.licensor);
+    if (licGeo.confidence !== 'low') {
+      await supabase.from('companies').update({
+        headquarters_country: licGeo.country, headquarters_region: licGeo.region,
+      }).eq('id', licensorId).is('headquarters_country', null);
+    }
+  }
+  if (licenseeId) {
+    const licnGeo = classifyCompanyCountry(deal.licensee);
+    if (licnGeo.confidence !== 'low') {
+      await supabase.from('companies').update({
+        headquarters_country: licnGeo.country, headquarters_region: licnGeo.region,
+      }).eq('id', licenseeId).is('headquarters_country', null);
+    }
+  }
+
+  // Parse pub date (fallback to today if RSS item has no date)
+  let announcedDate: string = new Date().toISOString().split('T')[0];
+  try {
+    const d = new Date(pubDate);
+    if (!isNaN(d.getTime())) announcedDate = d.toISOString().split('T')[0];
+  } catch { /* ignore */ }
+
+              return insertCitedDeal(supabase, {
+    sourceType: 'press_release',
+    sourceUrl: link,
+    sourceFilingId: guid,
+    extractionModel: 'claude-opus-4-6',
+    row: {
+    licensor_name: deal.licensor,
+    licensor_id: licensorId,
+    licensee_name: deal.licensee,
+    licensee_id: licenseeId,
+    licensor_country: geo.licensor_country !== 'unknown' ? geo.licensor_country : null,
+    licensee_country: geo.licensee_country !== 'unknown' ? geo.licensee_country : null,
+    licensor_region: geo.licensor_region !== 'unknown' ? geo.licensor_region : null,
+    licensee_region: geo.licensee_region !== 'unknown' ? geo.licensee_region : null,
+    cross_border: geo.cross_border,
+    deal_corridor: geo.deal_corridor,
+    asset_name: deal.asset_name,
+    asset_description: deal.asset_description,
+    modality: deal.modality,
+    indication_category: deal.indication_category,
+    indication_specific: deal.indication_specific,
+    target: deal.target,
+    mechanism_of_action: deal.mechanism_of_action,
+    phase_at_signing: deal.phase_at_signing,
+    territory: deal.territory,
+    territories_included: deal.territories_included || [],
+    exclusivity: deal.exclusivity,
+    deal_type: deal.deal_type,
+    upfront_usd: deal.upfront_usd,
+    milestones_total_usd: deal.milestones_total_usd,
+    milestones_development_usd: deal.milestones_development_usd,
+    milestones_regulatory_usd: deal.milestones_regulatory_usd,
+    milestones_commercial_usd: deal.milestones_commercial_usd,
+    royalty_low_pct: normalizeRoyaltyPct(deal.royalty_low_pct),
+    royalty_high_pct: normalizeRoyaltyPct(deal.royalty_high_pct),
+    total_deal_value_usd: deal.total_deal_value_usd,
+    equity_investment_usd: deal.equity_investment_usd,
+    includes_manufacturing: deal.includes_manufacturing,
+    includes_co_development: deal.includes_co_development,
+    includes_co_promotion: deal.includes_co_promotion,
+    option_exercise_fee: deal.option_exercise_fee,
+    // Rich term fields
+    milestone_details: deal.milestone_details || [],
+    sales_milestones: deal.sales_milestones || [],
+    research_funding_usd: deal.research_funding_usd,
+    profit_share_pct: deal.profit_share_pct,
+    cost_share_ratio: deal.cost_share_ratio,
+    opt_in_rights: deal.opt_in_rights,
+    opt_in_stage: deal.opt_in_stage,
+    regulatory_designations: deal.regulatory_designations || [],
+    term_years: deal.term_years,
+    sublicense_rights: deal.sublicense_rights,
+    rights_retained: deal.rights_retained,
+    indications_licensed: deal.indications_licensed,
+    includes_diagnostics: deal.includes_diagnostics || false,
+    announced_date: announcedDate,
+                  terms_disclosed: deal.upfront_usd !== null || deal.milestones_total_usd !== null,
+    confidence_score: deal.confidence_score,
+    extraction_notes: `Source: ${sourceName}.${needsReview ? ` Confidence ${deal.confidence_score}: needs verifier review.` : ''} ${deal.extraction_notes || ''}`.trim(),
+    therapeutic_area: therapeuticArea,
+    raw_text_excerpt: extractAuditExcerpt(content, deal.licensee ?? '', 500),
+    },
+  }, { dryRun });
 }
