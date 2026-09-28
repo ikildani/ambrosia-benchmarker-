@@ -67,6 +67,15 @@ export function translateCdeStatus(raw: string | null): string | null {
   return raw;
 }
 
+function fieldList(page: ScrapedPage, ...labels: string[]): string[] {
+  for (const l of labels) {
+    const v = page.fields[l];
+    if (Array.isArray(v)) return compact(v);
+    if (typeof v === 'string' && v.trim()) return splitList(v);
+  }
+  return [];
+}
+
 function field(page: ScrapedPage, ...labels: string[]): string | null {
   for (const l of labels) {
     const v = page.fields[l];
@@ -78,13 +87,20 @@ function field(page: ScrapedPage, ...labels: string[]): string | null {
 
 export function mapCdePage(page: ScrapedPage): RegistryRecord {
   const id = field(page, '登记号', 'Registration No', 'CTR') ?? page.id;
-  const sponsor = field(page, '申办者', '申请人', 'Sponsor');
+  const sponsor = field(page, '申办者', '申请人名称', '申请人', 'Sponsor');
   const drugType = field(page, '药物类型', 'Drug type');
-  const names = compact([...splitList(field(page, '药物名称', 'Drug name')), ...splitList(field(page, '药物代码', 'Code name'))]);
   const ivType = drugType && /生物/.test(drugType) ? 'biological' : 'drug';
-  const interventions = names
-    .map(n => makeIntervention(n, ivType, /安慰剂|placebo/i.test(n) ? 'placebo' : 'experimental'))
-    .filter((iv): iv is NonNullable<typeof iv> => !!iv);
+  // Detail pages (2026 layout) list investigational drugs under 试验药 and comparators under 对照药;
+  // 药物名称 is the registered product and the fallback.
+  const experimental = fieldList(page, '试验药');
+  const comparators = fieldList(page, '对照药');
+  const names = experimental.length > 0
+    ? experimental
+    : compact([...splitList(field(page, '药物名称', 'Drug name')), ...splitList(field(page, '药物代码', 'Code name'))]);
+  const interventions = [
+    ...names.map(n => makeIntervention(n, ivType, /安慰剂|placebo/i.test(n) ? 'placebo' : 'experimental')),
+    ...comparators.map(n => makeIntervention(n, ivType, /安慰剂|placebo/i.test(n) ? 'placebo' : 'comparator')),
+  ].filter((iv): iv is NonNullable<typeof iv> => !!iv);
   const phaseRaw = field(page, '试验分期', 'Phase');
   const phaseEn = phaseRaw ? phaseRaw.replace(/期/g, '').replace(/其它|其他/, 'other') : null;
   const statusRaw = field(page, '试验状态', 'Status');
