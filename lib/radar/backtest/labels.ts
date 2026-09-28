@@ -23,7 +23,7 @@
  * dated <= as_of (features.ts). Nothing in this module reads a feature.
  */
 
-import { matchAssetName, sameCompany, isEligibleDeal, type PartnershipDeal, type NameMatchKind } from '@/lib/radar/partnership';
+import { matchAssetName, nameSegments, sameCompany, isEligibleDeal, type PartnershipDeal, type NameMatchKind } from '@/lib/radar/partnership';
 
 export const LABEL_WINDOW_MONTHS = 12;
 export const POSITIVE_DEAL_TYPES: ReadonlySet<string> = new Set(['license', 'option', 'acquisition', 'co_development']);
@@ -42,6 +42,23 @@ export interface LabelAsset {
   company_name_variations?: string[] | null;
   asset_name: string;
   asset_aliases?: string[] | null;
+  /** Resolved drug_master node, for brand/INN matches the name matcher cannot see (ZYNLONTA vs loncastuximab). */
+  drug_master_id?: string | null;
+}
+
+export interface BuildLabelOptions {
+  /** drug_aliases.alias_normalized -> drug_id, for the deal names' segments. */
+  drugIdByKey?: ReadonlyMap<string, string>;
+}
+
+/** alias_normalized keys for a deal asset name: every segment, letters and digits only, lower case. */
+export function dealNameKeys(name: string | null | undefined): string[] {
+  const out = new Set<string>();
+  for (const seg of nameSegments(name)) {
+    const k = seg.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    if (k.length >= 3) out.add(k);
+  }
+  return [...out];
 }
 
 export interface LabelEvent {
@@ -103,7 +120,7 @@ export function isPositiveDealType(deal: Pick<LabelDeal, 'deal_type'>): boolean 
  * Every (asset, deal) pair that can ever be a positive, regardless of as_of.
  * Run once over the deals table; the per-snapshot label is then a date test.
  */
-export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly LabelDeal[]): LabelEvent[] {
+export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly LabelDeal[], opts: BuildLabelOptions = {}): LabelEvent[] {
   const byCompanyId = new Map<string, LabelAsset[]>();
   const all = assets;
   for (const a of assets) {
@@ -119,10 +136,15 @@ export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly 
     // Candidate assets: same licensor_id first (cheap), then name equality across all.
     const candidates = deal.licensor_id ? byCompanyId.get(deal.licensor_id) ?? [] : [];
     const pool = candidates.length ? candidates : all;
+    // Drug ids the deal name resolves to (brand, INN or code through drug_aliases).
+    const dealDrugIds = opts.drugIdByKey
+      ? new Set(dealNameKeys(deal.asset_name).map(k => opts.drugIdByKey!.get(k)).filter((d): d is string => !!d))
+      : null;
     for (const asset of pool) {
       const lm = licensorMatches(asset, deal);
       if (!lm) continue;
-      const kind = matchAssetName([asset.asset_name, ...(asset.asset_aliases ?? [])], deal.asset_name);
+      let kind = matchAssetName([asset.asset_name, ...(asset.asset_aliases ?? [])], deal.asset_name);
+      if (!kind && dealDrugIds && asset.drug_master_id && dealDrugIds.has(asset.drug_master_id)) kind = 'drug_master';
       if (!kind) continue;
       const key = `${asset.id}:${deal.id}`;
       if (seen.has(key)) continue;

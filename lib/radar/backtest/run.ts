@@ -30,7 +30,7 @@ import {
   type FeatureAsset, type FeatureBundle, type CompanyGroup, type TrialRow,
 } from '@/lib/radar/backtest/features';
 import {
-  buildLabelEvents, labelSnapshot, monthlySnapshotDates, keepNegativeAsset,
+  buildLabelEvents, dealNameKeys, labelSnapshot, monthlySnapshotDates, keepNegativeAsset,
   SNAPSHOT_FROM, SNAPSHOT_TO, POSITIVE_DEAL_TYPES, LABEL_WINDOW_MONTHS,
   type LabelAsset, type LabelDeal, type LabelEvent,
 } from '@/lib/radar/backtest/labels';
@@ -262,7 +262,7 @@ async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelD
   const assets: LabelAsset[] = [];
   for (const ids of chunk(Array.from(companyIds), 150)) {
     const [assetsRes, companiesRes] = await Promise.all([
-      supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases').in('company_id', ids).limit(5000),
+      supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases, drug_master_id').in('company_id', ids).limit(5000),
       supabase.from('companies').select('id, name_variations').in('id', ids),
     ]);
     if (assetsRes.error) throw new Error(`clinical_assets by company: ${assetsRes.error.message}`);
@@ -276,17 +276,34 @@ async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelD
         company_name_variations: a.company_id ? variations.get(a.company_id as string) ?? [] : [],
         asset_name: a.asset_name as string,
         asset_aliases: (a.asset_aliases as string[] | null) ?? [],
+        drug_master_id: (a.drug_master_id as string | null) ?? null,
       });
     }
   }
   return assets;
 }
 
+/** drug_aliases lookup for every segment of every deal's asset name (brand / INN / code -> drug_master). */
+async function fetchDealDrugIds(supabase: SupabaseClient, deals: readonly LabelDeal[]): Promise<Map<string, string>> {
+  const keys = new Set<string>();
+  for (const d of deals) for (const k of dealNameKeys(d.asset_name)) keys.add(k);
+  const out = new Map<string, string>();
+  for (const batch of chunk(Array.from(keys), 200)) {
+    const { data, error } = await supabase.from('drug_aliases').select('drug_id, alias_normalized').in('alias_normalized', batch);
+    if (error) throw new Error(`drug_aliases by key: ${error.message}`);
+    for (const row of data ?? []) {
+      const k = String(row.alias_normalized);
+      if (!out.has(k)) out.set(k, String(row.drug_id));
+    }
+  }
+  return out;
+}
+
 async function runLabelsPhase(supabase: SupabaseClient, state: BacktestCursorState, now: Date): Promise<{ written: number; errors: string[] }> {
   const errors: string[] = [];
   const deals = await fetchAllDeals(supabase);
-  const assets = await fetchLabelAssets(supabase, deals);
-  const events = buildLabelEvents(assets, deals);
+  const [assets, drugIdByKey] = await Promise.all([fetchLabelAssets(supabase, deals), fetchDealDrugIds(supabase, deals)]);
+  const events = buildLabelEvents(assets, deals, { drugIdByKey });
 
   // Replace the table wholesale so a rebuild never leaves stale pairs.
   const del = await supabase.from('radar_score_label_events').delete().gte('announced_date', '1900-01-01');
