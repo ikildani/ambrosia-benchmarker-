@@ -5,6 +5,7 @@ import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS 
 import { captureApiError } from '@/lib/sentry-api';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { pulseQuerySchema, formatZodErrors } from '@/lib/api-validation';
+import { collapseDuplicateDeals, canonicalModality } from '@/lib/digest/weekly-snapshot';
 
 export async function GET(request: NextRequest) {
   const identifier = getIdentifier(request);
@@ -24,34 +25,23 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServiceClient();
     const history = parsed.data.history === 'true';
-    const userId = parsed.data.user_id || null;
     const weekParam = parsed.data.week || null;
 
-    // Check user tier — try query param first, then auth cookies
+    // Tier comes from the session only. The client still sends ?user_id=, but trusting it
+    // let anyone who knew a Pro user's id read Pro data. Same-origin fetches carry the cookie.
     let userTier = 'free';
-    if (userId) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('tier')
-        .eq('id', userId)
-        .single();
-      if (profile?.tier) userTier = profile.tier;
-    }
-    // Fallback: check auth cookies if no user_id param
-    if (userTier === 'free' && !userId) {
-      try {
-        const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
-        const authUser = await getAuthenticatedUser(request);
-        if (authUser?.id) {
-          const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('tier')
-            .eq('id', authUser.id)
-            .single();
-          if (profile?.tier) userTier = profile.tier;
-        }
-      } catch {}
-    }
+    try {
+      const { getAuthenticatedUser } = await import('@/lib/auth-helpers');
+      const authUser = await getAuthenticatedUser(request);
+      if (authUser?.id) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('tier')
+          .eq('id', authUser.id)
+          .single();
+        if (profile?.tier) userTier = profile.tier;
+      }
+    } catch {}
 
     const isPro = userTier === 'pro' || userTier === 'report' || userTier === 'portfolio';
 
@@ -101,15 +91,13 @@ export async function GET(request: NextRequest) {
       snapshotQuery.single(),
 
       supabase
-        .from('deals')
-        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type, verification_status')
-        .eq('is_synthetic', false)
-        .neq('verification_status', 'rejected')
+        .from('deals_verified')  // quality-filtered view (migration 147)
+        .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, therapeutic_area, indication_category, source_type, verification_status, dedupe_group_id')
         .gte('announced_date', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .lte('announced_date', new Date().toISOString().split('T')[0])
         .not('therapeutic_area', 'in', '("other","_option_deals","_codev_deals","_china_deals")')
         .order('announced_date', { ascending: false })
-        .limit(30),
+        .limit(60),
     ]);
 
     if (snapshotResult.error) {
@@ -120,14 +108,12 @@ export async function GET(request: NextRequest) {
     const snapshot = snapshotResult.data;
     const rawDeals = dealsResult.data || [];
 
-    // Dedup: remove duplicate deals by licensor+licensee+announced_date key
-    const seen = new Set<string>();
-    const deals = rawDeals.filter(d => {
-      const key = `${(d.licensor_name || '').toLowerCase()}|${(d.licensee_name || '').toLowerCase()}|${d.announced_date || ''}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }).slice(0, 25);
+    // Dedup canonical duplicates (dedupe group, or the same parties + asset under different
+    // spellings or reversed roles), newest first, then cap the page at 25.
+    const allDeals = collapseDuplicateDeals(rawDeals)
+      .map((d) => ({ ...d, modality: canonicalModality(d.modality) }))
+      .sort((a, b) => (b.announced_date || '').localeCompare(a.announced_date || '') || String(a.id).localeCompare(String(b.id)));
+    const deals = allDeals.slice(0, 25);
 
     // Gate data for free users
     if (!isPro) {
@@ -143,7 +129,7 @@ export async function GET(request: NextRequest) {
           phase_breakdown: nullifyFinancials(snapshot.phase_breakdown),
         },
         deals: deals.slice(0, 2).map((d) => ({ ...d, upfront_usd: null, total_deal_value_usd: null })),
-        total_deals: deals.length,
+        total_deals: allDeals.length,
         is_pro: false,
       });
     }
@@ -151,7 +137,7 @@ export async function GET(request: NextRequest) {
     return apiSuccess({
       snapshot,
       deals,
-      total_deals: deals.length,
+      total_deals: allDeals.length,
       is_pro: true,
     });
   } catch (error) {

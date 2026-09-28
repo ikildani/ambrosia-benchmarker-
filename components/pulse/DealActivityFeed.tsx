@@ -89,14 +89,14 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">This Week's Deals</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{totalDeals} deal{totalDeals !== 1 ? 's' : ''} announced</p>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Recent Deals</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{totalDeals} deal{totalDeals !== 1 ? 's' : ''} announced in the last 14 days</p>
         </div>
       </div>
 
       {visibleDeals.length === 0 ? (
         <div className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-          No deals announced this week yet.
+          No verified deals announced in the last 14 days yet.
         </div>
       ) : (
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -131,9 +131,10 @@ export default function DealActivityFeed({ deals, totalDeals, isPro, onUpgrade }
                     )}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {new Date(deal.announced_date) > new Date()
+                    {/* announced_date is a calendar date: parse as local to avoid showing the previous day */}
+                    {new Date(`${deal.announced_date}T00:00:00`) > new Date()
                       ? 'Recent'
-                      : new Date(deal.announced_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      : new Date(`${deal.announced_date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
               </div>

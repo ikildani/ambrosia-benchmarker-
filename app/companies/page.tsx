@@ -41,6 +41,7 @@ async function getPublicCompanyDirectory() {
   const { data, error } = await supabase
     .from('companies')
     .select('id, name, company_type, deals_last_12mo, deals_last_24mo, hq_country, modalities_active, active_trials_count, acquisition_appetite, last_deal_date, last_deal_modality, data_quality_score')
+    .is('merged_into', null) // merged-away entities keep frozen stats; list the surviving company only
     .order('deals_last_12mo', { ascending: false, nullsFirst: false })
     .limit(100);
 

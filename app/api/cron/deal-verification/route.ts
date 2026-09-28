@@ -18,6 +18,7 @@ import { checkDealStatuses, type DealStatusResult } from '@/lib/ingestion/deal-s
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
 import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 import { runOutcomePhase } from '@/lib/outcomes/cron';
+import { fixFlaggedDeals, type FlagFixResult } from '@/lib/ingestion/flag-fixer';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -115,14 +116,35 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Flag-and-fix (lib/ingestion/flag-fixer.ts) rides on the :40 run each hour
+  // because vercel.json is at the 100-cron cap: verification gets a smaller
+  // budget on that run and the fixer takes the rest. ?flagFix=N runs it now.
+  const flagFixParam = Number(params.get('flagFix'));
+  const flagFixSlots = params.has('flagFix') && Number.isFinite(flagFixParam) && flagFixParam > 0
+    ? Math.min(10, flagFixParam)
+    : nowUtc.getUTCMinutes() >= 40 ? 4 : 0;
+  const FLAG_FIX_BUDGET_MS = 110_000;
+
   const result = await verifyPendingDeals(supabase, perplexityApiKey, anthropicApiKey, {
     maxDeals: 50,
-    timeBudgetMs: Math.max(60_000, 250_000 - (Date.now() - passStart)),
+    timeBudgetMs: Math.max(60_000, 250_000 - (flagFixSlots > 0 ? FLAG_FIX_BUDGET_MS : 0) - (Date.now() - passStart)),
     priorityTAs,
     // Fill source_url on already-verified deals with leftover budget (URL-only, verdict untouched)
     sourceBackfillSlots,
     flaggedRetryAfterDays,
   });
+
+  let flagFix: FlagFixResult | null = null;
+  if (flagFixSlots > 0) {
+    try {
+      flagFix = await fixFlaggedDeals(supabase, perplexityApiKey, anthropicApiKey, {
+        maxDeals: flagFixSlots,
+        timeBudgetMs: Math.max(30_000, 270_000 - (Date.now() - passStart)),
+      });
+    } catch (e) {
+      console.error('[flag-fixer] failed inside deal-verification:', e instanceof Error ? e.message : e);
+    }
+  }
 
   // Auto-remediation: accept high-confidence verified deals, reject low-confidence flagged deals
   const acceptResult = await autoAcceptVerifiedDeals(supabase);
@@ -132,7 +154,7 @@ export async function GET(request: NextRequest) {
   // recompute_deal_dedupe() promotes the best row of each dedupe group. Nothing
   // called it after Sep 25 2026, so 2,300 rows (911 verified) sat outside the
   // comparable pool. Run it whenever a verdict changed.
-  if (result.verified + result.reverified + result.flagged + acceptResult.fixed > 0 || (statusResult?.updated ?? 0) > 0) {
+  if (result.verified + result.reverified + result.flagged + acceptResult.fixed + (flagFix ? flagFix.fixed + flagFix.duplicates : 0) > 0 || (statusResult?.updated ?? 0) > 0) {
     const { error: recomputeErr } = await supabase.rpc('recompute_deal_dedupe');
     if (recomputeErr) console.error('[deal-verification] recompute_deal_dedupe failed:', recomputeErr.message);
   }
@@ -187,7 +209,7 @@ export async function GET(request: NextRequest) {
     processed: result.verified + result.flagged,
     inserted: result.verified,
     errors: result.errors,
-    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped, dealStatus: statusResult ? { checked: statusResult.checked, updated: statusResult.updated, byStatus: statusResult.byStatus, errors: statusResult.errors.length } : null },
+    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped, dealStatus: statusResult ? { checked: statusResult.checked, updated: statusResult.updated, byStatus: statusResult.byStatus, errors: statusResult.errors.length } : null, flagFix: flagFix ? { attempted: flagFix.attempted, fixed: flagFix.fixed, duplicates: flagFix.duplicates, unresolved: flagFix.unresolved, errors: flagFix.errors.length } : null },
     notes: result.regressions > 0 ? `BACKTEST: ${result.regressions} previously verified row(s) no longer hold` : undefined,
   });
 

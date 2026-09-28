@@ -73,7 +73,7 @@ describe('/api/checkout', () => {
 
     expect(response.status).toBe(200);
     expect(data.demo).toBe(true);
-    expect(data.message).toContain('Stripe not configured');
+    expect(data.error).toContain('Checkout is temporarily unavailable');
   });
 
   it('should return 400 for invalid purchaseType', async () => {

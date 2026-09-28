@@ -61,10 +61,9 @@ export async function GET(
       // Recent deals (last 12 months) — only real (non-synthetic) deals
       // R68 (2026-04-15): comment said "only real" but filter was missing.
       supabase
-        .from('deals')
+        .from('deals_verified')  // quality-filtered view (migration 147)
         .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-        .eq('is_synthetic', false)
         .gte('announced_date', oneYearAgo)
         .order('announced_date', { ascending: false })
         .limit(50),
@@ -79,10 +78,9 @@ export async function GET(
 
       // All deals for trend (3 years) — only real deals (R68: added filter)
       supabase
-        .from('deals')
+        .from('deals_verified')  // quality-filtered view (migration 147)
         .select('announced_date, modality, upfront_usd, indication_category')
         .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-        .eq('is_synthetic', false)
         .gte('announced_date', threeYearsAgo)
         .order('announced_date', { ascending: true }),
     ]);
@@ -191,10 +189,9 @@ export async function GET(
       const topPeerIds = competitivePeers.slice(0, 3).map((p) => p.id);
       // Fetch deals for each top peer in the last 12 months to derive stats
       const { data: peerDeals } = await supabase
-        .from('deals')
+        .from('deals_verified')  // quality-filtered view (migration 147)
         .select('licensee_id, licensor_id, modality')
         .or(topPeerIds.map(id => `licensee_id.eq.${id},licensor_id.eq.${id}`).join(','))
-        .eq('is_synthetic', false)  // R68
         .gte('announced_date', oneYearAgo);
 
       if (peerDeals) {
@@ -240,9 +237,8 @@ export async function GET(
         : null;
 
       const { data: marketAvgData } = await supabase
-        .from('deals')
+        .from('deals_verified')  // quality-filtered view (migration 147)
         .select('upfront_usd')
-        .eq('is_synthetic', false)  // R68
         .gte('announced_date', oneYearAgo)
         .not('upfront_usd', 'is', null)
         .gt('upfront_usd', 0);

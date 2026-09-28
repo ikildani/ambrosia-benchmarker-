@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/server';
 import CompanyPageClient from './CompanyPageClient';
@@ -13,6 +13,7 @@ export async function generateStaticParams() {
   const { data } = await supabase
     .from('companies')
     .select('id')
+    .is('merged_into', null)
     .order('deals_last_12mo', { ascending: false, nullsFirst: false })
     .limit(200);
   return (data || []).map((c) => ({ companyId: c.id }));
@@ -195,10 +196,9 @@ async function getCompanySEOData(companyId: string) {
     // R68: exclude is_synthetic=true so 845 flagged fakes stay off
     // company-detail pages shown to BD users.
     supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('id, licensor_name, licensee_name, asset_name, modality, phase_at_signing, upfront_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, deal_type, milestones_total_usd, royalty_low_pct, royalty_high_pct, terms_disclosed')
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-      .eq('is_synthetic', false)
       .gte('announced_date', oneYearAgo)
       .order('announced_date', { ascending: false })
       .limit(20),
@@ -214,10 +214,9 @@ async function getCompanySEOData(companyId: string) {
 
     // 3-year deal count for trend (R68: filter flagged fakes)
     supabase
-      .from('deals')
+      .from('deals_verified')  // quality-filtered view (migration 147)
       .select('announced_date, modality, indication_category, therapeutic_area')
       .or(`licensee_id.eq.${companyId},licensor_id.eq.${companyId},licensee_name.eq.${companyName},licensor_name.eq.${companyName}`)
-      .eq('is_synthetic', false)
       .gte('announced_date', threeYearsAgo),
   ]);
 
@@ -367,6 +366,11 @@ export default async function CompanyPage({ params }: Props) {
 
   if (!data) {
     notFound();
+  }
+
+  // A merged-away entity's page would show frozen stats; send it to the surviving company.
+  if (data.company.merged_into) {
+    permanentRedirect(`/companies/${data.company.merged_into}`);
   }
 
   const {

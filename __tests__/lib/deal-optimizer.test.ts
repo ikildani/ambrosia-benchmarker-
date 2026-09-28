@@ -157,13 +157,16 @@ describe('Deal Structure Optimizer', () => {
   describe('cross-TA cross-phase coverage', () => {
     test('runs without errors across multiple TA × phase combinations', () => {
       const TAs = ['oncology', 'neurology', 'immunology', 'metabolic', 'rareDisease'] as const;
+      // Deal types are phase-gated: acquisition from Phase 2, co-development from
+      // Phase 1, reformulation from Phase 3; licensing, option and collaboration always.
+      const expectedCount = { phase1: 4, phase2: 5, phase3: 6, approved: 6 } as const;
       const phases = ['phase1', 'phase2', 'phase3', 'approved'] as const;
       for (const ta of TAs) {
         for (const phase of phases) {
           const result = optimizeDealStructure(
             makeRNPVInput({ therapeuticArea: ta as any, phase: phase as any }),
           );
-          expect(result.rankings).toHaveLength(5);
+          expect(result.rankings).toHaveLength(expectedCount[phase]);
           expect(result.rankings.every(r => Number.isFinite(r.dealValue))).toBe(true);
         }
       }
