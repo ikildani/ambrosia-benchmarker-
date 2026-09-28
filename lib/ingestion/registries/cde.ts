@@ -87,7 +87,13 @@ function field(page: ScrapedPage, ...labels: string[]): string | null {
 
 export function mapCdePage(page: ScrapedPage): RegistryRecord {
   const id = field(page, '登记号', 'Registration No', 'CTR') ?? page.id;
-  const sponsor = field(page, '申办者', '申请人名称', '申请人', 'Sponsor');
+  // 申请人名称 lists co-applicants joined by "/" ("AstraZeneca AB/ 阿斯利康全球研发（中国）有限公司/
+  // AstraZeneca Nijmegen B.V."): the first is the sponsor, the rest collaborators.
+  const applicants = (field(page, '申办者', '申请人名称', '申请人', 'Sponsor') ?? '')
+    .split(/\s*\/\s*/)
+    .map(a => a.trim())
+    .filter(Boolean);
+  const sponsor = applicants[0] ?? null;
   const drugType = field(page, '药物类型', 'Drug type');
   const ivType = drugType && /生物/.test(drugType) ? 'biological' : 'drug';
   // Detail pages (2026 layout) list investigational drugs under 试验药 and comparators under 对照药;
@@ -103,6 +109,12 @@ export function mapCdePage(page: ScrapedPage): RegistryRecord {
   ].filter((iv): iv is NonNullable<typeof iv> => !!iv);
   const phaseRaw = field(page, '试验分期', 'Phase');
   const phaseEn = phaseRaw ? phaseRaw.replace(/期/g, '').replace(/其它|其他/, 'other') : null;
+  // Bioequivalence studies of generics (试验分类 生物等效性, or a BE title) are drug
+  // trials but not development programs: phase not_applicable keeps them out of
+  // the asset universe's core phases.
+  const category = field(page, '试验分类');
+  const title = field(page, '试验专业题目', '试验通俗题目', 'Title');
+  const bioequivalence = /生物等效性|生物利用度|BE\s*试验/.test(`${category ?? ''} ${title ?? ''}`);
   const statusRaw = field(page, '试验状态', 'Status');
   const allText = Object.values(page.fields).flat().filter(Boolean).join(' ');
 
@@ -110,17 +122,17 @@ export function mapCdePage(page: ScrapedPage): RegistryRecord {
     registry: 'cde',
     registry_id: id,
     secondary_ids: uniq([...compact([field(page, 'NCT编号', 'NCT')]), ...extractSecondaryIds(allText)]).filter(s => s !== id),
-    title: field(page, '试验专业题目', '试验通俗题目', 'Title'),
+    title,
     sponsor_name: sponsor,
     sponsor_type: classifySponsorClass(sponsor, sponsor && /医院|大学|研究所|学院/.test(sponsor) ? 'hospital' : 'company'),
-    collaborators: compact(splitList(field(page, '联合申办者', 'Co-sponsor'))).filter(c => c !== sponsor),
+    collaborators: compact([...applicants.slice(1), ...splitList(field(page, '联合申办者', 'Co-sponsor'))]).filter(c => c !== sponsor),
     interventions,
     conditions: splitList(field(page, '适应症', 'Indication')).slice(0, 20),
-    phase_raw: phaseRaw,
-    phase: mapRegistryPhase(phaseEn),
+    phase_raw: bioequivalence ? `${phaseRaw ?? ''} (bioequivalence)`.trim() : phaseRaw,
+    phase: bioequivalence ? 'not_applicable' : mapRegistryPhase(phaseEn),
     status_raw: statusRaw,
     status: mapRegistryStatus(translateCdeStatus(statusRaw)),
-    study_type: 'interventional',
+    study_type: bioequivalence ? 'bioequivalence' : 'interventional',
     countries: ['CN'],
     start_date: normalizeRegistryDate(field(page, '第一例受试者入组日期', 'First enrolment date')),
     primary_completion_date: normalizeRegistryDate(field(page, '试验完成日期', '试验终止日期', 'Completion date')),

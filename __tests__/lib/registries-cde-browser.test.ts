@@ -27,7 +27,7 @@ const DETAIL = `<html><body><div class="panel-body"><table class="searchDetailTa
 <tr> <th width="15%">登记号</th> <td width="35%">CTR20263723</td> <th width="15%">试验状态</th> <td width="35%">进行中</td> </tr>
 <tr> <th>申请人联系人</th> <td>贾海静</td> <th>首次公示信息日期</th> <td> 2026-09-24 </td> </tr>
 <tr> <th>申请人名称</th> <td colspan="3"> 深圳赛保尔生物药业有限公司 </td> </tr></table>
-<table class="searchDetailTable"><tr> <th>申请人名称</th> <td>1</td> </tr><tr> <th>联系人姓名</th> <td>贾海静</td> </tr></table>
+<table class="searchDetailTable"><tr> <th>申请人名称</th> <td>1 2</td> </tr><tr> <th>联系人姓名</th> <td>贾海静</td> </tr></table>
 <table class="searchDetailTable">
 <tr> <th>药物名称</th> <td colspan="3"> SPGL008注射液 &nbsp;&nbsp;曾用名: </td> </tr>
 <tr> <th>药物类型</th> <td colspan="3"> 生物制品 </td> </tr>
@@ -103,6 +103,29 @@ describe('CDE detail parser + mapper (2026 layout)', () => {
     expect(rec.first_registered).toBe('2026-09-24');
     expect(rec.start_date).toBeNull();
     expect(rec.countries).toEqual(['CN']);
+  });
+});
+
+describe('CDE co-applicants', () => {
+  it('takes the first applicant as sponsor and the rest as collaborators', () => {
+    const html = DETAIL.replace('深圳赛保尔生物药业有限公司', 'AstraZeneca AB/ 阿斯利康全球研发（中国）有限公司/ AstraZeneca Nijmegen B.V.');
+    const rec = mapCdePage(parseCdeDetail(html, 'u', { ctr: 'CTR20263723' }));
+    expect(rec.sponsor_name).toBe('AstraZeneca AB');
+    expect(rec.collaborators).toEqual(['阿斯利康全球研发（中国）有限公司', 'AstraZeneca Nijmegen B.V.']);
+    expect(rec.sponsor_type).toBe('INDUSTRY');
+  });
+});
+
+describe('CDE bioequivalence studies', () => {
+  it('keeps generic BE studies out of the development phases', () => {
+    const be = DETAIL
+      .replace('试验分类</th> <td width="17%"> 安全性和有效性', '试验分类</th> <td width="17%"> 生物等效性')
+      .replace(/SPGL008联合SSGJ-706±化疗治疗晚期非小细胞肺癌的II期临床研究/g, '评价恩曲替尼胶囊受试制剂与参比制剂在空腹条件下的生物等效性研究')
+      .replace('II期', '其它');
+    const rec = mapCdePage(parseCdeDetail(be, 'u', { ctr: 'CTR20263718', status: '进行中 尚未招募' }));
+    expect(rec.phase).toBe('not_applicable');
+    expect(rec.study_type).toBe('bioequivalence');
+    expect(rec.phase_raw).toMatch(/bioequivalence/);
   });
 });
 

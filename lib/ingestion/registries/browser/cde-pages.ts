@@ -129,7 +129,7 @@ export function parseCdeDetail(html: string, url: string, listing?: Partial<CdeL
     if (NOT_FILLED_RE.test(value)) continue;
     if (label === '药物名称') value = value.replace(/曾用名[:：].*$/, '').trim();
     // The applicant block repeats 申请人名称 as a numbered sub-heading ("申请人名称 | 1").
-    if (/^申请人名称|^申办者/.test(label) && /^\d+$/.test(value)) continue;
+    if (/^申请人名称|^申办者/.test(label) && /^[\d\s]+$/.test(value)) continue;
     if (!value) continue;
     add(label, value);
   }
