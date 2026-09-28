@@ -80,6 +80,17 @@ describe('labels — positive / negative construction', () => {
 
   test('deal type, rejection, synthetic and non-canonical flags exclude a deal', () => {
     expect(buildLabelEvents([ASSET], [deal({ deal_type: 'collaboration' })])).toHaveLength(0);
+  });
+
+  it('matches a brand or INN deal name to the asset through drug_master when names disagree', () => {
+    const brandDeal = deal({ asset_name: 'ZYNLONTA' });
+    const asset = { ...ASSET, asset_name: 'LONCASTUXIMAB TESIRINE', asset_aliases: [], drug_master_id: 'dm-lonca' };
+    expect(buildLabelEvents([asset], [brandDeal])).toHaveLength(0);
+    const events = buildLabelEvents([asset], [brandDeal], { drugIdByKey: new Map([['zynlonta', 'dm-lonca']]) });
+    expect(events).toHaveLength(1);
+    expect(events[0].match_kind).toBe('drug_master');
+    // A different drug on the same company does not match.
+    expect(buildLabelEvents([{ ...asset, drug_master_id: 'dm-other' }], [brandDeal], { drugIdByKey: new Map([['zynlonta', 'dm-lonca']]) })).toHaveLength(0);
     expect(buildLabelEvents([ASSET], [deal({ verification_status: 'rejected' })])).toHaveLength(0);
     expect(buildLabelEvents([ASSET], [deal({ is_synthetic: true })])).toHaveLength(0);
     expect(buildLabelEvents([ASSET], [deal({ is_canonical: false })])).toHaveLength(0);

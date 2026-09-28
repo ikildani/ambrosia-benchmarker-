@@ -42,6 +42,7 @@ import { FilterChips } from './FilterChips';
 import { FirstRun } from './FirstRun';
 import { MandateForm } from './MandateForm';
 import { MandateSwitcher } from './MandateSwitcher';
+import { RadarSubNav } from '@/components/radar/RadarSubNav';
 import { Pagination } from './Pagination';
 import { SearchBox } from './SearchBox';
 import { SaveViewDialog, ViewSwitcher, type SaveViewInput } from './ViewSwitcher';
@@ -324,6 +325,7 @@ export function RadarShell() {
   return (
     <div className={cn('min-h-screen bg-neutral-50 pt-16 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 sm:pt-20', ui.compare.length > 0 && 'pb-20')}>
       <div className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6">
+        <RadarSubNav current="feed" className="mb-3" />
         {/* Title row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">

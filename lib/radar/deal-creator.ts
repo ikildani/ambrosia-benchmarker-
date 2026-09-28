@@ -23,6 +23,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
+import { RADAR_PHASE_DEFAULT_EXCLUDED } from '@/lib/radar/vocab';
 import { modalityKey, modalitiesMatch } from '@/lib/comparables/match-normalize';
 import { phaseRank as sharedPhaseRank } from '@/lib/comparable-scoring';
 import { radarPhaseToDb } from './deal-thesis';
@@ -415,6 +416,9 @@ async function findMatchingAssets(
     .select(CANDIDATE_SELECT)
     .in('partnership_status', ['unpartnered', 'partially_partnered'])
     .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
+    // Phase 4 / approved programs are a divestiture market, not a licensing
+    // one; the feed hides them by default and so does the acquirer view.
+    .not('phase', 'in', `(${RADAR_PHASE_DEFAULT_EXCLUDED.join(',')})`)
     .gte('confidence_score', 30)
     .gt('licensing_intent_score', 0)
     // `.neq('company_id', x)` silently drops NULL company_id rows (SQL NULL

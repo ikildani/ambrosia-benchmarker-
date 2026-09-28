@@ -48,3 +48,4 @@ tmp/
 # local one-off scripts
 .jrct-backfill.ts
 .probe-*.ts
+.backtest-drive.ts

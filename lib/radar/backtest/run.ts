@@ -30,7 +30,7 @@ import {
   type FeatureAsset, type FeatureBundle, type CompanyGroup, type TrialRow,
 } from '@/lib/radar/backtest/features';
 import {
-  buildLabelEvents, labelSnapshot, monthlySnapshotDates, keepNegativeAsset,
+  buildLabelEvents, dealNameKeys, labelSnapshot, monthlySnapshotDates, keepNegativeAsset,
   SNAPSHOT_FROM, SNAPSHOT_TO, POSITIVE_DEAL_TYPES, LABEL_WINDOW_MONTHS,
   type LabelAsset, type LabelDeal, type LabelEvent,
 } from '@/lib/radar/backtest/labels';
@@ -124,7 +124,9 @@ export function rebuildDecision(args: {
 
 async function sourceCounts(supabase: SupabaseClient): Promise<SourceCounts> {
   const count = async (table: string): Promise<number> => {
-    const { count: n, error } = await supabase.from(table).select('id', { count: 'exact', head: true });
+    // '*' not 'id': radar_score_label_events has no id column, and a head
+    // count on a missing column fails with an empty message.
+    const { count: n, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
     if (error) throw new Error(`${table} count: ${error.message}`);
     return n ?? 0;
   };
@@ -262,7 +264,7 @@ async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelD
   const assets: LabelAsset[] = [];
   for (const ids of chunk(Array.from(companyIds), 150)) {
     const [assetsRes, companiesRes] = await Promise.all([
-      supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases').in('company_id', ids).limit(5000),
+      supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases, drug_master_id').in('company_id', ids).limit(5000),
       supabase.from('companies').select('id, name_variations').in('id', ids),
     ]);
     if (assetsRes.error) throw new Error(`clinical_assets by company: ${assetsRes.error.message}`);
@@ -276,17 +278,34 @@ async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelD
         company_name_variations: a.company_id ? variations.get(a.company_id as string) ?? [] : [],
         asset_name: a.asset_name as string,
         asset_aliases: (a.asset_aliases as string[] | null) ?? [],
+        drug_master_id: (a.drug_master_id as string | null) ?? null,
       });
     }
   }
   return assets;
 }
 
+/** drug_aliases lookup for every segment of every deal's asset name (brand / INN / code -> drug_master). */
+async function fetchDealDrugIds(supabase: SupabaseClient, deals: readonly LabelDeal[]): Promise<Map<string, string>> {
+  const keys = new Set<string>();
+  for (const d of deals) for (const k of dealNameKeys(d.asset_name)) keys.add(k);
+  const out = new Map<string, string>();
+  for (const batch of chunk(Array.from(keys), 200)) {
+    const { data, error } = await supabase.from('drug_aliases').select('drug_id, alias_normalized').in('alias_normalized', batch);
+    if (error) throw new Error(`drug_aliases by key: ${error.message}`);
+    for (const row of data ?? []) {
+      const k = String(row.alias_normalized);
+      if (!out.has(k)) out.set(k, String(row.drug_id));
+    }
+  }
+  return out;
+}
+
 async function runLabelsPhase(supabase: SupabaseClient, state: BacktestCursorState, now: Date): Promise<{ written: number; errors: string[] }> {
   const errors: string[] = [];
   const deals = await fetchAllDeals(supabase);
-  const assets = await fetchLabelAssets(supabase, deals);
-  const events = buildLabelEvents(assets, deals);
+  const [assets, drugIdByKey] = await Promise.all([fetchLabelAssets(supabase, deals), fetchDealDrugIds(supabase, deals)]);
+  const events = buildLabelEvents(assets, deals, { drugIdByKey });
 
   // Replace the table wholesale so a rebuild never leaves stale pairs.
   const del = await supabase.from('radar_score_label_events').delete().gte('announced_date', '1900-01-01');
@@ -692,11 +711,13 @@ async function runTrainPhase(
   const sample = [...outcome.testPredictions].sort((a, b) => b.prediction - a.prediction).slice(0, 2000);
   const positives = new Set(rows.filter(r => r.as_of >= TEST_FROM && r.label === 1).map(r => `${r.asset_id}:${r.as_of}`));
   for (const p of outcome.testPredictions) if (positives.has(`${p.asset_id}:${p.as_of}`) && !sample.includes(p)) sample.push(p);
+  // UPDATE in place (RPC, migration 144): a partial upsert fails the NOT NULL
+  // check on `features` before ON CONFLICT is considered.
   for (const batch of chunk(sample, 500)) {
-    const { error } = await supabase.from('radar_score_snapshots').upsert(
-      batch.map(p => ({ asset_id: p.asset_id, as_of: p.as_of, feature_version: state.feature_version, prediction: Math.round(p.prediction * 1e6) / 1e6, prediction_model: version })),
-      { onConflict: 'asset_id,as_of,feature_version', ignoreDuplicates: false },
-    );
+    const { error } = await supabase.rpc('radar_snapshot_set_predictions', {
+      rows: batch.map(p => ({ asset_id: p.asset_id, as_of: p.as_of, feature_version: state.feature_version, prediction: Math.round(p.prediction * 1e6) / 1e6 })),
+      model_version: version,
+    });
     if (error) { errors.push(`prediction sample: ${error.message}`); break; }
   }
 

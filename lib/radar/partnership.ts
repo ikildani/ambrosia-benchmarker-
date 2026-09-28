@@ -265,7 +265,7 @@ export function classifyOwnerType(name: string, ctgovClass?: string | null): Own
 // ASSET NAME MATCHER
 // ═══════════════════════════════════════════════════════════════════════
 
-export type NameMatchKind = 'exact' | 'code' | 'overlap';
+export type NameMatchKind = 'exact' | 'code' | 'overlap' | 'drug_master';
 
 /** Dosage-form and filler words that do not identify an asset. */
 const NAME_STOPWORDS = new Set([

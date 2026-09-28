@@ -147,7 +147,12 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
         <KV label="Target / mechanism">
           {asset.target || asset.mechanism || asset.moa_short
             ? <>{asset.target}{asset.target && (asset.mechanism || asset.moa_short) ? ' · ' : ''}{asset.mechanism || asset.moa_short}{asset.target_class ? <span className="block text-xs text-neutral-500 dark:text-neutral-400">{asset.target_class}</span> : null}</>
-            : <span className="text-neutral-500 dark:text-neutral-400">Not extracted</span>}
+            : <span className="text-neutral-500 dark:text-neutral-400">{asset.classification_status === 'classified' && (asset.classification_confidence ?? 100) < 60 ? 'Not disclosed in the registry record' : 'Not extracted'}</span>}
+          {asset.classification_status === 'classified' && (asset.classification_confidence ?? 100) < 60 && (
+            <span className="block text-xs text-amber-700 dark:text-amber-400" title="The classifier placed the area, indication and modality from registry text but could not settle the target or mechanism.">
+              Low-confidence classification
+            </span>
+          )}
         </KV>
         <KV label="Partnership">
           <Pill tone={partnership.status === 'unpartnered' ? 'emerald' : partnership.status === 'partnered' ? 'rose' : 'amber'}>{label(partnership.status)}</Pill>

@@ -39,16 +39,17 @@ export async function GET(
     .select(`
       id, match_score, match_reasons, is_read, is_saved, is_dismissed, is_stale, stale_reason, matched_at,
       clinical_assets (
-        id, company_name, asset_name, modality, therapeutic_area, phase,
-        partnership_status, licensing_intent_score, deal_readiness_score,
-        competitive_heat, confidence_score
+        id, company_name, asset_name, modality, therapeutic_area, indication_specific, phase,
+        partnership_status, ownership_status, licensing_intent_score, score_pct_peer, deal_readiness_score,
+        competitive_heat, confidence_score, originator_country
       )
     `)
     .eq('mandate_id', id)
     .eq('user_id', auth.userId)
     .eq('is_dismissed', false)
+    .order('is_read', { ascending: true })
     .order('matched_at', { ascending: false })
-    .limit(50);
+    .limit(200);
 
   return NextResponse.json({ mandate, matches: matches || [] });
 }

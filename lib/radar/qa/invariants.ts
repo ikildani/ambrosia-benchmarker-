@@ -19,6 +19,7 @@
  *   minor    backlog
  */
 
+import { CORE_UNIVERSE_PHASES } from '@/lib/radar/classify';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   RADAR_MODALITY_OPTIONS,
@@ -63,6 +64,12 @@ export interface QaUniverseStats {
   missing_company: { count: number; sample_ids: string[] };
   industry_phase_missing: { count: number; sample_ids: string[] };
   classification: { classified: number; skipped: number; needs_review: number; unclassified: number };
+  /**
+   * Same counts over the core universe the classify queue serves (industry,
+   * unpartnered/partial, pre-approval, ownership not excluded). Null until
+   * migration 145 is applied; the coverage gate then falls back to industry.
+   */
+  core_classification: { total: number; classified: number; skipped: number; needs_review: number; unclassified: number } | null;
   target_p2plus: { classified: number; with_target: number };
   drug_resolution: { resolved: number };
   partnership: {
@@ -294,6 +301,15 @@ export function normalizeUniverseStats(raw: Record<string, unknown> | null | und
       needs_review: n(obj('classification').needs_review),
       unclassified: n(obj('classification').unclassified),
     },
+    core_classification: r.core_classification && typeof r.core_classification === 'object'
+      ? {
+          total: n(obj('core_classification').total),
+          classified: n(obj('core_classification').classified),
+          skipped: n(obj('core_classification').skipped),
+          needs_review: n(obj('core_classification').needs_review),
+          unclassified: n(obj('core_classification').unclassified),
+        }
+      : null,
     target_p2plus: { classified: n(obj('target_p2plus').classified), with_target: n(obj('target_p2plus').with_target) },
     drug_resolution: { resolved: n(obj('drug_resolution').resolved) },
     partnership: {
@@ -395,28 +411,32 @@ export async function collectQaStats(supabase: SupabaseClient, opts: { now?: () 
     }
   };
 
-  const [universeRaw, thesisRaw, scoreRaw, pipelineRaw, preclinicalRaw] = await Promise.all([
+  const optionalRpc = async (fn: string, args: Record<string, unknown>): Promise<Record<string, unknown> | null> => {
+    try {
+      const { data, error } = await supabase.rpc(fn, args);
+      if (error) {
+        if (!/does not exist|could not find/i.test(error.message)) errors.push(`${fn}: ${error.message}`);
+        return null;
+      }
+      return (data ?? null) as Record<string, unknown> | null;
+    } catch (err) {
+      errors.push(`${fn}: ${err instanceof Error ? err.message : String(err)}`);
+      return null;
+    }
+  };
+
+  const [universeRaw, thesisRaw, scoreRaw, pipelineRaw, preclinicalRaw, coreClsRaw] = await Promise.all([
     rpc<Record<string, unknown>>('radar_qa_universe_stats', {
       p_vocab: { phase: PHASE_VOCAB_WITH_PLACEHOLDERS, territories: [...TERRITORY_VOCAB] },
     }),
     rpc<Record<string, unknown>>('radar_qa_thesis_stats', {}),
     rpc<Record<string, unknown>>('radar_qa_score_stats', { p_days: 14 }),
     rpc<Record<string, unknown>>('radar_qa_pipeline_stats', {}),
-    // Optional until migration 139 is applied: a missing function is not a gate failure.
-    (async () => {
-      try {
-        const { data, error } = await supabase.rpc('radar_qa_preclinical_stats', {});
-        if (error) {
-          if (!/does not exist|could not find/i.test(error.message)) errors.push(`radar_qa_preclinical_stats: ${error.message}`);
-          return null;
-        }
-        return (data ?? null) as Record<string, unknown> | null;
-      } catch (err) {
-        errors.push(`radar_qa_preclinical_stats: ${err instanceof Error ? err.message : String(err)}`);
-        return null;
-      }
-    })(),
+    // Optional until migrations 139 / 145 are applied: a missing function is not a gate failure.
+    optionalRpc('radar_qa_preclinical_stats', {}),
+    optionalRpc('radar_qa_core_classification', { p_phases: [...CORE_UNIVERSE_PHASES] }),
   ]);
+  if (universeRaw && coreClsRaw) (universeRaw as Record<string, unknown>).core_classification = coreClsRaw;
 
   const vocab: Record<string, VocabStat> = {};
   await Promise.all(
@@ -532,16 +552,22 @@ export function evaluateInvariants(stats: QaStats, opts: EvaluateOptions = {}): 
   }));
 
   // ── Coverage ────────────────────────────────────────────────────────
-  const clsCovered = u.classification.classified + u.classification.skipped;
-  const clsPct = pct(clsCovered, u.industry_assets);
+  // The classify queue serves the core universe (Phase 4 / marketed-elsewhere
+  // rows stay unclassified by decision), so the gate divides by the same
+  // population when migration 145 is applied; industry-wide is the fallback.
+  const core = u.core_classification;
+  const cls = core ?? u.classification;
+  const clsDen = core ? core.total : u.industry_assets;
+  const clsCovered = cls.classified + cls.skipped;
+  const clsPct = pct(clsCovered, clsDen);
   out.push(result({
     check_name: 'classification_coverage',
     severity: clsPct < T.classification_coverage_blocker_pct ? 'blocker' : 'major',
     passed: clsPct >= T.classification_coverage_min_pct,
-    expected: `classified + skipped ≥ ${T.classification_coverage_min_pct}% of industry assets`,
-    observed: `${clsCovered} of ${u.industry_assets} (${fmtPct(clsPct)}); needs_review ${u.classification.needs_review}, unclassified ${u.classification.unclassified}`,
-    count: u.classification.unclassified + u.classification.needs_review,
-    details: { ...u.classification, coverage_pct: clsPct },
+    expected: `classified + skipped ≥ ${T.classification_coverage_min_pct}% of ${core ? 'core-universe' : 'industry'} assets`,
+    observed: `${clsCovered} of ${clsDen} (${fmtPct(clsPct)}); needs_review ${cls.needs_review}, unclassified ${cls.unclassified}${core ? `; industry-wide unclassified ${u.classification.unclassified}` : ''}`,
+    count: cls.unclassified + cls.needs_review,
+    details: { ...cls, coverage_pct: clsPct, population: core ? 'core_universe' : 'industry', industry_wide: u.classification },
     group: 'coverage',
   }));
 

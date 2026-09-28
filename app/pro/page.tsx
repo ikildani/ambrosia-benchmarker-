@@ -69,6 +69,7 @@ const faqs = [
   { q: 'What data sources do you use?', a: 'SEC 8-K filings, FTC premerger filings, press releases, ClinicalTrials.gov, FDA/EMA regulatory databases, patent filings, and company financial reports. New deals are ingested from SEC filings, FTC premerger databases, press releases, and regulatory databases.' },
   { q: 'How often are benchmarks updated?', a: 'Daily. New deals are automatically ingested and benchmarks recalibrate in real time. Your analyses always reflect the latest market data.' },
   { q: 'Can I use this for board presentations?', a: 'Absolutely. PDF reports are designed for deal committees and investment committees. Export 20-page branded reports with scenario comparison, deal waterfall, real options, competitive dynamics, and buyer-specific valuation.' },
+  { q: 'What is Search & Evaluation?', a: 'The asset-screening module included in Pro. It ranks unpartnered clinical-stage and preclinical programs from trial registries in 100 countries and company filings by a licensing-intent score shown against peers, with predicted deal terms from cited comparables. Save a mandate and new matches arrive as a digest; the acquirer view shows which programs fit a given buyer.' },
   { q: 'How does this compare to Evaluate Pharma or Cortellis?', a: `Those platforms focus on pipeline and market data. Ambrosia focuses specifically on deal intelligence — benchmarking your deal terms against ${DEAL_STATS.TOTAL_DEALS} real transactions with institutional-grade financial modeling. Most users find it complementary, not duplicative.` },
 ];
 
@@ -707,6 +708,77 @@ export default function ProPage() {
                     className="inline-flex items-center gap-2 text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors group/link w-fit"
                   >
                     Explore company profiles <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Search & Evaluation ── */}
+            <div className="btc-card-teal bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden">
+              <div className="grid lg:grid-cols-2">
+                {/* Left: sample feed rows (layout examples, not live assets) */}
+                <div className="p-6 lg:p-8 bg-[#0a0f1a] border-b lg:border-b-0 lg:border-r border-white/[0.06]">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Mandate: mid-cap oncology in-licensing</span>
+                    <span className="text-[9px] font-mono text-teal-400">ranked by intent</span>
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { phase: 'P2', modality: 'ADC', area: 'HER2-low breast', owner: 'Originator · KR', rights: 'Ex-Asia', pct: 'Top 3%' },
+                      { phase: 'P1/2', modality: 'Bispecific', area: 'NSCLC', owner: 'Originator · CH', rights: 'Global', pct: 'Top 6%' },
+                      { phase: 'P2', modality: 'Small molecule', area: 'Pancreatic', owner: 'Originator · US', rights: 'Global', pct: 'Top 8%' },
+                      { phase: 'Preclinical', modality: 'Radioligand', area: 'Prostate', owner: 'Filing-disclosed · DE', rights: 'Global', pct: 'Top 12%' },
+                    ].map((r, i) => (
+                      <div key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 p-2.5 bg-white/[0.03] border border-white/[0.06] rounded-lg">
+                        <span className="px-1.5 py-0.5 text-[9px] font-semibold text-teal-300 bg-teal-500/10 border border-teal-500/20 rounded">{r.phase}</span>
+                        <div className="min-w-0">
+                          <p className="text-[11px] text-slate-200 font-medium truncate">{r.modality} · {r.area}</p>
+                          <p className="text-[9px] text-slate-500 truncate">{r.owner} · {r.rights} rights available</p>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-400">{r.pct}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-[9px] text-slate-600">Layout example. Live rows show the asset, owner and the evidence behind each score.</p>
+                </div>
+
+                {/* Right: Copy */}
+                <div className="p-8 lg:p-10 flex flex-col justify-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full mb-5 w-fit">
+                    <Search className="w-3 h-3 text-teal-400" />
+                    <span className="text-xs text-teal-300 font-medium">Search &amp; Evaluation</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">
+                    Find the programs that are<br className="hidden sm:block" /> about to change hands
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    A ranked universe of unpartnered clinical-stage and preclinical programs from registries in 100 countries and company filings, resolved to the owning company and scored on evidence we can actually cite. Predicted terms come from the same verified deals behind the benchmarks.
+                  </p>
+
+                  <div className="space-y-3 mb-8">
+                    {[
+                      { title: 'Licensing-intent score, shown against peers', sub: 'Percentile within phase and therapeutic area, every factor sourced, backtest published' },
+                      { title: 'Predicted terms per asset', sub: 'Upfront, total and royalty ranges from cited, phase-matched comparables' },
+                      { title: 'Mandates and daily digests', sub: 'Save buyer criteria once; new matches arrive by email, Slack or in-app' },
+                      { title: 'Acquirer view', sub: 'Pick a buyer and see the programs that fit its patent cliffs and portfolio gaps' },
+                      { title: 'Watchlist, alerts, saved views', sub: 'Score crossings, partnership changes and catalysts on the assets you follow' },
+                      { title: 'Ownership and partnership evidence', sub: '"No partner found" lists what was checked: deals, trials, press' },
+                    ].map(f => (
+                      <div key={f.title} className="flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm text-slate-200 font-medium">{f.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{f.sub}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Link
+                    href="/search-and-evaluation"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors group/link w-fit"
+                  >
+                    How the module works <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" />
                   </Link>
                 </div>
               </div>

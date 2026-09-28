@@ -55,6 +55,7 @@ function healthyStats(overrides: Partial<QaStats> = {}): QaStats {
       missing_company: { count: 0, sample_ids: [] },
       industry_phase_missing: { count: 300, sample_ids: [] },
       classification: { classified: 5500, skipped: 300, needs_review: 100, unclassified: 100 },
+      core_classification: null,
       target_p2plus: { classified: 2000, with_target: 1500 },
       drug_resolution: { resolved: 4000 },
       partnership: { checked: 9990, never_checked: 10, partnered_without_evidence: { count: 0, sample_ids: [] } },
@@ -154,6 +155,17 @@ describe('evaluateInvariants: thresholds and severity', () => {
     expect(c.details.coverage_pct).toBe(88.3);
     s.universe.classification = { classified: 4000, skipped: 0, needs_review: 1000, unclassified: 1000 }; // 66.7%
     expect(check(s, 'classification_coverage').severity).toBe('blocker');
+  });
+
+  it('classification coverage uses the core universe when migration 145 stats are present', () => {
+    const s = healthyStats();
+    s.universe.classification = { classified: 4000, skipped: 0, needs_review: 1000, unclassified: 1000 }; // 66.7% industry-wide
+    s.universe.core_classification = { total: 4300, classified: 4000, skipped: 200, needs_review: 100, unclassified: 0 }; // 97.7%
+    const c = check(s, 'classification_coverage');
+    expect(c.passed).toBe(true);
+    expect(c.expected).toContain('core-universe');
+    expect(c.observed).toContain('industry-wide unclassified 1000');
+    expect(c.details.population).toBe('core_universe');
   });
 
   it('target / drug resolution / freshness are majors at their thresholds', () => {
@@ -317,8 +329,8 @@ describe('runInvariants: persistence', () => {
         if (name === 'radar_qa_thesis_stats') return { data: healthy.thesis };
         if (name === 'radar_qa_score_stats') return { data: healthy.score };
         if (name === 'radar_qa_pipeline_stats') return { data: healthy.pipeline };
-        // Migration 139 stats are optional; null skips the preclinical checks.
-        if (name === 'radar_qa_preclinical_stats') return { data: null };
+        // Migration 139 / 145 stats are optional; null skips the preclinical checks and keeps the industry denominator.
+        if (name === 'radar_qa_preclinical_stats' || name === 'radar_qa_core_classification') return { data: null };
         if (name === 'radar_qa_vocab_violations') return { data: { violations: 0, samples: [] } };
         return { error: { message: 'unknown rpc' } };
       },
