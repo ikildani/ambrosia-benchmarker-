@@ -645,7 +645,8 @@ async function runTrainPhase(
   const rows = await loadSnapshots(supabase, state.feature_version);
   if (rows.length === 0) throw new Error('train: no snapshots for this feature version');
   const stamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 12);
-  const version = `v3.${stamp}`;
+  // Model name follows the feature generation it was trained on (v4.0 -> v4.<stamp>).
+  const version = `${(state.feature_version || FEATURE_VERSION).split('.')[0]}.${stamp}`;
   const outcome = trainAndEvaluate(rows, version, now);
 
   // Compare with the incumbent on the same test rows.
