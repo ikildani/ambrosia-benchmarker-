@@ -112,6 +112,15 @@ describe('normalisers', () => {
   it('matches indication and TA tolerantly', () => {
     expect(isSameIndication({ indication_category: 'cns', indication_specific: "Alzheimer's disease" }, 'alzheimers')).toBe(true);
     expect(isSameIndication({ indication_category: 'epilepsy', indication_specific: 'epilepsy' }, 'alzheimers')).toBe(false);
+    // camelCase registry keys resolve through the registry label and the split key (Sep 28 2026: every
+    // multi-word key matched only rows whose category was the literal concatenated key).
+    expect(isSameIndication({ indication_category: 'autoimmune', indication_specific: 'atopic dermatitis, rheumatoid arthritis, vitiligo' }, 'rheumatoidArthritis')).toBe(true);
+    expect(isSameIndication({ indication_category: 'hfref_(heart_failure_with_reduced_ejection_fraction)', indication_specific: 'HFrEF (heart failure with reduced ejection fraction)' }, 'heartFailureHfref')).toBe(true);
+    expect(isSameIndication({ indication_category: 'metabolic', indication_specific: 'obesity / type 2 diabetes / cardiovascular disease' }, 'type2Diabetes')).toBe(true);
+    expect(isSameIndication({ indication_category: 'autoimmune', indication_specific: 'psoriatic arthritis' }, 'rheumatoidArthritis')).toBe(false);
+    expect(isSameIndication({ indication_category: 'solid_tumor', indication_specific: 'head and neck squamous cell carcinoma' }, 'headNeck')).toBe(true);
+    expect(isSameIndication({ indication_category: 'hematology', indication_specific: 'non-Hodgkin lymphoma' }, 'hodgkins')).toBe(false);
+    expect(isSameIndication({ indication_category: 'hematology', indication_specific: 'classical Hodgkin lymphoma' }, 'hodgkins')).toBe(true);
     expect(isSameTA({ therapeutic_area: '_mega_deals', indication_category: 'sleep_disorders', indication_specific: 'narcolepsy' }, 'neurology')).toBe(true);
     expect(isSameTA({ therapeutic_area: 'oncology', indication_category: 'solid_tumor', indication_specific: 'NSCLC' }, 'neurology')).toBe(false);
   });

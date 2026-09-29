@@ -289,12 +289,48 @@ const INDICATION_SYNONYMS: Record<string, string[]> = {
   ocd: ['obsessive', 'ocd'],
   ptsd: ['post traumatic', 'ptsd'],
   gad: ['generalized anxiety', 'generalised anxiety', 'gad'],
+  // Registry values (looked up lower-cased) for indications whose deal rows use another spelling.
+  rheumatoidArthritis: ['rheumatoid'],
+  type2Diabetes: ['type 2 diabet', 'type ii diabet', 't2d', 't2dm'],
+  depression: ['major depress', 'mdd', 'depressive'],
+  hepatitisB: ['hepatitis b', 'hbv'],
+  hivAids: ['hiv'],
+  ulcerativeColitis: ['ulcerative colitis'],
+  nashMash: ['nash', 'mash', 'steatohepatitis'],
+  nonAlcoholicSteatohepatitis: ['nash', 'mash', 'steatohepatitis'],
+  diabeticMacularEdema: ['diabetic macular', 'dme'],
+  wetAmd: ['neovascular', 'wet amd', 'namd', 'wet age related macular'],
+  dryAmdGA: ['geographic atrophy', 'dry amd', 'dry age related macular'],
+  headNeck: ['head and neck', 'hnscc', 'head neck'],
+  merkelCell: ['merkel'],
+  mantleCell: ['mantle cell', 'mcl'],
+  mantleCellLymphoma: ['mantle cell', 'mcl'],
+  epilepsy: ['epilep', 'seizure'],
+  adhd: ['attention deficit', 'adhd'],
+  addiction: ['substance use', 'opioid use', 'alcohol use', 'addiction'],
+  tremor: ['tremor', 'movement disorder', 'dystonia'],
+  lewyBody: ['lewy'],
+  aancaVasculitis: ['anca', 'vasculitis'],
+  cidp: ['chronic inflammatory demyelinating', 'cidp'],
+  coronaryArteryDisease: ['coronary'],
+  peripheralArteryDisease: ['peripheral artery', 'peripheral arterial'],
+  aplasticAnemia: ['aplastic'],
+  amrBacterial: ['antibacterial', 'antibiotic', 'bacterial infection', 'gram negative', 'gram positive'],
+  menopause: ['menopaus', 'vasomotor'],
+};
+const SYNONYMS_LOWER = new Map<string, string[]>(Object.entries(INDICATION_SYNONYMS).map(([k, v]) => [k.toLowerCase(), v]));
+
+/** Text that must NOT appear for the key to match, even when a stem does ("non-Hodgkin" is not Hodgkin). */
+const INDICATION_EXCLUDES: Record<string, RegExp> = {
+  hodgkins: /\bnon\s*hodgkin/,
+  hodgkinlymphoma: /\bnon\s*hodgkin/,
 };
 
 /** Words that carry no indication meaning on their own. */
 const GENERIC_INDICATION_WORDS = new Set(['cancer', 'disease', 'disorder', 'disorders', 'syndrome', 'other', 'general', 'and', 'the', 'of', 'in', 'with', 'type', 'acute', 'chronic', 'solid', 'tumor', 'tumour', 'tumors', 'tumours', 'cns', 'rare', 'adult', 'pediatric']);
 
-const REGISTRY_LABEL = new Map<string, string>(INDICATION_REGISTRY.map(d => [d.value, d.label]));
+// Keyed by the lower-cased registry value: indicationStems lower-cases its input before the lookup.
+const REGISTRY_LABEL = new Map<string, string>(INDICATION_REGISTRY.map(d => [d.value.toLowerCase(), d.label]));
 
 /** Lower-case, non-alphanumerics to single spaces, trimmed. Keeps word boundaries (unlike normText). */
 function words(s: string | null | undefined): string {
@@ -312,14 +348,19 @@ function normText(s: string | null | undefined): string {
  */
 const STEM_CACHE = new Map<string, string[]>();
 export function indicationStems(assetIndication: string): string[] {
-  const key = (assetIndication ?? '').trim().toLowerCase();
+  const raw = (assetIndication ?? '').trim();
+  const key = raw.toLowerCase();
   const hit = STEM_CACHE.get(key);
   if (hit) return hit;
   const out = new Set<string>();
   const add = (v: string | null | undefined) => { const w = words(v); if (w && w.length >= 3) out.add(w); };
-  // Key itself (rows may carry the engine key) and its non-generic tokens of 5+ letters.
+  // Key itself (rows may carry the engine key), the key split at camelCase and
+  // underscores ("rheumatoidArthritis" → "rheumatoid arthritis"), and its
+  // non-generic tokens of 5+ letters.
+  const spaced = raw.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
   add(key.replace(/_/g, ' '));
-  for (const tok of key.split(/[_\s]+/)) if (tok.length >= 5 && !GENERIC_INDICATION_WORDS.has(tok)) add(tok);
+  add(spaced);
+  for (const tok of spaced.split(/\s+/)) if (tok.length >= 5 && !GENERIC_INDICATION_WORDS.has(tok)) add(tok);
   // Registry label: "Lung Cancer (NSCLC)" → "lung cancer", "nsclc"; "Alzheimer's Disease" → "alzheimer s disease", "alzheimer".
   const label = REGISTRY_LABEL.get(key);
   if (label) {
@@ -334,7 +375,7 @@ export function indicationStems(assetIndication: string): string[] {
     const poss = /^([a-z]+) s\b/.exec(words(main));
     if (poss) add(poss[1]);
   }
-  (INDICATION_SYNONYMS[key] ?? []).forEach(add);
+  (SYNONYMS_LOWER.get(key) ?? []).forEach(add);
   const stems = [...out];
   STEM_CACHE.set(key, stems);
   return stems;
@@ -355,6 +396,8 @@ export function isSameIndication(row: Pick<RawDealRow, 'indication_category' | '
   if (cat && cat === normText(key)) return true;
   const text = words(`${row.indication_category ?? ''} ${row.indication_specific ?? ''}`);
   if (!text) return false;
+  const exclude = INDICATION_EXCLUDES[key];
+  if (exclude && exclude.test(text)) return false;
   for (const stem of indicationStems(key)) if (stemMatches(text, stem)) return true;
   return false;
 }
