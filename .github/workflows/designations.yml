@@ -1,0 +1,56 @@
+name: Designations (FDA orphan)
+
+# Weekly pull of the FDA orphan drug designation database (one POST, no key,
+# no model). Sponsors become companies, drugs become preclinical assets when
+# no trial exists (asset_origin = 'designation'), and every designation is
+# recorded in asset_designations. Free: public repo, no paid API.
+#
+# Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+
+on:
+  schedule:
+    - cron: '20 5 * * 1'
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'Designation start date (YYYY-MM-DD)'
+        default: '2015-01-01'
+        type: string
+      limit:
+        description: 'Rows to process (0 = all)'
+        default: '0'
+        type: string
+      dry_run:
+        description: 'Report without writing'
+        default: false
+        type: boolean
+
+concurrency:
+  group: designations
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    name: FDA orphan designations
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Ingest
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REGISTRY_WORKER_RUNTIME: github-actions
+        run: |
+          NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/designations.ts \
+            --since "${{ github.event.inputs.since || '2015-01-01' }}" \
+            --limit "${{ github.event.inputs.limit || '0' }}" \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}

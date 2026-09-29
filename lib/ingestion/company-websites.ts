@@ -23,6 +23,8 @@ export const DISCOVERY_MODEL = 'claude-haiku-4-5-20251001';
 /** USD per web search (server tool), on top of tokens. */
 export const WEB_SEARCH_USD = 0.01;
 export const DISCOVERY_RECHECK_DAYS = 120;
+/** Mirrors PIPELINE_PATH_CANDIDATES in pipeline-pages.ts (kept here to avoid a circular import). */
+export const DEFAULT_PIPELINE_PATHS: ReadonlyArray<string> = ['/pipeline', '/our-pipeline', '/science/pipeline', '/research/pipeline', '/rd/pipeline', '/programs', '/portfolio', '/our-science/pipeline', '/science', '/products/pipeline', '/en/pipeline'];
 const MAX_TOKENS = 600;
 
 /** Hosts that are never a company's own site. Matched on the registrable domain or any parent. */
@@ -167,6 +169,175 @@ export async function hostResponds(url: string, timeoutMs = 12_000): Promise<boo
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// FREE DISCOVERY (no model, no paid API)
+// ═══════════════════════════════════════════════════════════════════════
+
+const FREE_MAIL_DOMAINS = new Set(['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'aol.com', 'protonmail.com', 'qq.com', '163.com', '126.com', 'sina.com', 'naver.com', 'daum.net', 'yandex.ru', 'mail.ru', 'live.com', 'msn.com', 'me.com']);
+/** CROs and service providers whose staff appear as trial contacts. */
+const CRO_DOMAINS = new Set(['iqvia.com', 'parexel.com', 'ppd.com', 'syneoshealth.com', 'icon.com', 'iconplc.com', 'labcorp.com', 'covance.com', 'medpace.com', 'premier-research.com', 'worldwide.com', 'fortrea.com', 'novotech-cro.com', 'tigermedgrp.com', 'linicalusa.com', 'cmedresearch.com', 'veristat.com', 'clinipace.com', 'rhoworld.com', 'ergomed.com', 'pharm-olam.com', 'psi-cro.com', 'wcgclinical.com', 'prahs.com', 'chiltern.com', 'inventivhealth.com', 'quintiles.com', 'ctifacts.com', 'clinicaltrials.gov', 'nih.gov']);
+const NAME_STOPWORDS = new Set(['inc', 'inc.', 'ltd', 'ltd.', 'llc', 'corp', 'corp.', 'co', 'co.', 'company', 'corporation', 'limited', 'incorporated', 'holdings', 'group', 'gmbh', 'ag', 'sa', 's.a.', 'plc', 'bv', 'b.v.', 'nv', 'n.v.', 'ab', 'oy', 'as', 'kk', 'pte', 'pty', 'the', 'of', 'and', '&', 'therapeutics', 'therapeutic', 'pharmaceuticals', 'pharmaceutical', 'pharma', 'biosciences', 'bioscience', 'biotech', 'biotechnology', 'biotechnologies', 'biopharma', 'biopharmaceuticals', 'biologics', 'medical', 'medicines', 'medicine', 'sciences', 'science', 'research', 'laboratories', 'labs', 'lab', 'international', 'global', 'health', 'healthcare', 'oncology', 'bio', 'biomedical', 'technologies', 'technology', 'tech', 'us', 'usa', 'europe', 'china', 'japan', 'korea', 'india', 'canada', 'australia', 'uk', 'a/s', 'srl', 's.r.l.', 'spa', 's.p.a.', 'sas', 'sarl']);
+
+/** Name tokens that identify the company (stopwords and legal suffixes removed), lowercase. */
+export function distinctiveTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/[(),.'’"]/g, ' ')
+    .split(/[\s\-\/]+/)
+    .map(t => t.trim())
+    .filter(t => t.length >= 3 && !NAME_STOPWORDS.has(t) && !/^\d+$/.test(t));
+}
+
+/** A domain belongs to the company when its label starts with (or contains) a distinctive name token. */
+export function domainMatchesCompany(domain: string, companyName: string): boolean {
+  const label = registrableDomain(domain).split('.')[0].replace(/[^a-z0-9]/g, '');
+  if (!label) return false;
+  const tokens = distinctiveTokens(companyName);
+  const joined = tokens.join('');
+  if (joined.length >= 5 && (label.startsWith(joined.slice(0, 5)) || joined.startsWith(label.slice(0, 5)))) return true;
+  return tokens.some(t => t.length >= 4 && (label.startsWith(t) || label.includes(t) || t.includes(label) && label.length >= 4));
+}
+
+/** Email domains from the company's own trials, filtered to ones that look like the company. */
+export function domainsFromContacts(companyName: string, emails: string[]): string[] {
+  const out: string[] = [];
+  for (const e of emails) {
+    const m = /@([a-z0-9.-]+\.[a-z]{2,})$/i.exec(e.trim());
+    if (!m) continue;
+    const d = m[1].toLowerCase();
+    const reg = registrableDomain(d);
+    if (FREE_MAIL_DOMAINS.has(reg) || CRO_DOMAINS.has(reg) || isBlockedHost(reg)) continue;
+    if (!domainMatchesCompany(reg, companyName)) continue;
+    if (!out.includes(reg)) out.push(reg);
+  }
+  return out;
+}
+
+const CTGOV_API = 'https://clinicaltrials.gov/api/v2/studies';
+
+/** Central-contact emails on the company's registered trials (free API, no key). */
+export async function ctgovContactEmails(companyName: string, timeoutMs = 15_000): Promise<string[]> {
+  const url = `${CTGOV_API}?query.spons=${encodeURIComponent(`"${companyName}"`)}&fields=protocolSection.sponsorCollaboratorsModule.leadSponsor,protocolSection.contactsLocationsModule.centralContacts&pageSize=10&format=json`;
+  try {
+    const res = await fetchWithTimeout(url, { timeoutMs, retries: 1, headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const data = await res.json() as { studies?: Array<{ protocolSection?: { sponsorCollaboratorsModule?: { leadSponsor?: { name?: string } }; contactsLocationsModule?: { centralContacts?: Array<{ email?: string }> } } }> };
+    const want = companyName.trim().toLowerCase();
+    const emails: string[] = [];
+    for (const st of data.studies ?? []) {
+      const lead = st.protocolSection?.sponsorCollaboratorsModule?.leadSponsor?.name?.trim().toLowerCase();
+      if (lead && lead !== want) continue;
+      for (const c of st.protocolSection?.contactsLocationsModule?.centralContacts ?? []) if (c.email) emails.push(c.email);
+    }
+    return emails;
+  } catch {
+    return [];
+  }
+}
+
+const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
+
+/** Official website (P856) of the Wikidata item whose English label is exactly the company name. */
+export async function wikidataWebsite(companyName: string, timeoutMs = 15_000): Promise<string | null> {
+  const label = companyName.replace(/["\\]/g, '').trim();
+  if (!label) return null;
+  const query = `SELECT ?site WHERE { ?item rdfs:label "${label}"@en . ?item wdt:P856 ?site . ?item wdt:P31/wdt:P279* wd:Q4830453 } LIMIT 2`;
+  try {
+    const res = await fetchWithTimeout(`${WIKIDATA_SPARQL}?query=${encodeURIComponent(query)}`, { timeoutMs, retries: 0, headers: { Accept: 'application/sparql-results+json', 'User-Agent': 'SolidusBot/1.0 (info@ambrosiaventures.co)' } });
+    if (!res.ok) return null;
+    const data = await res.json() as { results?: { bindings?: Array<{ site?: { value?: string } }> } };
+    const site = data.results?.bindings?.[0]?.site?.value ?? null;
+    const norm = normalizeUrl(site);
+    return norm && !isBlockedHost(new URL(norm).hostname) ? norm : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Candidate domains from the name: acme.com, acmebio.com, acmetx.com, acme-therapeutics.com ... */
+export function guessDomains(companyName: string): string[] {
+  const tokens = distinctiveTokens(companyName);
+  if (tokens.length === 0) return [];
+  const first = tokens[0].replace(/[^a-z0-9]/g, '');
+  const joined = tokens.map(t => t.replace(/[^a-z0-9]/g, '')).join('');
+  const lower = companyName.toLowerCase();
+  const suffix = /therapeutics/.test(lower) ? 'therapeutics' : /pharma/.test(lower) ? 'pharma' : /bio/.test(lower) ? 'bio' : null;
+  const stems = [...new Set([joined, first, suffix ? `${first}${suffix}` : '', suffix ? `${first}-${suffix}` : '', `${first}bio`, `${first}tx`, `${first}pharma`].filter(s => s.length >= 4))];
+  // .com for every stem first, then the alternatives, so the cap never drops a likely .com.
+  const out: string[] = [];
+  for (const tld of ['com', 'co', 'bio', 'io', 'net']) for (const st of stems) out.push(`${st}.${tld}`);
+  return out.slice(0, 18);
+}
+
+/** GET a candidate homepage; accept when the HTML names the company. */
+export async function verifyHomepage(domain: string, companyName: string, timeoutMs = 10_000): Promise<string | null> {
+  const url = `https://${domain}/`;
+  try {
+    const res = await fetchWithTimeout(url, { timeoutMs, retries: 0, redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SolidusBot/1.0; +https://solidus.ambrosiaventures.co)', Accept: 'text/html' } });
+    if (!res.ok) return null;
+    const finalHost = new URL(res.url || url).hostname;
+    if (isBlockedHost(finalHost) || registrableDomain(finalHost) !== registrableDomain(domain) && !domainMatchesCompany(finalHost, companyName)) return null;
+    const html = (await res.text()).slice(0, 200_000).toLowerCase();
+    const tokens = distinctiveTokens(companyName);
+    const hit = tokens.length > 0 && tokens.filter(t => html.includes(t)).length >= Math.min(2, tokens.length);
+    if (!hit) return null;
+    // Parked / for-sale pages.
+    if (/domain (?:is )?for sale|buy this domain|parked free|sedoparking|godaddy\.com\/domainsearch/.test(html)) return null;
+    return normalizeUrl(res.url || url);
+  } catch {
+    return null;
+  }
+}
+
+/** Common pipeline paths, checked with plain GET; first that answers with stage words wins. */
+export async function probePipelinePath(website: string, paths: readonly string[], timeoutMs = 10_000): Promise<string | null> {
+  const base = new URL(website);
+  for (const path of paths) {
+    const url = new URL(path, base).toString();
+    try {
+      const res = await fetchWithTimeout(url, { timeoutMs, retries: 0, redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SolidusBot/1.0; +https://solidus.ambrosiaventures.co)', Accept: 'text/html' } });
+      if (!res.ok) continue;
+      const html = (await res.text()).slice(0, 300_000);
+      if (/\b(pre-?clinical|discovery|ind-enabling|phase\s?[123]|phase\s?ii?i?)\b/i.test(html.replace(/<[^>]+>/g, ' '))) return normalizeUrl(res.url || url);
+    } catch {
+      // next path
+    }
+  }
+  return null;
+}
+
+export type DiscoveryMode = 'free' | 'paid';
+
+/**
+ * Zero-cost chain: trial contact emails → Wikidata → domain guessing with
+ * homepage verification. Returns the source that found the site.
+ */
+export async function discoverCompanySiteFree(company: { name: string; hq_country?: string | null }, pipelinePaths: readonly string[]): Promise<{ site: DiscoveredSite; source: 'ctgov_contact' | 'wikidata' | 'domain_guess' | null }> {
+  const none = { site: { website_url: null, pipeline_url: null, confidence: 0, note: null } as DiscoveredSite, source: null };
+  let website: string | null = null;
+  let source: 'ctgov_contact' | 'wikidata' | 'domain_guess' | null = null;
+
+  const domains = domainsFromContacts(company.name, await ctgovContactEmails(company.name));
+  for (const d of domains) {
+    website = await verifyHomepage(d, company.name) ?? await verifyHomepage(`www.${d}`, company.name);
+    if (website) { source = 'ctgov_contact'; break; }
+  }
+  if (!website) {
+    website = await wikidataWebsite(company.name);
+    if (website) source = 'wikidata';
+  }
+  if (!website) {
+    for (const d of guessDomains(company.name)) {
+      website = await verifyHomepage(d, company.name);
+      if (website) { source = 'domain_guess'; break; }
+    }
+  }
+  if (!website) return none;
+  const pipeline = await probePipelinePath(website, pipelinePaths);
+  return { site: { website_url: website, pipeline_url: pipeline, confidence: source === 'domain_guess' ? 60 : 80, note: source }, source };
+}
+
 export interface DiscoveryRunOptions {
   limit?: number;
   costCapUsd?: number;
@@ -175,6 +346,10 @@ export interface DiscoveryRunOptions {
   now?: Date;
   /** Skip the liveness check (tests). */
   skipHostCheck?: boolean;
+  /** free (default): trial contacts, Wikidata, domain guessing. paid: web search when the free chain finds nothing. */
+  mode?: DiscoveryMode;
+  /** Pipeline paths to probe on a found site. */
+  pipelinePaths?: readonly string[];
 }
 
 export interface DiscoveryRunResult {
@@ -208,8 +383,10 @@ export async function runWebsiteDiscovery(supabase: SupabaseClient, opts: Discov
   const r: DiscoveryRunResult = { processed: 0, found: 0, withPipeline: 0, notFound: 0, dead: 0, searches: 0, usage, costUsd: 0, errors: [], timedOut: false, costCapHit: false, sample: [] };
   const spent = () => (usage.input_tokens / 1e6) * 1 + (usage.output_tokens / 1e6) * 5 + r.searches * WEB_SEARCH_USD;
 
+  const mode: DiscoveryMode = opts.mode ?? 'free';
+  const paths = opts.pipelinePaths ?? DEFAULT_PIPELINE_PATHS;
   let client = opts.client ?? null;
-  if (!client) {
+  if (mode === 'paid' && !client) {
     if (!process.env.ANTHROPIC_API_KEY) { r.errors.push('ANTHROPIC_API_KEY not set'); return r; }
     client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 60_000 }) as unknown as IntentClient;
   }
@@ -233,16 +410,27 @@ export async function runWebsiteDiscovery(supabase: SupabaseClient, opts: Discov
     if (spent() >= costCap) { r.costCapHit = true; break; }
     r.processed++;
     const hint = (co.indications_active ?? []).slice(0, 2).join(', ') || null;
-    const call = await discoverCompanySite(client, { name: co.name, hq_country: co.hq_country, hint }, DISCOVERY_MODEL);
-    addUsage(usage, call.usage);
-    r.searches += call.searches;
-    if (call.error) { r.errors.push(`${co.name}: ${call.error}`); continue; }
-    let { website_url, pipeline_url } = call.site;
-    if (website_url && !opts.skipHostCheck && !(await hostResponds(website_url))) { r.dead++; website_url = null; pipeline_url = null; }
+    let website_url: string | null = null;
+    let pipeline_url: string | null = null;
+    let websiteSource = 'web_search';
+    const free = await discoverCompanySiteFree({ name: co.name, hq_country: co.hq_country }, paths);
+    if (free.site.website_url) {
+      website_url = free.site.website_url;
+      pipeline_url = free.site.pipeline_url;
+      websiteSource = free.source ?? 'free';
+    } else if (mode === 'paid' && client) {
+      const call = await discoverCompanySite(client, { name: co.name, hq_country: co.hq_country, hint }, DISCOVERY_MODEL);
+      addUsage(usage, call.usage);
+      r.searches += call.searches;
+      if (call.error) { r.errors.push(`${co.name}: ${call.error}`); continue; }
+      website_url = call.site.website_url;
+      pipeline_url = call.site.pipeline_url;
+      if (website_url && !opts.skipHostCheck && !(await hostResponds(website_url))) { r.dead++; website_url = null; pipeline_url = null; }
+    }
     const patch: Record<string, unknown> = { website_checked_at: now.toISOString() };
     if (website_url) {
       patch.website_url = website_url;
-      patch.website_source = 'web_search';
+      patch.website_source = websiteSource;
       patch.pipeline_page_url = pipeline_url;
       r.found++;
       if (pipeline_url) r.withPipeline++;

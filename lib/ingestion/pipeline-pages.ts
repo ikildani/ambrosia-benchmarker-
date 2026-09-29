@@ -25,13 +25,16 @@ import {
   dedupePrograms,
   quoteIsVerbatim,
   type DisclosedProgram,
+  type DisclosedStage,
   type FilingContext,
 } from './preclinical-pipeline';
 
 export const PIPELINE_PAGE_PROMPT_VERSION = 'pipeline-page-v1';
 export const PIPELINE_PAGE_FORM = 'pipeline_page';
 export const CHART_PREFIX = '[chart] ';
-const MAX_PARAGRAPHS = 120;
+const MAX_PARAGRAPHS = 400;
+/** Paragraphs sent to the model (the page text is capped higher for the rule-based pass). */
+const MAX_MODEL_PARAGRAPHS = 140;
 const MIN_PARAGRAPH_CHARS = 12;
 const MAX_PARAGRAPH_CHARS = 1_200;
 const MAX_OUTPUT_TOKENS = 12_000;
@@ -52,7 +55,8 @@ export function pipelineTextParagraphs(text: string, max = MAX_PARAGRAPHS): stri
   const out: string[] = [];
   const seen = new Set<string>();
   for (const raw of text.split(/\n+/)) {
-    const p = raw.replace(/\s+/g, ' ').trim();
+    // Table cells arrive tab-separated from innerText; keep them as a visible separator.
+    const p = raw.replace(/\t+/g, ' · ').replace(/\s+/g, ' ').trim();
     if (p.length < MIN_PARAGRAPH_CHARS) continue;
     const key = p.toLowerCase();
     if (seen.has(key)) continue;
@@ -138,7 +142,7 @@ export async function extractProgramsFromPage(
       model,
       max_tokens: MAX_OUTPUT_TOKENS,
       system: [{ type: 'text', text: PIPELINE_PAGE_SYSTEM, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: buildPageUserContent(company, url, crawledAt, paragraphs, screenshotPngBase64) }],
+      messages: [{ role: 'user', content: buildPageUserContent(company, url, crawledAt, paragraphs.slice(0, MAX_MODEL_PARAGRAPHS), screenshotPngBase64) }],
       output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
       thinking: { type: 'disabled' },
     } as Anthropic.MessageCreateParamsNonStreaming);
@@ -161,6 +165,101 @@ export async function extractProgramsFromPage(
   } catch (err) {
     return { programs: [], dropped: 0, invalid: 0, fromChart: 0, usage, error: err instanceof Error ? err.message.split('\n')[0].slice(0, 300) : String(err) };
   }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// RULE-BASED EXTRACTION (no model)
+// ═══════════════════════════════════════════════════════════════════════
+
+const STAGE_PATTERNS: Array<[RegExp, DisclosedStage]> = [
+  [/\bphase\s?(?:1\s?\/\s?2|i\s?\/\s?ii|1b\s?\/\s?2a?)\b/i, 'phase_1_2'],
+  [/\bphase\s?(?:2\s?\/\s?3|ii\s?\/\s?iii|2b\s?\/\s?3)\b/i, 'phase_2_3'],
+  [/\bphase\s?(?:3|iii)\b/i, 'phase_3'],
+  [/\bphase\s?(?:2|ii)[ab]?\b/i, 'phase_2'],
+  [/\bphase\s?(?:1|i)[ab]?\b/i, 'phase_1'],
+  [/\b(?:approved|marketed|commercial(?:ized|ised)?|registration|nda|bla|filed)\b/i, 'approved'],
+  [/\bind[- ]enabling\b|\bgLP tox|\bind[- ]ready\b|\bpre-?ind\b|\bcta[- ]enabling\b/i, 'ind_enabling'],
+  [/\blead (?:optimi[sz]ation|op)\b/i, 'lead_optimization'],
+  [/\bpre-?clinical\b|\bnonclinical\b/i, 'preclinical'],
+  [/\b(?:discovery|research|exploratory|hit[- ]to[- ]lead|target validation)\b/i, 'discovery'],
+];
+const STAGE_WORD_RE = /\b(?:phase\s?(?:[123]|i{1,3})|approved|marketed|commercial|ind[- ]enabling|lead optimi[sz]ation|pre-?clinical|nonclinical|discovery|research|exploratory)\b/i;
+const CODE_RE = /\b([A-Z]{2,6}-\d{1,5}[A-Z]?(?:[- ]\d{1,3})?|[A-Z]{2,6} ?\d{2,5}[A-Z]?(?:[- ]\d{1,3})?)\b/;
+/** INN-looking lowercase words (INNs are lowercase on pipeline pages; disease and English words are excluded by case and suffix). */
+const INN_RE = /\b([a-z]{5,}(?:mab|nib|tide|gene|cel|vec|zumab|ximab|umab|lisib|ciclib|rafenib|parib|sertib|tinib|degib|glutide|siran|rsen|kinra|cept|pril|sartan|prazole|lukast|afil|relin|tocin|zomib|mide|fenib|ostat|vastatin|oxacin|cycline|azole))\b/;
+const MODALITY_RULES: Array<[RegExp, string]> = [
+  [/\bantibody[- ]drug conjugate|\badc\b/i, 'adc'], [/\bbispecific|\bbite\b|\btrispecific/i, 'bispecific'], [/\bcar[- ]?t\b/i, 'car_t'],
+  [/\bcell therap|\bnk cell|\btil\b|\btcr[- ]t\b/i, 'cell_therapy'], [/\bgene therap|\baav\b|\blentivir/i, 'gene_therapy'], [/\bmrna\b/i, 'mrna'],
+  [/\bsirna\b|\bantisense|\baso\b|\boligonucleotide/i, 'oligonucleotide'], [/\bradioligand|\bradiopharm|\b(?:177|225|68)\s?(?:lu|ac|ga)\b/i, 'radiopharm'],
+  [/\bvaccine/i, 'vaccine'], [/\bpeptide/i, 'peptide'], [/\bmonoclonal|\bmab\b|\bantibody/i, 'antibody'], [/\bsmall[- ]molecule|\boral\b|\binhibitor|\bagonist|\bantagonist|\bdegrader|\bprotac/i, 'small_molecule'],
+];
+const SEP_RE = /\s*(?:[·•|]|\t|\s[-–—]\s|:\s)\s*/;
+const NAV_NOISE_RE = /\b(?:cookie|privacy|careers|contact us|investors|newsroom|sign up|subscribe|©|all rights reserved|terms of use|learn more|read more)\b/i;
+/** Segment names that are a disease, a stage column, or a generic label rather than a program. */
+const NOT_A_PROGRAM_RE = /^(?:.*\b(?:diseases?|syndromes?|cancers?|carcinomas?|tumou?rs?|encephalopathy|disorders?|deficienc(?:y|ies)|infections?|errors of metabolism|\w+(?:itis|omas?|osis|oses|emia|pathy|dosis|trophy|plasia|algia))\b.*|to be determined|tbd|undisclosed|n\/?a|indication|therapeutic area|modality|mechanism|target|program|programs|product|products|candidate|candidates|stage|phase|status|partner|name|compound|molecule|asset|assets|pipeline|registration|approved|marketed|commercial|discovery|preclinical|research|other|others)$/i;
+const PARTNER_RE = /\b(?:partnered with|in (?:collaboration|partnership) with|licensed to|co-developed with|collaboration with)\s+([A-Z][\w&.'-]*(?:\s+[A-Z][\w&.'-]*){0,3})/;
+
+export function stageFromText(text: string): DisclosedStage | null {
+  for (const [re, stage] of STAGE_PATTERNS) if (re.test(text)) return stage;
+  return null;
+}
+
+function modalityFromText(text: string): string | null {
+  for (const [re, m] of MODALITY_RULES) if (re.test(text)) return m;
+  return null;
+}
+
+/** Program name from a pipeline line: a development code, an INN, else the leading segment. */
+export function programNameFromLine(line: string): { name: string; kind: 'code' | 'inn' | 'segment' } | null {
+  const code = CODE_RE.exec(line);
+  if (code) return { name: code[1].replace(/\s+/g, '-'), kind: 'code' };
+  const inn = INN_RE.exec(line);
+  if (inn && inn[1].length <= 30) return { name: inn[1].toLowerCase(), kind: 'inn' };
+  const seg = line.split(SEP_RE)[0]?.trim() ?? '';
+  if (seg.length >= 3 && seg.length <= 48 && /[A-Za-z]/.test(seg) && !STAGE_WORD_RE.test(seg) && !NAV_NOISE_RE.test(seg) && !NOT_A_PROGRAM_RE.test(seg) && seg.split(/\s+/).length <= 6) {
+    return { name: seg, kind: 'segment' };
+  }
+  return null;
+}
+
+/**
+ * Programs from the page text alone: one per line that names a program and a
+ * stage. Confidence stays below the model's; chart-only pages yield nothing
+ * (they are flagged for an optional paid pass).
+ */
+export function extractProgramsHeuristic(paragraphs: string[]): DisclosedProgram[] {
+  const out: DisclosedProgram[] = [];
+  for (const raw of paragraphs) {
+    const line = raw.replace(/\t+/g, ' · ').replace(/\s+/g, ' ').trim();
+    if (line.length < 8 || NAV_NOISE_RE.test(line)) continue;
+    const stage = stageFromText(line);
+    if (!stage) continue;
+    const named = programNameFromLine(line);
+    if (!named) continue;
+    if (named.kind === 'segment' && line.length > 160) continue;
+    if (line.length > 320) continue;
+    const segments = line.split(SEP_RE).map(s => s.trim()).filter(Boolean);
+    const indication = segments.find(sg => sg.toLowerCase() !== named.name.toLowerCase() && !STAGE_WORD_RE.test(sg) && !CODE_RE.test(sg) && !/^\[stage hint/i.test(sg) && sg.length >= 4 && sg.length <= 60 && /[a-z]/.test(sg) && !/\b(?:program|candidate|pipeline|to be determined|tbd)\b/i.test(sg)) ?? null;
+    const partner = PARTNER_RE.exec(line)?.[1]?.trim() ?? null;
+    out.push({
+      program_name: named.name,
+      aliases: [],
+      stage,
+      target: null,
+      target_class: null,
+      modality: modalityFromText(line),
+      therapeutic_area: null,
+      indication_category: null,
+      indication_specific: indication ? indication.slice(0, 60) : null,
+      mechanism_short: null,
+      partnered: !!partner,
+      partner_name: partner ? partner.slice(0, 80) : null,
+      evidence_quote: line.slice(0, MAX_EXCERPT_CHARS),
+      confidence: named.kind === 'code' ? 62 : named.kind === 'inn' ? 58 : 50,
+    });
+  }
+  return dedupePrograms(out);
 }
 
 /** Stable id for one crawl of one page: URL hash + date, so a re-crawl is a new disclosure source. */

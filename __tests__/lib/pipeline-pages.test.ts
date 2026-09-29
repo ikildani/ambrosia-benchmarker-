@@ -91,3 +91,60 @@ describe('pipeline page context → asset rows', () => {
     expect(row.data_sources).toEqual(['sec_filing']);
   });
 });
+
+import { distinctiveTokens, domainMatchesCompany, domainsFromContacts, guessDomains } from '@/lib/ingestion/company-websites';
+import { extractProgramsHeuristic, programNameFromLine, stageFromText } from '@/lib/ingestion/pipeline-pages';
+
+describe('free discovery helpers', () => {
+  it('keeps distinctive name tokens', () => {
+    expect(distinctiveTokens('Kalevala Therapeutics, Inc.')).toEqual(['kalevala']);
+    expect(distinctiveTokens('Jiangsu Hengrui Pharmaceuticals Co., Ltd.')).toEqual(['jiangsu', 'hengrui']);
+  });
+  it('accepts contact domains that look like the company and drops free mail and CROs', () => {
+    expect(domainsFromContacts('Akeso', ['clinicaltrials@akesobio.com', 'pm@iqvia.com', 'x@gmail.com'])).toEqual(['akesobio.com']);
+    expect(domainsFromContacts('Kalevala Therapeutics, Inc.', ['info@kalevalatx.com'])).toEqual(['kalevalatx.com']);
+    expect(domainsFromContacts('Kalevala Therapeutics', ['info@someothercro.com'])).toEqual([]);
+    expect(domainMatchesCompany('hengrui.com', 'Jiangsu Hengrui Pharmaceuticals')).toBe(true);
+  });
+  it('guesses plausible domains from the name', () => {
+    const g = guessDomains('Kalevala Therapeutics, Inc.');
+    expect(g).toContain('kalevala.com');
+    expect(g).toContain('kalevalatherapeutics.com');
+    expect(g).toContain('kalevalatx.com');
+    expect(g.length).toBeLessThanOrEqual(18);
+  });
+});
+
+describe('rule-based pipeline extraction', () => {
+  it('reads stage words including sub-phases', () => {
+    expect(stageFromText('ABC-123 · NSCLC · Phase 1/2')).toBe('phase_1_2');
+    expect(stageFromText('IND-enabling studies ongoing')).toBe('ind_enabling');
+    expect(stageFromText('Preclinical')).toBe('preclinical');
+    expect(stageFromText('Phase II')).toBe('phase_2');
+    expect(stageFromText('Our team')).toBeNull();
+  });
+  it('names programs by code, INN or leading segment', () => {
+    expect(programNameFromLine('ABC-123 · KRAS G12D · NSCLC · Preclinical')).toEqual({ name: 'ABC-123', kind: 'code' });
+    expect(programNameFromLine('zilovertamab vedotin | ROR1 | Phase 2')).toEqual({ name: 'zilovertamab', kind: 'inn' });
+    expect(programNameFromLine('Anti-TL1A program – ulcerative colitis – Discovery')).toEqual({ name: 'Anti-TL1A program', kind: 'segment' });
+    expect(programNameFromLine('Phase 2 – something')).toBeNull();
+  });
+  it('turns pipeline rows into programs and skips navigation text', () => {
+    const paras = [
+      'Pipeline',
+      'ABC-123 · KRAS G12D inhibitor · NSCLC · IND-enabling',
+      'XYZ-9\tanti-TL1A antibody\tulcerative colitis\tPreclinical\tpartnered with Big Pharma Inc',
+      'Read more about our Phase 2 results in the newsroom',
+      'Cookie settings · Privacy · Phase 1',
+      'ABC-123 · KRAS G12D inhibitor · pancreatic cancer · IND-enabling',
+    ];
+    const out = extractProgramsHeuristic(paras);
+    expect(out.map(p => [p.program_name, p.stage, p.modality, p.indication_specific, p.partnered])).toEqual([
+      ['ABC-123', 'ind_enabling', 'small_molecule', 'KRAS G12D inhibitor', false],
+      ['XYZ-9', 'preclinical', 'antibody', 'anti-TL1A antibody', true],
+    ]);
+    expect(out[1].partner_name).toBe('Big Pharma Inc');
+    expect(out[0].evidence_quote).toBe('ABC-123 · KRAS G12D inhibitor · NSCLC · IND-enabling');
+    expect(out[0].confidence).toBe(62);
+  });
+});

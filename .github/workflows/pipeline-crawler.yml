@@ -3,13 +3,18 @@ name: Pipeline crawler (preclinical, global)
 # Company pipeline pages are the only source that reaches private biotechs'
 # preclinical and discovery programs worldwide. This job (a) finds the
 # official site and pipeline page for industry companies that have none on
-# record (one web search each, Claude Haiku), then (b) renders queued pipeline
-# pages in headless Chromium, extracts programs (text + screenshot, Claude
-# Sonnet) and writes them through the same path as the SEC filing pipeline
-# (asset_origin = 'pipeline_page'). Each run is logged to data_ingestion_log
+# record, then (b) renders queued pipeline pages in headless Chromium,
+# extracts programs and writes them through the same path as the SEC filing
+# pipeline (asset_origin = 'pipeline_page'). Logged to data_ingestion_log
 # under stage pipeline_pages.
 #
-# Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY.
+# Zero-cost by default (public repo: Actions minutes are free): discovery
+# uses trial contact emails, Wikidata and domain guessing; extraction is
+# rule-based on the page text. Dispatch with llm=haiku|sonnet and/or
+# paid_search=true to spend on the model for chart-only pages or sites the
+# free chain cannot find.
+#
+# Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY (only used when llm / paid_search is set).
 
 on:
   schedule:
@@ -28,6 +33,15 @@ on:
         description: 'Time budget in minutes'
         default: '45'
         type: string
+      llm:
+        description: 'Model extractor (none = rule-based, free)'
+        default: 'none'
+        type: choice
+        options: [none, haiku, sonnet]
+      paid_search:
+        description: 'Web search when the free discovery chain finds no site'
+        default: false
+        type: boolean
       dry_run:
         description: 'Print extractions without writing'
         default: false
@@ -66,4 +80,6 @@ jobs:
             --discover "${{ github.event.inputs.discover || '150' }}" \
             --crawl "${{ github.event.inputs.crawl || '60' }}" \
             --minutes "${{ github.event.inputs.minutes || '45' }}" \
+            --llm "${{ github.event.inputs.llm || 'none' }}" \
+            ${{ github.event.inputs.paid_search == 'true' && '--paid-search' || '' }} \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
