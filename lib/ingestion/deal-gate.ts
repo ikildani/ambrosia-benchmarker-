@@ -38,7 +38,7 @@ export function gateMode(): GateMode {
   return v === 'regex' || v === 'none' ? v : 'haiku';
 }
 
-const AGREEMENT = /\b(licen[cs]e|licens(?:ing|ed|or|ee)|collaborat(?:ion|e|ive)|co-?development|co-?promot|option agreement|exclusive (?:rights|option)|asset purchase|acqui(?:re|sition) of|merger agreement|research agreement|supply agreement|distribution agreement)\b/i;
+const AGREEMENT = /\b(licen[cs]e|licens(?:ing|ed|or|ee)|collaborat(?:ion|e|ive)|co-?development|co-?promot|option agreement|exclusive (?:rights|option)|asset purchase|acqui(?:re|res|red|sition)|merger|tender offer|research agreement|supply agreement|distribution agreement)\b/i;
 const ECONOMICS = /\b(upfront|up-front|milestone|royalt(?:y|ies)|\$\s?\d|USD\s?\d|\d+(?:\.\d+)?\s?(?:million|billion)|tiered|net sales)\b/i;
 const EARNINGS = /\b(financial results for the (?:first|second|third|fourth) quarter|reports? (?:first|second|third|fourth)[- ]quarter|quarterly (?:financial )?results|full[- ]year (?:financial )?results|earnings (?:call|release|conference)|conference call to discuss)\b/i;
 const GOVERNANCE_ONLY = /\b(annual meeting of (?:stock|share)holders|appointment of (?:director|officer)|resignation of|compensatory arrangement|employment agreement|severance)\b/i;
@@ -58,8 +58,8 @@ export function regexDealGate(text: string): GateDecision {
 }
 
 const HAIKU_SYSTEM = `You screen SEC filing text for a biopharma deal database. Answer with exactly one word: YES or NO.
-Answer YES only if the text describes a specific agreement between two named companies in which one grants the other rights to a drug, biologic, platform, or product (license, option, collaboration, co-development, acquisition, or supply/distribution of a therapeutic) AND at least one financial term is stated (upfront payment, milestone payments, royalties, equity, total deal value, or purchase price).
-Answer NO for earnings releases, financing announcements, governance or personnel changes, general pipeline updates, clinical data announcements without an agreement, and agreements with no financial terms.`;
+Answer YES if the text describes a specific agreement between two named companies in which one grants the other rights to a drug, biologic, platform, or product (license, option, collaboration, co-development, acquisition or merger of a biopharma company or asset, or supply/distribution of a therapeutic). Financial terms do not need to be disclosed: an announced agreement with undisclosed terms is still YES.
+Answer NO for earnings releases, financing rounds and equity offerings, governance or personnel changes, general pipeline updates, clinical data announcements without an agreement, conference presentations, and service or supply contracts with no rights to a product.`;
 
 /** Paid pass, about 1/40th of an Opus extraction. Fails open. */
 export async function haikuDealGate(text: string, anthropicApiKey: string): Promise<GateDecision> {
@@ -69,7 +69,7 @@ export async function haikuDealGate(text: string, anthropicApiKey: string): Prom
       model: GATE_MODEL,
       max_tokens: 5,
       system: HAIKU_SYSTEM,
-      messages: [{ role: 'user', content: `Filing text:\n${text.slice(0, GATE_TEXT_CHARS)}\n\nDoes this describe a biopharma deal with at least one financial term? Answer YES or NO.` }],
+      messages: [{ role: 'user', content: `Filing text:\n${text.slice(0, GATE_TEXT_CHARS)}\n\nDoes this describe a biopharma deal (licence, collaboration, option, co-development, asset purchase, or acquisition/merger)? Answer YES or NO.` }],
     });
     const first = res.content[0];
     const answer = first && first.type === 'text' ? first.text.trim().toUpperCase() : '';

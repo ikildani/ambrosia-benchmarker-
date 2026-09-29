@@ -24,8 +24,10 @@ import { regexDealGate, haikuDealGate } from './deal-gate';
 import { validateExtractedDeal } from './deal-extraction-validator';
 import { fetchArticleContent, extractDealFromArticle, persistExtractedPressDeal, pressContentHash } from './press-releases';
 import { mapWithConcurrency } from './concurrency';
+import { gunzipSync } from 'zlib';
+import { fetchWithTimeout } from '../fetch-with-timeout';
 
-export type WireSource = 'globenewswire';
+export type WireSource = 'globenewswire' | 'prnewswire';
 
 export interface WireItem {
   source: WireSource;
@@ -42,6 +44,8 @@ export interface WireArchiveOptions {
   fromMonth: string;
   toMonth: string;
   keywords?: readonly string[];
+  /** Archives to walk. GlobeNewswire by keyword search; PR Newswire by its monthly sitemap. Default both. */
+  sources?: readonly WireSource[];
   /** Cap on model extractions this run (gate calls are not counted). */
   maxExtractions?: number;
   concurrency?: number;
@@ -82,6 +86,13 @@ export const WIRE_KEYWORDS: readonly string[] = [
   '"upfront payment"',
   '"milestone payments"',
   '"worldwide rights"',
+  // M&A (Sep 29 2026: M&A coverage was under 20%; the list had one acquisition phrase)
+  '"to acquire"',
+  '"merger agreement"',
+  '"tender offer"',
+  '"completes acquisition"',
+  '"acquisition of"',
+  '"agreement to acquire"',
 ];
 
 const HEADLINE_DEAL = /\b(licen[cs]\w*|collaborat\w*|option|acqui\w*|merger|co-?develop\w*|partner\w*|agreement|rights|milestone\w*|upfront|royalt\w*|alliance|strategic)\b/i;
@@ -153,6 +164,65 @@ export async function searchGlobeNewswire(page: Page, keyword: string, from: str
   return [...out.values()];
 }
 
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127 Safari/537.36';
+
+/** Headline from a PR Newswire release URL slug: /news-releases/abbvie-to-acquire-stemcentrx-300259263.html. */
+export function titleFromPrnUrl(url: string): string | null {
+  const m = url.match(/\/news-releases\/([a-z0-9-]+?)-\d{6,}\.html$/i);
+  return m ? m[1].replace(/-/g, ' ') : null;
+}
+
+/**
+ * Every release PR Newswire lists for one month. Its archive search is client-rendered and
+ * returns nothing without a session, but robots.txt points to monthly sitemap files back to
+ * 2011 (Sitemap_Index_Apr_2016.xml.gz: ~3,400 English release URLs). The URL slug carries the
+ * headline, so the headline filter runs before any page is fetched.
+ */
+export async function listPrNewswireMonth(month: string, log?: (l: string) => void): Promise<WireItem[]> {
+  const [y, mm] = month.split('-').map(Number);
+  const url = `https://www.prnewswire.com/Sitemap_Index_${MONTH_ABBR[mm - 1]}_${y}.xml.gz`;
+  let xml = '';
+  for (let attempt = 0; attempt < 3 && !xml; attempt++) {
+    try {
+      const res = await fetchWithTimeout(url, { timeoutMs: 60_000, retries: 1, headers: { 'User-Agent': BROWSER_UA } });
+      if (!res.ok) { log?.(`[wire] prn sitemap ${month}: http ${res.status}`); return []; }
+      const buf = Buffer.from(await res.arrayBuffer());
+      xml = (buf[0] === 0x1f && buf[1] === 0x8b ? gunzipSync(buf) : buf).toString('utf8');
+    } catch (e) {
+      log?.(`[wire] prn sitemap ${month} attempt ${attempt + 1}: ${String(e).slice(0, 120)}`);
+    }
+  }
+  const out: WireItem[] = [];
+  const seen = new Set<string>();
+  for (const m of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    const loc = m[1].trim();
+    if (!/^https:\/\/www\.prnewswire\.com\/news-releases\//.test(loc) || seen.has(loc)) continue;
+    const title = titleFromPrnUrl(loc);
+    if (!title) continue;
+    seen.add(loc);
+    // Placeholder day; the release page's <meta name="date"> replaces it before insert.
+    out.push({ source: 'prnewswire', url: loc, title, date: `${month}-15`, keyword: 'sitemap' });
+  }
+  return out;
+}
+
+/** Release date from a PR Newswire page (<meta name='date' content="2016-04-28T07:20:00-04:00"/>). */
+export function prnDateFromHtml(html: string): string | null {
+  const m = html.match(/<meta\s+name=['"]date['"]\s+content=['"](\d{4}-\d{2}-\d{2})/i);
+  return m ? m[1] : null;
+}
+
+async function fetchPrnDate(url: string): Promise<string | null> {
+  try {
+    const res = await fetchWithTimeout(url, { timeoutMs: 20_000, retries: 1, headers: { 'User-Agent': BROWSER_UA } });
+    if (!res.ok) return null;
+    return prnDateFromHtml(await res.text());
+  } catch {
+    return null;
+  }
+}
+
 interface LedgerRow { source_url: string; processed: boolean | null; deal_id: string | null; is_deal_announcement: boolean | null }
 
 async function loadLedger(supabase: SupabaseClient, urls: string[]): Promise<Map<string, LedgerRow>> {
@@ -195,6 +265,7 @@ export async function runWireArchive(supabase: SupabaseClient, browser: Browser,
   const insertConfidence = opts.insertConfidence ?? 75;
   const reviewConfidence = opts.reviewConfidence ?? 60;
   const keywords = opts.keywords ?? WIRE_KEYWORDS;
+  const sources = opts.sources ?? (['globenewswire', 'prnewswire'] as const);
   const log = opts.log ?? ((l: string) => console.log(l));
   const funnel = new FunnelCounter();
   const result: WireArchiveResult = { months: [], listed: 0, candidates: 0, fetched: 0, gated_in: 0, extracted: 0, inserted: 0, duplicates: 0, errors: [], funnel: {}, timed_out: false };
@@ -206,11 +277,16 @@ export async function runWireArchive(supabase: SupabaseClient, browser: Browser,
       if (Date.now() - start > budget) { result.timed_out = true; break; }
       const { from, to } = monthBounds(month);
       const items = new Map<string, WireItem>();
-      for (const kw of keywords) {
+      if (sources.includes('globenewswire')) for (const kw of keywords) {
         if (Date.now() - start > budget) { result.timed_out = true; break; }
         const found = await searchGlobeNewswire(page, kw, from, to, log);
         for (const it of found) if (!items.has(it.url)) items.set(it.url, it);
         log(`[wire] ${month} ${kw}: ${found.length} listed, ${items.size} unique so far`);
+      }
+      if (sources.includes('prnewswire')) {
+        const prn = await listPrNewswireMonth(month, log);
+        for (const it of prn) if (!items.has(it.url)) items.set(it.url, it);
+        log(`[wire] ${month} prnewswire sitemap: ${prn.length} listed, ${items.size} unique so far`);
       }
       result.months.push(month);
       result.listed += items.size;
@@ -229,6 +305,10 @@ export async function runWireArchive(supabase: SupabaseClient, browser: Browser,
         if (Date.now() - start > budget) { result.timed_out = true; return; }
         if (extractions >= maxExtractions) return;
         try {
+          if (item.source === 'prnewswire') {
+            const d = await fetchPrnDate(item.url);
+            if (d) item.date = d;
+          }
           const content = await fetchArticleContent(item.url);
           if (content.length < 300) {
             funnel.count('content_unavailable', item.source, item.url);
@@ -251,7 +331,7 @@ export async function runWireArchive(supabase: SupabaseClient, browser: Browser,
           result.gated_in++;
           if (extractions >= maxExtractions) return;
           extractions++;
-          const deal = await extractDealFromArticle(item.title, content, 'GlobeNewswire archive', opts.anthropicApiKey);
+          const deal = await extractDealFromArticle(item.title, content, item.source === 'prnewswire' ? 'PR Newswire archive' : 'GlobeNewswire archive', opts.anthropicApiKey);
           if (!deal) {
             funnel.count('not_a_deal', 'article', item.title);
             if (!opts.dryRun) await upsertLedger(supabase, item, { processed: true, is_deal_announcement: false, processing_notes: 'archive: extractor found no deal' });
@@ -274,7 +354,7 @@ export async function runWireArchive(supabase: SupabaseClient, browser: Browser,
           }
           result.extracted++;
           const needsReview = deal.confidence_score < insertConfidence;
-          const ins = await persistExtractedPressDeal(supabase, { deal, content, link: item.url, guid: item.url, pubDate: item.date, sourceName: 'GlobeNewswire archive', needsReview, dryRun: !!opts.dryRun });
+          const ins = await persistExtractedPressDeal(supabase, { deal, content, link: item.url, guid: item.url, pubDate: item.date, sourceName: item.source === 'prnewswire' ? 'PR Newswire archive' : 'GlobeNewswire archive', needsReview, dryRun: !!opts.dryRun });
           if (ins.outcome === 'inserted') {
             result.inserted++;
             funnel.count(opts.dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`);
