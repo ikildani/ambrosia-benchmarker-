@@ -24,7 +24,9 @@ alert, email or report.
   (1,447 on 2026-09-28). `LIVE_DEAL_COUNT` in lib/config/constants.ts is only the fallback.
 - Company stats (`companies.deals_last_12mo` etc.) come from `update_company_deal_stats`,
   which applies the same filter, rolls merged entities up to the survivor, and is kept
-  current by the `deal_changed_company_stats` trigger (migration 146). Do not recompute
+  current by the `deal_changed_company_stats` trigger (migrations 146, 154). Since 154 the counts,
+  last deal, modalities and indications cover BOTH sides of a deal (the page says "Deals (12mo)");
+  avg/median upfront and phase preference stay licensee-only (buyer profile). Do not recompute
   them in app code.
 
 ## Ingestion: flag it, fix it, report it
