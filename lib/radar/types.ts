@@ -64,7 +64,7 @@ export interface ClinicalAssetRow {
   company_id: string | null;
   company_name: string;
   asset_name: string;
-  /** Cleaned program name (migration 157): doses, arms and formulations stripped; null until backfilled. */
+  /** Cleaned program name (migration 161): doses, arms and formulations stripped; null until backfilled. */
   display_name?: string | null;
   asset_aliases: string[] | null;
   mechanism: string | null;
@@ -100,8 +100,10 @@ export interface ClinicalAssetRow {
   program_trials?: number | null;
   originator_country: string | null;
   originator_region: string | null;
-  /** NULL = company HQ or registry sponsor; 'trial_sites' = inferred from where all the sponsor's trials run (migration 159). */
+  /** NULL = company HQ or registry sponsor; 'trial_sites' = inferred from where all the sponsor's trials run (migration 163). */
   originator_region_source?: string | null;
+  /** NULL = classifier or ingestion; 'trial_conditions' = keyword vote over trial conditions (migration 166). */
+  therapeutic_area_source?: string | null;
   licensing_intent_score: number | null;
   competitive_heat: number | null;
   deal_readiness_score: number | null;
