@@ -13,6 +13,8 @@ import { requireAuth } from '@/lib/auth-helpers';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { optimizeDealStructure } from '@/lib/financial/deal-structure-optimizer';
 import { createServiceClient } from '@/lib/supabase/server';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
+import { ENGINE_VERSION } from '@/lib/financial/calculation-version';
 import type { RNPVInput } from '@/lib/financial/types';
 import type { TherapeuticArea, Phase, Modality } from '@/lib/calculations';
 
@@ -122,6 +124,27 @@ export async function POST(request: NextRequest) {
       };
     }
   }
+
+  // Score archive (migration 139). Asset inputs are the user's; kept as a hash.
+  archiveAfterResponse(() => [{
+    product: 'solidus',
+    scoreType: 'trade_space.structure',
+    modelVersion: `rnpv-${ENGINE_VERSION}`,
+    origin: 'user',
+    entityType: 'profile',
+    therapeuticArea: rnpvInput.therapeuticArea,
+    phase: rnpvInput.phase,
+    modality: rnpvInput.modality,
+    indication: rnpvInput.indication || null,
+    confidential: true,
+    inputs: { rnpvInput, buyerName: buyerName ?? null },
+    output: {
+      rankings: result.rankings.map((r) => ({ dealType: r.dealType, upfrontMedian: r.upfrontMedian, totalDealMedian: r.totalDealMedian, pctVsBaseline: r.pctVsBaseline, rank: r.rank })),
+      recommendation: result.recommendation,
+      recommendationStrength: result.recommendationStrength,
+      buyerPremium,
+    },
+  }]);
 
   return apiSuccess({
     rankings: result.rankings.map((r) => ({

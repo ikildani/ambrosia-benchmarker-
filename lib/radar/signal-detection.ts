@@ -46,6 +46,7 @@ import { OWNERSHIP_EXCLUDED_IN } from '@/lib/radar/ownership';
 import { pgArrayLiteral } from '@/lib/radar/pg-array';
 import { createHash } from 'crypto';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import { archiveScores, type ScoreArchiveEntry } from '@/lib/score-archive';
 import type { ScoreFactorContribution, ScoreDriver, ScoreInterval } from '@/lib/radar/types';
 import { intervalFromBins, topDrivers, type CalibrationBin } from '@/lib/radar/score-presentation';
 import {
@@ -1720,6 +1721,46 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
+/** One score_archive entry per scored asset: the call, its drivers and its 12-month horizon. */
+export function radarArchiveEntry(asset: AssetForScoring, result: ScoringResult, now: Date): ScoreArchiveEntry {
+  const horizon = new Date(now);
+  horizon.setUTCFullYear(horizon.getUTCFullYear() + 1);
+  return {
+    product: 'solidus',
+    scoreType: 'radar.licensing_intent',
+    modelVersion: result.modelVersion,
+    origin: 'platform',
+    entityType: 'asset',
+    entityId: asset.id,
+    entityLabel: `${asset.company_name} — ${asset.asset_name}`,
+    therapeuticArea: asset.therapeutic_area,
+    phase: asset.phase,
+    modality: asset.modality,
+    indication: asset.indication_specific || asset.indication_category,
+    sourceTable: 'clinical_assets',
+    sourceId: asset.id,
+    inputs: {
+      company_id: asset.company_id,
+      partnership_status: asset.partnership_status,
+      features: result.featureVector ?? null,
+      contributions: result.contributions,
+    },
+    output: {
+      licensing_intent_score: result.licensingIntentScore,
+      probability: result.probability,
+      logit: result.logit,
+      interval: result.interval,
+      score_confidence: result.scoreConfidence,
+      competitive_heat: result.competitiveHeat,
+      deal_readiness_score: result.dealReadinessScore,
+      trend: result.trend,
+      score_delta: result.scoreDelta,
+      top_drivers: result.topDrivers,
+    },
+    horizonEnd: horizon.toISOString().slice(0, 10),
+  };
+}
+
 async function persistWave(
   supabase: SupabaseClient,
   scored: Array<{ asset: AssetForScoring; result: ScoringResult }>,
@@ -1842,7 +1883,8 @@ async function persistWave(
     last_scored_at: nowIso,
   }));
 
-  for (const rows of chunk(assetRows, 200)) {
+  const scoredChunks = chunk(scored, 200);
+  for (const [chunkIndex, rows] of chunk(assetRows, 200).entries()) {
     let { error } = await supabase.from('clinical_assets').upsert(rows, { onConflict: 'id' });
     if (error && ['score_probability', 'score_top_drivers', 'score_interval'].some(c => isMissingColumn(error!.message, c))) {
       outcome.errors.push('clinical_assets score presentation columns missing (apply migration 126); wrote scores without them');
@@ -1853,7 +1895,12 @@ async function persistWave(
       ({ error } = await supabase.from('clinical_assets').upsert(without(rows, 'score_model_version'), { onConflict: 'id' }));
     }
     if (error) outcome.errors.push(`clinical_assets score update (${rows.length} rows): ${error.message}`);
-    else outcome.assetsUpdated += rows.length;
+    else {
+      outcome.assetsUpdated += rows.length;
+      // Score archive (migration 139): the score as written, never overwritten.
+      const archived = await archiveScores(supabase, scoredChunks[chunkIndex].map(({ asset, result }) => radarArchiveEntry(asset, result, now)));
+      if (archived.rejected > 0) outcome.errors.push(`score_archive: ${archived.rejected} rows not archived (${archived.errors[0] ?? 'unknown'})`);
+    }
   }
 
   return outcome;
