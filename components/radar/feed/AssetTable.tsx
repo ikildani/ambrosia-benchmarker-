@@ -346,6 +346,11 @@ function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompa
           </Link>
           <div className="flex min-w-0 items-center gap-1.5">
             <PartnershipTag status={row.partnership_status} />
+            {(row.program_assets ?? 1) > 1 && (
+              <span className="shrink-0 rounded bg-neutral-100 px-1 text-[10px] font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300" title={`${row.program_assets} registry entries for this program (trial arms, doses, formulations); ${row.program_trials ?? 0} trials in total`}>
+                +{(row.program_assets ?? 1) - 1} arms
+              </span>
+            )}
             {row.mechanism && <span className={SECONDARY}>{row.mechanism}</span>}
           </div>
         </div>

@@ -415,6 +415,7 @@ async function findMatchingAssets(
     .from('clinical_assets')
     .select(CANDIDATE_SELECT)
     .in('partnership_status', ['unpartnered', 'partially_partnered'])
+    .eq('program_primary', true)
     .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
     // Phase 4 / approved programs are a divestiture market, not a licensing
     // one; the feed hides them by default and so does the acquirer view.
