@@ -1,7 +1,7 @@
--- 158: display names v3 + name-based program grouping.
--- Applied to production 2026-09-29 ahead of the PR merging.
+-- 162: display names v3 + name-based program grouping.
+-- Applied to production 2026-09-29 ahead of the PR merging, as ledger entries 158_radar_display_names_v3, 158b, 158c (renumbered: main took 158).
 --
--- Why: a spot check of 157 showed two failure modes.
+-- Why: a spot check of 161 showed two failure modes.
 --  1. drug_master matches are wrong even at confidence 92 (AVE1642 -> veligrotug,
 --     a Budesonide product -> albuterol), so a display name must never swap the
 --     registry name for the matched INN, and a program must not be grouped on the
@@ -78,7 +78,7 @@ END;
 $$;
 
 -- The matched INN is no longer substituted: matches are wrong too often.
--- Signature kept for the 157 trigger.
+-- Signature kept for the 161 trigger.
 CREATE OR REPLACE FUNCTION public.radar_display_name(p_name text, p_inn text, p_conf integer)
 RETURNS text
 LANGUAGE sql IMMUTABLE
@@ -144,7 +144,7 @@ BEGIN
 END;
 $$;
 
--- 158c: the backfill job may already be unscheduled when a manual call finds no work.
+-- 162c: the backfill job may already be unscheduled when a manual call finds no work.
 CREATE OR REPLACE FUNCTION public.radar_quality_backfill_batch()
  RETURNS integer
  LANGUAGE plpgsql

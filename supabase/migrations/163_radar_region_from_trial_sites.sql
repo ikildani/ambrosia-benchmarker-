@@ -1,7 +1,7 @@
--- 159: originator region inferred from trial sites, labelled as such.
--- Applied to production 2026-09-29 ahead of the PR merging.
+-- 163: originator region inferred from trial sites, labelled as such.
+-- Applied to production 2026-09-29 ahead of the PR merging, as ledger entry 159_radar_region_from_trial_sites.
 --
--- After 157 filled regions from company HQ, 2,494 default-feed programs still had
+-- After 161 filled regions from company HQ, 2,494 default-feed programs still had
 -- no region because the company has no country on file. When every site of every
 -- trial the company sponsors sits in one region, that region is recorded with
 -- originator_region_source = 'trial_sites' so the UI can say how it was derived.
@@ -13,7 +13,7 @@ ALTER TABLE public.clinical_assets
   ADD COLUMN IF NOT EXISTS originator_region_source text;
 
 COMMENT ON COLUMN public.clinical_assets.originator_region_source IS
-  'How originator_region was derived: NULL = company HQ or registry sponsor country; trial_sites = every trial site of the sponsor is in this region (159).';
+  'How originator_region was derived: NULL = company HQ or registry sponsor country; trial_sites = every trial site of the sponsor is in this region (163).';
 
 WITH miss AS (
   SELECT DISTINCT a.company_id

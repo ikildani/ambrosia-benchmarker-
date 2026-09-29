@@ -1,4 +1,5 @@
--- 157: data quality for what users read.
+-- 161: data quality for what users read.
+-- Applied to production 2026-09-29 ahead of the PR merging, under ledger names 157a/157b/157c_radar_display_names_regions (renumbered: main took 157).
 --
 -- 1. display_name: registry rows are named after trial arms and doses
 --    ("Phase Ib Cohort 2: HDM2005 1.4 mg/kg + R-Len", "EDP-323 Dose Regimen 1",
