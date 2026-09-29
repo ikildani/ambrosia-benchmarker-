@@ -3,7 +3,7 @@
  * The cases below are the production shapes from the Sep 25 2026 audit.
  */
 
-import { codePrefixOf, deriveOwnership, isComparatorNamed, isOwnershipHiddenByDefault, OWNERSHIP_EXCLUDED_IN, type OwnershipInput } from '@/lib/radar/ownership';
+import { codePrefixOf, deriveOwnership, isComparatorNamed, isPlaceholderNamed, isOwnershipHiddenByDefault, OWNERSHIP_EXCLUDED_IN, type OwnershipInput } from '@/lib/radar/ownership';
 
 const MERCK = 'c-merck';
 const SCHOLAR = 'c-scholar';
@@ -107,6 +107,18 @@ describe('deriveOwnership', () => {
     expect(isComparatorNamed('Standard of Care')).toBe(true);
     expect(isComparatorNamed('Controlled-release ABC-123')).toBe(false);
     expect(isComparatorNamed('Socazolimab')).toBe(false);
+  });
+
+  it('treats registry placeholders as background, not programs (migration 165)', () => {
+    for (const n of ['Treatment B', 'High', 'Biospecimen Collection', '국문', 'Placebos', 'Chemotherapy',
+      'The HRA has approved deferral of publication of the full details of the trial.',
+      'This is a phase I trial in healthy volunteers only']) {
+      expect(isPlaceholderNamed(n)).toBe(true);
+      expect(isComparatorNamed(n)).toBe(true);
+    }
+    for (const n of ['Highlight-101', 'Treatment of MDD with ABC-123', 'Testosterone', 'Lowestrin', 'Referenced ABC', 'Otherwise-named XYZ-9']) {
+      expect(isPlaceholderNamed(n)).toBe(false);
+    }
   });
 
   it("the company's own code series beats a foreign originator and no-arm rows (migration 143)", () => {

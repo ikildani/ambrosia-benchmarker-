@@ -67,8 +67,22 @@ export interface OwnershipResult {
 /** "Comparators: simvastatin and ezetimibe", "Placebo", "Standard of care": the row names a comparator, not a program. */
 export const COMPARATOR_NAME_RE = /^(comparators?\b|placebo\b|standard[- ]of[- ]care|soc\b|control\b|vehicle\b|sham\b|best supportive care|no intervention|usual care|background therapy)/i;
 
+/**
+ * Whole-name placeholders that are not a program: arm letters ("Treatment B"), dose
+ * levels ("High"), procedures ("Biospecimen Collection"), background therapy, and
+ * registry boilerplate (ISRCTN publication deferrals, the Korean "국문" stub).
+ * Mirrors radar_is_placeholder_named() (migration 165).
+ */
+export const PLACEHOLDER_NAME_RE = /^\s*(placebos?|treatment [a-z0-9]{1,2}|low|high|medium|test|reference|chemotherapy|biopsy|biospecimen collection|laboratory biomarker analysis|questionnaire administration|quality[- ]of[- ]life assessment|survey administration|androgen deprivation therapy|oral contraceptives?|국문|영문|해당\s?없음|n\/?a|none|not applicable|other)\s*$/i;
+export const PLACEHOLDER_TEXT_RE = /(deferral of publication|full details will be added to the study record|^\s*this is a phase i trial in healthy volunteers)/i;
+
+export function isPlaceholderNamed(name: string | null | undefined): boolean {
+  const n = name ?? '';
+  return PLACEHOLDER_NAME_RE.test(n) || PLACEHOLDER_TEXT_RE.test(n);
+}
+
 export function isComparatorNamed(name: string | null | undefined): boolean {
-  return COMPARATOR_NAME_RE.test(name ?? '');
+  return COMPARATOR_NAME_RE.test(name ?? '') || isPlaceholderNamed(name);
 }
 
 /** "JDQ443" -> "JDQ", "CP-742,033" -> "CP", "Dotinurad" -> null. Mirrors radar_code_prefix(). */
