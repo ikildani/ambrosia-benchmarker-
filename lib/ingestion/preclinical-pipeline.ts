@@ -372,6 +372,13 @@ export function matchExistingAsset(
   return { asset: null, drug_master_id: drugId };
 }
 
+export type DisclosureOrigin = 'filing' | 'pipeline_page';
+
+/**
+ * Where the programs came from. For a filing: form + accession. For a
+ * pipeline page: form = 'pipeline_page', accession = the page URL's hash
+ * and crawl date (see lib/ingestion/pipeline-pages.ts).
+ */
 export interface FilingContext {
   company_id: string;
   company_name: string;
@@ -381,6 +388,12 @@ export interface FilingContext {
   url: string;
   model: string;
   now: Date;
+  /** Defaults to 'filing'. */
+  origin?: DisclosureOrigin;
+}
+
+export function contextOrigin(ctx: Pick<FilingContext, 'origin'>): DisclosureOrigin {
+  return ctx.origin ?? 'filing';
 }
 
 export interface NewAssetRow {
@@ -407,12 +420,12 @@ export interface NewAssetRow {
   last_update_date: string;
   partnership_status: 'partnered' | 'unpartnered';
   partner_company_name: string | null;
-  partnership_basis: 'filing';
-  partnership_evidence: Array<{ type: 'filing'; id: string; url: string; date: string; note: string }>;
+  partnership_basis: DisclosureOrigin;
+  partnership_evidence: Array<{ type: DisclosureOrigin; id: string; url: string; date: string; note: string }>;
   partnership_confidence: number;
   partnership_checked_at: string;
   ownership_status: 'originator';
-  ownership_evidence: { rule: 'filing_disclosure'; accession: string; form: string };
+  ownership_evidence: { rule: 'filing_disclosure' | 'pipeline_page_disclosure'; accession: string; form: string };
   ownership_checked_at: string;
   owner_type: 'industry';
   data_sources: string[];
@@ -421,10 +434,10 @@ export interface NewAssetRow {
   classified_at: string;
   classification_confidence: number;
   classification_model: string;
-  classification_evidence: { reason: 'filing_extraction'; prompt_version: string; accession: string; form: string };
+  classification_evidence: { reason: 'filing_extraction' | 'pipeline_page_extraction'; prompt_version: string; accession: string; form: string };
   drug_master_id: string | null;
   drug_resolution_status: 'resolved' | 'unresolved';
-  asset_origin: 'filing';
+  asset_origin: DisclosureOrigin;
   disclosure_source_type: string;
   disclosure_accession: string;
   disclosure_url: string;
@@ -438,6 +451,7 @@ export function toNewAssetRow(p: DisclosedProgram, ctx: FilingContext, drugMaste
   const { phase, stage_detail } = stageToPhase(p.stage);
   if (phase !== 'preclinical') return null;
   const nowIso = ctx.now.toISOString();
+  const origin = contextOrigin(ctx);
   return {
     company_id: ctx.company_id,
     company_name: ctx.company_name,
@@ -462,26 +476,26 @@ export function toNewAssetRow(p: DisclosedProgram, ctx: FilingContext, drugMaste
     last_update_date: ctx.filing_date,
     partnership_status: p.partnered ? 'partnered' : 'unpartnered',
     partner_company_name: p.partnered ? p.partner_name : null,
-    partnership_basis: 'filing',
+    partnership_basis: origin,
     partnership_evidence: p.partnered
-      ? [{ type: 'filing', id: ctx.accession, url: ctx.url, date: ctx.filing_date, note: `${ctx.form}: ${p.partner_name ?? 'partner named in filing'}` }]
+      ? [{ type: origin, id: ctx.accession, url: ctx.url, date: ctx.filing_date, note: `${ctx.form}: ${p.partner_name ?? 'partner named in disclosure'}` }]
       : [],
     partnership_confidence: p.partnered ? 70 : 50,
     partnership_checked_at: nowIso,
     ownership_status: 'originator',
-    ownership_evidence: { rule: 'filing_disclosure', accession: ctx.accession, form: ctx.form },
+    ownership_evidence: { rule: origin === 'filing' ? 'filing_disclosure' : 'pipeline_page_disclosure', accession: ctx.accession, form: ctx.form },
     ownership_checked_at: nowIso,
     owner_type: 'industry',
-    data_sources: [DISCLOSURE_SOURCE],
+    data_sources: [origin === 'filing' ? DISCLOSURE_SOURCE : 'pipeline_page'],
     confidence_score: FILING_ASSET_CONFIDENCE,
     classification_status: 'classified',
     classified_at: nowIso,
     classification_confidence: p.confidence,
-    classification_model: `${ctx.model}:filing`,
-    classification_evidence: { reason: 'filing_extraction', prompt_version: PROMPT_VERSION, accession: ctx.accession, form: ctx.form },
+    classification_model: `${ctx.model}:${origin}`,
+    classification_evidence: { reason: origin === 'filing' ? 'filing_extraction' : 'pipeline_page_extraction', prompt_version: PROMPT_VERSION, accession: ctx.accession, form: ctx.form },
     drug_master_id: drugMasterId,
     drug_resolution_status: drugMasterId ? 'resolved' : 'unresolved',
-    asset_origin: 'filing',
+    asset_origin: origin,
     disclosure_source_type: ctx.form,
     disclosure_accession: ctx.accession,
     disclosure_url: ctx.url,
@@ -508,8 +522,8 @@ export function toExistingAssetPatch(p: DisclosedProgram, ctx: FilingContext, a:
     if (!a.moa_short && p.mechanism_short) patch.moa_short = p.mechanism_short;
     if (!a.mechanism && p.mechanism_short) patch.mechanism = p.mechanism_short;
   }
-  // A filing-origin row may advance within preclinical (or into the clinic) as later filings say so.
-  if (a.asset_origin === 'filing') {
+  // A disclosed row (filing or pipeline page) may advance within preclinical (or into the clinic) as later disclosures say so.
+  if (a.asset_origin === 'filing' || a.asset_origin === 'pipeline_page') {
     const { phase, stage_detail } = stageToPhase(p.stage);
     if (phase) {
       patch.phase = phase;
@@ -636,6 +650,85 @@ export async function extractPrograms(
   } catch (err) {
     return { programs: [], dropped: 0, invalid: 0, usage, error: err instanceof Error ? err.message.split('\n')[0].slice(0, 300) : String(err) };
   }
+}
+
+
+export interface PersistResult {
+  created: string[];
+  matched: number;
+  unmatchedClinical: number;
+  disclosuresWritten: number;
+  errors: string[];
+}
+
+/**
+ * Write extracted programs for one company: match existing assets (patch),
+ * create preclinical rows, and record every program in asset_disclosures.
+ * Shared by the filing pipeline and the pipeline-page crawler.
+ */
+export async function persistPrograms(supabase: SupabaseClient, ctx: FilingContext, programs: DisclosedProgram[]): Promise<PersistResult> {
+  const out: PersistResult = { created: [], matched: 0, unmatchedClinical: 0, disclosuresWritten: 0, errors: [] };
+  const errors = out.errors;
+  const co = { id: ctx.company_id, name: ctx.company_name };
+  const existing = await fetchExistingAssets(supabase, co.id);
+  const drugIds = await lookupDrugIds(supabase, [...new Set(programs.flatMap(programKeys))]);
+
+  const disclosures: DisclosureRow[] = [];
+  const newRows: NewAssetRow[] = [];
+  const pending: Array<{ row: NewAssetRow; program: DisclosedProgram }> = [];
+  const created = out.created;
+  let matched = 0;
+  for (const p of programs) {
+    const m = matchExistingAsset(p, existing, drugIds);
+    if (m.asset) {
+      const { error } = await supabase.from('clinical_assets').update(toExistingAssetPatch(p, ctx, m.asset)).eq('id', m.asset.id);
+      if (error) { errors.push(`${co.name} ${p.program_name}: update ${error.message}`); continue; }
+      disclosures.push(toDisclosureRow(p, ctx, m.asset.id, 'matched'));
+      matched++;
+      continue;
+    }
+    const row = toNewAssetRow(p, ctx, m.drug_master_id);
+    if (!row) {
+      const status: MatchStatus = stageToPhase(p.stage).phase ? 'unmatched_clinical' : 'skipped';
+      if (status === 'unmatched_clinical') out.unmatchedClinical++;
+      disclosures.push(toDisclosureRow(p, ctx, null, status));
+      continue;
+    }
+    newRows.push(row);
+    pending.push({ row, program: p });
+  }
+
+  if (newRows.length > 0) {
+    // Never overwrite a registry row that happens to share (company_name, asset_name).
+    const { data: inserted, error } = await supabase
+      .from('clinical_assets')
+      .upsert(newRows, { onConflict: 'company_name,asset_name', ignoreDuplicates: true })
+      .select('id, asset_name');
+    if (error) {
+      errors.push(`${co.name}: insert ${error.message}`);
+    } else {
+      const idByName = new Map((inserted ?? []).map(r => [normalizeKey(String(r.asset_name)), String(r.id)]));
+      for (const { row, program } of pending) {
+        const id = idByName.get(normalizeKey(row.asset_name)) ?? null;
+        if (id) {
+          created.push(row.asset_name);
+          disclosures.push(toDisclosureRow(program, ctx, id, 'created'));
+        } else {
+          disclosures.push(toDisclosureRow(program, ctx, null, 'skipped'));
+        }
+      }
+    }
+  }
+
+  if (disclosures.length > 0) {
+    const { error } = await supabase
+      .from('asset_disclosures')
+      .upsert(disclosures, { onConflict: 'company_id,source_id,program_key' });
+    if (error) errors.push(`${co.name}: asset_disclosures ${error.message}`);
+    else out.disclosuresWritten += disclosures.length;
+  }
+  out.matched = matched;
+  return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -821,65 +914,14 @@ export async function runPreclinicalPipeline(
         company_id: co.id, company_name: co.name, form: filing.form, accession: filing.accessionNumber,
         filing_date: filing.filingDate, url, model, now,
       };
-      const existing = await fetchExistingAssets(supabase, co.id);
-      const drugIds = await lookupDrugIds(supabase, [...new Set(ex.programs.flatMap(programKeys))]);
-
-      const disclosures: DisclosureRow[] = [];
-      const newRows: NewAssetRow[] = [];
-      const pending: Array<{ row: NewAssetRow; program: DisclosedProgram }> = [];
-      const created: string[] = [];
-      let matched = 0;
-      for (const p of ex.programs) {
-        const m = matchExistingAsset(p, existing, drugIds);
-        if (m.asset) {
-          const { error } = await supabase.from('clinical_assets').update(toExistingAssetPatch(p, ctx, m.asset)).eq('id', m.asset.id);
-          if (error) { errors.push(`${co.name} ${p.program_name}: update ${error.message}`); continue; }
-          disclosures.push(toDisclosureRow(p, ctx, m.asset.id, 'matched'));
-          matched++;
-          continue;
-        }
-        const row = toNewAssetRow(p, ctx, m.drug_master_id);
-        if (!row) {
-          const status: MatchStatus = stageToPhase(p.stage).phase ? 'unmatched_clinical' : 'skipped';
-          if (status === 'unmatched_clinical') result.unmatchedClinical++;
-          disclosures.push(toDisclosureRow(p, ctx, null, status));
-          continue;
-        }
-        newRows.push(row);
-        pending.push({ row, program: p });
-      }
-
-      if (newRows.length > 0) {
-        // Never overwrite a registry row that happens to share (company_name, asset_name).
-        const { data: inserted, error } = await supabase
-          .from('clinical_assets')
-          .upsert(newRows, { onConflict: 'company_name,asset_name', ignoreDuplicates: true })
-          .select('id, asset_name');
-        if (error) {
-          errors.push(`${co.name}: insert ${error.message}`);
-        } else {
-          const idByName = new Map((inserted ?? []).map(r => [normalizeKey(String(r.asset_name)), String(r.id)]));
-          for (const { row, program } of pending) {
-            const id = idByName.get(normalizeKey(row.asset_name)) ?? null;
-            if (id) {
-              created.push(row.asset_name);
-              disclosures.push(toDisclosureRow(program, ctx, id, 'created'));
-            } else {
-              disclosures.push(toDisclosureRow(program, ctx, null, 'skipped'));
-            }
-          }
-        }
-      }
-
-      if (disclosures.length > 0) {
-        const { error } = await supabase
-          .from('asset_disclosures')
-          .upsert(disclosures, { onConflict: 'company_id,source_id,program_key' });
-        if (error) errors.push(`${co.name}: asset_disclosures ${error.message}`);
-        else result.disclosuresWritten += disclosures.length;
-      }
-      result.assetsCreated += created.length;
-      result.assetsMatched += matched;
+      const persisted = await persistPrograms(supabase, ctx, ex.programs);
+      errors.push(...persisted.errors);
+      result.unmatchedClinical += persisted.unmatchedClinical;
+      result.disclosuresWritten += persisted.disclosuresWritten;
+      result.assetsCreated += persisted.created.length;
+      result.assetsMatched += persisted.matched;
+      const created = persisted.created;
+      const matched = persisted.matched;
       if (result.sample.length < 10) result.sample.push({ company: co.name, form: filing.form, created: created.slice(0, 8), matched });
       state.filings[co.id] = filing.accessionNumber;
     } catch (err) {

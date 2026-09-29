@@ -181,3 +181,32 @@ Branch feat/radar-credibility, migration 144.
   names in `companies` need the Chinese-name duplicate cleanup before the
   leaderboard reads cleanly (e.g. "SmithKline Beecham Corporation and Glaxo
   Group Limited (GSK)").
+
+## Sep 28 2026: global preclinical via company pipeline pages (item 2.9, second source)
+
+Filings reach SEC filers only (1,101 companies with a CIK). Most preclinical and
+discovery programs sit with private companies worldwide that publish a
+pipeline page. New source, migration 146:
+
+- `lib/ingestion/company-websites.ts`: one web search per company (Claude
+  Haiku + server web_search) returns the official site and pipeline page;
+  validation rejects aggregators, registries and newswires and requires the
+  pipeline page on the same registrable domain. Queue: industry companies
+  without a site, no-CIK first, busiest first; every company stamped
+  `website_checked_at` so it drains.
+- `lib/ingestion/pipeline-pages.ts`: page text as numbered paragraphs plus a
+  viewport screenshot (JPEG, ≤ 4,500 px) to Claude Sonnet; programs quoted
+  verbatim from text or as `[chart] <row label>` when read off a chart;
+  written through `persistPrograms` (shared with the filing pipeline) with
+  `asset_origin = 'pipeline_page'`.
+- `scripts/pipeline-crawler.ts` + `.github/workflows/pipeline-crawler.yml`
+  (`47 */3 * * *`, 45 min, cost cap $8/run): discover 150 + crawl 60 per run.
+  Dry run Sep 28: Merck and AstraZeneca pages gave 63 programs (24 from the
+  chart), $0.07 per page.
+- Known limits: big pharma pages list clinical programs only (expected; the
+  value is in small and private companies); duplicate company rows sharing a
+  domain are crawled once per run and stamped `duplicate_host`; pages that are
+  a single image with no text rely entirely on the screenshot.
+- Next sources in order: R&D newswire feeds → extractor; FDA / EMA orphan
+  designations; non-US annual reports (HKEX 18A, EDINET, ASX) through the
+  same extractor; PubMed / bioRxiv affiliations for discovery-stage codes.

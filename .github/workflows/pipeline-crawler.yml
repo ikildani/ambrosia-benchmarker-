@@ -1,0 +1,85 @@
+name: Pipeline crawler (preclinical, global)
+
+# Company pipeline pages are the only source that reaches private biotechs'
+# preclinical and discovery programs worldwide. This job (a) finds the
+# official site and pipeline page for industry companies that have none on
+# record, then (b) renders queued pipeline pages in headless Chromium,
+# extracts programs and writes them through the same path as the SEC filing
+# pipeline (asset_origin = 'pipeline_page'). Logged to data_ingestion_log
+# under stage pipeline_pages.
+#
+# Zero-cost by default (public repo: Actions minutes are free): discovery
+# uses trial contact emails, Wikidata and domain guessing; extraction is
+# rule-based on the page text. Dispatch with llm=haiku|sonnet and/or
+# paid_search=true to spend on the model for chart-only pages or sites the
+# free chain cannot find.
+#
+# Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY (only used when llm / paid_search is set).
+
+on:
+  schedule:
+    - cron: '47 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      discover:
+        description: 'Companies to web-search for a site this run'
+        default: '150'
+        type: string
+      crawl:
+        description: 'Pipeline pages to crawl this run'
+        default: '60'
+        type: string
+      minutes:
+        description: 'Time budget in minutes'
+        default: '45'
+        type: string
+      llm:
+        description: 'Model extractor (none = rule-based, free)'
+        default: 'none'
+        type: choice
+        options: [none, haiku, sonnet]
+      paid_search:
+        description: 'Web search when the free discovery chain finds no site'
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Print extractions without writing'
+        default: false
+        type: boolean
+
+concurrency:
+  group: pipeline-crawler
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  crawl:
+    name: Discover + crawl
+    runs-on: ubuntu-latest
+    timeout-minutes: 58
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Crawl
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REGISTRY_WORKER_RUNTIME: github-actions
+          PIPELINE_CRAWL_COST_CAP_USD: '8'
+        run: |
+          NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/pipeline-crawler.ts \
+            --discover "${{ github.event.inputs.discover || '150' }}" \
+            --crawl "${{ github.event.inputs.crawl || '60' }}" \
+            --minutes "${{ github.event.inputs.minutes || '45' }}" \
+            --llm "${{ github.event.inputs.llm || 'none' }}" \
+            ${{ github.event.inputs.paid_search == 'true' && '--paid-search' || '' }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
