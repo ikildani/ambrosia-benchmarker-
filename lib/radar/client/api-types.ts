@@ -38,6 +38,7 @@ export type FeedRow = Pick<
   | 'score_low_power'
   | 'partner_company_name'
   | 'territory_rights_available'
+  | 'rights_available'
   | 'licensing_intent_score'
   | 'score_confidence'
   | 'competitive_heat'
@@ -132,6 +133,8 @@ export interface RadarMandate {
   phase_max: string | null;
   countries: string[];
   regions: string[];
+  rights_available?: string[];
+  owner_types?: string[];
   partnership_statuses: string[];
   min_licensing_intent: number;
   min_deal_readiness: number;

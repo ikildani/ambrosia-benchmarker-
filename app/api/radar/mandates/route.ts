@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
     phase_max: input.phase_max || null,
     countries: input.countries || [],
     regions: input.regions || [],
+    rights_available: input.rights_available || [],
+    owner_types: input.owner_types || [],
     partnership_statuses: input.partnership_statuses || ['unpartnered', 'partially_partnered'],
     min_licensing_intent: input.min_licensing_intent || 0,
     min_deal_readiness: input.min_deal_readiness || 0,

@@ -299,7 +299,7 @@ describe('preclinical in the shared vocabulary', () => {
     expect(RADAR_PHASE_OPTIONS[0].value).toBe('preclinical');
     expect(RADAR_PHASE_RANK.preclinical).toBe(1);
     const empty = { phase: [], phase_min: null, phase_max: null, ownership: [] };
-    expect(defaultExclusions(empty).phase).toEqual(['phase_4']);
+    expect(defaultExclusions(empty).phase).toEqual(['phase_4', 'not_applicable', 'unknown']);
     expect(resolvePhaseList({ phase: [], phase_min: 'phase_1', phase_max: null })).not.toContain('preclinical');
     expect(resolvePhaseList({ phase: [], phase_min: null, phase_max: 'phase_1' })).toEqual(['preclinical', 'early_phase_1', 'phase_1']);
   });

@@ -10,6 +10,7 @@ import {
   DEFAULT_UI,
   EMPTY_FILTERS,
   MULTI_FACET_KEYS,
+  cleanTopPct,
   SORT_KEYS,
   cleanColumns,
   parseFilters,
@@ -35,10 +36,12 @@ export const viewFiltersInputSchema = z
     indication: stringList.optional(),
     target: stringList.optional(),
     company: stringList.optional(),
+    rights: stringList.optional(),
     score_band: stringList.optional(),
     phase_min: z.string().max(40).nullable().optional(),
     phase_max: z.string().max(40).nullable().optional(),
     min_score: z.number().nullable().optional(),
+    top_pct: z.number().nullable().optional(),
   })
   .strict();
 
@@ -55,6 +58,7 @@ export function sanitizeViewFilters(input: ViewFiltersInput): RadarFilterState {
   draft.phase_min = input.phase_min ?? null;
   draft.phase_max = input.phase_max ?? null;
   draft.min_score = typeof input.min_score === 'number' ? input.min_score : null;
+  draft.top_pct = cleanTopPct(input.top_pct ?? null);
   return parseFilters(serializeRadarState({ filters: draft, ui: DEFAULT_UI }));
 }
 
