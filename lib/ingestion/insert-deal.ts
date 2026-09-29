@@ -78,10 +78,23 @@ export class MissingCitationError extends Error {
  * Build the row that will be inserted, without touching the database.
  * Exported so dry runs and tests can see exactly what would be written.
  */
+/** Issuer newswires: a release there is the company's own announcement, i.e. a primary citation. */
+export const NEWSWIRE_HOST = /^https?:\/\/(www\.)?(globenewswire\.com|prnewswire\.com|businesswire\.com|accesswire\.com|newswire\.ca)\//i;
+
 export function buildCitedDealRow(input: CitedDealInsert, opts: { legacyConstraint?: boolean } = {}): Record<string, unknown> {
-  const sourceUrl = input.sourceUrl?.trim() || null;
-  const pressReleaseUrl = input.pressReleaseUrl?.trim() || null;
-  const sourceFilingId = input.sourceFilingId?.trim() || null;
+  let sourceUrl = input.sourceUrl?.trim() || null;
+  let pressReleaseUrl = input.pressReleaseUrl?.trim() || null;
+  let sourceFilingId = input.sourceFilingId?.trim() || null;
+  // A URL is never a filing id (Sep 29 2026: the press pipelines passed the article link as
+  // sourceFilingId, so every news article counted as a primary filing). Newswire links become
+  // the press-release citation; any other link stays a plain source URL.
+  if (sourceFilingId && /^https?:\/\//i.test(sourceFilingId)) {
+    const url = sourceFilingId;
+    sourceFilingId = null;
+    if (NEWSWIRE_HOST.test(url)) pressReleaseUrl = pressReleaseUrl ?? url;
+    sourceUrl = sourceUrl ?? url;
+  }
+  if (sourceUrl && !pressReleaseUrl && NEWSWIRE_HOST.test(sourceUrl) && normaliseSourceType(input.sourceType) === 'press_release') pressReleaseUrl = sourceUrl;
   if (!sourceUrl && !pressReleaseUrl && !sourceFilingId) {
     throw new MissingCitationError(
       `Refusing to insert ${String(input.row.licensor_name)} → ${String(input.row.licensee_name)}: no source_url, press_release_url or source_filing_id`,
