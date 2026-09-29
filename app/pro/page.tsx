@@ -1,3 +1,4 @@
+import { RADAR_PUBLIC } from '@/lib/radar/launch';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -69,7 +70,7 @@ const faqs = [
   { q: 'What data sources do you use?', a: 'SEC 8-K filings, FTC premerger filings, press releases, ClinicalTrials.gov, FDA/EMA regulatory databases, patent filings, and company financial reports. New deals are ingested from SEC filings, FTC premerger databases, press releases, and regulatory databases.' },
   { q: 'How often are benchmarks updated?', a: 'Daily. New deals are automatically ingested and benchmarks recalibrate in real time. Your analyses always reflect the latest market data.' },
   { q: 'Can I use this for board presentations?', a: 'Absolutely. PDF reports are designed for deal committees and investment committees. Export 20-page branded reports with scenario comparison, deal waterfall, real options, competitive dynamics, and buyer-specific valuation.' },
-  { q: 'What is Search & Evaluation?', a: 'The asset-screening module included in Pro. It ranks unpartnered clinical-stage and preclinical programs from trial registries in 100 countries and company filings by a licensing-intent score shown against peers, with predicted deal terms from cited comparables. Save a mandate and new matches arrive as a digest; the acquirer view shows which programs fit a given buyer.' },
+  ...(RADAR_PUBLIC ? [{ q: 'What is Search & Evaluation?', a: 'The asset-screening module included in Pro. It ranks unpartnered clinical-stage and preclinical programs from trial registries in 100 countries and company filings by a licensing-intent score shown against peers, with predicted deal terms from cited comparables. Save a mandate and new matches arrive as a digest; the acquirer view shows which programs fit a given buyer.' }] : []),
   { q: 'How does this compare to Evaluate Pharma or Cortellis?', a: `Those platforms focus on pipeline and market data. Ambrosia focuses specifically on deal intelligence — benchmarking your deal terms against ${DEAL_STATS.TOTAL_DEALS} real transactions with institutional-grade financial modeling. Most users find it complementary, not duplicative.` },
 ];
 
@@ -713,6 +714,7 @@ export default function ProPage() {
               </div>
             </div>
 
+            {RADAR_PUBLIC && (<>
             {/* ── Search & Evaluation ── */}
             <div className="btc-card-teal bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden">
               <div className="grid lg:grid-cols-2">
@@ -783,6 +785,7 @@ export default function ProPage() {
                 </div>
               </div>
             </div>
+            </>)}
 
             {/* ── Market Pulse ── */}
             <div className="btc-card-indigo bg-[#0d1420] border border-white/[0.06] rounded-2xl overflow-hidden">

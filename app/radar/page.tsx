@@ -10,16 +10,13 @@
 
 import { notFound } from 'next/navigation';
 import { radarBacktested } from '@/lib/radar/backtested';
+import { radarAccessible } from '@/lib/radar/launch-server';
 import { RadarFeedClient } from '@/components/radar/feed/RadarFeedClient';
 
 export const dynamic = 'force-dynamic';
 
-const RADAR_ENABLED =
-  process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ||
-  (!process.env.NEXT_PUBLIC_RADAR_ENABLED && process.env.NODE_ENV === 'development');
-
 export default async function RadarPage() {
-  if (!RADAR_ENABLED) notFound();
+  if (!(await radarAccessible())) notFound();
   const backtested = await radarBacktested();
   return <RadarFeedClient backtested={backtested} />;
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { radarVisibleTo } from '@/lib/radar/launch';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import AmbrosiaLogo from '@/components/AmbrosiaLogo';
@@ -77,9 +78,8 @@ export default function Header({
   const isRadarPage = pathname?.startsWith('/radar') || false;
   // Mirrors the gate in app/radar/page.tsx: link only when Radar is enabled
   // (NEXT_PUBLIC_RADAR_ENABLED=true, or development with the flag unset).
-  const RADAR_ENABLED =
-    process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ||
-    (!process.env.NEXT_PUBLIC_RADAR_ENABLED && process.env.NODE_ENV === 'development');
+  // Public launch, or an internal preview account (lib/radar/launch.ts).
+  const RADAR_ENABLED = radarVisibleTo(userEmail);
   const isIntelligencePage = pathname?.startsWith('/playbook') || pathname?.startsWith('/trade-space') || pathname?.startsWith('/simulator') || pathname?.startsWith('/intelligence') || pathname?.startsWith('/methodology/engine') || false;
   const [intelDropdownOpen, setIntelDropdownOpen] = useState(false);
 

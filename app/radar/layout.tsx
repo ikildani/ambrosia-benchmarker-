@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { radarAccessible } from '@/lib/radar/launch-server';
 import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
@@ -35,15 +36,11 @@ export const metadata: Metadata = {
   },
 };
 
-// Launch gate, evaluated on the server so the response is a real 404 (the
-// page-level check in page.tsx runs in a client component, which renders the
-// not-found UI but still returns HTTP 200). On in development when unset,
-// otherwise only when NEXT_PUBLIC_RADAR_ENABLED=true.
-const RADAR_ENABLED =
-  process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ||
-  (!process.env.NEXT_PUBLIC_RADAR_ENABLED && process.env.NODE_ENV === 'development');
-
-export default function RadarLayout({ children }: { children: React.ReactNode }) {
-  if (!RADAR_ENABLED) notFound();
+// Launch gate, evaluated on the server so the response is a real 404. Public
+// once NEXT_PUBLIC_RADAR_ENABLED=true; before that, internal preview accounts
+// (@ambrosiaventures.co, NEXT_PUBLIC_RADAR_PREVIEW_EMAILS) can open it in
+// production and everyone else gets a 404 (lib/radar/launch.ts).
+export default async function RadarLayout({ children }: { children: React.ReactNode }) {
+  if (!(await radarAccessible())) notFound();
   return <>{children}</>;
 }
