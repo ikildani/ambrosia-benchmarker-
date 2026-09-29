@@ -337,7 +337,7 @@ describe('radar scoring v3 — model path', () => {
     expect(r.modelVersion).toBe('v3.synthetic');
     expect(r.probability).not.toBeNull();
     expect(r.licensingIntentScore).toBe(Math.round(100 * (r.probability as number) * 1.0));
-    expect(r.featureVector?.version).toBe('v3.0');
+    expect(r.featureVector?.version).toBe('v4.0');
     expect(r.scoreConfidence).toBe(Math.round((r.featureVector?.completeness ?? 0) * 100));
     expect(r.scoreConfidence).toBeGreaterThan(0);
     // The nine legacy detectors still run and feed licensing_signals
