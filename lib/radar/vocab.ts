@@ -70,7 +70,8 @@ export const RADAR_PHASE_RANK: Record<string, number> = Object.fromEntries(
  * was never trained on; they stay reachable through the phase facet, which
  * counts them before this default is applied (migration 125).
  */
-export const RADAR_PHASE_DEFAULT_EXCLUDED: readonly string[] = ['phase_4'];
+/** Hidden unless asked for: approved products, and registry rows with no drug phase (devices, sample collection, diagnostics). */
+export const RADAR_PHASE_DEFAULT_EXCLUDED: readonly string[] = ['phase_4', 'not_applicable', 'unknown'];
 
 /** Phases that come from a trial registry; everything else is company-disclosed. */
 export const RADAR_CLINICAL_PHASES: readonly string[] = RADAR_PHASE_OPTIONS.map(o => o.value).filter(v => v !== 'preclinical');

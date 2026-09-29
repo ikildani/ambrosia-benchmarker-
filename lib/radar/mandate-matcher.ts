@@ -28,6 +28,10 @@ interface Mandate {
   phase_max: string | null;
   countries: string[];
   regions: string[];
+  /** Migration 154; undefined on older rows. */
+  rights_available?: string[] | null;
+  /** Migration 154; empty = industry only. */
+  owner_types?: string[] | null;
   partnership_statuses: string[];
   min_licensing_intent: number;
   min_deal_readiness: number;
@@ -50,6 +54,9 @@ interface Asset {
   confidence_score: number;
   /** Migration 125; undefined on older payloads. */
   ownership_status?: string | null;
+  /** Migration 154; undefined on older payloads. */
+  rights_available?: string[] | null;
+  owner_type?: string | null;
 }
 
 export type StaleReason = 'partnered' | 'score_below_min' | 'ownership_excluded' | 'filter_mismatch' | 'asset_removed';
@@ -149,6 +156,19 @@ function matchAssetToMandate(asset: Asset, mandate: Mandate): { matches: boolean
     reasons.push(`Region: ${asset.originator_region}`);
   }
 
+  // Owner type (default: industry only, like the feed)
+  const wantOwners = mandate.owner_types && mandate.owner_types.length ? mandate.owner_types : ['industry'];
+  if (asset.owner_type !== undefined && !wantOwners.includes(asset.owner_type ?? 'unknown')) return { matches: false, reasons: [] };
+
+  // Rights available
+  const wantRights = mandate.rights_available ?? [];
+  if (wantRights.length > 0) {
+    const have = asset.rights_available ?? [];
+    const hit = wantRights.filter(r => have.includes(r));
+    if (hit.length === 0) return { matches: false, reasons: [] };
+    reasons.push(`Rights: ${hit.join(', ')}`);
+  }
+
   // Partnership status
   if (mandate.partnership_statuses.length > 0) {
     if (!mandate.partnership_statuses.includes(asset.partnership_status)) {
@@ -184,7 +204,7 @@ function computeMatchScore(asset: Asset, reasons: string[]): number {
 // ═══════════════════════════════════════════════════════════════════════
 
 const MAX_RUNTIME_MS = 240_000;
-const ASSET_SELECT = 'id, therapeutic_area, modality, phase, originator_country, originator_region, partnership_status, licensing_intent_score, deal_readiness_score, confidence_score, ownership_status';
+const ASSET_SELECT = 'id, therapeutic_area, modality, phase, originator_country, originator_region, partnership_status, licensing_intent_score, deal_readiness_score, confidence_score, ownership_status, rights_available, owner_type';
 /** Standing matches per mandate that the re-evaluation will look at (paged; PostgREST caps unranged reads at 1,000). */
 const EXISTING_MATCH_CAP = 5000;
 const EXISTING_MATCH_PAGE = 1000;
@@ -256,7 +276,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
   // Fetch all active mandates
   const { data: mandates, error: mandateError } = await supabase
     .from('radar_user_mandates')
-    .select('id, user_id, therapeutic_areas, modalities, phase_min, phase_max, countries, regions, partnership_statuses, min_licensing_intent, min_deal_readiness, min_confidence, match_count, created_at, updated_at')
+    .select('id, user_id, therapeutic_areas, modalities, phase_min, phase_max, countries, regions, rights_available, owner_types, partnership_statuses, min_licensing_intent, min_deal_readiness, min_confidence, match_count, created_at, updated_at')
     .eq('is_active', true);
 
   if (mandateError) return fail(mandateError.message);

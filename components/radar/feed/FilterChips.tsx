@@ -35,6 +35,7 @@ export function FilterChips({ filters, dispatch }: { filters: RadarFilterState; 
     const hi = filters.phase_max ? radarLabel(filters.phase_max) : 'Any';
     chips.push({ key: 'phase_min', label: `Phase ${lo} to ${hi}`, title: 'Phase range' });
   }
+  if (filters.top_pct !== null) chips.push({ key: 'top_pct', label: `Top ${filters.top_pct}% of peers`, title: 'Peer rank within phase and therapeutic area' });
   if (filters.min_score !== null) chips.push({ key: 'min_score', label: `Score ${filters.min_score}+`, title: 'Minimum intent score' });
   for (const key of MULTI_FACET_KEYS) {
     for (const v of filters[key]) chips.push({ key, value: v, label: valueLabel(key, v), title: FACET_TITLES[key] });

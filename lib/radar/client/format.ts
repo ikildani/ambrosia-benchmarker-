@@ -31,7 +31,7 @@ export function partnershipLabel(v: PartnershipStatus | string | null | undefine
 }
 
 /** Facet key → rail heading. */
-export const FACET_TITLES: Record<keyof Omit<RadarFilterState, 'q' | 'phase_min' | 'phase_max' | 'min_score'>, string> = {
+export const FACET_TITLES: Record<keyof Omit<RadarFilterState, 'q' | 'phase_min' | 'phase_max' | 'min_score' | 'top_pct'>, string> = {
   region: 'Region',
   country: 'Country',
   ta: 'Therapeutic area',
@@ -40,6 +40,7 @@ export const FACET_TITLES: Record<keyof Omit<RadarFilterState, 'q' | 'phase_min'
   phase: 'Phase',
   target: 'Target',
   company: 'Company',
+  rights: 'Rights available',
   partnership: 'Partnership',
   ownership: 'Ownership',
   owner_type: 'Owner type',
@@ -119,6 +120,36 @@ export function fmtPct(n: number | null | undefined): string {
 }
 
 /** Territory list as a compact string: "Global" / "US, EU, Japan" / "—". */
+const RIGHT_ATOMS = ['us', 'eu', 'japan', 'china', 'row'] as const;
+const RIGHT_SHORT: Record<string, string> = { us: 'US', eu: 'EU', japan: 'Japan', china: 'China', row: 'RoW' };
+
+/**
+ * rights_available (migration 154) → one short label: "Worldwide",
+ * "Ex-China" / "US, EU", "Split unconfirmed", or "None" when fully partnered.
+ */
+export function fmtRightsAvailable(rights: string[] | null | undefined): { label: string; tone: 'open' | 'partial' | 'unknown' | 'none' } {
+  if (!rights) return { label: '—', tone: 'unknown' };
+  if (rights.length === 0) return { label: 'Partnered', tone: 'none' };
+  if (rights.includes('global')) return { label: 'Worldwide', tone: 'open' };
+  if (rights.includes('unconfirmed')) return { label: 'Split unconfirmed', tone: 'unknown' };
+  const have = RIGHT_ATOMS.filter(a => rights.includes(a));
+  const missing = RIGHT_ATOMS.filter(a => !rights.includes(a));
+  if (have.length === 0) return { label: 'Partnered', tone: 'none' };
+  if (missing.length === 1) return { label: `Ex-${RIGHT_SHORT[missing[0]]}`, tone: 'partial' };
+  return { label: have.map(a => RIGHT_SHORT[a]).join(', '), tone: 'partial' };
+}
+
+const PHASE_SHORT: Record<string, string> = {
+  preclinical: 'Pre', early_phase_1: 'E1', phase_1: 'P1', phase_1_2: 'P1/2', phase_2: 'P2', phase_2_3: 'P2/3', phase_3: 'P3', phase_4: 'P4',
+  not_applicable: 'N/A', unknown: '?',
+};
+
+/** Compact phase label for badges and stage charts ("Pre", "E1", "P1/2"). */
+export function phaseShort(phase: string | null | undefined): string {
+  if (!phase) return '—';
+  return PHASE_SHORT[phase] ?? phase;
+}
+
 export function fmtRights(rights: string[] | null | undefined): string {
   if (!rights || rights.length === 0) return '—';
   const norm = rights.map(r => r.toLowerCase());

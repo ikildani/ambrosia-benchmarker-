@@ -9,6 +9,9 @@
 import { RADAR_PHASE_OPTIONS, RADAR_PHASE_RANK } from '@/lib/radar/vocab';
 import { EMPTY_FILTERS, type RadarFilterState } from './filter-schema';
 import type { RadarMandate } from './api-types';
+import { RADAR_RIGHTS_OPTIONS } from './filter-schema';
+
+const RIGHTS_LABEL: Record<string, string> = Object.fromEntries(RADAR_RIGHTS_OPTIONS.map(o => [o.value, o.label]));
 
 export type DigestFrequency = RadarMandate['digest_frequency'];
 
@@ -23,6 +26,8 @@ export interface MandateFields {
   phase_max: string | null;
   countries: string[];
   regions: string[];
+  rights_available: string[];
+  owner_types: string[];
   partnership_statuses: string[];
   min_licensing_intent: number;
   min_deal_readiness?: number;
@@ -35,7 +40,7 @@ export interface MandateFields {
 export function mandateToFilters(m: Pick<
   RadarMandate,
   'therapeutic_areas' | 'modalities' | 'phase_min' | 'phase_max' | 'countries' | 'regions' | 'partnership_statuses' | 'min_licensing_intent'
->): RadarFilterState {
+> & { rights_available?: string[] | null; owner_types?: string[] | null }): RadarFilterState {
   return {
     ...EMPTY_FILTERS,
     ta: m.therapeutic_areas ?? [],
@@ -44,6 +49,8 @@ export function mandateToFilters(m: Pick<
     phase_max: m.phase_max ?? null,
     country: m.countries ?? [],
     region: m.regions ?? [],
+    rights: m.rights_available ?? [],
+    owner_type: m.owner_types ?? [],
     partnership: m.partnership_statuses ?? [],
     min_score: m.min_licensing_intent > 0 ? Number(m.min_licensing_intent) : null,
   };
@@ -70,6 +77,8 @@ export function filtersToMandateFields(
     phase_max: range.max,
     countries: f.country,
     regions: f.region,
+    rights_available: f.rights,
+    owner_types: f.owner_type,
     partnership_statuses: f.partnership,
     min_licensing_intent: f.min_score ?? 0,
     notify_email: meta.notify_email,
@@ -82,7 +91,6 @@ export function filtersToMandateFields(
 export function unsavedFilterKeys(f: RadarFilterState): (keyof RadarFilterState)[] {
   const out: (keyof RadarFilterState)[] = [];
   if (f.q) out.push('q');
-  if (f.owner_type.length) out.push('owner_type');
   if (f.ownership.length) out.push('ownership');
   if (f.trial_status.length) out.push('trial_status');
   if (f.indication.length) out.push('indication');
@@ -113,6 +121,7 @@ export function mandateSummary(m: RadarMandate, label: (v: string | null | undef
   }
   if (m.countries?.length) parts.push(m.countries.join(', '));
   else if (m.regions?.length) parts.push(m.regions.map(label).join(', '));
+  if (m.rights_available?.length) parts.push(`Rights: ${m.rights_available.map(r => RIGHTS_LABEL[r] ?? r).join(', ')}`);
   if (m.partnership_statuses?.length && m.partnership_statuses.length < 3) parts.push(m.partnership_statuses.map(label).join(', '));
   if (m.min_licensing_intent > 0) parts.push(`Score ${m.min_licensing_intent}+`);
   return parts.length ? parts.join(' · ') : 'All assets';

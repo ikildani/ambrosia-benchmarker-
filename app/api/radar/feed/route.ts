@@ -124,6 +124,7 @@ function applyFilters(query: Builder, f: RadarFilterState): Builder {
   if (f.indication.length) q = q.in('indication_category', f.indication);
   if (f.target.length) q = q.in('target', f.target);
   if (f.company.length) q = q.in('company_name', f.company);
+  if (f.rights.length) q = q.overlaps('rights_available', f.rights);
   if (f.owner_type.length) q = q.in('owner_type', f.owner_type);
   if (f.ownership.length) q = q.in('ownership_status', f.ownership);
   const phases = resolvePhaseList(f);
@@ -133,7 +134,9 @@ function applyFilters(query: Builder, f: RadarFilterState): Builder {
   const hidden = defaultExclusions(f);
   if (hidden.ownership) q = q.not('ownership_status', 'in', `(${hidden.ownership.join(',')})`);
   if (hidden.phase) q = q.not('phase', 'in', `(${hidden.phase.join(',')})`);
+  if (hidden.ownerType) q = q.in('owner_type', [...hidden.ownerType]);
   if (f.min_score !== null) q = q.gte('licensing_intent_score', f.min_score);
+  if (f.top_pct !== null) q = q.gte('score_pct_peer', 100 - f.top_pct);
   if (f.score_band.length) {
     const ranges = scoreBandRange(f.score_band);
     if (ranges.length) {

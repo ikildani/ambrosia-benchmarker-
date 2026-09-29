@@ -35,6 +35,7 @@ export type RadarAction =
   | { type: 'set_q'; q: string }
   | { type: 'set_phase_range'; min: string | null; max: string | null }
   | { type: 'set_min_score'; value: number | null }
+  | { type: 'set_top_pct'; value: number | null }
   /** Merge parsed chips (natural-language search) or a mandate's filters into the state. */
   | { type: 'apply_filters'; filters: Partial<RadarFilterState>; mode: 'merge' | 'replace'; sort?: SortKey | null }
   | { type: 'clear_filters' }
@@ -68,6 +69,8 @@ export function radarReducer(state: RadarState, action: RadarAction): RadarState
       return resetPage({ ...state, filters: { ...state.filters, phase_min: action.min, phase_max: action.max } });
     case 'set_min_score':
       return resetPage({ ...state, filters: { ...state.filters, min_score: action.value } });
+    case 'set_top_pct':
+      return resetPage({ ...state, filters: { ...state.filters, top_pct: action.value } });
     case 'apply_filters': {
       const base = action.mode === 'replace' ? EMPTY_FILTERS : state.filters;
       const merged: RadarFilterState = { ...base };
@@ -79,6 +82,7 @@ export function radarReducer(state: RadarState, action: RadarAction): RadarState
       if (action.filters.phase_min !== undefined) merged.phase_min = action.filters.phase_min;
       if (action.filters.phase_max !== undefined) merged.phase_max = action.filters.phase_max;
       if (action.filters.min_score !== undefined) merged.min_score = action.filters.min_score;
+      if (action.filters.top_pct !== undefined) merged.top_pct = action.filters.top_pct;
       const ui = action.sort
         ? { ...state.ui, sort: action.sort, dir: SORT_COLUMNS[action.sort].defaultDir, after: null }
         : { ...state.ui, after: null };
@@ -91,6 +95,7 @@ export function radarReducer(state: RadarState, action: RadarAction): RadarState
       if (action.key === 'q') f.q = '';
       else if (action.key === 'phase_min' || action.key === 'phase_max') f[action.key] = null;
       else if (action.key === 'min_score') f.min_score = null;
+      else if (action.key === 'top_pct') f.top_pct = null;
       else if (action.value !== undefined) f[action.key] = f[action.key].filter(v => v !== action.value);
       else f[action.key] = [];
       return resetPage({ ...state, filters: f });

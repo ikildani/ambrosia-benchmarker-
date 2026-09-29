@@ -50,6 +50,22 @@ export const RADAR_TRIAL_STATUS_OPTIONS: VocabOption[] = [
   { value: 'unknown', label: 'Unknown' },
 ];
 
+/**
+ * Rights available (clinical_assets.rights_available, migration 154).
+ * global = worldwide, no partner found; a region = available there
+ * (unpartnered, or a deal that left it out); unconfirmed = partially
+ * partnered with an unknown split.
+ */
+export const RADAR_RIGHTS_OPTIONS: VocabOption[] = [
+  { value: 'global', label: 'Worldwide', longLabel: 'Worldwide rights (no partner found)' },
+  { value: 'us', label: 'US', longLabel: 'United States' },
+  { value: 'eu', label: 'Europe', longLabel: 'Europe' },
+  { value: 'japan', label: 'Japan', longLabel: 'Japan' },
+  { value: 'china', label: 'China', longLabel: 'Greater China' },
+  { value: 'row', label: 'Rest of world', longLabel: 'Rest of world' },
+  { value: 'unconfirmed', label: 'Split unconfirmed', longLabel: 'Partnered in part, territories not confirmed' },
+];
+
 /** Licensing intent score bands; values must match radar_score_band() in migration 117. */
 export const RADAR_SCORE_BAND_OPTIONS: VocabOption[] = [
   { value: '80+', label: '80 and above' },
@@ -84,6 +100,7 @@ export const MULTI_FACET_KEYS = [
   'indication',
   'target',
   'company',
+  'rights',
   'score_band',
 ] as const;
 export type MultiFacetKey = (typeof MULTI_FACET_KEYS)[number];
@@ -107,11 +124,15 @@ export interface RadarFilterState {
   target: string[];
   /** Exact clinical_assets.company_name values (company-first browsing; length-capped). */
   company: string[];
+  /** rights_available atoms (RADAR_RIGHTS_OPTIONS). */
+  rights: string[];
   score_band: string[];
   phase_min: string | null;
   phase_max: string | null;
   /** Minimum licensing intent score, 0–100. */
   min_score: number | null;
+  /** Peer rank: keep the top N% of each asset's phase × therapeutic-area peer group (5, 10, 25). */
+  top_pct: number | null;
 }
 
 export const EMPTY_FILTERS: RadarFilterState = {
@@ -128,10 +149,12 @@ export const EMPTY_FILTERS: RadarFilterState = {
   indication: [],
   target: [],
   company: [],
+  rights: [],
   score_band: [],
   phase_min: null,
   phase_max: null,
   min_score: null,
+  top_pct: null,
 };
 
 export const SORT_KEYS = [
@@ -152,7 +175,9 @@ export type SortDir = 'asc' | 'desc';
 
 /** Sort key → clinical_assets column. Shared by the feed route (ORDER BY) and the cursor codec. */
 export const SORT_COLUMNS: Record<SortKey, { column: string; kind: 'number' | 'text'; defaultDir: SortDir }> = {
-  score: { column: 'licensing_intent_score', kind: 'number', defaultDir: 'desc' },
+  // The stored score is probability × 100 and rounds to 0 for nearly every
+  // program; the calibrated probability itself orders the feed.
+  score: { column: 'score_probability', kind: 'number', defaultDir: 'desc' },
   confidence: { column: 'score_confidence', kind: 'number', defaultDir: 'desc' },
   asset: { column: 'asset_name', kind: 'text', defaultDir: 'asc' },
   owner: { column: 'company_name', kind: 'text', defaultDir: 'asc' },
@@ -194,7 +219,7 @@ export const TABLE_COLUMNS: readonly TableColumn[] = [
   { key: 'modality', label: 'Modality', width: '100px', minPx: 100, sort: 'modality' },
   { key: 'ta', label: 'TA / indication', width: 'minmax(180px,1.3fr)', minPx: 180, sort: 'ta' },
   { key: 'target', label: 'Target', width: 'minmax(110px,0.8fr)', minPx: 110, sort: 'target' },
-  { key: 'rights', label: 'Rights available', width: '120px', minPx: 120 },
+  { key: 'rights', label: 'Rights', hint: 'Rights available: worldwide, a regional split, or unconfirmed', width: '136px', minPx: 136 },
   { key: 'catalyst', label: 'Next catalyst', width: '108px', minPx: 108 },
   { key: 'confidence', label: 'Confidence', hint: 'Evidence coverage behind the score', width: '84px', minPx: 84, sort: 'confidence', align: 'right' },
   { key: 'readiness', label: 'Readiness', hint: 'Deal readiness (transactability)', width: '84px', minPx: 84, sort: 'readiness', align: 'right' },
@@ -266,6 +291,7 @@ const FACET_VOCAB: Partial<Record<MultiFacetKey, VocabOption[]>> = {
   owner_type: RADAR_OWNER_TYPE_OPTIONS,
   trial_status: RADAR_TRIAL_STATUS_OPTIONS,
   score_band: RADAR_SCORE_BAND_OPTIONS,
+  rights: RADAR_RIGHTS_OPTIONS,
 };
 
 const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
@@ -319,6 +345,13 @@ export function cleanMinScore(raw: string | number | null | undefined): number |
   return Math.min(100, Math.max(0, Math.round(n)));
 }
 
+export const TOP_PCT_OPTIONS = [5, 10, 25] as const;
+
+export function cleanTopPct(raw: string | number | null | undefined): number | null {
+  const n = Number(raw);
+  return (TOP_PCT_OPTIONS as readonly number[]).includes(n) ? n : null;
+}
+
 /** Free text: control characters and PostgREST/LIKE metacharacters removed. Mirrors radar-api sanitizeSearchTerm. */
 export function cleanQuery(raw: string | null | undefined): string {
   if (!raw) return '';
@@ -364,19 +397,25 @@ export function resolvePhaseList(filters: Pick<RadarFilterState, 'phase' | 'phas
  * defaults and counts the phase and ownership buckets before them, so both
  * groups stay visible in the rail with their counts.
  */
-export function defaultExclusions(f: Pick<RadarFilterState, 'ownership' | 'phase' | 'phase_min' | 'phase_max'>): {
+export function defaultExclusions(f: Pick<RadarFilterState, 'ownership' | 'phase' | 'phase_min' | 'phase_max'> & Partial<Pick<RadarFilterState, 'owner_type'>>): {
   ownership: readonly string[] | null;
   phase: readonly string[] | null;
+  /** With no owner-type filter, only industry programs (migration 154). */
+  ownerType: readonly string[] | null;
 } {
   return {
     ownership: f.ownership.length ? null : RADAR_OWNERSHIP_DEFAULT_EXCLUDED,
     phase: resolvePhaseList(f) ? null : RADAR_PHASE_DEFAULT_EXCLUDED,
+    ownerType: f.owner_type && f.owner_type.length ? null : DEFAULT_OWNER_TYPES,
   };
 }
 
+/** Owner types the feed shows when the user has not chosen any. */
+export const DEFAULT_OWNER_TYPES: readonly string[] = ['industry'];
+
 export function isEmptyFilters(f: RadarFilterState): boolean {
   if (f.q) return false;
-  if (f.phase_min || f.phase_max || f.min_score !== null) return false;
+  if (f.phase_min || f.phase_max || f.min_score !== null || f.top_pct !== null) return false;
   return MULTI_FACET_KEYS.every(k => f[k].length === 0);
 }
 
@@ -385,6 +424,7 @@ export function countActiveFilters(f: RadarFilterState): number {
   if (f.q) n += 1;
   if (f.phase_min || f.phase_max) n += 1;
   if (f.min_score !== null) n += 1;
+  if (f.top_pct !== null) n += 1;
   return n;
 }
 
@@ -405,6 +445,7 @@ const URL_KEYS: Record<MultiFacetKey, string> = {
   indication: 'ind',
   target: 'tgt',
   company: 'co',
+  rights: 'rt',
   score_band: 'sb',
 };
 
@@ -417,6 +458,7 @@ export function parseFilters(params: URLSearchParams): RadarFilterState {
   f.phase_min = cleanPhaseBound(params.get('pmin'));
   f.phase_max = cleanPhaseBound(params.get('pmax'));
   f.min_score = cleanMinScore(params.get('min'));
+  f.top_pct = cleanTopPct(params.get('top'));
   return f;
 }
 
@@ -458,6 +500,7 @@ export function serializeRadarState(state: RadarState): URLSearchParams {
   if (f.phase_min) p.set('pmin', f.phase_min);
   if (f.phase_max) p.set('pmax', f.phase_max);
   if (f.min_score !== null) p.set('min', String(f.min_score));
+  if (f.top_pct !== null) p.set('top', String(f.top_pct));
   if (ui.sort !== DEFAULT_UI.sort) p.set('sort', ui.sort);
   if (ui.dir !== SORT_COLUMNS[ui.sort].defaultDir) p.set('dir', ui.dir);
   if (ui.view !== DEFAULT_UI.view) p.set('view', ui.view);
@@ -503,5 +546,6 @@ export function filtersFingerprint(f: RadarFilterState): string {
   if (f.phase_min) obj.phase_min = f.phase_min;
   if (f.phase_max) obj.phase_max = f.phase_max;
   if (f.min_score !== null) obj.min_score = f.min_score;
+  if (f.top_pct !== null) obj.top_pct = f.top_pct;
   return JSON.stringify(obj);
 }

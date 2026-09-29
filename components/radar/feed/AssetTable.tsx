@@ -15,11 +15,12 @@ import { ChevronDownIcon, ChevronUpIcon, ChevronUpDownIcon, FunnelIcon } from '@
 import { radarLabel } from '@/lib/radar/vocab';
 import type { FeedRow } from '@/lib/radar/client/api-types';
 import { DEFAULT_TABLE_COLUMNS, TABLE_COLUMNS, type SortDir, type SortKey, type TableColumn } from '@/lib/radar/client/filter-schema';
-import { daysUntil, fmtDate, fmtRelative, fmtRights, shortLabel } from '@/lib/radar/client/format';
+import { daysUntil, fmtDate, fmtRelative, fmtRightsAvailable, phaseShort, shortLabel } from '@/lib/radar/client/format';
+import { MODALITY_COLORS } from './Landscape';
 import { ScoreCell } from './ScoreCell';
 import { CountryTag, FOCUS_RING, OwnerTypeChip, PartnershipTag, cn } from './ui';
 
-export const ROW_HEIGHT = 56;
+export const ROW_HEIGHT = 60;
 const GAP_PX = 12; // gap-x-3
 
 interface Props {
@@ -169,7 +170,7 @@ export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, o
         role="row"
         aria-rowindex={1}
         style={gridStyle}
-        className="sticky top-0 z-10 grid h-9 items-center gap-x-3 border-b border-neutral-200 bg-neutral-50/95 px-3 text-[11px] font-semibold uppercase tracking-wider text-neutral-600 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/95 dark:text-neutral-400"
+        className="sticky top-0 z-10 grid h-10 items-center gap-x-3 border-b border-neutral-200 bg-white/95 px-4 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-500 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/95 dark:text-neutral-400"
       >
         {visible.map(col => {
           const active = col.sort && col.sort === sort;
@@ -222,7 +223,7 @@ export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, o
               onFocus={() => setFocusIndex(item.index)}
               style={{ ...gridStyle, height: item.size, transform: `translateY(${item.start}px)` }}
               className={cn(
-                'absolute left-0 top-0 grid w-full cursor-pointer items-center gap-x-3 border-b border-neutral-100 px-3 text-sm text-neutral-800 hover:bg-neutral-50 dark:border-neutral-800/70 dark:text-neutral-200 dark:hover:bg-neutral-800/50',
+                'absolute left-0 top-0 grid w-full cursor-pointer items-center gap-x-3 border-b border-neutral-100 px-4 text-[13px] text-neutral-800 transition-colors hover:bg-teal-50/40 dark:border-neutral-800/70 dark:text-neutral-200 dark:hover:bg-neutral-800/50',
                 inCompare && 'bg-teal-50/60 dark:bg-teal-500/5',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500',
               )}
@@ -248,9 +249,52 @@ export function AssetTable({ rows, sort, dir, onSort, compareIds, compareFull, o
 }
 
 // ── Cells ─────────────────────────────────────────────────────────────────
+// Type scale: 13px primary line, 12px secondary line, 11px only for badges.
+// Numbers use tabular figures in the body face (no monospace in the grid).
+
+const PRIMARY = 'truncate text-[13px] text-neutral-900 dark:text-neutral-100';
+const SECONDARY = 'truncate text-[12px] text-neutral-500 dark:text-neutral-400';
+const NUMBER = 'text-[13px] tabular-nums text-neutral-800 dark:text-neutral-200';
 
 function num(v: number | null | undefined): string {
   return v === null || v === undefined || Number.isNaN(Number(v)) ? '—' : String(Math.round(Number(v)));
+}
+
+const PHASE_TONE: Record<string, string> = {
+  preclinical: 'bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-500/30',
+  early_phase_1: 'bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/30',
+  phase_1: 'bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/30',
+  phase_1_2: 'bg-cyan-50 text-cyan-800 ring-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-300 dark:ring-cyan-500/30',
+  phase_2: 'bg-teal-50 text-teal-800 ring-teal-200 dark:bg-teal-500/10 dark:text-teal-300 dark:ring-teal-500/30',
+  phase_2_3: 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30',
+  phase_3: 'bg-emerald-100 text-emerald-900 ring-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/40',
+  phase_4: 'bg-neutral-100 text-neutral-600 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700',
+};
+
+export function PhaseBadge({ phase, stageDetail }: { phase: string | null; stageDetail?: string | null }) {
+  if (!phase) return <span className={SECONDARY}>—</span>;
+  const title = phase === 'preclinical' && stageDetail ? `Preclinical · ${radarLabel(stageDetail)}` : phase === 'not_applicable' ? 'No drug phase (device, diagnostic or sample study)' : phase === 'unknown' ? 'Phase not reported' : radarLabel(phase);
+  return (
+    <span title={title} className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset', PHASE_TONE[phase] ?? PHASE_TONE.phase_4)}>
+      {phaseShort(phase)}
+    </span>
+  );
+}
+
+const ORIGIN: Record<string, { label: string; tone: string; title: string }> = {
+  registry: { label: 'Registry', tone: 'text-neutral-600 dark:text-neutral-400', title: 'Trial registry' },
+  filing: { label: 'SEC filing', tone: 'text-sky-700 dark:text-sky-300', title: 'Disclosed in a 10-K / 20-F / S-1' },
+  pipeline_page: { label: 'Pipeline page', tone: 'text-violet-700 dark:text-violet-300', title: "Disclosed on the company's pipeline page" },
+  designation: { label: 'FDA orphan', tone: 'text-amber-700 dark:text-amber-300', title: 'FDA orphan drug designation' },
+};
+
+function Stacked({ top, bottom, title }: { top: ReactNode; bottom?: ReactNode; title?: string }) {
+  return (
+    <div role="gridcell" className="min-w-0" title={title}>
+      <div className={PRIMARY}>{top}</div>
+      {bottom !== undefined && bottom !== null && bottom !== '' && <div className={SECONDARY}>{bottom}</div>}
+    </div>
+  );
 }
 
 function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompany, companyActive }: {
@@ -263,20 +307,20 @@ function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompa
   companyActive?: boolean;
 }) {
   const right = col.align === 'right' ? 'text-right' : '';
-  let body: ReactNode;
   switch (col.key) {
     case 'compare':
-      body = (
-        <input
-          type="checkbox"
-          checked={inCompare}
-          disabled={!inCompare && compareFull}
-          onChange={() => onToggleCompare(row.id)}
-          aria-label={`Compare ${row.asset_name}`}
-          className={cn('h-4 w-4 rounded border-neutral-400 text-teal-600 dark:border-neutral-600 dark:bg-neutral-900', FOCUS_RING)}
-        />
+      return (
+        <div role="gridcell" className="flex items-center">
+          <input
+            type="checkbox"
+            checked={inCompare}
+            disabled={!inCompare && compareFull}
+            onChange={() => onToggleCompare(row.id)}
+            aria-label={`Compare ${row.asset_name}`}
+            className={cn('h-4 w-4 rounded border-neutral-300 text-teal-600 dark:border-neutral-600 dark:bg-neutral-900', FOCUS_RING)}
+          />
+        </div>
       );
-      return <div role="gridcell" className="flex items-center">{body}</div>;
     case 'score':
       return (
         <div role="gridcell">
@@ -294,22 +338,23 @@ function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompa
         <div role="gridcell" className="min-w-0">
           <Link
             href={`/radar/${row.id}`}
-            className={cn('block truncate font-medium text-neutral-900 hover:text-teal-700 dark:text-neutral-100 dark:hover:text-teal-300 rounded', FOCUS_RING)}
+            className={cn('block truncate rounded text-[13px] font-semibold text-neutral-900 hover:text-teal-700 dark:text-neutral-100 dark:hover:text-teal-300', FOCUS_RING)}
             tabIndex={-1}
+            title={row.asset_name}
           >
             {row.asset_name}
           </Link>
-          <div className="flex items-center gap-2 truncate text-xs text-neutral-600 dark:text-neutral-400">
+          <div className="flex min-w-0 items-center gap-1.5">
             <PartnershipTag status={row.partnership_status} />
-            {row.mechanism && <span className="truncate">{row.mechanism}</span>}
+            {row.mechanism && <span className={SECONDARY}>{row.mechanism}</span>}
           </div>
         </div>
       );
     case 'owner':
       return (
         <div role="gridcell" className="group/owner min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate">{row.company_name}</span>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className={PRIMARY} title={row.company_name}>{row.company_name}</span>
             <CountryTag code={row.originator_country} />
             {onFilterCompany && (
               <button
@@ -327,97 +372,86 @@ function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompa
               </button>
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
+          <div className="flex min-w-0 items-center gap-1.5">
             <OwnerTypeChip type={row.owner_type} />
-            {row.partner_company_name && <span className="truncate">with {row.partner_company_name}</span>}
+            {row.partner_company_name && <span className={SECONDARY}>with {row.partner_company_name}</span>}
           </div>
         </div>
       );
     case 'phase':
       return (
-        <div role="gridcell" className="font-mono text-xs tabular-nums" title={row.phase === 'preclinical' && row.stage_detail ? `${radarLabel(row.phase)} · ${radarLabel(row.stage_detail)}` : radarLabel(row.phase)}>
-          {shortLabel(row.phase)}
+        <div role="gridcell">
+          <PhaseBadge phase={row.phase} stageDetail={row.stage_detail} />
         </div>
       );
     case 'origin': {
-      const filing = row.asset_origin === 'filing';
-      return (
-        <div role="gridcell" className="truncate text-xs" title={filing ? `Company-disclosed${row.stage_detail ? ` · ${radarLabel(row.stage_detail)}` : ''}` : 'Trial registry'}>
-          <span className={filing ? 'text-sky-700 dark:text-sky-300' : 'text-neutral-600 dark:text-neutral-400'}>{filing ? 'SEC filing' : 'Registry'}</span>
-          {filing && row.stage_detail && row.stage_detail !== 'preclinical' && (
-            <span className="block truncate text-[11px] text-neutral-500 dark:text-neutral-400">{radarLabel(row.stage_detail)}</span>
-          )}
-        </div>
-      );
+      const o = ORIGIN[row.asset_origin ?? 'registry'] ?? ORIGIN.registry;
+      const detail = row.stage_detail && row.stage_detail !== 'preclinical' ? radarLabel(row.stage_detail) : null;
+      return <Stacked title={o.title} top={<span className={cn('font-medium', o.tone)}>{o.label}</span>} bottom={detail} />;
     }
     case 'modality':
       return (
-        <div role="gridcell" className="truncate text-xs" title={radarLabel(row.modality)}>
-          {shortLabel(row.modality)}
+        <div role="gridcell" className="flex min-w-0 items-center gap-1.5" title={radarLabel(row.modality)}>
+          {row.modality && <span className="h-2 w-2 shrink-0 rounded-sm" style={{ backgroundColor: MODALITY_COLORS[row.modality] ?? '#a3a3a3' }} aria-hidden />}
+          <span className={PRIMARY}>{row.modality ? shortLabel(row.modality) : '—'}</span>
         </div>
       );
     case 'ta':
       return (
-        <div role="gridcell" className="min-w-0">
-          <div className="truncate text-xs">{row.therapeutic_area ? radarLabel(row.therapeutic_area) : '—'}</div>
-          <div className="truncate text-xs text-neutral-600 dark:text-neutral-400" title={row.indication_specific ?? undefined}>
-            {row.indication_specific ?? (row.indication_category ? radarLabel(row.indication_category) : '')}
-          </div>
-        </div>
+        <Stacked
+          title={row.indication_specific ?? undefined}
+          top={row.therapeutic_area ? radarLabel(row.therapeutic_area) : '—'}
+          bottom={row.indication_specific ?? (row.indication_category ? radarLabel(row.indication_category) : null)}
+        />
       );
     case 'target':
+      return <Stacked title={row.target ?? undefined} top={row.target ?? <span className="text-neutral-400">—</span>} />;
+    case 'rights': {
+      const r = fmtRightsAvailable(row.rights_available ?? null);
+      const dot = r.tone === 'open' ? 'bg-emerald-500' : r.tone === 'partial' ? 'bg-teal-300' : r.tone === 'none' ? 'bg-neutral-300 dark:bg-neutral-600' : 'bg-amber-300';
+      const note = r.tone === 'open' ? 'No partner found' : r.tone === 'unknown' && r.label !== '—' ? 'Partnered in part' : r.tone === 'partial' ? 'Available' : null;
       return (
-        <div role="gridcell" className="truncate font-mono text-xs" title={row.target ?? undefined}>
-          {row.target ?? '—'}
-        </div>
-      );
-    case 'rights':
-      return (
-        <div role="gridcell" className="truncate text-xs" title={fmtRights(row.territory_rights_available)}>
-          {fmtRights(row.territory_rights_available)}
-        </div>
-      );
-    case 'catalyst': {
-      const catalystDays = daysUntil(row.next_catalyst_date);
-      return (
-        <div role="gridcell" className="text-xs">
-          {row.next_catalyst_date ? (
-            <>
-              <div className="tabular-nums">{fmtDate(row.next_catalyst_date)}</div>
-              {catalystDays !== null && (
-                <div className={cn('text-[11px]', catalystDays <= 90 ? 'text-teal-700 dark:text-teal-300' : 'text-neutral-600 dark:text-neutral-400')}>
-                  primary completion in {catalystDays}d
-                </div>
-              )}
-            </>
-          ) : (
-            <span className="text-neutral-500">—</span>
-          )}
+        <div role="gridcell" className="min-w-0" title={row.partner_company_name ? `Partner: ${row.partner_company_name}` : undefined}>
+          <div className="flex items-center gap-1.5">
+            <span className={cn('h-2 w-2 shrink-0 rounded-full', dot)} aria-hidden />
+            <span className={PRIMARY}>{r.label}</span>
+          </div>
+          {note && <div className={SECONDARY}>{note}</div>}
         </div>
       );
     }
+    case 'catalyst': {
+      const catalystDays = daysUntil(row.next_catalyst_date);
+      if (!row.next_catalyst_date) return <div role="gridcell" className={SECONDARY}>—</div>;
+      return (
+        <Stacked
+          top={<span className="tabular-nums">{fmtDate(row.next_catalyst_date)}</span>}
+          bottom={catalystDays !== null ? <span className={catalystDays <= 90 ? 'text-teal-700 dark:text-teal-300' : undefined}>readout in {catalystDays}d</span> : null}
+        />
+      );
+    }
     case 'confidence':
-      return <div role="gridcell" className={cn('font-mono text-xs tabular-nums', right)} title="Evidence coverage behind the score (0-100)">{num(row.score_confidence)}</div>;
+      return <div role="gridcell" className={cn(NUMBER, right)} title="Evidence coverage behind the score (0-100)">{num(row.score_confidence)}</div>;
     case 'readiness':
-      return <div role="gridcell" className={cn('font-mono text-xs tabular-nums', right)} title="Deal readiness (0-100)">{num(row.deal_readiness_score)}</div>;
+      return <div role="gridcell" className={cn(NUMBER, right)} title="Deal readiness (0-100)">{num(row.deal_readiness_score)}</div>;
     case 'heat':
-      return <div role="gridcell" className={cn('font-mono text-xs tabular-nums', right)} title="Competitive heat (0-100)">{num(row.competitive_heat)}</div>;
+      return <div role="gridcell" className={cn(NUMBER, right)} title="Competitive heat (0-100)">{num(row.competitive_heat)}</div>;
     case 'trials':
       return (
-        <div role="gridcell" className={cn('text-xs tabular-nums', right)}>
-          {row.asset_origin === 'filing' && !(row.trial_count ?? 0) ? (
-            <span className="text-neutral-500" title="Company-disclosed; no registered trial yet">disclosed</span>
+        <div role="gridcell" className={cn('min-w-0', right)}>
+          {row.asset_origin && row.asset_origin !== 'registry' && !(row.trial_count ?? 0) ? (
+            <span className={SECONDARY} title="Company-disclosed; no registered trial yet">No trial yet</span>
           ) : (
             <>
-              <div>{row.trial_count ?? 0} trial{(row.trial_count ?? 0) === 1 ? '' : 's'}</div>
-              <div className="text-[11px] text-neutral-600 dark:text-neutral-400">{(row.enrollment_total ?? 0).toLocaleString('en-US')} enrolled</div>
+              <div className={NUMBER}>{row.trial_count ?? 0}</div>
+              <div className={cn(SECONDARY, 'tabular-nums')}>{(row.enrollment_total ?? 0).toLocaleString('en-US')} pts</div>
             </>
           )}
         </div>
       );
     case 'updated':
       return (
-        <div role="gridcell" className="text-xs tabular-nums text-neutral-600 dark:text-neutral-400" title={fmtDate(row.last_update_date)}>
+        <div role="gridcell" className={cn(SECONDARY, 'tabular-nums')} title={fmtDate(row.last_update_date)}>
           {fmtRelative(row.last_update_date)}
         </div>
       );

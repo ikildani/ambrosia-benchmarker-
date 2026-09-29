@@ -64,6 +64,7 @@ function toRpcFilters(f: RadarFilterState): Record<string, unknown> {
   const phases = resolvePhaseList(f);
   if (phases) out.phase = phases;
   if (f.min_score !== null) out.min_score = f.min_score;
+  if (f.top_pct !== null) out.top_pct = f.top_pct;
   if (f.q) out.q = f.q;
   return out;
 }

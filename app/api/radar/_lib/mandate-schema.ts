@@ -33,6 +33,8 @@ export const mandateFieldsSchema = z.object({
   phase_max: vocabEnum(RADAR_PHASE_OPTIONS).nullable(),
   countries: z.array(vocabEnum(RADAR_COUNTRY_OPTIONS)).max(50),
   regions: z.array(vocabEnum(RADAR_REGION_OPTIONS)).max(20),
+  rights_available: z.array(z.enum(['global', 'us', 'eu', 'japan', 'china', 'row', 'unconfirmed'])).max(7),
+  owner_types: z.array(z.enum(['industry', 'academic', 'hospital', 'government', 'network', 'other', 'unknown'])).max(7),
   partnership_statuses: z.array(vocabEnum(RADAR_PARTNERSHIP_OPTIONS)).max(4),
   min_licensing_intent: z.coerce.number().min(0).max(100),
   min_deal_readiness: z.coerce.number().min(0).max(100),
