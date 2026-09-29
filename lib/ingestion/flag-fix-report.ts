@@ -24,6 +24,8 @@ export interface FlagFixReport {
   duplicates: ReportRow[];
   rejected: ReportRow[];
   unresolved: ReportRow[];
+  /** deal_quality_invariants() (migration 157): every count should be 0. */
+  invariants?: Array<{ check_name: string; violations: number; sample_ids: string | null }>;
 }
 
 const esc = (s: string | null | undefined) =>
@@ -43,12 +45,32 @@ function table(title: string, rows: ReportRow[], detail: (r: ReportRow) => strin
 
 const link = (u: string | null) => (u && /^https?:\/\//.test(u) ? `<a href="${esc(u)}">source</a>` : '');
 
+const INVARIANT_LABELS: Record<string, string> = {
+  duplicate_pairs_45d: 'Duplicate pairs (same parties within 45 days)',
+  upfront_exceeds_total: 'Upfront larger than total',
+  future_announced_date: 'Announced date in the future',
+  url_in_filing_id: 'Web address stored as a filing number',
+  no_citation: 'Public deal with no citation',
+  missing_party: 'Missing licensor or licensee',
+  same_party_both_sides: 'Same company on both sides',
+  royalty_over_50pct: 'Royalty above 50%',
+  company_count_stale: 'Company deal counts out of date',
+};
+
+function invariantsBlock(inv: FlagFixReport['invariants']): string {
+  if (!inv || inv.length === 0) return '';
+  const bad = inv.filter(i => Number(i.violations) > 0);
+  const rows = inv.map(i => `<tr><td style="padding:4px 8px;border-top:1px solid #e2e8f0">${esc(INVARIANT_LABELS[i.check_name] ?? i.check_name)}</td><td style="padding:4px 8px;border-top:1px solid #e2e8f0;text-align:right;font-weight:600;color:${Number(i.violations) > 0 ? '#b91c1c' : '#15803d'}">${Number(i.violations)}</td></tr>`).join('');
+  return `<h3 style="margin:24px 0 8px;font-size:16px">Quality checks on the public data${bad.length ? ` <span style="color:#b91c1c">(${bad.length} failing)</span>` : ' (all passing)'}</h3><table style="border-collapse:collapse;width:100%;font-size:14px">${rows}</table>`;
+}
+
 export function buildFlagFixReportHtml(r: FlagFixReport): string {
   const total = r.fixed.length + r.duplicates.length + r.rejected.length + r.unresolved.length;
   return `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;max-width:760px;margin:0 auto;padding:20px">
 <h2 style="margin:0 0 4px">Deal data: flagged and fixed</h2>
 <p style="margin:0 0 16px;color:#475569">Since ${esc(r.since.slice(0, 16).replace('T', ' '))} UTC. ${r.newlyFlagged} deals newly flagged; ${total} handled: ${r.fixed.length} fixed from primary sources, ${r.duplicates.length} removed as duplicates, ${r.rejected.length} rejected, ${r.unresolved.length} held out of counts and retried automatically (rejected after 3 attempts without a primary source). ${r.stillFlagged} flagged deals are in the fixer's queue; none need action from you.</p>
+${invariantsBlock(r.invariants)}
 ${table('Fixed', r.fixed, x => `${esc(x.action_taken)} ${link(x.new_value)}`)}
 ${table('Removed as duplicates', r.duplicates, x => esc(x.action_taken))}
 ${table('Rejected', r.rejected, x => esc(x.action_taken))}
@@ -102,11 +124,14 @@ export async function collectFlagFixReport(supabase: SupabaseClient, since: stri
 export async function sendFlagFixReport(supabase: SupabaseClient, hours = 24): Promise<{ sent: boolean; error?: string; report: FlagFixReport; html: string }> {
   const since = new Date(Date.now() - hours * 3_600_000).toISOString();
   const report = await collectFlagFixReport(supabase, since);
+  const { data: inv } = await supabase.rpc('deal_quality_invariants');
+  report.invariants = (inv ?? []) as FlagFixReport['invariants'];
+  const failing = (report.invariants ?? []).filter(i => Number(i.violations) > 0);
   const html = buildFlagFixReportHtml(report);
   const handled = report.fixed.length + report.duplicates.length + report.rejected.length + report.unresolved.length;
-  if (handled === 0 && report.newlyFlagged === 0) return { sent: false, error: 'nothing to report', report, html };
+  if (handled === 0 && report.newlyFlagged === 0 && failing.length === 0) return { sent: false, error: 'nothing to report', report, html };
   const to = process.env.ADMIN_NOTIFICATION_EMAIL || 'ikildani@ambrosiaventures.co';
-  const subject = `Deal data: ${report.fixed.length} fixed, ${report.duplicates.length} duplicates removed, ${report.rejected.length} rejected, ${report.unresolved.length} retrying`;
+  const subject = `${failing.length ? `QUALITY CHECK FAILING (${failing.map(f => f.check_name).join(', ')}) · ` : ''}Deal data: ${report.fixed.length} fixed, ${report.duplicates.length} duplicates removed, ${report.rejected.length} rejected, ${report.unresolved.length} retrying`;
   const res = await sendEmail({ to, subject, html });
   return { sent: res.success, error: res.success ? undefined : res.error, report, html };
 }

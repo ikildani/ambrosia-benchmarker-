@@ -8,7 +8,10 @@ Read this before touching deals, companies, counts or migrations. Update the
 No synthetic, duplicate, rejected or flagged deal may reach a user-facing count, list,
 alert, email or report.
 
-- **Read product surfaces from the `deals_verified` view** (migration 147), not `deals`.
+- **Read product surfaces from the `deals_verified` view** (migrations 147, 150, 156), not `deals`.
+  Since 156 it shows `verification_status = 'verified'` rows only (no pending, skipped, flagged or rejected),
+  and never rows with `duplicate_of` set. `deal_quality_invariants()` (157) must return all zeros; the daily
+  deal-data email prints it.
   It applies `is_synthetic = false AND is_canonical IS NOT FALSE AND
   coalesce(verification_status,'') NOT IN ('rejected','flagged')` in the database, with
   `security_invoker` so RLS still applies.
