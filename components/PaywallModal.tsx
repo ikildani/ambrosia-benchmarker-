@@ -5,6 +5,7 @@ import { CalculationInput, CalculationResult } from '@/lib/calculations';
 import { useTracking } from './TrackingProvider';
 import { PRICING, DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
+import { useProCheckout, useTrialEligibility } from '@/lib/hooks/useProCheckout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { captureClientError } from '@/lib/sentry-client';
@@ -20,68 +21,75 @@ interface PaywallModalProps {
   };
 }
 
+const PRO_POINTS = [
+  `Every comparable deal behind your numbers, linked to its filing (${DEAL_STATS.TOTAL_DEALS} deals)`,
+  `All ${ENGINE_COUNT} valuation engines and unlimited benchmarks`,
+  'Deal alerts the day a comparable deal is announced',
+  'PDF and Excel exports for your deal memo',
+];
+
+function Check() {
+  return (
+    <svg className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
+}
+
 export default function PaywallModal({ isOpen, onClose, reason, promoCode: initialPromo, calculationData }: PaywallModalProps) {
+  // All hooks run on every render, open or closed: callers keep this modal
+  // mounted and toggle isOpen.
   const [isReportLoading, setIsReportLoading] = useState(false);
-  const [isProLoading, setIsProLoading] = useState(false);
-  const [isTrialLoading, setIsTrialLoading] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
   const { trackUpgradeCtaClick, trackPaywallDismissed } = useTracking();
   const { promoId, promoStatus, promoDiscount } = usePromoCode(initialPromo);
   const { user } = useAuth();
-  const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
+  const { start, isLoading: isProLoading, error: proError } = useProCheckout();
+  const { eligible: trialEligible } = useTrialEligibility();
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, isOpen, onClose);
 
   if (!isOpen) return null;
+
+  const hasPromo = promoStatus === 'valid' && !!promoId;
+  const offerTrial = trialEligible && !hasPromo;
+  const canBuyReport = reason === 'report_upsell' && !!calculationData;
 
   const handleClose = () => {
     trackPaywallDismissed();
     onClose();
   };
 
-  const [trialError, setTrialError] = useState<string | null>(null);
-  const [trialSuccess, setTrialSuccess] = useState(false);
-
-  const handleTrialStart = async () => {
-    trackUpgradeCtaClick('paywall_trial');
-    setIsTrialLoading(true);
-    setTrialError(null);
-    try {
-      const response = await fetch('/api/trial/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setTrialSuccess(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else if (data.expired) {
-        setTrialError('Your free trial has ended. Subscribe to continue with Pro.');
-      } else if (data.alreadyActive) {
-        window.location.reload();
-      } else {
-        setTrialError(data.error || 'Unable to start trial. Please try again.');
-      }
-    } catch {
-      captureClientError(new Error('Trial start failed'), 'PaywallModal', { context: 'Trial start network error' });
-      setTrialError('Connection error. Please try again.');
-    } finally {
-      setIsTrialLoading(false);
-    }
+  const handleStartPro = () => {
+    trackUpgradeCtaClick(offerTrial ? 'paywall_trial' : 'paywall_pro');
+    void start({
+      trial: offerTrial,
+      billingInterval: 'monthly',
+      source: reason === 'report_upsell' ? 'paywall_report' : 'paywall_feature',
+      promoCode: hasPromo ? promoId ?? undefined : undefined,
+    });
   };
 
   const handleBuyReport = async () => {
     if (!calculationData) return;
     trackUpgradeCtaClick('paywall_report');
     setIsReportLoading(true);
+    setReportError(null);
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           purchaseType: 'report',
-          userId: user?.id,
           email: user?.email,
           calculationData: {
             inputs: calculationData.inputs,
@@ -92,48 +100,22 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
       const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
-      } else if (data.error) {
-        captureClientError(data.error, 'PaywallModal', { context: 'Report checkout API returned error' });
+        return;
       }
+      captureClientError(data.error, 'PaywallModal', { context: 'Report checkout API returned error' });
+      setReportError(data.error || 'Could not open checkout. Please try again.');
     } catch {
       captureClientError(new Error('Report checkout failed'), 'PaywallModal', { context: 'Report checkout network error' });
-    } finally {
-      setIsReportLoading(false);
+      setReportError('Connection error. Please try again.');
     }
+    setIsReportLoading(false);
   };
 
-  const handleUpgradePro = async () => {
-    trackUpgradeCtaClick('paywall_pro');
-    setIsProLoading(true);
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          purchaseType: 'subscription',
-          userId: user?.id,
-          email: user?.email,
-          promoCode: promoId || undefined,
-        }),
-      });
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        handleClose();
-        setTimeout(() => {
-          document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    } catch {
-      handleClose();
-      setTimeout(() => {
-        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } finally {
-      setIsProLoading(false);
-    }
-  };
+  const proLabel = offerTrial
+    ? 'Start 7-day free trial'
+    : hasPromo && promoDiscount?.percentOff === 100
+      ? 'Start your free month'
+      : `Start Pro — ${PRICING.PRO_MONTHLY}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -149,238 +131,81 @@ export default function PaywallModal({ isOpen, onClose, reason, promoCode: initi
         aria-modal="true"
         aria-labelledby="paywall-modal-title"
         tabIndex={-1}
-        className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up"
+        className="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-y-auto overscroll-contain animate-slide-up"
       >
+        <button
+          onClick={handleClose}
+          className="absolute top-3 right-3 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          aria-label="Close dialog"
+        >
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-6 py-6 overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(20, 184, 166, 0.4) 1px, transparent 0)`,
-              backgroundSize: '20px 20px'
-            }} />
-          </div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/20 rounded-full blur-3xl" />
+        <div className="bg-gradient-to-br from-navy-900 via-navy-800 to-navy-900 px-6 pt-7 pb-6 text-center">
+          <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-teal-300 mb-2">Solidus Pro</p>
+          <h2 id="paywall-modal-title" className="text-xl sm:text-2xl font-bold text-white">
+            {reason === 'report_upsell' ? 'See the full analysis behind your numbers' : 'This is a Pro feature'}
+          </h2>
+          <p className="text-slate-300 text-sm mt-2">
+            {offerTrial
+              ? 'Try everything in Pro free for 7 days.'
+              : 'Everything in Solidus, for every deal you work on.'}
+          </p>
+        </div>
+
+        <div className="p-6">
+          <ul className="space-y-2.5 mb-6">
+            {PRO_POINTS.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-sm text-slate-700 dark:text-slate-200">
+                <Check />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
 
           <button
-            onClick={handleClose}
-            className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            aria-label="Close dialog"
+            onClick={handleStartPro}
+            disabled={isProLoading}
+            aria-busy={isProLoading}
+            className="w-full py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl
+                     hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20
+                     disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            {isProLoading ? <><Spinner /> Opening secure checkout...</> : proLabel}
           </button>
+          <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">
+            {offerTrial
+              ? `$0 today, then ${PRICING.PRO_MONTHLY}. We email you 3 days before the first charge. Cancel anytime.`
+              : `Or ${PRICING.PRO_ANNUAL_MONTHLY} billed annually. Cancel anytime.`}
+          </p>
+          {proError && <p role="alert" className="text-xs text-center text-red-500 mt-2">{proError}</p>}
 
-          <div className="relative text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 mb-4 shadow-lg shadow-teal-500/30">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h2 id="paywall-modal-title" className="text-xl font-bold text-white mb-1">
-              Unlock Full Analysis
-            </h2>
-            <p className="text-slate-300 text-sm">
-              AI deal memo, full comparable deals, sensitivity analysis, and board-ready reports
-            </p>
-          </div>
-        </div>
-
-        {/* Trial Banner */}
-        <div className="mx-5 sm:mx-6 mt-5 p-4 sm:p-5 rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-500/20">
-          <div className="text-center">
-            <p className="text-xs font-bold text-teal-400 tracking-wider uppercase mb-2">Recommended</p>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Try Pro Free for 7 Days</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-              {ENGINE_COUNT} engines · Unlimited calculations · PDF exports · 700+ company profiles
-            </p>
-            <button
-              onClick={handleTrialStart}
-              disabled={isTrialLoading}
-              className="w-full sm:w-auto px-8 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg
-                       hover:from-teal-600 hover:to-cyan-600 transition-all shadow-lg shadow-teal-500/20
-                       disabled:opacity-50 disabled:cursor-not-allowed
-                       flex items-center justify-center gap-2 text-sm mx-auto"
-            >
-              {isTrialLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Processing...
-                </>
-              ) : 'Start Free Trial'}
-            </button>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">Cancel anytime during trial. No charge for 7 days.</p>
-          </div>
-        </div>
-
-        <div className="px-5 sm:px-6 pt-3 pb-1">
-          <p className="text-xs text-center text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">Or purchase directly</p>
-        </div>
-
-        {/* Three-option cards */}
-        <div className="p-5 sm:p-6 pt-2">
-          <div className="grid sm:grid-cols-3 gap-3">
-            {/* Starter Card */}
-            <div className="relative border-2 border-slate-200 dark:border-slate-600 rounded-xl p-4 hover:border-teal-300 dark:hover:border-teal-500 transition-all">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Starter</h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-xl font-bold text-slate-900 dark:text-white">{PRICING.STARTER_PRICE}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">/month</span>
+          {canBuyReport && (
+            <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">Only need this one deal?</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Deal memo, comparables, sensitivity and negotiation playbook as a board-ready PDF and Excel. {PRICING.REPORT_PRICE}, one time.
+                </p>
               </div>
-              <ul className="space-y-1.5 mb-4 text-xs">
-                {[
-                  '10 calculations/month',
-                  'Deal terms + rNPV',
-                  '3 partner matches',
-                  '3 PDF exports/month',
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                    <svg className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={async () => {
-                  trackUpgradeCtaClick('paywall_starter');
-                  try {
-                    const response = await fetch('/api/checkout', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ purchaseType: 'starter', userId: user?.id, email: user?.email }),
-                    });
-                    const data = await response.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch {}
-                }}
-                className="w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg
-                         hover:bg-slate-800 dark:hover:bg-slate-100 transition-all text-xs"
-              >
-                Start Starter — {PRICING.STARTER_MONTHLY}
-              </button>
-            </div>
-
-            {/* Pro Card */}
-            <div className="relative border-2 border-teal-400 dark:border-teal-500 rounded-xl p-4 bg-gradient-to-b from-teal-50/50 to-white dark:from-teal-900/10 dark:to-slate-800">
-              <div className="absolute -top-3 right-3">
-                <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full">
-                  Best Value
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Pro</h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-xl font-bold text-slate-900 dark:text-white">{PRICING.PRO_PRICE}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">/month</span>
-              </div>
-              <ul className="space-y-1.5 mb-4 text-xs">
-                {[
-                  'Unlimited calculations',
-                  `All ${ENGINE_COUNT} engines`,
-                  'Full partner + intent scoring',
-                  'Unlimited PDF + Excel',
-                  'Watchlist & deal alerts',
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                    <svg className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={handleUpgradePro}
-                disabled={isProLoading}
-                className="w-full py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-lg
-                         hover:from-teal-600 hover:to-cyan-600 transition-all shadow-soft hover:shadow-glow
-                         disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2 text-xs"
-              >
-                {isProLoading ? 'Processing...' : (hasValidPromo ? 'Start Free Month' : `Start Pro — ${PRICING.PRO_MONTHLY}`)}
-              </button>
-            </div>
-
-            {/* Report Card */}
-            <div className="relative border-2 border-slate-200 dark:border-slate-600 rounded-xl p-4 hover:border-teal-300 dark:hover:border-teal-500 transition-all">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">This Report</h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-xl font-bold text-slate-900 dark:text-white">{PRICING.REPORT_PRICE}</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">one-time</span>
-              </div>
-              <ul className="space-y-1.5 mb-4 text-xs">
-                {[
-                  'Deal memo + comparables',
-                  'Sensitivity analysis',
-                  'Negotiation playbook',
-                  'Board-ready PDF + Excel',
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                    <svg className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
               <button
                 onClick={handleBuyReport}
-                disabled={isReportLoading || !calculationData}
-                className="w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold rounded-lg
-                         hover:bg-slate-800 dark:hover:bg-slate-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                disabled={isReportLoading}
+                className="shrink-0 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 font-semibold rounded-lg
+                         hover:bg-slate-50 dark:hover:bg-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm inline-flex items-center gap-2"
               >
-                {isReportLoading ? 'Processing...' : `Get Report — ${PRICING.REPORT_PRICE}`}
+                {isReportLoading ? <><Spinner /> Opening...</> : `Get this report — ${PRICING.REPORT_PRICE}`}
               </button>
             </div>
-          </div>
+          )}
+          {reportError && <p role="alert" className="text-xs text-red-500 mt-2">{reportError}</p>}
 
-          {/* Trust Signals */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-            <div className="flex items-center gap-1">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>7-day money-back guarantee</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span>Secure checkout via Stripe</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              <span>Cancel anytime</span>
-            </div>
-          </div>
-
-          {/* Social proof */}
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <div className="flex -space-x-2">
-              {['IK', 'CZ', 'ML'].map((initials, i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-bold border-2 border-white dark:border-slate-800"
-                >
-                  {initials}
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Based on <span className="font-semibold text-slate-700 dark:text-slate-300">{DEAL_STATS.TOTAL_DEALS}</span> analyzed deals
-            </p>
-          </div>
-
-          {/* Close */}
           <button
             onClick={handleClose}
-            className="w-full mt-4 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="w-full mt-5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
             Maybe later
           </button>

@@ -161,6 +161,8 @@ export const checkoutSchema = z.object({
   billingInterval: z.enum(['monthly', 'annual']).default('monthly'),
   promoCode: z.string().optional(),
   trial: z.boolean().optional(),
+  /** Where the checkout was started (pricing, paywall, trial_page, ...), for attribution. */
+  source: z.string().max(40).optional(),
   shareToken: z.string().optional(),
   calculationData: z.object({
     inputs: z.record(z.string(), z.unknown()),

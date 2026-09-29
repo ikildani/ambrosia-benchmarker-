@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { ga4EmailCapture } from '@/lib/ga4';
 
 interface InsightEmailCaptureProps {
   slug: string;
@@ -38,6 +39,7 @@ export function InsightEmailCapture({ slug }: InsightEmailCaptureProps) {
         throw new Error(data.error || 'Subscription failed');
       }
 
+      ga4EmailCapture('insight_capture');
       setStatus('success');
     } catch (err) {
       setStatus('error');

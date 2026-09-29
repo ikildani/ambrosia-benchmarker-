@@ -2031,7 +2031,7 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </button>
-                <span className="text-xs text-slate-500">7-day free trial · No credit card required</span>
+                <span className="text-xs text-slate-500">7-day free trial · $0 today · Cancel anytime</span>
               </div>
             </div>
           </div>

@@ -26,7 +26,7 @@ export default function VerifyEmailView({ email, actions, setMode }: VerifyEmail
         <span className="font-semibold text-neutral-900">{email}</span>
       </p>
       <p className="text-sm text-teal-700 mb-6">
-        Your 7-day Pro trial is already active. Verify your email and sign in to use it.
+        Verify your email and sign in, then run your first benchmark. We'll email you the comparable deals behind it.
       </p>
       <button
         onClick={handleResendVerification}

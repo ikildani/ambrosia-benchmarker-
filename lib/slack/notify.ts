@@ -100,22 +100,48 @@ export async function notifyProSubscription(details: {
 export async function notifyTrialStarted(details: {
   email: string;
   promoCode?: string;
+  /** Card trials: the day Stripe first charges the card. */
+  chargesOn?: Date;
 }): Promise<void> {
   const fields = [
     { type: 'mrkdwn', text: `*Email:*\n${details.email}` },
   ];
   if (details.promoCode) fields.push({ type: 'mrkdwn', text: `*Promo:*\n${details.promoCode}` });
+  if (details.chargesOn) fields.push({ type: 'mrkdwn', text: `*First charge:*\n${details.chargesOn.toISOString().slice(0, 10)}` });
   fields.push({ type: 'mrkdwn', text: `*Time:*\n${formatTimestamp()}` });
 
   await postToSlack(
     [{
       color: '#f59e0b',
       blocks: [
-        { type: 'header', text: { type: 'plain_text', text: 'Trial Started (AMBROSIA)', emoji: true } },
+        { type: 'header', text: { type: 'plain_text', text: details.chargesOn ? 'Pro Trial Started (card on file)' : 'Trial Started', emoji: true } },
         { type: 'section', fields },
       ],
     }],
     `Trial started: ${details.email}`,
+  );
+}
+
+/** A card trial ended and Stripe charged the card: a paying Pro customer. */
+export async function notifyTrialConverted(details: {
+  email: string;
+  amount?: number;
+}): Promise<void> {
+  const fields = [
+    { type: 'mrkdwn', text: `*Email:*\n${details.email}` },
+  ];
+  if (details.amount) fields.push({ type: 'mrkdwn', text: `*Amount:*\n${formatAmount(details.amount)}` });
+  fields.push({ type: 'mrkdwn', text: `*Time:*\n${formatTimestamp()}` });
+
+  await postToSlack(
+    [{
+      color: '#14b8a6',
+      blocks: [
+        { type: 'header', text: { type: 'plain_text', text: 'Trial Converted to Paid Pro', emoji: true } },
+        { type: 'section', fields },
+      ],
+    }],
+    `Trial converted to paid Pro: ${details.email}`,
   );
 }
 
@@ -143,10 +169,12 @@ export async function notifyReportPurchase(details: {
 
 export async function notifyCheckoutStarted(details: {
   email: string;
-  type: 'report' | 'pro' | 'annual';
+  type: 'report' | 'pro' | 'annual' | 'trial';
   amount?: number;
 }): Promise<void> {
-  const typeLabel = details.type === 'report' ? 'Deal Report ($499)' : details.type === 'annual' ? 'Pro Annual ($199/mo)' : 'Pro Monthly ($299/mo)';
+  const typeLabel = details.type === 'report' ? 'Deal Report ($499)'
+    : details.type === 'trial' ? 'Pro 7-day trial (card required)'
+    : details.type === 'annual' ? 'Pro Annual ($199/mo)' : 'Pro Monthly ($299/mo)';
   const fields = [
     { type: 'mrkdwn', text: `*Email:*\n${details.email || 'anonymous'}` },
     { type: 'mrkdwn', text: `*Product:*\n${typeLabel}` },

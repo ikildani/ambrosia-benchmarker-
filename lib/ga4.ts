@@ -1,3 +1,5 @@
+import { PRICING } from "@/lib/config/constants";
+
 function gtag(...args: unknown[]) {
   if (typeof window !== "undefined" && "gtag" in window) {
     (window as { gtag: (...a: unknown[]) => void }).gtag(...args);
@@ -21,7 +23,7 @@ export function ga4ProConversion(plan: string, value: number) {
 }
 
 export function ga4ReportPurchase(ta: string) {
-  ga4Event("purchase", { event_category: "conversion", item: "deal_intelligence_brief", therapeutic_area: ta, value: 499, currency: "USD" });
+  ga4Event("purchase", { event_category: "conversion", item: "deal_report", therapeutic_area: ta, value: PRICING.REPORT_PRICE_NUM, currency: "USD" });
 }
 
 export function ga4EmailCapture(source: string) {

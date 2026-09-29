@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, CheckCircle, Loader2 } from 'lucide-react';
+import { ga4EmailCapture } from '@/lib/ga4';
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ export function NewsletterSignup() {
       });
 
       if (res.ok) {
+        ga4EmailCapture('newsletter');
         setStatus('success');
         setMessage('Thanks for subscribing! Check your inbox.');
         setEmail('');
