@@ -3,7 +3,8 @@ import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { captureApiError, maskEmail } from '@/lib/sentry-api';
 import { sendAdminSubscriptionNotification, sendUpgradeConfirmation, sendEmail } from '@/lib/email/client';
-import { notifyProSubscription, notifyTrialStarted, notifyReportPurchase, notifyPaymentFailed } from '@/lib/slack/notify';
+import { notifyProSubscription, notifyTrialStarted, notifyTrialConverted, notifyReportPurchase, notifyPaymentFailed } from '@/lib/slack/notify';
+import { buildCardTrialStartedEmail, buildTrialEndingEmail, formatPlanAmount } from '@/lib/email/card-trial';
 import { markBriefInvoicePaid, BRIEF_INVOICE_METADATA_KEY } from '@/lib/brief/invoice';
 
 // Stripe Webhook Handler
@@ -11,7 +12,8 @@ import { markBriefInvoicePaid, BRIEF_INVOICE_METADATA_KEY } from '@/lib/brief/in
 // 1. Set STRIPE_WEBHOOK_SECRET in .env.local
 // 2. Configure webhook in Stripe Dashboard pointing to /api/webhook
 // 3. Select events: checkout.session.completed, customer.subscription.updated,
-//    customer.subscription.deleted, invoice.payment_succeeded, invoice.payment_failed
+//    customer.subscription.deleted, customer.subscription.trial_will_end,
+//    invoice.payment_succeeded, invoice.payment_failed
 
 export async function POST(request: NextRequest) {
   try {
@@ -166,12 +168,32 @@ export async function POST(request: NextRequest) {
         const subscriptionId = session.subscription as string;
 
         const subscriptionTier = session.metadata?.product === 'deal-calculator-starter' ? 'starter' as const : 'pro' as const;
+
+        // Card trials (2026-09-29) come back as a `trialing` subscription.
+        // Read the real status rather than assuming 'active'.
+        let subscription: Stripe.Subscription | null = null;
+        if (subscriptionId) {
+          try {
+            subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          } catch (subErr) {
+            console.error('Webhook: subscription retrieve failed:', subErr instanceof Error ? subErr.message : subErr);
+          }
+        }
+        const isCardTrial = subscription?.status === 'trialing';
+        const trialEndsAt = subscription?.trial_end ? new Date(subscription.trial_end * 1000) : null;
+        const nowIso = new Date().toISOString();
         const updatePayload = {
           tier: subscriptionTier, tier_change_authorized: true,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
-          subscription_status: 'active',
-          updated_at: new Date().toISOString(),
+          subscription_status: subscription?.status ?? 'active',
+          pro_activated_at: nowIso,
+          // Stripe now owns this subscription's end date. A leftover
+          // pro_expires_at from an earlier no-card trial would make the
+          // pro-expiration cron downgrade a paying customer.
+          pro_expires_at: null,
+          pro_engagement_type: 'stripe',
+          updated_at: nowIso,
         };
 
         let upgraded = false;
@@ -227,26 +249,50 @@ export async function POST(request: NextRequest) {
           user_tier: 'pro', tier_change_authorized: true,
         });
 
-        // Notify admin of new subscription
+        if (isCardTrial) {
+          await supabase.from('events').insert({
+            user_id: userId || null,
+            event_type: 'trial_activated',
+            event_data: {
+              source: 'card-trial',
+              checkout_source: session.metadata?.source || null,
+              stripe_subscription_id: subscriptionId,
+              expires_at: trialEndsAt?.toISOString() ?? null,
+            },
+            user_tier: 'pro',
+          });
+        }
+
+        // Notify admin of new subscription or trial
         const promoUsed = session.metadata?.promo_code;
-        const isTrial = promoUsed === 'AMBROSIA';
         sendAdminSubscriptionNotification({
           email: customerEmail || 'unknown',
-          type: isTrial ? 'trial_started' : 'pro_subscription',
+          type: isCardTrial ? 'trial_started' : 'pro_subscription',
           amount: session.amount_total || undefined,
           promoCode: promoUsed || undefined,
         }).catch(err => console.error('Webhook: Admin subscription notification error:', err));
-        const slackNotify = isTrial ? notifyTrialStarted : notifyProSubscription;
-        slackNotify({
-          email: customerEmail || 'unknown',
-          amount: session.amount_total || undefined,
-          promoCode: promoUsed || undefined,
-        }).catch(err => console.error('Webhook: Slack subscription notification error:', err));
+        const slackNotify = isCardTrial
+          ? notifyTrialStarted({ email: customerEmail || 'unknown', promoCode: promoUsed || undefined, chargesOn: trialEndsAt ?? undefined })
+          : notifyProSubscription({ email: customerEmail || 'unknown', amount: session.amount_total || undefined, promoCode: promoUsed || undefined });
+        slackNotify.catch(err => console.error('Webhook: Slack subscription notification error:', err));
 
-        // Send upgrade confirmation to user
+        // Tell the user what they have and, for a trial, exactly when and how
+        // much the card is charged.
         if (customerEmail) {
-          sendUpgradeConfirmation(customerEmail, session.customer_details?.name || 'there')
-            .catch(err => console.error('Webhook: Upgrade confirmation email error:', err));
+          const customerName = session.customer_details?.name || null;
+          if (isCardTrial && trialEndsAt) {
+            const price = subscription?.items.data[0]?.price;
+            const { subject, html } = buildCardTrialStartedEmail({
+              name: customerName,
+              chargesOn: trialEndsAt,
+              amountLabel: formatPlanAmount(price?.unit_amount, price?.recurring?.interval, price?.currency),
+            });
+            sendEmail({ to: customerEmail, subject, html, replyTo: 'ikildani@ambrosiaventures.co' })
+              .catch(err => console.error('Webhook: Trial started email error:', err));
+          } else {
+            sendUpgradeConfirmation(customerEmail, customerName || 'there')
+              .catch(err => console.error('Webhook: Upgrade confirmation email error:', err));
+          }
         }
 
         // Mark lead as converted (stops drip emails)
@@ -297,6 +343,65 @@ export async function POST(request: NextRequest) {
           console.error('Failed to update subscription status:', error);
         } else {
           console.log('Subscription status updated:', customerId, status, '→ tier:', tier);
+        }
+
+        // Trial -> paid: the first charge went through.
+        const previousStatus = (event.data.previous_attributes as Partial<Stripe.Subscription> | undefined)?.status;
+        if (previousStatus === 'trialing' && status === 'active') {
+          const { data: convertedProfile } = await supabase
+            .from('user_profiles')
+            .select('id, email')
+            .eq('stripe_customer_id', customerId)
+            .maybeSingle();
+          const price = subscription.items.data[0]?.price;
+          await supabase.from('events').insert({
+            user_id: convertedProfile?.id ?? null,
+            event_type: 'trial_converted',
+            event_data: {
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscription.id,
+              amount: price?.unit_amount ?? null,
+              interval: price?.recurring?.interval ?? null,
+            },
+            user_tier: 'pro',
+          });
+          notifyTrialConverted({
+            email: convertedProfile?.email || 'unknown',
+            amount: price?.unit_amount ?? undefined,
+          }).catch(err => console.error('Webhook: Slack trial converted error:', err));
+        }
+        break;
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        // Stripe sends this 3 days before a trial ends. The trial-started
+        // email promised this reminder.
+        const subscription = event.data.object as Stripe.Subscription;
+        if (subscription.status !== 'trialing' || !subscription.trial_end) break;
+        const customerId = subscription.customer as string;
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('id, email, full_name')
+          .eq('stripe_customer_id', customerId)
+          .maybeSingle();
+        if (!profile?.email) {
+          console.warn('Webhook: trial_will_end with no matching profile:', customerId);
+          break;
+        }
+        const price = subscription.items.data[0]?.price;
+        const { subject, html } = buildTrialEndingEmail({
+          name: profile.full_name,
+          chargesOn: new Date(subscription.trial_end * 1000),
+          amountLabel: formatPlanAmount(price?.unit_amount, price?.recurring?.interval, price?.currency),
+        });
+        const result = await sendEmail({ to: profile.email, subject, html, replyTo: 'ikildani@ambrosiaventures.co' });
+        if (result.success) {
+          await supabase.from('events').insert({
+            user_id: profile.id,
+            event_type: 'trial_ending_reminder_sent',
+            event_data: { stripe_subscription_id: subscription.id, trial_end: subscription.trial_end },
+            user_tier: 'pro',
+          });
         }
         break;
       }
@@ -471,6 +576,13 @@ export async function POST(request: NextRequest) {
             .eq('email', invoiceEmail)
             .single();
 
+          // The $0 invoice that opens a card trial arrives here too; keep
+          // the profile's status in step with Stripe's.
+          let invoiceSubStatus: string = 'active';
+          try {
+            invoiceSubStatus = (await stripe.subscriptions.retrieve(invoiceSubId)).status;
+          } catch { /* keep 'active' */ }
+
           if (invoiceProfile && invoiceProfile.tier !== 'pro') {
             await supabase
               .from('user_profiles')
@@ -478,7 +590,8 @@ export async function POST(request: NextRequest) {
                 tier: 'pro', tier_change_authorized: true,
                 stripe_customer_id: invoiceCustomerId,
                 stripe_subscription_id: invoiceSubId,
-                subscription_status: 'active',
+                subscription_status: invoiceSubStatus,
+                pro_expires_at: null,
                 updated_at: new Date().toISOString(),
               })
               .eq('id', invoiceProfile.id);
@@ -493,7 +606,7 @@ export async function POST(request: NextRequest) {
               .update({
                 stripe_customer_id: invoiceCustomerId,
                 stripe_subscription_id: invoiceSubId,
-                subscription_status: 'active',
+                subscription_status: invoiceSubStatus,
                 updated_at: new Date().toISOString(),
               })
               .eq('id', invoiceProfile.id);

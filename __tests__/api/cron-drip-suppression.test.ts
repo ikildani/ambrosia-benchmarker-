@@ -82,15 +82,16 @@ describe('calculation-convert honours drip_suppressed_until', () => {
     mockSendEmail.mockReset();
   });
 
-  it('applies the suppression filter when resolving high-intent users to free tier', async () => {
-    // First query (events) must return 3+ calculation events for one user so
-    // the cron reaches the user_profiles lookup; that lookup then returns [].
-    const events = Array.from({ length: 3 }, () => ({ user_id: 'u-1', event_type: 'calculation_completed' }));
+  it('applies the suppression filter when resolving users for the comp set email', async () => {
+    // First query (calculations) returns one settled calculation so the cron
+    // reaches the prior-send check ([]) and then the user_profiles lookup,
+    // which returns [] because of the suppression filter.
+    const calcs = [{ id: 'c-1', user_id: 'u-1', created_at: new Date(Date.now() - 3 * 3600_000).toISOString() }];
     let call = 0;
     supa = makeSupabase();
     supa.builder.then = (resolve: (v: unknown) => void) => {
       call += 1;
-      resolve(call === 1 ? { data: events, error: null } : { data: [], error: null });
+      resolve(call === 1 ? { data: calcs, error: null } : { data: [], error: null });
     };
 
     const { GET } = await import('@/app/api/cron/calculation-convert/route');

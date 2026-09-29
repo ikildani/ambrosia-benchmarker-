@@ -96,6 +96,7 @@ import { UsageCounter } from './calculator/UsageCounter';
 import type { UserTier } from '@/types/tier';
 import CustomAssumptionsPanel from './calculator/CustomAssumptionsPanel';
 import { getResolvedDefaults } from '@/lib/financial/default-assumptions';
+import { ga4ReportPurchase } from '@/lib/ga4';
 
 const Results = dynamic(() => import('./Results'), { ssr: false, loading: () => <ResultsSkeleton /> });
 const DealQuery = dynamic(() => import('./DealQuery'), { ssr: false });
@@ -279,6 +280,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         .then(data => {
           if (data.status === 'completed') {
             setReportVerified(true);
+            // Count the purchase once, on the Stripe return, not on later visits.
+            if (params.get('success') === 'true') {
+              try {
+                const key = `ga4_report_${reportId}`;
+                if (!sessionStorage.getItem(key)) {
+                  sessionStorage.setItem(key, '1');
+                  ga4ReportPurchase(data.calculationInputs?.therapeuticArea || 'unknown');
+                }
+              } catch { /* storage blocked */ }
+            }
             // Pre-fill from purchased report's calculation inputs and auto-calculate
             if (data.calculationInputs) {
               const inp = data.calculationInputs;

@@ -1,11 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
-import { notifyTrialStarted } from '@/lib/slack/notify';
+import { notifyCheckoutStarted } from '@/lib/slack/notify';
+import {
+  TRIAL_DAYS,
+  buildSubscriptionCheckoutParams,
+  getTrialEligibility,
+  resolveSubscriptionPriceId,
+  type BillingInterval,
+} from '@/lib/billing/pro-checkout';
 
 export const dynamic = 'force-dynamic';
 
-const TRIAL_DAYS = 7;
+// Pro trials are card-required (2026-09-29). This route no longer switches a
+// profile to Pro by itself: POST opens a Stripe Checkout session with a
+// TRIAL_DAYS trial, and the Stripe webhook turns Pro on once the card is
+// saved. GET tells the UI whether to label the button "Start free trial" or
+// "Start Pro".
+
+function stripeOrNull(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY?.trim();
+  return key && key.startsWith('sk_') ? new Stripe(key) : null;
+}
+
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthenticatedUser(request);
+  const stripe = stripeOrNull();
+  // Signed-out visitors are eligible until proven otherwise: they have no account yet.
+  if (!authUser?.id || !stripe) {
+    return NextResponse.json({ eligible: true, trialDays: TRIAL_DAYS });
+  }
+  try {
+    const eligibility = await getTrialEligibility(stripe, createServiceClient(), {
+      userId: authUser.id,
+      email: authUser.email,
+    });
+    return NextResponse.json({ ...eligibility, trialDays: TRIAL_DAYS });
+  } catch (err) {
+    console.error('[trial/start] eligibility check failed:', err instanceof Error ? err.message : err);
+    // Fail open on the label only; POST re-checks before granting a trial.
+    return NextResponse.json({ eligible: true, trialDays: TRIAL_DAYS });
+  }
+}
 
 export async function POST(request: NextRequest) {
   const authUser = await getAuthenticatedUser(request);
@@ -13,78 +50,57 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Please sign in to start your trial.' }, { status: 401 });
   }
 
-  const supabase = createServiceClient();
+  const stripe = stripeOrNull();
+  if (!stripe) {
+    console.error('[trial/start] STRIPE_SECRET_KEY not configured');
+    return NextResponse.json({ error: 'Checkout is temporarily unavailable. Please contact support@ambrosiaventures.co.' }, { status: 503 });
+  }
 
+  let body: { billingInterval?: string; source?: string } = {};
+  try { body = await request.json(); } catch { /* no body */ }
+  const interval: BillingInterval = body.billingInterval === 'annual' ? 'annual' : 'monthly';
+  const source = typeof body.source === 'string' ? body.source.slice(0, 40) : undefined;
+
+  const supabase = createServiceClient();
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('id, email, tier, pro_expires_at, subscription_status, stripe_customer_id')
+    .select('id, email, tier, subscription_status, stripe_subscription_id')
     .eq('id', authUser.id)
-    .single();
+    .maybeSingle();
 
-  if (!profile) {
-    return NextResponse.json({ error: 'Profile not found.' }, { status: 404 });
+  if (profile?.stripe_subscription_id && ['active', 'trialing'].includes(profile.subscription_status ?? '')) {
+    return NextResponse.json({ alreadyActive: true, message: 'You already have Pro.' });
   }
 
-  if (profile.tier === 'pro' && profile.subscription_status === 'active' && profile.stripe_customer_id) {
-    return NextResponse.json({ error: 'You already have an active Pro subscription.' }, { status: 400 });
+  const priceId = resolveSubscriptionPriceId('pro', interval);
+  if (!priceId) {
+    console.error('[trial/start] STRIPE_PRICE_ID not configured for', interval);
+    return NextResponse.json({ error: 'Checkout is temporarily unavailable. Please contact support@ambrosiaventures.co.' }, { status: 503 });
   }
 
-  // Already inside a trial window (auto-trial from signup, self-serve, or email
-  // trial). Not an error — new signups get a trial automatically via the
-  // handle_new_user trigger (migration 098), so UI callers must treat this as
-  // "nothing to do" rather than surface an error toast.
-  if (profile.tier === 'pro' && profile.pro_expires_at && new Date(profile.pro_expires_at).getTime() > Date.now()) {
-    const activeUntil = new Date(profile.pro_expires_at);
-    return NextResponse.json({
-      alreadyActive: true,
-      expiresAt: activeUntil.toISOString(),
-      message: `Your Pro trial is already active until ${activeUntil.toLocaleDateString()}.`,
-    });
+  const email = profile?.email || authUser.email || undefined;
+  try {
+    const eligibility = await getTrialEligibility(stripe, supabase, { userId: authUser.id, email });
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://solidus.ambrosiaventures.co';
+    const session = await stripe.checkout.sessions.create(buildSubscriptionCheckoutParams({
+      plan: 'pro',
+      interval,
+      priceId,
+      appUrl,
+      userId: authUser.id,
+      email,
+      trial: eligibility.eligible,
+      source,
+    }));
+
+    notifyCheckoutStarted({
+      email: email || 'unknown',
+      type: eligibility.eligible ? 'trial' : interval === 'annual' ? 'annual' : 'pro',
+    }).catch(() => {});
+
+    return NextResponse.json({ url: session.url, trial: eligibility.eligible, reason: eligibility.reason });
+  } catch (err) {
+    console.error('[trial/start] checkout session failed:', err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: 'Could not open checkout. Please try again.' }, { status: 500 });
   }
-
-  const hadPriorTrial = profile.pro_expires_at && new Date(profile.pro_expires_at).getTime() < Date.now();
-  if (hadPriorTrial) {
-    return NextResponse.json({ error: 'Your free trial has ended. Subscribe to continue with Pro.', expired: true }, { status: 400 });
-  }
-
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-
-  const { error: updateError } = await supabase
-    .from('user_profiles')
-    .update({
-      tier: 'pro',
-      tier_change_authorized: true,
-      subscription_status: 'active',
-      pro_activated_at: now.toISOString(),
-      pro_expires_at: expiresAt.toISOString(),
-      pro_engagement_type: 'self-serve-trial',
-      updated_at: now.toISOString(),
-    })
-    .eq('id', profile.id);
-
-  if (updateError) {
-    console.error('[trial/start] update failed:', updateError.message);
-    return NextResponse.json({ error: 'Failed to start trial. Please try again.' }, { status: 500 });
-  }
-
-  // NOTE: events has no tier_change_authorized column — including it made this
-  // insert fail silently (PGRST204) and no trial_activated events were recorded.
-  const { error: eventError } = await supabase.from('events').insert({
-    user_id: profile.id,
-    event_type: 'trial_activated',
-    event_data: { source: 'self-serve-trial', expires_at: expiresAt.toISOString() },
-    user_tier: 'pro',
-  });
-  if (eventError) {
-    console.error('[trial/start] trial_activated event insert failed:', eventError.message);
-  }
-
-  notifyTrialStarted({ email: profile.email || authUser.email || 'unknown' }).catch(() => {});
-
-  return NextResponse.json({
-    success: true,
-    expiresAt: expiresAt.toISOString(),
-    message: `Your 7-day Pro trial is now active. Expires ${expiresAt.toLocaleDateString()}.`,
-  });
 }

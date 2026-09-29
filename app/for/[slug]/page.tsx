@@ -150,7 +150,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ slug: 
           >
             Run full benchmark — 7-day free trial &rarr;
           </Link>
-          <p className="text-xs text-slate-500 mt-3">No card required. Full Pro access for 7 days.</p>
+          <p className="text-xs text-slate-500 mt-3">Full Pro access for 7 days. $0 today, cancel anytime.</p>
         </div>
       </main>
 
