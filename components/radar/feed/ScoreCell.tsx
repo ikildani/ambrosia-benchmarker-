@@ -1,7 +1,7 @@
 'use client';
 
 import { fmtDelta, fmtScore } from '@/lib/radar/client/format';
-import { percentileLabel, probabilityLabel, scoreToneKey, unrankedReason, type ScorePresentation } from '@/lib/radar/client/score-copy';
+import { baseRateMultiple, percentileLabel, probabilityLabel, rankPhrase, scoreToneKey, unrankedReason, type ScorePresentation } from '@/lib/radar/client/score-copy';
 import { ConfidenceDot, Sparkline, cn } from './ui';
 
 interface Props {
@@ -15,50 +15,69 @@ interface Props {
   size?: 'table' | 'card';
 }
 
-const TONE_CLASS: Record<ReturnType<typeof scoreToneKey>, string> = {
+const TONE_TEXT: Record<ReturnType<typeof scoreToneKey>, string> = {
   high: 'text-teal-700 dark:text-teal-300',
   mid: 'text-amber-700 dark:text-amber-300',
-  neutral: 'text-neutral-800 dark:text-neutral-200',
-  none: 'text-neutral-500 dark:text-neutral-500',
+  neutral: 'text-neutral-700 dark:text-neutral-300',
+  none: 'text-neutral-400 dark:text-neutral-500',
 };
 
+const TONE_BAR: Record<ReturnType<typeof scoreToneKey>, string> = {
+  high: 'bg-teal-600 dark:bg-teal-400',
+  mid: 'bg-amber-500',
+  neutral: 'bg-neutral-400 dark:bg-neutral-500',
+  none: 'bg-neutral-300 dark:bg-neutral-600',
+};
+
+/** Five-bar signal gauge from the peer percentile: 1 bar = bottom fifth, 5 = top fifth. */
+export function SignalGauge({ pct, tone, className }: { pct: number | null | undefined; tone: ReturnType<typeof scoreToneKey>; className?: string }) {
+  const lit = pct === null || pct === undefined ? 0 : Math.min(5, Math.max(1, Math.ceil((pct + 0.0001) / 20)));
+  return (
+    <span className={cn('inline-flex items-end gap-[2px]', className)} aria-hidden>
+      {[0, 1, 2, 3, 4].map(i => (
+        <span key={i} className={cn('w-[3px] rounded-sm', i < lit ? TONE_BAR[tone] : 'bg-neutral-200 dark:bg-neutral-700')} style={{ height: `${5 + i * 2.5}px` }} />
+      ))}
+    </span>
+  );
+}
+
 /**
- * Licensing intent score with its peer percentile, confidence dot and 30-day
- * movement. The score is a calibrated probability × 100 and most programs sit
- * under 15, so the colour and the second line come from the percentile.
+ * Licensing intent as a peer rank. The raw score is a calibrated 12-month
+ * probability × 100, so almost every program shows 0 to 5 and the number
+ * alone says nothing; the gauge and "Top 3%" come from the percentile
+ * within phase × therapeutic area, and the second line gives the actual
+ * odds against the peer average. Unranked assets show the raw score.
  */
 export function ScoreCell({ score, confidence, delta30d, spark, presentation, size = 'table' }: Props) {
   const p: ScorePresentation = { score, ...(presentation ?? {}) };
-  const delta = fmtDelta(delta30d);
-  const deltaTone = delta30d === null ? '' : delta30d > 0 ? 'text-teal-700 dark:text-teal-300' : delta30d < 0 ? 'text-neutral-600 dark:text-neutral-400' : 'text-neutral-500';
-  const pct = percentileLabel(p);
+  const tone = scoreToneKey(p);
+  const rank = rankPhrase(p.pct_peer);
+  const pctLabel = percentileLabel(p);
   const prob = probabilityLabel(p);
+  const multiple = baseRateMultiple(p);
+  const delta = fmtDelta(delta30d);
   const label =
     score === null
       ? 'Not yet scored'
-      : [`Licensing intent ${fmtScore(score)} of 100`, pct, prob, delta ? `${delta} over 30 days` : null].filter(Boolean).join('. ');
-  const title = score === null ? undefined : [prob, pct ?? unrankedReason(p)].filter(Boolean).join('\n');
+      : [pctLabel ?? `Licensing intent ${fmtScore(score)} of 100`, prob, delta ? `${delta} over 30 days` : null].filter(Boolean).join('. ');
+  const title = score === null ? undefined : [pctLabel ?? unrankedReason(p), prob].filter(Boolean).join('\n');
+  const odds = p.probability !== null && p.probability !== undefined && Number.isFinite(p.probability)
+    ? `${(100 * p.probability) < 0.1 ? '<0.1' : (100 * p.probability).toFixed(100 * p.probability < 10 ? 1 : 0)}% odds`
+    : null;
 
   return (
-    <div className="flex flex-col gap-0.5" aria-label={label} title={title}>
+    <div className="flex min-w-0 flex-col gap-0.5" aria-label={label} title={title}>
       <div className="flex items-center gap-2">
-        <div className="flex items-baseline gap-1.5">
-          <span className={cn('font-mono tabular-nums font-semibold', size === 'card' ? 'text-2xl' : 'text-sm', TONE_CLASS[scoreToneKey(p)])}>
-            {fmtScore(score)}
-          </span>
-          <ConfidenceDot confidence={confidence} />
-        </div>
-        {spark.length >= 2 ? (
-          <Sparkline values={spark} width={size === 'card' ? 64 : 44} height={size === 'card' ? 20 : 16} />
-        ) : delta ? (
-          <span className={cn('font-mono text-[11px] tabular-nums', deltaTone)} aria-hidden>
-            {delta}
-          </span>
-        ) : null}
+        <SignalGauge pct={p.pct_peer} tone={tone} className={size === 'card' ? 'scale-125' : undefined} />
+        <span className={cn('truncate font-semibold tabular-nums', size === 'card' ? 'text-lg' : 'text-[13px]', TONE_TEXT[tone])}>
+          {score === null ? 'Not scored' : rank ?? `${fmtScore(score)}`}
+        </span>
+        <ConfidenceDot confidence={confidence} />
+        {spark.length >= 2 && <Sparkline values={spark} width={size === 'card' ? 56 : 36} height={14} />}
       </div>
-      {pct && (
-        <span className={cn('truncate text-neutral-500 dark:text-neutral-400', size === 'card' ? 'text-xs' : 'text-[11px]')} aria-hidden>
-          {pct}
+      {score !== null && (odds || multiple || delta) && (
+        <span className={cn('truncate tabular-nums text-neutral-500 dark:text-neutral-400', size === 'card' ? 'text-xs' : 'text-[12px]')} aria-hidden>
+          {[odds, multiple, delta ? `${delta} 30d` : null].filter(Boolean).join(' · ')}
         </span>
       )}
     </div>

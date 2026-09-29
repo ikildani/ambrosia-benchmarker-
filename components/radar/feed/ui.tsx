@@ -146,7 +146,7 @@ export function Sparkline({ values, width = 48, height = 16, className }: { valu
 export function CountryTag({ code }: { code: string | null | undefined }) {
   if (!code) return null;
   return (
-    <span className="inline-flex items-center rounded border border-neutral-300 px-1 font-mono text-[11px] font-medium leading-4 text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
+    <span className="inline-flex shrink-0 items-center rounded bg-neutral-100 px-1 text-[10px] font-semibold leading-4 tracking-wide text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
       {code}
     </span>
   );
@@ -166,7 +166,7 @@ const OWNER_TONE: Record<OwnerType, string> = {
 export function OwnerTypeChip({ type }: { type: OwnerType }) {
   if (type === 'industry') return null; // the default case; only non-industry owners need a flag
   return (
-    <span className={cn('inline-flex items-center rounded px-1.5 text-[11px] font-medium leading-4', OWNER_TONE[type])}>
+    <span className={cn('inline-flex shrink-0 items-center rounded px-1.5 text-[10px] font-semibold leading-4', OWNER_TONE[type])}>
       {ownerTypeLabel(type)}
     </span>
   );
@@ -181,7 +181,7 @@ export function PartnershipTag({ status }: { status: string | null | undefined }
         ? 'text-amber-700 dark:text-amber-300'
         : 'text-neutral-600 dark:text-neutral-400';
   const label = status === 'unpartnered' ? 'Unpartnered' : status === 'partially_partnered' ? 'Partial' : 'Partnered';
-  return <span className={cn('text-xs font-medium', tone)}>{label}</span>;
+  return <span className={cn('shrink-0 text-[12px] font-medium', tone)}>{label}</span>;
 }
 
 export function Spinner({ className }: { className?: string }) {

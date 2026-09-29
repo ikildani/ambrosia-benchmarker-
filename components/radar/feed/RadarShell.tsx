@@ -40,6 +40,7 @@ import { FacetDrawer, FacetRail } from './FacetRail';
 import { CardsSkeleton, EmptyState, ErrorState, TableSkeleton } from './FeedStates';
 import { FilterChips } from './FilterChips';
 import { FirstRun } from './FirstRun';
+import { Landscape } from './Landscape';
 import { MandateForm } from './MandateForm';
 import { MandateSwitcher } from './MandateSwitcher';
 import { RadarSubNav } from '@/components/radar/RadarSubNav';
@@ -183,7 +184,7 @@ export function RadarShell() {
   // Table height: fill the viewport below the toolbar, never below 480px.
   const [tableHeight, setTableHeight] = useState(560);
   useEffect(() => {
-    const measure = () => setTableHeight(Math.max(480, window.innerHeight - 300));
+    const measure = () => setTableHeight(Math.max(520, window.innerHeight - 260));
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
@@ -245,10 +246,10 @@ export function RadarShell() {
       try {
         if (mandateDialog?.mode === 'edit') {
           const m = await mandatesApi.update(mandateDialog.mandate.id, fields);
-          dispatch({ type: 'select_mandate', id: m.id, filters: { ...mandateToFilters(m), owner_type: formFilters.owner_type } });
+          dispatch({ type: 'select_mandate', id: m.id, filters: mandateToFilters(m) });
         } else {
           const m = await mandatesApi.create(fields);
-          dispatch({ type: 'select_mandate', id: m.id, filters: { ...mandateToFilters(m), owner_type: formFilters.owner_type } });
+          dispatch({ type: 'select_mandate', id: m.id, filters: mandateToFilters(m) });
         }
         setMandateDialog(null);
       } catch (err) {
@@ -308,6 +309,10 @@ export function RadarShell() {
     onClearFacet: (key: MultiFacetKey) => dispatch({ type: 'set_facet', key, values: [] }),
     onPhaseRange: (min: string | null, max: string | null) => dispatch({ type: 'set_phase_range', min, max }),
     onMinScore: (value: number | null) => dispatch({ type: 'set_min_score', value }),
+    onClearAll: () => dispatch({ type: 'clear_filters' }),
+    onTopPct: (value: number | null) => dispatch({ type: 'set_top_pct', value }),
+    onSetFacet: (key: MultiFacetKey, values: string[]) => dispatch({ type: 'set_facet', key, values }),
+    activeCount: countActiveFilters(filters),
   };
 
   if (firstRun) {
@@ -430,19 +435,28 @@ export function RadarShell() {
 
         <div className="mt-4 flex gap-5">
           {/* Facet rail */}
-          <aside className="hidden w-60 shrink-0 lg:block" aria-label="Filters">
-            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
+          <aside className="hidden w-64 shrink-0 lg:block" aria-label="Filters">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-xl border border-neutral-200 bg-white px-4 pt-3 dark:border-neutral-800 dark:bg-neutral-900">
               <FacetRail {...railProps} />
             </div>
           </aside>
 
           {/* Results */}
-          <section className={cn(PANEL, 'min-w-0 flex-1 overflow-hidden')} aria-label="Results">
+          <div className="min-w-0 flex-1">
+          <Landscape
+            filters={filters}
+            facets={facets.facets}
+            total={facets.total}
+            loading={facets.status === 'loading' && !facets.facets}
+            onToggle={(key, value) => dispatch({ type: 'toggle_facet', key, value })}
+            onPhaseRange={(min, max) => dispatch({ type: 'set_phase_range', min, max })}
+          />
+          <section className={cn(PANEL, 'min-w-0 overflow-hidden')} aria-label="Results">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 px-4 py-2 dark:border-neutral-800">
-              <p className="text-xs text-neutral-600 dark:text-neutral-400" aria-live="polite">
+              <p className="text-[13px] text-neutral-600 dark:text-neutral-400" aria-live="polite">
                 {totalText ? (
                   <>
-                    <span className="font-mono font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">{totalText}</span> assets
+                    <span className="font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">{totalText}</span> assets
                     {selectedMandate ? ` match ${selectedMandate.name}` : activeCount > 0 ? ' match these filters' : ' indexed'}
                   </>
                 ) : loading ? (
@@ -511,6 +525,7 @@ export function RadarShell() {
               />
             )}
           </section>
+          </div>
         </div>
       </div>
 
