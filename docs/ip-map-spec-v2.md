@@ -147,7 +147,7 @@ Metrics follow the prediction type: Brier/log loss for yes/no events, CRPS or pi
 
 ## 8. Visual-first interface
 
-The map is the interface; every view pairs a visual with a ranked, exportable list and the reasons behind each rank. Nine views, four shipped in Phase 1 (mockup screens 1–4).
+The map is the interface; every view pairs a visual with a ranked, exportable list and the reasons behind each rank. Ten views, five shipped in Phase 1. Mockups: v1 https://claude.ai/artifact/Lk8NfAsncW9HA7r7WrNv7Z, v2 institutional edition https://claude.ai/artifact/KnumXdkwRswQ5TwbKssUfT (Buyer Atlas map with family arcs, Forecasts, Claim Anatomy, Strength Grid, Runway).
 
 | View | What it shows | Decision it drives | Phase |
 |---|---|---|---|
@@ -155,6 +155,7 @@ The map is the interface; every view pairs a visual with a ranked, exportable li
 | **Buyer Board** (screen 1) | Ranked companies with score, Lift, window and a four-factor breakdown | The call list | 1 |
 | **Claim Anatomy** (screen 2) | Each independent claim read element by element, with functional-genus, sequence-identity and indefiniteness tiers highlighted | What counsel will attack | 1 |
 | **Claim Strength Grid** (screen 2) | Every independent claim in one grid: breadth percentile, narrowing, indefiniteness, enablement | Which claims carry the asset | 1 |
+| **Forecasts** (mockup v2) | All eight predictions in one ledger: central forecast, 80% range, what resolves it, 30-day change, drivers; the opportunity matrix (propensity × predicted window, sized by capacity to pay, shaded by need); calibration of every model against resolved outcomes | What we predict and how we are held to it | 1 |
 | **Exclusivity Runway** (screen 3) | Every protection layer on a timeline, US/EU/CN, with the LOE distribution and the derivation in words | How long the asset earns | 2 (US v1 in Phase 1) |
 | **Chain of Title** (screen 3) | Assignments, licences, security interests on a timeline | Clean title; distress | 2 |
 | **Citation Flow** | Sankey of citations between companies across a space | Who depends on whom | 3 |
