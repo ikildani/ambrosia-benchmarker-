@@ -40,10 +40,11 @@ async function main(): Promise<void> {
     const max = Number(arg('max', '400'));
     const kw = arg('keywords', '');
     const keywords = kw ? kw.split(',').map(s => s.trim()).filter(Boolean) : WIRE_KEYWORDS;
+    const src = arg('sources', 'globenewswire,prnewswire').split(',').map(s => s.trim()).filter(Boolean) as Array<'globenewswire' | 'prnewswire'>;
     const browser = await chromium.launch({ headless: true });
     try {
       const r = await runWireArchive(supabase, browser, {
-        anthropicApiKey, fromMonth: from, toMonth: to, keywords, maxExtractions: max,
+        anthropicApiKey, fromMonth: from, toMonth: to, keywords, sources: src, maxExtractions: max,
         concurrency: Number(arg('concurrency', '3')), dryRun, timeBudgetMs: minutes * 60_000, log,
       });
       console.log(JSON.stringify(dryRun ? r : { ...r, funnel: undefined }, null, 1));

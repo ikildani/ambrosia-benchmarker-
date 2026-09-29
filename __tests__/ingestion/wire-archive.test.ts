@@ -32,3 +32,16 @@ describe('month helpers', () => {
     expect(dateFromGnwUrl('https://www.globenewswire.com/search/keyword/x')).toBeNull();
   });
 });
+
+describe('PR Newswire sitemap helpers', () => {
+  const { titleFromPrnUrl, prnDateFromHtml } = require('@/lib/ingestion/wire-archive');
+  it('reads the headline from the release slug', () => {
+    expect(titleFromPrnUrl('https://www.prnewswire.com/news-releases/abbvie-to-expand-oncology-presence-through-acquisition-of-stemcentrx-300259263.html'))
+      .toBe('abbvie to expand oncology presence through acquisition of stemcentrx');
+    expect(titleFromPrnUrl('https://www.prnewswire.com/news-releases/')).toBeNull();
+  });
+  it('reads the release date from the page meta tag', () => {
+    expect(prnDateFromHtml(`<meta name='date' content="2016-04-28T07:20:00-04:00"/>`)).toBe('2016-04-28');
+    expect(prnDateFromHtml('<meta name="description" content="x"/>')).toBeNull();
+  });
+});

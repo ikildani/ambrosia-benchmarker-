@@ -625,7 +625,7 @@ export async function extractDealFromArticle(
 ): Promise<ExtractedDeal | null> {
   const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
-  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing deal information from press releases and news articles. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
+  const systemPrompt = `You are an expert biopharma deal analyst extracting licensing, collaboration and M&A deal information from press releases and news articles. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 
 Your task is to identify and extract structured deal data. Be precise and conservative:
 - Only extract information that is explicitly stated
@@ -645,9 +645,12 @@ REGULATORY DESIGNATIONS: breakthrough, fast_track, orphan, priority_review, rmat
 MILESTONE EXTRACTION: Extract individual milestones when disclosed. Classify as development (IND, Phase starts), regulatory (filing, approval), commercial (revenue-based), or sales (net sales thresholds).
 DEAL STRUCTURE: Look for opt-in/opt-out provisions, profit-sharing vs royalty, cost-sharing ratios, research funding, rights retained by licensor, sublicense rights, contract duration, companion diagnostic rights.`;
 
-  const userPrompt = `Extract the biopharma licensing/collaboration deal from this article. Return ONLY valid JSON.
+  const userPrompt = `Extract the biopharma deal from this article. Return ONLY valid JSON.
 
-If this is NOT a biopharma licensing/collaboration deal, return: {"is_deal": false, "reason": "brief explanation"}
+A deal is any agreement between two named parties over a drug, biologic, platform or program: a licence, option, collaboration, co-development or co-promotion, an asset purchase, or an acquisition or merger of a biopharma company. Deals whose financial terms are not disclosed still count: return them with null money fields.
+For an acquisition or merger: "licensor" is the company or asset being acquired (the target), "licensee" is the acquirer, deal_type is "acquisition", upfront_usd is the consideration payable at closing (cash and stock, the stated equity or transaction value), milestones_total_usd is contingent consideration (CVRs, earn-outs), total_deal_value_usd is upfront plus contingent. Name the target's lead asset(s) in asset_name when stated, else the company name.
+
+If this is NOT a biopharma deal (financing round, earnings, clinical data, personnel, a financial investor buying shares without rights), return: {"is_deal": false, "reason": "brief explanation"}
 
 If it IS a deal, return:
 {
@@ -712,17 +715,52 @@ ${content}`;
     const textContent = response.content[0];
     if (textContent.type !== 'text') return null;
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const parsed = JSON.parse(jsonMatch[0]);
+    const json = firstJsonObject(textContent.text);
+    if (!json) throw new ExtractionParseError(`no JSON object in the model reply for "${title}"`);
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(json);
+    } catch (e) {
+      throw new ExtractionParseError(`unparseable JSON for "${title}": ${String(e).slice(0, 120)}`);
+    }
     if (parsed.is_deal === false) return null;
 
-    return parsed as ExtractedDeal;
+    return parsed as unknown as ExtractedDeal;
   } catch (error) {
-    console.error(`[press-releases] Extraction error for "${title}":`, error);
-    return null;
+    // A parse failure or an API error is not a verdict: rethrow so callers retry the item
+    // instead of recording it as "not a deal" (Sep 29 2026: the NextCure/Avere merger and
+    // Sangamo's $163.55M asset sale were lost that way).
+    if (error instanceof ExtractionParseError) throw error;
+    console.error(`[press-releases] Extraction error for "${title}":`, error instanceof Error ? error.message : error);
+    throw error;
   }
+}
+
+export class ExtractionParseError extends Error {
+  constructor(msg: string) { super(msg); this.name = 'ExtractionParseError'; }
+}
+
+/**
+ * The first complete top-level JSON object in a model reply. The old greedy /\{[\s\S]*\}/
+ * swallowed trailing notes that contained braces, or a second object, and JSON.parse failed.
+ */
+export function firstJsonObject(text: string): string | null {
+  const start = text.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0, inString = false, escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') { depth--; if (depth === 0) return text.slice(start, i + 1); }
+  }
+  return null;
 }
 
 // === Main Ingestion Function ===
