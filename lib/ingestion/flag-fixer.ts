@@ -103,15 +103,26 @@ export interface ExtractedTerms {
   notes?: string | null;
 }
 
-export type FixOutcome =
+/** Every outcome carries the deal label and why it was flagged, so the Slack report reads on its own. */
+interface OutcomeContext { label: string; flaggedBecause: string }
+export type FixOutcome = OutcomeContext & (
   | { kind: 'fixed'; dealId: string; url: string; diff: string[] }
   | { kind: 'duplicate'; dealId: string; keeperId: string; url: string | null }
-  | { kind: 'unresolved'; dealId: string; reason: string };
+  | { kind: 'rejected'; dealId: string; reason: string }
+  | { kind: 'unresolved'; dealId: string; reason: string; attempt: number; retryOn: string });
+
+/**
+ * A flag is never left for a person. After this many attempts without a primary
+ * document the row is rejected: it cannot be shown under the primary-source rule,
+ * and a later primary filing re-enters through ingestion as a new, cited row.
+ */
+export const MAX_FIX_ATTEMPTS = 3;
 
 export interface FlagFixResult {
   attempted: number;
   fixed: number;
   duplicates: number;
+  rejected: number;
   unresolved: number;
   outcomes: FixOutcome[];
   errors: string[];
@@ -379,7 +390,7 @@ export async function fixFlaggedDeals(
   const maxDeals = options?.maxDeals ?? 8;
   const budget = options?.timeBudgetMs ?? 240_000;
   const retryAfterDays = options?.retryAfterDays ?? 3;
-  const result: FlagFixResult = { attempted: 0, fixed: 0, duplicates: 0, unresolved: 0, outcomes: [], errors: [] };
+  const result: FlagFixResult = { attempted: 0, fixed: 0, duplicates: 0, rejected: 0, unresolved: 0, outcomes: [], errors: [] };
   const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
   const since = new Date(Date.now() - retryAfterDays * 86_400_000).toISOString();
@@ -407,6 +418,7 @@ export async function fixFlaggedDeals(
       result.outcomes.push(outcome);
       if (outcome.kind === 'fixed') result.fixed++;
       else if (outcome.kind === 'duplicate') result.duplicates++;
+      else if (outcome.kind === 'rejected') result.rejected++;
       else result.unresolved++;
     } catch (e) {
       result.errors.push(`${deal.licensor_name}/${deal.licensee_name}: ${String(e).slice(0, 200)}`);
@@ -415,7 +427,28 @@ export async function fixFlaggedDeals(
   return result;
 }
 
+/** Label and flag reason for the report: the last verifier or pipeline note on the row. */
+export function outcomeContext(deal: Pick<FlaggedDeal, 'licensor_name' | 'licensee_name' | 'asset_name' | 'verification_notes'>): OutcomeContext {
+  const label = `${deal.licensor_name ?? '?'} → ${deal.licensee_name ?? '?'}${deal.asset_name ? ` (${deal.asset_name})` : ''}`;
+  const notes = (deal.verification_notes ?? '').replace(/\[\d{4}-\d{2}-\d{2} flag-and-fix:[^\]]*\]/g, '').trim();
+  const parts = notes.split(/\s\|\s|\s(?=\[\d{4}-\d{2}-\d{2})/).map(p => p.trim()).filter(Boolean);
+  const last = parts[parts.length - 1] ?? 'flagged by the verifier';
+  return { label, flaggedBecause: last.length > 220 ? `${last.slice(0, 217)}...` : last };
+}
+
 async function fixOne(supabase: SupabaseClient, anthropic: Anthropic, perplexityApiKey: string, deal: FlaggedDeal): Promise<FixOutcome> {
+  const ctx = outcomeContext(deal);
+  const outcome = await fixOneInner(supabase, anthropic, perplexityApiKey, deal);
+  return { ...ctx, ...outcome } as FixOutcome;
+}
+
+type BareOutcome =
+  | { kind: 'fixed'; dealId: string; url: string; diff: string[] }
+  | { kind: 'duplicate'; dealId: string; keeperId: string; url: string | null }
+  | { kind: 'rejected'; dealId: string; reason: string }
+  | { kind: 'unresolved'; dealId: string; reason: string; attempt: number; retryOn: string };
+
+async function fixOneInner(supabase: SupabaseClient, anthropic: Anthropic, perplexityApiKey: string, deal: FlaggedDeal): Promise<BareOutcome> {
   const parties = { licensor: deal.licensor_name, licensee: deal.licensee_name };
   const existing = [deal.source_url, deal.press_release_url].filter((u): u is string => !!u);
   let candidates = primaryCandidates(existing, parties);
@@ -435,11 +468,27 @@ async function fixOne(supabase: SupabaseClient, anthropic: Anthropic, perplexity
   }
 
   if (!terms || !url) {
+    const { count: prior } = await supabase.from('remediation_log').select('id', { count: 'exact', head: true })
+      .eq('cron_source', FLAG_FIXER_SOURCE).eq('deal_id', deal.id).eq('issue_type', 'flagged_unresolved');
+    const attempt = (prior ?? 0) + 1;
+    if (attempt >= MAX_FIX_ATTEMPTS) {
+      const reason = `no primary document after ${attempt} attempts (${lastReason})`;
+      await supabase.from('deals').update({
+        verification_status: 'rejected',
+        verified: false,
+        verify_attempted_at: new Date().toISOString(),
+        verification_notes: appendVerificationNote(deal.verification_notes, `[${today()} flag-and-fix: rejected, ${reason}. Removed from counts; a primary filing re-enters through ingestion.]`),
+      }).eq('id', deal.id);
+      await log(supabase, 'flagged_rejected_no_source', deal.id, reason, null, false);
+      return { kind: 'rejected', dealId: deal.id, reason };
+    }
+    const retryOn = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
     await supabase.from('deals').update({
-      verification_notes: appendVerificationNote(deal.verification_notes, `[${today()} flag-and-fix: unresolved, ${lastReason}]`),
+      verify_attempted_at: new Date().toISOString(),
+      verification_notes: appendVerificationNote(deal.verification_notes, `[${today()} flag-and-fix: attempt ${attempt} of ${MAX_FIX_ATTEMPTS}, ${lastReason}; held out of counts, retry ${retryOn}]`),
     }).eq('id', deal.id);
-    await log(supabase, 'flagged_unresolved', deal.id, lastReason, null, true);
-    return { kind: 'unresolved', dealId: deal.id, reason: lastReason };
+    await log(supabase, 'flagged_unresolved', deal.id, `attempt ${attempt} of ${MAX_FIX_ATTEMPTS}: ${lastReason}`, null, false);
+    return { kind: 'unresolved', dealId: deal.id, reason: lastReason, attempt, retryOn };
   }
 
   // Already held by a verified, cited row? Then this one is its duplicate.
@@ -487,7 +536,7 @@ async function fixOne(supabase: SupabaseClient, anthropic: Anthropic, perplexity
   return { kind: 'fixed', dealId: deal.id, url, diff };
 }
 
-async function markDuplicate(supabase: SupabaseClient, deal: FlaggedDeal, keeperId: string, url: string | null): Promise<FixOutcome> {
+async function markDuplicate(supabase: SupabaseClient, deal: FlaggedDeal, keeperId: string, url: string | null): Promise<BareOutcome> {
   await supabase.from('deals').update({
     verification_status: 'rejected',
     verified: false,

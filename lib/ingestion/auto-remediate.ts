@@ -246,10 +246,14 @@ export async function flagDuplicatesForReview(
     if (!deals || deals.length < 2) continue;
 
     for (let i = 1; i < deals.length; i++) {
+      // Append, never overwrite, the row's history; the flag-fixer resolves it (retire as
+      // duplicate of the cited keeper, or correct and verify). Nobody is asked to merge.
+      const { data: cur } = await supabase.from('deals').select('verification_notes').eq('id', deals[i].id).maybeSingle();
+      const stamp = new Date().toISOString().slice(0, 10);
       await supabase
         .from('deals')
         .update({
-          verification_notes: `Potential duplicate of deal ${deals[0].id} (${pair.licensor} / ${pair.licensee}). Higher-confidence version retained.`,
+          verification_notes: `${cur?.verification_notes ? `${cur.verification_notes} ` : ''}[${stamp} data-health] potential duplicate of ${deals[0].id} (${pair.licensor} / ${pair.licensee}); sent to the flag-fixer.`,
           verification_status: 'flagged',
         })
         .eq('id', deals[i].id);
@@ -257,9 +261,9 @@ export async function flagDuplicatesForReview(
       await logRemediation(supabase, {
         cronSource: 'deal_data_health', issueType: 'potential_duplicate',
         dealId: deals[i].id,
-        actionTaken: 'flagged_for_manual_merge',
+        actionTaken: 'sent_to_flag_fixer',
         oldValue: `duplicate of ${deals[0].id}`,
-        needsReview: true,
+        needsReview: false,
       });
       result.fixed++;
     }

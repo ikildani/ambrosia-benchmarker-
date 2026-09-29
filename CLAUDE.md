@@ -29,6 +29,13 @@ alert, email or report.
 
 ## Ingestion: flag it, fix it, report it
 
+**Owner rule (Issa, 2026-09-29): a flag is never a request for review.** Every flagged deal is
+resolved automatically, and Slack only shows "flagged because X → what was done". The verification
+cron hands the deals it flags to the flag-fixer in the same run; the fixer corrects and cites,
+retires as a duplicate, or holds the row out of counts and retries, rejecting it after
+`MAX_FIX_ATTEMPTS` (3) attempts with no primary document. Report builder:
+lib/ingestion/flag-resolution-report.ts. Never post "for review" / "needs review" about deals.
+
 A flagged deal is not parked for a human. It is fixed, and the owner gets a report of
 what was flagged and how it was fixed.
 

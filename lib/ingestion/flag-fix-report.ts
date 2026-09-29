@@ -48,11 +48,11 @@ export function buildFlagFixReportHtml(r: FlagFixReport): string {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;max-width:760px;margin:0 auto;padding:20px">
 <h2 style="margin:0 0 4px">Deal data: flagged and fixed</h2>
-<p style="margin:0 0 16px;color:#475569">Since ${esc(r.since.slice(0, 16).replace('T', ' '))} UTC. ${r.newlyFlagged} deals newly flagged; ${total} handled: ${r.fixed.length} fixed from primary sources, ${r.duplicates.length} removed as duplicates, ${r.rejected.length} rejected, ${r.unresolved.length} unresolved. ${r.stillFlagged} flagged deals remain in the queue.</p>
+<p style="margin:0 0 16px;color:#475569">Since ${esc(r.since.slice(0, 16).replace('T', ' '))} UTC. ${r.newlyFlagged} deals newly flagged; ${total} handled: ${r.fixed.length} fixed from primary sources, ${r.duplicates.length} removed as duplicates, ${r.rejected.length} rejected, ${r.unresolved.length} held out of counts and retried automatically (rejected after 3 attempts without a primary source). ${r.stillFlagged} flagged deals are in the fixer's queue; none need action from you.</p>
 ${table('Fixed', r.fixed, x => `${esc(x.action_taken)} ${link(x.new_value)}`)}
 ${table('Removed as duplicates', r.duplicates, x => esc(x.action_taken))}
 ${table('Rejected', r.rejected, x => esc(x.action_taken))}
-${table('Unresolved (still flagged, excluded from counts)', r.unresolved, x => esc(x.action_taken))}
+${table('Held out of counts, retrying automatically', r.unresolved, x => esc(x.action_taken))}
 ${total === 0 ? '<p>No flagged deals were handled in this window.</p>' : ''}
 <p style="margin-top:24px;color:#64748b;font-size:12px">Every change is in remediation_log and in each deal's verification_notes. Fixed deals were corrected only from the cited primary document.</p>
 </body></html>`;
@@ -89,7 +89,7 @@ export async function collectFlagFixReport(supabase: SupabaseClient, since: stri
     stillFlagged: stillFlagged ?? 0,
     fixed: all.filter(r => r.issue_type === 'flagged_fixed'),
     duplicates: all.filter(r => r.issue_type === 'flagged_duplicate'),
-    rejected: all.filter(r => r.issue_type === 'auto_reject'),
+    rejected: all.filter(r => r.issue_type === 'auto_reject' || r.issue_type === 'flagged_rejected_no_source'),
     unresolved: all.filter(r => r.issue_type === 'flagged_unresolved'),
   };
 }
@@ -106,7 +106,7 @@ export async function sendFlagFixReport(supabase: SupabaseClient, hours = 24): P
   const handled = report.fixed.length + report.duplicates.length + report.rejected.length + report.unresolved.length;
   if (handled === 0 && report.newlyFlagged === 0) return { sent: false, error: 'nothing to report', report, html };
   const to = process.env.ADMIN_NOTIFICATION_EMAIL || 'ikildani@ambrosiaventures.co';
-  const subject = `Deal data: ${report.fixed.length} fixed, ${report.duplicates.length} duplicates removed, ${report.unresolved.length} unresolved`;
+  const subject = `Deal data: ${report.fixed.length} fixed, ${report.duplicates.length} duplicates removed, ${report.rejected.length} rejected, ${report.unresolved.length} retrying`;
   const res = await sendEmail({ to, subject, html });
   return { sent: res.success, error: res.success ? undefined : res.error, report, html };
 }

@@ -323,7 +323,7 @@ export async function GET(request: NextRequest) {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `:wrench: *Auto-Remediation:*\n• Upfront > TDV: found ${issues.upfrontExceedsTdv} | fixed ${tdvFixResult.fixed} | review ${tdvFixResult.errors.length}\n• Missing TA: found ${issues.noTa} | fixed ${taFixResult.fixed} | skipped ${taFixResult.skipped}\n• Duplicates: found ${potentialDuplicates} | flagged ${dupResult.fixed} | review ${potentialDuplicates - dupResult.fixed}`,
+          text: `:wrench: *Auto-Remediation:*\n• Upfront > TDV: found ${issues.upfrontExceedsTdv} | fixed ${tdvFixResult.fixed} | retried next run ${tdvFixResult.errors.length}\n• Missing TA: found ${issues.noTa} | fixed ${taFixResult.fixed} | skipped ${taFixResult.skipped}\n• Duplicates: found ${potentialDuplicates} | sent to the flag-fixer ${dupResult.fixed} (resolved automatically, reported in the flagged-deals message)`,
         },
       },
       { type: 'divider' },
