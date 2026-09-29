@@ -715,17 +715,52 @@ ${content}`;
     const textContent = response.content[0];
     if (textContent.type !== 'text') return null;
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const parsed = JSON.parse(jsonMatch[0]);
+    const json = firstJsonObject(textContent.text);
+    if (!json) throw new ExtractionParseError(`no JSON object in the model reply for "${title}"`);
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(json);
+    } catch (e) {
+      throw new ExtractionParseError(`unparseable JSON for "${title}": ${String(e).slice(0, 120)}`);
+    }
     if (parsed.is_deal === false) return null;
 
-    return parsed as ExtractedDeal;
+    return parsed as unknown as ExtractedDeal;
   } catch (error) {
-    console.error(`[press-releases] Extraction error for "${title}":`, error);
-    return null;
+    // A parse failure or an API error is not a verdict: rethrow so callers retry the item
+    // instead of recording it as "not a deal" (Sep 29 2026: the NextCure/Avere merger and
+    // Sangamo's $163.55M asset sale were lost that way).
+    if (error instanceof ExtractionParseError) throw error;
+    console.error(`[press-releases] Extraction error for "${title}":`, error instanceof Error ? error.message : error);
+    throw error;
   }
+}
+
+export class ExtractionParseError extends Error {
+  constructor(msg: string) { super(msg); this.name = 'ExtractionParseError'; }
+}
+
+/**
+ * The first complete top-level JSON object in a model reply. The old greedy /\{[\s\S]*\}/
+ * swallowed trailing notes that contained braces, or a second object, and JSON.parse failed.
+ */
+export function firstJsonObject(text: string): string | null {
+  const start = text.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0, inString = false, escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') { depth--; if (depth === 0) return text.slice(start, i + 1); }
+  }
+  return null;
 }
 
 // === Main Ingestion Function ===
