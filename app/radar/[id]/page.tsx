@@ -36,12 +36,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const auth = await resolveUserTier();
   if (!auth.hasProAccess) return { ...base, title: 'Asset brief | Solidus Search & Evaluation' };
   const supabase = createServiceClient();
-  const { data } = await supabase.from('clinical_assets').select('asset_name, company_name').eq('id', id).maybeSingle();
+  const { data } = await supabase.from('clinical_assets').select('asset_name, display_name, company_name').eq('id', id).maybeSingle();
   if (!data) return { ...base, title: 'Asset brief | Solidus Search & Evaluation' };
   return {
     ...base,
-    title: `${data.asset_name} (${data.company_name}) — Search & Evaluation | Solidus`,
-    description: `Licensing intent, predicted terms with comparables, trials, acquirers and analyst brief for ${data.asset_name} by ${data.company_name}.`,
+    title: `${data.display_name || data.asset_name} (${data.company_name}) — Search & Evaluation | Solidus`,
+    description: `Licensing intent, predicted terms with comparables, trials, acquirers and analyst brief for ${data.display_name || data.asset_name} by ${data.company_name}.`,
   };
 }
 
