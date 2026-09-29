@@ -9,14 +9,16 @@ import { dripSuppressionFilter } from '@/lib/email/drip-suppression';
 import {
   CALCULATION_COLUMNS,
   assetFromCalculation,
-  buildCompSetEmail,
+  buildCompSetReport,
   buildUserCompSet,
   compSetIsSendable,
-  createBenchmarkShareLink,
+  compSetReportUrl,
   fetchVerifiedDealRows,
+  newReportToken,
+  saveCompSetReport,
   type CalculationRow,
-  type CompSetCta,
-} from '@/lib/onboarding/comp-set-email';
+} from '@/lib/onboarding/comp-set-report';
+import { buildCompSetEmail, type CompSetCta } from '@/lib/onboarding/comp-set-email';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -24,11 +26,11 @@ export const dynamic = 'force-dynamic';
 // ---------------------------------------------------------------------------
 // "Your comp set" email — every 4 hours (vercel.json "0 */4 * * *")
 //
-// The automated version of the comparable-deal set sent to prospects by hand
-// (lib/onboarding/comp-set-email.ts). For every signed-up user who has
-// benchmarked a program in the last 7 days and then stopped iterating for an
-// hour, take their latest calculation and email them the verified comparable
-// deals behind it, a forwardable /share link, and one next step.
+// The automated version of the comparable-deal set sent to prospects by hand.
+// For every signed-up user who has benchmarked a program in the last 7 days
+// and then stopped iterating for an hour, build the verified comparable deals
+// behind their latest calculation, save them as a comp set report
+// (/comps/<token>, Deal Intelligence Brief format) and email the link.
 //
 // Guards:
 //   - once per user, ever (event_type = 'comp_set_email_sent')
@@ -139,7 +141,7 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
     let skippedThin = 0;
     const errors: string[] = [];
-    const previews: Array<{ email: string; subject: string; comps: number; share: boolean }> = [];
+    const previews: Array<{ email: string; subject: string; comps: number }> = [];
 
     for (const calc of settled) {
       if (emailsSent >= MAX_SENDS_PER_RUN) break;
@@ -157,20 +159,18 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        const shareUrl = dryRun ? null : await createBenchmarkShareLink(supabase, { id: profile.id, email: profile.email }, calc.inputs);
-        const { subject, html } = buildCompSetEmail({
-          name: profile.full_name,
-          calc,
-          asset,
-          compSet,
-          shareUrl,
-          cta,
-        });
+        const token = newReportToken();
+        const report = buildCompSetReport({ calc, asset, compSet, preparedFor: profile.full_name, token });
+        const reportUrl = compSetReportUrl(token);
+        const { subject, html } = buildCompSetEmail({ name: profile.full_name, report, reportUrl, cta });
 
         if (dryRun) {
-          previews.push({ email: profile.email, subject, comps: compSet.rows.length, share: false });
+          previews.push({ email: profile.email, subject, comps: report.rows.length });
           continue;
         }
+
+        // Save before sending: the email must never point at a missing page.
+        await saveCompSetReport(supabase, { token, userId: profile.id, calculationId: calc.id, report });
 
         const result = await sendEmail({ to: profile.email, subject, html, replyTo: 'ikildani@ambrosiaventures.co' });
         if (!result.success) {
@@ -184,9 +184,10 @@ export async function GET(request: NextRequest) {
             calculation_id: calc.id,
             indication: asset.indication,
             phase: asset.phase,
-            comps: compSet.rows.length,
-            same_indication: compSet.rows.filter((r) => r.sameIndication).length,
-            share_url: shareUrl,
+            comps: report.rows.length,
+            same_indication: report.sameIndicationCount,
+            report_id: report.reportId,
+            report_token_prefix: token.slice(0, 4),
             cta: cta.kind,
           },
           user_tier: profile.tier ?? 'free',

@@ -1,13 +1,16 @@
 import {
   assetFromCalculation,
-  buildCompSetEmail,
+  buildCompSetReport,
   buildUserCompSet,
   compSetIsSendable,
+  compSetReportUrl,
   dedupeForDisplay,
   fmtM,
   indicationLabel,
+  newReportToken,
   type CalculationRow,
-} from '@/lib/onboarding/comp-set-email';
+} from '@/lib/onboarding/comp-set-report';
+import { buildCompSetEmail } from '@/lib/onboarding/comp-set-email';
 import type { RawDealRow } from '@/lib/brief/comp-set';
 
 const calc: CalculationRow = {
@@ -28,7 +31,6 @@ const calc: CalculationRow = {
   output_total_deal_value_high: '1861',
   output_royalty_low: '9',
   output_royalty_high: '21',
-  inputs: null,
 };
 
 function deal(i: number, over: Partial<RawDealRow> = {}): RawDealRow {
@@ -86,43 +88,55 @@ describe('comp set email', () => {
     expect(compSetIsSendable(buildUserCompSet([1, 2, 3, 4, 5, 6].map((i) => deal(i)), asset))).toBe(true);
   });
 
-  it('builds the email: benchmark, comparable stats, sourced rows, share link, trial CTA', () => {
+  function report(n = 7) {
     const asset = assetFromCalculation(calc)!;
-    const compSet = buildUserCompSet([1, 2, 3, 4, 5, 6, 7].map((i) => deal(i)), asset);
-    const { subject, html } = buildCompSetEmail({
-      name: 'John Smith',
-      calc,
-      asset,
-      compSet,
-      shareUrl: 'https://solidus.ambrosiaventures.co/share/token123',
-      cta: { kind: 'trial' },
-    });
-    expect(subject).toBe(`Your Pancreatic Cancer comp set: ${compSet.rows.length} comparable deals`);
+    const compSet = buildUserCompSet(Array.from({ length: n }, (_, i) => deal(i + 1)), asset);
+    return buildCompSetReport({ calc, asset, compSet, preparedFor: 'John Smith', token: 'abcdEFGH12345678', now: new Date('2026-09-29T12:00:00Z') });
+  }
+
+  it('snapshots the report: program labels, benchmark, headline stats, sourced rows', () => {
+    const r = report();
+    expect(r.reportId).toBe('CS-20260929-ABCD');
+    expect(r.program).toMatchObject({ phaseLabel: 'Phase 2', modalityLabel: 'small molecule', indicationLabel: 'Pancreatic Cancer', therapeuticAreaLabel: 'Oncology', dealTypeLabel: 'License' });
+    expect(r.benchmark.upfront).toEqual({ low: 27, high: 135, mid: 80 });
+    expect(r.benchmark.royalty).toMatchObject({ low: 9, high: 21 });
+    expect(r.headline.upfront?.p50).toBeGreaterThan(0);
+    expect(r.rows.length).toBe(7);
+    expect(r.sameIndicationCount).toBe(7);
+    expect(r.rows[0].sourceUrl).toMatch(/^https:\/\/www\.sec\.gov\//);
+  });
+
+  it('makes unguessable 16-character tokens and report URLs', () => {
+    const t = newReportToken();
+    expect(t).toMatch(/^[A-Za-z0-9_-]{16}$/);
+    expect(newReportToken()).not.toBe(t);
+    expect(compSetReportUrl(t)).toBe(`https://solidus.ambrosiaventures.co/comps/${t}`);
+  });
+
+  it('emails a short note that links to the report, with headline numbers and a trial line', () => {
+    const r = report();
+    const url = compSetReportUrl('abcdEFGH12345678');
+    const { subject, html } = buildCompSetEmail({ name: 'John Smith', report: r, reportUrl: url, cta: { kind: 'trial' } });
+    expect(subject).toBe(`Your Pancreatic Cancer comp set: ${r.rows.length} comparable deals`);
     expect(html).toContain('Hi John,');
     expect(html).toContain('Phase 2 small molecule program in Pancreatic Cancer');
-    expect(html).toContain('upfront $27M to $135M');
+    expect(html).toContain('Open your comp set');
+    expect(html).toContain(url);
     expect(html).toContain('Median upfront');
-    expect(html).toContain('https://www.sec.gov/doc1');
-    expect(html).toContain('/share/token123');
     expect(html).toContain('/trial?ref=comp_set');
-    expect(html).toContain('Start your 7-day free trial');
+    // The rows live on the report page, not in the email.
+    expect(html).not.toContain('https://www.sec.gov/doc1');
   });
 
-  it('points Pro users at the product, not a trial', () => {
-    const asset = assetFromCalculation(calc)!;
-    const compSet = buildUserCompSet([1, 2, 3, 4, 5, 6].map((i) => deal(i)), asset);
-    const { html } = buildCompSetEmail({ name: null, calc, asset, compSet, shareUrl: null, cta: { kind: 'pro' } });
+  it('points Pro users at alerts, not a trial', () => {
+    const { html } = buildCompSetEmail({ name: null, report: report(6), reportUrl: 'https://x/comps/t', cta: { kind: 'pro' } });
     expect(html).toContain('Hi,');
-    expect(html).toContain('Open in Solidus');
-    expect(html).not.toContain('free trial');
-    // Without a share link the benchmark button opens the calculator.
-    expect(html).toContain('https://solidus.ambrosiaventures.co/calculator');
+    expect(html).toContain('deal alert');
+    expect(html).not.toContain('free for 7 days');
   });
 
-  it('escapes party names from the database', () => {
-    const asset = assetFromCalculation(calc)!;
-    const rows = [1, 2, 3, 4, 5, 6].map((i) => deal(i, i === 1 ? { licensor_name: '<img src=x onerror=alert(1)>' } : {}));
-    const { html } = buildCompSetEmail({ name: 'A', calc, asset, compSet: buildUserCompSet(rows, asset), shareUrl: null, cta: { kind: 'trial' } });
+  it('escapes names in the email', () => {
+    const { html } = buildCompSetEmail({ name: '<img src=x onerror=alert(1)>', report: report(6), reportUrl: 'https://x/comps/t', cta: { kind: 'trial' } });
     expect(html).not.toContain('<img src=x');
   });
 
