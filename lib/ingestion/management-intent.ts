@@ -19,6 +19,7 @@
  * returned for the run log.
  */
 
+import { budgetCap } from '@/lib/ai/budget';
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -453,7 +454,7 @@ export async function runManagementIntent(
   const started = Date.now();
   const now = opts.now ?? new Date();
   const budget = opts.timeBudgetMs ?? DEFAULT_TIME_BUDGET_MS;
-  const costCap = opts.costCapUsd ?? Number(process.env.INTENT_COST_CAP_USD ?? '3');
+  const costCap = opts.costCapUsd ?? budgetCap(process.env.INTENT_COST_CAP_USD, 3, 1);
   const errors: string[] = [];
   const usage = emptyUsage();
   const result: ManagementIntentRunResult = {

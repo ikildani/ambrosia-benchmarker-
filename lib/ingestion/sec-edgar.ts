@@ -1,6 +1,7 @@
 // SEC EDGAR Deal Intelligence Ingestion
 // Extracts licensing deals from 8-K filings using Claude AI
 
+import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { secThrottle, SEC_USER_AGENT, eftsSearch } from './edgar-fts';
@@ -516,7 +517,7 @@ export async function fetchFilingContent(url: string): Promise<string> {
  * extractor can be moved (e.g. to claude-sonnet-5) without a deploy; the
  * provenance column records whichever model actually ran.
  */
-export const EXTRACTION_MODEL = process.env.EXTRACTION_MODEL || 'claude-opus-4-6';
+export const EXTRACTION_MODEL = budgetModel(process.env.EXTRACTION_MODEL, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL);
 export const EXTRACTION_MAX_TOKENS = 4000;
 
 /**
