@@ -1,3 +1,5 @@
+> **Superseded (Sep 28 2026)** by [`docs/ip-map-spec-v2.md`](ip-map-spec-v2.md). The rights layer below is now section 6 of v2; IP Map's core is the Buyer Propensity engine.
+
 # IP Map — the rights layer (Workstream 6 of the outcomes program)
 
 Decision (2026-09-25): IP Map is built as a layer that feeds Solidus, Augur and the Deal Intelligence Brief, keyed on the shared asset and company identifiers. It becomes a standalone product only if a buyer pays for it alone.
