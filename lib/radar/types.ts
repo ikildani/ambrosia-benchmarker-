@@ -104,6 +104,8 @@ export interface ClinicalAssetRow {
   originator_region_source?: string | null;
   /** NULL = classifier or ingestion; 'trial_conditions' = keyword vote over trial conditions (migration 166). */
   therapeutic_area_source?: string | null;
+  /** NULL = classifier or ingestion; 'name_rules' = unambiguous name evidence (migration 167). */
+  modality_source?: string | null;
   licensing_intent_score: number | null;
   competitive_heat: number | null;
   deal_readiness_score: number | null;
