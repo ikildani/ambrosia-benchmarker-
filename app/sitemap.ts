@@ -1,3 +1,4 @@
+import { RADAR_PUBLIC } from '@/lib/radar/launch';
 import { MetadataRoute } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getAllBenchmarkSlugsWithDb } from '@/lib/benchmarkPages';
@@ -102,7 +103,7 @@ function getCorePages(): MetadataRoute.Sitemap {
     // /radar is an app surface (noindex, Pro-gated) and stays out of the
     // sitemap even when enabled; the public page for the module is the
     // indexable landing page, not the feed.
-    staticEntry('/search-and-evaluation', 'weekly', 0.8),
+    ...(RADAR_PUBLIC ? [staticEntry('/search-and-evaluation', 'weekly', 0.8)] : []),
     staticEntry('/privacy', 'yearly', 0.3),
     staticEntry('/terms', 'yearly', 0.3),
     staticEntry('/security', 'yearly', 0.4),

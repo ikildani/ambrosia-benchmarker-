@@ -237,12 +237,6 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 13. Lifecycle Extensions — label expansion, pediatric exclusivity, combos
 14. Buyer-Specific Valuation — intent-adjusted deal economics per acquirer
 
-### Search & Evaluation (asset screening module, included in Pro)
-- 45,000+ unpartnered or partially partnered industry programs, preclinical to Phase 3, resolved from trial registries in 100 countries and from company filings (10-K / 20-F pipeline disclosures for preclinical programs)
-- Licensing-intent score per asset, shown as a percentile within phase × therapeutic-area peers, with the evidence behind each factor and an out-of-sample backtest published at https://solidus.ambrosiaventures.co/radar/methodology
-- Predicted deal terms per asset (upfront, total, royalty range) from cited, phase-matched comparable transactions
-- Mandates (saved buyer criteria) with daily digests, watchlists, alert rules, saved views and an acquirer view ("I am company X: which programs fit my gaps")
-- Landing page: https://solidus.ambrosiaventures.co/search-and-evaluation
 
 ### Coverage
 - 300+ verified, primary-sourced transactions (updated daily; live count at https://solidus.ambrosiaventures.co/methodology)
@@ -251,7 +245,6 @@ A preclinical asset valued at $65M by static rNPV may have a real options value 
 - 40+ modalities
 - 5 deal types
 - 6 territories (US, EU5, Japan, China, Global, Ex-US)
-- 45,000+ screenable clinical-stage and preclinical programs across 100 countries (Search & Evaluation)
 
 ### Pricing
 - Free: 3 calculations (account required), basic deal term estimates

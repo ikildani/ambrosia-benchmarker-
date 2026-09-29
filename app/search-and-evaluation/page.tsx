@@ -14,6 +14,9 @@ import { LIVE_DEAL_COUNT, formatDealCount, PRICING } from '@/lib/config/constant
 import { generateBreadcrumbSchema, generateFAQSchema, generateWebPageSchema } from '@/lib/seo/structured-data';
 import { radarBacktested } from '@/lib/radar/backtested';
 import { SearchEvaluationLanding } from '@/components/radar/landing/SearchEvaluationLanding';
+import { notFound } from 'next/navigation';
+import { RADAR_PUBLIC } from '@/lib/radar/launch';
+import { radarAccessible } from '@/lib/radar/launch-server';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 const URL = `${BASE_URL}/search-and-evaluation`;
@@ -35,6 +38,8 @@ export const metadata: Metadata = {
     'business development search and evaluation',
   ],
   alternates: { canonical: URL },
+  // Indexable only after the public launch.
+  robots: RADAR_PUBLIC ? undefined : { index: false, follow: false },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
@@ -56,7 +61,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const FAQS = [
   {
@@ -90,6 +95,7 @@ const FAQS = [
 ];
 
 export default async function SearchEvaluationPage() {
+  if (!(await radarAccessible())) notFound();
   const backtested = await radarBacktested();
   const faqSchema = generateFAQSchema(FAQS);
   const breadcrumbSchema = generateBreadcrumbSchema([

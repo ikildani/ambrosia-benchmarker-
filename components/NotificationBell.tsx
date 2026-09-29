@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { radarVisibleTo } from '@/lib/radar/launch';
 
 interface AlertItem {
   headline: string;
@@ -23,10 +25,6 @@ interface RadarEvent {
   payload: { title?: string; detail?: string; digest?: { mandate_name: string; total_new: number } };
 }
 
-// Mirrors the gate in app/radar/page.tsx: Radar alerts only when the module is on.
-const RADAR_ENABLED =
-  process.env.NEXT_PUBLIC_RADAR_ENABLED === 'true' ||
-  (!process.env.NEXT_PUBLIC_RADAR_ENABLED && process.env.NODE_ENV === 'development');
 
 function radarTitle(e: RadarEvent): string {
   if (e.payload.title) return e.payload.title;
@@ -48,6 +46,9 @@ function radarHref(e: RadarEvent): string {
  * Alerts page, so their unread count comes from the API.
  */
 export default function NotificationBell() {
+  // Radar alerts only when the module is public or this is an internal preview account.
+  const { user } = useAuth();
+  const RADAR_ENABLED = radarVisibleTo(user?.email);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [radar, setRadar] = useState<RadarEvent[]>([]);
   const [radarUnread, setRadarUnread] = useState(0);
@@ -88,7 +89,8 @@ export default function NotificationBell() {
         })
         .catch(() => {});
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when the viewer changes
+  }, [RADAR_ENABLED]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
