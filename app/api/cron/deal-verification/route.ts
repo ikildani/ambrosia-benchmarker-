@@ -18,6 +18,7 @@ import { checkDealStatuses, type DealStatusResult } from '@/lib/ingestion/deal-s
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
 import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 import { runOutcomePhase } from '@/lib/outcomes/cron';
+import { buildFlagResolutionSlack } from '@/lib/ingestion/flag-resolution-report';
 import { fixFlaggedDeals, type FlagFixResult } from '@/lib/ingestion/flag-fixer';
 
 export const maxDuration = 300;
@@ -134,13 +135,34 @@ export async function GET(request: NextRequest) {
     flaggedRetryAfterDays,
   });
 
+  // Every deal flagged in this pass is handed to the flag-fixer now, not posted for review
+  // (Issa, Sep 29 2026: "I shouldn't have to review it"). Whatever the budget does not reach
+  // is taken by the next hourly fixer slot and reported then. The :40 slot also drains the
+  // older backlog.
   let flagFix: FlagFixResult | null = null;
-  if (flagFixSlots > 0) {
+  const mergeFix = (a: FlagFixResult | null, b: FlagFixResult): FlagFixResult => a ? {
+    attempted: a.attempted + b.attempted, fixed: a.fixed + b.fixed, duplicates: a.duplicates + b.duplicates,
+    rejected: a.rejected + b.rejected, unresolved: a.unresolved + b.unresolved,
+    outcomes: [...a.outcomes, ...b.outcomes], errors: [...a.errors, ...b.errors],
+  } : b;
+  const justFlagged = result.flaggedDeals.map(d => d.id);
+  if (justFlagged.length > 0) {
     try {
-      flagFix = await fixFlaggedDeals(supabase, perplexityApiKey, anthropicApiKey, {
+      flagFix = mergeFix(flagFix, await fixFlaggedDeals(supabase, perplexityApiKey, anthropicApiKey, {
+        ids: justFlagged,
+        maxDeals: Math.min(justFlagged.length, 8),
+        timeBudgetMs: Math.max(30_000, 270_000 - (Date.now() - passStart)),
+      }));
+    } catch (e) {
+      console.error('[flag-fixer] same-run fix failed:', e instanceof Error ? e.message : e);
+    }
+  }
+  if (flagFixSlots > 0 && 270_000 - (Date.now() - passStart) > 40_000) {
+    try {
+      flagFix = mergeFix(flagFix, await fixFlaggedDeals(supabase, perplexityApiKey, anthropicApiKey, {
         maxDeals: flagFixSlots,
         timeBudgetMs: Math.max(30_000, 270_000 - (Date.now() - passStart)),
-      });
+      }));
     } catch (e) {
       console.error('[flag-fixer] failed inside deal-verification:', e instanceof Error ? e.message : e);
     }
@@ -159,48 +181,15 @@ export async function GET(request: NextRequest) {
     if (recomputeErr) console.error('[deal-verification] recompute_deal_dedupe failed:', recomputeErr.message);
   }
 
-  // Notify Slack if any deals were flagged
-  if (result.flagged > 0) {
-    // Fetch the flagged deals for the notification
-    const { data: flaggedDeals } = await supabase
-      .from('deals')
-      .select('licensor_name, licensee_name, verification_notes')
-      .in('verification_status', ['flagged', 'rejected'])
-      .order('updated_at', { ascending: false })
-      .limit(result.flagged);
-
-    const dealLines = (flaggedDeals || []).map(
-      (d) => `${d.licensor_name} \u2192 ${d.licensee_name}: ${d.verification_notes || 'No details'}`
-    );
-
-    await postToSlack(
-      [{
-        color: '#f59e0b',
-        blocks: [
-          {
-            type: 'header',
-            text: { type: 'plain_text', text: `\u26a0\ufe0f ${result.flagged} Deals Flagged for Review`, emoji: true },
-          },
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: dealLines.map((line) => `\u2022 ${line}`).join('\n'),
-            },
-          },
-          {
-            type: 'context',
-            elements: [
-              {
-                type: 'mrkdwn',
-                text: `Verified: ${result.verified} (${acceptResult.fixed} auto-accepted) | Flagged: ${result.flagged} | Rejected: ${rejectResult.fixed} auto-rejected | Unchanged: ${result.unchanged} | Source URLs added: ${result.sourceUrlsAdded} | Errors: ${result.errors.length}`,
-              },
-            ],
-          },
-        ],
-      }],
-      `\u26a0\ufe0f ${result.flagged} deals flagged for review`,
-    );
+  // Slack: flagged deals and what was done about each. Never a review request.
+  {
+    const reached = new Set((flagFix?.outcomes ?? []).map(o => o.dealId));
+    const report = buildFlagResolutionSlack({
+      outcomes: flagFix?.outcomes ?? [],
+      queued: result.flaggedDeals.filter(d => !reached.has(d.id)).map(d => ({ label: d.label, reason: d.reason })),
+      errors: flagFix?.errors ?? [],
+    });
+    if (report) await postToSlack(report.attachments, report.text);
   }
 
   // Log cron run

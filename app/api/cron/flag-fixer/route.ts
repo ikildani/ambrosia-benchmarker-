@@ -15,6 +15,7 @@ import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { fixFlaggedDeals } from '@/lib/ingestion/flag-fixer';
+import { buildFlagResolutionSlack } from '@/lib/ingestion/flag-resolution-report';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,11 @@ export async function GET(request: NextRequest) {
     if (error) result.errors.push(`recompute_deal_dedupe: ${error.message}`);
   }
 
+  const report = buildFlagResolutionSlack({ outcomes: result.outcomes, queued: [], errors: result.errors });
+  if (report && process.env.SLACK_WEBHOOK_URL) {
+    await fetch(process.env.SLACK_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(report) }).catch(() => {});
+  }
+
   await logCronRun(supabase, 'flag-fixer', {
     processed: result.attempted,
     inserted: result.fixed,
@@ -61,6 +67,7 @@ export async function GET(request: NextRequest) {
     attempted: result.attempted,
     fixed: result.fixed,
     duplicates: result.duplicates,
+    rejected: result.rejected,
     unresolved: result.unresolved,
     errors: result.errors,
   });

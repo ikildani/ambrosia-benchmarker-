@@ -29,6 +29,13 @@ alert, email or report.
 
 ## Ingestion: flag it, fix it, report it
 
+**Owner rule (Issa, 2026-09-29): a flag is never a request for review.** Every flagged deal is
+resolved automatically, and Slack only shows "flagged because X → what was done". The verification
+cron hands the deals it flags to the flag-fixer in the same run; the fixer corrects and cites,
+retires as a duplicate, or holds the row out of counts and retries, rejecting it after
+`MAX_FIX_ATTEMPTS` (3) attempts with no primary document. Report builder:
+lib/ingestion/flag-resolution-report.ts. Never post "for review" / "needs review" about deals.
+
 A flagged deal is not parked for a human. It is fixed, and the owner gets a report of
 what was flagged and how it was fixed.
 
@@ -56,8 +63,9 @@ money lands in its own group and becomes canonical again, and a manual
 `is_canonical = false` does not survive. `duplicate_of` has been set in both directions
 in the past, so it cannot be trusted as "this row is the loser".
 
-To retire a duplicate for good, set `verification_status = 'rejected'` with
-`duplicate_of = <keeper>` and a note. `deals_verified` excludes it whatever the recompute does.
+To retire a duplicate for good, set `duplicate_of = <keeper>` and a note. Since migration 150
+(2026-09-28) `deals_verified` excludes any row with `duplicate_of` set and `recompute_deal_dedupe()`
+keeps it in the keeper's group and never canonical; `rejected` is no longer required for that.
 Unique indexes to watch when correcting a row:
 - `idx_deals_dedup` on (licensor, licensee, total) for non-synthetic rows. Rejected rows
   count too, so correct whichever row of the pair will not collide.
@@ -85,4 +93,5 @@ A new cron entry fails the deploy. New scheduled work rides on an existing cron:
 | rNPV backtest calibration (2/20 within ±35%), red on main | needs owner decision | Thresholds deliberately unchanged. The comparison is risk-adjusted model value vs unrisked headline "up to" totals; see PR #70 notes |
 | Backtest corpus (data/comparable-deals-supabase.ts, generated 2026-04-17) | unowned | Only 78 of its 541 DB rows pass today's quality filter; regenerate from `deals_verified` before trusting /accuracy |
 | Radar sections, migrations 144–145 | `feat/radar-credibility` / PR #69 | Open |
+| Coverage program 2024→2011: newswire archive walker (lib/ingestion/wire-archive.ts), data-quality worker script, `persistExtractedPressDeal()` refactor; migrations 148 (coverage panel on `deals_verified`), 149 (value-less rows join valued twin's group), 150 (`duplicate_of` rows excluded from `deals_verified`, never canonical) | `feat/coverage-2024-2026` / PR #75 | Migrations 148–150 applied to production 2026-09-28; worker is dispatched by hand (commands in PR #75); three reviewed passes logged in `remediation_log` under `dedupe_review_2026_09_28`, `note_audit_2026_09_28`, `flag_review_2026_09_28` |
 | Older deal-integrity work | `feat/deal-data-integrity` / PR #7 | Open since 2026-09-17; overlaps the rule above, rebase before merging |

@@ -259,6 +259,8 @@ export async function verifyPendingDeals(
   /** Backtest sample rows whose verified verdict no longer held. */
   regressions: number;
   rolesSwapped: number;
+  /** Deals this pass flagged (not rejected), with the verifier's reason, so the fixer can resolve them in the same run. */
+  flaggedDeals: Array<{ id: string; label: string; reason: string }>;
   errors: string[];
 }> {
   const maxDeals = options?.maxDeals ?? 30;
@@ -268,7 +270,7 @@ export async function verifyPendingDeals(
   const sourceBackfillSlots = options?.sourceBackfillSlots ?? 0;
   const flaggedRetryAfterDays = options?.flaggedRetryAfterDays ?? 1;
 
-  const result = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, reverified: 0, regressions: 0, rolesSwapped: 0, errors: [] as string[] };
+  const result = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, reverified: 0, regressions: 0, rolesSwapped: 0, flaggedDeals: [] as Array<{ id: string; label: string; reason: string }>, errors: [] as string[] };
   const DEAL_COLUMNS = 'id, licensor_name, licensee_name, asset_name, deal_type, upfront_usd, milestones_total_usd, total_deal_value_usd, announced_date, indication_category, therapeutic_area, phase_at_signing, territory, source_url, press_release_url, raw_text_excerpt, verification_notes, confidence_score, verification_status';
 
   // 1. Query pending deals — prioritize discovery-stage deals (only 9%
@@ -698,6 +700,13 @@ Rules:
       }
       if (verification.status === 'verified') result.verified++;
       else result.flagged++; // flagged and rejected both count here for reporting
+      if (verification.status === 'flagged') {
+        result.flaggedDeals.push({
+          id: deal.id,
+          label: `${deal.licensor_name} → ${deal.licensee_name}${deal.asset_name ? ` (${deal.asset_name})` : ''}`,
+          reason: String(verification.reason ?? '').slice(0, 300),
+        });
+      }
 
       // Rate limit between API calls
       await new Promise(r => setTimeout(r, 2000));
