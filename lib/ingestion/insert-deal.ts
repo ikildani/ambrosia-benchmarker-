@@ -139,7 +139,12 @@ export async function insertCitedDeal(
         licensor: String(row.licensor_name ?? ''), licensee: String(row.licensee_name ?? ''),
         asset: (row.asset_name as string | null | undefined) ?? null, announcedDate: String(row.announced_date ?? new Date().toISOString().slice(0, 10)),
       });
-      if (dup) return { ok: false, outcome: 'duplicate', error: `likely duplicate of ${dup.id} (${dup.reason}${dup.reversed ? ', roles reversed' : ''})` };
+      if (dup && !dup.possible) return { ok: false, outcome: 'duplicate', error: `likely duplicate of ${dup.id} (${dup.reason}${dup.reversed ? ', roles reversed' : ''})` };
+      if (dup?.possible) {
+        // Held out of every surface (deals_verified excludes flagged) until the flag-fixer compares the documents.
+        row.verification_status = 'flagged';
+        row.verification_notes = `${row.verification_notes ? String(row.verification_notes) + ' ' : ''}[${new Date().toISOString().slice(0, 10)} insert] possible duplicate of ${dup.id}: same parties within 30 days, different asset name; held for review.`;
+      }
     } catch (e) {
       console.warn('[insert-deal] duplicate check failed, inserting anyway:', e);
     }

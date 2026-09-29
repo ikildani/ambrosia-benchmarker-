@@ -46,7 +46,7 @@ async function main(): Promise<void> {
         anthropicApiKey, fromMonth: from, toMonth: to, keywords, maxExtractions: max,
         concurrency: Number(arg('concurrency', '3')), dryRun, timeBudgetMs: minutes * 60_000, log,
       });
-      console.log(JSON.stringify({ ...r, funnel: undefined }, null, 1));
+      console.log(JSON.stringify(dryRun ? r : { ...r, funnel: undefined }, null, 1));
     } finally {
       await browser.close();
     }

@@ -32,6 +32,38 @@ export function assetKey(name: string | null | undefined): string {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+const ROOT_STOP = /\b(inc|ltd|llc|corp|corporation|co|plc|ag|sa|nv|ab|as|oy|kk|gmbh|limited|company|holdings?|group|pharmaceuticals?|pharma|therapeutics|biosciences?|biotechnology|biotech|biopharma|biopharmaceuticals?|bio|biologics|laboratories|labs?|medicines?|sciences?|the|and|of)\b/g;
+const ROOT_ALIASES: Record<string, string> = {
+  eli: 'lilly', bms: 'bristol', bristolmyers: 'bristol', hoffmann: 'roche', genentech: 'genentech', msd: 'merck', az: 'astrazeneca',
+  jnj: 'johnson', janssen: 'janssen', glaxosmithkline: 'gsk', boehringer: 'boehringer', jiangsu: 'hengrui', shenyang: '3sbio', sunshine: '3sbio',
+};
+
+/**
+ * Company root for duplicate matching, mirroring the database's deal_party_root() (migration 152):
+ * first meaningful token after legal/sector words are removed, with a small alias table.
+ * "Eli Lilly and Company" and "Lilly" → lilly; "F. Hoffmann-La Roche" → roche; "Merck KGaA" → merckkgaa.
+ * Non-Latin names keep their first 24 characters so distinct names stay distinct.
+ */
+/** Raw-name search terms for a root, so an alias root still finds "MSD" or "GlaxoSmithKline". */
+const ROOT_SEARCH: Record<string, string[]> = {
+  merck: ['merck', 'msd'], merckkgaa: ['merck', 'emd'], gsk: ['gsk', 'glaxo'], bristol: ['bristol', 'bms'],
+  johnson: ['johnson', 'jnj', 'j&j'], astrazeneca: ['astrazeneca', 'az'], roche: ['roche', 'hoffmann'], lilly: ['lilly'],
+};
+export function rootSearchTerms(root: string): string[] {
+  return (ROOT_SEARCH[root] ?? [root]).map(t => t.replace(/[%_,()]/g, ''));
+}
+
+export function partyRoot(name: string | null | undefined): string {
+  if (!name) return '';
+  const n = name.toLowerCase();
+  const tokens = n.replace(/\([^)]*\)/g, ' ').replace(/[^a-z0-9]+/g, ' ').replace(ROOT_STOP, ' ').split(/\s+/).filter(t => t.length >= 2);
+  if (tokens.length === 0) return n.replace(/\s+/g, '').slice(0, 24);
+  const t = tokens[0];
+  if (t === 'merck' && /kgaa|darmstadt|emd serono/.test(n)) return 'merckkgaa';
+  if (t === 'emd') return 'merckkgaa';
+  return ROOT_ALIASES[t] ?? t;
+}
+
 /** Unordered pair key so swapped roles collapse together. */
 export function pairKey(licensor: string, licensee: string): string {
   const a = partyKey(licensor), b = partyKey(licensee);
@@ -53,8 +85,10 @@ export interface DuplicateCandidate {
 
 export interface DuplicateMatch {
   id: string;
-  reason: 'same_asset' | 'same_parties_near_date';
+  reason: 'same_asset' | 'same_parties_near_date' | 'same_parties_30d_different_asset';
   reversed: boolean;
+  /** Not a hard duplicate: insert flagged for review instead of dropping. */
+  possible?: boolean;
 }
 
 /**
@@ -66,28 +100,41 @@ export async function findLikelyDuplicate(
   supabase: SupabaseClient,
   deal: { licensor: string; licensee: string; asset?: string | null; announcedDate: string },
 ): Promise<DuplicateMatch | null> {
-  const lk = partyKey(deal.licensor), ek = partyKey(deal.licensee);
-  if (lk.length < 3 || ek.length < 3) return null;
+  const lk = partyRoot(deal.licensor), ek = partyRoot(deal.licensee);
+  if (lk.length < 2 || ek.length < 2) return null;
   const ak = assetKey(deal.asset);
-  const token = (k: string) => k.slice(0, Math.min(6, k.length));
-  const tl = token(lk), te = token(ek);
-  // Either orientation: (licensor~lk AND licensee~ek) OR (licensor~ek AND licensee~lk)
+  // Candidates by root token in either orientation; the root is one word, so ilike on the raw name finds it.
+  const clauses: string[] = [];
+  for (const a of rootSearchTerms(lk)) for (const b of rootSearchTerms(ek)) {
+    clauses.push(`and(licensor_name.ilike.%${a}%,licensee_name.ilike.%${b}%)`, `and(licensor_name.ilike.%${b}%,licensee_name.ilike.%${a}%)`);
+  }
   const { data } = await supabase
     .from('deals')
     .select('id, licensor_name, licensee_name, asset_name, announced_date, verification_status')
     .eq('is_synthetic', false)
-    .or(`and(licensor_name.ilike.%${tl}%,licensee_name.ilike.%${te}%),and(licensor_name.ilike.%${te}%,licensee_name.ilike.%${tl}%)`)
-    .limit(50);
-  const target = pairKey(deal.licensor, deal.licensee);
+    .is('duplicate_of', null)
+    .or(clauses.join(','))
+    .limit(300);
+  const samePair = (c: DuplicateCandidate) => {
+    const a = partyRoot(c.licensor_name), b = partyRoot(c.licensee_name);
+    return (a === lk && b === ek) || (a === ek && b === lk);
+  };
+  let possible: DuplicateMatch | null = null;
   for (const c of (data ?? []) as DuplicateCandidate[]) {
-    if (pairKey(c.licensor_name, c.licensee_name) !== target) continue;
-    const reversed = partyKey(c.licensor_name) !== lk;
+    if (!samePair(c)) continue;
+    const reversed = partyRoot(c.licensor_name) !== lk;
     const dd = daysBetween(c.announced_date, deal.announcedDate);
     const cak = assetKey(c.asset_name);
-    if (ak && cak && ak === cak && dd <= 400) return { id: c.id, reason: 'same_asset', reversed };
+    const sameAsset = !!ak && !!cak && (ak === cak || (Math.min(ak.length, cak.length) >= 5 && (ak.includes(cak) || cak.includes(ak))));
+    if (sameAsset && dd <= 400) return { id: c.id, reason: 'same_asset', reversed };
     if ((!ak || !cak) && dd <= 60) return { id: c.id, reason: 'same_parties_near_date', reversed };
+    // Same parties within 30 days but differently named assets: usually one agreement named two
+    // ways ("research collaboration" vs "multi-target research collaboration"), sometimes two real
+    // deals (Seagen → Merck, tucatinib and ladiratuzumab, 13 days apart). Not a hard duplicate:
+    // the caller inserts it flagged so it stays off every surface until the flag-fixer decides.
+    if (dd <= 30) possible = possible ?? { id: c.id, reason: 'same_parties_30d_different_asset', reversed, possible: true };
   }
-  return null;
+  return possible;
 }
 
 /** True when the pair reads backwards: a big buyer listed as licensor while the other side is not. */
