@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { radarLabel } from '@/lib/radar/vocab';
 import type { FeedRow } from '@/lib/radar/client/api-types';
-import { daysUntil, fmtDate, fmtRelative, fmtRights, shortLabel } from '@/lib/radar/client/format';
+import { assetLabel, daysUntil, fmtDate, fmtRelative, fmtRights, shortLabel } from '@/lib/radar/client/format';
 import { ScoreCell } from './ScoreCell';
 import { CountryTag, FOCUS_RING, OwnerTypeChip, PartnershipTag, cn } from './ui';
 
@@ -40,7 +40,7 @@ export function AssetCards({ rows, compareIds, compareFull, onToggleCompare, loa
                   href={`/radar/${row.id}`}
                   className={cn('block truncate text-sm font-semibold text-neutral-900 hover:text-teal-700 dark:text-neutral-100 dark:hover:text-teal-300 rounded', FOCUS_RING)}
                 >
-                  {row.asset_name}
+                  {assetLabel(row)}
                 </Link>
                 <div className="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
                   <span className="truncate">{row.company_name}</span>

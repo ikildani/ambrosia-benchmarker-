@@ -161,3 +161,9 @@ export function fmtRights(rights: string[] | null | undefined): string {
 export function factorLabel(slug: string): string {
   return slug.replace(/[_-]+/g, ' ').replace(/^\w/, c => c.toUpperCase());
 }
+
+/** Program name for display: the cleaned name when migration 161 produced one, else the registry name. */
+export function assetLabel(row: { asset_name: string; display_name?: string | null }): string {
+  const d = row.display_name?.trim();
+  return d && d.length >= 2 ? d : row.asset_name;
+}

@@ -14,6 +14,7 @@ export type FeedRow = Pick<
   | 'company_id'
   | 'company_name'
   | 'asset_name'
+  | 'display_name'
   | 'modality'
   | 'therapeutic_area'
   | 'indication_category'

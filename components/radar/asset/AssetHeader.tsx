@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import type { AssetBrief } from './types';
 import { Pill, KV, ExternalLink, scoreTone } from './ui';
+import { assetLabel } from '@/lib/radar/client/format';
 import { label, fmtAge, fmtDate, territoryLabel, signedPts } from './format';
 import {
   LOW_POWER_NOTE,
@@ -65,7 +66,10 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Search & Evaluation · Deal brief</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-3xl">{asset.asset_name}</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-3xl">{assetLabel(asset)}</h1>
+          {assetLabel(asset) !== asset.asset_name && (
+            <p className="mt-0.5 truncate text-xs text-neutral-500 dark:text-neutral-400" title={asset.asset_name}>Registry name: {asset.asset_name}</p>
+          )}
           {aliases.length > 0 && (
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Also known as {aliases.join(', ')}</p>
           )}
