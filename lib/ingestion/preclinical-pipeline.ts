@@ -27,6 +27,7 @@
  * position and the accession already processed per company.
  */
 
+import { budgetCap } from '@/lib/ai/budget';
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -818,7 +819,7 @@ export async function runPreclinicalPipeline(
   const started = Date.now();
   const now = opts.now ?? new Date();
   const budget = opts.timeBudgetMs ?? DEFAULT_TIME_BUDGET_MS;
-  const costCap = opts.costCapUsd ?? Number(process.env.PRECLINICAL_COST_CAP_USD ?? String(DEFAULT_COST_CAP_USD));
+  const costCap = opts.costCapUsd ?? budgetCap(process.env.PRECLINICAL_COST_CAP_USD, DEFAULT_COST_CAP_USD, 1);
   const model = opts.model ?? PRECLINICAL_MODEL;
   const usage = emptyUsage();
   const errors: string[] = [];

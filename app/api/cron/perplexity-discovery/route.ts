@@ -11,6 +11,7 @@
  * Cost: ~$0.03-0.05 per run (~$3/month)
  */
 
+import { leanSkip } from '@/lib/ai/budget';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
@@ -57,6 +58,11 @@ export async function GET(request: NextRequest) {
 
   if (!isValid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Lean AI budget: two runs a day (00:00 and 12:00 UTC) instead of six.
+  if (leanSkip(new Date(), 12)) {
+    return NextResponse.json({ success: true, skipped: true, reason: 'lean AI budget: runs at 00:00 and 12:00 UTC only' });
   }
 
   const perplexityApiKey = process.env.PERPLEXITY_API_KEY;

@@ -11,6 +11,10 @@
  * Expected yield: 5-15 verified deals per TA query
  */
 
+import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
+
+/** Deal extraction from Perplexity answers; Sonnet 5 in lean mode (lib/ai/budget.ts). */
+export const PERPLEXITY_EXTRACTION_MODEL = budgetModel(process.env.PERPLEXITY_EXTRACTION_MODEL, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL);
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -296,7 +300,7 @@ async function extractDealsFromText(
   const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
 
   const response = await anthropic.messages.create({
-    model: 'claude-opus-4-6',
+    model: PERPLEXITY_EXTRACTION_MODEL,
     max_tokens: 4000,
     system: `You extract structured biopharma deal data from text. Return ONLY valid JSON — an array of deal objects. Be precise: only include deals with enough information to be useful (at minimum: two company names and an asset/program name). Use null for unknown values. Do not invent or hallucinate data.`,
     messages: [{
@@ -584,7 +588,7 @@ export async function runPerplexityDealDiscovery(
               // Never write an internal rotation key ('_mega_deals' etc.) as the therapeutic area (Sep 25 2026: 176 rows had one).
               therapeutic_area: derivedTA !== 'other' ? derivedTA : (ta.startsWith('_') ? 'other' : ta),
               extraction_notes: `Perplexity discovery → Claude extraction`,
-              extraction_model: 'perplexity+claude-opus-4-6',
+              extraction_model: `perplexity+${PERPLEXITY_EXTRACTION_MODEL}`,
               extraction_timestamp: new Date().toISOString(),
             });
 
