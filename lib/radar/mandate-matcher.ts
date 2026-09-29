@@ -294,6 +294,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
   const { data: recentAssets, error: assetError } = await supabase
     .from('clinical_assets')
     .select(ASSET_SELECT)
+    .eq('program_primary', true)
     .gte('confidence_score', 15)
     .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
     .gte('updated_at', cutoff.toISOString())
@@ -310,6 +311,7 @@ export async function runMandateMatching(supabase: SupabaseClient): Promise<Matc
     const { data, error } = await supabase
       .from('clinical_assets')
       .select(ASSET_SELECT)
+      .eq('program_primary', true)
       .in('partnership_status', ['unpartnered', 'partially_partnered'])
       .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
       .gte('confidence_score', 15)

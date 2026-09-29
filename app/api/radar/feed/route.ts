@@ -135,6 +135,8 @@ function applyFilters(query: Builder, f: RadarFilterState): Builder {
   if (hidden.ownership) q = q.not('ownership_status', 'in', `(${hidden.ownership.join(',')})`);
   if (hidden.phase) q = q.not('phase', 'in', `(${hidden.phase.join(',')})`);
   if (hidden.ownerType) q = q.in('owner_type', [...hidden.ownerType]);
+  // One row per program (company x drug); siblings are trial arms and formulations (migration 156).
+  q = q.eq('program_primary', true);
   if (f.min_score !== null) q = q.gte('licensing_intent_score', f.min_score);
   if (f.top_pct !== null) q = q.gte('score_pct_peer', 100 - f.top_pct);
   if (f.score_band.length) {

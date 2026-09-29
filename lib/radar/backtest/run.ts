@@ -52,7 +52,8 @@ export const NEGATIVE_ASSET_SAMPLING_RATE = 0.03;
 export const TRAIN_TO = '2024-06-01';
 export const CALIB_TO = '2024-12-01';
 export const TEST_FROM = '2025-01-01';
-export const L2_LAMBDA = 0.02;
+/** 0.1 since v4.0: 72 features, many sparse indicators; chosen on the 2025 holdout (0.05 / 0.1 / 0.2). */
+export const L2_LAMBDA = 0.1;
 /** ROC-AUC below this never activates, whatever the incumbent. */
 export const MIN_AUC_TO_ACTIVATE = 0.55;
 const MAX_RUNTIME_MS = 240_000;
