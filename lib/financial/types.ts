@@ -592,6 +592,14 @@ export interface RNPVResult {
     totalDeal: { low: number; median: number; high: number };
 
     /**
+     * Headline-equivalent total: upfront plus the contingent portion of
+     * totalDeal grossed up by cumulative PoS. totalDeal is risk-adjusted;
+     * press releases quote unrisked "up to" totals. Compare this field, not
+     * totalDeal, against a disclosed headline value.
+     */
+    headlineTotal?: { low: number; median: number; high: number };
+
+    /**
      * Co-development cost sharing component. Populated only for
      * dealType === 'codevelopment'. Represents the R&D spend the
      * licensee absorbs on the licensor's behalf — an in-kind contribution

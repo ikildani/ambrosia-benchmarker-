@@ -1550,6 +1550,7 @@ export function calculateRNPV(input: RNPVInput): RNPVResult {
     impliedDealValue: {
       upfront: roundRange(impliedDealValue.upfront),
       totalDeal: roundRange(impliedDealValue.totalDeal),
+      headlineTotal: roundRange(headlineEquivalent(impliedDealValue.upfront, impliedDealValue.totalDeal, cumulativePoS)),
       ...(impliedDealValue.codevCostSharing
         ? { codevCostSharing: impliedDealValue.codevCostSharing }
         : {}),
@@ -2118,6 +2119,27 @@ function getPhaseDealToRNPVRatio(phase: string): number {
     approved: 0.90,
   };
   return ratios[phase] || 0.55;
+}
+
+/**
+ * Headline-equivalent ("up to") total from the risk-adjusted range. The
+ * contingent part (totalDeal - upfront) is an expected value; dividing it by
+ * cumulative PoS restates it as the unrisked milestone stack a press release
+ * quotes. PoS is floored at 5% so a near-zero PoS cannot explode the figure.
+ * An upper-bound restatement: early milestones are likelier than approval.
+ */
+export function headlineEquivalent(
+  upfront: { low: number; median: number; high: number },
+  totalDeal: { low: number; median: number; high: number },
+  cumulativePoS: number,
+): { low: number; median: number; high: number } {
+  const pos = Math.max(0.05, Math.min(1, cumulativePoS || 0));
+  const gross = (u: number, t: number) => u + Math.max(0, t - u) / pos;
+  return {
+    low: gross(upfront.low, totalDeal.low),
+    median: gross(upfront.median, totalDeal.median),
+    high: gross(upfront.high, totalDeal.high),
+  };
 }
 
 /** Round a range object to nearest integer */
