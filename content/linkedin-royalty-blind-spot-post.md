@@ -16,21 +16,15 @@ Samples for points 2 and 3 are small; the first comment says so.
 
 ## POST TEXT (from Issa's personal LinkedIn profile)
 
-Royalty rates are the hardest term to benchmark in a licensing deal. Of the 1,083 deals we've tracked since 2019, only about a third disclose one.
+Only a third of biopharma licensing deals disclose their royalty rate.
 
-So we went through the 353 that do. Three things stood out that I'd want to know before negotiating one.
+We went through the 353 that did since 2019. Three things I'd want to know before negotiating one:
 
-1. The headline rate is the top tier, and many products never reach it.
+1. "Up to 19%" is the top tier, and many products never reach it. The bottom tier was a median of 5 points lower, and in almost half the deals the top rate was at least double the bottom. Negotiate where the sales thresholds sit, not just the rates.
 
-Press releases say "tiered royalties up to 19%." In the deals that disclosed both ends, the bottom tier was a median of 5 points lower, and in almost half of them the top rate was at least double the bottom. If the top tier only starts above, say, $1 billion in annual sales, most products will spend their whole life on the lower rates. Where the sales thresholds sit matters as much as the rates themselves.
+2. Taking less upfront doesn't seem to buy a better royalty. Deals that paid more upfront had the same or higher royalties at every stage. At Phase 2, the median top tier was 19% for upfront-heavy deals and 15% for the rest.
 
-2. Taking less upfront doesn't seem to buy you a better royalty.
-
-We split the deals at each stage by how much of the total was paid upfront. The upfront-heavy deals had the same or higher royalties, not lower ones. At Phase 2, the median top tier was 19% for the upfront-heavy half and 15% for the rest. If you're offered a better royalty in exchange for less cash at signing, the data doesn't say you have to accept that trade.
-
-3. Benchmark against deals for the same rights.
-
-Late-stage deals for a single market like Japan, China or the US mostly had top tiers between 16% and 24%. Late-stage deals for worldwide rights came in around 12%. Benchmarking a regional deal against global comps could leave several points on the table.
+3. Use comps for the same rights. Late-stage deals for a single market like Japan, China or the US mostly topped out between 16% and 24%. Worldwide deals came in around 12%. Global comps undersell a regional deal.
 
 For those who've negotiated these: which royalty term do you wish you'd pushed harder on?
 
