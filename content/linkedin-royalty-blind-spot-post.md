@@ -34,6 +34,6 @@ For those who've negotiated these: which royalty term do you wish you'd pushed h
 
 ## FIRST COMMENT (post immediately after publishing)
 
-On the method: licensing deals announced January 2019 to September 2026 with sourced terms, duplicates excluded. Some of the cuts above rest on small samples (11 to 20 deals per group for the upfront comparison, 8 to 17 per market for the territory one), so read them as directional.
+Method: licensing deals from 2019 to 2026 with sourced terms, duplicates removed. Points 2 and 3 rest on small samples, so treat them as directional.
 
-If you want these benchmarks cut for your own asset, by stage, modality and territory, that's what we built Solidus for: solidus.ambrosiaventures.co
+Benchmarks for your own asset: solidus.ambrosiaventures.co
