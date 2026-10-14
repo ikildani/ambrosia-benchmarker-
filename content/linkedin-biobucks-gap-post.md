@@ -11,46 +11,30 @@ upfront and headline value (n = 664). Pulled 2026-10-14.
 
 ## POST TEXT (from Issa's personal LinkedIn profile)
 
-$401 billion.
+When a biotech announces a licensing deal "worth up to $1.5 billion," the first thing I look for is the upfront.
 
-That's the headline value of every biopharma licensing deal with disclosed terms since 2019.
+It's almost always a lot smaller than people expect.
 
-$46 billion was actually paid at signing.
+I pulled every licensing deal in our database since 2019 where both numbers were disclosed. There are 664 of them. Together they add up to about $400 billion in headline value. The upfront payments come to $46 billion.
 
-The other $355 billion is a promise.
+For the typical deal, the upfront is about 8% of the number in the headline. For billion-dollar-plus deals it's closer to 7%, and two thirds of those paid less than 10% at signing.
 
-We went through 664 verified licensing deals in our database. Here's what the press releases don't say:
+The rest is milestones. Some of that money gets paid. A lot of it never will, because programs fail, partners change priorities, and sales targets written into a term sheet years earlier rarely survive contact with the market.
 
-→ The median deal pays 8% of its headline upfront
-→ In "$1B+" deals, it drops to 7%
-→ Two out of three billion-dollar deals pay less than 10% at signing
+The thing that moves the number most is how far along the asset is when you sign. In our data the median upfront share was 5% for preclinical deals, 6% at Phase 1, 8% at Phase 2, 13% at Phase 3 and 19% for approved products.
 
-So the typical "$1B deal" is a $70M deal, plus a long list of things that have to go right.
+None of this makes the big headline deals bad deals. Taking less upfront in exchange for a partner who funds the expensive trials is often the right call. But the headline tells you very little about what the company actually walked away with.
 
-And the gap depends on when you sign:
+If you're a founder or on a board looking at a term sheet, start with the upfront and the near-term milestones. That's the money you can plan around.
 
-Preclinical: 5% upfront
-Phase 1: 6%
-Phase 2: 8%
-Phase 3: 13%
-Approved: 19%
+I'm curious whether this matches what others have seen. Has anyone here turned down a bigger headline for more cash at signing?
 
-Carry the asset from preclinical to approval and the share you get paid on day one roughly quadruples.
-
-That's the real negotiation. Not the headline. The split.
-
-If you're a founder, a board member or an investor reading "up to $X billion," ask one question first:
-
-How much of that is cash on signing?
-
-What's the biggest gap between headline and upfront you've seen in a deal?
-
-#Biotech #Biopharma #Licensing #BusinessDevelopment #DealMaking
+#Biotech #Licensing #BusinessDevelopment
 
 ---
 
 ## FIRST COMMENT (post immediately after publishing)
 
-Method: 664 licensing deals announced Jan 2019 to Sep 2026, each with a verified, sourced upfront and headline value. Duplicates and unverified rows excluded.
+For anyone who wants the method: 664 licensing deals announced between January 2019 and September 2026, each with a sourced upfront and headline value. Duplicates and unverified deals are excluded.
 
-See where any deal sits against its comparables: solidus.ambrosiaventures.co
+We built Solidus to make this kind of comparison quick for any deal: solidus.ambrosiaventures.co
