@@ -22,7 +22,7 @@ We went through the 353 that did since 2019. Three things I'd want to know befor
 
 1. "Up to 19%" is the top tier, and many products never reach it. The bottom tier was a median of 5 points lower, and in almost half the deals the top rate was at least double the bottom. Negotiate where the sales thresholds sit, not just the rates.
 
-2. Taking less upfront doesn't seem to buy a better royalty. Deals that paid more upfront had the same or higher royalties at every stage. At Phase 2, the median top tier was 19% for upfront-heavy deals and 15% for the rest.
+2. Taking less upfront doesn't seem to buy a better royalty. Deals that paid more upfront had the same or higher royalties at almost every stage. At Phase 2, the median top tier was 19% for upfront-heavy deals and 15% for the rest.
 
 3. Use comps for the same rights. Late-stage deals for a single market like Japan, China or the US mostly topped out between 16% and 24%. Worldwide deals came in around 12%. Global comps undersell a regional deal.
 
