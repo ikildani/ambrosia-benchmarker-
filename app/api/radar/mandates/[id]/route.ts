@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { isUuid } from '@/app/api/radar/_lib/radar-api';
 import { mandateFieldsSchema, formatValidationError } from '@/app/api/radar/_lib/mandate-schema';
 
@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   // Pro-only; the user_id filter means other users' mandates 404.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -61,7 +61,7 @@ export async function PATCH(
   // Pro-only. Ownership is enforced on the UPDATE itself (not just the
   // pre-check) so a race or a bypassed pre-check can never touch another
   // user's row.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -129,7 +129,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   // Pro-only; the user_id filter prevents deleting another user's mandate.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

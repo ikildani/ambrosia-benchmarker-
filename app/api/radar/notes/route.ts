@@ -13,7 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { isUuid, uuidSchema } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
   // Notes are private workspace data: require a signed-in user and scope the
   // read to the caller's own notes plus their teammates'. Watchlist/notes are
   // a free-tier hook, so no Pro check here.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // Writes require a signed-in user; the note is always attributed to the
   // session user, never to a user_id supplied in the body.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   // Only the author may delete a note; the user_id filter enforces that even
   // though the service client bypasses RLS.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
