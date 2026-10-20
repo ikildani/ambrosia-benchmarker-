@@ -78,7 +78,7 @@ export function IntelligenceUpgradeGate({ isAuthenticated }: Props) {
 
           <p className="mt-6 text-xs text-slate-500">
             Already Pro? Make sure you&rsquo;re signed in with the same email as your subscription.
-            Having trouble? <a href="mailto:hello@ambrosiaventures.co" className="text-cyan-400 hover:text-cyan-300">hello@ambrosiaventures.co</a>
+            Having trouble? <a href="mailto:info@ambrosiaventures.co" className="text-cyan-400 hover:text-cyan-300">info@ambrosiaventures.co</a>
           </p>
         </div>
       </section>

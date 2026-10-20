@@ -13,20 +13,77 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const supabase = createClient();
+  // Read the URL hash before the Supabase client exists: on init it strips
+  // #error_description=... from the address bar.
+  const [initialHash] = useState(() => (typeof window === 'undefined' ? '' : window.location.hash));
+  // One browser client per page: createBrowserClient also exchanges a
+  // ?code= on init, and a second client would race it for the same code.
+  const [supabase] = useState(() => createClient());
   const supabaseConfigured = isSupabaseConfigured();
 
+  // Recovery links arrive in one of three shapes:
+  //  - ?token_hash=...&type=recovery (email template links here directly).
+  //    Verified only on submit, so corporate link scanners (Outlook Safe
+  //    Links, Mimecast) that pre-open the URL cannot burn the token, and it
+  //    works on a different device from the one that asked for the reset.
+  //  - ?code=... (PKCE). Needs the code verifier cookie from the browser
+  //    that requested the reset, so it fails on another browser or device.
+  //  - ?error_description=... or #error_description=... when Supabase
+  //    rejected the link before it reached us.
+  const [tokenHash, setTokenHash] = useState<string | null>(null);
+  const [linkChecked, setLinkChecked] = useState(false);
+  const [resendEmail, setResendEmail] = useState('');
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle');
+
   useEffect(() => {
-    // Check if we have a valid session from the reset link
-    if (supabaseConfigured && supabase) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session) {
-          // No session means the reset link is invalid or expired
-          setError('This password reset link has expired. Please request a new one.');
+    if (!supabaseConfigured || !supabase) return;
+    let cancelled = false;
+
+    const run = async () => {
+      const query = new URLSearchParams(window.location.search);
+      const hash = new URLSearchParams((initialHash || window.location.hash).replace(/^#/, ''));
+      const linkError = query.get('error_description') || hash.get('error_description');
+      const hashParam = query.get('token_hash');
+      const code = query.get('code');
+
+      if (linkError) {
+        if (!cancelled) setError(`${linkError.replace(/\+/g, ' ')}. Request a new link below.`);
+      } else if (hashParam) {
+        if (!cancelled) setTokenHash(hashParam);
+      } else {
+        // getSession waits for the client's own ?code= exchange to finish.
+        let { data: { session } } = await supabase.auth.getSession();
+        if (!session && code) {
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (!exchangeError) session = data.session;
         }
-      });
-    }
-  }, [supabaseConfigured, supabase]);
+        if (!session && !cancelled) {
+          setError(
+            code
+              ? 'This reset link could not be verified. It may have been opened in a different browser from the one you used to request it. Request a new link below.'
+              : 'This password reset link has expired. Request a new one below.'
+          );
+        }
+      }
+      // Keep tokens out of the address bar and browser history.
+      if (code || hashParam || linkError) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+      if (!cancelled) setLinkChecked(true);
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [supabaseConfigured, supabase, initialHash]);
+
+  const handleResend = async () => {
+    if (!supabase || !resendEmail) return;
+    setResendState('sending');
+    await supabase.auth.resetPasswordForEmail(resendEmail, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    // Same message whether or not the account exists.
+    setResendState('sent');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +110,19 @@ export default function ResetPasswordPage() {
     }
 
     try {
+      if (tokenHash) {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type: 'recovery',
+          token_hash: tokenHash,
+        });
+        if (verifyError) {
+          setTokenHash(null);
+          setError(`${verifyError.message}. Request a new link below.`);
+          return;
+        }
+        setTokenHash(null);
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({
         password,
       });
@@ -199,6 +269,39 @@ export default function ResetPasswordPage() {
               <span>Reset Password</span>
             )}
           </button>
+
+          {linkChecked && error && (
+            <div className="mt-6 pt-6 border-t border-neutral-200">
+              {resendState === 'sent' ? (
+                <p className="text-sm text-neutral-600 text-center">
+                  If an account exists for {resendEmail}, a new reset link is on its way.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  <label htmlFor="reset-resend-email" className="block text-sm font-semibold text-neutral-700">
+                    Send a new reset link
+                  </label>
+                  <input
+                    id="reset-resend-email"
+                    type="email"
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400
+                             focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendState === 'sending' || !resendEmail}
+                    className="w-full border border-teal-600 text-teal-700 font-semibold py-3 rounded-xl hover:bg-teal-50 transition-colors disabled:opacity-60"
+                  >
+                    {resendState === 'sending' ? 'Sending...' : 'Email me a new link'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             <a

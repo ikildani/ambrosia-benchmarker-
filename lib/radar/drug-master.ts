@@ -338,7 +338,7 @@ export function resetExternalCachesForTests(): void {
   negativeCacheHits = 0;
 }
 
-const USER_AGENT = 'AmbrosiaSolidus-AssetRadar/1.0 (drug-master resolver; contact: hello@ambrosiaventures.co)';
+const USER_AGENT = 'AmbrosiaSolidus-AssetRadar/1.0 (drug-master resolver; contact: info@ambrosiaventures.co)';
 
 type FetchOutcome =
   | { status: 'ok'; json: unknown }

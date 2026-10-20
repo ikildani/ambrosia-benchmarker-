@@ -66,7 +66,7 @@ function buildWelcomeEmail(name: string, magicLink?: string | null): string {
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
     <p style="color: #94a3b8; font-size: 12px; text-align: center;">
       Ambrosia Ventures · <a href="${APP_URL}" style="color: #0d9488;">solidus.ambrosiaventures.co</a><br>
-      Questions? Reply to this email or reach us at hello@ambrosiaventures.co
+      Questions? Reply to this email or reach us at info@ambrosiaventures.co
     </p>
   </div>
 </body>
@@ -130,7 +130,7 @@ async function main() {
         await sgMail.send({
           to: user.email,
           from: 'Ambrosia Ventures <info@ambrosiaventures.co>',
-          replyTo: 'hello@ambrosiaventures.co',
+          replyTo: 'info@ambrosiaventures.co',
           subject: magicLink ? 'Your Ambrosia Pro Account is Live — Sign In Instantly' : 'Your Ambrosia Pro Account is Live',
           html: buildWelcomeEmail(user.name, magicLink),
         });

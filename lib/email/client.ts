@@ -2,7 +2,7 @@ import sgMail from '@sendgrid/mail';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 const DEFAULT_FROM = 'Ambrosia Ventures <info@ambrosiaventures.co>';
-const DEFAULT_REPLY_TO = 'hello@ambrosiaventures.co';
+const DEFAULT_REPLY_TO = 'info@ambrosiaventures.co';
 
 function initSendGrid(): boolean {
   const apiKey = process.env.SENDGRID_API_KEY;
