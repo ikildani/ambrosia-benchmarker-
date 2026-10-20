@@ -19,7 +19,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { isUuid, uuidSchema } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
@@ -61,7 +61,7 @@ function displayName(fullName: string | null | undefined): string {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
@@ -258,7 +258,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }

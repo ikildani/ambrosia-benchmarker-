@@ -22,7 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import {
   RADAR_TA_OPTIONS,
   RADAR_MODALITY_OPTIONS,
@@ -51,7 +51,7 @@ const anthropic = new Anthropic();
 const SUGGESTION_LIMIT = 8;
 
 export async function GET(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
   // Natural-language search costs a model call per request, so it is
   // restricted to Pro-tier users (also rate-limited in middleware.ts under
   // the aiGeneration bucket).
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
