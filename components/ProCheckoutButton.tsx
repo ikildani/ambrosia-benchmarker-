@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Loader2, Tag } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { captureClientError } from '@/lib/sentry-client';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { useProCheckout, useTrialEligibility } from '@/lib/hooks/useProCheckout';
 
 interface ProCheckoutButtonProps {
   billingInterval?: 'monthly' | 'annual';
   className?: string;
   children?: React.ReactNode;
+  /** Offer the 7-day card trial. Falls back to "Start Pro" for anyone who has used theirs. */
   trial?: boolean;
+  /** Where the button sits, for attribution. */
+  source?: string;
 }
 
 export default function ProCheckoutButton({
@@ -17,133 +18,34 @@ export default function ProCheckoutButton({
   className = '',
   children,
   trial = false,
+  source = 'pro_page',
 }: ProCheckoutButtonProps) {
-  const { user, isAuthenticated, openAuthModal } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
-  const [showPromo, setShowPromo] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const pendingCheckoutRef = useRef(false);
+  const { start, isLoading, error } = useProCheckout();
+  const { eligible } = useTrialEligibility();
+  const offerTrial = trial && eligible;
 
-  // Auto-trigger checkout after user signs up via the auth modal
-  useEffect(() => {
-    if (isAuthenticated && pendingCheckoutRef.current) {
-      pendingCheckoutRef.current = false;
-      handleCheckout();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
-
-  const [trialSuccess, setTrialSuccess] = useState(false);
-
-  const handleCheckout = async () => {
-    if (!isAuthenticated) {
-      pendingCheckoutRef.current = true;
-      openAuthModal('signup');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      if (trial) {
-        const res = await fetch('/api/trial/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const data = await res.json();
-        if (data.success) {
-          setTrialSuccess(true);
-          setTimeout(() => { window.location.reload(); }, 1500);
-          return;
-        }
-        if (data.alreadyActive) { window.location.reload(); return; }
-        setError(data.error || 'Unable to start trial.');
-        return;
-      }
-
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user?.email,
-          userId: user?.id,
-          billingInterval,
-          promoCode: promoCode.trim() || undefined,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.error) {
-        setError(data.error);
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      if (data.demo || data.message) {
-        setError(data.message || 'Checkout is temporarily unavailable. Please contact support@ambrosiaventures.co.');
-        return;
-      }
-
-      setError('Something went wrong. Please try again or contact support@ambrosiaventures.co.');
-    } catch (err) {
-      captureClientError(err, 'ProCheckoutButton', { context: 'Checkout failed' });
-      setError('Connection error. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // A trial CTA whose trial is already used must not promise one.
+  const label = trial && !eligible
+    ? <>Continue with Pro <ArrowRight className="w-4 h-4" /></>
+    : children || <>Start Pro <ArrowRight className="w-4 h-4" /></>;
 
   return (
-    <div className="inline-flex flex-col items-center gap-3">
+    <div className="inline-flex flex-col items-center gap-2">
       <button
-        onClick={handleCheckout}
+        onClick={() => start({ trial: offerTrial, billingInterval, source })}
         disabled={isLoading}
+        aria-busy={isLoading}
         className={`inline-flex items-center gap-2 font-semibold rounded-xl transition-all disabled:opacity-60 ${className}`}
       >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          children || <>Start Pro <ArrowRight className="w-4 h-4" /></>
-        )}
+        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : label}
       </button>
 
-      {/* Promo code — visible with icon */}
-      {!showPromo ? (
-        <button
-          onClick={() => setShowPromo(true)}
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-teal-400 transition-colors border border-slate-700 hover:border-teal-500/30 rounded-lg px-3 py-1.5 bg-white/[0.02]"
-        >
-          <Tag className="w-3 h-3" />
-          Have a promo code?
-        </button>
-      ) : (
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-              placeholder="Enter promo code"
-              autoFocus
-              className="pl-7 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-500 w-44 focus:outline-none focus:border-teal-500/40 focus:ring-1 focus:ring-teal-500/20"
-            />
-          </div>
-          {promoCode && (
-            <span className="text-xs text-teal-400 font-medium">✓ Applied</span>
-          )}
-        </div>
+      {offerTrial && (
+        <p className="text-xs text-slate-400">$0 today · Reminder before you&apos;re charged · Cancel anytime</p>
       )}
 
       {error && (
-        <p className="text-xs text-red-400 max-w-xs text-center">{error}</p>
+        <p role="alert" className="text-xs text-red-400 max-w-xs text-center">{error}</p>
       )}
     </div>
   );

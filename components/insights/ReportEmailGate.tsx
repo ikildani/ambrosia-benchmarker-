@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
+import { ga4EmailCapture } from '@/lib/ga4';
 
 interface ReportEmailGateProps {
   children: ReactNode;
@@ -71,6 +72,7 @@ export function ReportEmailGate({ children, report }: ReportEmailGateProps) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: inputValue, source: `report-gate-${report}` }),
                   });
+                  ga4EmailCapture(`report_gate_${report}`);
                 } catch {}
                 localStorage.setItem(STORAGE_KEY, inputValue);
                 setEmail(inputValue);

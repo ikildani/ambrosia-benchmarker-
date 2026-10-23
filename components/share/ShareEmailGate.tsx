@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
+import { ga4EmailCapture } from '@/lib/ga4';
 
 export function ShareEmailGate({
   token,
@@ -33,6 +34,7 @@ export function ShareEmailGate({
       });
     } catch {}
     try { localStorage.setItem('share_email_captured', '1'); } catch {}
+    ga4EmailCapture('share_view');
     setUnlocked(true);
     setLoading(false);
   }

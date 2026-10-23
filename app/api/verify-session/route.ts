@@ -33,12 +33,27 @@ export async function GET(request: NextRequest) {
       '';
 
     const plan =
-      session.metadata?.product === 'deal-calculator-pro' ? 'pro' : 'unknown';
+      session.metadata?.product === 'deal-calculator-pro' ? 'pro'
+        : session.metadata?.product === 'deal-calculator-starter' ? 'starter'
+        : 'unknown';
+
+    // Card trial: what the welcome page needs to say "nothing charged until X"
+    // and to report the conversion to analytics.
+    const subscription = session.subscription && typeof session.subscription === 'object'
+      ? (session.subscription as Stripe.Subscription)
+      : null;
+    const trialing = subscription?.status === 'trialing';
+    const price = subscription?.items.data[0]?.price;
 
     return apiSuccess({
       valid: true,
       email: customerEmail,
       plan,
+      trialing,
+      trialEndsAt: trialing && subscription?.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+      /** Recurring price in dollars (not what was charged today). */
+      planAmount: price?.unit_amount != null ? price.unit_amount / 100 : null,
+      planInterval: price?.recurring?.interval ?? null,
       customerName:
         typeof session.customer === 'object' && session.customer
           ? (session.customer as Stripe.Customer).name || ''

@@ -248,6 +248,18 @@ export async function GET(request: NextRequest) {
       let emailType: 'day1' | 'day4' | 'day6' | null = null;
       let emailContent: { subject: string; html: string } | null = null;
 
+      // Card trials (Stripe `trialing`) get their welcome and their
+      // "trial ends in 3 days" reminder from the Stripe webhook, and they do
+      // not revert to Free: the card is charged. Only the day-4 feature nudge
+      // applies to them; day1 and day6 are for no-card trials.
+      const cardTrial = user.subscription_status === 'trialing';
+      if (cardTrial) {
+        if (daysSinceActivation >= 3 && !sent.has('trial_onboarding_day4_sent')) {
+          emailType = 'day4';
+          emailContent = buildDay4Email(user.full_name || user.email, Array.from(featureMap.get(user.id) || []));
+        }
+      } else
+
       if (daysSinceActivation >= 5 && !sent.has('trial_onboarding_day6_sent')) {
         emailType = 'day6';
         emailContent = buildDay6Email(user.full_name || user.email);

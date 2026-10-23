@@ -3,8 +3,9 @@
 import { RADAR_PUBLIC } from '@/lib/radar/launch';
 import { useState } from 'react';
 import Link from 'next/link';
-import { PRICING, DEAL_STATS, PORTFOLIO_PRICING } from '@/lib/config/constants';
+import { PRICING, DEAL_STATS, PORTFOLIO_PRICING, ENGINE_COUNT } from '@/lib/config/constants';
 import { usePromoCode } from '@/lib/hooks/usePromoCode';
+import { useProCheckout, useTrialEligibility } from '@/lib/hooks/useProCheckout';
 import { generatePricingSchema } from '@/lib/seo/structured-data';
 import { captureClientError } from '@/lib/sentry-client';
 import type { UserTier } from '@/types/tier';
@@ -18,98 +19,33 @@ interface PricingProps {
 }
 
 export default function Pricing({ currentTier, onSelectTier, userEmail, userId, initialPromoCode }: PricingProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [isManageLoading, setIsManageLoading] = useState(false);
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('annual');
-  const [error, setError] = useState<string | null>(null);
-  const {
-    promoCode, setPromoCode, promoStatus, promoDiscount, promoId, promoError,
-    validatePromoCode, clearPromo,
-  } = usePromoCode(initialPromoCode);
+  const [manageError, setManageError] = useState<string | null>(null);
+  // Promo codes arrive only from campaign links (?code=); anyone else can type
+  // a code on the Stripe checkout page.
+  const { promoStatus, promoDiscount, promoId, clearPromo } = usePromoCode(initialPromoCode);
+  const hasPromo = promoStatus === 'valid' && !!promoId;
+  const hasFreeMonthPromo = hasPromo && promoDiscount?.percentOff === 100;
 
-  const hasValidPromo = promoStatus === 'valid' && promoDiscount?.percentOff === 100;
+  const { start, isLoading, error: checkoutError } = useProCheckout();
+  const { eligible: trialEligible } = useTrialEligibility();
+  // A campaign code is applied to a paid checkout; otherwise lead with the trial.
+  const offerTrial = trialEligible && !hasPromo;
+  const error = checkoutError || manageError;
 
-  const [isTrialLoading, setIsTrialLoading] = useState(false);
+  const handleStart = () => start({
+    trial: offerTrial,
+    billingInterval,
+    source: 'pricing',
+    promoCode: hasPromo ? promoId ?? undefined : undefined,
+  });
 
-  const handleUpgrade = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: userEmail,
-          userId: userId,
-          billingInterval,
-          promoCode: promoId || undefined,
-        }),
-      });
-      const data = await response.json();
-
-      if (data.error) {
-        setError(data.error);
-        return;
-      }
-
-      if (data.demo) {
-        setError('Payment system is being configured. Please contact info@ambrosiaventures.co to upgrade.');
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError('Unable to start checkout. Please try again.');
-      }
-    } catch (err) {
-      captureClientError(err, 'Pricing', { context: 'Checkout request failed' });
-      setError('Connection error. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const [trialSuccess, setTrialSuccess] = useState(false);
-
-  const handleStartTrial = async () => {
-    setIsTrialLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/trial/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        setTrialSuccess(true);
-        setTimeout(() => { window.location.reload(); }, 1500);
-        return;
-      }
-
-      if (data.expired) {
-        setError('Your free trial has ended. Subscribe to continue with Pro.');
-        return;
-      }
-
-      if (data.alreadyActive) {
-        window.location.reload();
-        return;
-      }
-
-      setError(data.error || 'Unable to start trial. Please try again.');
-    } catch (err) {
-      captureClientError(err, 'Pricing', { context: 'Trial checkout request failed' });
-      setError('Connection error. Please try again.');
-    } finally {
-      setIsTrialLoading(false);
-    }
-  };
+  const priceLabel = billingInterval === 'annual' ? PRICING.PRO_ANNUAL_MONTHLY : PRICING.PRO_MONTHLY;
 
   const handleManageSubscription = async () => {
     setIsManageLoading(true);
-    setError(null);
+    setManageError(null);
     try {
       const response = await fetch('/api/billing/portal', {
         method: 'POST',
@@ -122,18 +58,18 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
       const data = await response.json();
 
       if (data.error) {
-        setError(data.error);
+        setManageError(data.error);
         return;
       }
 
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setError('Unable to open billing portal. Please try again.');
+        setManageError('Unable to open billing portal. Please try again.');
       }
     } catch (err) {
       captureClientError(err, 'Pricing', { context: 'Billing portal request failed' });
-      setError('Connection error. Please try again.');
+      setManageError('Connection error. Please try again.');
     } finally {
       setIsManageLoading(false);
     }
@@ -250,7 +186,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
               </div>
 
               <div className="mb-4">
-                {hasValidPromo ? (
+                {hasFreeMonthPromo ? (
                   <div>
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-bold text-white">$0</span>
@@ -278,68 +214,18 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                 )}
               </div>
 
-              {/* Promo Code Section */}
-              {currentTier !== 'pro' && (
-                <div className="mb-4">
-                  {promoStatus === 'valid' ? (
-                    <div className="flex items-center gap-2 bg-teal-500/20 border border-teal-500/30 rounded-lg px-3 py-2">
-                      <div className="w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-teal-300 text-xs font-semibold flex-1">7-Day Free Trial</span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); clearPromo(); }}
-                        className="text-teal-400/50 hover:text-teal-300"
-                        aria-label="Remove promo code"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={promoCode}
-                        onChange={(e) => {
-                          setPromoCode(e.target.value);
-                          if (promoStatus !== 'idle') {
-                            clearPromo();
-                            setPromoCode(e.target.value);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            validatePromoCode(promoCode);
-                          }
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Promo code"
-                        aria-label="Promo code"
-                        className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-lg px-3 py-2 min-h-11 sm:min-h-9 text-white text-sm
-                                   placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-teal-500
-                                   focus:border-transparent transition-all"
-                        maxLength={20}
-                      />
-                      <button
-                        onClick={(e) => { e.stopPropagation(); validatePromoCode(promoCode); }}
-                        disabled={!promoCode.trim() || promoStatus === 'validating'}
-                        className="px-3 py-2 min-h-11 sm:min-h-9 bg-white/10 border border-white/20 rounded-lg text-white text-sm
-                                   font-medium hover:bg-white/20 transition-all disabled:opacity-40
-                                   disabled:cursor-not-allowed"
-                      >
-                        {promoStatus === 'validating' ? '...' : 'Apply'}
-                      </button>
-                    </div>
-                  )}
-                  {promoStatus === 'invalid' && promoError && (
-                    <p className="text-red-400 text-xs mt-1 ml-1">{promoError}</p>
-                  )}
+              {hasPromo && currentTier !== 'pro' && (
+                <div className="mb-4 flex items-center gap-2 bg-teal-500/20 border border-teal-500/30 rounded-lg px-3 py-2">
+                  <span className="text-teal-300 text-xs font-semibold flex-1">
+                    Code applied{promoDiscount?.name ? `: ${promoDiscount.name}` : ''}
+                  </span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); clearPromo(); }}
+                    className="text-teal-400/60 hover:text-teal-300 text-xs"
+                    aria-label="Remove promo code"
+                  >
+                    Remove
+                  </button>
                 </div>
               )}
 
@@ -352,23 +238,26 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
                   {isManageLoading ? 'Loading...' : 'Manage Subscription'}
                 </button>
               ) : (
-                <div className="space-y-2.5">
-                  {!hasValidPromo && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleStartTrial(); }}
-                      disabled={isTrialLoading}
-                      className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-400 hover:to-cyan-400 shadow-soft hover:shadow-soft-lg"
-                    >
-                      {isTrialLoading ? 'Processing...' : 'Start 7-Day Free Trial'}
-                    </button>
-                  )}
+                <div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleUpgrade(); }}
+                    onClick={(e) => { e.stopPropagation(); handleStart(); }}
                     disabled={isLoading}
-                    className="w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 shadow-soft hover:shadow-soft-lg"
+                    aria-busy={isLoading}
+                    className="w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-400 hover:to-cyan-400 shadow-soft hover:shadow-soft-lg disabled:opacity-60"
                   >
-                    {isLoading ? 'Processing...' : hasValidPromo ? 'Start Free Month' : billingInterval === 'annual' ? `Start Pro — ${PRICING.PRO_ANNUAL_MONTHLY}` : `Start Pro — ${PRICING.PRO_MONTHLY}`}
+                    {isLoading
+                      ? 'Opening secure checkout...'
+                      : offerTrial
+                        ? 'Start 7-day free trial'
+                        : hasFreeMonthPromo
+                          ? 'Start your free month'
+                          : `Start Pro — ${priceLabel}`}
                   </button>
+                  <p className="mt-2 text-[11px] leading-snug text-neutral-400 text-center">
+                    {offerTrial
+                      ? `$0 today, then ${priceLabel}. We email you 3 days before the first charge. Cancel anytime.`
+                      : 'Secure checkout by Stripe. Cancel anytime.'}
+                  </p>
                 </div>
               )}
 
@@ -381,7 +270,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
 
             {/* Right: compact feature list */}
             <div className="lg:flex-1">
-              <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">Everything in Report, plus:</p>
+              <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">What Pro includes</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {[
                   'Unlimited full reports',
@@ -466,7 +355,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
         <div className="mt-12 sm:mt-16 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-8 max-w-2xl mx-auto">
           {[
             { stat: DEAL_STATS.TOTAL_DEALS, label: 'Real deals analyzed' },
-            { stat: '127+', label: 'BD pros upgraded' },
+            { stat: String(ENGINE_COUNT), label: 'Valuation engines' },
             { stat: '10x', label: 'Faster partner research' },
           ].map((item, i) => (
             <div key={i} className="text-center">
@@ -490,7 +379,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span className="text-xs sm:text-sm font-medium">7-Day Money-Back Guarantee</span>
+            <span className="text-xs sm:text-sm font-medium">Cancel Anytime</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-500 dark:text-slate-400">
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -506,7 +395,7 @@ export default function Pricing({ currentTier, onSelectTier, userEmail, userId, 
             onClick={(e) => { e.stopPropagation(); onSelectTier('free'); }}
             className="text-xs text-neutral-400 dark:text-slate-500 hover:text-neutral-600 dark:hover:text-slate-300 transition-colors"
           >
-            Just exploring? Try the calculator free — no account required →
+            Just exploring? The Free plan includes 3 benchmarks a month →
           </button>
         </div>
       </div>

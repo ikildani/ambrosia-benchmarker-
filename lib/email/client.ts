@@ -46,9 +46,11 @@ export async function sendEmail(options: EmailOptions) {
 
 export async function sendWelcomeEmail(to: string, name: string, trialExpiresAt?: Date | string | null) {
   const expiry = trialExpiresAt ? new Date(trialExpiresAt) : null;
-  const trialLine = expiry && !Number.isNaN(expiry.getTime())
-    ? `Your 7-day Pro trial is already active — no card required — and runs until <strong>${expiry.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>.`
-    : 'Your 7-day Pro trial is already active — no card required.';
+  // New signups start on Free (migration 168); only someone still inside an
+  // older no-card trial gets the trial line.
+  const trialLine = expiry && !Number.isNaN(expiry.getTime()) && expiry.getTime() > Date.now()
+    ? `Your Pro trial runs until <strong>${expiry.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>.`
+    : 'Run your first benchmark and we will email you the comparable deals behind it. When you want everything, Pro is free for 7 days.';
   const html = `
     <!DOCTYPE html>
     <html>

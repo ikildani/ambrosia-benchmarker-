@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ga4EmailCapture } from '@/lib/ga4';
 
 export function IntelligenceEmailCapture({ context }: { context?: string }) {
   const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ export function IntelligenceEmailCapture({ context }: { context?: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'intelligence_capture', calculation_context: { page: context || 'intelligence' } }),
       });
+      ga4EmailCapture('intelligence_capture');
       setSubmitted(true);
     } catch {
       setSubmitted(true);

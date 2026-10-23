@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useAuth } from '@/contexts/AuthContext';
 import { DEAL_STATS } from '@/lib/config/constants';
+import { ga4EmailCapture } from '@/lib/ga4';
 
 interface VariantCopy {
   id: string;
@@ -125,6 +126,7 @@ export default function ExitIntentCapture() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'exit_intent' }),
       }).catch(() => {});
+      ga4EmailCapture('exit_intent');
       setSubmitted(true);
       localStorage.setItem('email_captured', 'true');
     } catch {

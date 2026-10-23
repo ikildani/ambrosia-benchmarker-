@@ -5,11 +5,13 @@ import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { checkoutSchema, formatZodErrors } from '@/lib/api-validation';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { notifyCheckoutStarted } from '@/lib/slack/notify';
+import { buildSubscriptionCheckoutParams, getTrialEligibility, resolveSubscriptionPriceId } from '@/lib/billing/pro-checkout';
 
 // Stripe Checkout Session API
-// Supports two purchase types:
-// 1. 'subscription' — $299/month Pro plan (default)
-// 2. 'report' — $499 one-time Deal Report
+// Supports three purchase types:
+// 1. 'subscription' — Pro plan (default), optionally as a card-required 7-day trial
+// 2. 'starter' — Starter plan
+// 3. 'report' — $499 one-time Deal Report
 // SECURITY: userId is derived from auth session, never from request body
 
 export async function POST(request: NextRequest) {
@@ -99,19 +101,8 @@ export async function POST(request: NextRequest) {
 
     // --- SUBSCRIPTION (Pro or Starter plan — monthly or annual) ---
     const billingInterval = body.billingInterval || 'monthly';
-    const isStarter = body.purchaseType === 'starter';
-    const productLabel = isStarter ? 'deal-calculator-starter' : 'deal-calculator-pro';
-
-    let priceId: string | undefined;
-    if (isStarter) {
-      priceId = billingInterval === 'annual'
-        ? (process.env.STRIPE_STARTER_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_STARTER_PRICE_ID?.trim())
-        : process.env.STRIPE_STARTER_PRICE_ID?.trim();
-    } else {
-      priceId = billingInterval === 'annual'
-        ? (process.env.STRIPE_ANNUAL_PRICE_ID?.trim() || process.env.STRIPE_PRICE_ID?.trim())
-        : process.env.STRIPE_PRICE_ID?.trim();
-    }
+    const plan = body.purchaseType === 'starter' ? 'starter' as const : 'pro' as const;
+    const priceId = resolveSubscriptionPriceId(plan, billingInterval);
     if (!priceId) {
       console.error('[checkout] STRIPE_PRICE_ID not configured for billing interval:', billingInterval);
       return NextResponse.json({
@@ -120,140 +111,53 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const sessionOptions: Stripe.Checkout.SessionCreateParams = {
-      mode: 'subscription',
-      payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}/welcome?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}?canceled=true`,
-      billing_address_collection: 'required',
-      tax_id_collection: { enabled: true },
-      subscription_data: {
-        metadata: {
-          product: productLabel,
-          user_id: userId ?? '',
-          promo_code: promoCode || '',
-        },
-      },
-      metadata: {
-        product: productLabel,
-        user_id: userId ?? '',
-        promo_code: promoCode || '',
-      },
-    };
-
-    // Promo code handling (subscription only)
+    // A promo code arrives either as a Stripe promotion-code id (validated by
+    // /api/promo/validate) or as the customer-facing code. Anything else is
+    // typed straight into Stripe Checkout, which accepts promotion codes.
+    let promotionCodeId: string | undefined;
     if (promoCode) {
-      const normalizedCode = promoCode.trim().toUpperCase();
-
-      // AMBROSIA code: 7-day free trial — one use per user, expires April 30 2026
-      if (normalizedCode === 'AMBROSIA') {
-        // Check expiration
-        const expiresAt = new Date('2026-04-30T23:59:59Z');
-        if (new Date() > expiresAt) {
-          return apiError('This promo code has expired.', 400);
-        }
-
-        // Check if this user/email has already used the AMBROSIA code
-        const supabase = createServiceClient();
-        const checkEmail = customerEmail?.toLowerCase();
-        let alreadyUsed = false;
-
-        if (userId) {
-          const { data: existing } = await supabase
-            .from('sessions')
-            .select('id')
-            .eq('user_id', userId)
-            .like('metadata->>promo_code', 'AMBROSIA')
-            .limit(1);
-          if (existing && existing.length > 0) alreadyUsed = true;
-        }
-
-        // Also check Stripe for any previous trials on this email
-        if (!alreadyUsed && checkEmail) {
-          const customers = await stripe.customers.list({ email: checkEmail, limit: 1 });
-          if (customers.data.length > 0) {
-            const subs = await stripe.subscriptions.list({
-              customer: customers.data[0].id,
-              limit: 10,
-            });
-            const hadTrial = subs.data.some(
-              s => s.metadata?.promo_code === 'AMBROSIA' || s.trial_end !== null
-            );
-            if (hadTrial) alreadyUsed = true;
-          }
-        }
-
-        if (alreadyUsed) {
-          return apiError('This promo code has already been used on your account.', 400);
-        }
-
-        sessionOptions.subscription_data = {
-          ...sessionOptions.subscription_data,
-          trial_period_days: 7,
-        };
+      if (promoCode.startsWith('promo_')) {
+        promotionCodeId = promoCode;
       } else {
-        let promoId = promoCode;
-        if (!promoCode.startsWith('promo_')) {
-          const promoCodes = await stripe.promotionCodes.list({
-            code: normalizedCode,
-            active: true,
-            limit: 1,
-          });
-          if (promoCodes.data.length === 0) {
-            return apiError('Invalid or expired promo code. Please try again without the code.', 400);
-          }
-          promoId = promoCodes.data[0].id;
+        const promoCodes = await stripe.promotionCodes.list({
+          code: promoCode.trim().toUpperCase(),
+          active: true,
+          limit: 1,
+        });
+        if (promoCodes.data.length === 0) {
+          return apiError('That promo code is invalid or has expired. You can also enter a code on the checkout page.', 400);
         }
-        sessionOptions.discounts = [{ promotion_code: promoId }];
+        promotionCodeId = promoCodes.data[0].id;
       }
     }
 
-    // 7-day trial for first-time subscribers (no promo code needed)
-    if (body.trial && !sessionOptions.subscription_data?.trial_period_days) {
-      let hadPriorSub = false;
-      const supabase = createServiceClient();
-
-      if (userId) {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('subscription_status')
-          .eq('id', userId)
-          .single();
-        if (profile?.subscription_status && ['active', 'cancelled', 'past_due', 'expired'].includes(profile.subscription_status)) {
-          hadPriorSub = true;
-        }
-      }
-
-      if (!hadPriorSub && customerEmail) {
-        const customers = await stripe.customers.list({ email: customerEmail.toLowerCase(), limit: 1 });
-        if (customers.data.length > 0) {
-          const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, limit: 10 });
-          hadPriorSub = subs.data.some(s => s.trial_end !== null);
-        }
-      }
-
-      if (!hadPriorSub) {
-        sessionOptions.subscription_data = {
-          ...sessionOptions.subscription_data,
-          trial_period_days: 7,
-        };
-      }
+    // Card-required trial: only when asked for and only once per person.
+    // Not eligible falls through to a normal subscription checkout rather than
+    // an error, so the button still leads somewhere.
+    let trial = false;
+    if (body.trial && plan === 'pro') {
+      const eligibility = await getTrialEligibility(stripe, createServiceClient(), { userId, email: customerEmail });
+      trial = eligibility.eligible;
     }
 
-    if (customerEmail) {
-      sessionOptions.customer_email = customerEmail;
-    }
+    const session = await stripe.checkout.sessions.create(buildSubscriptionCheckoutParams({
+      plan,
+      interval: billingInterval,
+      priceId,
+      appUrl,
+      userId,
+      email: customerEmail,
+      trial,
+      promotionCodeId,
+      source: body.source,
+    }));
 
-    const session = await stripe.checkout.sessions.create(sessionOptions);
-
-    // Notify Slack that subscription checkout started
     notifyCheckoutStarted({
       email: customerEmail || 'anonymous',
-      type: billingInterval === 'annual' ? 'annual' : 'pro',
+      type: trial ? 'trial' : billingInterval === 'annual' ? 'annual' : 'pro',
     }).catch(() => {});
 
-    return apiSuccess({ url: session.url });
+    return apiSuccess({ url: session.url, trial });
   } catch (error: unknown) {
     console.error('Checkout error:', error);
     if (error instanceof Stripe.errors.StripeError) {

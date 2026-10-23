@@ -151,14 +151,11 @@ export default function ProPage() {
                   <ProCheckoutButton
                     billingInterval="monthly"
                     trial
+                    source="pro_page_hero"
                     className="px-7 py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-base shadow-lg shadow-teal-500/25 hover:from-teal-400 hover:to-cyan-400 hover:-translate-y-0.5"
                   >
                     Start 7-Day Free Trial <ArrowRight className="w-4 h-4" />
                   </ProCheckoutButton>
-                  <ProCheckoutButton
-                    billingInterval="monthly"
-                    className="px-7 py-3.5 bg-white/10 text-white text-base border border-white/20 hover:bg-white/20 hover:-translate-y-0.5"
-                  />
                   <Link
                     href="/calculator"
                     className="inline-flex items-center gap-2 px-7 py-3.5 text-slate-300 font-medium rounded-xl hover:text-white hover:bg-white/5 transition-all border border-white/10"
@@ -1180,13 +1177,14 @@ export default function ProPage() {
                 <ProCheckoutButton
                   billingInterval="monthly"
                   trial
+                  source="pro_page_footer"
                   className="px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-lg shadow-lg shadow-teal-500/25 hover:from-teal-400 hover:to-cyan-400 hover:-translate-y-0.5"
                 >
                   Start 7-Day Free Trial <ArrowRight className="w-4 h-4" />
                 </ProCheckoutButton>
               </div>
             </div>
-            <p className="mt-6 text-sm text-slate-600">No charge for 7 days. Cancel anytime.</p>
+            <p className="mt-6 text-sm text-slate-600">Card required, nothing charged for 7 days. We remind you before the first charge.</p>
           </div>
         </section>
 

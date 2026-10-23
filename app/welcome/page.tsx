@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
+import { ga4ProConversion, ga4Event } from '@/lib/ga4';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -15,6 +16,10 @@ interface SessionData {
   email: string;
   plan: string;
   customerName: string;
+  trialing?: boolean;
+  trialEndsAt?: string | null;
+  planAmount?: number | null;
+  planInterval?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -373,6 +378,21 @@ function WelcomePageInner() {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
   }, [verifying, verifyError]);
 
+  // Report the conversion once per checkout session (a reload must not double count).
+  useEffect(() => {
+    if (!sessionData?.valid || !sessionId) return;
+    const key = `ga4_conv_${sessionId}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch { /* storage blocked: still report once for this render */ }
+    if (sessionData.trialing) {
+      ga4Event('start_trial', { event_category: 'conversion', plan: sessionData.plan, value: sessionData.planAmount ?? undefined, currency: 'USD' });
+    } else {
+      ga4ProConversion(sessionData.plan, sessionData.planAmount ?? 0);
+    }
+  }, [sessionData, sessionId]);
+
   // Set tier to pro after successful verification + persist to localStorage
   useEffect(() => {
     if (sessionData?.valid && sessionData.plan === 'pro') {
@@ -581,10 +601,12 @@ function WelcomePageInner() {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-4">
-            Welcome to{' '}
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              Ambrosia Pro
-            </span>
+            {sessionData?.trialing ? 'Your Pro trial is on' : <>Welcome to{' '}</>}
+            {!sessionData?.trialing && (
+              <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                Solidus Pro
+              </span>
+            )}
           </h1>
 
           <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
@@ -592,9 +614,18 @@ function WelcomePageInner() {
             {ENGINE_COUNT} analytical engines, {DEAL_STATS.TOTAL_DEALS} benchmarked transactions, and unlimited analyses.
           </p>
 
+          {sessionData?.trialing && sessionData.trialEndsAt && (
+            <p className="mt-5 inline-block rounded-lg border border-teal-500/30 bg-teal-500/10 px-4 py-2 text-sm text-teal-200">
+              Nothing charged today. Your trial runs until{' '}
+              <strong>{new Date(sessionData.trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}</strong>
+              {sessionData.planAmount != null && <>, then ${sessionData.planAmount.toLocaleString('en-US')}/{sessionData.planInterval === 'year' ? 'year' : 'month'}</>}.
+              {' '}We&apos;ll email you 3 days before. Cancel any time from Settings.
+            </p>
+          )}
+
           {sessionData?.email && (
             <p className="mt-4 text-sm text-slate-500">
-              Subscribed as {sessionData.email}
+              {sessionData.trialing ? 'Trial started for' : 'Subscribed as'} {sessionData.email}
             </p>
           )}
         </section>

@@ -1,11 +1,12 @@
-import Link from 'next/link';
 import { LIVE_DEAL_COUNT, formatDealCount } from '@/lib/config/constants';
+import ProCheckoutButton from '@/components/ProCheckoutButton';
 
 interface Props {
-  isAuthenticated: boolean;
+  /** Kept for callers; the trial button handles signed-out visitors itself. */
+  isAuthenticated?: boolean;
   /** An activated backtest stands behind the live score; the copy only claims it when true. */
   backtested?: boolean;
-  /** Opens the sign-up modal in place; without it the CTA links to the sign-in page. */
+  /** Kept for callers; the trial button opens the sign-up modal itself. */
   onSignUp?: () => void;
 }
 
@@ -26,7 +27,7 @@ const SAMPLE_ROWS: { asset: string; owner: string; country: string; phase: strin
 const CTA =
   'inline-flex shrink-0 items-center justify-center rounded-full bg-teal-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-600/20 hover:bg-teal-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950';
 
-export function RadarUpgradeGate({ isAuthenticated, backtested = false, onSignUp }: Props) {
+export function RadarUpgradeGate({ backtested = false }: Props) {
   const deals = formatDealCount(LIVE_DEAL_COUNT);
   const scoreBody = backtested
     ? 'Nine factors, each with the source it came from and a confidence figure, shown as a percentile within the asset\'s peers. Backtested against announced deals; the methodology page shows the numbers.'
@@ -99,21 +100,14 @@ export function RadarUpgradeGate({ isAuthenticated, backtested = false, onSignUp
         <div className="mt-8 flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900 sm:flex-row sm:items-center">
           <div className="flex-1">
             <p className="text-sm font-medium">
-              {isAuthenticated ? 'Search & Evaluation is included in Pro and Portfolio plans.' : 'Start a Pro trial to open the feed.'}
+              Search &amp; Evaluation is included in Pro and Portfolio plans.
             </p>
             <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
-              {isAuthenticated
-                ? `Pro also covers every engine and all ${deals} deal comps.`
-                : 'Sign up and you get seven days of Pro. No card.'}
+              {`Pro also covers every engine and all ${deals} deal comps. $0 for 7 days, cancel anytime.`}
             </p>
           </div>
-          {isAuthenticated ? (
-            <Link href="/pro" className={CTA}>Upgrade to Pro</Link>
-          ) : onSignUp ? (
-            <button type="button" onClick={onSignUp} className={CTA}>Start free trial</button>
-          ) : (
-            <Link href="/auth/signin" className={CTA}>Start free trial</Link>
-          )}
+          {/* One click: signs a visitor up first, then opens the card trial checkout. */}
+          <ProCheckoutButton trial source="radar_gate" className={CTA}>Start free trial</ProCheckoutButton>
         </div>
       </section>
     </main>
