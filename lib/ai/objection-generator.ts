@@ -10,6 +10,7 @@
 import { parseJsonResponse } from './parse-json';
 import { modalityLabels } from '@/lib/report/helpers';
 import type { AssetProfile, DecisionSummary, PositioningObjections } from '@/lib/brief/types';
+import { guardedFetch } from '@/lib/ai/spend-guard';
 
 export const OBJECTION_MODEL = 'claude-opus-4-6';
 const MAX_TOKENS = 1800;
@@ -97,7 +98,7 @@ async function callAnthropic(prompt: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY environment variable is required');
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await guardedFetch('objection')('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -36,6 +36,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { deriveRunStatus, logRadarRun } from '@/lib/radar/run-log';
@@ -1051,7 +1052,7 @@ export async function classifyBatchWithModel(
 
 function makeClient(): ClassifierClient {
   // maxRetries 0: this module owns retries so the request cap counts every attempt.
-  return new Anthropic({ maxRetries: 0, timeout: 120_000 });
+  return new Anthropic(withSpendGuard('asset-classify', { maxRetries: 0, timeout: 120_000 }));
 }
 
 export async function classifyAssetsBatch(supabase: SupabaseClient, opts: ClassifyOptions = {}): Promise<ClassifyRunResult> {

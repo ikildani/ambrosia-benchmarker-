@@ -11,6 +11,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
@@ -115,7 +116,7 @@ async function extractPublicDeals(
   combinedText: string,
   anthropicApiKey: string
 ): Promise<PublicDeal[]> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('completeness-audit', { apiKey: anthropicApiKey, timeout: 60_000 }));
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',

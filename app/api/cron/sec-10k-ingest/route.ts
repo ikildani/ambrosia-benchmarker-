@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import {
   findOrCreateCompany,
@@ -184,7 +185,7 @@ async function extractDealsFrom10K(
   filingCompany: string,
   apiKey: string,
 ): Promise<Extracted10KDeal[]> {
-  const anthropic = new Anthropic({ apiKey, timeout: 90_000 });
+  const anthropic = new Anthropic(withSpendGuard('sec-10k-ingest', { apiKey, timeout: 90_000 }));
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',

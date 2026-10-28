@@ -15,6 +15,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
@@ -100,7 +101,7 @@ async function extractFTCDeals(
   text: string,
   anthropicApiKey: string
 ): Promise<FTCDeal[]> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('ftc-premerger', { apiKey: anthropicApiKey, timeout: 60_000 }));
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',

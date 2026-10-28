@@ -16,6 +16,7 @@ import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib
 /** Deal extraction from Perplexity answers; Sonnet 5 in lean mode (lib/ai/budget.ts). */
 export const PERPLEXITY_EXTRACTION_MODEL = budgetModel(process.env.PERPLEXITY_EXTRACTION_MODEL, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL);
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { findOrCreateCompany, deriveTherapeuticArea } from './sec-edgar';
@@ -297,7 +298,7 @@ async function extractDealsFromText(
   anthropicApiKey: string,
   citations: string[] = []
 ): Promise<PerplexityDeal[]> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('perplexity-deals', { apiKey: anthropicApiKey, timeout: 60_000 }));
 
   const response = await anthropic.messages.create({
     model: PERPLEXITY_EXTRACTION_MODEL,

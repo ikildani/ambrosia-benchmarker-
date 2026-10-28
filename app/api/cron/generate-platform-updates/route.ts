@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { captureApiError } from '@/lib/sentry-api';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 import { DEAL_STATS } from '@/lib/config/constants';
@@ -79,7 +80,7 @@ async function generateUpdates(commits: GitHubCommit[]): Promise<GeneratedUpdate
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicApiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 90_000 });
+  const anthropic = new Anthropic(withSpendGuard('generate-platform-updates', { apiKey: anthropicApiKey, timeout: 90_000 }));
 
   const commitList = commits
     .map((c) => `- ${c.commit.message.split('\n')[0]}`)

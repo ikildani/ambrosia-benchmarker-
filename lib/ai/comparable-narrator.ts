@@ -27,6 +27,7 @@ import type { RNPVResult } from '@/lib/financial/types';
 import { parseJsonResponse } from './parse-json';
 import { CircuitBreaker } from './circuit-breaker';
 import { createLogger } from '@/lib/logger';
+import { guardedFetch } from '@/lib/ai/spend-guard';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -179,7 +180,7 @@ async function callClaude(prompt: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY required');
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await guardedFetch('comparable-narrator')('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

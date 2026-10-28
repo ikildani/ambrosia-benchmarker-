@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import benchmarks from '@/data/benchmarks.json';
 import {
   generateModalityInsightsPrompt,
@@ -184,7 +185,7 @@ export class ContentGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey });
+    this.client = new Anthropic(withSpendGuard('content-generator', { apiKey }));
   }
 
   async generateBlogPost(params: GenerationParameters): Promise<GeneratedBlogContent> {

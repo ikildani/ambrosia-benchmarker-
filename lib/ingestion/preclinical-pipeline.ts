@@ -29,6 +29,7 @@
 
 import { budgetCap } from '@/lib/ai/budget';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
@@ -845,7 +846,7 @@ export async function runPreclinicalPipeline(
       result.durationMs = Date.now() - started;
       return result;
     }
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 180_000 }) as unknown as IntentClient;
+    client = new Anthropic(withSpendGuard('preclinical-pipeline', { apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 180_000 })) as unknown as IntentClient;
   }
 
   const cursor = await readSyncCursor<CursorState>(supabase, SYNC_SOURCE);

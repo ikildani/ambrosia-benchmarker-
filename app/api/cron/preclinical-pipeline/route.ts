@@ -18,6 +18,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { leanSkip } from '@/lib/ai/budget';
+import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
 import { timingSafeEqual } from 'crypto';
 import { runPreclinicalPipeline } from '@/lib/ingestion/preclinical-pipeline';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
@@ -54,6 +56,13 @@ export async function GET(request: NextRequest) {
   const companyIds = (params.get('company') ?? '').split(',').map(s => s.trim()).filter(Boolean);
   const force = params.get('force') === '1';
   const startedAt = Date.now();
+
+  // Lean mode (Oct 28 2026): every 6 h instead of every run, and never past the daily bulk AI budget.
+  if (request.nextUrl.searchParams.size === 0 && leanSkip(new Date(), 6)) {
+    return NextResponse.json({ success: true, skipped: 'lean_mode_slot' });
+  }
+  const budget = await aiBudgetAvailable('preclinical-pipeline');
+  if (!budget.ok) return NextResponse.json({ success: true, skipped: 'ai_budget', reason: budget.reason });
 
   try {
     const result = await runPreclinicalPipeline(supabase, {

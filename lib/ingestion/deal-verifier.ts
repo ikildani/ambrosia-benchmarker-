@@ -16,6 +16,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import { isTimeBudgetExceeded } from '../cron-utils';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -408,7 +409,7 @@ export async function verifyPendingDeals(
     return result;
   }
 
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('deal-verifier', { apiKey: anthropicApiKey, timeout: 60_000 }));
 
   for (const deal of deals) {
     // 3. Check time budget between each deal

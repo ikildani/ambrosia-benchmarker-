@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { reclassifyOtherDeals } from '@/lib/cron-utils';
 import { REMEDIATION_THRESHOLDS } from '@/lib/config/remediation-thresholds';
 
@@ -112,7 +113,7 @@ export async function fixMissingTherapeuticArea(supabase: SupabaseClient): Promi
 
   if (!remaining || remaining.length === 0) return result;
 
-  const anthropic = new Anthropic({ apiKey: anthropicKey, timeout: 30_000 });
+  const anthropic = new Anthropic(withSpendGuard('auto-remediate', { apiKey: anthropicKey, timeout: 30_000 }));
 
   const dealDescriptions = remaining.map((d, i) =>
     `${i + 1}. asset="${d.asset_name || 'unknown'}" indication="${d.indication_specific || d.indication_category || 'unknown'}" modality="${d.modality || 'unknown'}" licensor="${d.licensor_name}" licensee="${d.licensee_name}"`

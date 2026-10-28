@@ -16,6 +16,7 @@ import { timingSafeEqual } from 'crypto';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { findOrCreateCompany } from '@/lib/ingestion/sec-edgar';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { logCronRun } from '@/lib/cron-utils';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
       if (text.length < 50) { result.processed++; continue; }
 
       // Extract structured data with Claude
-      const anthropic = new Anthropic({ apiKey: anthropicKey, timeout: 30_000 });
+      const anthropic = new Anthropic(withSpendGuard('deal-enrichment', { apiKey: anthropicKey, timeout: 30_000 }));
       const extraction = await anthropic.messages.create({
         model: 'claude-opus-4-6',
         max_tokens: 800,

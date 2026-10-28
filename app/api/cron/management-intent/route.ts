@@ -16,6 +16,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { leanSkip } from '@/lib/ai/budget';
+import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
 import { timingSafeEqual } from 'crypto';
 import { runManagementIntent } from '@/lib/ingestion/management-intent';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
@@ -46,6 +48,13 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient();
+
+  // Lean mode (Oct 28 2026): every 8 h instead of every run, and never past the daily bulk AI budget.
+  if (request.nextUrl.searchParams.size === 0 && leanSkip(new Date(), 8)) {
+    return NextResponse.json({ success: true, skipped: 'lean_mode_slot' });
+  }
+  const budget = await aiBudgetAvailable('management-intent');
+  if (!budget.ok) return NextResponse.json({ success: true, skipped: 'ai_budget', reason: budget.reason });
   const params = request.nextUrl.searchParams;
   const pressLimit = parsePositiveNumber(params.get('press_limit'), undefined);
   const filingLimit = parsePositiveNumber(params.get('filing_limit'), undefined);

@@ -20,6 +20,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
+import { budgetModel } from '@/lib/ai/budget';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
 import { resolveUserTier } from '@/lib/auth/tier-check';
@@ -44,7 +46,7 @@ import type {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-const anthropic = new Anthropic();
+const anthropic = new Anthropic(withSpendGuard('radar-search'));
 
 // ── Typeahead ─────────────────────────────────────────────────────────────
 
@@ -257,7 +259,8 @@ export async function POST(request: NextRequest) {
   try {
     // Instructions live in the system prompt; the user text is a delimited data-only turn.
     const parseResponse = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      // Lean mode: Haiku turns a typed search into filters; every field is whitelisted below either way.
+      model: budgetModel(process.env.RADAR_SEARCH_MODEL, 'claude-sonnet-4-20250514', 'claude-haiku-4-5'),
       max_tokens: 300,
       system: PARSE_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: `<user_query>\n${query}\n</user_query>` }],
