@@ -125,6 +125,7 @@ Return JSON with 5 sections. Each section: title, content (2-3 sentences), bulle
 }
 
 import { parseJsonResponse } from './parse-json';
+import { guardedFetch } from '@/lib/ai/spend-guard';
 
 // Shared circuit breaker for playbook API calls
 const circuitBreaker = new CircuitBreaker({
@@ -150,7 +151,7 @@ async function callAnthropicAPI(prompt: string, maxTokens: number): Promise<stri
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY environment variable is required');
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await guardedFetch('playbook')('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

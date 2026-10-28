@@ -2,6 +2,7 @@
 // Generates personalized approach strategies and outreach emails using Claude
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import {
   ApproachStrategy,
   OutreachEmail,
@@ -278,7 +279,7 @@ export class OutreachGenerator {
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
-    this.client = new Anthropic({ apiKey });
+    this.client = new Anthropic(withSpendGuard('outreach-generator', { apiKey }));
   }
 
   /**

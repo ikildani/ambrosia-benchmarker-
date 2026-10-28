@@ -13,6 +13,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { logCronRun } from '@/lib/cron-utils';
+import { isLean } from '@/lib/ai/budget';
+import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
 import { verifyPendingDeals } from '@/lib/ingestion/deal-verifier';
 import { checkDealStatuses, type DealStatusResult } from '@/lib/ingestion/deal-status';
 import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ingestion/auto-remediate';
@@ -68,6 +70,18 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient();
+
+  // Lean mode (Oct 28 2026): the :20 run is skipped (2 runs an hour instead of 3); the :40 run
+  // still carries the flag-fixer. Every run stops once the daily AI budget for core work is spent.
+  const minute = new Date().getUTCMinutes();
+  if (isLean() && minute >= 20 && minute < 40 && request.nextUrl.searchParams.size === 0) {
+    return NextResponse.json({ success: true, skipped: 'lean_mode_slot' });
+  }
+  const budget = await aiBudgetAvailable('deal-verifier');
+  if (!budget.ok) {
+    await logCronRun(supabase, 'deal_verification', { fetched: 0, processed: 0, inserted: 0, expectRecords: false, notes: `skipped: ${budget.reason}` });
+    return NextResponse.json({ success: true, skipped: 'ai_budget', reason: budget.reason });
+  }
 
   // Read demand signals to prioritize verification of user-demanded TAs
   let priorityTAs: string[] = [];

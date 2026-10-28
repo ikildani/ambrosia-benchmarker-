@@ -5,6 +5,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { type CompetitorEntry } from './competitor-monitor';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -91,7 +92,7 @@ Return ONLY valid JSON with no additional text:
   ]
 }`;
 
-  const client = new Anthropic({ apiKey });
+  const client = new Anthropic(withSpendGuard('competitor-analysis', { apiKey }));
   const message = await client.messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 4096,

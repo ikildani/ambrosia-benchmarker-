@@ -3,6 +3,7 @@
 
 import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { secThrottle, SEC_USER_AGENT, eftsSearch } from './edgar-fts';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -697,7 +698,7 @@ export async function extractDealFromFiling(
   filingText: string,
   anthropicApiKey: string
 ): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('sec-edgar', { apiKey: anthropicApiKey, timeout: 60_000 }));
   try {
     const response = await anthropic.messages.create(buildDealExtractionRequest(filingText));
     const content = response.content[0];

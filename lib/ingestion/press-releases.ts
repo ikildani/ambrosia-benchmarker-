@@ -3,6 +3,7 @@
 // Uses Claude AI to extract structured deal data (same pattern as SEC EDGAR)
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { createHash } from 'crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ExtractedDeal } from './sec-edgar';
@@ -623,7 +624,7 @@ export async function extractDealFromArticle(
   source: string,
   anthropicApiKey: string
 ): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+  const anthropic = new Anthropic(withSpendGuard('press-releases', { apiKey: anthropicApiKey }));
 
   const systemPrompt = `You are an expert biopharma deal analyst extracting licensing, collaboration and M&A deal information from press releases and news articles. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 

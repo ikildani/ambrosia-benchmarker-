@@ -6,6 +6,7 @@
 
 import { type SupabaseClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { generateMetaOptimizationPrompt } from '@/lib/ai/prompts/meta-optimization';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -174,7 +175,7 @@ export async function optimizePage(
     throw new Error('ANTHROPIC_API_KEY environment variable is required');
   }
 
-  const client = new Anthropic({ apiKey });
+  const client = new Anthropic(withSpendGuard('ctr-optimizer', { apiKey }));
 
   const prompt = generateMetaOptimizationPrompt({
     currentTitle: candidate.currentTitle,

@@ -2,6 +2,7 @@
 // Uses Claude Sonnet to extract per-drug revenue from 10-K filing text
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const SEC_SUBMISSIONS_API = 'https://data.sec.gov/submissions';
@@ -32,7 +33,7 @@ export async function extractProductRevenue(params: {
 }): Promise<ProductRevenue[]> {
   const { filingText, anthropicApiKey, companyName, knownDrugs } = params;
 
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+  const anthropic = new Anthropic(withSpendGuard('sec-revenue-extraction', { apiKey: anthropicApiKey }));
 
   const systemPrompt = `You are a pharmaceutical financial analyst extracting product-level revenue data from SEC 10-K filings. Be precise and conservative. Only extract revenue figures that are clearly and explicitly stated in the filing text.`;
 

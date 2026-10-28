@@ -22,6 +22,7 @@ import { readSyncCursor, writeSyncCursor } from '../radar/sync-cursor';
 import { FunnelCounter } from './funnel';
 import { PHARMA_DEAL_QUERIES, eftsSearch, hitToDocument, isLikelyPharmaDealHit, quartersSince, quartersBetween, EFTS_PAGE_SIZE, type EftsDocument } from './edgar-fts';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { processEftsDocument, loadEftsDocumentText } from './edgar-realtime';
 import { ExtractionUnavailableError } from './sec-edgar';
 import { backfillExtractionMode, submitExtractionBatch, drainExtractionBatches, type BatchItem, type BackfillExtractionMode } from './edgar-fts-batch';
@@ -140,7 +141,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
   const funnel = new FunnelCounter();
   const errors: string[] = [];
   let extractionMode: BackfillExtractionMode = opts.extractionMode ?? backfillExtractionMode();
-  const anthropic = new Anthropic({ apiKey: opts.anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('edgar-fts-backfill', { apiKey: opts.anthropicApiKey, timeout: 60_000 }));
   let batchId: string | null = null;
   let drained: BackfillResult['drained'];
 

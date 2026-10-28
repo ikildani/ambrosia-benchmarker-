@@ -27,6 +27,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { isLean } from '@/lib/ai/budget';
+import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
 import { timingSafeEqual } from 'crypto';
 import {
   DEFAULT_MODEL,
@@ -95,11 +97,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: report.errors.length === 0, mode: 'validate', ...report });
     }
 
+    // Stop for the day once the bulk AI budget is spent; lean mode also caps requests per run
+    // (10 x 20 assets every 30 min still clears ~9,600 new assets a day).
+    const budget = await aiBudgetAvailable('asset-classify');
+    if (!budget.ok) return NextResponse.json({ success: true, mode: 'classify', skipped: 'ai_budget', reason: budget.reason });
+    const requestedMax = parsePositiveInt(params.get('maxRequests'), undefined);
     const result = await classifyAssetsBatch(supabase, {
       limit: parsePositiveInt(params.get('limit'), undefined),
       batchSize: parsePositiveInt(params.get('batch'), undefined),
       concurrency: parsePositiveInt(params.get('concurrency'), undefined),
-      maxRequests: parsePositiveInt(params.get('maxRequests'), undefined),
+      maxRequests: isLean() ? Math.min(requestedMax ?? 10, 10) : requestedMax,
       model: parseModel(params.get('model'), DEFAULT_MODEL),
       onlyStatuses: parseStatuses(params.get('only')),
       scope: params.get('scope') === 'all' ? 'all' : 'core',

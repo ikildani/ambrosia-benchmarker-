@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { createServiceClient } from '@/lib/supabase/server';
 import {
   findOrCreateCompany,
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Send to Claude for deal extraction
     console.log(`[deal-ingest] Extracting deal from ${textContent.length} chars...`);
-    const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 25_000 });
+    const anthropic = new Anthropic(withSpendGuard('admin-deal-ingest', { apiKey: anthropicApiKey, timeout: 25_000 }));
 
     const response = await anthropic.messages.create({
       model: 'claude-opus-4-6',

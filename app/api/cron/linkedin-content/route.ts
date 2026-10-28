@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { DEAL_STATS } from '@/lib/config/constants';
@@ -452,7 +453,7 @@ export async function GET(request: NextRequest) {
   if (!apiKey) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
   }
-  const anthropic = new Anthropic({ apiKey });
+  const anthropic = new Anthropic(withSpendGuard('linkedin-content', { apiKey }));
 
   try {
     // 3. Fetch deal trends

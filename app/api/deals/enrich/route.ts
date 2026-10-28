@@ -15,6 +15,7 @@ import { verifyAdminAuth } from '@/lib/admin-auth';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { findOrCreateCompany } from '@/lib/ingestion/sec-edgar';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -77,7 +78,7 @@ async function extractStructuredEnrichment(
   royalty_high_pct?: number;
   announced_date?: string;
 }> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 30_000 });
+  const anthropic = new Anthropic(withSpendGuard('deals-enrich', { apiKey: anthropicApiKey, timeout: 30_000 }));
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',

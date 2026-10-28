@@ -19,9 +19,10 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const anthropic = new Anthropic();
+const anthropic = new Anthropic(withSpendGuard('radar-narrative'));
 
 /** Must match NARRATIVE_MODEL in app/api/radar/_lib/radar-api.ts. */
 const NARRATIVE_MODEL = 'claude-opus-4-6';

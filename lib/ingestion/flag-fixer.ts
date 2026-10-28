@@ -23,6 +23,7 @@
  * the before -> after diff and the source URL; the daily report emails it.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import { isTimeBudgetExceeded } from '../cron-utils';
@@ -391,7 +392,7 @@ export async function fixFlaggedDeals(
   const budget = options?.timeBudgetMs ?? 240_000;
   const retryAfterDays = options?.retryAfterDays ?? 3;
   const result: FlagFixResult = { attempted: 0, fixed: 0, duplicates: 0, rejected: 0, unresolved: 0, outcomes: [], errors: [] };
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+  const anthropic = new Anthropic(withSpendGuard('flag-fixer', { apiKey: anthropicApiKey }));
 
   const since = new Date(Date.now() - retryAfterDays * 86_400_000).toISOString();
   const { data: recent } = await supabase.from('remediation_log').select('deal_id')

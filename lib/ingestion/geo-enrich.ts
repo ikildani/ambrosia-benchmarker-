@@ -13,6 +13,7 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { FunnelCounter } from './funnel';
 import { deriveRegion, classifyCompanyCountry } from './company-geography';
 import type { AdapterRunResult } from './exchanges/shared';
@@ -62,7 +63,7 @@ export async function runGeoEnrichment(supabase: SupabaseClient, opts: GeoRunOpt
   const dryRun = !!opts.dryRun;
   const funnel = new FunnelCounter();
   const errors: string[] = [];
-  const anthropic = new Anthropic({ apiKey: opts.anthropicApiKey, timeout: 30_000 });
+  const anthropic = new Anthropic(withSpendGuard('geo-enrich', { apiKey: opts.anthropicApiKey, timeout: 30_000 }));
 
   const { data, error } = await supabase
     .from('deals')

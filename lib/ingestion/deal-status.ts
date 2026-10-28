@@ -11,6 +11,7 @@
  * moves. Rides inside the deal-verification cron on a weekly window.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import { isTimeBudgetExceeded } from '../cron-utils';
@@ -88,7 +89,7 @@ export async function checkDealStatuses(
   }
   if (!rows.length) return result;
 
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 60_000 });
+  const anthropic = new Anthropic(withSpendGuard('deal-status', { apiKey: anthropicApiKey, timeout: 60_000 }));
   for (const deal of rows) {
     if (isTimeBudgetExceeded(start, timeBudgetMs)) break;
     const stamp = new Date().toISOString();

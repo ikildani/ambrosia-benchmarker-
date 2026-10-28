@@ -15,6 +15,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { addUsage, emptyUsage, type IntentClient, type TokenUsage } from './management-intent';
@@ -388,7 +389,7 @@ export async function runWebsiteDiscovery(supabase: SupabaseClient, opts: Discov
   let client = opts.client ?? null;
   if (mode === 'paid' && !client) {
     if (!process.env.ANTHROPIC_API_KEY) { r.errors.push('ANTHROPIC_API_KEY not set'); return r; }
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 60_000 }) as unknown as IntentClient;
+    client = new Anthropic(withSpendGuard('company-websites', { apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 60_000 })) as unknown as IntentClient;
   }
 
   const recheckBefore = new Date(now.getTime() - DISCOVERY_RECHECK_DAYS * 86_400_000).toISOString();

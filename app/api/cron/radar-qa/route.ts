@@ -23,6 +23,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logRadarRun } from '@/lib/radar/run-log';
 import { runInvariants } from '@/lib/radar/qa/invariants';
@@ -168,7 +169,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'ANTHROPIC_API_KEY is not set' }, { status: 500 });
     }
     const modelRaw = params.get('model');
-    const client = new Anthropic({ maxRetries: 0, timeout: 120_000 });
+    const client = new Anthropic(withSpendGuard('radar-qa', { maxRetries: 0, timeout: 120_000 }));
     const report = await runGoldenAgreement(supabase, client, {
       model: modelRaw && MODEL_RE.test(modelRaw) ? modelRaw : undefined,
       batchSize: parsePositiveInt(params.get('batch'), undefined),

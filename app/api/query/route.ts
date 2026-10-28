@@ -15,6 +15,7 @@
 
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { createServiceClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth-helpers';
 import { isProEmail } from '@/lib/config/authorized-emails';
@@ -456,7 +457,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       return apiError('AI service is not configured', 500, 'CONFIG_ERROR');
     }
 
-    const anthropic = new Anthropic({ apiKey });
+    const anthropic = new Anthropic(withSpendGuard('query', { apiKey }));
 
     const sqlResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',

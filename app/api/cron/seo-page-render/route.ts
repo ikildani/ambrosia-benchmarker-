@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
@@ -343,7 +344,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
   }
 
-  const client = new Anthropic({ apiKey });
+  const client = new Anthropic(withSpendGuard('seo-page-render', { apiKey }));
   const publishedPages: Array<{ slug: string; title: string; source: string; indexed: boolean }> = [];
   const errors: string[] = [];
 

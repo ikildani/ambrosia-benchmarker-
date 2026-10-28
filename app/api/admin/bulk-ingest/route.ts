@@ -23,6 +23,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { validateExtractedDeal } from '@/lib/ingestion/deal-extraction-validator';
 import { findOrCreateCompany, deriveTherapeuticArea } from '@/lib/ingestion/sec-edgar';
@@ -182,7 +183,7 @@ interface ExtractedDeal {
 }
 
 async function extractDeals(text: string, queryId: string, anthropicApiKey: string): Promise<ExtractedDeal[]> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 120_000 });
+  const anthropic = new Anthropic(withSpendGuard('admin-bulk-ingest', { apiKey: anthropicApiKey, timeout: 120_000 }));
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',

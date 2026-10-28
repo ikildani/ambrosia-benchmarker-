@@ -21,6 +21,7 @@
 
 import { budgetCap } from '@/lib/ai/budget';
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
@@ -472,7 +473,7 @@ export async function runManagementIntent(
       result.durationMs = Date.now() - started;
       return result;
     }
-    client = new Anthropic({ apiKey }) as unknown as IntentClient;
+    client = new Anthropic(withSpendGuard('management-intent', { apiKey })) as unknown as IntentClient;
   }
 
   const cursor = await readSyncCursor<CursorState>(supabase, SYNC_SOURCE);

@@ -1999,7 +1999,8 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
         const apiKey = process.env.ANTHROPIC_API_KEY;
         if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-        const anthropic = new Anthropic({ apiKey });
+        const { withSpendGuard } = await import('@/lib/ai/spend-guard');
+        const anthropic = new Anthropic(withSpendGuard('mcp', { apiKey }));
         const supabase = createServiceClient();
 
         // Schema for SQL generation

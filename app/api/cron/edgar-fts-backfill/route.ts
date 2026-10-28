@@ -13,6 +13,8 @@ import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runEdgarFtsBackfill } from '@/lib/ingestion/edgar-fts-backfill';
 import { logCronRun } from '@/lib/cron-utils';
+import { isLean } from '@/lib/ai/budget';
+import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -50,7 +52,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, skipped: 'daily_cap', usedToday, dailyCap });
     }
   }
-  const maxExtractions = Math.min(400, Number(request.nextUrl.searchParams.get('max')) || 300);
+  // Lean mode (Oct 28 2026): 2017 → present is walked; the cursor is now in pre-2017 quarters, which
+  // are not worth the API spend. Runs only drain batches already paid for, unless EDGAR_FTS_BACKFILL=on.
+  const drainOnly = isLean() && process.env.EDGAR_FTS_BACKFILL !== 'on' && !request.nextUrl.searchParams.get('max');
+  const budget = drainOnly ? { ok: true, reason: null } : await aiBudgetAvailable('edgar-fts-backfill');
+  if (!budget.ok && !dryRun) {
+    await logCronRun(supabase, 'edgar_fts_backfill', { fetched: 0, processed: 0, inserted: 0, expectRecords: false, notes: `skipped: ${budget.reason}` });
+    return NextResponse.json({ success: true, skipped: 'ai_budget', reason: budget.reason });
+  }
+  const maxExtractions = drainOnly ? 0 : Math.min(400, Number(request.nextUrl.searchParams.get('max')) || 300);
   const concurrency = Math.min(8, Number(request.nextUrl.searchParams.get('concurrency')) || 6);
   try {
     const result = await runEdgarFtsBackfill(supabase, { anthropicApiKey, dryRun, timeBudgetMs: 250_000, maxExtractions, concurrency });
@@ -64,7 +74,7 @@ export async function GET(request: NextRequest) {
         parameters: { quarter: result.quarterKey, query: result.query, pages: result.pages, next: result.next, finished: result.finished, prefiltered: result.prefiltered, alreadyProcessed: result.alreadyProcessed, maxExtractions, concurrency, extractionMode: process.env.BACKFILL_EXTRACTION_MODE || 'batch', gate: process.env.EXTRACTION_GATE || 'haiku', batchId: result.batchId ?? null, drained: result.drained ?? null },
         // A quarter/query with no hits is a legitimate empty page once the walk is finished.
         expectRecords: !result.finished,
-        notes: result.finished ? 'backfill walk complete; cursor at the current quarter' : undefined,
+        notes: drainOnly ? 'lean mode: drain only (set EDGAR_FTS_BACKFILL=on to walk)' : result.finished ? 'backfill walk complete; cursor at the current quarter' : undefined,
       });
     }
     return NextResponse.json({ success: true, dryRun, ...result });

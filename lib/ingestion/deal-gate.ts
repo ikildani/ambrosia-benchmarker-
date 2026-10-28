@@ -20,6 +20,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
 
 export type GateMode = 'haiku' | 'regex' | 'none';
 
@@ -63,7 +64,7 @@ Answer NO for earnings releases, financing rounds and equity offerings, governan
 
 /** Paid pass, about 1/40th of an Opus extraction. Fails open. */
 export async function haikuDealGate(text: string, anthropicApiKey: string): Promise<GateDecision> {
-  const anthropic = new Anthropic({ apiKey: anthropicApiKey, timeout: 30_000, maxRetries: 1 });
+  const anthropic = new Anthropic(withSpendGuard('deal-gate', { apiKey: anthropicApiKey, timeout: 30_000, maxRetries: 1 }));
   try {
     const res = await anthropic.messages.create({
       model: GATE_MODEL,

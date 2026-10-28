@@ -11,6 +11,7 @@ import { estimateMarketSize } from '@/lib/financial/market-size';
 import { validateIndicationTA } from '@/lib/financial/validation';
 import { fixNegativeDealValues, fixMissingTherapeuticArea } from '@/lib/ingestion/auto-remediate';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { guardedFetch } from '@/lib/ai/spend-guard';
 
 export const maxDuration = 300; // 5 min — full matrix takes time
 export const dynamic = 'force-dynamic';
@@ -476,7 +477,7 @@ export async function GET(request: NextRequest) {
       checks.push({ name: 'AI Ingestion (Claude)', status: 'fail', details: 'ANTHROPIC_API_KEY not configured — all deal ingestion is BLOCKED' });
     } else {
       try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await guardedFetch('qa-health-check')('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
           body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
