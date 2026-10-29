@@ -467,7 +467,7 @@ async function chemblLane(
   const CONC = 4;
   for (let i = 0; i < todo.length; i += CONC) {
     await Promise.all(todo.slice(i, i + CONC).map(async q => {
-      const r = await chemblSearch(q);
+      const r = await Promise.race([chemblSearch(q), sleep(45_000).then(() => 'error' as const)]);
       if (r === 'error') { errors++; return; }
       cache[normalizeKey(q)] = r.length ? r.map(m => ({ ...m, synonyms: m.synonyms.slice(0, 80) })) : null;
     }));
@@ -542,7 +542,7 @@ async function ncitLane(
   const CONC = 4;
   for (let i = 0; i < todo.length; i += CONC) {
     await Promise.all(todo.slice(i, i + CONC).map(async q => {
-      const r = await searchNcit(q);
+      const r = await Promise.race([searchNcit(q), sleep(45_000).then(() => 'error' as const)]);
       if (r === 'error') { errors++; return; }
       cache[normalizeKey(q)] = r.length ? r : null;
     }));
@@ -599,4 +599,4 @@ async function ncitLane(
 }
 
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });
