@@ -347,8 +347,8 @@ async function main() {
   const comboIds = new Map<string, string>();
   {
     const keys = [...comboNeeds.keys()];
-    for (let i = 0; i < keys.length; i += 200) {
-      const { data, error } = await withRetry(() => supabase.from('drug_aliases').select('drug_id, alias_normalized').in('alias_normalized', keys.slice(i, i + 200).map(k => normalizeKey(k))));
+    for (let i = 0; i < keys.length; i += 40) {
+      const { data, error } = await withRetry(() => supabase.from('drug_aliases').select('drug_id, alias_normalized').in('alias_normalized', keys.slice(i, i + 40).map(k => normalizeKey(k))));
       if (error) throw new Error(error.message);
       for (const r of (data ?? []) as Array<{ drug_id: string; alias_normalized: string }>) {
         const k = keys.find(x => normalizeKey(x) === r.alias_normalized);
