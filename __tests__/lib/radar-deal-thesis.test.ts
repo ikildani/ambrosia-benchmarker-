@@ -373,7 +373,22 @@ describe('profile caching', () => {
     expect(mockedComps).toHaveBeenCalledWith(
       { therapeuticArea: 'oncology', modality: 'small_molecule', indication: 'Non-Small Cell Lung Cancer', phase: 'phase_1_2', dealType: 'licensing' },
       expect.any(Number),
+      { licensingTermsOnly: true },
     );
+  });
+
+  it('maps snake_case Radar TAs to the deals-table spelling (infectious disease was always "insufficient")', async () => {
+    const { client } = createMockSupabase({
+      queue: [
+        asset({ id: uuid(110), therapeutic_area: 'infectious_disease' }),
+        asset({ id: uuid(111), therapeutic_area: 'rare_disease' }),
+        asset({ id: uuid(112), therapeutic_area: 'womens_health' }),
+      ],
+      backlog: 0,
+    });
+    await generateDealTheses(client, { limit: 10 });
+    const tas = mockedComps.mock.calls.map(c => c[0].therapeuticArea).sort();
+    expect(tas).toEqual(['infectiousDisease', 'rareDisease', 'womensHealth']);
   });
 
   it('counts refreshed vs generated from the queue row and reports the backlog', async () => {

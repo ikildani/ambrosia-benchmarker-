@@ -15,6 +15,7 @@ import {
   scoreCompMatch,
   selectWithRelaxation,
   shouldExcludeForStage,
+  isLicensingTermsComp,
   type CompRelaxation,
   type CompMatchBreakdown,
 } from '@/lib/comparable-scoring';
@@ -243,6 +244,21 @@ export interface EnrichedComparableResult {
   relaxation: CompRelaxation;
   /** Approved-stage M&A deals dropped because the query phase is pre-approval. */
   excludedApprovedMA: number;
+  /**
+   * `licensingTermsOnly` runs only: acquisitions / mergers and
+   * partial-territory licenses dropped from the pool. 0 otherwise.
+   */
+  excludedNonLicensing?: number;
+}
+
+export interface EnrichedComparableOptions {
+  /**
+   * Pool for predicting licensing terms on global rights (Radar deal theses):
+   * reads `deals_verified`, drops acquisitions / mergers and partial-territory
+   * licenses, and requires the same or an adjacent phase on the strict rung.
+   * Off by default so the calculator's comp panel is unchanged.
+   */
+  licensingTermsOnly?: boolean;
 }
 
 /** Recency-weighted p25 / median / p75 over disclosed values. */
@@ -276,11 +292,15 @@ export function computeBenchmarkRange(
 export async function findEnrichedComparableDeals(
   inputs: { therapeuticArea: string; modality: string; indication: string; phase?: string; dealType?: string },
   maxDeals: number = 30,
+  options: EnrichedComparableOptions = {},
 ): Promise<EnrichedComparableResult> {
   const supabase = createServiceClient();
+  const licensingOnly = options.licensingTermsOnly === true;
 
   const { data: dbDeals } = await supabase
-    .from('deals')
+    // CLAUDE.md: product surfaces read deals_verified. The licensing-terms
+    // pool (Radar) does; the calculator path keeps its inline filter below.
+    .from(licensingOnly ? 'deals_verified' : 'deals')
     .select('id, licensor_name, licensee_name, total_deal_value_usd, upfront_usd, announced_date, modality, indication_category, indication_specific, therapeutic_area, phase_at_signing, deal_type, territory, asset_name, confidence_score, verification_status, source_url, source_type, provenance_tier')
     // NOTE: licensor_country / licensee_country / cross_border / deal_corridor
     // (migration 079) are not present on the production deals table. Selecting
@@ -306,9 +326,14 @@ export async function findEnrichedComparableDeals(
   // Stage/structure sanity filter — approved-stage acquisitions/mergers are
   // not comps for a pre-approval licensing query.
   let excludedApprovedMA = 0;
+  let excludedNonLicensing = 0;
   const stageFiltered = (dbDeals || []).filter(d => {
     if (shouldExcludeForStage(inputs.phase, d.phase_at_signing, d.deal_type)) {
       excludedApprovedMA++;
+      return false;
+    }
+    if (licensingOnly && !isLicensingTermsComp({ dealType: d.deal_type, territory: d.territory })) {
+      excludedNonLicensing++;
       return false;
     }
     return true;
@@ -364,7 +389,9 @@ export async function findEnrichedComparableDeals(
   });
 
   // Pass threshold: TA + one of {phase, adjacent phase, indication}; relax if thin.
-  const { items, relaxation } = selectWithRelaxation(scored, s => s.breakdown);
+  // Licensing-terms pools are phase-anchored: an indication match alone does
+  // not make a deal "phase matched".
+  const { items, relaxation } = selectWithRelaxation(scored, s => s.breakdown, undefined, { phaseAnchored: licensingOnly });
   if (relaxation !== 'none') {
     console.info(`[comparableDeals] relaxation=${relaxation} for ${inputs.therapeuticArea}/${inputs.phase ?? '?'}/${inputs.modality} (strict pool too thin)`);
   }
@@ -374,5 +401,5 @@ export async function findEnrichedComparableDeals(
     .slice(0, maxDeals)
     .map(s => s.deal);
 
-  return { deals, benchmarkRange: computeBenchmarkRange(deals), relaxation, excludedApprovedMA };
+  return { deals, benchmarkRange: computeBenchmarkRange(deals), relaxation, excludedApprovedMA, excludedNonLicensing };
 }
