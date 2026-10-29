@@ -215,10 +215,65 @@ describe('evaluateInvariants: thresholds and severity', () => {
     expect(check(s, 'thesis_coverage')).toMatchObject({ passed: false, severity: 'major' });
     s.thesis.with_thesis = 2500; // 83% < 90
     expect(check(s, 'thesis_coverage').severity).toBe('blocker');
+    // Pre-172 fallback: |calc − comps| / comps ≤ 2 (calculator within 3× high).
     s.thesis.calculator_ratio = { n: 100, median: 1.4, p90: 3 };
-    expect(check(s, 'thesis_calculator_vs_comps')).toMatchObject({ passed: false, severity: 'major' });
+    expect(check(s, 'thesis_calculator_vs_comps')).toMatchObject({ passed: true, severity: 'minor' });
+    s.thesis.calculator_ratio = { n: 100, median: 1.96, p90: 7.67 };
+    expect(check(s, 'thesis_calculator_vs_comps').passed).toBe(true);
+    s.thesis.calculator_ratio = { n: 100, median: 2.5, p90: 9 };
+    expect(check(s, 'thesis_calculator_vs_comps')).toMatchObject({ passed: false, severity: 'minor' });
     s.thesis.calculator_ratio = { n: 0, median: null, p90: null };
     expect(check(s, 'thesis_calculator_vs_comps').passed).toBe(true);
+  });
+
+  it('calculator gap uses the symmetric log ratio once migration 172 is applied', () => {
+    const s = healthyStats();
+    s.thesis.calculator_ratio = { n: 100, median: 9, p90: 20 }; // ignored when the log ratio is present
+    s.thesis.calculator_log_ratio = { n: 100, median_abs_log: Math.log(2.5), share_over_2x: 0.6 };
+    expect(check(s, 'thesis_calculator_vs_comps')).toMatchObject({ passed: true, severity: 'minor' });
+    s.thesis.calculator_log_ratio = { n: 100, median_abs_log: Math.log(3.5), share_over_2x: 0.8 };
+    const c = check(s, 'thesis_calculator_vs_comps');
+    expect(c.passed).toBe(false);
+    expect(c.observed).toContain('3.5×');
+    expect(c.observed).toContain('80% more than 2× apart');
+  });
+
+  it('headline upfront must rise with phase', () => {
+    const s = healthyStats();
+    // Pre-fix production shape (2026-10-28): flat across phases.
+    s.thesis.upfront_by_phase = { phase_1: { n: 15509, median: 35 }, phase_2: { n: 16665, median: 40 }, phase_3: { n: 9833, median: 45 } };
+    expect(check(s, 'thesis_upfront_rises_with_phase')).toMatchObject({ passed: false, severity: 'major' });
+    // Post-fix shape from the replayed pools.
+    s.thesis.upfront_by_phase = { preclinical: { n: 1500, median: 20 }, phase_1: { n: 18702, median: 40 }, phase_2: { n: 19953, median: 65 }, phase_3: { n: 12297, median: 75 } };
+    expect(check(s, 'thesis_upfront_rises_with_phase').passed).toBe(true);
+    // Phase 2 below Phase 1 fails even when Phase 3 clears the bar.
+    s.thesis.upfront_by_phase = { phase_1: { n: 500, median: 40 }, phase_2: { n: 500, median: 30 }, phase_3: { n: 500, median: 90 } };
+    expect(check(s, 'thesis_upfront_rises_with_phase').passed).toBe(false);
+    // Too few theses to judge: pass.
+    s.thesis.upfront_by_phase = { phase_1: { n: 10, median: 40 }, phase_3: { n: 10, median: 20 } };
+    expect(check(s, 'thesis_upfront_rises_with_phase').passed).toBe(true);
+  });
+
+  it('M&A in a licensing comp pool is a major failure; checks are absent before migration 172', () => {
+    const s = healthyStats();
+    expect(s.thesis.ma_in_pool).toBeNull();
+    expect(evaluateInvariants(s, { now }).find(c => c.check_name === 'thesis_pool_excludes_ma')).toBeUndefined();
+    expect(evaluateInvariants(s, { now }).find(c => c.check_name === 'thesis_upfront_rises_with_phase')).toBeUndefined();
+    s.thesis.ma_in_pool = { count: 44240, sample_ids: ['a1'] };
+    expect(check(s, 'thesis_pool_excludes_ma')).toMatchObject({ passed: false, severity: 'major', failing_ids: ['a1'] });
+    s.thesis.ma_in_pool = { count: 0, sample_ids: [] };
+    expect(check(s, 'thesis_pool_excludes_ma').passed).toBe(true);
+  });
+
+  it('normalizeThesisStats reads the migration-172 keys', () => {
+    const t = normalizeThesisStats({
+      calculator_log_ratio: { n: '10', median_abs_log: '0.5', share_over_2x: 0.2 },
+      upfront_by_phase: { phase_1: { n: 3, median: '40' } },
+      ma_in_pool: { count: 2, sample_ids: ['x'] },
+    });
+    expect(t.calculator_log_ratio).toEqual({ n: 10, median_abs_log: 0.5, share_over_2x: 0.2 });
+    expect(t.upfront_by_phase).toEqual({ phase_1: { n: 3, median: 40 } });
+    expect(t.ma_in_pool).toEqual({ count: 2, sample_ids: ['x'] });
   });
 
   it('score contract: entries / sums escalate by share; distribution blocker when nothing ≥ 30', () => {
