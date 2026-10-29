@@ -44,6 +44,10 @@ export interface OwnershipInput {
   assetName?: string | null;
   /** Other originator programs of the same company sharing this asset's code prefix (migration 143). */
   codePrefixOriginators?: number;
+  /** Another industry company holds the same drug node (migration 173). */
+  sharedWithOtherCompanies?: boolean;
+  /** The drug node is a combination (migration 173: marketed_shared applies to single agents only). */
+  drugIsCombination?: boolean;
 }
 
 export type OwnershipRule =
@@ -54,6 +58,7 @@ export type OwnershipRule =
   | 'marketed_other'
   | 'comparator'
   | 'originator_mismatch'
+  | 'marketed_shared'
   | 'arm_comparator'
   | 'sponsor_default'
   | 'no_arm_evidence';
@@ -69,6 +74,14 @@ export const COMPARATOR_NAME_RE = /^(comparators?\b|placebo\b|standard[- ]of[- ]
 
 export function isComparatorNamed(name: string | null | undefined): boolean {
   return COMPARATOR_NAME_RE.test(name ?? '');
+}
+
+/**
+ * The name carries a sponsor development code anywhere (CT-P13, "MK-3475 (pembrolizumab)",
+ * SHR-A1811). Mirrors radar_has_dev_code() (migration 173).
+ */
+export function hasDevelopmentCode(name: string | null | undefined): boolean {
+  return /(^|[^A-Za-z0-9])[A-Z]{1,6}(-[A-Z])?[- ]?[0-9]{2,8}[A-Za-z]{0,2}([^A-Za-z0-9]|$)/.test(name ?? '');
 }
 
 /** "JDQ443" -> "JDQ", "CP-742,033" -> "CP", "Dotinurad" -> null. Mirrors radar_code_prefix(). */
@@ -98,6 +111,10 @@ export const CODE_PREFIX_MIN_ORIGINATORS = 2;
  *   originator_mismatch  trusted originator is another company but the drug is in
  *                        an experimental arm here: a possible licensee with no deal
  *                        on record, left visible as 'unknown'
+ *   marketed_shared      (migration 173) no trusted originator, the single-agent drug is
+ *                        approved, another industry company holds it too, and this row's
+ *                        name carries no development code: a backbone, comparator, DDI
+ *                        probe or generic, not the sponsor's program
  *   arm_comparator       no trusted originator; every matched arm is a comparator
  *   sponsor_default      no trusted originator; at least one experimental arm
  *   code_prefix_match    (again) no arms, but the code series is the company's own
@@ -130,6 +147,8 @@ export function deriveOwnership(input: OwnershipInput): OwnershipResult {
     rule = 'code_prefix_match'; status = 'originator';
   } else if (trustedOriginator) {
     rule = 'originator_mismatch'; status = 'unknown';
+  } else if (drug?.maxPhase === 'approved' && !input.drugIsCombination && input.sharedWithOtherCompanies && !hasDevelopmentCode(input.assetName)) {
+    rule = 'marketed_shared'; status = 'marketed_other';
   } else if (matched > 0 && experimental === 0 && comparator > 0) {
     rule = 'arm_comparator'; status = 'comparator_or_background';
   } else if (experimental > 0) {
