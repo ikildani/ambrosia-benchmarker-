@@ -10,6 +10,7 @@
 import type { AssetBrief } from './types';
 import { escapeHtml } from '@/lib/radar/notifications';
 import { fmtM, fmtRoyalty, fmtDate, fmtNum, label, fmtPhaseDb, territoryLabel, sourceLabel, factorLabel, GAP_LABELS } from './format';
+import { termsHeadline, disagreementNote, HEADLINE_RULE_TEXT } from '@/lib/radar/terms-headline';
 
 const MAX_TRIALS = 12;
 const MAX_COMPS = 10;
@@ -18,7 +19,7 @@ const MAX_ACQUIRERS = 5;
 function esc(v: unknown): string { return escapeHtml(v == null ? '' : String(v)); }
 
 function relaxationLabel(r: string | null | undefined): string {
-  if (!r || r === 'none') return 'exact TA + modality + phase';
+  if (!r || r === 'none') return 'phase-matched: TA + same or adjacent phase';
   if (r === 'modality_only') return 'widened to modality';
   if (r === 'ta_only') return 'widened to therapeutic area';
   return r.replace(/_/g, ' ');
@@ -130,6 +131,8 @@ export function buildBriefHtml(brief: AssetBrief, opts: { generatedAt?: Date; ba
     </div>`;
 
   const th = terms.thesis;
+  const headline = terms.insufficient ? null : termsHeadline(th);
+  const note = disagreementNote(headline);
   const compRows = terms.comps.slice(0, MAX_COMPS).map(c => `
     <tr>
       <td class="mono">${c.year ?? (c.announced_date ? c.announced_date.slice(0, 4) : '—')}</td>
@@ -146,14 +149,16 @@ export function buildBriefHtml(brief: AssetBrief, opts: { generatedAt?: Date; ba
   const termsHtml = `
     <div class="section">
       <h2>Predicted terms <span class="muted" style="text-transform:none;letter-spacing:0;">n = ${terms.n} comps (${terms.verified_n} verified) · ${esc(relaxationLabel(terms.relaxation))}${th?.terms_basis ? ` · basis: ${esc(th.terms_basis)}` : ''}</span></h2>
-      ${terms.insufficient || !th || th.predicted_upfront_mid == null ? `
+      ${!headline || !th ? `
         <div class="warn">Insufficient comparables for a defensible range (${terms.n} found, ${terms.min_comps} required). No terms are predicted; the comps below are shown for context only.</div>` : `
         <div class="grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 6px;">
-          ${kv('Upfront (P25 / P50 / P75)', `<span class="mono">${esc(fmtM(th.predicted_upfront_low))} / <b>${esc(fmtM(th.predicted_upfront_mid))}</b> / ${esc(fmtM(th.predicted_upfront_high))}</span>`)}
-          ${kv('Total value', `<span class="mono">${esc(fmtM(th.predicted_total_low))} / <b>${esc(fmtM(th.predicted_total_mid))}</b> / ${esc(fmtM(th.predicted_total_high))}</span>`)}
+          ${kv('Expected upfront (global rights)', `<span class="mono"><b>${esc(fmtM(headline.mid))}</b></span><div class="muted mono">range ${esc(fmtM(headline.low))} to ${esc(fmtM(headline.high))} (P25 to P75)</div>`)}
+          ${kv('Total value (headline)', `<span class="mono">${esc(fmtM(th.predicted_total_low))} / <b>${esc(fmtM(th.predicted_total_mid))}</b> / ${esc(fmtM(th.predicted_total_high))}</span>`)}
           ${kv('Royalty', `<span class="mono">${esc(fmtRoyalty(th.predicted_royalty_low, th.predicted_royalty_high))}</span>`)}
-          ${kv('Confidence / dispersion', `<span class="mono">${th.thesis_confidence}% · IQR/median ${th.comp_dispersion != null ? th.comp_dispersion.toFixed(2) : '—'}</span>${th.calculator_upfront_mid != null ? `<div class="muted">Calculator for this profile: ${esc(fmtM(th.calculator_upfront_mid))} upfront${th.calculator_total_mid != null ? ` / ${esc(fmtM(th.calculator_total_mid))} total` : ''}</div>` : ''}`)}
-        </div>`}
+          ${kv('Confidence / dispersion', `<span class="mono">${th.thesis_confidence}% · IQR/median ${th.comp_dispersion != null ? th.comp_dispersion.toFixed(2) : '—'}</span>${th.calculator_upfront_mid != null ? `<div class="muted">Calculator model (reference): ${esc(fmtM(th.calculator_upfront_mid))} upfront</div>` : ''}`)}
+        </div>
+        ${note ? `<div class="warn" style="margin-bottom:6px;">${esc(note)}</div>` : ''}
+        <div class="muted" style="font-size:8.5px;margin-bottom:6px;">${esc(HEADLINE_RULE_TEXT)}</div>`}
       <table>
         <thead><tr><th>Year</th><th>Parties</th><th>Asset</th><th>Phase</th><th class="r">Upfront</th><th class="r">Total</th><th class="r">Royalty</th><th>Status</th><th>Source</th></tr></thead>
         <tbody>${compRows || '<tr><td colspan="9" class="muted">No comparable transactions found.</td></tr>'}</tbody>
