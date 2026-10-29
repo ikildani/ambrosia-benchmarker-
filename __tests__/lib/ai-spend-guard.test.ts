@@ -14,27 +14,30 @@ describe('AI spend guard', () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'k';
   });
 
-  it('puts user-facing, new-deal and bulk work in separate lanes', () => {
-    expect(laneFor('radar-search')).toBe('interactive');
+  it('puts the product, Search & Evaluation, new-deal and bulk work in separate lanes', () => {
+    expect(laneFor('deal-memo')).toBe('interactive');
+    expect(laneFor('radar-search')).toBe('search');
+    expect(laneFor('radar-narrative')).toBe('search');
     expect(laneFor('sec-edgar')).toBe('core');
     expect(laneFor('asset-classify')).toBe('bulk');
     expect(laneFor('something-new')).toBe('bulk');
   });
 
   it('has low lean caps, higher full caps, and honours env overrides', () => {
-    expect(spendCaps(lean)).toEqual({ background: 12, bulk: 6, interactive: 5 });
+    expect(spendCaps(lean)).toEqual({ background: 6, bulk: 2, interactive: 5, search: 1 });
     expect(spendCaps(full).background).toBe(150);
-    expect(spendCaps({ AI_DAILY_CAP_USD: '20', AI_BULK_SHARE: '0.25' } as unknown as NodeJS.ProcessEnv)).toEqual({ background: 20, bulk: 5, interactive: 5 });
+    expect(spendCaps({ AI_DAILY_CAP_USD: '20', AI_BULK_SHARE: '0.25' } as unknown as NodeJS.ProcessEnv)).toEqual({ background: 20, bulk: 5, interactive: 5, search: 1 });
   });
 
   it('stops bulk before core, and never lets background spend touch the interactive pool', () => {
-    const caps = { background: 12, bulk: 6, interactive: 5 };
-    const t = { interactive: 0, core: 3, bulk: 6 };
+    const caps = { background: 12, bulk: 6, interactive: 5, search: 1 };
+    const t = { interactive: 0, search: 0, core: 3, bulk: 6 };
     expect(overCap('bulk', t, caps)).toMatch(/^bulk/);
     expect(overCap('core', t, caps)).toBeNull();
     expect(overCap('core', { ...t, core: 6 }, caps)).toMatch(/^background/);
-    expect(overCap('interactive', { interactive: 1, core: 99, bulk: 99 }, caps)).toBeNull();
-    expect(overCap('interactive', { interactive: 5, core: 0, bulk: 0 }, caps)).toMatch(/^interactive/);
+    expect(overCap('interactive', { interactive: 1, search: 99, core: 99, bulk: 99 }, caps)).toBeNull();
+    expect(overCap('interactive', { interactive: 5, search: 0, core: 0, bulk: 0 }, caps)).toMatch(/^interactive/);
+    expect(overCap('search', { interactive: 0, search: 1, core: 0, bulk: 0 }, caps)).toMatch(/^search/);
   });
 
   it('prices dated model ids by family and unknown models at the Opus rate', () => {

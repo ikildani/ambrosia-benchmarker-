@@ -7,14 +7,16 @@
  *      once the caller's lane is over its daily cap;
  *   2. reads `usage` from the response and adds the cost to ai_spend_daily.
  *
- * Lanes, so a bulk job can never eat the budget users and new deals depend on:
- *   interactive  user-facing requests (search, memos, MCP/API). Own pool.
+ * Lanes, so ingestion and Search & Evaluation can never eat the credits the core
+ * Solidus product needs (Issa, Oct 28 2026):
+ *   interactive  the Solidus product: memos, comparables narration, query, MCP/API. Own pool.
+ *   search       Search & Evaluation user requests (typed search, asset narrative). Own small pool.
  *   core         new-deal ingestion and verification.
- *   bulk         backfills, classification, enrichment, SEO/content. Capped at a
- *                share of the background pool.
+ *   bulk         backfills, S&E classification/preclinical/intent, enrichment, SEO/content.
+ *                Capped at a share of the background pool.
  *
  * Caps (USD per UTC day): AI_DAILY_CAP_USD (core + bulk), AI_BULK_SHARE (share of it
- * bulk may use), AI_INTERACTIVE_DAILY_CAP_USD. Lean defaults are deliberately low;
+ * bulk may use), AI_INTERACTIVE_DAILY_CAP_USD, AI_SEARCH_DAILY_CAP_USD. Lean defaults are deliberately low;
  * AI_BUDGET_MODE=full raises them. Ledger errors fail open: a database hiccup must
  * not stop the product, and the per-run caps in each job still apply.
  */
@@ -22,7 +24,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { isLean } from '@/lib/ai/budget';
 
-export type SpendLane = 'interactive' | 'core' | 'bulk';
+export type SpendLane = 'interactive' | 'search' | 'core' | 'bulk';
 
 /** List price, USD per million tokens. Unknown models are charged at the Opus rate (overestimate, never under). */
 export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
@@ -37,8 +39,9 @@ export const MODEL_PRICING: Record<string, { input: number; output: number }> = 
 const FALLBACK_PRICING = { input: 5, output: 25 };
 const WEB_SEARCH_USD = 0.01;
 
+const SEARCH_SOURCES = new Set(['radar-search', 'radar-narrative']);
 const INTERACTIVE_SOURCES = new Set([
-  'radar-search', 'radar-narrative', 'query', 'mcp', 'deals-enrich', 'deal-memo', 'playbook',
+  'query', 'mcp', 'deals-enrich', 'deal-memo', 'playbook',
   'objection', 'comparable-narrator', 'admin-deal-ingest', 'admin-bulk-ingest', 'outreach-generator',
 ]);
 const CORE_SOURCES = new Set([
@@ -47,6 +50,7 @@ const CORE_SOURCES = new Set([
 ]);
 
 export function laneFor(source: string): SpendLane {
+  if (SEARCH_SOURCES.has(source)) return 'search';
   if (INTERACTIVE_SOURCES.has(source)) return 'interactive';
   if (CORE_SOURCES.has(source)) return 'core';
   return 'bulk';
@@ -82,6 +86,7 @@ export interface SpendCaps {
   background: number;
   bulk: number;
   interactive: number;
+  search: number;
 }
 
 export function spendCaps(env: NodeJS.ProcessEnv = process.env): SpendCaps {
@@ -90,15 +95,23 @@ export function spendCaps(env: NodeJS.ProcessEnv = process.env): SpendCaps {
     const n = Number(v);
     return v !== undefined && v !== '' && Number.isFinite(n) && n >= 0 ? n : d;
   };
-  const background = num(env.AI_DAILY_CAP_USD, lean ? 12 : 150);
-  const share = Math.min(1, num(env.AI_BULK_SHARE, 0.5));
-  return { background, bulk: background * share, interactive: num(env.AI_INTERACTIVE_DAILY_CAP_USD, lean ? 5 : 50) };
+  const background = num(env.AI_DAILY_CAP_USD, lean ? 6 : 150);
+  const share = Math.min(1, num(env.AI_BULK_SHARE, lean ? 1 / 3 : 0.5));
+  return {
+    background,
+    bulk: background * share,
+    interactive: num(env.AI_INTERACTIVE_DAILY_CAP_USD, lean ? 5 : 50),
+    search: num(env.AI_SEARCH_DAILY_CAP_USD, lean ? 1 : 20),
+  };
 }
 
 export type LaneTotals = Record<SpendLane, number>;
 
 /** Null when the lane may spend; otherwise why not. */
 export function overCap(lane: SpendLane, t: LaneTotals, caps: SpendCaps): string | null {
+  if (lane === 'search') {
+    return t.search >= caps.search ? `search $${t.search.toFixed(2)} of $${caps.search.toFixed(2)}` : null;
+  }
   if (lane === 'interactive') {
     return t.interactive >= caps.interactive ? `interactive $${t.interactive.toFixed(2)} of $${caps.interactive.toFixed(2)}` : null;
   }
@@ -123,22 +136,22 @@ function ledger(): SupabaseClient {
   return db;
 }
 let cached: { at: number; day: string; totals: LaneTotals } | null = null;
-let localSince: LaneTotals = { interactive: 0, core: 0, bulk: 0 };
+let localSince: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0 };
 
 const utcDay = () => new Date().toISOString().slice(0, 10);
 
 async function todayTotals(): Promise<LaneTotals | null> {
   const day = utcDay();
   if (cached && cached.day === day && Date.now() - cached.at < REFRESH_MS) {
-    return { interactive: cached.totals.interactive + localSince.interactive, core: cached.totals.core + localSince.core, bulk: cached.totals.bulk + localSince.bulk };
+    return { interactive: cached.totals.interactive + localSince.interactive, search: cached.totals.search + localSince.search, core: cached.totals.core + localSince.core, bulk: cached.totals.bulk + localSince.bulk };
   }
   try {
     const { data, error } = await ledger().rpc('ai_spend_today');
     if (error) throw new Error(error.message);
-    const totals: LaneTotals = { interactive: 0, core: 0, bulk: 0 };
+    const totals: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0 };
     for (const r of (data ?? []) as { lane: SpendLane; usd: number | string }[]) totals[r.lane] = Number(r.usd) || 0;
     cached = { at: Date.now(), day, totals };
-    localSince = { interactive: 0, core: 0, bulk: 0 };
+    localSince = { interactive: 0, search: 0, core: 0, bulk: 0 };
     return totals;
   } catch (err) {
     console.warn('[spend-guard] ledger read failed, allowing call:', err instanceof Error ? err.message : String(err));
@@ -261,5 +274,5 @@ export function withSpendGuard<T extends object>(source: string, opts?: T): T & 
 /** Test hook. */
 export function __resetSpendGuardCache() {
   cached = null;
-  localSince = { interactive: 0, core: 0, bulk: 0 };
+  localSince = { interactive: 0, search: 0, core: 0, bulk: 0 };
 }
