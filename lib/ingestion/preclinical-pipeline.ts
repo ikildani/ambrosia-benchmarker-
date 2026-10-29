@@ -420,7 +420,7 @@ export interface NewAssetRow {
   enrollment_total: number;
   first_posted_date: string;
   last_update_date: string;
-  partnership_status: 'partnered' | 'unpartnered';
+  partnership_status: 'partnered' | 'partially_partnered' | 'unpartnered';
   partner_company_name: string | null;
   partnership_basis: DisclosureOrigin;
   partnership_evidence: Array<{ type: DisclosureOrigin; id: string; url: string; date: string; note: string }>;
@@ -476,7 +476,9 @@ export function toNewAssetRow(p: DisclosedProgram, ctx: FilingContext, drugMaste
     enrollment_total: 0,
     first_posted_date: ctx.filing_date,
     last_update_date: ctx.filing_date,
-    partnership_status: p.partnered ? 'partnered' : 'unpartnered',
+    // A partner named in an SEC filing is hard evidence; one named on the company's own web page is
+    // not (marketing copy, often stale), so it reads as partially partnered until a deal or filing confirms it.
+    partnership_status: p.partnered ? (origin === 'filing' ? 'partnered' : 'partially_partnered') : 'unpartnered',
     partner_company_name: p.partnered ? p.partner_name : null,
     partnership_basis: origin,
     partnership_evidence: p.partnered

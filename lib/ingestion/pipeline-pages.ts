@@ -200,6 +200,20 @@ const NAV_NOISE_RE = /\b(?:cookie|privacy|careers|contact us|investors|newsroom|
 const NOT_A_PROGRAM_RE = /^(?:.*\b(?:diseases?|syndromes?|cancers?|carcinomas?|tumou?rs?|encephalopathy|disorders?|deficienc(?:y|ies)|infections?|errors of metabolism|\w+(?:itis|omas?|osis|oses|emia|pathy|dosis|trophy|plasia|algia))\b.*|to be determined|tbd|undisclosed|n\/?a|indication|therapeutic area|modality|mechanism|target|program|programs|product|products|candidate|candidates|stage|phase|status|partner|name|compound|molecule|asset|assets|pipeline|registration|approved|marketed|commercial|discovery|preclinical|research|other|others)$/i;
 const PARTNER_RE = /\b(?:partnered with|in (?:collaboration|partnership) with|licensed to|co-developed with|collaboration with)\s+([A-Z][\w&.'-]*(?:\s+[A-Z][\w&.'-]*){0,3})/;
 
+const PARTNER_TAIL_NOISE_RE = /(?:\s+(?:preclinical|discovery|clinical|phase|ind|research|platform|program|programs|pipeline|lead|candidate))+$/i;
+
+/**
+ * A partner name captured from page text, or null when it isn't a usable company name
+ * ("OphthaNova Therapeutics Preclinical" → "OphthaNova Therapeutics"; "Vall" → null).
+ */
+export function cleanPartnerName(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const name = raw.replace(PARTNER_TAIL_NOISE_RE, '').replace(/[\s,.;:-]+$/, '').trim();
+  if (name.length < 4) return null;
+  if (!/\s/.test(name) && name.length < 5) return null;
+  return name.slice(0, 80);
+}
+
 export function stageFromText(text: string): DisclosedStage | null {
   for (const [re, stage] of STAGE_PATTERNS) if (re.test(text)) return stage;
   return null;
@@ -241,7 +255,7 @@ export function extractProgramsHeuristic(paragraphs: string[]): DisclosedProgram
     if (line.length > 320) continue;
     const segments = line.split(SEP_RE).map(s => s.trim()).filter(Boolean);
     const indication = segments.find(sg => sg.toLowerCase() !== named.name.toLowerCase() && !STAGE_WORD_RE.test(sg) && !CODE_RE.test(sg) && !/^\[stage hint/i.test(sg) && sg.length >= 4 && sg.length <= 60 && /[a-z]/.test(sg) && !/\b(?:program|candidate|pipeline|to be determined|tbd)\b/i.test(sg)) ?? null;
-    const partner = PARTNER_RE.exec(line)?.[1]?.trim() ?? null;
+    const partner = cleanPartnerName(PARTNER_RE.exec(line)?.[1]);
     out.push({
       program_name: named.name,
       aliases: [],
