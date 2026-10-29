@@ -38,7 +38,8 @@ permissions:
 jobs:
   sweep:
     name: Sweep ${{ github.event.inputs.registry || 'cde' }}
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04 (Oct 27 2026), which Playwright 1.58 cannot install Chromium on.
+    runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
