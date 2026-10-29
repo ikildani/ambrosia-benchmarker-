@@ -15,6 +15,11 @@
  *   bulk         backfills, S&E classification/preclinical/intent, enrichment, SEO/content.
  *                Capped at a share of the background pool.
  *
+ *   backlog      one-off allowance (Issa, Oct 29 2026: ~45% of the $200 credit) for clearing the
+ *                classification backlog, the unread SEC filers and private-company pipeline
+ *                pages. Each of those sources draws on its own share until it is spent, at most
+ *                AI_BACKLOG_DAILY_USD a day, then falls back to the bulk lane.
+ *
  * Caps (USD per UTC day): AI_DAILY_CAP_USD (core + bulk), AI_BULK_SHARE (share of it
  * bulk may use), AI_INTERACTIVE_DAILY_CAP_USD, AI_SEARCH_DAILY_CAP_USD. Lean defaults are deliberately low;
  * AI_BUDGET_MODE=full raises them. Ledger errors fail open: a database hiccup must
@@ -24,7 +29,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { isLean } from '@/lib/ai/budget';
 
-export type SpendLane = 'interactive' | 'search' | 'core' | 'bulk';
+export type SpendLane = 'interactive' | 'search' | 'core' | 'bulk' | 'backlog';
 
 /** List price, USD per million tokens. Unknown models are charged at the Opus rate (overestimate, never under). */
 export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
@@ -107,8 +112,41 @@ export function spendCaps(env: NodeJS.ProcessEnv = process.env): SpendCaps {
 
 export type LaneTotals = Record<SpendLane, number>;
 
+export interface BacklogPlan {
+  start: string;
+  totalUsd: number;
+  dailyUsd: number;
+  sources: Record<string, number>;
+}
+
+/** The one-off backlog allowance. AI_BACKLOG_TOTAL_USD=0 turns it off. */
+export function backlogPlan(env: NodeJS.ProcessEnv = process.env): BacklogPlan {
+  const num = (v: string | undefined, d: number) => {
+    const n = Number(v);
+    return v !== undefined && v !== '' && Number.isFinite(n) && n >= 0 ? n : d;
+  };
+  return {
+    start: env.AI_BACKLOG_START || '2026-10-29',
+    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 90),
+    dailyUsd: num(env.AI_BACKLOG_DAILY_USD, 15),
+    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35 },
+  };
+}
+
+/** Null when `source` may draw on the backlog allowance; otherwise why not. */
+export function backlogBlocked(source: string, spentBySource: Record<string, number>, spentToday: number, plan: BacklogPlan): string | null {
+  const share = plan.sources[source];
+  if (!share) return 'not a backlog source';
+  const total = Object.values(spentBySource).reduce((a, b) => a + b, 0);
+  if (total >= plan.totalUsd) return `backlog $${total.toFixed(2)} of $${plan.totalUsd.toFixed(2)} spent`;
+  if ((spentBySource[source] ?? 0) >= share) return `${source} backlog share $${share.toFixed(2)} spent`;
+  if (spentToday >= plan.dailyUsd) return `backlog today $${spentToday.toFixed(2)} of $${plan.dailyUsd.toFixed(2)}`;
+  return null;
+}
+
 /** Null when the lane may spend; otherwise why not. */
 export function overCap(lane: SpendLane, t: LaneTotals, caps: SpendCaps): string | null {
+  if (lane === 'backlog') return null; // gated by backlogBlocked()
   if (lane === 'search') {
     return t.search >= caps.search ? `search $${t.search.toFixed(2)} of $${caps.search.toFixed(2)}` : null;
   }
@@ -136,22 +174,22 @@ function ledger(): SupabaseClient {
   return db;
 }
 let cached: { at: number; day: string; totals: LaneTotals } | null = null;
-let localSince: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0 };
+let localSince: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0, backlog: 0 };
 
 const utcDay = () => new Date().toISOString().slice(0, 10);
 
 async function todayTotals(): Promise<LaneTotals | null> {
   const day = utcDay();
   if (cached && cached.day === day && Date.now() - cached.at < REFRESH_MS) {
-    return { interactive: cached.totals.interactive + localSince.interactive, search: cached.totals.search + localSince.search, core: cached.totals.core + localSince.core, bulk: cached.totals.bulk + localSince.bulk };
+    return { interactive: cached.totals.interactive + localSince.interactive, search: cached.totals.search + localSince.search, backlog: cached.totals.backlog + localSince.backlog, core: cached.totals.core + localSince.core, bulk: cached.totals.bulk + localSince.bulk };
   }
   try {
     const { data, error } = await ledger().rpc('ai_spend_today');
     if (error) throw new Error(error.message);
-    const totals: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0 };
+    const totals: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0, backlog: 0 };
     for (const r of (data ?? []) as { lane: SpendLane; usd: number | string }[]) totals[r.lane] = Number(r.usd) || 0;
     cached = { at: Date.now(), day, totals };
-    localSince = { interactive: 0, search: 0, core: 0, bulk: 0 };
+    localSince = { interactive: 0, search: 0, core: 0, bulk: 0, backlog: 0 };
     return totals;
   } catch (err) {
     console.warn('[spend-guard] ledger read failed, allowing call:', err instanceof Error ? err.message : String(err));
@@ -159,8 +197,47 @@ async function todayTotals(): Promise<LaneTotals | null> {
   }
 }
 
+let backlogCache: { at: number; bySource: Record<string, number> } | null = null;
+let backlogLocal: Record<string, number> = {};
+
+async function backlogSpent(start: string): Promise<Record<string, number> | null> {
+  if (!backlogCache || Date.now() - backlogCache.at >= REFRESH_MS) {
+    try {
+      const { data, error } = await ledger().rpc('ai_spend_backlog', { p_since: start });
+      if (error) throw new Error(error.message);
+      const bySource: Record<string, number> = {};
+      for (const r of (data ?? []) as { source: string; usd: number | string }[]) bySource[r.source.replace(/:batch$/, '')] = (bySource[r.source.replace(/:batch$/, '')] ?? 0) + (Number(r.usd) || 0);
+      backlogCache = { at: Date.now(), bySource };
+      backlogLocal = {};
+    } catch (err) {
+      console.warn('[spend-guard] backlog ledger read failed, using bulk lane:', err instanceof Error ? err.message : String(err));
+      return null;
+    }
+  }
+  const out = { ...backlogCache.bySource };
+  for (const [k, v] of Object.entries(backlogLocal)) out[k] = (out[k] ?? 0) + v;
+  return out;
+}
+
+/** The lane this call is charged to: the backlog allowance while it lasts for this source, else the normal lane. */
+async function resolveLane(source: string, totals: LaneTotals | null): Promise<{ lane: SpendLane; backlogReason: string | null }> {
+  const plan = backlogPlan();
+  if (!plan.sources[source] || plan.totalUsd <= 0 || utcDay() < plan.start) return { lane: laneFor(source), backlogReason: null };
+  const spent = await backlogSpent(plan.start);
+  if (!spent) return { lane: laneFor(source), backlogReason: 'ledger unavailable' };
+  const reason = backlogBlocked(source, spent, totals?.backlog ?? 0, plan);
+  return reason ? { lane: laneFor(source), backlogReason: reason } : { lane: 'backlog', backlogReason: null };
+}
+
+/** True while `source` still has backlog allowance; jobs use it to run at backlog pace. */
+export async function backlogActive(source: string): Promise<boolean> {
+  const totals = await todayTotals();
+  return (await resolveLane(source, totals)).lane === 'backlog';
+}
+
 async function record(lane: SpendLane, source: string, model: string, row: { calls: number; blocked: number; input: number; output: number; usd: number }) {
   localSince[lane] += row.usd;
+  if (lane === 'backlog') backlogLocal[source.replace(/:batch$/, '')] = (backlogLocal[source.replace(/:batch$/, '')] ?? 0) + row.usd;
   try {
     const { error } = await ledger().rpc('ai_spend_record', {
       p_lane: lane, p_source: source, p_model: model || 'unknown',
@@ -176,7 +253,8 @@ async function record(lane: SpendLane, source: string, model: string, row: { cal
 export async function aiBudgetAvailable(source: string): Promise<{ ok: boolean; reason: string | null }> {
   const totals = await todayTotals();
   if (!totals) return { ok: true, reason: null };
-  const reason = overCap(laneFor(source), totals, spendCaps());
+  const { lane } = await resolveLane(source, totals);
+  const reason = overCap(lane, totals, spendCaps());
   return { ok: !reason, reason };
 }
 
@@ -213,7 +291,6 @@ function estimateBatch(body: unknown): { model: string; input: number; output: n
 
 /** A fetch for the Anthropic SDK (or direct calls) that enforces and records the daily budget. */
 export function guardedFetch(source: string, inner: typeof fetch = fetch): typeof fetch {
-  const lane = laneFor(source);
   return (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const method = (init?.method ?? (typeof input === 'object' && 'method' in input ? input.method : 'GET')).toUpperCase();
@@ -228,6 +305,7 @@ export function guardedFetch(source: string, inner: typeof fetch = fetch): typeo
     const requestedModel = (body as { model?: string } | null)?.model ?? '';
 
     const totals = await todayTotals();
+    const { lane } = await resolveLane(source, totals);
     const reason = totals ? overCap(lane, totals, spendCaps()) : null;
     if (reason) {
       await record(lane, source, requestedModel, { calls: 0, blocked: 1, input: 0, output: 0, usd: 0 });
@@ -274,5 +352,7 @@ export function withSpendGuard<T extends object>(source: string, opts?: T): T & 
 /** Test hook. */
 export function __resetSpendGuardCache() {
   cached = null;
-  localSince = { interactive: 0, search: 0, core: 0, bulk: 0 };
+  backlogCache = null;
+  backlogLocal = {};
+  localSince = { interactive: 0, search: 0, core: 0, bulk: 0, backlog: 0 };
 }

@@ -1,7 +1,7 @@
 const rpc = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({ createClient: () => ({ rpc }) }));
 
-import { __resetSpendGuardCache, guardedFetch, laneFor, overCap, spendCaps, usageCostUsd } from '@/lib/ai/spend-guard';
+import { __resetSpendGuardCache, backlogBlocked, backlogPlan, guardedFetch, laneFor, overCap, spendCaps, usageCostUsd } from '@/lib/ai/spend-guard';
 
 const lean = {} as unknown as NodeJS.ProcessEnv;
 const full = { AI_BUDGET_MODE: 'full' } as unknown as NodeJS.ProcessEnv;
@@ -58,7 +58,7 @@ describe('AI spend guard', () => {
   it('refuses with a non-retryable 429 once the lane is over its cap, without calling the API', async () => {
     rpc.mockResolvedValueOnce({ data: [{ lane: 'bulk', usd: 7 }], error: null }).mockResolvedValue({ data: null, error: null });
     const inner = jest.fn();
-    const res = await guardedFetch('asset-classify', inner)('https://api.anthropic.com/v1/messages', { method: 'POST', body: '{"model":"claude-sonnet-5"}' });
+    const res = await guardedFetch('completeness-audit', inner)('https://api.anthropic.com/v1/messages', { method: 'POST', body: '{"model":"claude-sonnet-5"}' });
     expect(inner).not.toHaveBeenCalled();
     expect(res.status).toBe(429);
     expect(res.headers.get('x-should-retry')).toBe('false');
@@ -70,6 +70,30 @@ describe('AI spend guard', () => {
     const inner = jest.fn().mockResolvedValue(new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } }));
     await guardedFetch('asset-classify', inner)('https://api.anthropic.com/v1/messages', { method: 'POST', body: '{}' });
     expect(inner).toHaveBeenCalled();
+  });
+
+  it('draws on the backlog allowance per source until its share, the total or the daily pace is spent', () => {
+    const plan = backlogPlan({} as unknown as NodeJS.ProcessEnv);
+    expect(plan.totalUsd).toBe(90);
+    expect(backlogBlocked('asset-classify', {}, 0, plan)).toBeNull();
+    expect(backlogBlocked('sec-edgar', {}, 0, plan)).toMatch(/not a backlog source/);
+    expect(backlogBlocked('asset-classify', { 'asset-classify': 40 }, 0, plan)).toMatch(/share/);
+    expect(backlogBlocked('pipeline-pages', { 'asset-classify': 40, 'pipeline-pages': 34, 'preclinical-pipeline': 16 }, 0, plan)).toMatch(/^backlog \$90/);
+    expect(backlogBlocked('pipeline-pages', {}, 15, plan)).toMatch(/today/);
+    expect(backlogPlan({ AI_BACKLOG_TOTAL_USD: '0' } as unknown as NodeJS.ProcessEnv).totalUsd).toBe(0);
+  });
+
+  it('charges a backlog source to the backlog lane while it has allowance', async () => {
+    rpc.mockImplementation(async (fn: string) => {
+      if (fn === 'ai_spend_today') return { data: [{ lane: 'bulk', usd: 99 }], error: null };
+      if (fn === 'ai_spend_backlog') return { data: [{ source: 'asset-classify', usd: 1 }], error: null };
+      return { data: null, error: null };
+    });
+    const inner = jest.fn().mockResolvedValue(new Response(JSON.stringify({ model: 'claude-sonnet-5', usage: { input_tokens: 1000, output_tokens: 100 } }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    const res = await guardedFetch('asset-classify', inner)('https://api.anthropic.com/v1/messages', { method: 'POST', body: '{"model":"claude-sonnet-5"}' });
+    expect(res.status).toBe(200);
+    expect(rpc).toHaveBeenLastCalledWith('ai_spend_record', expect.objectContaining({ p_lane: 'backlog', p_source: 'asset-classify' }));
+    rpc.mockReset();
   });
 
   it('passes non-message requests straight through', async () => {

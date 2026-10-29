@@ -28,7 +28,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isLean } from '@/lib/ai/budget';
-import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
+import { aiBudgetAvailable, backlogActive } from '@/lib/ai/spend-guard';
 import { timingSafeEqual } from 'crypto';
 import {
   DEFAULT_MODEL,
@@ -102,14 +102,18 @@ export async function GET(request: NextRequest) {
     const budget = await aiBudgetAvailable('asset-classify');
     if (!budget.ok) return NextResponse.json({ success: true, mode: 'classify', skipped: 'ai_budget', reason: budget.reason });
     const requestedMax = parsePositiveInt(params.get('maxRequests'), undefined);
+    // Backlog allowance (Oct 29 2026): 40 requests a run across the whole industry queue (core first)
+    // until the classifier's $40 share is spent; then back to the lean 10 a run, core only.
+    const backlog = await backlogActive('asset-classify');
+    const leanMax = backlog ? 40 : 10;
     const result = await classifyAssetsBatch(supabase, {
       limit: parsePositiveInt(params.get('limit'), undefined),
       batchSize: parsePositiveInt(params.get('batch'), undefined),
       concurrency: parsePositiveInt(params.get('concurrency'), undefined),
-      maxRequests: isLean() ? Math.min(requestedMax ?? 10, 10) : requestedMax,
+      maxRequests: isLean() ? Math.min(requestedMax ?? leanMax, leanMax) : requestedMax,
       model: parseModel(params.get('model'), DEFAULT_MODEL),
       onlyStatuses: parseStatuses(params.get('only')),
-      scope: params.get('scope') === 'all' ? 'all' : 'core',
+      scope: params.get('scope') === 'all' || (backlog && params.get('scope') !== 'core') ? 'all' : 'core',
       dedupeByDrug: params.get('dedupe') !== '0',
       dryRun: params.get('dry') === '1',
       timeBudgetMs,
