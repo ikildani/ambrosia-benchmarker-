@@ -2100,7 +2100,7 @@ async function resolveAssetsOnDrug(supabase: SupabaseClient, drugId: string, con
 function emptyExternalStats(): ExternalPassStats {
   return {
     drugsQueued: 0, drugsChecked: 0, upgraded: 0, merged: 0, fuzzyMerged: 0, misses: 0, assetsResolved: 0, assetsTail: 0,
-    externalCalls: 0, callsByHost: { gsrs: 0, chembl: 0, pubchem: 0 }, negativeCacheHits: 0, negativesPreloaded: 0,
+    externalCalls: 0, callsByHost: { gsrs: 0, chembl: 0, pubchem: 0, ncit: 0 }, negativeCacheHits: 0, negativesPreloaded: 0,
     negativesWritten: 0, budgetExhausted: false,
   };
 }
