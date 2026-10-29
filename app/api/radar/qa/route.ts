@@ -8,6 +8,8 @@
  *   ?run=<uuid>     report for a specific invariants run (default: latest)
  *   ?format=md      text/markdown instead of JSON
  *   ?sheet=1        download the human review XLSX for the current golden set
+ *   ?select=100     (re)select a stratified golden set of that size (20–200), then
+ *                   download the sheet with ?sheet=1. Free: no model calls.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,10 +17,10 @@ import { verifyAdminAuth } from '@/lib/admin-auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { isUuid } from '@/app/api/radar/_lib/radar-api';
 import { buildQaReport, renderQaReportMarkdown } from '@/lib/radar/qa/report';
-import { exportHumanReviewSheet } from '@/lib/radar/qa/golden-set';
+import { exportHumanReviewSheet, selectGoldenSet } from '@/lib/radar/qa/golden-set';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
   const denied = await verifyAdminAuth(request);
@@ -28,6 +30,11 @@ export async function GET(request: NextRequest) {
   const supabase = createServiceClient();
 
   try {
+    const selectSize = Number.parseInt(params.get('select') ?? '', 10);
+    if (Number.isFinite(selectSize)) {
+      const result = await selectGoldenSet(supabase, { size: Math.min(200, Math.max(20, selectSize)) });
+      return NextResponse.json({ success: true, selected: result, next: '?sheet=1' }, { headers: { 'Cache-Control': 'no-store' } });
+    }
     if (params.get('sheet') === '1') {
       const origin = request.nextUrl.origin;
       const { buffer, rows, assets } = await exportHumanReviewSheet(supabase, { baseUrl: origin });
