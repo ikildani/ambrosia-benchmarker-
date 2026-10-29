@@ -23,6 +23,7 @@
 
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import Anthropic from '@anthropic-ai/sdk';
+import { backlogActive, withSpendGuard } from '@/lib/ai/spend-guard';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 import { runWebsiteDiscovery } from '@/lib/ingestion/company-websites';
@@ -166,7 +167,9 @@ async function main() {
   const costCap = Number(arg('cost-cap', process.env.PIPELINE_CRAWL_COST_CAP_USD ?? '8'));
   const only = arg('company', '');
   const dryRun = flag('dry-run');
-  const llm = arg('llm', 'none');
+  // 'auto' (the scheduled default): Sonnet while the pipeline-pages backlog allowance lasts, else rule-based only.
+  const llmArg = arg('llm', 'none');
+  const llm = llmArg === 'auto' ? ((await backlogActive('pipeline-pages')) ? 'sonnet' : 'none') : llmArg;
   const paidSearch = flag('paid-search');
   const model = LLM_MODELS[llm] ?? null;
   if (llm !== 'none' && !model) throw new Error(`--llm must be none, haiku or sonnet (got ${llm})`);
@@ -176,7 +179,7 @@ async function main() {
   let client: IntentClient | null = null;
   if (model || paidSearch) {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set (needed for --llm / --paid-search)');
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 180_000 }) as unknown as IntentClient;
+    client = new Anthropic(withSpendGuard('pipeline-pages', { apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 180_000 })) as unknown as IntentClient;
   }
   console.log(new Date().toISOString(), 'mode', JSON.stringify({ llm, paidSearch, discoverN, crawlN, minutes, costCap: model || paidSearch ? costCap : 0 }));
 
@@ -234,6 +237,8 @@ async function main() {
         if (model && client) {
           const ex = await extractProgramsFromPage(client, co.name, page.url, now.toISOString(), paragraphs, page.screenshot, model);
           addUsage(usage, ex.usage);
+          // A budget refusal is not the page's fault: leave the company unstamped and end the run.
+          if (ex.error && /AI budget reached/.test(ex.error)) { totals.errors.push(`stopped: ${ex.error}`); break; }
           if (ex.error) { totals.errors.push(`${co.name}: ${ex.error}`); await stamp('fetch_failed', { pipeline_page_url: page.url }); continue; }
           programs = ex.programs;
           fromChart = ex.fromChart;

@@ -83,6 +83,12 @@ describe('pipeline page context → asset rows', () => {
     expect(row.disclosure_excerpt).toBe('[chart] ABC-123 · KRAS G12D · IND-enabling');
     expect(toDisclosureRow(program, ctx, 'a1', 'created').source_type).toBe('pipeline_page');
   });
+  it('a partner named only on the company web page reads as partially partnered; in a filing, as partnered', () => {
+    const partneredProgram = { ...program, partnered: true, partner_name: 'Biogen' };
+    expect(toNewAssetRow(partneredProgram, ctx, null)!.partnership_status).toBe('partially_partnered');
+    const filing = { ...ctx, origin: undefined, form: '10-K', accession: '0001-24' };
+    expect(toNewAssetRow(partneredProgram, filing, null)!.partnership_status).toBe('partnered');
+  });
   it('filing rows are unchanged', () => {
     const filing = { ...ctx, origin: undefined, form: '10-K', accession: '0001-24' };
     const row = toNewAssetRow(program, filing, null)!;
@@ -93,7 +99,7 @@ describe('pipeline page context → asset rows', () => {
 });
 
 import { distinctiveTokens, domainMatchesCompany, domainsFromContacts, guessDomains } from '@/lib/ingestion/company-websites';
-import { extractProgramsHeuristic, programNameFromLine, stageFromText } from '@/lib/ingestion/pipeline-pages';
+import { cleanPartnerName, extractProgramsHeuristic, programNameFromLine, stageFromText } from '@/lib/ingestion/pipeline-pages';
 
 describe('free discovery helpers', () => {
   it('keeps distinctive name tokens', () => {
@@ -146,5 +152,15 @@ describe('rule-based pipeline extraction', () => {
     expect(out[1].partner_name).toBe('Big Pharma Inc');
     expect(out[0].evidence_quote).toBe('ABC-123 · KRAS G12D inhibitor · NSCLC · IND-enabling');
     expect(out[0].confidence).toBe(62);
+  });
+});
+
+describe('partner names from page text', () => {
+  it('drops stage words caught after the name and rejects fragments', () => {
+    expect(cleanPartnerName('OphthaNova Therapeutics Preclinical')).toBe('OphthaNova Therapeutics');
+    expect(cleanPartnerName('Vall')).toBeNull();
+    expect(cleanPartnerName('Sanofi')).toBe('Sanofi');
+    expect(cleanPartnerName('Eli Lilly')).toBe('Eli Lilly');
+    expect(cleanPartnerName(null)).toBeNull();
   });
 });

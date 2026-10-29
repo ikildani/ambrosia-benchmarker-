@@ -34,10 +34,10 @@ on:
         default: '45'
         type: string
       llm:
-        description: 'Model extractor (none = rule-based, free)'
-        default: 'none'
+        description: 'Model extractor (auto = Sonnet while the backlog allowance lasts, none = rule-based, free)'
+        default: 'auto'
         type: choice
-        options: [none, haiku, sonnet]
+        options: [auto, none, haiku, sonnet]
       paid_search:
         description: 'Web search when the free discovery chain finds no site'
         default: false
@@ -81,6 +81,6 @@ jobs:
             --discover "${{ github.event.inputs.discover || '150' }}" \
             --crawl "${{ github.event.inputs.crawl || '60' }}" \
             --minutes "${{ github.event.inputs.minutes || '45' }}" \
-            --llm "${{ github.event.inputs.llm || 'none' }}" \
+            --llm "${{ github.event.inputs.llm || 'auto' }}" \
             ${{ github.event.inputs.paid_search == 'true' && '--paid-search' || '' }} \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}

@@ -604,6 +604,24 @@ async function selectCompaniesToIndex(
 // ═══════════════════════════════════════════════════════════════════════
 
 const MAX_RUNTIME_MS = 240_000;
+
+const OPEN_TRIAL_STATUSES = ['recruiting', 'active_not_recruiting', 'not_yet_recruiting', 'enrolling_by_invitation'];
+/** ClinicalTrials.gov marks a study "Unknown status" when its record has not been verified for 2 years. */
+export const TRIAL_UNVERIFIED_AFTER_DAYS = 730;
+
+/**
+ * Asset-level trial status: 'active' only when an open trial was updated in the last 2 years;
+ * 'unverified' when every open trial is older than that (CT.gov's own convention, and CT.gov
+ * flips such studies to UNKNOWN without changing their last-update date, so the sweep never
+ * sees it); else 'completed' or 'other'.
+ */
+export function assetTrialStatus(trials: Array<{ status: string | null; last_update_posted: string | null }>, now: Date = new Date()): 'active' | 'unverified' | 'completed' | 'other' {
+  const cutoff = new Date(now.getTime() - TRIAL_UNVERIFIED_AFTER_DAYS * 86_400_000).toISOString().slice(0, 10);
+  const open = trials.filter(t => t.status && OPEN_TRIAL_STATUSES.includes(t.status));
+  if (open.some(t => t.last_update_posted && t.last_update_posted >= cutoff)) return 'active';
+  if (open.length > 0) return 'unverified';
+  return trials.some(t => t.status === 'completed') ? 'completed' : 'other';
+}
 // 50 companies per batch: each batch costs a fixed set of round trips (trials,
 // interventions, existing keys, alias prefilter, stamp); at 10 the indexer
 // managed ~250 companies per 240 s run against the 24k-company backlog.
@@ -778,8 +796,14 @@ export async function indexAssetUniverse(
     const rowsByKey = new Map<string, AssetRow>();
     let batchTimedOut = false;
 
-    for (const group of assetGroups) {
-      if (isOutOfTime()) { timedOut = true; batchTimedOut = true; break; }
+    // Company by company, freshest trials first, so a timeout leaves whole companies done
+    // (stamped below) and an oversized company's most current programs written first.
+    const latestUpdate = (g: AssetGroup) => g.trials.reduce((m, t) => (t.last_update_posted && t.last_update_posted > m ? t.last_update_posted : m), '');
+    assetGroups.sort((a, b) => (a.companyId < b.companyId ? -1 : a.companyId > b.companyId ? 1 : latestUpdate(b).localeCompare(latestUpdate(a))));
+    let stoppedAt = assetGroups.length;
+
+    for (const [groupIndex, group] of assetGroups.entries()) {
+      if (isOutOfTime()) { timedOut = true; batchTimedOut = true; stoppedAt = groupIndex; break; }
 
       try {
         // Partnership status is no longer resolved here. The per-asset deal
@@ -806,11 +830,7 @@ export async function indexAssetUniverse(
         const firstPosted = group.trials.map(t => t.first_posted_date).filter(Boolean).sort();
         const updateDates = group.trials.map(t => t.last_update_posted).filter(Boolean).sort().reverse();
 
-        const statuses = group.trials.map(t => t.status).filter(Boolean);
-        const hasActive = statuses.some(s =>
-          ['recruiting', 'active_not_recruiting', 'not_yet_recruiting', 'enrolling_by_invitation'].includes(s!)
-        );
-        const trialStatus = hasActive ? 'active' : (statuses.includes('completed') ? 'completed' : 'other');
+        const trialStatus = assetTrialStatus(group.trials);
 
         // Therapeutic area: first indication category that maps to a TA
         const indicationArr = [...group.indications];
@@ -933,22 +953,32 @@ export async function indexAssetUniverse(
       }
     }
 
-    if (batchTimedOut) {
-      // Partial batch: rows built so far were persisted, but the batch is
-      // NOT stamped so the remaining groups are picked up next run.
-      break;
+    // ── Advance the cursor for every company whose programs were all written ──
+    // A batch used to be stamped only when all 50 companies finished, so one company
+    // too large for the time budget (Sun Yat-sen University, 1,030 trials) held the
+    // same batch at the head of the queue from Sep 16 to Oct 29 2026 and nothing
+    // behind it was re-indexed.
+    const inProgress = stoppedAt < assetGroups.length ? assetGroups[stoppedAt].companyId : null;
+    let stampIds = batchTimedOut ? batchIds.filter(id => id !== inProgress && !assetGroups.slice(stoppedAt).some(g => g.companyId === id)) : batchIds;
+    if (batchTimedOut && i === 0 && inProgress) {
+      // The run's first batch had nearly the whole budget, so the company still in progress is
+      // too large for one run: its freshest programs are written; stamp it so the queue moves on
+      // instead of retrying it forever. (A later batch's company had only leftover time: retried.)
+      stampIds = [...stampIds, inProgress];
+      errors.push(`${batchLabel}: company ${inProgress} too large for one run; freshest ${stoppedAt} of its programs written, queue advanced`);
     }
-
-    // ── Advance cursor for the fully processed batch ──────────────────
-    const { error: stampError } = await supabase
-      .from('companies')
-      .update({ assets_indexed_at: new Date().toISOString() })
-      .in('id', batchIds);
-    if (stampError) {
-      errors.push(`Cursor stamp error for ${batchLabel}: ${stampError.message}`);
+    if (stampIds.length > 0) {
+      const { error: stampError } = await supabase
+        .from('companies')
+        .update({ assets_indexed_at: new Date().toISOString() })
+        .in('id', stampIds);
+      if (stampError) {
+        errors.push(`Cursor stamp error for ${batchLabel}: ${stampError.message}`);
+      }
     }
+    companiesProcessed += stampIds.length;
 
-    companiesProcessed += batch.length;
+    if (batchTimedOut) break;
   }
 
   return finish(`assets_indexed_at window ${cursorStart ?? 'NULL'} → ${cursorEnd ?? 'NULL'} (${companies.length} selected)`);
