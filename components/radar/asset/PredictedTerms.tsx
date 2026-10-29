@@ -7,9 +7,10 @@ import type { PredictedTerms as Terms, CompRow, AssetBrief } from './types';
 import { SectionCard, Pill, ExternalLink, EmptyState, btnSecondary, btnGhost } from './ui';
 import { fmtM, fmtRoyalty, fmtPhaseDb, sourceLabel, fmtDate } from './format';
 import { calculatorHref } from './calculator-link';
+import { termsHeadline, disagreementNote, HEADLINE_RULE_TEXT } from '@/lib/radar/terms-headline';
 
 function relaxationLabel(r: string | null | undefined): { text: string; tone: 'emerald' | 'amber' | 'rose' } {
-  if (!r || r === 'none') return { text: 'Exact: TA + modality + phase', tone: 'emerald' };
+  if (!r || r === 'none') return { text: 'Phase-matched: TA + same or adjacent phase', tone: 'emerald' };
   if (r === 'modality_only') return { text: 'Widened to modality', tone: 'amber' };
   if (r === 'ta_only') return { text: 'Widened to therapeutic area', tone: 'rose' };
   return { text: r.replace(/_/g, ' '), tone: 'amber' };
@@ -41,7 +42,9 @@ export function PredictedTerms({ terms, asset }: { terms: Terms; asset: AssetBri
     return showAll ? rows : rows.slice(0, 8);
   }, [terms.comps, sort, showAll]);
 
-  const hasTerms = !terms.insufficient && th && th.predicted_upfront_mid != null;
+  const headline = terms.insufficient ? null : termsHeadline(th);
+  const hasTerms = headline != null && th != null;
+  const note = disagreementNote(headline);
 
   return (
     <SectionCard
@@ -56,10 +59,21 @@ export function PredictedTerms({ terms, asset }: { terms: Terms; asset: AssetBri
         </span>
       }
     >
-      {hasTerms && th ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <TermStat label="Upfront" low={th.predicted_upfront_low} mid={th.predicted_upfront_mid} high={th.predicted_upfront_high} fmt={fmtM} />
-          <TermStat label="Total value" low={th.predicted_total_low} mid={th.predicted_total_mid} high={th.predicted_total_high} fmt={fmtM} />
+      {hasTerms && headline && th ? (
+        <>
+        <div className="mb-4" data-testid="terms-headline">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" title={HEADLINE_RULE_TEXT}>Expected upfront (global rights)</p>
+          <p className="mt-0.5 font-mono text-3xl tabular-nums text-neutral-900 dark:text-neutral-50">{fmtM(headline.mid)}</p>
+          <p className="font-mono text-xs tabular-nums text-neutral-500 dark:text-neutral-400">
+            range {fmtM(headline.low)} to {fmtM(headline.high)} (P25 to P75 of comparable licenses)
+          </p>
+          {note && (
+            <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-200" role="note">
+              {note}
+            </p>
+          )}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Royalty</p>
             <p className="mt-0.5 font-mono text-xl tabular-nums text-neutral-900 dark:text-neutral-50">{fmtRoyalty(th.predicted_royalty_low, th.predicted_royalty_high)}</p>
@@ -73,7 +87,9 @@ export function PredictedTerms({ terms, asset }: { terms: Terms; asset: AssetBri
               {th.generated_at && <> · {fmtDate(th.generated_at)}</>}
             </p>
           </div>
+          <TermStat label="Total value (headline, incl. milestones)" low={th.predicted_total_low} mid={th.predicted_total_mid} high={th.predicted_total_high} fmt={fmtM} />
         </div>
+        </>
       ) : (
         <div className="rounded-md border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-200">
           <p className="font-medium">Insufficient comparables for a defensible range.</p>
@@ -86,14 +102,14 @@ export function PredictedTerms({ terms, asset }: { terms: Terms; asset: AssetBri
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4 dark:border-neutral-800">
         <div className="text-xs text-neutral-600 dark:text-neutral-300">
-          <span className="font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Comps median</span>{' '}
-          <span className="font-mono tabular-nums">{fmtM(terms.comps_median_upfront_m)}</span> upfront · <span className="font-mono tabular-nums">{fmtM(terms.comps_median_total_m)}</span> total
-          {th?.calculator_upfront_mid != null && (
-            <span className="ml-3 border-l border-neutral-300 pl-3 dark:border-neutral-700">
-              <span className="font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Calculator for this profile</span>{' '}
+          {th?.calculator_upfront_mid != null ? (
+            <span title="Reference only. The headline above follows the comparable deals, which tracked real upfronts more closely in back-testing.">
+              <span className="font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Calculator model (reference)</span>{' '}
               <span className="font-mono tabular-nums">{fmtM(th.calculator_upfront_mid)}</span> upfront
               {th.calculator_total_mid != null && <> · <span className="font-mono tabular-nums">{fmtM(th.calculator_total_mid)}</span> total</>}
             </span>
+          ) : (
+            <span className="text-neutral-500 dark:text-neutral-400">{HEADLINE_RULE_TEXT}</span>
           )}
         </div>
         <Link href={calcHref} className={btnSecondary}>

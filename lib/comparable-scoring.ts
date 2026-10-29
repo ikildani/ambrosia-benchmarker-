@@ -137,6 +137,47 @@ export function shouldExcludeForStage(
 }
 
 // ---------------------------------------------------------------------------
+// Licensing-terms pool hygiene (Radar deal theses)
+// ---------------------------------------------------------------------------
+
+/**
+ * Rights scope of a deal's `territory` text.
+ *  - 'full':    global / worldwide, the US (or US + EU), or global ex-China
+ *               (the usual shape of a Chinese originator's out-license)
+ *  - 'partial': a single region or country (Greater China, Japan, Korea,
+ *               Europe, "regional", ex-US, emerging markets, ...)
+ *  - 'unknown': not recorded
+ *
+ * An asset in Search & Evaluation is priced for its available (global)
+ * rights. Partial-territory licenses carry far smaller upfronts (median
+ * $16–21M vs $54–90M for global Phase 3 licenses on 2026-10-28), so they are
+ * not comps for that question.
+ */
+export function territoryScope(territory: string | null | undefined): 'full' | 'partial' | 'unknown' {
+  const t = (territory ?? '').trim().toLowerCase();
+  if (!t) return 'unknown';
+  if (/^(global|worldwide|ww|us|us_only|us_eu|united states)$/.test(t)) return 'full';
+  if (/^global\b/.test(t)) return 'full';
+  // "ex_china", "ex-Greater China", "global excluding mainland China, Hong Kong ..."
+  if (/^ex[\s_-]*(mainland\s+)?(greater[\s_]+)?china\b/.test(t)) return 'full';
+  if (/^(us,|us and|us co-exclusive)/.test(t)) return 'full';
+  return 'partial';
+}
+
+const LICENSING_EXCLUDED_DEAL_TYPES = new Set(['acquisition', 'acquisitions', 'merger', 'm&a']);
+
+/**
+ * True when a deal can stand as a comparable for predicted licensing terms:
+ * not an acquisition / merger (an M&A price is not a licensing upfront; the
+ * Phase 1–3 acquisitions in the pool had a median "upfront" of $950M–1.65B)
+ * and not a partial-territory license.
+ */
+export function isLicensingTermsComp(deal: { dealType?: string | null; territory?: string | null }): boolean {
+  if (deal.dealType && LICENSING_EXCLUDED_DEAL_TYPES.has(deal.dealType.toLowerCase().trim())) return false;
+  return territoryScope(deal.territory) !== 'partial';
+}
+
+// ---------------------------------------------------------------------------
 // Scoring
 // ---------------------------------------------------------------------------
 
@@ -274,20 +315,37 @@ export function passesAtRung(b: CompMatchBreakdown, rung: CompRelaxation): boole
   return b.ta;
 }
 
+/**
+ * Phase-anchored pass rule used for licensing-terms predictions (Radar deal
+ * theses). The strict rung requires the same or an adjacent phase: an
+ * indication match alone no longer counts as "phase matched" (a Phase 1 deal
+ * in the same indication is not a Phase 3 comp). The relaxed rungs are the
+ * same as the default ladder.
+ */
+export function passesAtRungPhaseAnchored(b: CompMatchBreakdown, rung: CompRelaxation): boolean {
+  const phaseOk = b.phase || b.adjacentPhase;
+  if (rung === 'none') return b.ta && phaseOk;
+  if (rung === 'modality_only') return b.ta && (b.modality || phaseOk);
+  return b.ta;
+}
+
 const LADDER: CompRelaxation[] = ['none', 'modality_only', 'ta_only'];
 
 /**
  * Walk the ladder until at least `minPool` items pass. Returns the surviving
  * items (unsorted — caller sorts by score) and the rung that was applied.
+ * `opts.phaseAnchored` switches the strict rung to `passesAtRungPhaseAnchored`.
  */
 export function selectWithRelaxation<T>(
   items: T[],
   getBreakdown: (item: T) => CompMatchBreakdown,
   minPool: number = MIN_POOL_BEFORE_RELAX,
+  opts: { phaseAnchored?: boolean } = {},
 ): { items: T[]; relaxation: CompRelaxation } {
+  const passes = opts.phaseAnchored ? passesAtRungPhaseAnchored : passesAtRung;
   let last: { items: T[]; relaxation: CompRelaxation } = { items: [], relaxation: 'ta_only' };
   for (const rung of LADDER) {
-    const passing = items.filter(it => passesAtRung(getBreakdown(it), rung));
+    const passing = items.filter(it => passes(getBreakdown(it), rung));
     last = { items: passing, relaxation: rung };
     if (passing.length >= minPool) return last;
   }

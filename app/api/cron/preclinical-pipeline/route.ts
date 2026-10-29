@@ -19,7 +19,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { leanSkip } from '@/lib/ai/budget';
-import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
+import { aiBudgetAvailable, backlogActive } from '@/lib/ai/spend-guard';
 import { timingSafeEqual } from 'crypto';
 import { runPreclinicalPipeline } from '@/lib/ingestion/preclinical-pipeline';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
@@ -58,7 +58,9 @@ export async function GET(request: NextRequest) {
   const startedAt = Date.now();
 
   // Lean mode (Oct 28 2026): every 6 h instead of every run, and never past the daily bulk AI budget.
-  if (request.nextUrl.searchParams.size === 0 && leanSkip(new Date(), 6)) {
+  // Backlog allowance (Oct 29 2026): every run and $3 a run until the unread filers are read.
+  const backlog = await backlogActive('preclinical-pipeline');
+  if (!backlog && request.nextUrl.searchParams.size === 0 && leanSkip(new Date(), 6)) {
     return NextResponse.json({ success: true, skipped: 'lean_mode_slot' });
   }
   const budget = await aiBudgetAvailable('preclinical-pipeline');
@@ -67,7 +69,7 @@ export async function GET(request: NextRequest) {
   try {
     const result = await runPreclinicalPipeline(supabase, {
       companyLimit: companyLimit ? Math.floor(companyLimit) : undefined,
-      costCapUsd,
+      costCapUsd: costCapUsd ?? (backlog ? 3 : undefined),
       companyIds: companyIds.length ? companyIds : undefined,
       force,
       timeBudgetMs: 240_000,

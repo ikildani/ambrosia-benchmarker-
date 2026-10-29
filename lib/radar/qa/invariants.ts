@@ -90,6 +90,12 @@ export interface QaThesisStats {
   terms_basis_inconsistent: { count: number; sample_ids: string[] };
   terms_basis_null: number;
   calculator_ratio: { n: number; median: number | null; p90: number | null };
+  /** Migration 172: symmetric gap, median |ln(calculator / headline)|. Null before 172. */
+  calculator_log_ratio: { n: number; median_abs_log: number | null; share_over_2x: number | null } | null;
+  /** Migration 172: median headline upfront ($M) per phase on phase_matched theses. Null before 172. */
+  upfront_by_phase: Record<string, { n: number; median: number | null }> | null;
+  /** Migration 172: phase_matched theses whose comp pool holds an acquisition / merger. Null before 172. */
+  ma_in_pool: { count: number; sample_ids: string[] } | null;
 }
 
 export interface QaScoreStats {
@@ -194,7 +200,12 @@ export const QA_THRESHOLDS = {
   partnered_without_evidence_blocker_count: 25,
   thesis_coverage_min_pct: 99,
   thesis_coverage_blocker_pct: 90,
-  calculator_ratio_median_max: 1.0,
+  /** Median |ln(calculator / headline)| ≤ ln 3: the calculator within 3× of the comps headline. */
+  calculator_log_ratio_median_max: Math.log(3),
+  /** Headline Phase 3 median upfront ≥ this × Phase 1 median (pre-fix: 45 / 35 = 1.29). */
+  phase3_over_phase1_min: 1.5,
+  /** Minimum phase_matched theses per phase before the phase-order check is judged. */
+  phase_order_min_n: 100,
   score_entries_bad_major_pct: 1,
   score_entries_bad_blocker_pct: 10,
   score_sum_bad_major_pct: 1,
@@ -345,6 +356,18 @@ export function normalizeThesisStats(raw: Record<string, unknown> | null | undef
       median: nullableNum(obj('calculator_ratio').median),
       p90: nullableNum(obj('calculator_ratio').p90),
     },
+    calculator_log_ratio: r.calculator_log_ratio == null ? null : {
+      n: n(obj('calculator_log_ratio').n),
+      median_abs_log: nullableNum(obj('calculator_log_ratio').median_abs_log),
+      share_over_2x: nullableNum(obj('calculator_log_ratio').share_over_2x),
+    },
+    upfront_by_phase: r.upfront_by_phase == null ? null : Object.fromEntries(
+      Object.entries(obj('upfront_by_phase')).map(([phase, v]) => {
+        const row = (v ?? {}) as Record<string, unknown>;
+        return [phase, { n: n(row.n), median: nullableNum(row.median) }];
+      }),
+    ),
+    ma_in_pool: r.ma_in_pool == null ? null : { count: n(obj('ma_in_pool').count), sample_ids: ids(obj('ma_in_pool').sample_ids) },
   };
 }
 
@@ -685,19 +708,63 @@ export function evaluateInvariants(stats: QaStats, opts: EvaluateOptions = {}): 
     group: 'thesis',
   }));
 
+  // Calculator vs headline (2026-10-28 redefinition). The headline upfront is
+  // the comps median (lib/radar/terms-headline.ts); the calculator is a
+  // reference that the UI flags when it is more than 2× away. The old metric
+  // |calc − comps| / comps was asymmetric and treated the calculator as the
+  // reference, although it validated worse on real deals. This check now
+  // tracks the calculator's calibration gap: minor, symmetric (log ratio).
   const ratio = th.calculator_ratio;
+  const lr = th.calculator_log_ratio;
   out.push(result({
     check_name: 'thesis_calculator_vs_comps',
-    severity: 'major',
-    passed: ratio.median === null || ratio.median <= T.calculator_ratio_median_max,
-    expected: `median |calculator_upfront_mid − predicted_upfront_mid| / predicted_upfront_mid ≤ ${T.calculator_ratio_median_max} on phase_matched theses`,
-    observed: ratio.n > 0
-      ? `n=${ratio.n}, median ${ratio.median?.toFixed(2)}, p90 ${ratio.p90?.toFixed(2)}`
-      : 'no phase_matched theses with both values',
+    severity: 'minor',
+    passed: lr
+      ? lr.median_abs_log === null || lr.median_abs_log <= T.calculator_log_ratio_median_max
+      // Before migration 172: |calc − comps| / comps ≤ 2 is the same "within 3× high" bound.
+      : ratio.median === null || ratio.median <= 2,
+    expected: `median |ln(calculator_upfront_mid / predicted_upfront_mid)| ≤ ln 3 (${T.calculator_log_ratio_median_max.toFixed(2)}) on phase_matched theses; the headline follows comps and the UI notes gaps over 2×`,
+    observed: lr
+      ? (lr.n > 0 ? `n=${lr.n}, median |ln ratio| ${lr.median_abs_log?.toFixed(2)} (${lr.median_abs_log != null ? Math.exp(lr.median_abs_log).toFixed(1) : '—'}×), ${lr.share_over_2x != null ? (lr.share_over_2x * 100).toFixed(0) : '—'}% more than 2× apart` : 'no phase_matched theses with both values')
+      : (ratio.n > 0 ? `n=${ratio.n}, median ${ratio.median?.toFixed(2)}, p90 ${ratio.p90?.toFixed(2)} (pre-172 metric)` : 'no phase_matched theses with both values'),
     count: null,
-    details: { n: ratio.n, median: ratio.median, p90: ratio.p90 },
+    details: { n: ratio.n, median: ratio.median, p90: ratio.p90, log_ratio: lr },
     group: 'thesis',
   }));
+
+  // Headline upfront must rise with phase (it was flat: P1 $35M, P3 $45M,
+  // because the pool mixed regional licenses and M&A into global-rights comps).
+  const bp = th.upfront_by_phase;
+  if (bp) {
+    const p1 = bp.phase_1, p2 = bp.phase_2, p3 = bp.phase_3;
+    const judged = !!(p1 && p3 && p1.median && p3.median && p1.n >= T.phase_order_min_n && p3.n >= T.phase_order_min_n);
+    const p3ok = !judged || (p3!.median! >= T.phase3_over_phase1_min * p1!.median!);
+    const p2ok = !judged || !p2 || p2.median == null || p2.n < T.phase_order_min_n || p2.median >= p1!.median!;
+    out.push(result({
+      check_name: 'thesis_upfront_rises_with_phase',
+      severity: 'major',
+      passed: p3ok && p2ok,
+      expected: `median headline upfront: Phase 2 ≥ Phase 1 and Phase 3 ≥ ${T.phase3_over_phase1_min}× Phase 1 (phase_matched theses, n ≥ ${T.phase_order_min_n} per phase)`,
+      observed: ['preclinical', 'phase_1', 'phase_2', 'phase_3']
+        .map(ph => `${ph} ${bp[ph]?.median != null ? `$${Math.round(bp[ph].median!)}M` : '—'} (n=${bp[ph]?.n ?? 0})`).join(' · '),
+      count: null,
+      details: { upfront_by_phase: bp },
+      group: 'thesis',
+    }));
+  }
+
+  if (th.ma_in_pool) {
+    out.push(result({
+      check_name: 'thesis_pool_excludes_ma',
+      severity: 'major',
+      passed: th.ma_in_pool.count === 0,
+      expected: 'no acquisition / merger deal in any phase_matched licensing comp pool',
+      observed: `${th.ma_in_pool.count} theses`,
+      count: th.ma_in_pool.count,
+      failing_ids: th.ma_in_pool.sample_ids,
+      group: 'thesis',
+    }));
+  }
 
   // ── Score contract ──────────────────────────────────────────────────
   const sc = stats.score;

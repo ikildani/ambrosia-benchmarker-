@@ -37,17 +37,16 @@ export const RADAR_OWNER_TYPE_OPTIONS: (VocabOption & { value: OwnerType })[] = 
   { value: 'unknown', label: 'Unknown' },
 ];
 
-/** clinical_assets.trial_status slugs written by lib/ingestion/clinical-trials.ts. */
+/**
+ * clinical_assets.trial_status: the asset-level roll-up written by lib/radar/asset-universe.ts
+ * (assetTrialStatus). The trial-level CT.gov statuses used to be listed here, so picking
+ * "Recruiting" matched no asset at all.
+ */
 export const RADAR_TRIAL_STATUS_OPTIONS: VocabOption[] = [
-  { value: 'recruiting', label: 'Recruiting' },
-  { value: 'not_yet_recruiting', label: 'Not yet recruiting' },
-  { value: 'active_not_recruiting', label: 'Active, not recruiting' },
-  { value: 'enrolling_by_invitation', label: 'Enrolling by invitation' },
+  { value: 'active', label: 'Active trials' },
+  { value: 'unverified', label: 'Status unverified (no update in 2+ years)' },
   { value: 'completed', label: 'Completed' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'terminated', label: 'Terminated' },
-  { value: 'withdrawn', label: 'Withdrawn' },
-  { value: 'unknown', label: 'Unknown' },
+  { value: 'other', label: 'Stopped, withdrawn or other' },
 ];
 
 /**

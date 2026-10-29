@@ -9,10 +9,12 @@
  * thesis was written. Each run is time-boxed and picks up where the previous
  * one stopped, so the backlog drains across runs.
  *
- * Comps come from the SAME server path the calculator uses
- * (`findEnrichedComparableDeals`): canonical/verified/terms-disclosed rows,
- * the shared weight table, stage sanity filter and relaxation ladder. Radar
- * and the calculator therefore agree on the comp set for a given asset. The
+ * Comps come from the same server path the calculator uses
+ * (`findEnrichedComparableDeals`) with `licensingTermsOnly`: verified,
+ * terms-disclosed rows from `deals_verified`, the shared weight table, no
+ * acquisitions / mergers, no partial-territory licenses, and a phase-anchored
+ * strict rung (same or adjacent phase). Validated 2026-10-28 on a hold-out of
+ * recent global-rights licensing deals: see lib/radar/terms-headline.ts. The
  * comps engine is the cost, so pools are computed once per distinct
  * (TA, modality, phase, indication) profile per run and shared by every
  * asset with that profile.
@@ -81,6 +83,8 @@ export interface ComparableSet {
   comps: DealComp[];
   relaxation: CompRelaxation;
   excludedApprovedMA: number;
+  /** Acquisitions / mergers and partial-territory licenses dropped from the pool. */
+  excludedNonLicensing?: number;
 }
 
 export type TermsBasis = 'phase_matched' | 'ta_modality' | 'ta_only' | 'insufficient';
@@ -271,12 +275,31 @@ export interface ThesisAssetProfile {
   regulatory_designations?: string[] | null;
 }
 
+/**
+ * Radar spells multi-word TAs in snake_case; the deals table uses camelCase.
+ * Before 2026-10-28 the comps query filtered `therapeutic_area =
+ * 'infectious_disease'` and matched nothing, so every infectious-disease,
+ * rare-disease and women's-health asset (~11,000 theses) was "insufficient".
+ */
+const RADAR_TA_TO_DEALS_TA: Record<string, string> = {
+  infectious_disease: 'infectiousDisease',
+  infectious: 'infectiousDisease',
+  rare_disease: 'rareDisease',
+  womens_health: 'womensHealth',
+};
+
+/** Deals-table spelling of a Radar therapeutic area. */
+export function radarTaToDealsTa(ta: string): string {
+  const k = ta.toLowerCase().trim();
+  return RADAR_TA_TO_DEALS_TA[k] ?? k;
+}
+
 /** Inputs for the shared comparable-deals path, derived from a clinical asset. */
 export function buildCompInputs(asset: ThesisAssetProfile): { therapeuticArea: string; modality: string; indication: string; phase?: string; dealType: string } | null {
   if (!asset.therapeutic_area) return null;
   const phase = radarPhaseToDb(asset.phase);
   return {
-    therapeuticArea: asset.therapeutic_area.toLowerCase().trim(),
+    therapeuticArea: radarTaToDealsTa(asset.therapeutic_area),
     modality: asset.modality || '',
     indication: asset.indication_specific || asset.indication_category || '',
     phase: phase ?? undefined,
@@ -345,9 +368,12 @@ export async function fetchComparableDeals(
   const inputs = buildCompInputs(asset);
   if (!inputs) return { comps: [], relaxation: 'none', excludedApprovedMA: 0 };
 
-  const result = await findEnrichedComparableDeals(inputs, maxDeals);
+  // Licensing-terms pool: verified deals only, no M&A, no partial-territory
+  // licenses, phase-anchored strict rung (see EnrichedComparableOptions).
+  const result = await findEnrichedComparableDeals(inputs, maxDeals, { licensingTermsOnly: true });
+  const excludedNonLicensing = result.excludedNonLicensing ?? 0;
   if (result.deals.length === 0) {
-    return { comps: [], relaxation: result.relaxation, excludedApprovedMA: result.excludedApprovedMA };
+    return { comps: [], relaxation: result.relaxation, excludedApprovedMA: result.excludedApprovedMA, excludedNonLicensing };
   }
 
   // The enriched row carries upfront/total in $M but not royalties, milestones
@@ -366,6 +392,7 @@ export async function fetchComparableDeals(
     comps: result.deals.map(d => toDealComp(d, extraById.get(d.id))),
     relaxation: result.relaxation,
     excludedApprovedMA: result.excludedApprovedMA,
+    excludedNonLicensing,
   };
 }
 
