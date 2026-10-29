@@ -103,12 +103,13 @@ BEGIN
    LIMIT GREATEST(COALESCE(p_limit, 3000), 1);
 
   IF v_kind = 'drug_new' THEN
-    INSERT INTO public.drug_master (id, preferred_name, inn, source, confidence, is_combination, component_drug_ids, ncit_code, unii, modality, external_checked_at)
+    INSERT INTO public.drug_master (id, preferred_name, inn, source, confidence, is_combination, component_drug_ids, ncit_code, unii, chembl_id, modality, external_checked_at)
     SELECT b.drug_id, b.payload->>'preferred_name', b.payload->>'inn', b.payload->>'source',
            COALESCE((b.payload->>'confidence')::int, 75), COALESCE((b.payload->>'is_combination')::boolean, false),
            COALESCE(ARRAY(SELECT jsonb_array_elements_text(b.payload->'component_drug_ids'))::uuid[], '{}'::uuid[]),
            b.payload->>'ncit_code',
            CASE WHEN (b.payload->>'unii') ~ '^[A-Z0-9]{10}$' THEN b.payload->>'unii' END,
+           CASE WHEN (b.payload->>'chembl_id') ~ '^CHEMBL[0-9]+$' THEN b.payload->>'chembl_id' END,
            b.payload->>'modality', now()
       FROM tmp_dib b
     ON CONFLICT (id) DO NOTHING;
@@ -180,7 +181,7 @@ BEGIN
     SELECT p_run, 'alias_drop', del.id, to_jsonb(del), NULL FROM del;
     GET DIAGNOSTICS v_n = ROW_COUNT;
 
-  ELSE -- originator
+  ELSE  /* originator */
     INSERT INTO public.radar_drug_identity_log (run_id, kind, ref_id, old_values, new_values)
     SELECT p_run, 'originator', d.id, jsonb_build_object('originator_company_id', d.originator_company_id),
            jsonb_build_object('originator_company_id', b.new_originator_company_id, 'code_prefix', b.match_key)
