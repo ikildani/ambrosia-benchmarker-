@@ -348,7 +348,7 @@ async function main() {
   {
     const keys = [...comboNeeds.keys()];
     for (let i = 0; i < keys.length; i += 200) {
-      const { data, error } = await supabase.from('drug_aliases').select('drug_id, alias_normalized').in('alias_normalized', keys.slice(i, i + 200).map(k => normalizeKey(k)));
+      const { data, error } = await withRetry(() => supabase.from('drug_aliases').select('drug_id, alias_normalized').in('alias_normalized', keys.slice(i, i + 200).map(k => normalizeKey(k))));
       if (error) throw new Error(error.message);
       for (const r of (data ?? []) as Array<{ drug_id: string; alias_normalized: string }>) {
         const k = keys.find(x => normalizeKey(x) === r.alias_normalized);
@@ -372,7 +372,7 @@ async function main() {
   const upload = async (table: string, recs: Array<Record<string, unknown>>) => {
     for (let i = 0; i < recs.length; i += 1000) {
       for (let attempt = 1; attempt <= 5; attempt++) {
-        const { error } = await supabase.from(table).insert(recs.slice(i, i + 1000));
+        const { error } = await supabase.from(table).insert(recs.slice(i, i + 1000)).then(r => r, (e: unknown) => ({ error: { message: String(e) } }));
         if (!error) break;
         if (attempt === 5) throw new Error(`${table} insert failed: ${error.message}`);
         await sleep(2000 * attempt);
@@ -388,6 +388,13 @@ async function main() {
   await upload('radar_drug_identity_plan', dropAliases.map(id => ({ run_id: runId, kind: 'alias_drop', alias_id: id })));
   await upload('radar_drug_identity_plan', originators.map(o => ({ run_id: runId, kind: 'originator', drug_id: o.drug_id, new_originator_company_id: o.new, match_key: o.prefix })));
   console.log(`staged run ${runId}: ${newDrugs.length} NCIt nodes, ${newAliases.length} NCIt aliases, ${rows.length} asset rows (${stagedCombos.length} new combination nodes), ${dropAliases.length} alias drops, ${originators.length} originator changes`);
+}
+
+// A dropped connection rejects instead of returning { error }; retry those.
+async function withRetry<T>(fn: () => PromiseLike<T>, attempts = 5): Promise<T> {
+  for (let i = 1; ; i++) {
+    try { return await fn(); } catch (e) { if (i >= attempts) throw e; await sleep(2000 * i); }
+  }
 }
 
 function TRUSTED_SOURCE(s: string): boolean {
