@@ -27,7 +27,9 @@ import { renderPDFBuffer } from '@/lib/report/server-renderer';
 import epiData from '@/data/epidemiology.json';
 import { resolveIntake } from '@/lib/brief/intake-map';
 import { buildBrief } from '@/lib/brief/build';
-import { recordBriefPrediction } from '@/lib/outcomes/writers';
+import { recordBriefPrediction, BRIEF_MODEL_VERSION } from '@/lib/outcomes/writers';
+import { archiveScores } from '@/lib/score-archive';
+import { briefArchiveEntry } from '@/lib/score-archive/brief';
 import { loadPriorsSnapshot } from '@/lib/outcomes/priors-snapshot';
 import { fetchBriefPartners } from '@/lib/brief/partners';
 import { buildExcelWorkbook } from '@/lib/generateExcel';
@@ -190,8 +192,9 @@ export async function POST(request: NextRequest) {
     // Step 5c: Outcome ledger — commit the brief's ask/floor, buyers and window
     // as a prediction (Alaric WS1). Fire-and-forget; never breaks generation.
     let predictionId: string | null = null;
+    let priorsAsOf: string | null = null;
     try {
-      const priorsAsOf = await loadPriorsSnapshot(supabase);
+      priorsAsOf = await loadPriorsSnapshot(supabase);
       const written = await recordBriefPrediction(supabase, built.brief, { requestId, userId: req.user_id ?? null, priorsAsOf });
       if (written.ok) predictionId = written.id;
       else if (written.reason === 'deduped') {
@@ -201,6 +204,14 @@ export async function POST(request: NextRequest) {
       }
     } catch (e) {
       console.warn('[Outcomes] brief prediction threw:', e instanceof Error ? e.message : e);
+    }
+
+    // Step 5d: Score archive (migration 139) — the full call, every generation.
+    try {
+      const entry = briefArchiveEntry(built.brief, { requestId, predictionId, modelVersion: BRIEF_MODEL_VERSION, priorsAsOf });
+      if (entry) await archiveScores(supabase, [entry]);
+    } catch (e) {
+      console.warn('[ScoreArchive] brief archive threw:', e instanceof Error ? e.message : e);
     }
 
     // Step 6: Assemble PDFReportData

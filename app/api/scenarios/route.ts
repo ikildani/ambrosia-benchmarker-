@@ -1,6 +1,7 @@
 import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
 import { requireAuth } from '@/lib/auth-helpers';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
@@ -144,6 +145,20 @@ export async function POST(request: NextRequest) {
       console.error('Error saving scenario:', error);
       return apiError('Failed to save scenario', 500);
     }
+
+    // Score archive (migration 139): the scenario's results as saved.
+    archiveAfterResponse(() => [{
+      product: 'solidus',
+      scoreType: 'scenario.saved',
+      modelVersion: 'scenario-1',
+      origin: 'user',
+      entityType: 'profile',
+      sourceTable: 'saved_scenarios',
+      sourceId: scenario?.id ?? null,
+      confidential: true,
+      inputs,
+      output: results ?? {},
+    }], supabase);
 
     return apiSuccess({ scenario });
   } catch (error) {

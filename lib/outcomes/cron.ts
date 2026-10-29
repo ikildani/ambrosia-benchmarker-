@@ -7,7 +7,8 @@
  * `rollupHour`, or when `forceRollups` is set — it also runs the Radar writer
  * (if enabled), materialises the accuracy rollups, blends client outcomes
  * into the buyer premiums (outcome priors; idempotent, writes only on change)
- * and sends the day-45 / day-120 brief outcome follow-ups. Never throws;
+ * sends the day-45 / day-120 brief outcome follow-ups and seals finished days
+ * of the score archive into chained digests (migration 139). Never throws;
  * returns a report and logs exactly one line with counts.
  */
 
@@ -17,6 +18,7 @@ import { materialiseRollups } from './rollups';
 import { recordRadarPredictions } from './writers';
 import { runOutcomeFollowups, type FollowupRunReport } from './followups';
 import { refreshOutcomePriors, type PriorsRunReport } from './priors';
+import { sealScoreArchive } from '@/lib/score-archive';
 import type { RadarWriterReport, ResolverRunReport, RollupRunReport } from './types';
 
 export interface OutcomePhaseOptions {
@@ -38,6 +40,8 @@ export interface OutcomePhaseReport {
   rollups: RollupRunReport | null;
   priors: PriorsRunReport | null;
   followups: FollowupRunReport | null;
+  /** Score-archive days sealed this run (nightly only). */
+  archiveDaysSealed: number | null;
   nightly: boolean;
   ms: number;
   errors: string[];
@@ -61,6 +65,7 @@ export async function runOutcomePhase(supabase: SupabaseClient, opts: OutcomePha
   let rollups: RollupRunReport | null = null;
   let priors: PriorsRunReport | null = null;
   let followups: FollowupRunReport | null = null;
+  let archiveDaysSealed: number | null = null;
   if (nightly) {
     try {
       radar = await recordRadarPredictions(supabase, { now, force: opts.forceRadar });
@@ -90,14 +95,17 @@ export async function runOutcomePhase(supabase: SupabaseClient, opts: OutcomePha
         errors.push(`followups: ${e instanceof Error ? e.message : String(e)}`);
       }
     }
+    const seal = await sealScoreArchive(supabase);
+    archiveDaysSealed = seal.sealed.length;
+    if (seal.error) errors.push(`score archive seal: ${seal.error}`);
   }
 
   const ms = Date.now() - started;
   console.log(
     `[Outcomes] resolve: deals=${resolver.dealsScanned} open=${resolver.openPredictions} pairs=${resolver.pairsScored} ` +
     `auto=${resolver.autoResolved} queued=${resolver.queued} expired=${resolver.expired} cursor=${resolver.cursorTo ?? '-'}` +
-    (nightly ? ` | nightly: radar=${radar ? `${radar.inserted}/${radar.candidates}${radar.enabled ? '' : ' (off)'}` : '-'} rollups=${rollups ? `${rollups.cells} cells from ${rollups.inputRows} rows` : '-'} priors=${priors ? `${priors.buyersTouched} buyers from ${priors.observations} obs` : '-'} followups=${followups ? `${followups.sent}/${followups.due} due of ${followups.requests}` : '-'}` : '') +
+    (nightly ? ` | nightly: radar=${radar ? `${radar.inserted}/${radar.candidates}${radar.enabled ? '' : ' (off)'}` : '-'} rollups=${rollups ? `${rollups.cells} cells from ${rollups.inputRows} rows` : '-'} priors=${priors ? `${priors.buyersTouched} buyers from ${priors.observations} obs` : '-'} followups=${followups ? `${followups.sent}/${followups.due} due of ${followups.requests}` : '-'} sealed=${archiveDaysSealed ?? '-'}` : '') +
     ` | ${ms}ms${errors.length ? ` | errors=${errors.length}: ${errors.slice(0, 3).join('; ')}` : ''}`,
   );
-  return { resolver, radar, rollups, priors, followups, nightly, ms, errors };
+  return { resolver, radar, rollups, priors, followups, archiveDaysSealed, nightly, ms, errors };
 }

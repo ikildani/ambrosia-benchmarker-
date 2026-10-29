@@ -1,6 +1,7 @@
 import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
 import { requireAuth } from '@/lib/auth-helpers';
 import { nanoid } from 'nanoid';
 import { captureApiError } from '@/lib/sentry-api';
@@ -109,6 +110,21 @@ export async function POST(request: NextRequest) {
     }
 
     const shareUrl = `https://solidus.ambrosiaventures.co/share/${shareToken}`;
+
+    // Score archive (migration 139): the numbers as published on the link.
+    archiveAfterResponse(() => [{
+      product: 'solidus',
+      scoreType: 'share.published',
+      modelVersion: `rnpv-${provenance.engineVersion}`,
+      origin: 'user',
+      entityType: 'profile',
+      sourceTable: 'shared_calculations',
+      sourceId: shareToken,
+      confidential: true,
+      inputs,
+      output: { results: resultsWithSummary, provenance },
+      dataAsOf: provenance.benchmarksVersion,
+    }], supabase);
 
     return apiSuccess({
       shareToken,
