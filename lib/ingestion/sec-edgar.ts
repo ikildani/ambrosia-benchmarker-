@@ -18,52 +18,48 @@ export const PHARMA_CIKS: Record<string, string> = {
   // Large Pharma
   '78003': 'Pfizer',
   '310158': 'Merck',
-  '14272': 'Abbott Laboratories',
+  '1800': 'Abbott Laboratories',
   '1551152': 'AbbVie',
-  '769397': 'Gilead Sciences',
+  '882095': 'Gilead Sciences',
   '318154': 'Amgen',
   '885535': 'Regeneron',
   '59478': 'Eli Lilly',
-  '1739104': 'Takeda',
-  '70858': 'Bristol-Myers Squibb',
-  '21344': 'Johnson & Johnson',
-  '1800': 'AstraZeneca',
-  '1397187': 'Novartis',
-  '1776985': 'Roche',
-  '1110803': 'Sanofi',
-  '1585364': 'GSK',
+  '1395064': 'Takeda',
+  '14272': 'Bristol-Myers Squibb',
+  '200406': 'Johnson & Johnson',
+  '901832': 'AstraZeneca',
+  '1114448': 'Novartis',
+  '1121404': 'Sanofi',
+  '1131399': 'GSK',
   '1776903': 'Novo Nordisk',
 
   // Large Biotech
   '1682852': 'Moderna',
-  '875045': 'Vertex Pharmaceuticals',
+  '875320': 'Vertex Pharmaceuticals',
   '765258': 'Alexion',
   '936402': 'BioMarin',
   '1124140': 'Incyte',
-  '1276533': 'Bluebird Bio',
   '1159167': 'Seattle Genetics',
-  '1368514': 'BioNTech',
-  '1802768': 'Daiichi Sankyo',
+  '1776985': 'BioNTech',
   '1397723': 'Jazz Pharmaceuticals',
-  '1142750': 'Neurocrine',
-  '1018963': 'Alkermes',
+  '914475': 'Neurocrine',
+  '1520262': 'Alkermes',
   '1491924': 'Exact Sciences',
   '1418091': 'Ultragenyx',
-  '1651308': 'Argenx',
-  '913241': 'Biogen',
+  '1697862': 'Argenx',
+  '875045': 'Biogen',
 
   // Rare Disease / Specialty
   '1629377': 'Sarepta Therapeutics',
   '1576263': 'Insmed',
-  '1527599': 'Apellis Pharmaceuticals',
 
   // Ophthalmology
   '1167379': 'Alcon',
 
   // CV/Metabolic
-  '1624512': 'BridgeBio Pharma',
-  '1801417': 'Madrigal Pharmaceuticals',
-  '1859690': 'Structure Therapeutics',
+  '1743881': 'BridgeBio Pharma',
+  '1157601': 'Madrigal Pharmaceuticals',
+  '1888886': 'Structure Therapeutics',
 
   // Respiratory/Immunology
   '818686': 'Teva',
@@ -72,60 +68,54 @@ export const PHARMA_CIKS: Record<string, string> = {
   // Dermatology/Autoimmune
   '1750153': 'Roivant Sciences',
   '1787858': 'Arcutis Biotherapeutics',
-  '1555280': 'Galapagos',
 
   // Mid-cap Pharma/Biotech
   '1545654': 'Blueprint Medicines',
-  '1438423': 'Agios',
+  '1439222': 'Agios',
   '1493152': 'Rocket Pharmaceuticals',
   '1636050': 'Syndax Pharmaceuticals',
-  '1526520': 'Protagonist Therapeutics',
-  '1447028': 'Revolution Medicines',
+  '1377121': 'Protagonist Therapeutics',
+  '1628171': 'Revolution Medicines',
   '1603466': 'Y-mAbs Therapeutics',
   '1801198': 'Legend Biotech',
   '1802749': 'Replimune',
   '1564406': 'Turning Point Therapeutics',
-  '1564708': 'MacroGenics',
+  '1125345': 'MacroGenics',
   '1592836': 'ImmunoGen',
-  '1411685': 'Arcus Biosciences',
-  '1653087': 'CRISPR Therapeutics',
+  '1724521': 'Arcus Biosciences',
+  '1674416': 'CRISPR Therapeutics',
   '1652130': 'Intellia Therapeutics',
   '1650664': 'Editas Medicine',
-  '1745916': 'Beam Therapeutics',
+  '1745999': 'Beam Therapeutics',
   '1610950': 'Relay Therapeutics',
-  '1588978': 'Nuvalent',
-  '1713539': 'Recursion Pharmaceuticals',
+  '1601830': 'Recursion Pharmaceuticals',
 
   // Neuroscience
-  '1566044': 'Intra-Cellular Therapies',
   '939767': 'Exelixis',
 
   // Gene/Cell Therapy
-  '1637459': 'Allogene Therapeutics',
-  '1585521': 'Autolus Therapeutics',
-  '1702780': 'Caribou Biosciences',
+  '1737287': 'Allogene Therapeutics',
+  '1730463': 'Autolus Therapeutics',
+  '1619856': 'Caribou Biosciences',
   '1070698': 'Precision BioSciences',
   '1472468': 'Fate Therapeutics',
-  '1636651': 'Poseida Therapeutics',
 
   // Radiopharmaceuticals
   '1521036': 'Lantheus',
 
   // Oligonucleotide
   '1178670': 'Alnylam',
-  '936395': 'Ionis Pharmaceuticals',
+  '874015': 'Ionis Pharmaceuticals',
   '1580608': 'Arrowhead Pharmaceuticals',
 
   // Chinese Biotech (US-listed)
-  '1651625': 'BeiGene',
   '1704292': 'Zai Lab',
   '1564824': 'Hutchmed',
 
   // Regional
-  '1478242': 'Zealand Pharma',
   '1649904': 'Rhythm Pharmaceuticals',
   '1634293': 'Travere Therapeutics',
-  '1393584': 'Bicycle Therapeutics',
+  '1761612': 'Bicycle Therapeutics',
 
   // Immunology/Autoimmune
   '1671927': 'Immunocore',
@@ -163,13 +153,10 @@ export const PHARMA_CIKS: Record<string, string> = {
 
   // Cardiovascular additions
   '1061983': 'Cytokinetics',
-  '1743881': 'BridgeBio Pharma',
   '1840574': 'Verve Therapeutics',
-  '874015': 'Ionis Pharmaceuticals',
   '1936258': 'NewAmsterdam Pharma',
 
   // Infectious Disease additions
-  '882095': 'Gilead Sciences',
   '1706431': 'Vir Biotechnology',
   '1426800': 'Assembly Biosciences',
 
@@ -185,68 +172,53 @@ export const PHARMA_CIKS: Record<string, string> = {
 
   // Neurology / CNS (expand from 5 → 20+)
   '1739600': 'Arvinas',
-  '1522540': 'Annovis Bio',
-  '1598665': 'Voyager Therapeutics',
-  '1411579': 'Axsome Therapeutics',
-  '1784535': 'Karuna Therapeutics',
+  '1477845': 'Annovis Bio',
+  '1640266': 'Voyager Therapeutics',
+  '1579428': 'Axsome Therapeutics',
   '1620280': 'Praxis Precision Medicine',
   '1830974': 'Neumora Therapeutics',
   '1852985': 'Longboard Pharmaceuticals',
-  '1599617': 'Lenz Therapeutics',
+  '1815776': 'Lenz Therapeutics',
   '1742912': 'Passage Bio',
   '1564590': 'uniQure',
   '1622879': 'Annexon Biosciences',
-  '1815903': 'Vigil Neuroscience',
 
   // Cardiovascular (expand from 5 → 15+)
   '1635984': 'Akcea Therapeutics',
   '794323': 'Esperion Therapeutics',
-  '1689548': 'Agepha Pharma',
   '1855756': 'CinCor Pharma',
-  '1868941': 'Lexeo Therapeutics',
+  '1907108': 'Lexeo Therapeutics',
   '1815184': 'Tenaya Therapeutics',
-  '1769624': 'Rocket Pharmaceuticals',
-  '1590418': 'Myokardia',
-  '1742927': 'Cardiol Therapeutics',
+  '1281895': 'Rocket Pharmaceuticals',
+  '1702123': 'Cardiol Therapeutics',
 
   // Metabolic / Endocrine (expand from 7 → 20+)
   '1739347': 'Fractyl Health',
-  '1628171': 'Carmot Therapeutics',
   '1822994': 'Rivus Pharmaceuticals',
-  '1708527': 'Eiger BioPharmaceuticals',
   '1840292': 'COUR Pharmaceutical',
   '1795579': 'Imvax',
   '1751299': 'Inversago Pharma',
-  '1799011': 'Boehringer Ingelheim',
-  '1831097': 'Zealand Pharma',
   '1739727': 'ProSciento',
-  '1826397': 'Keros Therapeutics',
-  '1824502': 'Biomea Fusion',
+  '1664710': 'Keros Therapeutics',
+  '1840439': 'Biomea Fusion',
 
   // Immunology / Autoimmune (expand from 8 → 20+)
   '1598014': 'Principia Biopharma',
-  '1645460': 'TG Therapeutics',
-  '1766400': 'Prometheus Biosciences',
+  '1001316': 'TG Therapeutics',
   '1784756': 'Arena Pharmaceuticals',
   '1611983': 'Chinook Therapeutics',
-  '1803696': 'Alumis',
+  '1847367': 'Alumis',
   '1821580': 'ACELYRIN',
-  '1853145': 'Upstream Bio',
+  '2022626': 'Upstream Bio',
   '1748252': 'Nurix Therapeutics',
-  '1707502': 'Magenta Therapeutics',
 
   // Rare Disease (expand from 3 → 15+)
   '1178879': 'Alexion Pharmaceuticals',
-  '1516551': 'Catalyst Biosciences',
-  '1661059': 'Myonexus Therapeutics',
   '1773427': 'Passage Bio',
   '1756701': 'Taysha Gene Therapies',
   '1805260': 'Abeona Therapeutics',
-  '1609065': 'Avrobio',
   '1661587': 'Solid Biosciences',
   '1804220': 'Vigil Neuroscience',
-  '1735707': 'Prevail Therapeutics',
-  '1699136': 'Homology Medicines',
   '1709323': 'Akeso Health Sciences',
 
   // Infectious Disease (expand from 3 → 12+)
@@ -255,33 +227,25 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1752474': 'VBI Vaccines',
   '1699531': 'Emergent BioSolutions',
   '1599738': 'Paratek Pharmaceuticals',
-  '1709164': 'Iterum Therapeutics',
-  '1789029': 'Vaxcyte',
-  '1837014': 'Affinivax',
-  '1579428': 'Inovio Pharmaceuticals',
+  '1649094': 'Vaxcyte',
+  '1055726': 'Inovio Pharmaceuticals',
 
   // Ophthalmology (expand from 2 → 10+)
   '1567514': 'Aldeyra Therapeutics',
   '1595585': 'Adverum Biotechnologies',
-  '1738177': 'Kodiak Sciences',
+  '1468748': 'Kodiak Sciences',
   '1708493': 'Gyroscope Therapeutics',
-  '1776661': 'Ocuphire Pharma',
-  '1745999': 'Eyenovia',
-  '1662579': 'RXSight',
-  '1808997': 'Iveric Bio',
+  '1111485': 'RXSight',
 
   // Dermatology (expand from 2 → 10+)
   '1413754': 'Dermavant Sciences',
   '1581552': 'Cassiopea',
-  '1516513': 'Sol-Gel Technologies',
+  '1684693': 'Sol-Gel Technologies',
   '1757758': 'Forte Biosciences',
-  '1768224': 'Skin Biotech',
   '1640251': 'Verrica Pharmaceuticals',
-  '1737287': 'Nuvation Bio',
-  '1763950': 'Ralexar Therapeutics',
+  '1811063': 'Nuvation Bio',
 
   // Respiratory / Pulmonology
-  '1408075': 'Windtree Therapeutics',
   '1756222': 'Aerogen',
   '1740582': 'Gossamer Bio',
   '1770141': 'Kinaset Therapeutics',
@@ -289,19 +253,15 @@ export const PHARMA_CIKS: Record<string, string> = {
   '1680379': 'Theravance Biopharma',
 
   // Gastroenterology
-  '1613780': 'Iterative Scopes',
-  '1672619': 'Ardelyx',
+  '1437402': 'Ardelyx',
   '1661839': '9 Meters Biopharma',
   '1773086': 'Applied DNA Sciences',
   '1776197': 'RedHill Biopharma',
-  '1614744': 'Assembly Biosciences',
 
   // Hematology (non-oncology)
-  '1669811': 'Global Blood Therapeutics',
   '1826170': 'Forma Therapeutics',
-  '1810182': 'Disc Medicine',
+  '1816736': 'Disc Medicine',
   '1723648': 'Rallybio',
-  '1717115': 'Protagonist Therapeutics',
 };
 
 // Search terms for licensing deals

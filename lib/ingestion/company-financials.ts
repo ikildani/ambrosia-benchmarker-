@@ -22,6 +22,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { readSyncCursor, writeSyncCursor } from '@/lib/radar/sync-cursor';
+import { secNameMatches } from './sec-name-match';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -764,6 +765,12 @@ export async function runCompanyFinancials(
       const [facts, submissions] = await Promise.all([fetchCompanyFacts(cik), fetchSubmissions(cik)]);
       if (!facts) {
         result.skippedNoCik++;
+        continue;
+      }
+      // A CIK that files under another company's name is a wrong CIK: never store its cash and burn here.
+      if (facts.entityName && !secNameMatches(facts.entityName, [c.name, ...(c.name_variations ?? [])])) {
+        errors.push(`cik ${cik} files as "${facts.entityName}", not ${c.name}; skipped`);
+        result.failed++;
         continue;
       }
       const filings = submissions ? listRecentFilings(submissions) : [];

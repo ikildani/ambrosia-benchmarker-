@@ -3,6 +3,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { PHARMA_CIKS } from './sec-edgar';
+import { secNameMatches } from './sec-name-match';
 
 const SEC_XBRL_API = 'https://data.sec.gov/api/xbrl/companyfacts';
 const USER_AGENT = 'Solidus research@ambrosiaventures.co';
@@ -145,7 +146,7 @@ export async function runXBRLRevenueUpdate(supabase: SupabaseClient): Promise<XB
     .select('id, name, name_variations, sec_cik, total_annual_revenue');
 
   // Build lookup maps
-  const nameToCompany = new Map<string, { id: string; name: string; sec_cik: string | null; total_annual_revenue: number | null }>();
+  const nameToCompany = new Map<string, { id: string; name: string; name_variations: string[] | null; sec_cik: string | null; total_annual_revenue: number | null }>();
   for (const c of allCompanies || []) {
     nameToCompany.set(c.name.toLowerCase(), c);
     for (const v of c.name_variations || []) {
@@ -153,7 +154,7 @@ export async function runXBRLRevenueUpdate(supabase: SupabaseClient): Promise<XB
     }
   }
 
-  const cikToCompany = new Map<string, { id: string; name: string; sec_cik: string | null; total_annual_revenue: number | null }>();
+  const cikToCompany = new Map<string, { id: string; name: string; name_variations: string[] | null; sec_cik: string | null; total_annual_revenue: number | null }>();
   for (const c of allCompanies || []) {
     if (c.sec_cik) {
       cikToCompany.set(c.sec_cik, c);
@@ -189,6 +190,14 @@ export async function runXBRLRevenueUpdate(supabase: SupabaseClient): Promise<XB
 
       if (!company) {
         console.log(`No company match for ${companyName} (CIK ${cik})`);
+        continue;
+      }
+
+      // The filer behind this CIK must be this company, or its revenue (and the CIK) would
+      // land on the wrong row.
+      if (!secNameMatches(revenue.companyName, [company.name, ...(company.name_variations ?? [])])) {
+        console.warn(`CIK ${cik} files as "${revenue.companyName}", not ${company.name}. Skipping.`);
+        result.skipped_anomalies++;
         continue;
       }
 
