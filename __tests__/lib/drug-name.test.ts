@@ -486,7 +486,7 @@ describe('ExternalBudget (per-host limiters)', () => {
     expect(await budget.acquire('pubchem')).toBe(true);
     expect(await budget.acquire('gsrs')).toBe(true);
     expect(budget.used).toBe(4);
-    expect(budget.usedByHost).toEqual({ gsrs: 2, chembl: 1, pubchem: 1 });
+    expect(budget.usedByHost).toEqual({ gsrs: 2, chembl: 1, pubchem: 1, ncit: 0 });
   });
 
   it('denies calls past the cap and past the deadline', async () => {

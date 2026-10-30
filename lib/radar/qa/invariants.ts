@@ -129,7 +129,8 @@ export interface QaStageRun {
 }
 
 export interface QaPipelineStats {
-  duplicates: { groups: number; sample: Record<string, unknown>[] };
+  /** groups = unexplained owned duplicates (migration 173); classes = every cross-company node by class. */
+  duplicates: { groups: number; sample: Record<string, unknown>[]; classes?: Record<string, number> };
   trial_orphans: { count: number };
   press_empty_mentions: { total_90d: number; empty: number };
   stages: QaStageRun[];
@@ -404,7 +405,11 @@ export function normalizePipelineStats(raw: Record<string, unknown> | null | und
   const r = (raw ?? {}) as Record<string, unknown>;
   const obj = (k: string) => (r[k] ?? {}) as Record<string, unknown>;
   return {
-    duplicates: { groups: n(obj('duplicates').groups), sample: Array.isArray(obj('duplicates').sample) ? (obj('duplicates').sample as Record<string, unknown>[]) : [] },
+    duplicates: {
+      groups: n(obj('duplicates').groups),
+      sample: Array.isArray(obj('duplicates').sample) ? (obj('duplicates').sample as Record<string, unknown>[]) : [],
+      classes: Object.fromEntries(Object.entries((obj('duplicates').classes ?? {}) as Record<string, unknown>).map(([k, v]) => [k, n(v)])),
+    },
     trial_orphans: { count: n(obj('trial_orphans').count) },
     press_empty_mentions: { total_90d: n(obj('press_empty_mentions').total_90d), empty: n(obj('press_empty_mentions').empty) },
     stages: Array.isArray(r.stages) ? (r.stages as QaStageRun[]).map(s => ({ ...s, stage: s.stage ?? '' })) : [],
@@ -848,10 +853,13 @@ export function evaluateInvariants(stats: QaStats, opts: EvaluateOptions = {}): 
     check_name: 'drug_master_cross_company_duplicates',
     severity: p.duplicates.groups > T.duplicates_major_groups || p.duplicates.groups < 0 ? 'major' : 'minor',
     passed: p.duplicates.groups === 0,
-    expected: 'no drug_master node held by ≥ 2 industry companies (radar_drug_duplicates)',
-    observed: p.duplicates.groups < 0 ? 'radar_drug_duplicates RPC unavailable' : `${p.duplicates.groups} groups`,
+    // Migration 173: a drug held by several companies is not a duplicate when the other holders run it as a
+    // comparator or background therapy, or when the owners are one corporate family, partners / licensees,
+    // or biosimilar makers. Only owned programs claimed by unrelated companies with nothing on record count.
+    expected: 'no drug_master node claimed as an owned program by ≥ 2 unrelated industry companies (radar_drug_duplicates; comparator, family, partner, licensee and biosimilar groups excluded)',
+    observed: p.duplicates.groups < 0 ? 'radar_drug_duplicates RPC unavailable' : `${p.duplicates.groups} unexplained groups`,
     count: Math.max(0, p.duplicates.groups),
-    details: { sample: p.duplicates.sample },
+    details: { sample: p.duplicates.sample, classes: p.duplicates.classes ?? {} },
     group: 'pipeline',
   }));
 

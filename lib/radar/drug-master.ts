@@ -60,6 +60,7 @@ import {
   type NormalizedDrugName,
   type RadarModality,
 } from '@/lib/radar/drug-name';
+import { pickNcitConcept, searchNcit, usefulSynonyms } from '@/lib/radar/ncit';
 
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
@@ -219,14 +220,14 @@ function isMissingFunction(message: string | undefined): boolean {
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-export type ExternalHost = 'gsrs' | 'chembl' | 'pubchem';
-export const EXTERNAL_HOSTS: readonly ExternalHost[] = ['gsrs', 'chembl', 'pubchem'];
+export type ExternalHost = 'gsrs' | 'chembl' | 'pubchem' | 'ncit';
+export const EXTERNAL_HOSTS: readonly ExternalHost[] = ['gsrs', 'chembl', 'pubchem', 'ncit'];
 
 /**
  * Per-host request rates. The three services are independent hosts, so one
  * aggregate 3 req/s limiter left two thirds of the allowed traffic unused.
  */
-export const HOST_RATE_PER_SEC: Record<ExternalHost, number> = { gsrs: 3, chembl: 3, pubchem: 4 };
+export const HOST_RATE_PER_SEC: Record<ExternalHost, number> = { gsrs: 3, chembl: 3, pubchem: 4, ncit: 4 };
 
 /** Token-interval limiter for one host. `reserve` is synchronous, so it is safe under concurrent callers. */
 class HostLimiter {
@@ -254,7 +255,7 @@ export interface ExternalBudgetOptions {
  */
 export class ExternalBudget {
   used = 0;
-  readonly usedByHost: Record<ExternalHost, number> = { gsrs: 0, chembl: 0, pubchem: 0 };
+  readonly usedByHost: Record<ExternalHost, number> = { gsrs: 0, chembl: 0, pubchem: 0, ncit: 0 };
   private readonly limiters: Record<ExternalHost, HostLimiter>;
   private readonly deadlineMs: number;
 
@@ -265,6 +266,7 @@ export class ExternalBudget {
       gsrs: new HostLimiter(interval('gsrs')),
       chembl: new HostLimiter(interval('chembl')),
       pubchem: new HostLimiter(interval('pubchem')),
+      ncit: new HostLimiter(interval('ncit')),
     };
     this.deadlineMs = options.deadlineMs ?? Number.POSITIVE_INFINITY;
   }
@@ -289,7 +291,7 @@ export class ExternalBudget {
 // ═══════════════════════════════════════════════════════════════════════
 
 export interface ExternalHit {
-  sources: Array<'gsrs' | 'chembl' | 'pubchem'>;
+  sources: Array<'gsrs' | 'chembl' | 'pubchem' | 'ncit'>;
   preferredName: string;
   inn: string | null;
   unii: string | null;
@@ -570,6 +572,28 @@ async function pubchemLookup(name: string, budget: ExternalBudget): Promise<Look
   };
 }
 
+async function ncitLookup(name: string, budget: ExternalBudget): Promise<LookupOutcome> {
+  if (!(await budget.acquire('ncit'))) return { hit: null, definitive: false };
+  const concepts = await searchNcit(name);
+  if (concepts === 'error') return { hit: null, definitive: false };
+  const c = pickNcitConcept(name, concepts);
+  if (!c) return { hit: null, definitive: true };
+  const aliases: AliasInput[] = [];
+  for (const syn of usefulSynonyms(c)) pushAlias(aliases, syn, 'ncit');
+  const inn = looksLikeInn(c.name) ? c.name.toLowerCase() : null;
+  return {
+    hit: {
+      sources: ['ncit'],
+      preferredName: inn ?? c.name,
+      inn,
+      unii: c.unii,
+      ncitCode: c.code,
+      aliases,
+    },
+    definitive: true,
+  };
+}
+
 function mergeHits(name: string, parts: Array<Partial<ExternalHit> | null>): ExternalHit | null {
   const present = parts.filter((p): p is Partial<ExternalHit> => !!p);
   if (present.length === 0) return null;
@@ -583,7 +607,8 @@ function mergeHits(name: string, parts: Array<Partial<ExternalHit> | null>): Ext
   };
   const hasGsrs = sources.includes('gsrs');
   const hasChembl = sources.includes('chembl');
-  const confidence = hasGsrs && hasChembl ? 92 : hasGsrs ? 85 : hasChembl ? 80 : 65;
+  const hasNcit = sources.includes('ncit');
+  const confidence = hasGsrs && hasChembl ? 92 : hasGsrs ? 85 : hasChembl ? 80 : hasNcit ? 80 : 65;
   const preferredName = pick('inn') ?? pick('preferredName') ?? name;
   return {
     sources,
@@ -626,10 +651,14 @@ export async function lookupExternal(name: string, budget: ExternalBudget): Prom
       const [gsrs, chembl] = await Promise.all([gsrsLookup(name, budget), chemblLookup(name, budget)]);
       let pubchem: LookupOutcome = { hit: null, definitive: true };
       if (!gsrs.hit && !chembl.hit) pubchem = await pubchemLookup(name, budget);
-      const hit = mergeHits(name, [gsrs.hit, chembl.hit, pubchem.hit]);
+      // NCI Thesaurus last (migration 173): it carries sponsor codes of investigational agents
+      // the other three often lack ("PLB1004" → andamertinib). Exact synonym, one substance only.
+      let ncit: LookupOutcome = { hit: null, definitive: true };
+      if (!gsrs.hit && !chembl.hit && !pubchem.hit) ncit = await ncitLookup(name, budget);
+      const hit = mergeHits(name, [gsrs.hit, chembl.hit, pubchem.hit, ncit.hit]);
       if (hit) {
         externalCache.set(key, hit);
-      } else if (gsrs.definitive && chembl.definitive && pubchem.definitive) {
+      } else if (gsrs.definitive && chembl.definitive && pubchem.definitive && ncit.definitive) {
         externalCache.set(key, null);
         negativeKeys.add(key);
         pendingNegatives.set(key, [...EXTERNAL_HOSTS]);
@@ -1013,9 +1042,16 @@ async function resolveSingle(ctx: Ctx, raw: string, extraNames: string[]): Promi
     return { ...resultFromDrug(drug, 'internal', { status: 'unresolvable', aliasesRecorded: recorded }), reason: 'cjk' };
   }
 
-  // (a)+(b) exact alias / code hits
-  const hits = await findAliasHits(supabase, keys);
-  let picked = disambiguate(hits, n);
+  // (a)+(b) exact alias / code hits. The name's own candidates decide first; the
+  // asset's other intervention names only count when they agree on one drug
+  // (migration 173: an alias list can carry a sibling drug from the same trial).
+  const ownKeys = n.candidates.map(normalizeKey).filter(Boolean);
+  const ownHits = await findAliasHits(supabase, ownKeys);
+  let picked = disambiguate(ownHits, n);
+  if (!picked) {
+    const extraHits = await findAliasHits(supabase, keys.filter(k => !ownKeys.includes(k)));
+    if (new Set(extraHits.map(h => h.drug_id)).size === 1) picked = disambiguate(extraHits, n);
+  }
 
   // (c) INN fuzzy on INN-looking candidates only
   if (!picked) {
@@ -1034,7 +1070,8 @@ async function resolveSingle(ctx: Ctx, raw: string, extraNames: string[]): Promi
   if (picked) {
     const drug = await getDrug(supabase, picked.drugId);
     if (drug) {
-      const recorded = await recordAliases(supabase, drug.id, inputAliases(n, extraCandidates, ctx.aliasSource));
+      // Only the name's own candidates become aliases (never the asset's other intervention names).
+      const recorded = await recordAliases(supabase, drug.id, inputAliases(n, [], ctx.aliasSource));
       if (picked.ambiguous) {
         return resultFromDrug(drug, picked.via, { status: 'ambiguous', confidence: AMBIGUOUS_CONFIDENCE, aliasesRecorded: recorded });
       }
@@ -1062,7 +1099,7 @@ async function resolveSingle(ctx: Ctx, raw: string, extraNames: string[]): Promi
       const hit = await lookupExternal(candidate, ctx.budget);
       const calls = ctx.budget.used - before;
       if (!hit) continue;
-      const created = await drugFromHit(ctx, hit, n, extraCandidates);
+      const created = await drugFromHit(ctx, hit, n, []);
       return { ...created, externalCalls: created.externalCalls + calls };
     }
   }
@@ -1077,7 +1114,7 @@ async function resolveSingle(ctx: Ctx, raw: string, extraNames: string[]): Promi
     confidence: INTERNAL_CONFIDENCE,
     external_checked_at: ctx.allowExternal && ctx.budget.canCall() ? new Date().toISOString() : null,
   });
-  const recorded = await recordAliases(supabase, drug.id, inputAliases(n, extraCandidates, ctx.aliasSource));
+  const recorded = await recordAliases(supabase, drug.id, inputAliases(n, [], ctx.aliasSource));
   return resultFromDrug(drug, 'internal', { status: 'unresolvable', aliasesRecorded: recorded });
 }
 
@@ -1401,6 +1438,8 @@ export interface LocalUnit {
   candidateKeys: string[];
   /** Candidates contributed by asset_aliases (singles only). */
   extraCandidates: string[];
+  /** Keys written by the name itself (display, parentheticals, codes): never the asset_aliases. */
+  ownKeys: string[];
   cjk: boolean;
 }
 
@@ -1428,7 +1467,7 @@ function unitFor(component: string, extraNames: readonly string[]): LocalUnit | 
   const n = normalizeDrugName(component);
   if (n.reason === 'empty' || n.reason === 'placebo' || n.reason === 'non_drug') return null;
   if (n.reason === 'cjk') {
-    return { key: n.key, n, candidates: [n.display], candidateKeys: n.key ? [n.key] : [], extraCandidates: [], cjk: true };
+    return { key: n.key, n, candidates: [n.display], candidateKeys: n.key ? [n.key] : [], extraCandidates: [], ownKeys: n.key ? [n.key] : [], cjk: true };
   }
   const extraCandidates = extraCandidatesFrom(extraNames);
   const seen = new Set<string>();
@@ -1442,7 +1481,8 @@ function unitFor(component: string, extraNames: readonly string[]): LocalUnit | 
     candidateKeys.push(k);
   }
   if (!n.key) return null;
-  return { key: n.key, n, candidates, candidateKeys, extraCandidates, cjk: false };
+  const ownKeys = [...new Set(n.candidates.map(normalizeKey).filter(Boolean))];
+  return { key: n.key, n, candidates, candidateKeys, extraCandidates, ownKeys, cjk: false };
 }
 
 /**
@@ -1514,8 +1554,10 @@ export function groupUnitsByCandidateKeys<T extends { candidateKeys: readonly st
 
 /** INN first (lowercased), then a code name, then the first display. */
 export function pickInternalPreferredName(group: readonly LocalUnit[]): string {
-  for (const u of group) for (const c of u.candidates) if (looksLikeInn(c)) return c.toLowerCase();
-  for (const u of group) for (const c of u.candidates) if (isCodeName(c)) return c;
+  // The name's own candidates only: an asset alias is not the node's name (migration 173).
+  const own = (u: LocalUnit) => u.candidates.filter(c => !u.ownKeys || u.ownKeys.includes(normalizeKey(c)));
+  for (const u of group) for (const c of own(u)) if (looksLikeInn(c)) return c.toLowerCase();
+  for (const u of group) for (const c of own(u)) if (isCodeName(c)) return c;
   return group[0]?.n.display ?? group[0]?.candidates[0] ?? '';
 }
 
@@ -1732,6 +1774,7 @@ interface UnitState {
   candidates: Set<string>;
   candidateKeys: Set<string>;
   extraCandidates: Set<string>;
+  ownKeys: Set<string>;
   industry: boolean;
   rawNames: Set<string>;
   drugId: string | null;
@@ -1774,7 +1817,7 @@ async function runLocalPass(
       let state = units.get(u.key);
       if (!state) {
         state = {
-          unit: u, candidates: new Set(), candidateKeys: new Set(), extraCandidates: new Set(), industry: false,
+          unit: u, candidates: new Set(), candidateKeys: new Set(), extraCandidates: new Set(), ownKeys: new Set(), industry: false,
           rawNames: new Set(), drugId: null, ambiguous: false, drug: null, isNew: false,
         };
         units.set(u.key, state);
@@ -1782,6 +1825,7 @@ async function runLocalPass(
       u.candidates.forEach(c => state!.candidates.add(c));
       u.candidateKeys.forEach(k => state!.candidateKeys.add(k));
       u.extraCandidates.forEach(c => state!.extraCandidates.add(c));
+      u.ownKeys.forEach(k => state!.ownKeys.add(k));
       state.rawNames.add(asset.asset_name);
       if (isIndustry(asset)) state.industry = true;
     }
@@ -1791,9 +1835,14 @@ async function runLocalPass(
   const { hits: hitsByKey, lookups } = await findAliasHitsBatched(supabase, [...units.values()].flatMap(s => [...s.candidateKeys]));
   stats.aliasLookups += lookups;
 
-  // 3. Disambiguate per unit.
+  // 3. Disambiguate per unit: the name's own keys first; the asset's other intervention
+  // names only when they agree on a single drug (migration 173).
   for (const state of units.values()) {
-    const hits = [...state.candidateKeys].flatMap(k => hitsByKey.get(k) ?? []);
+    let hits = [...state.ownKeys].flatMap(k => hitsByKey.get(k) ?? []);
+    if (hits.length === 0) {
+      const extra = [...state.candidateKeys].filter(k => !state.ownKeys.has(k)).flatMap(k => hitsByKey.get(k) ?? []);
+      if (new Set(extra.map(h => h.drug_id)).size === 1) hits = extra;
+    }
     const picked = disambiguate(hits, state.unit.n);
     if (!picked) continue;
     state.drugId = picked.drugId;
@@ -1809,7 +1858,9 @@ async function runLocalPass(
 
   // 4. Industry-owned misses: one internal row per group of key-sharing units.
   const misses = [...units.values()].filter(s => !s.drugId && s.industry);
-  const groups = groupUnitsByCandidateKeys(misses.map(s => ({ state: s, candidateKeys: [...s.candidateKeys] })));
+  // Group on the names' own keys only: grouping through asset_aliases chained unrelated
+  // drugs of one trial into a single node (the Oct 2026 doxorubicin snowball).
+  const groups = groupUnitsByCandidateKeys(misses.map(s => ({ state: s, candidateKeys: [...s.ownKeys] })));
   const internalRows: Array<{
     id: string; preferred_name: string; inn: string | null; modality: RadarModality | null;
     source: 'internal'; confidence: number; external_checked_at: null;
@@ -1852,7 +1903,7 @@ async function runLocalPass(
     if (!state.drugId || state.ambiguous) continue;
     const inputs: AliasInput[] = state.unit.cjk
       ? [{ alias: state.unit.n.display, type: 'other', source: 'clinicaltrials' }]
-      : [...state.candidates].map(c => ({ alias: c.trim(), type: classifyAlias(c), source: 'clinicaltrials' }));
+      : [...state.candidates].filter(c => state.ownKeys.has(normalizeKey(c))).map(c => ({ alias: c.trim(), type: classifyAlias(c), source: 'clinicaltrials' }));
     for (const a of inputs) {
       const k = normalizeKey(a.alias);
       if (!k || a.alias.length > 200) continue;
@@ -2049,7 +2100,7 @@ async function resolveAssetsOnDrug(supabase: SupabaseClient, drugId: string, con
 function emptyExternalStats(): ExternalPassStats {
   return {
     drugsQueued: 0, drugsChecked: 0, upgraded: 0, merged: 0, fuzzyMerged: 0, misses: 0, assetsResolved: 0, assetsTail: 0,
-    externalCalls: 0, callsByHost: { gsrs: 0, chembl: 0, pubchem: 0 }, negativeCacheHits: 0, negativesPreloaded: 0,
+    externalCalls: 0, callsByHost: { gsrs: 0, chembl: 0, pubchem: 0, ncit: 0 }, negativeCacheHits: 0, negativesPreloaded: 0,
     negativesWritten: 0, budgetExhausted: false,
   };
 }
