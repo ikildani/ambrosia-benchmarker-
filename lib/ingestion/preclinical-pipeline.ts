@@ -303,6 +303,50 @@ export function stageToPhase(stage: DisclosedStage): { phase: string | null; sta
   }
 }
 
+// Words that say what kind of program something is without saying which one: stage, therapeutic
+// area, filler. A name made only of these ("Urology program", "Autoimmune disorder target discovery
+// program", "Undisclosed Program") is a bucket on a pipeline chart, not an asset.
+const GENERIC_PROGRAM_WORDS = new Set((
+  'program programs programme project projects pipeline asset assets candidate candidates product products ' +
+  'discovery research preclinical clinical early stage late lead target targets targeted undisclosed unnamed ' +
+  'additional other others new novel next future further multiple various several and or the of ' +
+  'for in with to a an our its translational biology development drug drugs grant platform area areas ' +
+  'therapeutic therapeutics therapy therapies care disease diseases disorder disorders indication indications ' +
+  'oncology cancer cancers tumor tumors solid hematologic hematology urology infectious infection infections ' +
+  'cns neurology neuroscience neurological neurodegenerative neurodegeneration psychiatry psychiatric epilepsy ' +
+  'pain neuropathic musculoskeletal chemotherapy rare orphan neuromuscular gastrointestinal gastroenterology gi ' +
+  'pediatric pediatrics women womens health adhd autoimmune autoimmunity inflammation inflammatory immunology ' +
+  'immune metabolic metabolism cardiovascular cardiometabolic cardiology respiratory pulmonary dermatology ' +
+  'ophthalmology ophthalmic eye liver hepatic kidney renal fibrosis fibrotic endocrine endocrinology obesity ' +
+  'genetic vaccines antiviral antibacterial collaboration researchers'
+).split(' '));
+
+/**
+ * True when an extracted program name is a group or a plan rather than one program: plural
+ * programs / candidates / targets, a pipeline or bare platform, "Multiple/Various/Other ..." lists,
+ * year-led plans ("2026 ADHD program"), or a name
+ * with nothing specific left once stage, area and filler words are removed. Names carrying a
+ * code, target, mechanism or molecule ("KRAS preclinical program", "Undisclosed molecule (TBI)")
+ * pass.
+ */
+export function isPlaceholderProgramName(name: string): boolean {
+  const s = (name ?? '').trim();
+  if (!s) return true;
+  if (/^(19|20)\d{2}\b/.test(s)) return true;
+  // A development code ("AN-018", "HFG1", "BD18") names one program even when its letters are a filler word.
+  const hasCode = /\b[a-z]{1,8}-?\d+[a-z]?\b/i.test(s.replace(/\b(program|programme|discovery|research)\s+\d+\b/gi, ''));
+  if (/^(multiple|various|several|other|additional|future)\b/i.test(s)) return true;
+  // Groups: several programs, candidates or targets, a whole pipeline, or a platform with no named drug.
+  if (/\b(programs|programmes|candidates|targets|assets|pipelines?|platforms)\b/i.test(s)) return true;
+  if (/\bplatform\b/i.test(s) && !/\d|\b(candidate|lead|molecule|compound)\b/i.test(s)) return true;
+  const specific = s
+    .toLowerCase()
+    .replace(/'s\b/g, '')
+    .split(/[^a-z0-9]+/)
+    .filter(w => w && !/^\d+$/.test(w) && !GENERIC_PROGRAM_WORDS.has(w));
+  return specific.length === 0 && !hasCode;
+}
+
 /** Keys under which a program can be matched to an existing asset or drug alias. */
 export function programKeys(p: Pick<DisclosedProgram, 'program_name' | 'aliases'>): string[] {
   const out = new Set<string>();
@@ -683,6 +727,11 @@ export async function persistPrograms(supabase: SupabaseClient, ctx: FilingConte
   const created = out.created;
   let matched = 0;
   for (const p of programs) {
+    // A chart bucket ("Other CNS Discovery Programs") is recorded as a disclosure, never as an asset.
+    if (isPlaceholderProgramName(p.program_name)) {
+      disclosures.push(toDisclosureRow(p, ctx, null, 'skipped'));
+      continue;
+    }
     const m = matchExistingAsset(p, existing, drugIds);
     if (m.asset) {
       const { error } = await supabase.from('clinical_assets').update(toExistingAssetPatch(p, ctx, m.asset)).eq('id', m.asset.id);
