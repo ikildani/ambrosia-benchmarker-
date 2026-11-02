@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { runCtgovSweep } from '@/lib/ingestion/ctgov-sweep';
+import { recheckQuietOpenTrials } from '@/lib/ingestion/ctgov-recheck';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
 
 export const maxDuration = 300;
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
   const pageSize = parsePositiveInt(params.get('limit'), undefined);
   const timeBudgetMs = parsePositiveInt(params.get('budget'), undefined);
 
+  const started = Date.now();
   try {
     const result = await runCtgovSweep(supabase, {
       full,
@@ -62,6 +64,13 @@ export async function GET(request: NextRequest) {
       timeBudgetMs,
       runType: full ? 'backfill' : 'scheduled',
     });
+
+    // Once the sweep has caught up, spend the rest of the run re-asking CT.gov about open trials
+    // that have been quiet for a year (the sweep never revisits them; see ctgov-recheck.ts).
+    const left = (maxDuration * 1000) - (Date.now() - started) - 30_000;
+    const recheck = result.caughtUp && !full && left > 20_000
+      ? await recheckQuietOpenTrials(supabase, { timeBudgetMs: left }).catch(err => ({ error: err instanceof Error ? err.message : String(err) }))
+      : null;
 
     // Cron health tracking (same pattern as asset-universe); never fatal.
     try {
@@ -95,6 +104,7 @@ export async function GET(request: NextRequest) {
       errors: result.errors.slice(0, 10),
       error_count: result.errors.length,
       logged: result.logged,
+      recheck,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
