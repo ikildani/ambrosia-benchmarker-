@@ -84,6 +84,13 @@ export async function GET(request: NextRequest) {
       runType: isManual ? 'manual' : 'scheduled',
     });
 
+    // Theses of assets that left the eligible pool are never regenerated; retire them so the
+    // asset page stops showing a stale estimate (migration 176). Rows are kept in
+    // radar_deal_theses_retired.
+    const retire = await supabase.rpc('radar_retire_ineligible_theses');
+    if (retire.error) result.errors.push(`retire ineligible theses: ${retire.error.message}`);
+    const retired = typeof retire.data === 'number' ? retire.data : 0;
+
     const status = result.errors.length > 0 && result.assetsProcessed === 0 && result.assetsQueued > 0
       ? 'failed'
       : result.errors.length > 0 || result.timedOut
@@ -103,6 +110,7 @@ export async function GET(request: NextRequest) {
       profiles_cached: result.profilesCached,
       acquirer_profiles_cached: result.acquirerProfilesCached,
       remaining_backlog: result.remainingBacklog,
+      retired_ineligible: retired,
       duration_seconds: result.durationSeconds,
       min_comps_for_terms: MIN_COMPS_FOR_TERMS,
       limit: limit.value ?? DEFAULT_RUN_LIMIT,
