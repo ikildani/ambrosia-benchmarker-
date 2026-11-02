@@ -16,7 +16,7 @@ const REVENUE_TAGS = [
   'SalesRevenueGoodsNet',
 ] as const;
 
-interface XBRLUnit {
+export interface XBRLUnit {
   start?: string;
   end: string;
   val: number;
@@ -42,6 +42,30 @@ export interface XBRLResult {
   updated: number;
   skipped_anomalies: number;
   errors: string[];
+}
+
+const DAY_MS = 86_400_000;
+
+/**
+ * The latest full-year revenue fact across REVENUE_TAGS, by period end. `fy` is the fiscal year of
+ * the filing, not of the figure (each 10-K restates two prior years under the same fy), and a
+ * company that moved from Revenues to RevenueFromContractWithCustomer... keeps its old tag's last
+ * year forever (Amgen and Gilead showed FY2020 on Nov 2 2026). Tag order only breaks ties.
+ */
+export function latestAnnualRevenue(usGaap: Record<string, { units?: { USD?: XBRLUnit[] } }>): { tag: string; fact: XBRLUnit } | null {
+  let best: { tag: string; fact: XBRLUnit; rank: number } | null = null;
+  for (const [rank, tag] of REVENUE_TAGS.entries()) {
+    for (const u of usGaap[tag]?.units?.USD ?? []) {
+      if (!/^10-K/.test(u.form) || !u.start || !(u.val > 0)) continue;
+      const days = (Date.parse(u.end) - Date.parse(u.start)) / DAY_MS;
+      if (!(days >= 350 && days <= 380)) continue;
+      const better = !best
+        || u.end > best.fact.end
+        || (u.end === best.fact.end && (rank < best.rank || (rank === best.rank && u.filed > best.fact.filed)));
+      if (better) best = { tag, fact: u, rank };
+    }
+  }
+  return best ? { tag: best.tag, fact: best.fact } : null;
 }
 
 /**
@@ -76,32 +100,16 @@ export async function fetchCompanyRevenue(cik: string): Promise<CompanyRevenue |
       return null;
     }
 
-    // Try each revenue tag in priority order
-    for (const tag of REVENUE_TAGS) {
-      const tagData = usGaap[tag];
-      if (!tagData?.units?.USD) continue;
-
-      const units: XBRLUnit[] = tagData.units.USD;
-
-      // Filter for annual 10-K filings only
-      const annualFilings = units.filter(
-        (u) => u.form === '10-K' && u.fp === 'FY'
-      );
-
-      if (annualFilings.length === 0) continue;
-
-      // Sort by fiscal year descending, take most recent
-      annualFilings.sort((a, b) => b.fy - a.fy);
-      const mostRecent = annualFilings[0];
-
+    const latest = latestAnnualRevenue(usGaap);
+    if (latest) {
       return {
         cik,
         companyName,
-        totalRevenue: mostRecent.val,
-        fiscalYear: mostRecent.fy,
-        fiscalPeriod: mostRecent.fp,
-        revenueTag: tag,
-        filedDate: mostRecent.filed,
+        totalRevenue: latest.fact.val,
+        fiscalYear: Number(latest.fact.end.slice(0, 4)),
+        fiscalPeriod: 'FY',
+        revenueTag: latest.tag,
+        filedDate: latest.fact.filed,
       };
     }
 
@@ -141,9 +149,23 @@ export async function runXBRLRevenueUpdate(supabase: SupabaseClient): Promise<XB
   const logId = logEntry?.id;
 
   // Fetch all companies with their name variations for matching
-  const { data: allCompanies } = await supabase
-    .from('companies')
-    .select('id, name, name_variations, sec_cik, total_annual_revenue');
+  // Paged: a bare select stops at PostgREST's 1,000-row cap, which left all but a handful of the
+  // ~36k companies unmatched (Nov 2 2026: 2 of 180 filers updated).
+  const allCompanies: Array<{ id: string; name: string; name_variations: string[] | null; sec_cik: string | null; total_annual_revenue: number | null }> = [];
+  for (let from = 0; ; from += 1000) {
+    const { data: page, error: pageError } = await supabase
+      .from('companies')
+      .select('id, name, name_variations, sec_cik, total_annual_revenue')
+      .is('merged_into', null)
+      .order('id')
+      .range(from, from + 999);
+    if (pageError) {
+      result.errors.push(`companies read: ${pageError.message}`);
+      break;
+    }
+    allCompanies.push(...(page ?? []));
+    if (!page || page.length < 1000) break;
+  }
 
   // Build lookup maps
   const nameToCompany = new Map<string, { id: string; name: string; name_variations: string[] | null; sec_cik: string | null; total_annual_revenue: number | null }>();
@@ -209,17 +231,15 @@ export async function runXBRLRevenueUpdate(supabase: SupabaseClient): Promise<XB
           .eq('id', company.id);
       }
 
-      // Anomaly check: if new revenue > 10x existing AND existing is not null, flag and skip
+      // A >10x jump used to be skipped as a likely wrong filer. The filer-name check above now
+      // catches that directly, and the skip froze stale figures left by the old fy-based pick
+      // (Vertex stored $1.0B against $12.0B filed), so the jump is only logged.
       if (
         company.total_annual_revenue !== null &&
         company.total_annual_revenue > 0 &&
         revenue.totalRevenue > 10 * company.total_annual_revenue
       ) {
-        console.warn(
-          `ANOMALY: ${companyName} revenue ${revenue.totalRevenue} is >10x existing ${company.total_annual_revenue}. Skipping.`
-        );
-        result.skipped_anomalies++;
-        continue;
+        console.warn(`Revenue jump: ${companyName} ${company.total_annual_revenue} -> ${revenue.totalRevenue} (filer verified).`);
       }
 
       // Update company revenue
