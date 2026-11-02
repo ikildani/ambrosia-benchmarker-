@@ -55,7 +55,7 @@ export interface ReferencingColumn {
 /**
  * Every column that holds a companies.id. Source: pg_constraint (contype =
  * 'f', confrelid = companies) and pg_attribute for uuid columns named after a
- * company, Sep 25 2026. Keep in sync with docs/entity-graph.md "Merge job".
+ * company, Sep 25 2026 (re-measured Nov 2 2026). Keep in sync with docs/entity-graph.md "Merge job".
  */
 export const COMPANY_REFERENCING_COLUMNS: readonly ReferencingColumn[] = [
   { table: 'deals', column: 'licensor_id', kind: 'uuid', fk: true, onDelete: 'set_null', uniqueWith: null, pk: ['id'] },
@@ -82,6 +82,9 @@ export const COMPANY_REFERENCING_COLUMNS: readonly ReferencingColumn[] = [
   { table: 'outcomes', column: 'licensee_id', kind: 'uuid', fk: true, onDelete: 'set_null', uniqueWith: null, pk: ['id'] },
   { table: 'outreach_emails', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'set_null', uniqueWith: null, pk: ['id'] },
   { table: 'watchlist_items', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'cascade', uniqueWith: null, pk: ['id'] },
+  // Added Nov 2 2026 (migrations 139 / 147 era tables that postdate the Sep 25 measurement).
+  { table: 'asset_designations', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'set_null', uniqueWith: null, pk: ['id'] },
+  { table: 'asset_disclosures', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'cascade', uniqueWith: ['source_id', 'program_key'], pk: ['id'] },
   // No foreign key, but the value is a companies.id.
   { table: 'radar_score_snapshots', column: 'company_id', kind: 'uuid', fk: false, onDelete: null, uniqueWith: null, pk: ['feature_version', 'as_of', 'asset_id'] },
   { table: 'portfolio_deal_pipelines', column: 'partner_company_id', kind: 'uuid', fk: false, onDelete: null, uniqueWith: null, pk: ['id'] },
