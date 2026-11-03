@@ -74,11 +74,12 @@ describe('AI spend guard', () => {
 
   it('draws on the backlog allowance per source until its share, the total or the daily pace is spent', () => {
     const plan = backlogPlan({} as unknown as NodeJS.ProcessEnv);
-    expect(plan.totalUsd).toBe(90);
+    expect(plan.totalUsd).toBe(105);
+    expect(backlogBlocked('hkex-pipeline', {}, 0, plan)).toBeNull();
     expect(backlogBlocked('asset-classify', {}, 0, plan)).toBeNull();
     expect(backlogBlocked('sec-edgar', {}, 0, plan)).toMatch(/not a backlog source/);
     expect(backlogBlocked('asset-classify', { 'asset-classify': 40 }, 0, plan)).toMatch(/share/);
-    expect(backlogBlocked('pipeline-pages', { 'asset-classify': 40, 'pipeline-pages': 34, 'preclinical-pipeline': 16 }, 0, plan)).toMatch(/^backlog \$90/);
+    expect(backlogBlocked('pipeline-pages', { 'asset-classify': 40, 'pipeline-pages': 34, 'preclinical-pipeline': 16, 'hkex-pipeline': 15 }, 0, plan)).toMatch(/^backlog \$105/);
     expect(backlogBlocked('pipeline-pages', {}, 15, plan)).toMatch(/today/);
     expect(backlogPlan({ AI_BACKLOG_TOTAL_USD: '0' } as unknown as NodeJS.ProcessEnv).totalUsd).toBe(0);
   });
