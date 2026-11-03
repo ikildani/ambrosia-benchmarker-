@@ -44,6 +44,7 @@ import {
 } from '@/lib/calculations';
 import { findPartnerMatches, type MatchInput, type PartnerMatch } from '@/lib/services/partner-matching';
 import staticBenchmarks from '@/data/benchmarks.json';
+import { refreshCalibrationCache } from '@/lib/benchmarks';
 import { logRadarRun, deriveRunStatus } from './run-log';
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1227,6 +1228,10 @@ export async function generateDealTheses(
   const errors: string[] = [];
   const elapsed = () => Date.now() - startTime;
   const outOfTime = () => elapsed() > maxRuntimeMs;
+
+  // The calculator reads calibrated baselines through getBenchmarksSync, which only starts a background
+  // load on first use; without this await a cold run priced every thesis off the static baselines.
+  await refreshCalibrationCache().catch(err => errors.push(`calibration load: ${err instanceof Error ? err.message : String(err)}`));
 
   let assetsProcessed = 0;
   let generated = 0;
