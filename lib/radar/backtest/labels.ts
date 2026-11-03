@@ -8,7 +8,7 @@
  *       lib/radar/partnership.ts; never substring),
  *   (b) the deal's asset_name matches the asset (matchAssetName: exact,
  *       code-token or ≥80 % word overlap; short names never substring-match),
- *   (c) deal_type ∈ {license, option, acquisition, co_development}, and
+ *   (c) deal_type ∈ {license, option, acquisition, co_development, collaboration}, and
  *   (d) announced_date ∈ (as_of, as_of + 12 months].
  *
  * Negative: an asset that existed at as_of (a trial posted on or before it),
@@ -26,7 +26,8 @@
 import { matchAssetName, nameSegments, sameCompany, isEligibleDeal, type PartnershipDeal, type NameMatchKind } from '@/lib/radar/partnership';
 
 export const LABEL_WINDOW_MONTHS = 12;
-export const POSITIVE_DEAL_TYPES: ReadonlySet<string> = new Set(['license', 'option', 'acquisition', 'co_development']);
+// collaboration added Nov 3 2026: 281 asset-level collaborations were missing from the positives.
+export const POSITIVE_DEAL_TYPES: ReadonlySet<string> = new Set(['license', 'option', 'acquisition', 'co_development', 'collaboration']);
 export const SNAPSHOT_FROM = '2022-01-01';
 export const SNAPSHOT_TO = '2025-09-01';
 
