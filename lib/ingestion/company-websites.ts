@@ -351,6 +351,8 @@ export interface DiscoveryRunOptions {
   mode?: DiscoveryMode;
   /** Pipeline paths to probe on a found site. */
   pipelinePaths?: readonly string[];
+  /** Work this list instead of the default queue (e.g. pipeline_region_targets). */
+  companies?: readonly CompanyRow[];
 }
 
 export interface DiscoveryRunResult {
@@ -368,7 +370,7 @@ export interface DiscoveryRunResult {
   sample: Array<{ company: string; website: string | null; pipeline: string | null }>;
 }
 
-interface CompanyRow { id: string; name: string; hq_country: string | null; indications_active: string[] | null; active_trials_count: number | null }
+export interface CompanyRow { id: string; name: string; hq_country: string | null; indications_active: string[] | null; active_trials_count: number | null }
 
 /**
  * Industry companies with no site, most trials first, never re-asked within
@@ -393,7 +395,7 @@ export async function runWebsiteDiscovery(supabase: SupabaseClient, opts: Discov
   }
 
   const recheckBefore = new Date(now.getTime() - DISCOVERY_RECHECK_DAYS * 86_400_000).toISOString();
-  const { data, error } = await supabase
+  const { data, error } = opts.companies ? { data: opts.companies, error: null } : await supabase
     .from('companies')
     .select('id, name, hq_country, indications_active, active_trials_count, cik')
     .eq('owner_type', 'industry')
@@ -437,6 +439,8 @@ export async function runWebsiteDiscovery(supabase: SupabaseClient, opts: Discov
       if (pipeline_url) r.withPipeline++;
     } else {
       r.notFound++;
+      // A paid search that found nothing is not repeated by the regional queue.
+      if (mode === 'paid' && client) patch.website_source = 'web_search_none';
     }
     const { error: upErr } = await supabase.from('companies').update(patch).eq('id', co.id);
     if (upErr) r.errors.push(`${co.name}: update ${upErr.message}`);

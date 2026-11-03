@@ -38,6 +38,10 @@ on:
         default: 'auto'
         type: choice
         options: [auto, none, haiku, sonnet]
+      regions:
+        description: 'Only companies whose assets come from these regions (comma list; empty = all)'
+        default: 'china,japan,south_korea,asia_pacific,middle_east,israel,latin_america'
+        type: string
       paid_search:
         description: 'Web search when the free discovery chain finds no site'
         default: false
@@ -76,6 +80,10 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REGISTRY_WORKER_RUNTIME: github-actions
           PIPELINE_CRAWL_COST_CAP_USD: '8'
+          # Owner, Nov 3 2026: spend the rest of the pipeline-pages allowance on Asian, Middle Eastern
+          # and Latin American companies. Scheduled runs use this list; web search is on while the
+          # allowance lasts (llm auto → sonnet), then discovery falls back to the free chain.
+          PIPELINE_CRAWL_REGIONS: ${{ github.event.inputs.regions || 'china,japan,south_korea,asia_pacific,middle_east,israel,latin_america' }}
         run: |
           NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/pipeline-crawler.ts \
             --discover "${{ github.event.inputs.discover || '150' }}" \

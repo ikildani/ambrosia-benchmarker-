@@ -170,7 +170,9 @@ async function main() {
   // 'auto' (the scheduled default): Sonnet while the pipeline-pages backlog allowance lasts, else rule-based only.
   const llmArg = arg('llm', 'none');
   const llm = llmArg === 'auto' ? ((await backlogActive('pipeline-pages')) ? 'sonnet' : 'none') : llmArg;
-  const paidSearch = flag('paid-search');
+  // --regions china,japan,...: discover and crawl only companies whose assets come from these regions (migration 178).
+  const regions = arg('regions', process.env.PIPELINE_CRAWL_REGIONS ?? '').split(',').map(r => r.trim()).filter(Boolean);
+  const paidSearch = flag('paid-search') || (regions.length > 0 && llmArg === 'auto' && llm === 'sonnet');
   const model = LLM_MODELS[llm] ?? null;
   if (llm !== 'none' && !model) throw new Error(`--llm must be none, haiku or sonnet (got ${llm})`);
   const started = Date.now();
@@ -181,12 +183,18 @@ async function main() {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set (needed for --llm / --paid-search)');
     client = new Anthropic(withSpendGuard('pipeline-pages', { apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 180_000 })) as unknown as IntentClient;
   }
-  console.log(new Date().toISOString(), 'mode', JSON.stringify({ llm, paidSearch, discoverN, crawlN, minutes, costCap: model || paidSearch ? costCap : 0 }));
+  console.log(new Date().toISOString(), 'mode', JSON.stringify({ llm, paidSearch, regions, discoverN, crawlN, minutes, costCap: model || paidSearch ? costCap : 0 }));
+  const regionTargets = async (mode: 'discover' | 'crawl', limit: number, recrawlBefore?: string) => {
+    const { data, error } = await supabase.rpc('pipeline_region_targets', { p_regions: regions, p_mode: mode, p_limit: limit, ...(recrawlBefore ? { p_recrawl_before: recrawlBefore } : {}) });
+    if (error) throw new Error(`pipeline_region_targets(${mode}): ${error.message}`);
+    return (data ?? []) as Array<CompanyRow & { hq_country: string | null; indications_active: string[] | null; active_trials_count: number | null; region: string }>;
+  };
 
   // ── Stage 1: discovery ────────────────────────────────────────────────
   let discovery: Awaited<ReturnType<typeof runWebsiteDiscovery>> | null = null;
   if (discoverN > 0 && !only) {
-    discovery = await runWebsiteDiscovery(supabase, { limit: discoverN, costCapUsd: costCap / 2, timeBudgetMs: Math.min(deadline - Date.now(), 20 * 60_000), client: client ?? undefined, mode: paidSearch ? 'paid' : 'free', pipelinePaths: PIPELINE_PATH_CANDIDATES });
+    const companies = regions.length ? await regionTargets('discover', discoverN) : undefined;
+    discovery = await runWebsiteDiscovery(supabase, { companies, limit: discoverN, costCapUsd: costCap / 2, timeBudgetMs: Math.min(deadline - Date.now(), 20 * 60_000), client: client ?? undefined, mode: paidSearch ? 'paid' : 'free', pipelinePaths: PIPELINE_PATH_CANDIDATES });
     console.log(new Date().toISOString(), 'discovery', JSON.stringify({ ...discovery, usage: undefined, sample: discovery.sample.slice(0, 6), errors: discovery.errors.slice(0, 3) }));
   }
 
@@ -199,7 +207,7 @@ async function main() {
     .is('merged_into', null)
     .not('website_url', 'is', null);
   q = only ? q.eq('id', only) : q.or(`pipeline_page_checked_at.is.null,pipeline_page_checked_at.lt.${recrawlBefore}`).order('pipeline_page_checked_at', { ascending: true, nullsFirst: true }).limit(crawlN);
-  const { data, error } = await q;
+  const { data, error } = regions.length && !only ? { data: await regionTargets('crawl', crawlN, recrawlBefore), error: null } : await q;
   if (error) throw new Error(`companies read: ${error.message}`);
   const companies = (data ?? []) as CompanyRow[];
 
