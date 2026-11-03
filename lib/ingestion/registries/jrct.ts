@@ -55,6 +55,12 @@ const BASE = () => process.env.JRCT_BASE_URL ?? 'https://jrct.mhlw.go.jp';
 /** Search lanes: 3 = company-sponsored IND trials, 7 = investigator-initiated IND trials. */
 export const JRCT_SPECS = ['3', '7'] as const;
 const LISTING_PAGE_SIZE = 50;
+/**
+ * The listing's CDN answers 403 past page 20 (verified Nov 3 2026: page 20 → 200, pages 21+ → 403
+ * in 0.1 s), so a lane holds its newest 1,000 rows. The cursor sat on page 51 from Sep 28 and
+ * every run since failed on the listing; past the cap the lane now ends and the sweep restarts.
+ */
+export const JRCT_MAX_LISTING_PAGE = 20;
 
 export interface JrctRaw {
   id: string;
@@ -312,6 +318,11 @@ export const jrctAdapter: RegistryAdapter<JrctRaw> = {
         break;
       }
       const spec = JRCT_SPECS[c.lane];
+      if (c.page > JRCT_MAX_LISTING_PAGE) {
+        const lane = nextLane();
+        if (lane) { c = lane; continue; }
+        return { records, nextCursor: null, done: true, warnings };
+      }
       let rows = c.rows;
       if (!rows) {
         try {

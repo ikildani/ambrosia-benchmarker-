@@ -40,7 +40,7 @@ import { mapHealthCanadaRecord, phaseFromTitle } from '@/lib/ingestion/registrie
 import { mapIrctXml } from '@/lib/ingestion/registries/irct';
 import { extractRebecCodes, extractRebecInternalId, mapRebecXml } from '@/lib/ingestion/registries/rebec';
 import { drksId, mapDrksHtml } from '@/lib/ingestion/registries/drks';
-import { mapJrctHtml, parseJrctListing, japaneseEraDateToIso, jrctListingUrl, phaseFromTitle } from '@/lib/ingestion/registries/jrct';
+import jrctAdapter, { mapJrctHtml, parseJrctListing, japaneseEraDateToIso, jrctListingUrl, phaseFromTitle, JRCT_MAX_LISTING_PAGE } from '@/lib/ingestion/registries/jrct';
 import { mapCrisHtml } from '@/lib/ingestion/registries/cris';
 import { mapMfdsItem } from '@/lib/ingestion/registries/mfds';
 import { mapAnzctrXml } from '@/lib/ingestion/registries/anzctr';
@@ -1014,5 +1014,14 @@ describe('jrct listing (Sep 2026 walker)', () => {
 
   it('builds the token-free listing URL', () => {
     expect(jrctListingUrl('3', 2)).toBe('https://jrct.mhlw.go.jp/search?searched=1&spec=3&page=2&sort=record_cert_date');
+  });
+
+  it('ends a lane past the listing cap instead of requesting a page the CDN refuses', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch');
+    const last = JSON.stringify({ lane: 1, page: JRCT_MAX_LISTING_PAGE + 31, idx: 0, sweepStartedAt: '2026-09-28T00:52:31.301Z' });
+    const res = await jrctAdapter.fetchPage(last, { limit: 10 });
+    expect(res).toMatchObject({ records: [], nextCursor: null, done: true });
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
   });
 });
