@@ -170,7 +170,7 @@ export function buildOutputJsonSchema(): Record<string, unknown> {
 // PROMPT
 // ═══════════════════════════════════════════════════════════════════════
 
-export const SYSTEM_PROMPT = `You extract a biopharma company's own drug pipeline from numbered paragraphs of its SEC annual report (10-K / 20-F) or registration statement (S-1 / F-1). Return every distinct program the FILER itself is developing or has disclosed, with its development stage as stated in the filing.
+export const SYSTEM_PROMPT = `You extract a biopharma company's own drug pipeline from numbered paragraphs of its annual report or listing document: an SEC 10-K / 20-F / S-1 / F-1, or a Hong Kong Stock Exchange (HKEX) annual report or prospectus. Return every distinct program the FILER itself is developing or has disclosed, with its development stage as stated in the filing.
 
 Fields:
 - program_name: the name the filing uses (development code like "ABC-123", an INN, or a descriptive name such as "KRAS G12D inhibitor program" when no code is given). One entry per program; merge duplicates and put other names in aliases.
@@ -436,6 +436,8 @@ export interface FilingContext {
   now: Date;
   /** Defaults to 'filing'. */
   origin?: DisclosureOrigin;
+  /** data_sources tag for created assets; defaults to DISCLOSURE_SOURCE ('sec_filing'). */
+  dataSource?: string;
 }
 
 export function contextOrigin(ctx: Pick<FilingContext, 'origin'>): DisclosureOrigin {
@@ -534,7 +536,7 @@ export function toNewAssetRow(p: DisclosedProgram, ctx: FilingContext, drugMaste
     ownership_evidence: { rule: origin === 'filing' ? 'filing_disclosure' : 'pipeline_page_disclosure', accession: ctx.accession, form: ctx.form },
     ownership_checked_at: nowIso,
     owner_type: 'industry',
-    data_sources: [origin === 'filing' ? DISCLOSURE_SOURCE : 'pipeline_page'],
+    data_sources: [origin === 'filing' ? (ctx.dataSource ?? DISCLOSURE_SOURCE) : 'pipeline_page'],
     confidence_score: FILING_ASSET_CONFIDENCE,
     classification_status: 'classified',
     classified_at: nowIso,

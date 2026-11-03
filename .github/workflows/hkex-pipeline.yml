@@ -1,0 +1,50 @@
+name: HKEX pipeline reader
+
+# Reads the latest HKEX annual report of each mapped Hong Kong biotech and records its pipeline
+# (scripts/hkex-pipeline.ts). Manual only: reports are annual, and each run spends from the
+# 'hkex-pipeline' backlog share. Reports already read are skipped, so a re-run costs only the new ones.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Issuers to read (0 = all)'
+        default: '0'
+        type: string
+      cost_cap:
+        description: 'Spend cap for this run in USD'
+        default: '15'
+        type: string
+      dry_run:
+        description: 'Extract without writing'
+        default: false
+        type: boolean
+
+concurrency:
+  group: hkex-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 58
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Read reports
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/hkex-pipeline.ts \
+            --limit "${{ github.event.inputs.limit || '0' }}" \
+            --cost-cap "${{ github.event.inputs.cost_cap || '15' }}" \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}

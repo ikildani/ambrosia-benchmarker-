@@ -1,0 +1,541 @@
+[
+ {
+  "stockId": 1000001102,
+  "code": "00013",
+  "shortName": "HUTCHMED",
+  "companyId": "f8412f09-9f60-422b-80ef-c005e38a0ce8",
+  "companyName": "Hutchmed"
+ },
+ {
+  "stockId": 1000321376,
+  "code": "00054",
+  "shortName": "HEMAY PHARMA-B",
+  "companyId": "b48e1e44-7f45-4173-8950-fb8b59d659cb",
+  "companyName": "Tianjin Hemay Pharmaceutical Co., Ltd"
+ },
+ {
+  "stockId": 54111,
+  "code": "00460",
+  "shortName": "SIHUAN PHARM",
+  "companyId": "60023ceb-f486-432c-81c7-42a8e0c1e551",
+  "companyName": "Sihuan Pharmaceutical Holdings Group Ltd."
+ },
+ {
+  "stockId": 1089,
+  "code": "00512",
+  "shortName": "GRAND PHARMA",
+  "companyId": "9a5864cb-b119-4397-bc68-e2d45dc328b4",
+  "companyName": "GrandPharma (China) Co., Ltd."
+ },
+ {
+  "stockId": 47399,
+  "code": "00950",
+  "shortName": "LEE'S PHARM",
+  "companyId": "8ff743aa-e66b-4603-ba9d-2da76dda2dcd",
+  "companyName": "Lee's Pharmaceutical Limited"
+ },
+ {
+  "stockId": 2467,
+  "code": "01093",
+  "shortName": "CSPC PHARMA",
+  "companyId": "1fd620e0-9e03-4b88-9e40-b32a39f8199f",
+  "companyName": "CSPC Pharmaceutical"
+ },
+ {
+  "stockId": 1000068770,
+  "code": "01167",
+  "shortName": "JACOBIO-B",
+  "companyId": "a0db6352-b3cb-4308-b3a3-d067de4915e9",
+  "companyName": "Jacobio Pharmaceuticals"
+ },
+ {
+  "stockId": 1000125089,
+  "code": "01228",
+  "shortName": "CANBRIDGE-B",
+  "companyId": "aaba0a97-d54f-404c-9004-23d9cd7db3e0",
+  "companyName": "CANbridge"
+ },
+ {
+  "stockId": 1000177182,
+  "code": "01244",
+  "shortName": "3D MEDICINES",
+  "companyId": "1b966e82-4aa7-44b7-800a-0c0a09241acd",
+  "companyName": "3D Medicines"
+ },
+ {
+  "stockId": 1000260506,
+  "code": "01276",
+  "shortName": "HENGRUI PHARMA",
+  "companyId": "7416c3be-ef86-49be-8989-0b8bd1047ee9",
+  "companyName": "Jiangsu Hengrui"
+ },
+ {
+  "stockId": 1000045671,
+  "code": "01477",
+  "shortName": "OCUMENSION-B",
+  "companyId": "d62a90de-c0db-42ef-8a6d-bfcbedd503fb",
+  "companyName": "Ocumension Therapeutics"
+ },
+ {
+  "stockId": 98703,
+  "code": "01513",
+  "shortName": "LIVZON PHARMA",
+  "companyId": "91806737-297f-426b-8def-d171ae843034",
+  "companyName": "Livzon Pharmaceutical"
+ },
+ {
+  "stockId": 125086,
+  "code": "01530",
+  "shortName": "3SBIO",
+  "companyId": "8768763b-00b4-4ad0-93ed-d91917fe72e9",
+  "companyName": "3SBio"
+ },
+ {
+  "stockId": 1000200062,
+  "code": "01541",
+  "shortName": "IMMUNEONCO-B",
+  "companyId": "d0ca1e95-7b54-40fd-a8fa-ed8c02eb4f40",
+  "companyName": "ImmuneOnco Biopharmaceuticals (Shanghai) Inc."
+ },
+ {
+  "stockId": 193226,
+  "code": "01672",
+  "shortName": "ASCLETIS-B",
+  "companyId": "9b18eeb4-5114-43be-af2e-0b4d867f1378",
+  "companyName": "Ascletis Pharma"
+ },
+ {
+  "stockId": 98238,
+  "code": "01681",
+  "shortName": "CONSUN PHARMA",
+  "companyId": "96d87f77-be5f-4a84-8bd9-f3520198be20",
+  "companyName": "Consun Pharmaceutical Group"
+ },
+ {
+  "stockId": 1000304114,
+  "code": "01779",
+  "shortName": "LONGBIO-B",
+  "companyId": "4dd26b46-e6b6-4f5e-a814-5d3dbf65617d",
+  "companyName": "Longbio Pharma"
+ },
+ {
+  "stockId": 202911,
+  "code": "01801",
+  "shortName": "INNOVENT BIO",
+  "companyId": "3eabf065-f357-4d2f-86f8-5bea0b7d988a",
+  "companyName": "Innovent Biologics"
+ },
+ {
+  "stockId": 209261,
+  "code": "01877",
+  "shortName": "JUNSHI BIO",
+  "companyId": "acad98c9-1639-4f25-ae3e-4b62b830685a",
+  "companyName": "Shanghai Junshi Biosciences"
+ },
+ {
+  "stockId": 1000060859,
+  "code": "02096",
+  "shortName": "SIMCERE PHARMA",
+  "companyId": "033e4b4d-486c-4522-9d68-20a521c994a8",
+  "companyName": "Simcere Pharmaceutical"
+ },
+ {
+  "stockId": 1000194000,
+  "code": "02105",
+  "shortName": "LAEKNA-B",
+  "companyId": "b57e9da0-3a73-4232-bbbe-a498ad8e6225",
+  "companyName": "Laekna Therapeutics"
+ },
+ {
+  "stockId": 1000101866,
+  "code": "02137",
+  "shortName": "BRII-B",
+  "companyId": "fe7a548d-ace2-4c4e-8dd9-5c6b3df842fd",
+  "companyName": "Brii Biosciences"
+ },
+ {
+  "stockId": 1000067871,
+  "code": "02142",
+  "shortName": "HBM HOLDINGS-B",
+  "companyId": "c4b7b9fb-4231-4d3e-a6f3-56c5868e2df8",
+  "companyName": "Harbour BioMed"
+ },
+ {
+  "stockId": 1000120944,
+  "code": "02157",
+  "shortName": "LEPU BIO",
+  "companyId": "29742b88-bd18-4bc6-8cd5-c43b796d5d44",
+  "companyName": "Lepu Biopharma"
+ },
+ {
+  "stockId": 1000101642,
+  "code": "02162",
+  "shortName": "KEYMED BIO-B",
+  "companyId": "101b244f-3155-43a5-8e8e-1eaf3ca13a6e",
+  "companyName": "Keymed Biosciences Co.Ltd"
+ },
+ {
+  "stockId": 1000099082,
+  "code": "02171",
+  "shortName": "CARSGEN-B",
+  "companyId": "53651fe0-29f8-42a1-a651-ca2bc78f333e",
+  "companyName": "CARsgen Therapeutics Co., Ltd."
+ },
+ {
+  "stockId": 222611,
+  "code": "02181",
+  "shortName": "MABPHARM-B",
+  "companyId": "d2565791-5904-4521-a6d5-388e46871018",
+  "companyName": "泰州迈博太科药业有限公司"
+ },
+ {
+  "stockId": 107833,
+  "code": "02186",
+  "shortName": "LUYE PHARMA",
+  "companyId": "a2d9854a-5161-4b30-a98f-c98d529cb6bd",
+  "companyName": "Luye Pharma"
+ },
+ {
+  "stockId": 79961,
+  "code": "02196",
+  "shortName": "FOSUN PHARMA",
+  "companyId": "3accf2ff-f2fb-4122-8702-0ad34a40c9c2",
+  "companyName": "Shanghai Fosun Pharmaceutical"
+ },
+ {
+  "stockId": 1000121538,
+  "code": "02197",
+  "shortName": "CLOVER BIO-B",
+  "companyId": "5e70c8e9-780c-4619-aa7b-b8e644c0cd79",
+  "companyName": "Sichuan Clover Biopharmaceuticals, Inc."
+ },
+ {
+  "stockId": 1000118652,
+  "code": "02256",
+  "shortName": "ABBISKO-B",
+  "companyId": "7a681517-5880-4e44-9a71-0e4597963bd9",
+  "companyName": "Abbisko"
+ },
+ {
+  "stockId": 1000129618,
+  "code": "02257",
+  "shortName": "SIRNAOMICS-B",
+  "companyId": "ec0d1161-4591-4ab9-87db-cd5da9c6e221",
+  "companyName": "Sirnaomics"
+ },
+ {
+  "stockId": 1000306892,
+  "code": "02335",
+  "shortName": "MICOT PHARMA-B",
+  "companyId": "c68f026f-1cb2-4ddb-8eb0-3be82dc35f69",
+  "companyName": "Shaanxi Micot Pharmaceutical Technology Co., Ltd."
+ },
+ {
+  "stockId": 6316,
+  "code": "02348",
+  "shortName": "DAWNRAYS PHARMA",
+  "companyId": "9dce3919-462a-40d2-b3c5-f56f2518c374",
+  "companyName": "Dawnrays Pharmaceutical (Holdings) Limited"
+ },
+ {
+  "stockId": 1000229320,
+  "code": "02410",
+  "shortName": "TYK MEDICINES-B",
+  "companyId": "d91f9487-7f5c-455b-8053-4e60e8d6200e",
+  "companyName": "TYK Medicines, Inc"
+ },
+ {
+  "stockId": 1000190423,
+  "code": "02480",
+  "shortName": "LUZHU BIOTECH-B",
+  "companyId": "5e5e3920-39bb-4601-bfa1-95355262e712",
+  "companyName": "Beijing Luzhu Biotechnology Co., Ltd."
+ },
+ {
+  "stockId": 1000194290,
+  "code": "02487",
+  "shortName": "CUTIA-B",
+  "companyId": "f7b20f30-b4be-4232-bbce-b78e83e4c5e2",
+  "companyName": "Cutia Therapeutics"
+ },
+ {
+  "stockId": 1000299468,
+  "code": "02493",
+  "shortName": "MABWELL-B",
+  "companyId": "22ec8719-b9ee-427d-83c1-25517002ad40",
+  "companyName": "Mabwell Bioscience"
+ },
+ {
+  "stockId": 1000200300,
+  "code": "02496",
+  "shortName": "YZYBIO-B",
+  "companyId": "62c3ddfe-ff23-4797-aec1-90f5ee3c10b1",
+  "companyName": "Wuhan YZY Biopharma Co., Ltd."
+ },
+ {
+  "stockId": 1000213407,
+  "code": "02509",
+  "shortName": "QYUNS-B",
+  "companyId": "c57ae5e1-99bc-480a-ba0c-44d0d25558ec",
+  "companyName": "Qyuns Therapeutics"
+ },
+ {
+  "stockId": 1000207637,
+  "code": "02511",
+  "shortName": "HIGHTIDE-B",
+  "companyId": "27d35b80-98a4-4d3a-a2ad-f827a0c3c9df",
+  "companyName": "Shenzhen HighTide Biopharmaceutical Ltd."
+ },
+ {
+  "stockId": 1000252969,
+  "code": "02561",
+  "shortName": "VISEN PHARMA-B",
+  "companyId": "771c681b-cdc1-4ecc-9554-37a9c0533bfb",
+  "companyName": "Visen Pharmaceuticals (Shanghai) Co., Ltd."
+ },
+ {
+  "stockId": 1000238781,
+  "code": "02563",
+  "shortName": "BIOSTAR PHARM-B",
+  "companyId": "b4500506-1ca0-4cf4-b1f9-06c62eaa51c9",
+  "companyName": "Beijing Biostar Pharmaceuticals Co., Ltd."
+ },
+ {
+  "stockId": 1000251376,
+  "code": "02565",
+  "shortName": "PEGBIO CO-B",
+  "companyId": "2e5c7059-2fe8-40ae-baab-6a981bcb6152",
+  "companyName": "PegBio Co., Ltd."
+ },
+ {
+  "stockId": 1000227756,
+  "code": "02566",
+  "shortName": "JIUYUAN GENE",
+  "companyId": "79dc96a4-fcff-4b52-8ce5-ee46c1c2dafa",
+  "companyName": "Hangzhou Jiuyuan Gene Engineering Co. Ltd.,"
+ },
+ {
+  "stockId": 1000276176,
+  "code": "02575",
+  "shortName": "XUANZHUBIO-B",
+  "companyId": "639b7d75-8f78-4ab0-ab2f-a6392b3a196c",
+  "companyName": "Xuanzhu Biopharmaceutical Co., Ltd."
+ },
+ {
+  "stockId": 1000254489,
+  "code": "02592",
+  "shortName": "CLOUDBREAK-B",
+  "companyId": "1ac5fbae-e5ca-40c1-bf3c-d57a4e00e5d8",
+  "companyName": "Cloudbreak Therapeutics"
+ },
+ {
+  "stockId": 1000272347,
+  "code": "02595",
+  "shortName": "GENFLEET-B",
+  "companyId": "9a567070-1ddc-4b87-927e-0a0f2397b737",
+  "companyName": "GenFleet Therapeutics"
+ },
+ {
+  "stockId": 1000280730,
+  "code": "02615",
+  "shortName": "BIOKIN",
+  "companyId": "90f62ec1-bf24-4c8c-9dfd-541a01c9ac7f",
+  "companyName": "Biokin (Shanghai) Biopharmaceutical Co., Ltd."
+ },
+ {
+  "stockId": 215361,
+  "code": "02616",
+  "shortName": "CSTONE PHARMA-B",
+  "companyId": "4436d501-06eb-4222-80b9-005bc5506446",
+  "companyName": "CStone Pharmaceuticals"
+ },
+ {
+  "stockId": 1000252045,
+  "code": "02617",
+  "shortName": "TRANSTHERA-B",
+  "companyId": "ecf550d9-27f4-481c-94bd-76707b0eae5a",
+  "companyName": "TransThera Sciences (Nanjing), Inc."
+ },
+ {
+  "stockId": 1000279595,
+  "code": "02630",
+  "shortName": "VIGONVITA-B",
+  "companyId": "5eb894c6-3a8f-4548-95b8-4129ff383647",
+  "companyName": "Vigonvita Life Sciences"
+ },
+ {
+  "stockId": 1000283962,
+  "code": "02659",
+  "shortName": "BAO PHARMA-B",
+  "companyId": "ba61a9dc-51ac-4f02-9ce8-fcd6c40c14f3",
+  "companyName": "Shanghai Bao Pharmaceuticals Co., Ltd."
+ },
+ {
+  "stockId": 8275,
+  "code": "02877",
+  "shortName": "SHINEWAY PHARM",
+  "companyId": "9c05d4cd-75a4-4108-b839-f471cf98bf82",
+  "companyName": "Shineway Pharmaceutical Co.,Ltd"
+ },
+ {
+  "stockId": 1000220180,
+  "code": "02898",
+  "shortName": "SUNHO BIO-B",
+  "companyId": "a5a50b19-1cb7-4001-bb2c-952497429193",
+  "companyName": "SUNHO（China）BioPharmaceutical CO., Ltd."
+ },
+ {
+  "stockId": 1000284736,
+  "code": "03378",
+  "shortName": "HANXBIO-B",
+  "companyId": "748cf1b3-9c5e-4b2c-8601-f494d047999c",
+  "companyName": "HanX Biopharmaceuticals, Inc."
+ },
+ {
+  "stockId": 1000014016,
+  "code": "03681",
+  "shortName": "SINOMAB BIO-B",
+  "companyId": "466a0ef3-4273-4896-9445-79557a0dbc64",
+  "companyName": "SinoMab BioScience Ltd"
+ },
+ {
+  "stockId": 225787,
+  "code": "03692",
+  "shortName": "HANSOH PHARMA",
+  "companyId": "00519bdf-9d72-474c-b489-bba2d27e1b9e",
+  "companyName": "Hansoh Pharma"
+ },
+ {
+  "stockId": 194142,
+  "code": "06160",
+  "shortName": "BEONE MEDICINES",
+  "companyId": "6150df09-bdf0-4160-9dbe-ba2b974872db",
+  "companyName": "BeOne Medicines"
+ },
+ {
+  "stockId": 219414,
+  "code": "06185",
+  "shortName": "CANSINOBIO",
+  "companyId": "eb784a16-b3e5-401d-b63e-d0125a5f96a4",
+  "companyName": "CanSino Biologics Inc."
+ },
+ {
+  "stockId": 1000091684,
+  "code": "06622",
+  "shortName": "ZHAOKE OPHTH-B",
+  "companyId": "474bd36d-8852-42cc-bebb-7637c7fd63ae",
+  "companyName": "Zhaoke Ophthalmology Limited"
+ },
+ {
+  "stockId": 1000102034,
+  "code": "06628",
+  "shortName": "TRANSCENTA-B",
+  "companyId": "c384230e-1343-4f24-9493-c4524be082c7",
+  "companyName": "Transcenta Holding"
+ },
+ {
+  "stockId": 1000167856,
+  "code": "06660",
+  "shortName": "AIM VACCINE",
+  "companyId": "93f6bd70-2ffc-4bfa-8151-009ec836ca88",
+  "companyName": "AIM Vaccine Co., Ltd."
+ },
+ {
+  "stockId": 1000303225,
+  "code": "06872",
+  "shortName": "TENNOR THERAP-B",
+  "companyId": "d71954aa-6196-4333-b843-a4c717595e3c",
+  "companyName": "TenNor Therapeutics Limited"
+ },
+ {
+  "stockId": 1000286593,
+  "code": "06938",
+  "shortName": "RIBOLIFE-B",
+  "companyId": "13ae2ed2-451e-4276-b6fe-39f98a79628c",
+  "companyName": "Suzhou Ribo Life Sciences"
+ },
+ {
+  "stockId": 1000179491,
+  "code": "06955",
+  "shortName": "BOAN BIOTECH",
+  "companyId": "9d640737-18d7-4e28-97fd-31070f8e598b",
+  "companyName": "Shandong Boan Biotechnology"
+ },
+ {
+  "stockId": 1000043901,
+  "code": "06978",
+  "shortName": "IMMUNOTECH-B",
+  "companyId": "fe28d8ae-9b58-4ee2-bed5-765471f5f1e1",
+  "companyName": "China Immunotech (Beijing) Biotechnology Co., Ltd."
+ },
+ {
+  "stockId": 1000196617,
+  "code": "06990",
+  "shortName": "SKB BIO",
+  "companyId": "4d2b946b-a5b9-49c6-bf02-26636c9d2389",
+  "companyName": "Sichuan Kelun-Biotech Biopharmaceutical Co. Ltd."
+ },
+ {
+  "stockId": 1000063972,
+  "code": "06996",
+  "shortName": "ANTENGENE-B",
+  "companyId": "69cf5c25-8166-4ae4-aca4-c65a4468fe1b",
+  "companyName": "Antengene Corporation Limited"
+ },
+ {
+  "stockId": 1000301848,
+  "code": "07630",
+  "shortName": "IMPACT THERAP-B",
+  "companyId": "daf4fd8e-8a38-4144-b259-fd7f32106550",
+  "companyName": "IMPACT Therapeutics"
+ },
+ {
+  "stockId": 1000254492,
+  "code": "09606",
+  "shortName": "DUALITYBIO-B",
+  "companyId": "45e46d25-6776-47a8-86a3-7a043beff92c",
+  "companyName": "DualityBio"
+ },
+ {
+  "stockId": 1000307414,
+  "code": "09637",
+  "shortName": "ALEBUND-B",
+  "companyId": "22cd3373-f63a-458e-948e-9cbe0582de28",
+  "companyName": "Alebund Pharmaceuticals"
+ },
+ {
+  "stockId": 1000057951,
+  "code": "09688",
+  "shortName": "ZAI LAB",
+  "companyId": "0b0e532a-99bc-4e30-91a5-9aad80bc99d7",
+  "companyName": "Zai Lab"
+ },
+ {
+  "stockId": 1000265333,
+  "code": "09887",
+  "shortName": "LEADS BIOLABS-B",
+  "companyId": "3526a0ca-812b-4066-9641-8d991bf2b385",
+  "companyName": "Nanjing Leads Biolabs Co.,Ltd"
+ },
+ {
+  "stockId": 1000035461,
+  "code": "09926",
+  "shortName": "AKESO",
+  "companyId": "fff01cf7-fe98-4dd0-973f-5c87e1c9daaa",
+  "companyName": "Akeso"
+ },
+ {
+  "stockId": 1000038320,
+  "code": "09939",
+  "shortName": "KINTOR PHARMA-B",
+  "companyId": "fa2bc231-6bdc-46c5-89a4-d7206994b11e",
+  "companyName": "Kintor Pharmaceutical"
+ },
+ {
+  "stockId": 1000016741,
+  "code": "09966",
+  "shortName": "ALPHAMAB-B",
+  "companyId": "00d11d88-9e77-4e25-a3f6-adcbeac52113",
+  "companyName": "Alphamab Oncology"
+ }
+]

@@ -127,9 +127,10 @@ export function backlogPlan(env: NodeJS.ProcessEnv = process.env): BacklogPlan {
   };
   return {
     start: env.AI_BACKLOG_START || '2026-10-29',
-    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 90),
+    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026.
+    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105),
     dailyUsd: num(env.AI_BACKLOG_DAILY_USD, 15),
-    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35 },
+    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15 },
   };
 }
 

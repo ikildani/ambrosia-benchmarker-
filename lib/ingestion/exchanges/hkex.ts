@@ -105,15 +105,40 @@ export async function searchHkexTitles(term: string, fromIso: string, toIso: str
   return { rows: parsed.rows, throttled: parsed.throttled };
 }
 
+/** HKEX document categories (t1code / t2code) used by the pipeline reader. */
+export const HKEX_ANNUAL_REPORT = { t1code: '40000', t2code: '40100' } as const;
+
+/**
+ * One issuer's documents of one category, newest first. Filtered by stockId the servlet accepts
+ * windows of a year or more (the 14-day limit applies to the unfiltered title search).
+ */
+export async function searchHkexIssuerDocuments(
+  stockId: number | string, category: { t1code: string; t2code: string }, fromIso: string, toIso: string,
+): Promise<{ rows: HkexAnnouncement[]; throttled: boolean }> {
+  await throttle();
+  const params = new URLSearchParams({
+    sortDir: '0', sortByOptions: 'DateTime', category: '0', market: 'SEHK', stockId: String(stockId), documentType: '-1',
+    fromDate: yyyymmdd(fromIso), toDate: yyyymmdd(toIso), title: '', searchType: '1',
+    t1code: category.t1code, t2Gcode: '-2', t2code: category.t2code, rowRange: '20', lang: 'EN',
+  });
+  const res = await fetchWithTimeout(`${SERVLET}?${params}`, {
+    timeoutMs: 20_000, retries: 0,
+    headers: { 'User-Agent': BROWSER_UA, Accept: 'application/json, text/javascript, */*; q=0.01', 'X-Requested-With': 'XMLHttpRequest', Referer: `${HKEX_BASE}/search/titlesearch.xhtml?lang=en` },
+  });
+  if (!res.ok) return { rows: [], throttled: res.status === 429 || res.status >= 500 };
+  const parsed = parseHkexResult(await res.text());
+  return { rows: parsed.rows, throttled: parsed.throttled };
+}
+
 export function isDealTitle(title: string): boolean {
   if (TITLE_EXCLUDE.test(title)) return false;
   return /licen|collaborat|co-development|option agreement|commercialization|partnership agreement/i.test(title);
 }
 
 /** Fetch an announcement PDF and return its text. */
-export async function fetchHkexPdfText(url: string): Promise<{ ok: boolean; status: number; text: string }> {
+export async function fetchHkexPdfText(url: string, timeoutMs = 30_000): Promise<{ ok: boolean; status: number; text: string }> {
   await throttle();
-  const res = await fetchWithTimeout(url, { timeoutMs: 30_000, retries: 1, headers: { 'User-Agent': BROWSER_UA, Accept: 'application/pdf' } });
+  const res = await fetchWithTimeout(url, { timeoutMs, retries: 1, headers: { 'User-Agent': BROWSER_UA, Accept: 'application/pdf' } });
   if (!res.ok) return { ok: false, status: res.status, text: '' };
   const buf = new Uint8Array(await res.arrayBuffer());
   const { extractText, getDocumentProxy } = await import('unpdf');
