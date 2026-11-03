@@ -4,10 +4,11 @@
  * trial approved to run in Korea (industry-sponsored INDs), including the
  * sponsor, product and phase — the fields Radar needs for Korean assets.
  *
- * Endpoint   GET https://apis.data.go.kr/1471000/ClncExamPlanDtlService2/getClncExamPlanDtlInq2
+ * Endpoint   GET https://apis.data.go.kr/1471000/ClncExamPlanDtlService03/getClncExamPlanDtlInq03
  *              ?serviceKey={MFDS_API_KEY}&type=json&pageNo={n}&numOfRows=100
- *            ("식품의약품안전처_의약품 임상시험 승인 정보" — verified Sep 2026 that the path is live:
- *            it answers SERVICE_KEY_IS_NOT_REGISTERED_ERROR (code 30) without a key.)
+ *            (data.go.kr dataset 15090589 "식품의약품안전처_의약품 임상시험 계획 상세정보". The dataset
+ *            moved to version 03 by Nov 2026: a key issued today is for ClncExamPlanDtlService03;
+ *            the path answers SERVICE_KEY_IS_NULL (code 20) without a key, checked Nov 3 2026.)
  *            Standard data.go.kr envelope:
  *              {"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},
  *               "body":{"pageNo":1,"totalCount":N,"numOfRows":100,"items":[{…}]}}
@@ -39,7 +40,7 @@ import {
 } from './shared';
 
 const ENDPOINT = () =>
-  process.env.MFDS_API_URL ?? 'https://apis.data.go.kr/1471000/ClncExamPlanDtlService2/getClncExamPlanDtlInq2';
+  process.env.MFDS_API_URL ?? 'https://apis.data.go.kr/1471000/ClncExamPlanDtlService03/getClncExamPlanDtlInq03';
 const PAGE_SIZE = 100;
 
 export type MfdsItem = Record<string, unknown>;
