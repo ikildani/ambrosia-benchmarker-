@@ -551,7 +551,7 @@ describe('fetchClassificationQueue', () => {
     expect(queue.map(a => a.id)).toEqual(['core1', 'core2', 'review1']);
     expect(ops.length).toBe(2);
     // programs the company does not own are never sent to the model
-    expect(has(ops[0].calls, 'not', 'ownership_status', 'in', '(comparator_or_background,marketed_other,duplicate_program)')).toBe(true);
+    expect(has(ops[0].calls, 'not', 'ownership_status', 'in', '(comparator_or_background,marketed_other,duplicate_program,not_a_program)')).toBe(true);
   });
 
   it('honours onlyStatuses', async () => {

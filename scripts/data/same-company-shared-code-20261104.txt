@@ -1,0 +1,295 @@
+# Shared development code, no deal between holders: hand-checked corporate families (Nov 4 2026).
+# Source: radar_shared_code_company_pairs() (migration 180). One line per family; excluded pairs and reasons in the PR.
+172bf8c0-55c3-43e8-9a2e-61982c34149b,1fd620e0-9e03-4b88-9e40-b32a39f8199f,e4cf5936-b217-4a9b-8d71-6d13d1036080,d99f9adc-0bed-4797-a089-7e4d55fb3dec,4dbd4a16-6ad1-44f9-beb5-755f5caf88e8,4e7ac279-0a46-4fd4-baa3-8368ea212786,69a0e041-0902-4a2e-8a9e-397f45f4da07,93131c41-5ffc-4c9b-aace-8d4a35e2b4a8,c363ffce-28d0-42bc-bc77-219754cac9d6,3433cc52-b70a-49ec-8fd0-d3e189545b1f,aba6d943-bfb2-427e-9e90-87a2b2d6602b,0d1f2bb8-4c43-4eb9-aeea-47c795f0e2b1 # CSPC Megalith Biopharmaceutical Co.,Ltd. | CSPC Pharmaceutical | CSPC ZhongQi Pharmaceutical Technology Co., Ltd. | CSPC Zhongnuo Pharmaceutical (Shijiazhuang) Co., Ltd. | CSPC Ouyi Pharmaceutical Co., Ltd. | Conjupro Biotherapeutics, Inc. | CSPC Baike (Shandong) Biopharmaceutical Co., Ltd. | 石药集团百克（山东）生物制药股份有限公司 | 石药集团欧意药业有限公司 | 石药集团中奇制药技术（石家庄）有限公司 | 石药集团中诺药业（石家庄）有限公司 | Shanghai JMT-Bio Inc.
+7416c3be-ef86-49be-8989-0b8bd1047ee9,9dc0d644-9ea2-427a-8129-3332c41b2d74,25b22bf5-878a-4eb4-96e9-a5a7acc5500a,e1ba0e81-c696-4c54-a13c-fe92bd9109c0,cea3c048-73a8-4945-9652-25891b54730d,bdfa46f3-ea0f-4715-8ac0-2ba31b1ce49d,934939ee-3ac7-4a27-9316-201c09b8d1bb,2a8fecc4-271e-479e-b9f9-4329cb4f8caa,577c4a54-1ead-4af0-afd1-a3af7e11c610,a2bb1b80-5852-452f-8461-3435f5557dd4,abcfb4ef-16cd-4761-a593-a9036a0d0a04,970fa224-4846-45bc-a8e2-cb8a6575475a # Jiangsu Hengrui | Atridia Pty Ltd. | Suzhou Suncadia Biopharmaceuticals Co., Ltd. | 成都盛迪医药有限公司 | 苏州盛迪亚生物医药有限公司 | 江苏恒瑞医药股份有限公司 | 广东恒瑞医药有限公司 | 福建盛迪医药有限公司 | Fujian Shengdi Pharmaceutical Co., Ltd. | 上海恒瑞医药有限公司 | 天津恒瑞医药有限公司 | 山东盛迪医药有限公司
+1e4024ea-5630-444a-93a5-f5126fb164d6,c504507f-0391-4d8e-9086-2a260eabc9cb,4a7580ea-0276-4ac5-ba53-bd4bb59acafd,ac0ed4dc-0edb-4c31-ba83-1cda1b52bbca,c582c64a-62ec-4c79-ae32-649fefdb603f,0de11e79-62b9-42b8-b1f2-006bb2debdb4,c8833629-e870-45e8-8c79-8028b3abb8bc,e1bfd44b-0596-4e32-9269-ff0f3f092820 # MedImmune LLC | AstraZeneca | Pearl Therapeutics, Inc. | Alexion Pharma GK. | Alexion | Alexion/AstraZeneca | Alexion AstraZeneca Rare Disease | Arrow Therapeutics
+045e9a75-3282-4c08-93c6-35ce331a6708,edc58f9a-88a6-4f43-9946-59a6ad2414d4,39b88c4c-fad9-4e09-9aaf-1cfde7741756,a989d41e-164a-4a81-8e0b-877a785bd263,932dae7a-bae5-486d-9d75-1b79b49debb9,b4aebea4-3a60-4ffd-a600-179ef2409e8c,e99092c1-fd7a-402d-8b69-5ffcf92d7225 # Chia Tai Tianqing Pharmaceutical Group Co. Ltd. | Chia Tai Tianqing Pharmaceutical Group Nanjing Shunxin Pharmaceutical Co., Ltd. | Shanghai Chia Tai Tianqing Pharmaceutical Technology Development Co., Ltd. | 上海正大天晴医药科技开发有限公司 | 正大天晴药业集团南京顺欣制药有限公司 | 正大天晴药业集团股份有限公司 | 正大天晴（广州）医药有限公司
+1253179e-218d-4ab7-829a-49b130b3c4a1,80c83cc2-1ac4-4366-8112-b4feebe30206,a9e9eb61-429d-4985-9f0e-b532b1266ee9,a12c1186-5eb7-4b53-9ffc-491ac6884f98,5fdb01d4-701b-415d-b933-8d4cd4a8efae,8aee7aef-8c3e-4cb7-abf4-609b30d932f3,28fb11e7-90b8-4468-bafa-a7f693e611f5 # Bristol-Myers Squibb | Bristol-Myers Squibb Services Unlimited Company | Juno Therapeutics, Inc., a Bristol-Myers Squibb Company | Bristol Myers Squibb (Celgene) | Forbius (Formation Biologics) | Celgene Corporation, a Bristol-Myers Squibb Company | Formation Biologics
+2afeef07-9643-4db7-b34b-a4027029d27e,76beeae2-da2d-4ea2-a38f-ec65165d941d,58731abb-7c79-4ea6-a60b-53f13addf0a6,cffa3c0e-ce36-4f7c-9c85-def7b1297355,06ddf5db-0dd2-4b09-b1ae-6a35513a4828,3ffb4d66-0340-4ef8-895d-62097abc8927,b762e8ea-ba8d-4195-a50e-8fb42f027193 # Acceleron Pharma, Inc., a wholly-owned subsidiary of Merck & Co., Inc., Rahway, NJ USA | Merck | Cidara Therapeutics | Cidara Therapeutics Inc., a subsidiary of Merck & Co., Inc. (Rahway, New Jersey USA) | Harpoon Therapeutics, Inc., a subsidiary of Merck & Co., Inc. (Rahway, New Jersey USA) | Idenix Pharmaceuticals, Inc. | Merck Oncology
+3eabf065-f357-4d2f-86f8-5bea0b7d988a,fe8489cc-69a7-4cc7-985d-5c65a66a8db9,beb4ea7c-eea3-410e-bd54-72d91296395c,ef63c0f8-32f2-4007-91e8-1e9993bb922b,5cd404c4-c40d-4997-8f7f-497d90518d53,05dd2fa6-88b8-4e30-823d-ac6125214abb # Innovent Biologics | 信达生物制药（苏州）有限公司 | Innovent Biologics Technology Limited (Shanghai R&D Center) | Innovent Biopharmaceutical Technology (Hangzhou) Co., LTD. | Fortvita Biologics (USA)Inc. | 信达生物科技有限公司
+0405fa9a-70b1-4e1b-bfb2-03d2dd67197b,8c97bf3e-d02d-454d-8f71-abf9347da2c2,fab64647-c289-441a-81cb-ae40c1cc59b1,fab76b77-0c39-4d0a-a383-7c4272313e90,2c5457fe-8037-4326-90cd-0f92e21ee7b5,1cb3e51a-8784-43e2-ab51-4ca8b37ac650 # Merck KGaA | Merck Healthcare KGaA, Darmstadt, Germany | EMD Serono Research & Development Institute, Inc. | Merck Healthcare KGaA, Darmstadt, Germany, an affiliate of Merck KGaA, Darmstadt, Germany | Merck KGaA / EMD Serono | Merck Serono
+eecf3194-51bb-4ffb-b506-aba5574e714d,f3bff2be-3782-4a01-9fcc-9a3468d3e94a,f9088dad-2b26-4b70-98b9-43af76ba6854,79b8191f-fda2-4508-afce-bbd0cdf365b3,266f4efc-0b72-4cb1-b1fa-a4d06df6b5c2,d59ffafb-90bd-49bb-9392-c9599ce92647 # Xizang Haisco Pharmaceutical Co., Ltd | Chongqing Haisco Pharmaceutical Group | 辽宁海思科制药有限公司 | 上海海思盛诺医药科技有限公司 | 四川海思科制药有限公司 | 沈阳海思科制药有限公司
+512fb006-ae26-41fb-b8fc-aa3b28723746,d0fa6d27-1092-4779-86d1-3e873b84c1ab,0ba276f2-5df9-4b7b-a45e-0bb82ca9a9ee,2cf60266-c104-4f72-a4dd-844d01fed57c,212f75e6-5eea-40fd-a8ac-d97b9607b03e # Otsuka Pharmaceutical Development & Commercialization, Inc. | Otsuka Pharmaceutical | Korea Otsuka Pharmaceutical Co., Ltd. | Otsuka Beijing Research Institute | Otsuka Pharmaceutical Factory, Inc.
+26ff3186-5503-4da6-9ab1-b9879785ffff,ad2b7419-30e8-4e86-aaf9-55d542d6070d,63d2ba31-b6bd-440b-8755-170bbf7be177,edbd8c56-a3e0-46b7-80cc-1706da367cfc,e02eefb1-8811-4cec-a3cd-dc145aa1efb5 # Astellas Pharma Global Development, Inc. | Astellas | Astellas Gene Therapy | Astellas Institute for Regenerative Medicine | Astellas Gene Therapies
+01629c25-c3c9-412b-9145-fcf849bfaab6,186b6014-eeb4-4d84-908f-7e173a053029,9780cfab-2007-46e6-9982-e34ef25d9724,01bf2122-c310-4ecf-b4d6-f5942439dda9,e6d0a9de-ad50-4de1-8371-de826b10ccaa # Centocor, Inc. | Johnson & Johnson | Janssen Research & Development, LLC | Janssen-Cilag International NV | Crucell Holland BV
+946a722b-69bd-4672-aded-ca1f38286071,cf0f5f21-0988-4c41-9bfb-729b0d4eea90,5717ac3f-0b48-4812-ac87-7f4633d05497,5a89b444-b860-4adc-b69c-a9288af64bb7,31a1dde5-ae4e-4c5e-b736-c6c8ca265f66 # Pfizer | Array Biopharma, now a wholly owned subsidiary of Pfizer | Metsera, a wholly owned subsidiary of Pfizer | Metsera | Wyeth is now a wholly owned subsidiary of Pfizer
+12579b48-e860-434f-bdd8-56c05c585c14,17d30d7c-4b27-4fa7-803b-71d0ebe00cf9,02a1fd17-09cd-4b7c-9824-8c141fc43417,d8902d4a-1571-4162-9a0f-acdb71c15e1f # Sanofi | Sanofi-Aventis Recherche & Developpement | Sanofi Aventis Group | Sanofi Pasteur, a Sanofi Company
+4b9fbe2c-0b5d-4764-b889-312afd148a0c,e363aaeb-e375-44e4-a55e-0fea0ab7f137,3accf2ff-f2fb-4122-8702-0ad34a40c9c2,cbceab5b-0ada-4a32-a4f7-a37cad8ea8f8 # Shanghai Fosun Pharmaceutical Industrial Development Co. Ltd. | Shanghai Fosun Pharmaceutical Development Co., Ltd. | Shanghai Fosun Pharmaceutical | 复星医药产业发展（深圳）有限公司
+00519bdf-9d72-474c-b489-bba2d27e1b9e,2e95af98-73c5-4822-bcfb-5864d6c670b3,f4e82445-dda0-4735-9c57-90d65475946d,5d13d4d4-6836-4ada-9e08-51b66564300b # Hansoh Pharma | Hansoh BioMedical R&D Company | 上海翰森生物医药科技有限公司 | 江苏豪森药业集团有限公司
+11c02925-14bb-4bed-bc39-7d0cb4eb7ad0,e944da89-7d13-42c3-98f9-e76494b0e4aa,013b85bf-5506-4e1c-a1c9-0efdf7397f5b,52f8b836-d4b5-4937-8c39-36fe1281e376 # Roche | Hoffmann-La Roche | F. Hoffman-La Roche AG | F. Hoffmann-La Roche AG
+09bcbec4-0a97-47d9-bc03-5a167f79b6cb,131cd08d-01cf-49e8-baf0-2a3cb44024ac,2d8465e4-fc2e-4e91-97d1-4fc64951dea0,0dc60648-1611-426a-9f0f-098ad4618127 # Qilu Pharmaceutical Co., Ltd. | Qilu Pharmaceutical (Hainan) Co., Ltd. | Shanghai Qilu Pharmaceutical Research and Development Center LTD | 上海齐鲁制药研究中心有限公司
+d8d34823-76bf-4f8f-b80b-76ae09d4db3c,f456e974-d63f-4ef4-9dc0-94f4bafabe1f,6b2daa32-9a9c-47f8-97de-9d59745548fc,c17ca556-09fe-4558-8143-65700e1cdccd # Shanghai Jeyou Pharmaceutical Co., Ltd. | Shanghai Jemincare Pharmaceutical Co., Ltd | 上海济煜医药科技有限公司 | 上海济煜医药科技股份有限公司
+5a0184c5-41b0-4ba4-9e92-a3891c27467c,a478a9ab-4423-4586-a2e8-a06db301aed2,d2e4ef7f-2a30-4b8d-90f0-56044aa99a16,5482f2ed-c6e9-4f5b-b88d-287fd49ba53c # Atom Therapeutics Co., Ltd | 杭州新元素药业股份有限公司 | 江苏新元素医药科技有限公司 | 杭州新元素药业有限公司
+dea42f32-d4c0-4934-a4ce-7285e197e674,f80d740b-9e5a-452e-b1b6-4d4cc0355544,2fa978f3-166b-43bb-b88d-dcbceb316182,5bd02623-d027-472f-8106-5567fa9afa49 # Beijing InnoCare Pharma Tech Co., Ltd. | 北京诺诚健华医药科技有限公司 | InnoCare Pharma | 广州诺诚健华医药科技有限公司
+4975d4a7-f8da-4f82-8a5b-16893d38de45,4e824e09-eccc-4020-a079-9ea3fed5e580,65ac14f5-a0cd-478e-8a4b-25ad8fef48eb,4536c2e2-8e2f-4440-ba8e-5ae1bd34b321 # Biogen | Biogen Idec Research Limited | Stromedix, Inc. | Biogen Ma Incorporated
+153b985d-96fe-4d69-affc-b79e3c81ae14,c1965178-ce61-446e-be2b-d64b95c7254a,4a13c46a-999b-4a04-ae71-32baaa1e8f4d,0c68470e-e944-43a7-bfc9-fe88ff730606 # Boehringer Ingelheim | Boehringer Ingelheim Metabolic | Boehringer Ingelheim (Canada) Ltd Ltee | Boehringer Ingelheim International GmbH, Boehringer Ingelheim Espana S.A.
+73e3695e-ecbb-441e-944d-6071fd79da9b,8c03b2a4-d15c-4056-bf6c-d97b2de69a77,d4f4b755-fc29-4f68-b5c0-7f2bdd901e08,92b241f8-e26b-49f5-bfa3-bcb43bd610ca # Shanghai Henlius | 复星汉霖（深圳）生物技术有限公司 | 上海复宏汉霖生物制药有限公司 | 上海复宏瑞霖生物技术有限公司
+a2228db4-61a3-440c-8f88-e62978f0840f,def64756-6dba-45a9-a023-913a31cada37,03e0a69f-08cc-441e-afa0-b7c5dbc6e212 # Aptevo BioTherapeutics | Aptevo Therapeutics | Aptevo Research and Development LLC
+b8cfdc1d-46cd-4756-b9d6-ab23dcabdd2b,de4ab2ae-f76e-468f-9c01-57248286fee8,44de1ae4-daaf-4342-a92f-58313d6a364e # Shanghai Pharmaceuticals | Shanghai Pharmaceuticals Holding Co., Ltd | Shanghai Pharma Biotherapeutics USA Inc.
+26b0c541-f5e6-4976-b44f-e178dbde1cc0,9616b60c-fcc7-4910-b6de-f4d39a24d2af,0e355cff-c790-44cb-8faf-3c9d6c86a165 # Amgen | Amgen Obesity | Horizon Therapeutics Ireland Designated Activity Company
+804ae770-b034-4458-a6cb-ffc0a95543ac,f2ab79f4-8af6-4857-bebc-51daac306bed,5f9d391c-df1c-4b96-8716-3d36b2264181 # Bausch Health | Dow Pharmaceutical Sciences | Valeant Pharmaceuticals
+120bcf51-4431-4866-835a-847d63a6ca96,8768763b-00b4-4ad0-93ed-d91917fe72e9,6df3da13-7023-4306-9930-6dcc63a569c9 # Shenyang Sunshine Pharmaceutical Co., LTD. | 3SBio | 深圳赛保尔生物药业有限公司
+253ab04e-32f4-419f-ad52-7da21cc9f930,8321bcd1-ba57-44cc-a489-8aad3f5b7123,83583ee9-ac03-4d52-bd23-7eda2c6ed1e8 # Teva Branded Pharmaceutical Products R&D, Inc. | Teva Pharmaceutical | Duramed Research
+380c5eb5-07b4-4a45-8d21-9762efa33682,69cf5c25-8166-4ae4-aca4-c65a4468fe1b,121c0f85-4bc5-4a14-a9d7-52cec7ae44c5 # 德琪（杭州）生物有限公司 | Antengene Corporation Limited | Antengene Discovery Limited
+22cd3373-f63a-458e-948e-9cbe0582de28,b2463240-e675-4173-ac3c-d700afeeed99,cf8ae5f9-9b09-4489-b6ae-ac53cdbe67bc # Alebund Pharmaceuticals | 礼邦药业（上海）有限公司 | 上海礼邦医药科技有限公司
+00d11d88-9e77-4e25-a3f6-adcbeac52113,b5c59982-69b8-4bfe-93cd-d031cc3b5f7b,b0f84913-9f43-4abc-a533-8fdacce8654f # Alphamab Oncology | Jiangsu Alphamab Biopharmaceuticals Co., Ltd | 江苏康宁杰瑞生物制药有限公司
+387468d5-ec51-480f-97eb-5cd1762f0957,50a0d748-bcfc-47a1-8b77-a6e35d6de9eb,8652fb6f-255f-4d0b-a211-a2c093f77f7f # Angitia Incorporated Limited | 安济盛生物医药技术（广州）有限公司 | Angitia Biopharmaceuticals Guangzhou Limited
+2db751fb-4e36-4103-92eb-fbc84ec459d2,bd8397b8-430f-4079-88de-add4356b18df,7f0b4b75-f50f-42f1-a11e-edee4bc7254e # AskBio | AskBio/Bayer | Bayer
+92fa4d3b-8603-4093-8b19-6761057cde35,daf13809-246a-4365-be98-cba31b84ee8a,53262970-6fa7-4959-b442-426c49eb5a02 # Ausper Biopharma Co., Ltd. | AusperBio Therapeutics Inc. | 杭州浩博医药有限公司
+48e59a37-5793-47e2-b4be-9f46f8cce688,59eb74f2-3aff-4d4d-9182-feffdc21ef51,0ef86c0f-a2bf-41e3-90c2-d79fabae3634 # BioRay Pharmaceutical Co Ltd | 杭州博之锐生物制药有限公司 | 台州博之锐生物制药有限公司
+53651fe0-29f8-42a1-a651-ca2bc78f333e,999fa167-8969-486b-8095-2c23ea702dc1,700f38f0-a2e2-4484-a731-220e34e93cf6 # CARsgen Therapeutics Co., Ltd. | 优恺泽生物医药（上海）有限公司 | UCARsgen Biotech Limited
+145816eb-fb18-4a00-a7c0-030a79cf8998,84cba6fa-e265-4b9f-ad94-146318cc7afe,037d299e-69f2-4274-9fbf-524a1bc9e79a # Exscientia | Recursion Pharmaceuticals | Exscientia AI Ltd., a wholly owned subsidiary of Recursion Pharmaceuticals, Inc.
+ae6fab86-ce62-45a4-a47b-2826f93f16ae,ffa06d9c-1a14-4ac6-a996-8342111eed83,f9c23fe8-194f-4705-96be-45fee89c449c # Gilead Sciences | Kite, A Gilead Company | Kite Pharma, Inc.
+22a115a5-28fb-463e-b4a7-81afb7ee9c22,4f96bdec-b6ec-4768-af03-9dd939e5e77e,8c5d31c9-ee4f-4456-9b32-09db5a5bc325 # GSK | IDRX, Inc., a wholly owned subsidiary of GSK, LLC | Sirtris, a GSK Company
+d405f29f-a32e-4d15-9ccc-33b0fe0dec91,f279cc59-28cf-4c84-bddb-f6b4d63b06c7,92a663c0-b668-48bd-9059-686c1b0a6807 # Incyte | Incyte Dermatology | Incyte Biosciences Japan GK
+2c5592de-80ae-4577-a540-55aa3c3df242,8abf8380-e43d-4a02-b529-f9a4458a12b7,34a6db03-7257-470e-bfe5-13aeeefae933 # Jiangsu vcare pharmaceutical technology co., LTD | 江苏威凯尔医药科技股份有限公司 | 江苏威凯尔医药科技有限公司
+5bb806a6-b226-4397-b6f5-326fcc5aeb90,e75eb488-e063-4623-89aa-4908ccb26de1,0f5abfb2-891a-441d-9f83-18ab2c1b31d9 # MeiraGTx | MeiraGTx UK II Ltd | Meiragtx Ocular UK Limited
+17b877f5-3eb3-4eb5-8560-9e19c51b54d7,ca2b4156-fcae-4eca-951e-2d1a5dc9894e,32afc0e4-1b1a-42f4-889e-75558f158c5f # ModeX Therapeutics, An OPKO Health Company | ModeX Therapeutics | OPKO Health, Inc.
+69f575a7-20ba-4b68-a357-2bd18fa6531c,ca58b733-25ee-4776-b836-e25c686066e7,621952ab-b95b-4bbc-a457-b9d55be63b98 # Ranok Therapeutics (Hangzhou) Co., Ltd. | 珃诺生物医药科技（杭州）有限公司 | Ranok Therapuetics Co. Ltd.
+033e4b4d-486c-4522-9d68-20a521c994a8,ab24dce7-197b-42b2-b30a-04e97069800f,93840bf9-7ed2-4220-be30-f46097949564 # Simcere Pharmaceutical | 江苏先声药业有限公司 | 南京再明医药有限公司
+a2d46535-7409-4958-b28e-f9906d0e6645,c2e9776e-806c-494a-9ed6-6dad4ed0e052,66918335-1b15-417c-bd93-dd8b3c491d39 # SIMR (Australia) Biotech Pty Ltd. | Shanghai SIMR Biotechnology Co., Ltd. | 上海赛默罗德生物科技有限公司
+91b62ab8-e162-44fb-b1ff-067e1b3a0aad,daac7d24-676c-401a-9116-4f4e13c8dad3,9abea53b-5bf4-4b0d-8ab1-8b3fb2e8048f # Tibotec, Inc | Tibotec BVBA | Janssen R&D, LLC
+3246e241-0a1d-4799-9132-37b66c4f364f,dc777aed-5378-4208-99c6-b8038e711ade,1ffa2b5d-3b20-404d-8c6b-b99a94714126 # TLL Pharmaceutical, LLC | 杭州高光制药股份有限公司 | 杭州高光制药有限公司
+3231d1e6-0c81-4e03-be53-ae0dd9592d53,6203fec4-8641-4f64-a1dc-61f54244e1ae,0d88bad5-1bd5-4891-8c2b-439ea97eb6db # Zhejiang Yangli Pharmaceutical Technology Co., Ltd. | 浙江扬厉医药技术有限公司 | 深圳扬厉医药技术有限公司
+7c83358e-7625-4497-ad27-a452178568b5,e803ee4e-7eb0-400f-afbe-e31eb23fc5c2,935ebd6c-a119-44f6-9b08-24046f4ff92e # 南京远大赛威信生物医药有限公司 | Grand Theravac Life Sciences (Nanjing) Co., Ltd. | 远大赛威信生命科学（南京）有限公司
+7eba2bf7-5224-43f1-9fc9-896febc5b06d,b57e9da0-3a73-4232-bbbe-a498ad8e6225,9a23d352-59af-49a2-800f-424937ad171c # 来凯制药（宁波）有限公司 | Laekna Therapeutics | 来凯医药科技（上海）有限公司
+4413e97b-8378-4e3f-84ae-2f0ad00b0635,d7ab4d6d-c0a0-4e40-b120-eb604c329fc8 # Vertex Pharmaceuticals Incorporated | Vertex Pain
+0ca8baf5-aa19-4e8e-94cb-f7cb47ec901e,34dc8346-b29e-4af4-b57d-a83a98d3df63 # Zymeworks BC Inc. | Zymeworks
+d24b738a-3942-46aa-b9ea-7ce2f43f4168,fd2f8e01-3fd8-42da-94c9-73b950716c62 # Eurofarma | Eurofarma Laboratorios S.A.
+98f44143-71b3-45cb-b0cd-20bb7a7e8e8e,d3c6a78a-d67f-495b-a7c3-fdbee85e5794 # Surrozen Operating, Inc. | Surrozen
+0a44d2a5-4c78-4971-b595-5fb87ba68514,e8a00c5b-0456-4010-ae1f-064493867759 # NantCell, Inc. | ImmunityBio, Inc.
+4271cf37-b082-45b6-a158-f86f205d1d5e,eab9a621-53b2-40a7-b713-086f9902fa19 # Shanghai Minwei Biotechnology Co., Ltd | 上海民为生物技术有限公司
+13ae2ed2-451e-4276-b6fe-39f98a79628c,cb9c1cae-7488-42ac-bd2e-5b6d755d9b1c # Suzhou Ribo Life Sciences | Ribocure Pharmaceuticals AB
+6150df09-bdf0-4160-9dbe-ba2b974872db,a2ef73ed-d66a-41ea-b551-3e33e2574e59 # BeOne Medicines | BeiGene
+a8896d1b-33b3-47d2-a7f3-bf25897ebd37,e3d12739-eeb5-4d66-b6f0-b87c417a082e # Chengdu Kanghong Biotech Co., Ltd. | 成都康弘药业集团股份有限公司
+68c379cd-eee1-4904-a5bd-344fb63c23ba,eb2e92ff-a1a8-4f3f-b9b0-0a292b95d4f4 # Create Medicines | Myeloid Therapeutics
+324c68cb-48f2-400a-9312-efa7a7366eb6,9b18eeb4-5114-43be-af2e-0b4d867f1378 # Gannex Pharma Co., Ltd. | Ascletis Pharma
+3e98c237-87e1-416a-918c-b9cdc947495a,f44a4654-7977-4568-9245-4d5bbf7d4223 # Helixon Biotechnology (Suzhou) Co., Ltd | 华深智药生物科技（苏州）有限公司
+5e6f7e3c-7770-4bf4-a40b-795e9f7142ef,f1357251-9dfd-471f-9687-c3f3ab5d2369 # Jazz Pharmaceuticals | Jazz Pharmaceuticals Research Uk Limited
+4d2b946b-a5b9-49c6-bf02-26636c9d2389,8bcccf17-dad4-4b49-a90a-0ba64649bc60 # Sichuan Kelun-Biotech Biopharmaceutical Co. Ltd. | 四川科伦博泰生物医药股份有限公司
+37ff0a76-a084-4fe6-b67a-d31699342f28,edb72ef4-8bb0-4355-991a-f09b612faa90 # Takeda | Millennium Pharmaceuticals, Inc.
+48cbaf64-cc0c-49f0-8997-bae29815c70b,c2b54b39-720c-4912-8529-b566b5813dae # ThromboGenics | Oxurion
+291c187d-b6d5-4583-9174-144c183f77b9,f0a002c8-1b5b-40a0-be02-4e5a96fd688c # UBP Greater China (Shanghai) Co., Ltd | United BioPharma
+235f7b88-ef82-4879-8d3d-f867cd316b0a,6e569e2b-e506-4b2a-bd94-ad81549a631b # 南京瑞初医药有限公司 | Nanjing Reju Therapeutics Co., Ltd
+58f5d240-5cd1-4a51-ba30-e9f689650055,a5a50b19-1cb7-4001-bb2c-952497429193 # 盛禾（中国）生物制药有限公司 | SUNHO（China）BioPharmaceutical CO., Ltd.
+0d6e9af9-d625-4361-831c-81a53e46665b,549711cc-5eb9-454b-92ad-899feb4109f4 # 联邦生物科技（珠海横琴）有限公司 | The United Bio-Technology (Hengqin) Co., Ltd.
+054979dc-03e0-45cd-b084-13db78fbd2ba,c13c525e-e9c5-4356-9c2b-c73da83b798f # 35Pharma Inc. | 35Pharma Inc., a GSK company
+87339ef3-1bfd-4211-aaef-1b20c8dcc399,da2ffb36-a564-4fd0-8f8f-6fbe3f05e6b8 # ABM Therapeutics Shanghai Company Limited | ABM Therapeutics Corporation
+27e63479-6d43-44ce-8139-216536803a50,8f927c40-5ec2-4bdb-8289-6de2a0281421 # Advenchen Laboratories Nanjing Ltd. | Advenchen Pharmaceuticals, LLC.
+0a59ebd4-8616-4d6e-9ac9-186fcd8a1e51,1614e1ce-0840-4942-b0af-9e46bd8af908 # Agomab Spain S.L.U. | AgomAb Therapeutics
+c348b88e-e3cc-4fc1-ba31-c9572b42e59d,fff01cf7-fe98-4dd0-973f-5c87e1c9daaa # Akesobio Australia Pty Ltd | Akeso
+c124ea40-3681-4b34-aee8-8bbcca8fa981,fc353043-1ad9-40f0-a9f7-e4e2ebd9bffb # Alcon Research | ESBATech AG
+a23a1cd4-0294-485d-810b-d95dbaf112d1,f9475561-592c-44e4-b03e-eed18795efbc # Allergan Pharmaceuticals International Ltd. | Anterios Inc.
+60a1df14-0b36-4305-99c5-fc0a46955ab1,cec221be-3821-46ef-bcd2-2319af1ad263 # Alvotech Swiss AG | Alvotech
+3ee1d2ca-068d-482d-a0cf-e77ffa4a5599,b950a4f8-874a-4897-810d-0663d379046b # Attovia Therapeutics Inc | 艾拓维医药（上海）有限公司
+3c3ed77f-a374-46cd-9160-3ff2890eb5f8,d9788a97-891f-4c46-8a42-c93549b9481b # Bambusa Therapeutics | 杉竹曜（北京）生物医药科技有限公司
+8b215f59-21ba-4fdb-a19d-74df39e7c76e,92f6f761-d6e9-447d-a914-d4669490d4ab # Beacon Therapeutics | Applied Genetic Technologies Corporation
+2a2f1da2-e71f-45e8-81b0-573f63988638,5f4d6853-0c53-4a11-847a-6a8b29257b51 # BeBetter Med Inc | 广州必贝特医药技术有限公司
+2ae4d2c7-6675-4615-89cd-f4350fc393cf,b54252a4-c9ea-40fb-8530-c6db44d821ac # Beijing Dayspring Pharmaceutical Technology Co., Ltd | 北京辰光医药科技有限公司
+4920ec23-4ace-4623-9205-caa6bc2eef37,61b35c18-b7fa-400a-8744-9b116318316c # Beijing Immupeutics Medicine Technology Limited | 北京臻知医学科技有限责任公司
+06c941d9-8855-43e7-aa25-39cbd26918ce,c30fb82e-572c-433f-83d8-664fc57c3fd1 # Beijing StarMab Biomed Technology Ltd | 珠海烁星生物医药科技有限公司
+18246eae-c193-43b5-bd4b-87a62c3a38ed,a37b681b-6fce-48b5-8f16-3a0cd5cf31e3 # BioNTech | BioNTech Research & Development, Inc.
+d0f6cf6d-803a-46d1-84c2-7a8c4d4fc429,ea2e1bb0-5a76-4bc2-a52e-4189101c22ad # Biotech Pharmaceutical Co., Ltd. | 百泰生物药业有限公司
+31f9f367-a919-4eea-a501-ab5dd8aafe8e,ea8ef89c-1134-42d6-ab5f-457005c10f93 # Broadenbio Ltd., Co. | 北京伯汇生物技术有限公司
+162de37a-15f4-4617-bc1b-162e96c8455b,777ef807-42b4-4a3d-8c18-13d8b47ab3d7 # CANbridge Care Pharma Hong Kong Limited | CANbridgepharma Limited
+2eb5dcf9-1c74-4791-962e-a2fc73732e88,631a0a6d-9dbb-4b20-8651-5f8dc704665e # Canwell Biotech Limited | 康威（广州）生物科技有限公司
+42bf283e-f1dd-482b-b2a9-8ebc40af4c4d,71f5087d-44a1-4af5-810e-0af1ee350a89 # Cascade Pharmaceuticals, Inc | 凯思凯迪（上海）医药科技有限公司
+4d7187f0-8231-4b25-983b-d16db031e007,7138dd08-5e62-48c4-b934-ec4611dbbe89 # Cell2Cure ApS | Cell to Cure ApS
+9f4d3bc3-9e11-48b6-b99b-3760321bb277,b3f7525d-da24-4829-aa50-2d1f8a60c59b # Chendu DIAO Nine Hong Pharmaceutical Factory | 成都地奥九泓制药厂
+843fd233-9350-4d67-86b8-a5584a3a780b,b7a2bacb-8c7f-40f7-a886-72a22c068c49 # Chendu DIAO Pharmaceutical Group CO., LTD. | 成都地奥制药集团有限公司
+5b391c8a-2332-41f2-8db5-104e5825c6b8,895329ec-cab1-4711-98a9-d1655ab29039 # Chengdu Anticancer Bioscience, Ltd. | 成都安泰康赛生物科技有限公司
+c33d2ae8-9697-4c69-bfbe-9edb065b5021,f1047f27-26c0-4e9a-bfaf-5d2658096236 # Chengdu Zenitar Biomedical Technology Co., Ltd | 成都赜灵生物医药科技有限公司
+31871809-704b-456e-a652-917c6d6a9b9d,d164429f-6f07-42bd-8bae-d54a476e9c73 # CorrectSequence Therapeutics Co., Ltd | 正序（上海）生物医药科技有限公司
+20113fd1-794e-43e1-8493-e5a809aff29f,f6860427-1193-4e9c-9b93-394539b3c4e4 # CSL Behring | CSL Limited
+4436d501-06eb-4222-80b9-005bc5506446,6e40a06a-36a4-43f7-b120-3a9e846a5167 # CStone Pharmaceuticals | 基石药业（苏州）有限公司
+5cd0e5ee-19f8-459b-860f-34a8061f47d9,a51374ed-b6e7-4923-9bca-0f5e606f1096 # CytosinLab Therapeutics Co., Ltd. | 赛岚（杭州）生物医药科技有限公司
+2aec5759-cdad-499d-a34c-288ae019fb82,efcc4b3d-14e5-49c3-8874-ca83c662446c # Dainippon Sumitomo | Sumitomo Pharma
+8f470796-fc5e-4089-9e8f-df0efac71d58,98bb9a0a-b513-4a2f-8d92-b581d5b333bb # Degron Therapeutics Co. | 杭州达歌生物医药科技有限公司
+3825af86-65a6-4dee-bada-adb0aa969cf4,9f88c669-03fc-44ee-a6d3-f5f9cce5cf93 # Dizal Pharmaceutical | 迪哲（江苏）医药股份有限公司
+32454cbc-3d6e-49d5-94f5-82a3f176581b,ad1791d2-9137-4d99-928c-57d0152e7187 # Dompe' Farmaceutici S.p.A. | Dompé Farmaceutici S.p.A
+57ed0530-2be7-4913-88ed-deaa4fa5b3d2,d88b4748-074c-4f52-8f59-c93a70dc5179 # Everest Medicines | 云顶新耀医药科技有限公司
+164e8132-6e29-4421-a25c-dc1d393bf91b,c8e38334-a6de-474e-a813-7ec882e2a781 # Evopoint Biosciences | 山东信诺维医药科技有限公司
+60065e9a-6fcc-46b9-824f-48410728ddf6,bbed341c-7b74-4652-bd2c-bd9cac3cb372 # Forward Pharmaceuticals Co., Ltd. | 深圳福沃药业有限公司
+c114a557-5e5b-4349-9b3e-24128f1d1553,e370015f-6252-4f84-944c-c6a2f0102098 # Fujian Haixi Pharmaceuticals Co., Ltd. | 福建海西新药创制股份有限公司
+072b24a0-09c2-4a2e-967c-c3f48580476f,3287f60f-9f42-49b9-a9d4-a87feb2e4013 # GB001, Inc, a wholly owned subsidiary of Gossamer Bio, Inc. | Gb001 Inc
+af47e1eb-8baf-4666-ab5b-7299c66f69ae,d53747a0-1086-4a3a-94ec-736b26641900 # Gb005, Inc. | GB005, Inc., a wholly owned subsidiary of Gossamer Bio, Inc.
+171d6e3e-9c0b-4231-801f-e0c470c7d034,cb1c7e3b-79b5-4616-a296-23814bbf4362 # GC Biopharma Corp | Green Cross Corporation
+2e7a2864-cc14-4445-8df8-7b42067d8eca,9b13a1ee-3bc9-4f6e-bed3-6c0bbe223ee3 # Gen Ilac Ve Saglik Urunleri Sanayi Ve Ticaret A.S. | GEN İlaç ve Sağlık Ürünleri A.Ş.
+60acb567-73c1-42db-bbfd-16ad74bb8fd9,f3443bb2-31e9-4405-8abc-f1f4022e970b # GeneSail Biotech (Shanghai) Co., Ltd. | 上海锦斯生物技术有限公司
+37297e3d-8f6d-477f-ace4-6623cefcdc60,3eb6e4e4-f365-4e91-9aef-bfb4dd55436e # Genmab | Genmab Bispecific
+3e627b69-d91c-4fee-9e86-998aa6381d5d,cf949502-5b3a-4212-95a9-0ce8a27e96fe # Glenmark Specialty S.A. | Glenmark Pharmaceuticals
+6509bdbe-ff8b-4c7e-ab66-55254534da7e,86bdcbb9-698d-460c-ba28-fe4ef4d2f49f # Grünenthal | Gruenenthal GmbH
+5b37210f-7a5a-4e28-9f69-c3d91577e552,7623a735-53a4-4ec9-a046-242b1f8da477 # Guangdong Fapon Biopharma Inc. | 珠海菲鹏制药有限公司
+44c15726-0c17-4f68-aae2-c2a7e0916f0d,74ee3a3e-3d3a-4fff-88da-132da304886e # Guangzhou Xiling Biotechnology Co., Ltd. | 广州希灵生物科技有限公司
+5a213e36-d208-468a-a03d-914d7329668e,c5375b8b-cedb-44ae-8de1-9cf635080c25 # Hangzhou Dinovate Biotech Co., Ltd | 杭州鼎乐新为生物科技有限公司
+2466a33e-3cac-4402-a9aa-a259f1414b6b,c29681c4-6366-410f-acc0-b8f73b9fb399 # Hangzhou MacroLink Biopharmaceutical LLC | 杭州麦联科生物医药有限公司
+28ea059f-e9a5-4e64-8fc2-87da78903118,8a41e082-0563-4ea9-aefb-e3747475722e # Hangzhou Reprogenix Bioscience, Inc | 杭州瑞普晨创科技有限公司
+3a562c99-1107-48a3-92a0-7004a45e6e29,c85c7ba5-807e-4a71-8117-662ffd216862 # Hangzhou SynRx Therapeutics Biomedical Technology Co., Ltd | 杭州圣域生物医药科技有限公司
+748cf1b3-9c5e-4b2c-8601-f494d047999c,ef604b8f-ff81-402e-b341-17271c645e3c # HanX Biopharmaceuticals, Inc. | 翰思艾泰生物医药科技（武汉）股份有限公司
+5076dce1-aae7-4899-a427-7da35a9de6ba,d69c8717-9b17-4811-a954-cc9ba8e98f9c # Hebei Senlang Biotechnology Inc., Ltd. | 河北森朗生物科技有限公司
+048791c4-d9e3-4eff-87d8-4e05d9079e18,369e6417-4771-4b99-8b22-857a3bd07d47 # Hope Medicine | 和其瑞医药（南京）有限公司
+8b5c1207-c482-4525-9c84-4591ac491d62,f8412f09-9f60-422b-80ef-c005e38a0ce8 # Hutchison Medipharma Limited | Hutchmed
+070bdafa-90a7-4ef6-9929-32d6b77c17f6,69172c19-ebc0-4e43-9df8-5f012ea6c82b # Ichnos Sciences | Ichnos Glenmark Innovation
+1cbcfb74-9918-4fb7-8d2e-09d56212c662,82ca012f-4f16-4b8c-afb8-61a5e095c2a4 # ICM Co. Ltd. | ICM Biotech Australia Pty Ltd.
+55b3d0f5-11c6-4fda-af42-87b2a18e1053,6a8b62fa-5683-4d8b-a13e-b73abe1e2f3d # Insmed | Insmed Gene Therapy LLC
+0d7f96a1-66d2-412e-807d-b66beecb3e3c,83e868eb-c3f7-4c2d-83d8-d7672b4e62ee # InventisBio Co., Ltd | 益方生物科技（上海）股份有限公司
+4102f805-c20e-48fd-ba77-c4a0e92461b2,459c67f6-6d49-4164-a7cf-d3b8a12e0bfb # JenKem Technology Co., Ltd. | 天津键凯科技有限公司
+9b1684fa-03b4-4327-945d-c8ca47823d2b,e1bbe57e-a0fb-455e-87de-e3be85dd8e6d # Johnson & Johnson Pharmaceutical Research & Development, L.L.C. | Alza Corporation, DE, USA
+4ec734fd-9bfc-48f2-b38c-b442f11e09b4,d00fb65a-ed83-4fa6-b0b0-585b62db168a # Kangabio AUSTRALIA LTD PTY | 北京康抗生物技术有限公司
+8a3ab824-5dcb-4aec-8db5-ad906d8f4aef,b5a5e84d-2a6d-4464-b92d-88170dcc91c6 # Kanyos Bio Inc. | Kanyos Bio, Inc., a wholly-owned subsidiary of Anokion SA
+27d71a8d-3ff9-4ebb-bc51-93eb78c67197,f6e2a58c-51d2-4b6d-a5b9-13ffa00ce9f2 # Kelun Pharmaceutical | Sichuan Kelun Pharmaceutical Research Institute Co., Ltd.
+4efd1a96-ed5a-4a50-8ef4-b544821a0b63,f815b32a-2366-4dd4-8b29-38530179d1b7 # KinoTeck Therapeutics Co., Ltd | 广州科恩泰生物医药科技有限公司
+d0699770-0b02-406b-8f8b-72ef749f33f7,fa45e3b6-366f-495e-9d23-e082764e219a # Kowa Research Institute, Inc. | Kowa Company, Ltd.
+3a8ce1c5-9e92-490f-ae36-3b6a548aff78,d6025392-aa72-40d1-bf78-9b7c18d1e00f # Lanyue Biotech (Hangzhou) Co., Ltd. | 揽月生物医药科技（杭州）有限公司
+540f53c7-3a72-4026-951d-5668fc966d8f,7171baae-1a81-4da3-8f65-741438550a95 # Lassen Therapeutics 1 PTY LTD | Lassen Therapeutics Inc.
+0fb8e3c0-c19a-4749-8236-6065e8563890,edd4bc35-b2a6-4a95-b57a-439f7e9d5080 # Mabsoft Therapeutics (Shanghai) Co., Ltd. | 慕宝盛科生物医药（广东横琴）有限公司
+3239ac49-9cad-4c24-89b4-ae2e8b205e22,d678dbf5-ea67-429e-b722-f36820226e3f # Microbial Resource Management Health | MRM Health NV
+4a938086-65be-4b00-ab86-d75f21ecee28,f04c6752-1c6d-4523-af2b-e4a7db182cbb # Multitude Therapeutics Inc. | 普众发现医药科技（上海）有限公司
+92f3dd94-f9a7-4957-9d8e-823739d1b209,be839627-12b9-4bc9-bc8d-5333489cb9cc # Nanjing Immunophage Biotech Co., Ltd | 南京艾美斐生物医药科技有限公司
+57fd233b-45c5-4985-ab1d-099164e90579,fb675a86-5d12-4b45-94b7-975cd8f07377 # Nanjing Jingao biomidical technology Co. Ltd. | 南京境奥生物医药科技有限公司
+148a9068-8e89-457f-ba35-a23c534a5248,33b3cd4f-c5fb-4c14-b2f4-2c65aca297f0 # Nantong Bencao Quadriga Medical Technology Co. Ltd. | Quadriga Biosciences, Inc.
+54b24ad0-b533-4ad9-9ffa-6d7b82ac0fd1,66d14c0f-c777-4f28-b83b-668343cb35ea # Neuregen Therapeutics Co., Ltd. | 纽伦捷生物医药科技（苏州）有限公司
+2aa465a1-12b2-44d0-b63a-159c8ca1cde2,310d21c9-7dc2-452f-a7eb-7dbc05d3f002 # NewLink Genetics Corporation | Lumos Pharma
+3f671473-fe2b-4918-b8d5-0b0da5328165,54553e0f-8afd-4524-971f-367d79ade88c # NGGT INC. | NGGT (Suzhou) Biotechnology Co., Ltd.
+433911e0-0fdb-4f0f-9047-b401a34b4b8e,e2162e4c-3e52-4e10-ab1e-68a6f03bb448 # Nippon Shinyaku | NS Pharma, Inc.
+0dfae2d2-4b75-4b1f-ba95-b6353c18354d,c744cc32-d039-4307-be7a-72c890627df9 # NodThera Limited | Rezera (formerly NodThera Limited)
+5bbd0a24-afb7-4cac-8cd3-0b278f4188c5,aabce965-49a9-44c7-b405-6851a6871f36 # Orion Corporation, Orion Pharma | Orion Corporation
+38637aac-b2ee-4e8d-a673-78d8aa7f0fe8,ec4e1b3f-1532-44fe-828c-7237f4af917b # Oxford Cannabinoid Technologies Holdings PLC | Oxford Cannabinoids Technologies Ltd.
+d1cc0752-6419-4139-bcef-1eccb58785f0,f1fc389e-4bcc-412f-ac9a-0d502b3d8f9d # Parr Biotechnology (Hebei) Co., Ltd. | 华普生物技术（河北）股份有限公司
+11ac1ac9-6a3e-4b82-bce8-1e735059e718,d3eef6ee-2a1f-49b7-96e2-048a8c415bae # Pelican Therapeutics, Inc. | Heat Biologics
+a617c79c-5152-4993-95ab-062ba83ab194,b86ae768-6d8d-446b-8c95-3bea55323772 # PharmBio Corporation | PharmaBio Corporation
+6d482c8d-b3f9-4e50-8b63-c6d784261bde,8a44ee01-b0b8-4fde-8dc5-c0c56e6c8153 # Pierre Fabre Laboratories | Pierre Fabre Medicament, Fondation EspeRare
+14245475-cfda-4a10-80dd-b6858b28cccf,d5f61e79-f828-4c31-b923-3a5629542e47 # Pneumagen Ltd. | Pneumagen Ltd, a subsidiary of NorthLinks Bio
+28683c68-a51f-421f-94b9-31d570ccdbc5,7827c8ff-0e6d-4323-a294-3b0c5f55a166 # PulseSight Therapeutics | Eyevensys
+17e876de-b6b8-4d98-8c93-e69fd9e4eafa,7333b9f8-50fd-4672-8a50-4338d981ffcd # Purple Biotech Ltd. | TyrNovo Ltd.
+1ec6b734-588d-4420-9f89-b452785e12fa,c164da4d-6388-4df7-aee3-3937d108f416 # QuantX Biosciences, Inc. | 曲欣生物科技（上海）有限公司
+54fa4284-d799-415a-bc3c-9bc12f03aab7,a7b7d6b0-51b3-438c-bb17-02811d504601 # Regend Therapeutics | 上海吉锐医学科技有限公司
+46ceb454-1bed-40d2-a9cf-fbe7c0cff24c,4a23acf2-38aa-42a2-869b-d31f68c8aaf4 # Revolo Biotherapeutics | Peptinnovate
+6533d86a-4941-4aeb-a065-c68331f1584b,b8a5a513-672e-4680-9b45-b4284c7893b1 # RinuaGene Biotechnology Co., Ltd. | 仁景（苏州）生物科技有限公司
+062a4464-a8d2-4ebc-91dd-e5f7d08a8109,fe6bda2d-095f-4944-8bd6-b04ecc99d471 # Risen (Suzhou) Pharma Tech Co., Ltd. | 润佳（苏州）医药科技有限公司
+3592a362-25e1-4437-b9a8-e1748a0bea5c,4c1683ea-dea9-4d76-88d6-16af68ebda4b # ScinnoHub Pharmaceutical Co., Ltd. | 赛诺哈勃药业（成都）有限公司
+8dba6cab-f96f-4852-8fe7-dc0e1bb38b47,afb1eced-9413-43dd-9663-cd9f1be64d46 # Semnur Pharmaceuticals, Inc. | Scilex Holding Company
+9f48f116-289b-4f90-8a95-36f9f85d264a,ee53b241-6167-4e31-b21e-22d36508bf19 # Shanghai Allink Biotherapeutics Co., Ltd. | 上海安领科生物医药有限公司
+3110b839-bffd-4ca8-b974-9d3ebf49dccf,fe61956b-da6b-46c6-a320-0b1453edb4b8 # Shanghai EpimAb Biotherapeutics Co., Ltd. | 上海岸迈生物科技有限公司
+98db97c7-f957-4795-ac67-6218773bc627,dd458ffa-df89-4ddb-996e-7c41b94ccc33 # Shanghai Euhearing Therapeutics Co., Ltd | 上海佑音医药生物科技有限公司
+9074b34c-5e55-4616-a014-82ccc313cc20,c93649e4-bc27-4732-9c7c-7c679b6a2e6f # Shanghai Hongyitang Biopharmaceutical Technology Co. Ltd. | 上海弘医堂生物医药科技有限公司
+55cb5707-80dc-4a32-8752-6ea0fab081cd,8393dad6-80d0-4f7a-b64a-5d303b381aaa # Shanghai Hutchison Pharmaceuticals Limited | 上海和黄药业有限公司
+acad98c9-1639-4f25-ae3e-4b62b830685a,cd7f5a95-b1ce-4508-a989-99b8acbb2589 # Shanghai Junshi Biosciences | Shanghai JunTop Biosciences Co., LTD
+82975f88-8ce8-43e6-aff3-acf1ce156147,dc1e75fb-88a3-4402-ab2e-1c2a75253b93 # Shanghai Mabgen Biopharmaceutical Technology Co., Ltd. | 上海迈晋生物医药科技有限公司
+22e276b4-efb6-4e19-a01d-e77492ed3852,a771af0b-a25e-48d4-a152-369ebe79addb # Shanghai Medinno Pharmaceutical Technology Co., Ltd. | 迈英诺医药科技（珠海）有限公司
+be47d4a2-738e-4b65-8282-6afb12e0b4b8,e8b9a1a2-b600-4677-aaf7-d539f2905ba8 # Shanghai UniXell Biotechnology Co., Ltd | 上海跃赛生物科技有限公司
+04865a99-ef49-40b8-a2db-fe44a725769f,89ebe511-0683-4552-85e5-5fe80dc08ba6 # Shanghai Xitaili Biomedicine Technology co., Ltd. | 上海西泰利生物医药科技有限公司
+79ba741e-6d3b-429e-8cbc-dd93b7a4e2e7,d5460f9e-18b9-4d15-883f-c761dcc2474d # Shanghai Yao Yuan Biotechnology Ltd. (also known as Drug Farm) | 上海药苑生物科技有限公司
+7c54e607-89db-4211-8fc6-da0075595876,dc075afe-2b9c-4239-9e00-34faa0b8465b # Shenzhen Huishan Biotechnology Co., Ltd. | 深圳惠善生物科技有限公司
+95276b46-64bf-446b-acce-3108533bc652,b4148e2c-8b84-4340-a192-851558636259 # Shenzhen Shenxin Biotechnology Co., Ltd | 深圳深信生物科技有限公司
+57e1a308-e8d0-4b14-8b58-afe1cdee8a65,d9db0189-5c0a-4535-9073-44491feabd1d # Sierra Oncology LLC - a GSK company | Sierra Oncology
+bb4e592f-4641-48ee-8956-8a77dea87714,efa348a6-d755-49af-90d3-734407e1cfad # Signet Therapeutics | 希格生科（深圳）有限公司
+7a759ab7-c4c4-498e-944f-fb38573d2093,a58bd339-f597-4ce7-9f29-13c91fc6ca81 # Siran Biotechnology | 苏州时安生物技术有限公司
+08e57280-2c10-4bdc-9189-5b266235ee30,2f7b2066-98fc-40d4-82fa-cdd77766a06e # Spur Therapeutics | Freeline Therapeutics
+764220af-d229-4546-ae23-34c069e73f28,aa11fc9e-f7a3-4e29-a1b4-89425b19ba1e # Suzhou Junjing BioSciences Co., Ltd. | 苏州君境生物医药科技有限公司
+37a34a5b-e573-4d47-ac24-d09732e7371b,f07b4b5e-f1f5-4760-ba40-f334005cab7d # Suzhou Sanegene Bio Inc. | 苏州圣因生物医药有限公司
+433078f6-e0de-4ce7-a192-c9afbe4616b5,e1363660-08a2-492b-bc8e-795f04375116 # T-MAXIMUM Pharmaceutical Inc | Suzhou Maximum Bio-tech Co., Ltd.
+24b8aceb-51c9-4d39-a8ee-ef84c627cf1f,e76125cf-5c24-48c4-ac04-72624a2d409b # Tarapeutics Science Inc. | 安徽中科拓苒药物科学研究有限公司
+8b1cc0de-fc6f-42a8-90dd-9992214a796e,dc0846a5-ec65-47c0-9dcd-4a5aa27230f0 # Tasly Pharmaceutical Group Co., Ltd. | Tasly Biopharmaceuticals
+6493652b-2b60-4dfd-943d-a605de0f73ff,f0782a7c-851a-49c6-a567-e8c11dd6974d # Tectonic Operating Company, Inc. | Tectonic Therapeutic
+6a300d58-3e12-4faf-8bd9-d57c2447c9e6,706283de-64c6-4768-91ef-5c37984af402 # Tianjin ConjuStar Biologics Co., Ltd. | 天津星联肽生物科技有限公司
+21e8eac5-292c-450a-a8b6-11f49ce01675,b48e1e44-7f45-4173-8950-fb8b59d659cb # Tianjin Hemay Oncology Pharmaceutical Co., Ltd | Tianjin Hemay Pharmaceutical Co., Ltd
+4a6ce424-b55f-42c1-a12b-c37255a509ab,e865dfc5-9af0-4e5d-a968-981d9c6765c4 # UCB Biopharma | UCB
+dc246dbb-f7f5-4240-bd33-74f241f4a683,f31d7b52-757b-4b1b-8eac-7b830ce10bff # Urogen Pharma Ltd. | UroGen Pharma, Inc., a subsidiary of UroGen Pharma Ltd.
+4842e8c1-f34e-4a4c-9dcb-661c77ddd92c,566c9890-8f47-4c04-b688-44fecb7a2ee9 # Vasa Therapeutics Sp. z o. o. | Vasa Therapeutics
+c9d613ce-5c83-4131-b140-5c8de66d2ed8,e8394a06-f3da-470a-9d64-50226b620615 # VeonGen Therapeutics GmbH | ViGeneron GmbH
+4d581efb-0265-4de9-8ae3-741a971a4aea,a7bfc90c-4748-4a2d-b71a-71a693e8ba6e # Verve Therapeutics | Verve Therapeutics, Inc., A Wholly Owned Subsidiary Of Eli Lilly And Company
+0d7e0028-19c6-417b-89f9-838318e9cd27,1621e700-df61-4012-a895-91e196b27c1e # Vico Therapeutics B. V. | Vico Therapeutics B.V.
+358d7e4e-92ae-43cb-a927-cc7c9cde35a7,8f6df9dd-0e7b-4fc2-b17c-cebc57d7271c # Wayshine Biopharm, Inc. | 威尚（上海）生物医药有限公司
+16f98dce-bc33-4ada-9434-4e981fdaaf9d,db515094-b9e6-4697-9ae1-dc21b856f8ac # WestVac Biopharma Co., Ltd. | 北京威斯克生物医药有限公司
+2f20ddc9-b9f7-4018-839c-d48a0e41297e,cf1f9969-6fcf-4b11-a0a9-fcce3905791e # Wuhan Neurophth Biotechnology Limited Company | 武汉纽福斯生物科技有限公司
+39d4f8db-4587-4a2c-aaee-e81437dad23a,3fd948d9-9f3b-492c-8174-83eb18152220 # Xiamen Amoytop Biotech Co., Ltd. | 厦门特宝生物工程股份有限公司
+7a2b558c-e122-4c18-8e5d-e4f819937eec,c70ed8bc-13c3-4fe7-b1d5-c7599eaa4d80 # YolTech Therapeutics | 上海尧唐生物科技股份有限公司
+4402522c-b04f-4520-8e54-0d1a1502bcaa,4c88d0dd-3220-4229-9299-af860facfbfd # Zhejiang Wenda Pharma Technology LTD. | 浙江文达医药科技有限公司
+26ab181a-0dce-4e3d-ad13-8fdf4e3d6382,d78c543d-363e-4908-9f96-c89733b4e494 # Zhejiang Yuejia Pharmaceuticals Co., Ltd. | 浙江越甲药业有限公司
+262beb6f-b298-4f17-baca-86435004c48b,d90eb29e-85e3-45d8-ad85-d0a710be150f # Zhuhai United Laboratories Co., Ltd. | 珠海联邦制药股份有限公司
+1c9566f0-33b0-4100-b534-c1e89fb75c82,d8678ca8-c24d-4823-84cb-07be9f0d3fbf # 上海中泽医药科技有限公司 | Shanghai Zhongze Therapeutics Co., Ltd.
+0bc4feff-4b45-4c08-8ace-b69629273440,cc13cffd-33af-4e6e-83bb-6290383b3e90 # 上海亚虹医药科技有限公司 | Jiangsu Yahong Meditech Co., Ltd aka Asieris
+5cc6c169-6688-41c1-b8ab-3e4c0047746d,ba61a9dc-51ac-4f02-9ce8-fcd6c40c14f3 # 上海宝济药业股份有限公司 | Shanghai Bao Pharmaceuticals Co., Ltd.
+63db0bf3-0a86-4020-8bda-10532bbd44aa,8f5d53af-0c5d-4a67-be8b-2e21b4b7cc4d # 上海洛启生物医药技术有限公司 | Shanghai Novamab Biopharmaceuticals Co., Ltd.
+bfbe9699-47cf-4dc5-be45-9a822bbcad99,e6a5b875-b004-433d-bec8-67892e5b635d # 上海润石医药科技有限公司 | Shanghai Runshi Pharmaceutical Technology Co., Ltd
+5aa8a545-33f8-4421-829c-b7777bc1a0e9,be795993-813f-4ddb-9aa5-675041819414 # 上海澳宗生物科技有限公司 | Shanghai Auzone Biological Technology Co., Ltd.
+31ee86d2-d722-414f-a1a6-417783ae0163,8e39dbe9-7e53-4b68-8f8b-4f8d1f89700f # 上海瀚辰星泰医药科技有限公司 | Shanghai Peptidstar Therapeutics Limited
+052bfe25-077e-4a34-bc2d-8f17f84c2f83,2b8a1abf-f053-459a-98d2-47b29931cf4f # 上海爱博医药科技有限公司 | Shanghai AB PharmaTech Ltd.
+d6e2a2ed-84ad-49a7-b6bc-8f038c61b124,e6acb1f7-a988-4c1e-82fe-81258f42752b # 上海莱士血液制品股份有限公司 | Shanghai RAAS Blood Products Co., Ltd.
+2ee402cd-1137-4492-b67a-dd5816fd0b2b,f98e2f92-ae6a-4162-babe-0c833746b3b7 # 上海长森药业有限公司 | Shanghai Longwood Biopharmaceuticals Co., Ltd.
+8672afd0-1a2f-4853-b330-07ba19bbdc77,ebc9a399-598f-4ae6-b695-61f95a176e0d # 上藥博康生物醫藥（香港）有限公司 | SPH-BIOCAD (HK) Limited
+08617085-b692-4d28-a43a-a3c2ad17646e,1609c72e-6794-4ad3-b18d-83e5c455ae69 # 东莞市东阳光生物药研发有限公司 | Sunshine Lake Pharma Co., Ltd.
+22795526-826f-4797-bd0f-03f035a7cca3,2bc98b07-9d3f-4cf7-9737-904fcc890d9b # 主流源生物科技（上海）有限公司 | Mainline Biosciences, Inc.
+05de203b-6748-4976-ab93-b7d6654293d6,d91b68e8-8c08-435d-8fe1-a96f8d1445ae # 乘典（苏州）生物医药有限公司 | CD (Suzhou) Biopharma Co., Ltd.
+75aca4cc-3d75-4844-a136-4289055219c1,d5effabf-d18e-4866-b406-a44107c33db3 # 云南白药集团股份有限公司 | Yunnan Baiyao Group Co., Ltd.
+e40c3855-8379-4767-afae-6def1a9a1d27,e4be9726-6474-4ca7-baca-b1eba8767b66 # 亿腾医药（珠海）有限公司 | Eddingpharm (Zhuhai) Co., Ltd.
+88c22677-6e20-4b07-a498-1f51a6fcee43,bea2a500-f1b7-4d48-bcb2-0c051a20b4f0 # 倍思可（上海）生物科技有限公司 | BaseCure Therapeutics Inc.
+6cecf480-f4ec-4b55-92cd-1d3738ba9a8c,92621819-6681-46b4-8aec-ae550bec8c9a # 倍臻生物技术（苏州）有限公司 | Bisirna Therapeutics Pte. Ltd.
+200c9b2c-733d-4074-aa1b-3d3f3d62b4f8,fb03f210-ff73-45e2-968f-fc189bf50ce4 # 凌科药业（杭州）有限公司 | Lynk Pharmaceuticals
+4730a5a1-d5ab-4063-9fba-714ed9d98a1f,bfc3d489-101d-4209-abdf-b8c6fc3a6827 # 北京丹擎医药科技有限公司 | Danatlas Pharmaceuticals Co., Ltd
+4f81783e-27a0-4c8e-91a1-f6d609cb92e5,81134a6d-2766-44c1-b177-de33f2711c0d # 北京再极医药科技有限公司 | Maxinovel Pty., Ltd.
+1d68b19b-c1da-479c-8d8f-84a582081dd1,9cd08e21-cf1c-4e27-a6de-6ecae9240863 # 北京北生研医药科技有限公司 | China National Biotec Group Company Limited
+addb5490-41b8-4b89-996b-14f6a98123f3,f95bc52c-3873-4803-b4ce-9ebebbd5f939 # 北京声光纳医疗科技有限公司 | Beijing SonoPhotoNano Medical Technology Co., Ltd.
+315341e9-6c89-40e4-9b53-ce41075b9ec5,398db70b-936c-4f32-ba4c-96a34a37103d # 北京康弘生物医药有限公司 | Beijing Kanghong Biological Medicine Co., Ltd.
+2bf69a29-af43-4ba1-918d-711e97836173,f97266ef-cd10-4f7e-b964-bd124ad2d77d # 北京望实智慧科技有限公司 | Beijing StoneWise Technology Co., Ltd
+055ebed0-49aa-4906-bde6-a35d5d4bc475,16f6e029-e75e-45e8-9d41-7598c3a1f0b9 # 北京极客基因科技有限公司 | Beijing Geekgene Technology Co., LTD
+7c0ebd01-fbc2-4564-aa99-78e1c53efa00,9f737d19-1ae0-4aaf-8cd2-1aa992207290 # 北京炎明生物科技有限公司 | Pyrotech Therapeutics, Inc.
+8d678dc9-a13b-4662-ae10-ebe974f614b2,91ac58ee-b739-4fd4-a2dd-081ede864278 # 北京舜景生物医药技术有限公司 | Beijing Sungen Biomedical Technology Co., Ltd
+3967302e-5521-40f1-9a0e-bdafa6b142ca,5196129e-944d-475b-9e80-f0353949ad7d # 北京艺妙医疗科技有限公司 | Beijing Immunochina Medical Science & Technology Co., Ltd.
+1d7a1492-215c-4ee8-8a66-abb7c5fd9150,cd43e84d-0fe8-463e-a170-e928a37c20af # 北京鞍石生物科技股份有限公司 | Avistone Biotechnology Co., Ltd.
+5f6a94b5-51b8-47dd-a388-a0f4b2909aa2,91cdc398-e258-4e38-8e23-bc4359fb7ca5 # 嘉和生物药业有限公司 | Genor Biopharma Co., Ltd.
+a7f75f92-a618-4bd7-b451-009bef582a12,e71359d7-cc26-4434-9479-1f1ec9b58418 # 四川弘合生物科技有限公司 | Sichuan Honghe Biotechnology Co., Ltd.
+1a929dfb-fb9c-4571-9f37-e32a44a7e874,d8047e5f-32a2-4141-aebf-9fb8f755da13 # 多玛医药科技（苏州）有限公司 | Doma Biopharmaceutical（Suzhou）Co., Ltd.
+8aae01dc-451d-4449-ab56-4b09e5446b4e,e183a43f-5dd0-4543-80be-f3628a2c5bfc # 天士力国际基因网络药物创新中心有限公司 | Tasly GeneNet Pharmaceuticals Co., Ltd
+1910cad4-fe1c-499a-b996-e58290256150,2924efba-427e-47ad-a5f1-b47322cb3cc5 # 宝船生物医药科技（上海）有限公司 | Dragonboat Biopharmaceutical Company Limited
+63494241-0af0-4f7c-ac0b-f3bb2f20a949,9d640737-18d7-4e28-97fd-31070f8e598b # 山东博安生物技术股份有限公司 | Shandong Boan Biotechnology
+2843c58d-e4f2-4132-b56e-562afb372ae9,6a675965-6a6c-43cb-b8bb-df106f2a8eef # 广州瑞安博医药科技有限公司 | Guangzhou Ruianbo Pharmaceutical Technology Co., Ltd
+0a93fc79-68dc-4ffd-8be3-d0d53cf637d9,d7968061-c5c3-40c0-8ecc-3487eb092a7a # 应世生物科技（南京）有限公司 | InxMed (Shanghai) Co., Ltd.
+0d540fd1-c3aa-4024-8480-b9244bd8ae5c,7ba0c249-ce40-49ec-97f5-196ee9890755 # 思努赛生物科技（上海）有限责任公司 | Synusight Biotech (Shanghai) Co., Ltd.
+0898ac9a-5227-419d-9563-54cc40a052e6,b1b0a4f3-51ac-468b-9ae5-d5c31e1b5ace # 恒翼生物医药（上海）股份有限公司 | Newsoara Biopharma Co., Ltd.
+2e8ceb80-ed67-4c7b-9b04-e6fb6c2d056a,f12d1367-014f-4976-bd82-b66026140982 # 成都百利多特生物药业有限责任公司 | Sichuan Baili Pharmaceutical Co., Ltd.
+7de1a794-3db7-4443-b623-cda8d131bc63,a037b4e8-af20-499f-9802-59ac9d4c1acc # 成都科岭源医药技术有限公司 | Chengdu SciMount Pharmatech Co., Ltd.
+09609eeb-7926-494b-934c-f92d4a2d891e,a2b5a252-1097-4751-8a97-6638e4ab7ebc # 拜耳医药保健有限公司 | Vividion Therapeutics
+56d7e41c-7f93-403a-91a7-14a6588ec79d,6f6444ed-de56-49f5-9410-bdaac7c5a8f0 # 无锡奕拓医药科技有限责任公司 | ETERN Therapeutics Wuxi Limited
+51f0d023-a424-453d-82f8-312d2d548cb0,7ff3a478-b935-4395-b135-c3544f800e01 # 普灵生物医药（深圳）有限公司 | Primelink BioTherapeitics(ShenZhen) Limited
+8ade445d-75f8-4754-95b0-874814dcdc96,a2c2b52a-4e93-486e-8da6-a8df8a3f1638 # 朗信启昇（苏州）生物制药有限公司 | Innostellar Biotherapeutics Co.,Ltd
+7ee5aafa-bc7b-4ef0-9161-fe117feac7c2,9e0c15f5-9771-455c-babb-721c19d94e0f # 杭州中美华东制药有限公司 | Hangzhou Zhongmei Huadong Pharmaceutical Co., Ltd.
+570bce6b-aae1-4999-9d42-be44e1da1982,79dc96a4-fcff-4b52-8ce5-ee46c1c2dafa # 杭州九源基因工程有限公司 | Hangzhou Jiuyuan Gene Engineering Co. Ltd.,
+424c88c1-3d1f-4e7e-b488-cf0557b2e786,43610588-a11b-49c3-a93d-e2d0a7bcdea2 # 杭州启函生物科技有限公司 | Hangzhou Qihan Biotech Co., Ltd.
+ad999237-3571-4ab4-a3db-1b7b4b8d3726,bfe34b95-5fa6-4000-afe9-e16c06238a6a # 杭州壹瑞医药科技有限公司 | Hangzhou Yirui Pharmaceutical Technology Co., Ltd
+497996d5-0948-466b-a6fb-0905a15d59ed,7d9c7396-6b5a-47e7-8a88-002be8876629 # 杭州天玑济世生物科技有限公司 | Hangzhou PhecdaMed Co., Ltd.
+5d927ea0-056c-4027-a8e2-164c70899a7a,929397ec-b18b-47ce-ae6c-1ee7f02f234e # 杭州尚健生物技术股份有限公司 | Hangzhou Sumgen Biotech Co., Ltd.
+43de9b1f-239c-4c51-b1ea-87df0b8b99ec,f75d2655-db97-46c4-bc17-4301c93538b5 # 杭州高田生物医药有限公司 | HighField Biopharmaceuticals Corporation
+9850d239-63d0-4d15-8694-eb58ddf92817,c5941f29-87a6-4192-a777-4017b8ec876b # 江苏亚尧生物科技有限公司 | Jiangsu YaYao Biotechnology Co., Ltd.
+73386c28-7831-470d-9812-ee7444eef712,d91f9487-7f5c-455b-8053-4e60e8d6200e # 浙江同源康医药股份有限公司 | TYK Medicines, Inc
+83cc40f0-4025-41e6-a45a-7f7bee0e6d0f,f4759668-b918-4373-9c87-13f17d5f25c3 # 浙江康佰裕生物科技有限公司 | Carbiogene Therapeutics Co. Ltd.
+faa8a463-04de-4522-883f-76db476421d8,fbb7552e-abfd-4bbe-8f51-d4f467a7f8b7 # 浙江道尔生物科技有限公司 | Zhejiang Doer Biologics Co., Ltd.
+463dbbc7-8137-4c86-825a-e04f10b6e222,87db26cf-f84a-4fcf-aab4-b79acd14870f # 浙江鑫康合生物医药科技有限公司 | Zhejiang Kanova Biopharmaceutical Co., LTD
+ae68053a-f3b6-45f3-b804-6bd38094a904,d30aec0c-0884-4490-a9be-8f1a52d84417 # 深圳市海普瑞药业集团股份有限公司 | Shenzhen Hepalink Pharmaceutical Group Co., Ltd.
+7740648e-051c-42b0-af89-dc16c5458a64,de37f289-ceea-4552-ac20-be0c6db4f025 # 烟台荣昌制药股份有限公司 | Rongchang Pharmaceuticals Co., Ltd.
+54f05732-c5e2-4859-b0ae-b77a7826a8d3,d1d78fc6-b591-4a2c-864c-bc48ab10d7cb # 烟台蓝纳成生物技术有限公司 | Yantai LNC Biotechnology Singapore PTE. LTD.
+53dab75f-3c15-46c3-bec8-bd01578a1d45,debaa6a2-e93b-4826-9e1f-76ece340ce50 # 珠海丹序生物制药有限公司 | Singlomics Biopharmaceuticals Zhuhai Co., Ltd.
+3a25eb14-62f7-4a0b-935c-fba488e574a5,c4a24a28-4e26-4163-8c57-0032717d25e1 # 瑞博泰克（山东）生物医药科技有限公司 | Ribotek Biopharmaceuticals (Shandong) Co., Ltd
+0b563830-a50f-41e4-aae5-3df6ce143ef2,db56cb9c-fd15-40f1-91b2-f92a5fed5277 # 甘李药业山东有限公司 | Gan & Lee Pharmaceuticals
+834e5647-f20a-4c08-bb41-e5108688bee1,8bc03689-dac8-441b-b7ba-2495135dd56b # 甫康（上海）健康科技有限责任公司 | Convalife Pharmaceuticals Co., Ltd.
+07599548-5daa-4d56-b366-1c6d47ad33f0,d7463f13-cb7a-4a75-b3d9-a6e7a6476856 # 百奥泰生物科技（广州）有限公司 | Bio-Thera Solutions
+ad01c389-ae38-46cc-8ec1-ee8710b9ee96,fe31a292-449d-4e2e-a5ea-492ac8064d0e # 益科思特（北京）医药科技发展有限公司 | Excyte Biopharma Ltd
+419fab09-0f2f-4482-b810-5c89493fc17d,efbb29a6-2de0-44bc-a218-a8e305309b40 # 知微生物医药（新乡）有限公司 | 知微药业科技（上海）有限公司
+2d5ef2c5-8e13-4d77-9fb4-5ee03e942854,7abfc314-33b0-4f22-bc4e-056a9991188d # 福建广生堂药业股份有限公司 | Fujian Cosunter Pharmaceutical Co. Ltd
+dc984825-44bf-4383-8a65-67e18bd6256a,e3f830aa-6b6c-45e1-9ba2-95177ab6a39e # 福石生物科技（合肥）有限公司 | Foresight Therapeutics (Hefei) Co., Ltd.
+332616fc-fc3a-4967-8b45-ad8529eb1373,8cc714d5-a9a1-4b5a-936b-23d177538721 # 科弈（浙江）药业科技有限公司 | Novatim Immune Therapeutics (Zhejiang) Co., Ltd.
+63f88d61-84df-4508-8c86-66385291ddd2,7b524379-0fef-4a26-a3d7-d82a97380836 # 纽欧申医药（上海）有限公司 | NeuShen Therapeutics
+631bb7b0-8361-4383-9bd5-85d5b7cccae7,a0bec9df-a8ea-4736-a90d-34cad4e79971 # 翎泰天润生物技术（上海）有限公司 | LyncBio Therapeutics Co., Ltd.
+174e39ac-16a3-4090-8b4e-4c9203c2f601,5c6779a8-bf9f-4a21-a718-bb4e8acb59bb # 舒泰神（北京）生物制药股份有限公司 | Staidson Biopharma Inc.
+1aa013b8-e37e-4ba0-bb85-56bb5882c702,9cb81847-2bb8-4402-80bc-cdbfc479485d # 艾斯拓康医药科技（北京）有限公司 | Axter Therapeutics (Beijing) Co., Ltd
+42c38ee7-dd05-4411-8e07-369c3eb69bab,8eed6cd8-b1ee-47f5-be43-cad9ae6e3dd1 # 艾码生物科技（南京）有限公司 | ExoRNA Bioscience
+8865fdfc-8d06-4d44-9f97-57018f319b7f,c8ff1918-75a5-4950-a6bd-95a5978051ef # 苏州博奥明赛生物制药有限公司 | Suzhou Biomissile Pharmaceuticals Co., Ltd.
+221a9934-e7cb-41b9-b068-24829eabad57,a91f80d2-c13f-4406-8ab7-7541053fedc7 # 苏州必扬医药科技有限公司 | Beyang Therapeutics Co., Ltd.
+02b60a25-8ae9-433d-8b71-1a24c175287f,15449c09-b1de-4580-9e70-44f50f9e6c65 # 苏州浦合医药科技有限公司 | Suzhou Puhe Pharmaceutical Technology Co., LTD
+3375d4a8-783d-46ae-aa39-0098c2ae5ecc,a1309cea-d3c7-48f4-8e85-5311e987ac6d # 荣昌生物制药（烟台）股份有限公司 | RemeGen
+0f8b0a56-3781-412e-81db-978b865f2b58,243b0c28-4abb-4459-becd-f465c252f84e # 诺华（中国）生物医学研究有限公司 | Novartis
+0625541e-05ef-4373-aa9a-bb49e87c43dd,715a4ce5-cc28-4e58-b2db-bd36b8348fc8 # 达尔文起点（湖北）生物制药有限责任公司 | Darwin Origin (Hubei) Biopharmaceutical Co., Ltd.
+36e46c39-11f6-4d51-a553-e3d3dee16954,b9997fd4-f571-4849-a336-25c1e722eaa2 # 重庆智翔金泰生物制药有限公司 | 智翔（上海）医药科技有限公司
+c99fde85-3847-481b-8225-0a9e8e21c89f,d0bc89fa-9634-42a2-b044-30180ac27441 # 领诺（上海）医药科技有限公司 | Linno Pharmaceuticals, Inc.
+5781b366-c0c1-4b42-9ec9-d34cca1180d8,63eb86cc-dcda-43ce-b5cd-4c12cc78149f # 复星凯瑞（上海）生物科技有限公司 | Shenzhen Fosun Kairos Biotechnology Co., Ltd.

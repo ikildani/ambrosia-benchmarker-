@@ -321,9 +321,24 @@ const GENERIC_PROGRAM_WORDS = new Set((
   'genetic vaccines antiviral antibacterial collaboration researchers'
 ).split(' '));
 
+// Stage and status words a pipeline page prints next to a program ("Pre-IND Stage", "Target
+// validation", "IND ready to file with FDA"). A name made only of these and the words above is a
+// column label or a status line, not a program.
+const STATUS_PROGRAM_WORDS = new Set((
+  'status current active ind cta nda bla enabling pre fda ema feedback meeting completed received positive ' +
+  'favourable favorable ready file filed filing glp toxicology tox validation optimization optimisation op ' +
+  'efficacy safety outcome outcomes route delivery source code icon internal licensed learn vendor publications ' +
+  'landmark studies study underway phase science behind beyond clinic look ahead biotech biomedical engineering ' +
+  'continuous improvement fields hemato malignancy malignancies broad potential has been is are design molecule'
+).split(' '));
+
+// Website furniture, institutions and news lines that a page crawl picks up as table rows.
+const PAGE_TEXT_RE = /(contact|e-?mail|linkedin|website|copyright|©|https?:|^\/|more info|director|\bceo\b|\bcfo\b|registration no|awarded|\bgrant\b|acquires|acquisition|headcount|mission|category [a-c] agent|\bcdmo\b|\bcmo\b|universit|college|school of|campus|mythbusters|curtain raiser|produkte|konten|intensivmedizin|klinische)/i;
+
 /**
  * True when an extracted program name is a group or a plan rather than one program: plural
  * programs / candidates / targets, a pipeline or bare platform, "Multiple/Various/Other ..." lists,
+ * website text ("Connect on LinkedIn", "Copyright© 2026", a campus name), stage or status labels,
  * year-led plans ("2026 ADHD program"), or a name
  * with nothing specific left once stage, area and filler words are removed. Names carrying a
  * code, target, mechanism or molecule ("KRAS preclinical program", "Undisclosed molecule (TBI)")
@@ -336,14 +351,16 @@ export function isPlaceholderProgramName(name: string): boolean {
   // A development code ("AN-018", "HFG1", "BD18") names one program even when its letters are a filler word.
   const hasCode = /\b[a-z]{1,8}-?\d+[a-z]?\b/i.test(s.replace(/\b(program|programme|discovery|research)\s+\d+\b/gi, ''));
   if (/^(multiple|various|several|other|additional|future)\b/i.test(s)) return true;
+  if (PAGE_TEXT_RE.test(s)) return true;
   // Groups: several programs, candidates or targets, a whole pipeline, or a platform with no named drug.
   if (/\b(programs|programmes|candidates|targets|assets|pipelines?|platforms)\b/i.test(s)) return true;
   if (/\bplatform\b/i.test(s) && !/\d|\b(candidate|lead|molecule|compound)\b/i.test(s)) return true;
   const specific = s
     .toLowerCase()
     .replace(/'s\b/g, '')
-    .split(/[^a-z0-9]+/)
-    .filter(w => w && !/^\d+$/.test(w) && !GENERIC_PROGRAM_WORDS.has(w));
+    // Unicode letters, so a Chinese or Korean name ("듀피트렌구축 치료제") counts as specific.
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(w => w && !/^\d+$/.test(w) && !GENERIC_PROGRAM_WORDS.has(w) && !STATUS_PROGRAM_WORDS.has(w));
   return specific.length === 0 && !hasCode;
 }
 

@@ -148,11 +148,12 @@ describe('default exclusion', () => {
     expect(isOwnershipHiddenByDefault('comparator_or_background')).toBe(true);
     expect(isOwnershipHiddenByDefault('marketed_other')).toBe(true);
     expect(isOwnershipHiddenByDefault('duplicate_program')).toBe(true);
+    expect(isOwnershipHiddenByDefault('not_a_program')).toBe(true);
     for (const s of ['originator', 'licensee', 'co_developer', 'unknown']) expect(isOwnershipHiddenByDefault(s)).toBe(false);
     expect(isOwnershipHiddenByDefault(null)).toBe(false);
   });
 
   it('PostgREST literal matches the vocabulary', () => {
-    expect(OWNERSHIP_EXCLUDED_IN).toBe('(comparator_or_background,marketed_other,duplicate_program)');
+    expect(OWNERSHIP_EXCLUDED_IN).toBe('(comparator_or_background,marketed_other,duplicate_program,not_a_program)');
   });
 });

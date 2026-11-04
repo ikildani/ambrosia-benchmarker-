@@ -31,6 +31,7 @@ function ownershipTitle(status: string, evidence: AssetBrief['asset']['ownership
       if (evidence?.rule === 'generic_drug_fda') return 'An FDA-approved generic drug (ANDA holders on record) used in this company\'s trials, not a program it owns.';
       if (evidence?.rule === 'background_or_placebo') return 'A background regimen or placebo arm in this company\'s trials, not a program.';
       return `Used as a comparator or background therapy in this company's trials (${armText}).`;
+    case 'not_a_program': return 'Text from a company web page (a heading, status line or footer), not a program.';
     case 'duplicate_program': return 'A trial arm, dose group or alternate name of a program listed on another row for this company.';
     case 'licensee': return 'In-licensed: a drug ownership record names this company as licensee.';
     case 'co_developer': return 'Co-developed: a drug ownership record names this company as co-developer.';
