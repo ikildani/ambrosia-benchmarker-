@@ -111,10 +111,11 @@ export const RADAR_OWNERSHIP_OPTIONS: VocabOption[] = [
   { value: 'unknown', label: 'Unverified', longLabel: 'Ownership not verified' },
   { value: 'comparator_or_background', label: 'Comparator', longLabel: 'Comparator or background therapy' },
   { value: 'marketed_other', label: "Other's marketed drug", longLabel: "Another company's marketed drug" },
+  { value: 'duplicate_program', label: 'Duplicate row', longLabel: 'Trial arm or dose group of a program listed elsewhere' },
 ];
 
 /** Ownership states the feed hides unless the ownership facet selects them. */
-export const RADAR_OWNERSHIP_DEFAULT_EXCLUDED: readonly string[] = ['comparator_or_background', 'marketed_other'];
+export const RADAR_OWNERSHIP_DEFAULT_EXCLUDED: readonly string[] = ['comparator_or_background', 'marketed_other', 'duplicate_program'];
 
 /** clinical_assets.partnership_basis (migration 125): the evidence class behind partnership_status. */
 export const RADAR_PARTNERSHIP_BASIS_OPTIONS: VocabOption[] = [

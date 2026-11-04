@@ -90,6 +90,7 @@ A new cron entry fails the deploy. New scheduled work rides on an existing cron:
 
 | Area | Owner (branch / PR) | Status (2026-09-28) |
 |---|---|---|
+| S&E one row per program: `duplicate_program` ownership status, rule-ownership trigger, pool view (migration 181); shared-code company pairs (migration 180) | `fix/duplicate-program-rows` | Both applied to production Nov 4 2026; 11,305 arm/dose rows flagged (log step `duplicate_program_20261104`), pool 59,226 → 47,909; code awaiting merge |
 | Deal quality: competitor alert, Market Pulse, company pages, headline count, `deals_verified` view, company stats | `claude/lsx-email-deliverability-g58r36` / PR #70 | Migrations 146 and 147 applied to production; code awaiting merge |
 | Surfaces still reading `deals` with an inline filter: lib/brief/buyer-map.ts, lib/brief/comp-set.ts, lib/outcomes/resolver.ts, lib/ingestion/deal-status.ts, callers of `applyDealQualityFilter` | unowned | Filter is correct; move to `deals_verified` when next touched |
 | Flag-and-fix cron + daily report | PR #70 | Code in review; 25-deal manual pilot researched, awaiting owner go-ahead to write |
