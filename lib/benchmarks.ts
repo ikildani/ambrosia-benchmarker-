@@ -16,6 +16,8 @@ export interface PhaseBaselineEntry {
     sampleSize: number;
     calibratedAt: string | null;
     source: 'calibrated' | 'static';
+    /** Set when the numbers were filled from calibrated neighbouring phases (harmonizeCalibratedBaselines). */
+    interpolated?: boolean;
   };
 }
 
@@ -320,6 +322,60 @@ export async function ensureBenchmarksLoaded(): Promise<void> {
   }
 }
 
+export const MIN_PHASE_BASELINE_N = 10;
+export const MODALITY_MULTIPLIER_MIN = 0.6;
+export const MODALITY_MULTIPLIER_MAX = 1.67;
+/** A calibrated median more than this factor off both calibrated neighbours is replaced by their geometric mean. */
+export const BASELINE_OUTLIER_FACTOR = 3;
+const HARMONIZED_PHASES = ['preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3', 'approved'] as const;
+
+const geo = (a: number, b: number) => Math.sqrt(Math.max(a, 0) * Math.max(b, 0));
+function blend(a: PhaseBaselineEntry, b: PhaseBaselineEntry, into: PhaseBaselineEntry): void {
+  for (const part of ['upfront', 'totalValue'] as const) {
+    for (const k of ['low', 'median', 'high'] as const) into[part][k] = Math.round(geo(a[part][k], b[part][k]) * 10) / 10;
+  }
+  into.meta = { sampleSize: Math.min(a.meta?.sampleSize ?? 0, b.meta?.sampleSize ?? 0), calibratedAt: a.meta?.calibratedAt ?? b.meta?.calibratedAt ?? null, source: 'calibrated', interpolated: true };
+}
+
+/**
+ * Make one area's calibrated phase ladder self-consistent (mutates `baselines`):
+ *  - half-steps (phase1_2, phase2_3) with calibrated neighbours take their geometric mean instead of the
+ *    static mega-deal numbers (CV phase1_2 $168M against a calibrated phase2 of $62.5M);
+ *  - a calibrated median more than BASELINE_OUTLIER_FACTOR above or below both calibrated neighbours is
+ *    replaced by their geometric mean;
+ *  - calibrated medians never fall as the phase advances.
+ * Static cells are left alone when no calibrated neighbour exists.
+ */
+export function harmonizeCalibratedBaselines(baselines: PhaseBaselines): void {
+  const cal = (p: string) => baselines[p]?.meta?.source === 'calibrated';
+  const at = (i: number) => baselines[HARMONIZED_PHASES[i]];
+  for (let i = 1; i < HARMONIZED_PHASES.length - 1; i++) {
+    const p = HARMONIZED_PHASES[i];
+    const [prev, next] = [HARMONIZED_PHASES[i - 1], HARMONIZED_PHASES[i + 1]];
+    if (!baselines[p] || !cal(prev) || !cal(next)) continue;
+    const lo = Math.min(at(i - 1).upfront.median, at(i + 1).upfront.median);
+    const hi = Math.max(at(i - 1).upfront.median, at(i + 1).upfront.median);
+    const m = baselines[p].upfront.median;
+    const halfStep = p === 'phase1_2' || p === 'phase2_3';
+    if ((halfStep && !cal(p)) || (cal(p) && (m > hi * BASELINE_OUTLIER_FACTOR || m < lo / BASELINE_OUTLIER_FACTOR))) blend(at(i - 1), at(i + 1), baselines[p]);
+  }
+  let floor: PhaseBaselineEntry | null = null;
+  for (const p of HARMONIZED_PHASES) {
+    const e = baselines[p];
+    if (!e || !cal(p)) continue;
+    if (floor) {
+      for (const part of ['upfront', 'totalValue'] as const) {
+        if (e[part].median < floor[part].median) {
+          e[part].median = floor[part].median;
+          e[part].low = Math.min(e[part].low, e[part].median);
+          e[part].high = Math.max(e[part].high, e[part].median);
+        }
+      }
+    }
+    floor = e;
+  }
+}
+
 export function getBenchmarksSync(): Benchmarks {
   const now = Date.now();
 
@@ -340,8 +396,11 @@ export function getBenchmarksSync(): Benchmarks {
   const merged = deepClone(staticBenchmarksData as unknown as Benchmarks);
 
   for (const cal of calibrationCache) {
-    // Only apply calibrations with sufficient sample size
+    // Only apply calibrations with sufficient sample size. Phase baselines need MIN_PHASE_BASELINE_N:
+    // cells of 5-9 deals produced gastroenterology Phase 3 at $4,125M upfront and neurology Phase 3
+    // below Phase 2 (Nov 3 2026 audit), and the thesis and the calculator then disagreed >2x on 43% of assets.
     if (cal.sample_size < 5) continue;
+    if (cal.calibration_type === 'phase_baseline' && cal.sample_size < MIN_PHASE_BASELINE_N) continue;
 
     if (cal.calibration_type === 'phase_baseline' && cal.phase && cal.therapeutic_area) {
       // Find the correct baselines key for this therapeutic area.
@@ -388,8 +447,14 @@ export function getBenchmarksSync(): Benchmarks {
 
     if (cal.calibration_type === 'modality_multiplier' && cal.modality && cal.multiplier !== null) {
       if (!merged.modalities[cal.modality]) continue;
-      merged.modalities[cal.modality].multiplier = cal.multiplier;
+      // The phase baselines already reflect each area's modality mix, so a raw calibrated multiplier
+      // (small molecule 0.30 in ID / metabolic / derm) double-counts it. Keep it to a modest adjustment.
+      merged.modalities[cal.modality].multiplier = Math.min(MODALITY_MULTIPLIER_MAX, Math.max(MODALITY_MULTIPLIER_MIN, cal.multiplier));
     }
+  }
+
+  for (const key of Object.keys(merged) as Array<keyof Benchmarks>) {
+    if (typeof key === 'string' && key.endsWith('PhaseBaselines')) harmonizeCalibratedBaselines(merged[key] as unknown as PhaseBaselines);
   }
 
   return merged;
