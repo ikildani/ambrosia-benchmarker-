@@ -25,6 +25,30 @@ describe('isPlaceholderProgramName', () => {
     'Additional ion channel modulators for pain',
     'Researchers',
     '',
+    // Website text and status lines from pipeline-page crawls (Nov 2026)
+    '✉️ Contact on Email',
+    'Connect on LinkedIn',
+    'Copyright© 2026',
+    '/medical-population-genetics',
+    'CREIGHTON UNIVERSITY SCHOOL OF DENTISTRY',
+    'Independent Director',
+    'Banook Acquires Fluidda',
+    'ALS/MND FightMND Drug Development Program Grant',
+    'CDC Category A Agent',
+    'Pre-IND Stage',
+    'Pre-IND (FDA)',
+    'Received positive pre-IND FDA feedback',
+    'IND ready to file with FDA',
+    'FDA pre-IND meeting has been completed.',
+    'IND/CTA ENABLING',
+    'Target Validation Molecule Design',
+    'GLP TOXICOLOGY',
+    'Phase 0 study underway',
+    'Current status',
+    'OUR SCIENCE',
+    'Behind the Science',
+    'Hemato-Malignancy',
+    'Radiopharmaceuticals CDMO / CMO Products',
   ])('treats %p as a bucket', name => {
     expect(isPlaceholderProgramName(name)).toBe(true);
   });
@@ -47,6 +71,13 @@ describe('isPlaceholderProgramName', () => {
     "Crohn's disease target discovery collaboration",
     'Genmab ISAC collaboration program',
     'Precision ADC Program (SMARCA degrader payloads with AbCellera)',
+    'EGFR targeted protein degrader program',
+    'Undisclosed Trispecific - Prostate Cancer',
+    'Multispecific Antibody for Influenza',
+    'Placenta-derived exosomes',
+    'PRAME ImmunoSTAT',
+    'atidarsagene autotemcel',
+    '듀피트렌구축 치료제 Pre-IND (FDA)',
   ])('keeps %p', name => {
     expect(isPlaceholderProgramName(name)).toBe(false);
   });

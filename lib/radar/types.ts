@@ -17,7 +17,11 @@ export type OwnershipStatus =
   | 'co_developer'
   | 'comparator_or_background'
   | 'marketed_other'
-  | 'unknown';
+  | 'unknown'
+  /** Migration 181: another row of the same company and drug is the program's primary row. */
+  | 'duplicate_program'
+  /** Migration 183: website text a pipeline-page crawl stored as an asset. */
+  | 'not_a_program';
 
 /** Migration 125. The evidence class behind partnership_status. */
 export type PartnershipBasis = 'deal_confirmed' | 'press' | 'trial_collaborator' | 'drug_owner' | 'filing' | 'no_evidence';

@@ -5,6 +5,7 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import type { AssetBrief } from './types';
 import { Pill, KV, ExternalLink, scoreTone } from './ui';
 import { label, fmtAge, fmtDate, territoryLabel, signedPts } from './format';
+import { isOwnershipHiddenByDefault } from '@/lib/radar/ownership';
 import {
   LOW_POWER_NOTE,
   PRECLINICAL_RANK_NOTE,
@@ -26,7 +27,12 @@ function ownershipTitle(status: string, evidence: AssetBrief['asset']['ownership
   const armText = arms ? `arms: ${arms.experimental ?? 0} experimental, ${arms.comparator ?? 0} comparator, ${arms.unknown ?? 0} unknown` : 'no matched trial arms';
   switch (status) {
     case 'marketed_other': return `Another company's marketed drug; this sponsor is trialling it (${armText}).`;
-    case 'comparator_or_background': return `Used as a comparator or background therapy in this company's trials (${armText}).`;
+    case 'comparator_or_background':
+      if (evidence?.rule === 'generic_drug_fda') return 'An FDA-approved generic drug (ANDA holders on record) used in this company\'s trials, not a program it owns.';
+      if (evidence?.rule === 'background_or_placebo') return 'A background regimen or placebo arm in this company\'s trials, not a program.';
+      return `Used as a comparator or background therapy in this company's trials (${armText}).`;
+    case 'not_a_program': return 'Text from a company web page (a heading, status line or footer), not a program.';
+    case 'duplicate_program': return 'A trial arm, dose group or alternate name of a program listed on another row for this company.';
     case 'licensee': return 'In-licensed: a drug ownership record names this company as licensee.';
     case 'co_developer': return 'Co-developed: a drug ownership record names this company as co-developer.';
     default: return `Ownership not verified: ${evidence?.rule === 'originator_mismatch' ? 'the drug originated elsewhere but sits in an experimental arm here (possible licensee)' : armText}.`;
@@ -99,7 +105,7 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
             {designations.map(d => <Pill key={d} tone="sky">{d.replace(/_/g, ' ')}</Pill>)}
             {asset.ownership_status && asset.ownership_status !== 'originator' && (
               <Pill
-                tone={asset.ownership_status === 'comparator_or_background' || asset.ownership_status === 'marketed_other' ? 'rose' : 'amber'}
+                tone={isOwnershipHiddenByDefault(asset.ownership_status) ? 'rose' : 'amber'}
                 title={ownershipTitle(asset.ownership_status, asset.ownership_evidence)}
               >
                 {label(asset.ownership_status)}
