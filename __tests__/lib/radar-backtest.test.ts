@@ -79,7 +79,11 @@ describe('labels — positive / negative construction', () => {
   });
 
   test('deal type, rejection, synthetic and non-canonical flags exclude a deal', () => {
-    expect(buildLabelEvents([ASSET], [deal({ deal_type: 'collaboration' })])).toHaveLength(0);
+    expect(buildLabelEvents([ASSET], [deal({ deal_type: 'merger_services' })])).toHaveLength(0);
+  });
+
+  test('an asset-level collaboration is a partnering event and counts as a label', () => {
+    expect(buildLabelEvents([ASSET], [deal({ deal_type: 'collaboration' })])).toHaveLength(1);
   });
 
   it('matches a brand or INN deal name to the asset through drug_master when names disagree', () => {

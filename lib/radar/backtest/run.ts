@@ -231,7 +231,7 @@ async function fetchAllDeals(supabase: SupabaseClient): Promise<LabelDeal[]> {
     const { data, error } = await supabase
       .from('deals')
       .select(DEAL_COLUMNS)
-      .in('deal_type', ['license', 'option', 'acquisition', 'co_development'])
+      .in('deal_type', Array.from(POSITIVE_DEAL_TYPES))
       .not('announced_date', 'is', null)
       .gte('announced_date', '2015-01-01')
       .or('is_canonical.is.null,is_canonical.eq.true')
@@ -264,14 +264,21 @@ async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelD
   const variations = new Map<string, string[]>();
   const assets: LabelAsset[] = [];
   for (const ids of chunk(Array.from(companyIds), 150)) {
-    const [assetsRes, companiesRes] = await Promise.all([
-      supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases, drug_master_id').in('company_id', ids).limit(5000),
-      supabase.from('companies').select('id, name_variations').in('id', ids),
-    ]);
-    if (assetsRes.error) throw new Error(`clinical_assets by company: ${assetsRes.error.message}`);
+    const companiesRes = await supabase.from('companies').select('id, name_variations').in('id', ids);
     if (companiesRes.error) throw new Error(`companies variations: ${companiesRes.error.message}`);
     for (const c of companiesRes.data ?? []) variations.set(c.id as string, (c.name_variations as string[] | null) ?? []);
-    for (const a of assetsRes.data ?? []) {
+    // Paged: a 150-company chunk holds 1,500-6,700 assets and PostgREST returns at most 1,000 rows per
+    // request, so the old `.limit(5000)` read dropped ~25k of 34k licensor assets. Their deals never became
+    // labels (107 of 1,197 eligible deals, Nov 3 2026) and licensed assets were scored as negatives.
+    const rows: Array<Record<string, unknown>> = [];
+    for (let from = 0; ; from += ASSET_PAGE) {
+      const { data, error } = await supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases, drug_master_id')
+        .in('company_id', ids).order('id', { ascending: true }).range(from, from + ASSET_PAGE - 1);
+      if (error) throw new Error(`clinical_assets by company: ${error.message}`);
+      rows.push(...(data ?? []));
+      if ((data ?? []).length < ASSET_PAGE) break;
+    }
+    for (const a of rows) {
       assets.push({
         id: a.id as string,
         company_id: a.company_id as string | null,
