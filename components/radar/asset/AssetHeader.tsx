@@ -27,9 +27,10 @@ function ownershipTitle(status: string, evidence: AssetBrief['asset']['ownership
   const armText = arms ? `arms: ${arms.experimental ?? 0} experimental, ${arms.comparator ?? 0} comparator, ${arms.unknown ?? 0} unknown` : 'no matched trial arms';
   switch (status) {
     case 'marketed_other': return `Another company's marketed drug; this sponsor is trialling it (${armText}).`;
-    case 'comparator_or_background': return evidence?.rule === 'generic_drug_fda'
-      ? 'An FDA-approved generic drug (ANDA holders on record) used in this company\'s trials, not a program it owns.'
-      : `Used as a comparator or background therapy in this company's trials (${armText}).`;
+    case 'comparator_or_background':
+      if (evidence?.rule === 'generic_drug_fda') return 'An FDA-approved generic drug (ANDA holders on record) used in this company\'s trials, not a program it owns.';
+      if (evidence?.rule === 'background_or_placebo') return 'A background regimen or placebo arm in this company\'s trials, not a program.';
+      return `Used as a comparator or background therapy in this company's trials (${armText}).`;
     case 'duplicate_program': return 'A trial arm, dose group or alternate name of a program listed on another row for this company.';
     case 'licensee': return 'In-licensed: a drug ownership record names this company as licensee.';
     case 'co_developer': return 'Co-developed: a drug ownership record names this company as co-developer.';
