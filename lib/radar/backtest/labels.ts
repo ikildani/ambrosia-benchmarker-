@@ -123,20 +123,39 @@ export function isPositiveDealType(deal: Pick<LabelDeal, 'deal_type'>): boolean 
  */
 export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly LabelDeal[], opts: BuildLabelOptions = {}): LabelEvent[] {
   const byCompanyId = new Map<string, LabelAsset[]>();
-  const all = assets;
+  // licensorMatches by name depends only on the company name and its variations, so a deal without a
+  // usable licensor_id is compared once per company name group, not once per asset (42k assets x
+  // thousands of unlinked deals ran the label phase past the cron's 300 s limit, Nov 2026).
+  const byNames = new Map<string, { names: string[]; assets: LabelAsset[] }>();
   for (const a of assets) {
-    if (!a.company_id) continue;
-    const list = byCompanyId.get(a.company_id) ?? [];
-    list.push(a);
-    byCompanyId.set(a.company_id, list);
+    if (a.company_id) {
+      const list = byCompanyId.get(a.company_id) ?? [];
+      list.push(a);
+      byCompanyId.set(a.company_id, list);
+    }
+    const names = [a.company_name, ...(a.company_name_variations ?? [])].filter(Boolean);
+    const key = names.join('\u0000');
+    const group = byNames.get(key) ?? { names, assets: [] };
+    group.assets.push(a);
+    byNames.set(key, group);
   }
+  const groups = Array.from(byNames.values());
+  const nameMatchCache = new Map<string, LabelAsset[]>();
+  const assetsMatchingName = (licensorName: string | null | undefined): LabelAsset[] => {
+    const cacheKey = licensorName ?? '';
+    const hit = nameMatchCache.get(cacheKey);
+    if (hit) return hit;
+    const out = groups.filter(g => g.names.some(n => sameCompany(n, licensorName))).flatMap(g => g.assets);
+    nameMatchCache.set(cacheKey, out);
+    return out;
+  };
   const events: LabelEvent[] = [];
   const seen = new Set<string>();
   for (const deal of deals) {
     if (!deal.announced_date || !isPositiveDealType(deal) || !isEligibleDeal(deal as PartnershipDeal)) continue;
-    // Candidate assets: same licensor_id first (cheap), then name equality across all.
+    // Candidate assets: same licensor_id first (cheap), then company-name matches.
     const candidates = deal.licensor_id ? byCompanyId.get(deal.licensor_id) ?? [] : [];
-    const pool = candidates.length ? candidates : all;
+    const pool = candidates.length ? candidates : assetsMatchingName(deal.licensor_name);
     // Drug ids the deal name resolves to (brand, INN or code through drug_aliases).
     const dealDrugIds = opts.drugIdByKey
       ? new Set(dealNameKeys(deal.asset_name).map(k => opts.drugIdByKey!.get(k)).filter((d): d is string => !!d))

@@ -20,6 +20,7 @@ import {
   rocAuc, prAuc, precisionAtK, liftTopDecile, brier, calibrationBins, computeMetrics, factorImportance, toBacktestSummary,
 } from '@/lib/radar/backtest/metrics';
 import { trainAndEvaluate, type LoadedSnapshot, rebuildDecision } from '@/lib/radar/backtest/run';
+import { matchAssetName } from '@/lib/radar/partnership';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────
 
@@ -595,5 +596,34 @@ describe('rebuildDecision (auto-retrain when sources get denser or the model age
     const fresh = '2026-09-25T00:00:00Z';
     expect(rebuildDecision({ countsNow: { ...base, patents: 40 }, countsThen: base, trainedAt: fresh, now }).rebuild).toBe(false);
     expect(rebuildDecision({ countsNow: { ...base, patents: 100 }, countsThen: base, trainedAt: fresh, now }).rebuild).toBe(true);
+  });
+});
+
+describe('buildLabelEvents name grouping', () => {
+  it('matches the per-asset scan for deals without a licensor_id', () => {
+    const names = ['Jiangsu Hengrui', 'Hengrui Medicine', 'Innovent Biologics', 'Akeso, Inc.', 'Zai Lab'];
+    const assets: LabelAsset[] = [];
+    names.forEach((company, i) => {
+      for (let j = 0; j < 6; j++) {
+        assets.push({ id: `a${i}-${j}`, company_id: `c${i}`, company_name: company, company_name_variations: i === 0 ? ['Hengrui Pharma'] : [], asset_name: `X${i}${j}0-${j}`, asset_aliases: [] });
+      }
+    });
+    const deals: LabelDeal[] = [
+      { id: 'd1', licensor_id: null, licensor_name: 'Hengrui Pharma', asset_name: 'X000-0', deal_type: 'license', announced_date: '2023-05-01', verification_status: null, is_synthetic: false, is_canonical: true },
+      { id: 'd2', licensor_id: null, licensor_name: 'Akeso Inc', asset_name: 'X320-2', deal_type: 'collaboration', announced_date: '2024-01-10', verification_status: null, is_synthetic: false, is_canonical: true },
+      { id: 'd3', licensor_id: 'c2', licensor_name: 'Innovent', asset_name: 'X210-1', deal_type: 'option', announced_date: '2022-03-01', verification_status: null, is_synthetic: false, is_canonical: true },
+      { id: 'd4', licensor_id: null, licensor_name: 'Unrelated Bio', asset_name: 'X000-0', deal_type: 'license', announced_date: '2023-06-01', verification_status: null, is_synthetic: false, is_canonical: true },
+    ];
+    const naive: string[] = [];
+    for (const d of deals) {
+      const pool = d.licensor_id ? assets.filter(a => a.company_id === d.licensor_id) : assets;
+      for (const a of pool) {
+        if (!licensorMatches(a, d)) continue;
+        if (matchAssetName([a.asset_name, ...(a.asset_aliases ?? [])], d.asset_name)) naive.push(`${a.id}:${d.id}`);
+      }
+    }
+    const got = buildLabelEvents(assets, deals).map(e => `${e.asset_id}:${e.deal_id}`);
+    expect(got.sort()).toEqual(naive.sort());
+    expect(got.length).toBeGreaterThan(0);
   });
 });
