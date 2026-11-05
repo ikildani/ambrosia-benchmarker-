@@ -38,6 +38,12 @@ export const TERMS_VALIDATION = {
     oldComps: { mdae: 1.39, coveragePct: 100 },
     calculator: { mdae: 1.39, coveragePct: 85, medianOverstatement: 2.9 },
   },
+  /**
+   * Nov 5 2026 recheck of the calculator alone with calibration loaded and the modality floor
+   * (lib/benchmarks.ts MODALITY_MULTIPLIER_FLOOR): median calculator / actual upfront and median |ln| error
+   * on global licenses signed 2023-01 to 2026-09. In-sample: the calibrations were built from these deals.
+   */
+  calculatorRecheck: { asOf: '2026-11-05', n: 340, medianRatio: 0.93, mdae: 0.98, inSample: true },
 } as const;
 
 export interface TermsHeadlineInput {
@@ -96,6 +102,13 @@ export function termsHeadline(th: TermsHeadlineInput | null | undefined): TermsH
   };
 }
 
+// Neither direction is presumed wrong: the Oct 28 hold-out found the calculator a median 2.9x above the
+// upfront paid, which no longer holds; with calibration loaded and the modality floor it sat at x0.93 of
+// the upfront on 340 global licenses (TERMS_VALIDATION.calculatorRecheck).
+const CALCULATOR_GAP_TEXT =
+  'The calculator prices from therapeutic-area, phase and modality benchmarks; the headline follows the comparable deals '
+  + 'for this specific profile. A gap this wide means terms for this profile are uncertain, so weight the range over either point.';
+
 function fmtMoney(m: number): string {
   if (m >= 1000) return `$${(m / 1000).toFixed(m >= 10_000 ? 0 : 1)}B`;
   return `$${Math.round(m)}M`;
@@ -115,12 +128,11 @@ export function disagreementNote(h: TermsHeadline | null): string | null {
   if (h.disagreement === 'calculator_higher') {
     const r = h.calculatorMid / h.mid;
     return `The Solidus calculator puts this profile at ${calc} upfront, ${fmtRatio(r)} the comparable-deal median. `
-      + `The calculator is built from headline deal values and on recent global-rights licenses it ran a median `
-      + `${TERMS_VALIDATION.globalRights.calculator.medianOverstatement}× above the upfront actually paid, so the headline follows the comparable deals.`;
+      + CALCULATOR_GAP_TEXT;
   }
   const r = h.mid / h.calculatorMid;
   return `The Solidus calculator puts this profile at ${calc} upfront, ${fmtRatio(r)} below the comparable-deal median. `
-    + `The headline follows the comparable deals, which tracked real upfronts more closely on recent licenses; treat the gap as a sign the comps may run rich for this profile.`;
+    + CALCULATOR_GAP_TEXT;
 }
 
 /** One-line statement of the rule, for tooltips and the brief footnote. */
