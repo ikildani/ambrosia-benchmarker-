@@ -32,6 +32,17 @@ const COUNTRY_TO_REGION: Record<string, string> = {
   BR: 'latin_america', MX: 'latin_america', AR: 'latin_america', CL: 'latin_america',
   CO: 'latin_america', PE: 'latin_america',
   ZA: 'africa', EG: 'africa', NG: 'africa', KE: 'africa', MA: 'africa',
+  // Added Nov 6 2026: programs from these countries had no region, so regional filters missed them.
+  RU: 'europe', UA: 'europe', BY: 'europe', GE: 'europe', AM: 'europe', MD: 'europe', RS: 'europe',
+  BA: 'europe', ME: 'europe', MK: 'europe', AL: 'europe', CY: 'europe', MT: 'europe', LI: 'europe', MC: 'europe',
+  IR: 'middle_east', IQ: 'middle_east', LB: 'middle_east', SY: 'middle_east', YE: 'middle_east', PS: 'middle_east',
+  KZ: 'asia_pacific', UZ: 'asia_pacific', PK: 'asia_pacific', BD: 'asia_pacific', LK: 'asia_pacific', NP: 'asia_pacific',
+  MM: 'asia_pacific', KH: 'asia_pacific', MN: 'asia_pacific', BN: 'asia_pacific',
+  VE: 'latin_america', EC: 'latin_america', UY: 'latin_america', PY: 'latin_america', BO: 'latin_america',
+  CR: 'latin_america', PA: 'latin_america', DO: 'latin_america', CU: 'latin_america', GT: 'latin_america',
+  PR: 'latin_america', JM: 'latin_america', TT: 'latin_america', KY: 'latin_america',
+  TZ: 'africa', UG: 'africa', ET: 'africa', GH: 'africa', TN: 'africa', DZ: 'africa', RW: 'africa',
+  SN: 'africa', CM: 'africa', CI: 'africa', ZW: 'africa', ZM: 'africa', MW: 'africa', BW: 'africa', MZ: 'africa',
 };
 
 // ═══════════════════════════════════════════════════════════════════════
