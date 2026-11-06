@@ -244,6 +244,22 @@ const GOVERNMENT_RE = /\b(nih\b|nci\b|niaid|nhlbi|nida|niddk|nimh|national insti
 const NONPROFIT_RE = /\b(foundation|fondation|fundación|society|association|charity|charitable|trust\b|network|consortium|cooperative|cooperative group|coalition|alliance for|fund\b|initiative|program\b|programme\b)/i;
 
 /**
+ * Contract research organisations run trials for the sponsor; CT.gov lists them as industry
+ * collaborators, but they never hold rights (Smerud, Theradex and others flagged 3,138 programs
+ * "partially partnered" before Nov 6 2026).
+ */
+const CRO_RE = /\b(iqvia|quintiles|parexel|icon plc|icon clinical|syneos|inc research|ppd\b|pra health|covance|labcorp drug|fortrea|medpace|novotech|tigermed|pharm-?olam|worldwide clinical|premier research|clinipace|psi cro|celerion|quotient sciences|linical|veristat|simbec|richmond pharmacology|theradex|smerud|cmic|wuxi clinical|clinical research organi[sz]ation|contract research|\bcro\b|site management|clinical trials? (services|unit)|research services)/i;
+
+/** companies.owner_type that can hold rights; unclassified rows fall through to the name classifier. */
+export function isIndustryOwner(ownerType: string | null | undefined): boolean {
+  return ownerType == null || ownerType === 'industry' || ownerType === 'unknown';
+}
+
+export function isContractResearchOrg(name: string | null | undefined): boolean {
+  return CRO_RE.test(name || '');
+}
+
+/**
  * Classify a sponsor / collaborator by name. Only 'industry' collaborators
  * count as partnership evidence. When the CT.gov class is known it wins.
  */
@@ -686,7 +702,7 @@ export function derivePartnership(input: DerivePartnershipInput): PartnershipRes
   for (const c of input.trialCollaborators) {
     const name = (c.collaborator_name || '').trim();
     if (!name) continue;
-    if (classifyOwnerType(name, c.collaborator_class) !== 'industry') continue;
+    if (classifyOwnerType(name, c.collaborator_class) !== 'industry' || isContractResearchOrg(name)) continue;
     if (ownerNames.some(o => sameCompany(o, name))) continue;
     const key = companyKey(name) || name.toLowerCase();
     if (!collaboratorTrials.has(key)) collaboratorTrials.set(key, new Set());
@@ -924,7 +940,7 @@ interface AssetRow {
   partnership_basis?: string | null;
 }
 
-interface CompanyRow { id: string; name: string; name_variations: string[] | null }
+interface CompanyRow { id: string; name: string; name_variations: string[] | null; owner_type?: string | null }
 
 interface TrialRow {
   nct_id: string;
@@ -1266,13 +1282,26 @@ async function processSlice(
   // Most industry-looking collaborator strings are drug-supply partners on
   // combination arms (e.g. Merck supplying Keytruda); flagging those as
   // partially partnered would be wrong far more often than right, so a
-  // collaborator string is evidence only when it is a company we track.
+  // collaborator string is evidence only when it is a company we track — and an industry one: the
+  // companies table also holds hospitals, study groups and individual investigators (owner_type
+  // academic / hospital / government / network / other), which flagged 511 programs before Nov 6 2026.
   const rawCollaboratorNames = [...new Set(trialRows.flatMap(t => t.collaborator_names ?? []).filter(Boolean))];
   const knownCollaboratorKeys = new Set<string>();
   for (const names of chunk(rawCollaboratorNames, IN_CHUNK)) {
-    const res = await supabase.from('companies').select('id, name, name_variations').in('name', names).range(0, PAGE_SIZE - 1);
+    const res = await supabase.from('companies').select('id, name, name_variations, owner_type').in('name', names).range(0, PAGE_SIZE - 1);
     if (res.error) { errors.push(`collaborator companies read failed: ${res.error.message}`); continue; }
-    for (const row of (res.data ?? []) as CompanyRow[]) for (const n of [row.name, ...(row.name_variations ?? [])]) { const k = companyKey(n); if (k) knownCollaboratorKeys.add(k); }
+    for (const row of (res.data ?? []) as CompanyRow[]) {
+      if (!isIndustryOwner(row.owner_type)) continue;
+      for (const n of [row.name, ...(row.name_variations ?? [])]) { const k = companyKey(n); if (k) knownCollaboratorKeys.add(k); }
+    }
+  }
+  // Owner types of the other companies indexed on the same NCTs (the co-party rule below).
+  const coPartyOwnerType = new Map<string, string | null>();
+  const coPartyIds = [...new Set(trialRows.map(t => t.company_id).filter((x): x is string => !!x))];
+  for (const ids of chunk(coPartyIds, IN_CHUNK)) {
+    const res = await supabase.from('companies').select('id, owner_type').in('id', ids).range(0, PAGE_SIZE - 1);
+    if (res.error) { errors.push(`co-party companies read failed: ${res.error.message}`); continue; }
+    for (const row of res.data ?? []) coPartyOwnerType.set(row.id as string, (row.owner_type as string | null) ?? null);
   }
 
   if (outOfTime()) return { timedOut: true };
@@ -1339,7 +1368,9 @@ async function processSlice(
           const rowIsOwner = (t.company_id && t.company_id === partnershipAsset.company_id) || ownerNames.some(o => sameCompany(o, t.company_name));
           for (const name of t.collaborator_names ?? []) if (name && knownCollaboratorKeys.has(companyKey(name))) collaborators.push({ nct_id: nct, collaborator_name: name });
           // Another indexed company carries the same NCT: treat it as an industry co-party
-          if (!rowIsOwner && t.company_name) collaborators.push({ nct_id: nct, collaborator_name: t.company_name, collaborator_class: t.lead_sponsor_type });
+          if (!rowIsOwner && t.company_name && (!t.company_id || isIndustryOwner(coPartyOwnerType.get(t.company_id)))) {
+            collaborators.push({ nct_id: nct, collaborator_name: t.company_name, collaborator_class: t.lead_sponsor_type });
+          }
         }
       }
 

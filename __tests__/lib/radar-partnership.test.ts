@@ -13,7 +13,9 @@ import {
   dealTerritoryScope,
   derivePartnership,
   extractCounterparty,
+  isContractResearchOrg,
   isEligibleDeal,
+  isIndustryOwner,
   matchAssetName,
   nameSegments,
   pressMentionsAsset,
@@ -208,6 +210,28 @@ describe('derivePartnership', () => {
     });
     expect(r.status).toBe('unpartnered');
     expect(r.evidence).toHaveLength(0);
+  });
+
+  it('contract research organisations do not count, even with the INDUSTRY class', () => {
+    const r = derive({
+      collaborators: [
+        { nct_id: 'NCT01234567', collaborator_name: 'Smerud Medical Research International AS', collaborator_class: 'INDUSTRY' },
+        { nct_id: 'NCT01234567', collaborator_name: 'Theradex', collaborator_class: 'INDUSTRY' },
+        { nct_id: 'NCT01234567', collaborator_name: 'IQVIA RDS Inc.', collaborator_class: 'INDUSTRY' },
+      ],
+    });
+    expect(r.status).toBe('unpartnered');
+    expect(r.evidence).toHaveLength(0);
+  });
+
+  it('CRO and owner-type helpers', () => {
+    expect(isContractResearchOrg('Parexel International')).toBe(true);
+    expect(isContractResearchOrg('Novotech (Australia) Pty Limited')).toBe(true);
+    expect(isContractResearchOrg('Orion Corporation, Orion Pharma')).toBe(false);
+    expect(isIndustryOwner('industry')).toBe(true);
+    expect(isIndustryOwner(null)).toBe(true);
+    expect(isIndustryOwner('hospital')).toBe(false);
+    expect(isIndustryOwner('other')).toBe(false);
   });
 
   it('the owning company listed as its own collaborator does not count', () => {
