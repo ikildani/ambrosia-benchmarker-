@@ -320,6 +320,9 @@ export async function ensureBenchmarksLoaded(): Promise<void> {
   }
 }
 
+/** Lowest calibrated modality multiplier applied (see getBenchmarksSync). */
+export const MODALITY_MULTIPLIER_FLOOR = 0.6;
+
 export function getBenchmarksSync(): Benchmarks {
   const now = Date.now();
 
@@ -388,7 +391,11 @@ export function getBenchmarksSync(): Benchmarks {
 
     if (cal.calibration_type === 'modality_multiplier' && cal.modality && cal.multiplier !== null) {
       if (!merged.modalities[cal.modality]) continue;
-      merged.modalities[cal.modality].multiplier = cal.multiplier;
+      // The calibrated phase baselines already reflect each area's modality mix, so a raw multiplier
+      // below MODALITY_MULTIPLIER_FLOOR double-counts it: small molecules priced at x0.46 of the upfront
+      // actually paid on 121 global licenses (Nov 5 2026), x0.92 with the floor. No cap: raising the
+      // ceiling or harmonising phase ladders (#110, reverted in #114) inflated late-stage terms 2-3x.
+      merged.modalities[cal.modality].multiplier = Math.max(MODALITY_MULTIPLIER_FLOOR, cal.multiplier);
     }
   }
 

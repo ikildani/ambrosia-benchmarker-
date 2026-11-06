@@ -109,7 +109,7 @@ describe('termsHeadline', () => {
     expect(disagreementNote(h)).toBeNull();
   });
 
-  it('calculator more than 2× above → note says so with the ratio and the validation result', () => {
+  it('calculator more than 2× above → note says so with the ratio, without presuming either side wrong', () => {
     // Pre-fix production median for Phase 3: comps $45M, calculator $213M.
     const h = termsHeadline({ ...base, predicted_upfront_mid: 45, calculator_upfront_mid: 213 })!;
     expect(h.disagreement).toBe('calculator_higher');
@@ -117,13 +117,15 @@ describe('termsHeadline', () => {
     const note = disagreementNote(h)!;
     expect(note).toContain('$213M');
     expect(note).toContain('4.7×');
-    expect(note).toContain('2.9× above');
+    expect(note).toContain('terms for this profile are uncertain');
+    expect(note).not.toContain('2.9×');
   });
 
   it('calculator more than 2× below → note in the other direction', () => {
     const h = termsHeadline({ ...base, predicted_upfront_mid: 60, calculator_upfront_mid: 21 })!;
     expect(h.disagreement).toBe('calculator_lower');
-    expect(disagreementNote(h)).toContain('2.9× below');
+    expect(disagreementNote(h)).toContain('2.9× below the comparable-deal median');
+    expect(disagreementNote(h)).toContain('terms for this profile are uncertain');
   });
 
   it('threshold is exactly the 2× factor, both directions', () => {
