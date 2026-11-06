@@ -844,7 +844,7 @@ describe('ingestRegistryRecords', () => {
 
     const companyUpsert = calls.find(c => c.table === 'companies' && c.op === 'upsert')!;
     const companyRow = (companyUpsert.payload as Record<string, unknown>[])[0];
-    expect(companyRow).toMatchObject({ name: 'Kisoji Biotechnology Inc.', actively_acquiring: false, data_sources: ['registry:isrctn'], owner_type: 'industry', hq_country: 'GB' });
+    expect(companyRow).toMatchObject({ name: 'Kisoji Biotechnology Inc.', actively_acquiring: false, data_sources: ['registry:isrctn'], owner_type: 'industry', hq_country: null }); // ISRCTN sponsors are mostly foreign: no country stamp
     expect(companyUpsert.options).toEqual({ onConflict: 'name' });
 
     const ctUpserts = calls.filter(c => c.table === 'company_trials' && c.op === 'upsert');

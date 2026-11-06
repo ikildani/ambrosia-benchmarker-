@@ -41,6 +41,7 @@ import {
 import { classifyCompanyCountry, deriveRegion } from '@/lib/ingestion/company-geography';
 import { readSyncCursor, writeSyncCursor } from '@/lib/radar/sync-cursor';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import { siteConsensusCountry } from '@/lib/radar/company-geography';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -376,7 +377,7 @@ export function dominantLocationCountry(countries: string[]): string | null {
 
 /**
  * Headquarters for a new company row: the name classifier when it is
- * confident, else the trial's dominant location country. Returns ISO-2 +
+ * confident, else the trial's site country when the sites agree. Returns ISO-2 +
  * region slug (lib/ingestion/company-geography.ts vocabulary).
  */
 export function resolveSponsorGeography(
@@ -387,7 +388,11 @@ export function resolveSponsorGeography(
   if (geo.country !== 'unknown' && geo.confidence !== 'low') {
     return { country: geo.country, region: geo.region !== 'unknown' ? geo.region : null, source: 'name' };
   }
-  const loc = ctgovCountryToIso(dominantLocationCountry(locationCountries));
+  // One trial's sites say where it ran, not where the sponsor sits: only a clear consensus counts
+  // (siteConsensusCountry). The dominant-site rule left 28% of sweep companies in the wrong country.
+  const counts = new Map<string, number>();
+  for (const c of locationCountries) { const iso = ctgovCountryToIso(c); if (iso) counts.set(iso, (counts.get(iso) ?? 0) + 1); }
+  const loc = siteConsensusCountry([...counts].map(([iso, n]) => ({ iso, n })));
   if (loc) {
     const region = deriveRegion(loc);
     return { country: loc, region: region !== 'unknown' ? region : null, source: 'location' };
