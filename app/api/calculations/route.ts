@@ -9,6 +9,7 @@ import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 import { notifyCalculation } from '@/lib/slack/notify';
 import { recordAuditEvent } from '@/lib/audit-log';
 import { recordCalculatorPrediction } from '@/lib/outcomes/writers';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
 import { z } from 'zod';
 
 // ── Team-scope history (migration 100) ───────────────────────────────────────
@@ -269,6 +270,25 @@ export async function POST(request: NextRequest) {
         console.warn('[Outcomes] calculator prediction threw:', e instanceof Error ? e.message : e);
       }
     }
+
+    // Score archive (migration 139) — every saved calculation, signed in or not.
+    // The user's inputs stay as a hash; only the coarse profile is kept.
+    archiveAfterResponse(() => [{
+      product: 'solidus',
+      scoreType: 'calculator.deal_terms',
+      modelVersion: `calculator-${calculationData.calculation_version}`,
+      origin: 'user',
+      entityType: 'profile',
+      therapeuticArea: calculationData.therapeutic_area,
+      phase: calculationData.development_phase,
+      modality: calculationData.modality,
+      indication: calculationData.indication_specific || calculationData.indication_category || null,
+      sourceTable: 'calculations',
+      sourceId: calculation!.id,
+      confidential: true,
+      inputs: { inputs: body.inputs ?? null, modifiers: body.modifiers ?? null, deal_type: calculationData.deal_type, territory: calculationData.territory_scope },
+      output: body.outputs ?? {},
+    }], supabase);
 
     // Fire event and update session count (non-blocking — don't let these fail the response)
     const validSessionId = calculationData.session_id;

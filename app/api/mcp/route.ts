@@ -24,6 +24,8 @@ import { DEAL_STATS, ENGINE_COUNT } from '@/lib/config/constants';
 import { validateApiKey, type ApiKeyContext } from '@/lib/api-v1-auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { currentPeriodMonth } from '@/lib/enterprise-api';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
+import { mcpArchiveEntry, MCP_ENGINE_VERSION } from '@/lib/score-archive/mcp';
 import { resolveApiTierToMcpTier, assertToolAccess, type McpTier } from '@/lib/mcp-tiers';
 
 // ── Engine imports ──────────────────────────────────────────────────────
@@ -324,7 +326,7 @@ function getResponseMeta(): object {
   return {
     data_as_of: new Date().toISOString().split('T')[0],
     deal_count: DEAL_STATS.TOTAL_DEALS,
-    engine_version: '2.0.0',
+    engine_version: MCP_ENGINE_VERSION,
     source: 'Ambrosia Ventures Proprietary Database',
     verification: 'Primary-source-verified from SEC EDGAR, FTC filings, and direct research',
   };
@@ -347,6 +349,26 @@ function createMcpServerInstance(apiKeyContext: ApiKeyContext, mcpTier: McpTier)
     version: '2.0.0',
     description: `Institutional-grade biopharma deal intelligence — ${ENGINE_COUNT} engines, ${DEAL_STATS.TOTAL_DEALS} transactions, 700+ companies`,
   });
+
+  // Score archive (migration 139): every tool below that computes a score is
+  // archived after the response, without touching each handler.
+  const registerTool = server.tool.bind(server) as (...args: unknown[]) => unknown;
+  (server as unknown as { tool: (...args: unknown[]) => unknown }).tool = (...args: unknown[]) => {
+    const last = args.length - 1;
+    const handler = args[last];
+    const toolName = args[0];
+    if (typeof toolName === 'string' && typeof handler === 'function') {
+      args[last] = async (...handlerArgs: unknown[]) => {
+        const result = await (handler as (...a: unknown[]) => unknown)(...handlerArgs);
+        archiveAfterResponse(() => {
+          const entry = mcpArchiveEntry(toolName, handlerArgs[0], result);
+          return entry ? [entry] : [];
+        });
+        return result;
+      };
+    }
+    return registerTool(...args);
+  };
 
   // ─────────────────────────────────────────────────────────────────────
   // Tool 1: calculate_deal_terms

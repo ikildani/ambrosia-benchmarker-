@@ -4,6 +4,7 @@ import { calculatePharmaIntent, getCalibratedIntentWeights } from '@/lib/service
 import type { TrialForIntent, DealForIntent } from '@/lib/services/pharma-intent';
 import { timingSafeEqual } from 'crypto';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { archiveScores } from '@/lib/score-archive';
 
 export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
@@ -182,6 +183,24 @@ export async function GET(request: NextRequest) {
           console.error(`[IntentSnapshots] Insert error (batch ${i / batchSize + 1}):`, insertError.message);
           errorCount += batch.length;
           snapshotCount -= batch.length;
+        } else {
+          // Score archive (migration 139): intent_score_snapshots is upserted
+          // per day; the archive keeps every write as made.
+          await archiveScores(supabase, batch.map((r) => ({
+            product: 'solidus' as const,
+            scoreType: 'pharma_intent.score',
+            modelVersion: `pharma-intent:${intentWeightsResolved.source}`,
+            origin: 'platform' as const,
+            entityType: 'company' as const,
+            entityId: r.company_id,
+            modality: r.modality,
+            indication: r.indication,
+            sourceTable: 'intent_score_snapshots',
+            sourceId: `${r.company_id}:${r.modality}:${r.indication}:${r.snapshot_date}`,
+            inputs: { weights: intentWeightsResolved.weights },
+            output: { intent_score: r.intent_score, intent_tier: r.intent_tier, factors: r.factors },
+            dataAsOf: intentWeightsResolved.calibratedAt ?? null,
+          })));
         }
       }
     }

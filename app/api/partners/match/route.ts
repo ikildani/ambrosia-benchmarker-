@@ -1,6 +1,7 @@
 import { requireSingleSession } from "@/lib/auth/require-single-session";
 import { NextRequest } from 'next/server';
 import { createServiceClient, createServerClient } from '@/lib/supabase/server';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
 import { findPartnerMatches, getDealHistoryCrossReference, MatchInput, FindPartnerMatchesOptions } from '@/lib/services/partner-matching';
 import { isProEmail } from '@/lib/config/authorized-emails';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
@@ -250,6 +251,25 @@ export async function POST(request: NextRequest) {
     };
 
     await supabase.from('partner_match_results').insert(matchResultData);
+
+    // Score archive (migration 139): the ranked buyer fit as returned.
+    archiveAfterResponse(() => [{
+      product: 'solidus',
+      scoreType: 'partner_match.fit',
+      modelVersion: 'partner-matching-1',
+      origin: 'user',
+      entityType: 'profile',
+      phase: development_phase,
+      modality,
+      indication: indication_specific || indication_category || null,
+      sourceTable: 'partner_match_results',
+      sourceId: calculation_id || null,
+      inputs: { modality, development_phase, indication_category: indication_category || null, indication_specific: indication_specific || null, territory_scope: territory_scope || null },
+      output: {
+        total_matches: result.total_matches,
+        matches: result.matches.slice(0, 25).map(m => ({ company_id: m.company_id, company_name: m.company_name, match_score: m.match_score })),
+      },
+    }], supabase);
 
     // Track event
     await supabase.from('events').insert({

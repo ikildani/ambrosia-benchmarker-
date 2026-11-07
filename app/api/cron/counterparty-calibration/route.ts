@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { archiveScores } from '@/lib/score-archive';
 import { timingSafeEqual } from 'crypto';
 import {
   computeCounterpartyPremiums,
@@ -92,6 +93,28 @@ export async function GET(request: NextRequest) {
       .from('counterparty_premiums')
       .upsert(rows, { onConflict: 'company_id,as_of_date' });
     if (upsertErr) throw upsertErr;
+
+    // Score archive (migration 139): the premiums every later forecast is priced on.
+    await archiveScores(supabase, rows.map(r => ({
+      product: 'solidus' as const,
+      scoreType: 'counterparty.premium',
+      modelVersion: 'counterparty-premiums-1',
+      origin: 'platform' as const,
+      entityType: 'company' as const,
+      entityId: r.company_id,
+      entityLabel: r.company_name,
+      sourceTable: 'counterparty_premiums',
+      sourceId: `${r.company_id}:${r.as_of_date}`,
+      inputs: { deals_analyzed: deals.length },
+      output: {
+        premium_multiplier: r.premium_multiplier,
+        sample_size: r.sample_size,
+        confidence: r.confidence,
+        by_therapeutic_area: r.by_therapeutic_area,
+        by_phase: r.by_phase,
+      },
+      dataAsOf: r.as_of_date,
+    })));
 
     // Intelligence tracking
     try {

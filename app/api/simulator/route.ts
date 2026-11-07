@@ -14,6 +14,8 @@ import { requireAuth } from '@/lib/auth-helpers';
 import { apiSuccess, apiError } from '@/lib/api-response';
 import { calculateRNPV } from '@/lib/financial/rnpv-engine';
 import { createServiceClient } from '@/lib/supabase/server';
+import { archiveAfterResponse } from '@/lib/score-archive/after-response';
+import { ENGINE_VERSION } from '@/lib/financial/calculation-version';
 import type { RNPVInput } from '@/lib/financial/types';
 import type { TherapeuticArea, Phase, Modality } from '@/lib/calculations';
 
@@ -166,6 +168,22 @@ export async function POST(request: NextRequest) {
       recommendedFallback,
     };
   });
+
+  // Score archive (migration 139). Asset inputs are the user's; kept as a hash.
+  archiveAfterResponse(() => [{
+    product: 'solidus',
+    scoreType: 'simulator.zopa',
+    modelVersion: `rnpv-${ENGINE_VERSION}`,
+    origin: 'user',
+    entityType: 'profile',
+    therapeuticArea,
+    phase,
+    modality,
+    indication: indication || null,
+    confidential: true,
+    inputs: { rnpvInput, buyers, batnaUpfrontM },
+    output: { upfrontMedian: baseUpfront, totalDealMedian, riskAdjustedNPV, buyers: buyerResults },
+  }], supabase);
 
   return apiSuccess({
     baseRNPV: {
