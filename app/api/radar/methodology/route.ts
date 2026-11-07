@@ -18,13 +18,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { loadMethodologySummary, type MethodologySummary } from '@/lib/radar/backtest/run';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.isAuthenticated) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }

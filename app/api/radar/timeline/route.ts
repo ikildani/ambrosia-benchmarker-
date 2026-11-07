@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { isUuid } from '@/app/api/radar/_lib/radar-api';
 
 export const dynamic = 'force-dynamic';
@@ -41,7 +41,7 @@ function isoDate(v: unknown): string | null {
 
 export async function GET(request: NextRequest) {
   // Auth-only (not Pro), matching the watchlist it feeds.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.userId) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }

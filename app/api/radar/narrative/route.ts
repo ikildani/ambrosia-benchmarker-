@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { getOrGenerateNarrative, isUuid, NARRATIVE_MODEL } from '@/app/api/radar/_lib/radar-api';
 import { buildEvidenceRows } from '@/lib/radar/narrative';
 
@@ -21,7 +21,7 @@ export const maxDuration = 30;
 export async function GET(request: NextRequest) {
   // Each cache miss is an Opus call: Pro-only, and rate-limited in
   // middleware.ts under the aiGeneration bucket.
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

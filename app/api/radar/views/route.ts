@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { formatValidationError } from '@/app/api/radar/_lib/mandate-schema';
 import { MAX_VIEWS_PER_USER, sanitizeViewFilters, savedViewFieldsSchema } from '@/app/api/radar/_lib/view-schema';
 import { DEFAULT_TABLE_COLUMNS } from '@/lib/radar/client/filter-schema';
@@ -20,7 +20,7 @@ import { activeTeamId } from '@/app/api/radar/_lib/team';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -39,7 +39,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

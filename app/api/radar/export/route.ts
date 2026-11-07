@@ -14,7 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders } from '@/lib/rate-limit';
 import { isUuid, uuidSchema } from '@/app/api/radar/_lib/radar-api';
 import { renderPDFBuffer } from '@/lib/report/server-renderer';
@@ -54,7 +54,7 @@ function audit(supabase: ReturnType<typeof createServiceClient>, userId: string,
 }
 
 export async function GET(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 1800;
 
 export async function GET() {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

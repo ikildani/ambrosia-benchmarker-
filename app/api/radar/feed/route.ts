@@ -21,7 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { ASSET_LIST_COLUMNS, type ClinicalAssetRow, type OwnerType } from '@/lib/radar/types';
 import {
   parseFilters,
@@ -172,7 +172,7 @@ function applyCursor(query: Builder, column: string, dir: SortDir, cursor: { val
 // ── Handler ───────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

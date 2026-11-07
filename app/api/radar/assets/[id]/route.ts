@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { isUuid } from '@/app/api/radar/_lib/radar-api';
 import { loadAssetBrief } from '@/components/radar/asset/brief-loader';
 
@@ -23,7 +23,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }

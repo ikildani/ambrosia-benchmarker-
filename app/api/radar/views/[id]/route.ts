@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { resolveUserTier } from '@/lib/auth/tier-check';
+import { resolveRadarAccess } from '@/lib/radar/launch-server';
 import { isUuid } from '@/app/api/radar/_lib/radar-api';
 import { formatValidationError } from '@/app/api/radar/_lib/mandate-schema';
 import { sanitizeViewFilters, savedViewFieldsSchema } from '@/app/api/radar/_lib/view-schema';
@@ -17,7 +17,7 @@ import { activeTeamId } from '@/app/api/radar/_lib/team';
 export const dynamic = 'force-dynamic';
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -77,7 +77,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
@@ -101,7 +101,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
 /** Marks the view as used (owner or teammate); never fails the caller's navigation. */
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await resolveUserTier();
+  const auth = await resolveRadarAccess();
   if (!auth.hasProAccess || !auth.userId) {
     return NextResponse.json({ error: 'Pro access required' }, { status: 403 });
   }
