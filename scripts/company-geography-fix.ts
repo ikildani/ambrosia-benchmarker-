@@ -19,7 +19,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { deriveRegion } from '../lib/ingestion/company-geography';
 import { normalizeCountryCode } from '../lib/radar/asset-universe';
 import {
-  GEOGRAPHY_FIX_STEP, decideCompanyCountry, edgarAddressCountry,
+  GEOGRAPHY_FIX_STEP, decideCompanyCountry, edgarAddressCountry, edgarNameMatches,
   type GeographyDecision, type SiteCount,
 } from '../lib/radar/company-geography';
 
@@ -34,8 +34,11 @@ const limitIdx = args.indexOf('--limit');
 const limit = limitIdx >= 0 ? Number(args[limitIdx + 1]) : Infinity;
 
 interface Company { id: string; name: string; cik: string | null; stored: string | null; storedSource: string | null }
-type Cache = { edgar: Record<string, string | null>; wikidata: Record<string, string | null> };
-const cache: Cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : { edgar: {}, wikidata: {} };
+type EdgarEntry = { iso: string | null; names: string[] };
+type Cache = { edgar?: Record<string, string | null>; edgarFiler?: Record<string, EdgarEntry>; wikidata: Record<string, string | null> };
+const cache: Cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : { wikidata: {} };
+cache.edgarFiler ??= {};
+cache.wikidata ??= {};
 const saveCache = () => writeFileSync(CACHE, JSON.stringify(cache));
 
 async function poolCompanies(supabase: SupabaseClient): Promise<Company[]> {
@@ -85,15 +88,23 @@ async function siteCounts(supabase: SupabaseClient, companyIds: string[]): Promi
   return new Map([...by].map(([k, m]) => [k, [...m].map(([iso, n]) => ({ iso, n }))]));
 }
 
-async function edgarCountry(cik: string): Promise<string | null> {
+/** EDGAR business-address country, only when the filer (current or former name) is this company. */
+async function edgarCountry(cik: string, name: string): Promise<string | null> {
   const key = cik.replace(/\D/g, '').padStart(10, '0');
-  if (key in cache.edgar) return cache.edgar[key];
-  const res = await fetch(`https://data.sec.gov/submissions/CIK${key}.json`, { headers: { 'User-Agent': SEC_UA, Accept: 'application/json' } });
-  await sleep(120);
-  const iso = res.ok ? edgarAddressCountry(((await res.json()) as { addresses?: { business?: Record<string, string | null> } }).addresses?.business) : null;
-  cache.edgar[key] = iso;
-  return iso;
+  let entry = cache.edgarFiler![key];
+  if (!entry) {
+    const res = await fetch(`https://data.sec.gov/submissions/CIK${key}.json`, { headers: { 'User-Agent': SEC_UA, Accept: 'application/json' } });
+    await sleep(120);
+    if (res.ok) {
+      const j = (await res.json()) as { name?: string; formerNames?: Array<{ name?: string }>; addresses?: { business?: Record<string, string | null> } };
+      entry = { iso: edgarAddressCountry(j.addresses?.business), names: [j.name, ...(j.formerNames ?? []).map(f => f.name)].filter((n): n is string => !!n) };
+    } else entry = { iso: null, names: [] };
+    cache.edgarFiler![key] = entry;
+  }
+  if (entry.iso && !edgarNameMatches(name, entry.names)) { edgarMismatches++; return null; }
+  return entry.iso;
 }
+let edgarMismatches = 0;
 
 const BUSINESS = /pharma|biotech|bio-?pharm|therapeutic|laborator|drug|medic|vaccine|biolog|life science|health|company|corporation|manufacturer|business|enterprise|conglomerate|chemical/i;
 const cleanName = (n: string) => n.replace(/\(.*?\)/g, ' ')
@@ -103,9 +114,13 @@ const cleanName = (n: string) => n.replace(/\(.*?\)/g, ' ')
 async function wd(params: Record<string, string>): Promise<any> {
   const url = 'https://www.wikidata.org/w/api.php?' + new URLSearchParams({ format: 'json', ...params });
   for (let attempt = 0; attempt < 3; attempt++) {
-    const res = await fetch(url, { headers: { 'User-Agent': WD_UA } });
-    if (res.ok) return res.json();
-    await sleep(1500);
+    try {
+      const res = await fetch(url, { headers: { 'User-Agent': WD_UA } });
+      if (res.ok) return res.json();
+    } catch {
+      // dropped connection: retry
+    }
+    await sleep(1500 * (attempt + 1));
   }
   return null;
 }
@@ -174,7 +189,7 @@ async function main() {
   const plan: Array<{ c: Company; d: GeographyDecision }> = [];
   const tally: Record<string, number> = {};
   for (const [i, c] of all.entries()) {
-    const edgar = c.cik ? await edgarCountry(c.cik) : null;
+    const edgar = c.cik ? await edgarCountry(c.cik, c.name) : null;
     const wikidata = await wikidataCountry(c.name);
     const d = decideCompanyCountry({ name: c.name, stored: c.stored, storedSource: c.storedSource, edgar, wikidata, sites: sites.get(c.id) ?? [] });
     tally[d.reason] = (tally[d.reason] ?? 0) + 1;
@@ -186,6 +201,7 @@ async function main() {
   writeFileSync(file, ['company_id\tname\tstored\tstored_source\tnew\treason\tbasis',
     ...plan.map(({ c, d }) => [c.id, c.name, c.stored ?? '', c.storedSource ?? '', d.country ?? '', d.reason, d.basis.join(',')].join('\t'))].join('\n') + '\n');
   console.log('Decisions:', tally);
+  console.log(`EDGAR addresses dropped for a filer-name mismatch: ${edgarMismatches}`);
   console.log(`${plan.length} changes planned → ${file}`);
   if (apply) await applyChanges(supabase, plan);
   else console.log('Dry run; rerun with --apply to write.');
