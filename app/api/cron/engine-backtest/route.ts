@@ -91,13 +91,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Persist backtest results for historical tracking and API access
+    // Persist backtest results for historical tracking and API access.
+    // This wrote to a cron_runs table that never existed (the insert error was
+    // swallowed), so no run was ever stored; data_ingestion_log is the cron log.
     try {
       const supabase = createServiceClient();
-      await supabase.from('cron_runs').insert({
-        cron_name: 'engine-backtest',
-        status: failingThresholds.length > 0 ? 'degraded' : 'passed',
-        metadata: {
+      const { error: logError } = await supabase.from('data_ingestion_log').insert({
+        source: 'engine_backtest',
+        run_type: 'cron',
+        completed_at: new Date().toISOString(),
+        records_processed: report.assetCount,
+        // data_ingestion_log_status_check allows running / completed / failed / partial.
+        status: failingThresholds.length > 0 ? 'partial' : 'completed',
+        notes: failingThresholds.length > 0 ? failingThresholds.join('; ') : 'ok',
+        parameters: {
           assetCount: report.assetCount,
           edgeCaseCount: report.edgeCaseCount,
           confidence: report.overallConfidence,
@@ -110,8 +117,8 @@ export async function GET(request: NextRequest) {
           timingAccuracy: report.timingAccuracyCompetitorYear,
           failingThresholds,
         },
-        created_at: new Date().toISOString(),
       });
+      if (logError) console.error('[engine-backtest] log insert failed:', logError.message);
       await runCronIntelligence(supabase, 'engine-backtest', {
         processed: 1,
         inserted: 0,
