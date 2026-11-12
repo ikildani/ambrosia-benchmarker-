@@ -33,6 +33,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { classifyCompanyCountry, deriveRegion } from '@/lib/ingestion/company-geography';
+import { NON_DOMESTIC_REGISTRIES } from '@/lib/radar/company-geography';
 import { inferIndicationFromConditions, inferModalityFromIntervention } from '@/lib/ingestion/clinical-trials';
 import { normalizeInterventionName } from '@/lib/ingestion/ctgov-sweep';
 import { escapeLikePattern } from '@/lib/radar/signal-detection';
@@ -263,7 +264,10 @@ export async function resolveSponsorCompany(
   // (5) create.
   const geo = classifyCompanyCountry(name);
   const scope = adapter?.countryScope ?? [];
-  const country = geo.confidence !== 'low' && geo.country !== 'unknown' ? geo.country : scope.length === 1 ? scope[0] : null;
+  // A registry's own country is evidence only where its sponsors are mostly domestic: Health Canada and
+  // ISRCTN stamps were 0 of 17 right against SEC addresses (lib/radar/company-geography.ts).
+  const scopeCountry = scope.length === 1 && !NON_DOMESTIC_REGISTRIES.has(`registry:${record.registry}`) ? scope[0] : null;
+  const country = geo.confidence !== 'low' && geo.country !== 'unknown' ? geo.country : scopeCountry;
   const display = displayCompanyName(name);
   const row: Record<string, unknown> = {
     name: display,

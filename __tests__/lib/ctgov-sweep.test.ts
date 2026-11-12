@@ -519,7 +519,9 @@ describe('geography', () => {
   it('uses the name classifier when confident, else the trial locations', () => {
     expect(resolveSponsorGeography('Pfizer Inc.', ['China'])).toEqual({ country: 'US', region: 'north_america', source: 'name' });
     expect(resolveSponsorGeography('Hangzhou Zhongmei Biotech Co., Ltd.', [])).toMatchObject({ country: 'CN', region: 'china' });
-    expect(resolveSponsorGeography('Acme Oncology, Inc.', ['China', 'United States', 'China'])).toEqual({ country: 'CN', region: 'china', source: 'location' });
+    expect(resolveSponsorGeography('Acme Oncology, Inc.', ['China', 'United States', 'China'])).toEqual({ country: null, region: null, source: null });
+    expect(resolveSponsorGeography('Acme Oncology, Inc.', ['China', 'China', 'China'])).toEqual({ country: 'CN', region: 'china', source: 'location' });
+    expect(resolveSponsorGeography('Acme Oncology, Inc.', ['Australia', 'Australia', 'Australia'])).toEqual({ country: null, region: null, source: null });
     expect(resolveSponsorGeography('Acme Oncology, Inc.', [])).toEqual({ country: null, region: null, source: null });
   });
 });

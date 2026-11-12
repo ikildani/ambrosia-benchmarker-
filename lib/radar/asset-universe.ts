@@ -231,6 +231,8 @@ const COUNTRY_NAME_TO_ISO: Record<string, string> = {
   'portugal': 'PT', 'czech republic': 'CZ', 'czechia': 'CZ', 'hungary': 'HU', 'greece': 'GR',
   'new zealand': 'NZ', 'thailand': 'TH', 'malaysia': 'MY', 'philippines': 'PH', 'vietnam': 'VN',
   'luxembourg': 'LU', 'iceland': 'IS',
+  'uae': 'AE', 'iran': 'IR', 'russia': 'RU', 'russian federation': 'RU', 'ukraine': 'UA', 'slovenia': 'SI',
+  'serbia': 'RS', 'egypt': 'EG', 'pakistan': 'PK', 'chile': 'CL', 'colombia': 'CO', 'peru': 'PE',
 };
 
 /** Normalize any stored country value (ISO-2, 'UK', full name) to ISO-2 or null. */
