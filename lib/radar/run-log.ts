@@ -25,7 +25,9 @@ export type RadarRunSource =
   | 'patents_assignee'
   | 'catalysts'
   | 'score_backtest'
-  | 'asset_classify';
+  | 'asset_classify'
+  | 'country_backfill'
+  | 'company_enrichment';
 
 export interface RadarRunLog {
   source: RadarRunSource;
