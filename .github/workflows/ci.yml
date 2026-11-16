@@ -30,7 +30,14 @@ jobs:
             node-version: '20'                                                         
             cache: 'npm'                                                               
         - run: npm ci                                                                  
-        - run: npm run build                                                           
+        # Placeholder Supabase settings: the build must not reach the production
+        # database, so queries fail fast against a closed local port and pages take
+        # their no-data path instead of throwing "Missing Supabase environment variables".
+        - run: npm run build
+          env:
+            NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: 'ci-placeholder'
+            SUPABASE_SERVICE_ROLE_KEY: 'ci-placeholder'
                                                                                        
     security:                                                                          
       name: Security Audit                                                             
