@@ -175,8 +175,9 @@ export type SortDir = 'asc' | 'desc';
 /** Sort key → clinical_assets column. Shared by the feed route (ORDER BY) and the cursor codec. */
 export const SORT_COLUMNS: Record<SortKey, { column: string; kind: 'number' | 'text'; defaultDir: SortDir }> = {
   // The stored score is probability × 100 and rounds to 0 for nearly every
-  // program; the calibrated probability itself orders the feed.
-  score: { column: 'score_probability', kind: 'number', defaultDir: 'desc' },
+  // program, and the calibrated probability is a step function that ties the
+  // top block; the model's raw logit (migration 186) orders the feed.
+  score: { column: 'score_logit', kind: 'number', defaultDir: 'desc' },
   confidence: { column: 'score_confidence', kind: 'number', defaultDir: 'desc' },
   asset: { column: 'asset_name', kind: 'text', defaultDir: 'asc' },
   owner: { column: 'company_name', kind: 'text', defaultDir: 'asc' },

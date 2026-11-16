@@ -117,6 +117,12 @@ export interface QaScoreStats {
     p90: number | null;
     count_ge_50: number;
     count_ge_30: number;
+    /** Calibrated probability spread and logit resolution (migration 186). */
+    prob_n: number;
+    prob_p50: number | null;
+    prob_p99: number | null;
+    logit_distinct: number;
+    logit_missing: number;
   };
 }
 
@@ -371,6 +377,10 @@ export function normalizeThesisStats(raw: Record<string, unknown> | null | undef
   };
 }
 
+function fmtProb(p: number | null): string {
+  return p == null ? 'n/a' : `${(p * 100).toFixed(2)}%`;
+}
+
 export function normalizeScoreStats(raw: Record<string, unknown> | null | undefined): QaScoreStats {
   const r = (raw ?? {}) as Record<string, unknown>;
   const obj = (k: string) => (r[k] ?? {}) as Record<string, unknown>;
@@ -397,6 +407,11 @@ export function normalizeScoreStats(raw: Record<string, unknown> | null | undefi
       p90: nullableNum(dist.p90),
       count_ge_50: n(dist.count_ge_50),
       count_ge_30: n(dist.count_ge_30),
+      prob_n: n(dist.prob_n),
+      prob_p50: nullableNum(dist.prob_p50),
+      prob_p99: nullableNum(dist.prob_p99),
+      logit_distinct: n(dist.logit_distinct),
+      logit_missing: n(dist.logit_missing),
     },
   };
 }
@@ -821,16 +836,22 @@ export function evaluateInvariants(stats: QaStats, opts: EvaluateOptions = {}): 
 
   const d = sc.distribution;
   const ge50Pct = pct(d.count_ge_50, d.n);
+  // The display score (probability x 100) rounds to 0-2 for every program, so
+  // discrimination is measured on the probability itself: the top 1% must sit
+  // well above the median, and the logit must separate programs (the feed
+  // orders by it; calibration alone ties whole blocks).
+  const spread = d.prob_p50 && d.prob_p50 > 0 && d.prob_p99 != null ? d.prob_p99 / d.prob_p50 : null;
+  const minDistinct = Math.min(1000, Math.ceil(d.prob_n / 10));
   out.push(result({
     check_name: 'score_discriminates',
     severity: 'blocker',
-    passed: d.n > 0 && d.count_ge_30 > 0,
-    expected: 'at least one scored industry asset ≥ 30 (score does not discriminate otherwise)',
-    observed: d.n > 0
-      ? `n=${d.n}, max ${d.max}, mean ${d.mean?.toFixed(1)}, p50 ${d.p50}, p90 ${d.p90}; ≥30: ${d.count_ge_30}; ≥50: ${d.count_ge_50} (${fmtPct(ge50Pct)})`
+    passed: d.prob_n > 0 && spread != null && spread >= 3 && d.logit_distinct >= minDistinct,
+    expected: `p99 probability ≥ 3× the median, and ≥ ${minDistinct} distinct logits among scored industry programs`,
+    observed: d.prob_n > 0
+      ? `n=${d.prob_n}, p50 ${fmtProb(d.prob_p50)}, p99 ${fmtProb(d.prob_p99)} (${spread == null ? 'n/a' : spread.toFixed(1)}×); ${d.logit_distinct} distinct logits, ${d.logit_missing} scored without a logit`
       : 'no scored industry assets',
     count: null,
-    details: { ...d, share_ge_50_pct: ge50Pct },
+    details: { ...d, share_ge_50_pct: ge50Pct, spread_p99_p50: spread },
     group: 'score',
   }));
 

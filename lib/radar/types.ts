@@ -141,6 +141,8 @@ export interface ClinicalAssetRow {
   partnership_sources_checked?: PartnershipSourcesChecked;
   /** Added by migration 126 (score presentation). */
   score_probability?: number | null;
+  /** Raw model logit; orders the feed (migration 186). */
+  score_logit?: number | null;
   score_pct_peer?: number | null;
   score_peer_n?: number | null;
   score_peer_key?: string | null;
@@ -179,7 +181,7 @@ export interface ScoreInterval {
 
 /** Columns the feed/table needs; keep the select list in one place. */
 export const ASSET_LIST_COLUMNS =
-  'id, company_id, company_name, asset_name, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, phase, trial_status, trial_count, enrollment_total, partnership_status, partner_company_name, territory_rights_available, program_key, program_assets, program_trials, rights_available, licensing_intent_score, score_confidence, competitive_heat, deal_readiness_score, confidence_score, originator_country, originator_region, first_posted_date, last_update_date, last_scored_at, nct_ids, drug_master_id, target_class, moa_short, classification_status, owner_type, ownership_status, partnership_basis, partnership_sources_checked, score_probability, score_pct_peer, score_peer_n, score_peer_key, score_pct_universe, score_base_rate, score_top_drivers, score_low_power, asset_origin, stage_detail, disclosure_source_type, disclosure_url, disclosure_date, disclosed_last_seen_at';
+  'id, company_id, company_name, asset_name, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, phase, trial_status, trial_count, enrollment_total, partnership_status, partner_company_name, territory_rights_available, program_key, program_assets, program_trials, rights_available, licensing_intent_score, score_confidence, competitive_heat, deal_readiness_score, confidence_score, originator_country, originator_region, first_posted_date, last_update_date, last_scored_at, nct_ids, drug_master_id, target_class, moa_short, classification_status, owner_type, ownership_status, partnership_basis, partnership_sources_checked, score_probability, score_logit, score_pct_peer, score_peer_n, score_peer_key, score_pct_universe, score_base_rate, score_top_drivers, score_low_power, asset_origin, stage_detail, disclosure_source_type, disclosure_url, disclosure_date, disclosed_last_seen_at';
 
 export interface ScoreFactorContribution {
   factor: string;
