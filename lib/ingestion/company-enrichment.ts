@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { logRadarRun } from '@/lib/radar/run-log';
 
 export interface CompanyEnrichmentOptions {
   companyIds?: string[];    // specific companies, or all if not provided
@@ -232,25 +233,23 @@ export async function runCompanyEnrichment(
   const durationMs = Date.now() - startTime;
 
   // Step 3: Log to data_ingestion_log
-  const { error: logError } = await supabase.from('data_ingestion_log').insert({
+  await logRadarRun(supabase, {
     source: 'company_enrichment',
-    status: timedOut ? 'partial' : errors.length === 0 ? 'success' : 'partial',
-    records_processed: companiesProcessed,
-    records_inserted: appetiteUpdated,
-    errors: errors.length > 0 ? errors.slice(0, 50) : null,
-    duration_ms: durationMs,
-    metadata: {
+    startedAt: startTime,
+    status: timedOut || errors.length > 0 ? 'partial' : 'completed',
+    processed: companiesProcessed,
+    updated: appetiteUpdated,
+    failed: errors.length,
+    errors,
+    parameters: {
       stats_updated: statsUpdated,
       appetite_updated: appetiteUpdated,
       full_refresh: options?.fullRefresh || false,
       specific_ids: options?.companyIds?.length || 0,
       timed_out: timedOut,
+      duration_ms: durationMs,
     },
   });
-
-  if (logError) {
-    console.error('Failed to write to data_ingestion_log:', logError.message);
-  }
 
   console.log(
     `Company enrichment complete: ${companiesProcessed} processed, ${statsUpdated} stats updated, ${appetiteUpdated} appetite updated, ${errors.length} errors (${durationMs}ms)`

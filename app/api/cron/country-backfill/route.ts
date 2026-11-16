@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { logRadarRun } from '@/lib/radar/run-log';
 import { timingSafeEqual } from 'crypto';
 import {
   classifyCompanyCountry,
@@ -161,16 +162,18 @@ export async function GET(request: NextRequest) {
     // ── Log results ──────────────────────────────────────────────────
     const duration = Math.round((Date.now() - startTime) / 1000);
 
-    await supabase.from('data_ingestion_log').insert({
+    const timedOut = Date.now() - startTime >= MAX_RUNTIME_MS;
+    const logWritten = await logRadarRun(supabase, {
       source: 'country_backfill',
-      status: errors.length > 0 ? 'partial' : 'success',
-      records_processed: dealsProcessed,
-      records_inserted: dealsUpdated,
-      duration_seconds: duration,
-      error_details: errors.length > 0 ? errors.slice(0, 10) : null,
-      metadata: {
+      startedAt: startTime,
+      status: errors.length > 0 || timedOut ? 'partial' : 'completed',
+      processed: dealsProcessed,
+      updated: dealsUpdated,
+      skipped: dealsSkipped,
+      failed: errors.length,
+      errors,
+      parameters: {
         companies_updated: companiesUpdated,
-        deals_skipped: dealsSkipped,
         top_corridors: Object.entries(corridorCounts)
           .sort(([, a], [, b]) => b - a)
           .slice(0, 10)
@@ -179,7 +182,7 @@ export async function GET(request: NextRequest) {
           .sort(([, a], [, b]) => b - a)
           .slice(0, 10)
           .map(([country, count]) => `${country}: ${count}`),
-        timed_out: Date.now() - startTime >= MAX_RUNTIME_MS,
+        timed_out: timedOut,
       },
     });
 
@@ -197,7 +200,8 @@ export async function GET(request: NextRequest) {
         .sort(([, a], [, b]) => b - a)
         .slice(0, 10),
       errors: errors.slice(0, 5),
-      timed_out: Date.now() - startTime >= MAX_RUNTIME_MS,
+      timed_out: timedOut,
+      log_written: logWritten,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
