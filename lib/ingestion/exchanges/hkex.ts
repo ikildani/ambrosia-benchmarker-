@@ -51,6 +51,8 @@ export interface HkexAnnouncement {
   fileLink: string; // path
   url: string;
   totalCount: number;
+  /** HKEX headline category (LONG_TEXT), e.g. "Announcements and Notices - [Placing]". */
+  category?: string;
 }
 
 let lastCallAt = 0;
@@ -79,6 +81,7 @@ export function parseHkexResult(body: string): { rows: HkexAnnouncement[]; empty
     fileLink: String(r.FILE_LINK ?? ''),
     url: `${HKEX_BASE}${String(r.FILE_LINK ?? '')}`,
     totalCount: Number(r.TOTAL_COUNT ?? inner.length),
+    category: String(r.LONG_TEXT ?? ''),
   })).filter(r => r.newsId && r.fileLink);
   return { rows, empty: rows.length === 0, throttled: false };
 }
@@ -113,13 +116,13 @@ export const HKEX_ANNUAL_REPORT = { t1code: '40000', t2code: '40100' } as const;
  * windows of a year or more (the 14-day limit applies to the unfiltered title search).
  */
 export async function searchHkexIssuerDocuments(
-  stockId: number | string, category: { t1code: string; t2code: string }, fromIso: string, toIso: string,
+  stockId: number | string, category: { t1code: string; t2code: string }, fromIso: string, toIso: string, rowRange = 20,
 ): Promise<{ rows: HkexAnnouncement[]; throttled: boolean }> {
   await throttle();
   const params = new URLSearchParams({
     sortDir: '0', sortByOptions: 'DateTime', category: '0', market: 'SEHK', stockId: String(stockId), documentType: '-1',
     fromDate: yyyymmdd(fromIso), toDate: yyyymmdd(toIso), title: '', searchType: '1',
-    t1code: category.t1code, t2Gcode: '-2', t2code: category.t2code, rowRange: '20', lang: 'EN',
+    t1code: category.t1code, t2Gcode: '-2', t2code: category.t2code, rowRange: String(rowRange), lang: 'EN',
   });
   const res = await fetchWithTimeout(`${SERVLET}?${params}`, {
     timeoutMs: 20_000, retries: 0,
