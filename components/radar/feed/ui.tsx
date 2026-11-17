@@ -7,6 +7,7 @@
  */
 
 import type { ReactNode, ButtonHTMLAttributes } from 'react';
+import { availabilityNote } from '@/lib/radar/vocab';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import type { OwnerType } from '@/lib/radar/types';
 import { ownerTypeLabel } from '@/lib/radar/client/format';
@@ -182,6 +183,23 @@ export function PartnershipTag({ status }: { status: string | null | undefined }
         : 'text-neutral-600 dark:text-neutral-400';
   const label = status === 'unpartnered' ? 'Unpartnered' : status === 'partially_partnered' ? 'Partial' : 'Partnered';
   return <span className={cn('shrink-0 text-[12px] font-medium', tone)}>{label}</span>;
+}
+
+/** Why a program ranks lower under "Best fit" (migration 188); renders nothing when no obstacle is known. */
+export function AvailabilityTag({ reasons }: { reasons: readonly string[] | null | undefined }) {
+  const note = availabilityNote(reasons);
+  if (!note) return null;
+  const first = note.split(' · ')[0];
+  const more = (reasons?.length ?? 1) - 1;
+  return (
+    <span
+      className="shrink-0 rounded bg-amber-50 px-1 text-[10px] font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+      title={`Ranked lower under Best fit: ${note}`}
+    >
+      {first}
+      {more > 0 ? ` +${more}` : ''}
+    </span>
+  );
 }
 
 export function Spinner({ className }: { className?: string }) {

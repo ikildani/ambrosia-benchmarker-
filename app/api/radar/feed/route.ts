@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
   const filters = parseFilters(searchParams);
 
   const sortRaw = searchParams.get('sort');
-  const sort: SortKey = (SORT_KEYS as readonly string[]).includes(sortRaw ?? '') ? (sortRaw as SortKey) : 'score';
+  const sort: SortKey = (SORT_KEYS as readonly string[]).includes(sortRaw ?? '') ? (sortRaw as SortKey) : 'fit';
   const dirRaw = searchParams.get('dir');
   const dir: SortDir = dirRaw === 'asc' || dirRaw === 'desc' ? dirRaw : SORT_COLUMNS[sort].defaultDir;
   const { column, kind } = SORT_COLUMNS[sort];

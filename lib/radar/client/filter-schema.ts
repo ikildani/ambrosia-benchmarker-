@@ -157,6 +157,7 @@ export const EMPTY_FILTERS: RadarFilterState = {
 };
 
 export const SORT_KEYS = [
+  'fit',
   'score',
   'confidence',
   'asset',
@@ -178,6 +179,9 @@ export const SORT_COLUMNS: Record<SortKey, { column: string; kind: 'number' | 't
   // program, and the calibrated probability is a step function that ties the
   // top block; the model's raw logit (migration 186) orders the feed.
   score: { column: 'score_logit', kind: 'number', defaultDir: 'desc' },
+  // Best fit: the logit discounted for programs a buyer cannot realistically
+  // license (partnered, large pharma, another company's drug; migration 188).
+  fit: { column: 'score_rank', kind: 'number', defaultDir: 'desc' },
   confidence: { column: 'score_confidence', kind: 'number', defaultDir: 'desc' },
   asset: { column: 'asset_name', kind: 'text', defaultDir: 'asc' },
   owner: { column: 'company_name', kind: 'text', defaultDir: 'asc' },
@@ -264,7 +268,7 @@ export const FEED_MAX_PAGE_SIZE = 100;
 
 export const DEFAULT_UI: RadarUiState = {
   view: 'table',
-  sort: 'score',
+  sort: 'fit',
   dir: 'desc',
   after: null,
   mandate: null,

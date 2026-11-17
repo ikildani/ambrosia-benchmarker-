@@ -41,6 +41,7 @@ export type FeedRow = Pick<
   | 'rights_available'
   | 'program_key'
   | 'program_name'
+  | 'availability_reasons'
   | 'program_assets'
   | 'program_trials'
   | 'licensing_intent_score'

@@ -6,7 +6,7 @@ import type { FeedRow } from '@/lib/radar/client/api-types';
 import { programLabel } from '@/lib/radar/types';
 import { daysUntil, fmtDate, fmtRelative, fmtRights, shortLabel } from '@/lib/radar/client/format';
 import { ScoreCell } from './ScoreCell';
-import { CountryTag, FOCUS_RING, OwnerTypeChip, PartnershipTag, cn } from './ui';
+import { AvailabilityTag, CountryTag, FOCUS_RING, OwnerTypeChip, PartnershipTag, cn } from './ui';
 
 interface Props {
   rows: FeedRow[];
@@ -71,7 +71,8 @@ export function AssetCards({ rows, compareIds, compareFull, onToggleCompare, loa
               <div>
                 <dt className="text-neutral-600 dark:text-neutral-400">Partnership</dt>
                 <dd>
-                  <PartnershipTag status={row.partnership_status} />
+                  <PartnershipTag status={row.partnership_status} />{' '}
+                  <AvailabilityTag reasons={row.availability_reasons} />
                 </dd>
               </div>
               {row.next_catalyst_date && (
