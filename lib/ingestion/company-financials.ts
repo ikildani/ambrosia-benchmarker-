@@ -548,7 +548,7 @@ async function throttle(): Promise<void> {
   lastRequestAt = Date.now();
 }
 
-async function secGetJson<T>(url: string, timeoutMs = 20_000): Promise<T | null> {
+export async function secGetJson<T>(url: string, timeoutMs = 20_000): Promise<T | null> {
   await throttle();
   const res = await fetchWithTimeout(url, {
     headers: { 'User-Agent': secUserAgent(), Accept: 'application/json' },
@@ -558,6 +558,19 @@ async function secGetJson<T>(url: string, timeoutMs = 20_000): Promise<T | null>
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`SEC ${res.status} for ${url}`);
   return (await res.json()) as T;
+}
+
+/** Plain-text SEC fetch under the same fair-access throttle (Form D primary_doc.xml). Null on 404. */
+export async function secGetText(url: string, timeoutMs = 20_000): Promise<string | null> {
+  await throttle();
+  const res = await fetchWithTimeout(url, {
+    headers: { 'User-Agent': secUserAgent(), Accept: 'application/xml, text/xml, text/plain, */*' },
+    timeoutMs,
+    retries: 1,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`SEC ${res.status} for ${url}`);
+  return res.text();
 }
 
 export async function fetchCompanyTickers(): Promise<SecTickerEntry[]> {
