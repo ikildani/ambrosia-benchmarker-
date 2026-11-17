@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       name: input.name,
       description: input.description ?? null,
       filters: sanitizeViewFilters(input.filters ?? {}),
-      sort: input.sort ?? 'score',
+      sort: input.sort ?? 'fit',
       dir: input.dir ?? 'desc',
       view_mode: input.view_mode ?? 'table',
       columns: input.columns?.length ? input.columns : [...DEFAULT_TABLE_COLUMNS],

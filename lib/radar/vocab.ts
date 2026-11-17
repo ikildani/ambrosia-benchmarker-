@@ -115,6 +115,22 @@ export const RADAR_OWNERSHIP_OPTIONS: VocabOption[] = [
   { value: 'not_a_program', label: 'Not a program', longLabel: 'Website text stored as an asset' },
 ];
 
+/** Reasons a program is less available to license (clinical_assets.availability_reasons, migration 188). */
+export const RADAR_AVAILABILITY_REASONS: Record<string, string> = {
+  partnered: 'Already partnered',
+  originator_elsewhere: "Another company's drug",
+  large_pharma: 'Large pharma owner',
+  approved_molecule: 'Approved molecule',
+  licensee: 'In-licensed',
+  partial_deal: 'Some rights licensed',
+};
+
+/** One-line note for a program's availability reasons; null when nothing is known against it. */
+export function availabilityNote(reasons: readonly string[] | null | undefined): string | null {
+  const labels = (reasons ?? []).map(r => RADAR_AVAILABILITY_REASONS[r]).filter((l): l is string => Boolean(l));
+  return labels.length ? labels.join(' · ') : null;
+}
+
 /** Ownership states the feed hides unless the ownership facet selects them. */
 export const RADAR_OWNERSHIP_DEFAULT_EXCLUDED: readonly string[] = ['comparator_or_background', 'marketed_other', 'duplicate_program', 'not_a_program'];
 

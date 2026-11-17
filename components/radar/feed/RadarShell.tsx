@@ -50,6 +50,7 @@ import { SaveViewDialog, ViewSwitcher, type SaveViewInput } from './ViewSwitcher
 import { BTN_GHOST, BTN_SECONDARY, FOCUS_RING, PANEL, Pill, cn } from './ui';
 
 const SORT_LABELS: Record<SortKey, string> = {
+  fit: 'Best fit',
   score: 'Intent score',
   confidence: 'Confidence',
   asset: 'Asset name',
