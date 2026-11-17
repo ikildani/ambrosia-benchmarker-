@@ -14,6 +14,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronDownIcon, ChevronUpIcon, ChevronUpDownIcon, FunnelIcon } from '@heroicons/react/16/solid';
 import { radarLabel } from '@/lib/radar/vocab';
 import type { FeedRow } from '@/lib/radar/client/api-types';
+import { programLabel } from '@/lib/radar/types';
 import { DEFAULT_TABLE_COLUMNS, TABLE_COLUMNS, type SortDir, type SortKey, type TableColumn } from '@/lib/radar/client/filter-schema';
 import { daysUntil, fmtDate, fmtRelative, fmtRightsAvailable, phaseShort, shortLabel } from '@/lib/radar/client/format';
 import { MODALITY_COLORS } from './Landscape';
@@ -342,7 +343,7 @@ function Cell({ col, row, inCompare, compareFull, onToggleCompare, onFilterCompa
             tabIndex={-1}
             title={row.asset_name}
           >
-            {row.asset_name}
+            {programLabel(row)}
           </Link>
           <div className="flex min-w-0 items-center gap-1.5">
             <PartnershipTag status={row.partnership_status} />

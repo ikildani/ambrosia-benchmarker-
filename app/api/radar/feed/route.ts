@@ -153,7 +153,7 @@ function applyFilters(query: Builder, f: RadarFilterState): Builder {
   if (f.q) {
     // cleanQuery() already removed , ( ) % and backslashes, so the term cannot alter the expression.
     const term = `%${f.q}%`;
-    q = q.or(`asset_name.ilike.${term},company_name.ilike.${term},target.ilike.${term},indication_specific.ilike.${term}`);
+    q = q.or(`asset_name.ilike.${term},program_name.ilike.${term},company_name.ilike.${term},target.ilike.${term},indication_specific.ilike.${term}`);
   }
   return q;
 }

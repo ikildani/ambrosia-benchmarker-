@@ -40,6 +40,7 @@ export type FeedRow = Pick<
   | 'territory_rights_available'
   | 'rights_available'
   | 'program_key'
+  | 'program_name'
   | 'program_assets'
   | 'program_trials'
   | 'licensing_intent_score'
@@ -209,6 +210,7 @@ export interface CompareTerms {
 export interface CompareAsset {
   id: string;
   asset_name: string;
+  program_name?: string | null;
   company_name: string;
   company_id: string | null;
   owner_type: OwnerType;

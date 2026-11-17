@@ -20,11 +20,12 @@ import type { CompareAsset, CompareFactor, CompareResponse, CompareTerms } from 
 export const dynamic = 'force-dynamic';
 
 const ASSET_SELECT =
-  'id, asset_name, company_name, company_id, originator_country, originator_region, phase, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, partnership_status, partner_company_name, territory_rights_available, regulatory_designations, trial_count, enrollment_total, licensing_intent_score, score_confidence, deal_readiness_score, competitive_heat, last_update_date, score_probability, score_pct_peer, score_peer_n, score_peer_key, score_base_rate, score_top_drivers, companies(owner_type)';
+  'id, asset_name, program_name, company_name, company_id, originator_country, originator_region, phase, modality, therapeutic_area, indication_category, indication_specific, target, mechanism, partnership_status, partner_company_name, territory_rights_available, regulatory_designations, trial_count, enrollment_total, licensing_intent_score, score_confidence, deal_readiness_score, competitive_heat, last_update_date, score_probability, score_pct_peer, score_peer_n, score_peer_key, score_base_rate, score_top_drivers, companies(owner_type)';
 
 interface AssetRow {
   id: string;
   asset_name: string;
+  program_name: string | null;
   company_name: string;
   company_id: string | null;
   originator_country: string | null;
