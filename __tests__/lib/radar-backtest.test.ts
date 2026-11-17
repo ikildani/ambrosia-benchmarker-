@@ -504,6 +504,21 @@ describe('metrics — known vectors', () => {
     expect(calibrationBins(s, l, 10, w)[8].observed).toBeCloseTo(calibrationBins(sRep, lRep, 10)[8].observed, 10);
   });
 
+  test('computeMetrics ranks on rankScores (logits) but keeps Brier on the calibrated scores', () => {
+    // Calibration flattened the top four rows to one value; the logits still order them.
+    const calibrated = [0.5, 0.5, 0.5, 0.5, 0.1, 0.1];
+    const logits = [0.4, 0.9, 0.1, 0.2, -2, -3];
+    const l = [0, 1, 0, 0, 0, 0];
+    const tied = computeMetrics(calibrated, l);
+    const ranked = computeMetrics(calibrated, l, undefined, logits);
+    expect(ranked.precision_at_50).toBeCloseTo(tied.precision_at_50, 10); // k ≥ n: same rows
+    expect(precisionAtK(logits, l, 1)).toBe(1);
+    expect(ranked.roc_auc).toBe(1);
+    expect(ranked.roc_auc).toBeGreaterThan(tied.roc_auc);
+    expect(ranked.brier).toBeCloseTo(brier(calibrated, l), 10);
+    expect(() => computeMetrics(calibrated, l, undefined, [1, 2])).toThrow();
+  });
+
   test('computeMetrics flags low power and toBacktestSummary keeps the flag in the notes', () => {
     const m = computeMetrics(scores, labels);
     expect(m.positives).toBe(3);

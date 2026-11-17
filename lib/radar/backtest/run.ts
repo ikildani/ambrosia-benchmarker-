@@ -611,7 +611,8 @@ export function trainAndEvaluate(rows: readonly LoadedSnapshot[], version: strin
 
   const testX = test.map(r => r.row);
   const preds = predictBatch(testX, params);
-  const metrics = computeMetrics(preds, test.map(r => r.label), test.map(r => r.weight));
+  // Rank on logits: calibration ties the top block (see computeMetrics).
+  const metrics = computeMetrics(preds, test.map(r => r.label), test.map(r => r.weight), logitBatch(testX, params));
   const importance = factorImportance(FEATURE_NAMES, contributionMatrix(testX, params));
   notes.push(`negatives subsampled at ${NEGATIVE_ASSET_SAMPLING_RATE} per asset; metrics weighted back to the full universe`);
   notes.push(`train positives ${posTrain} / ${train.length} rows; class weight ${fit.classWeightPos.toFixed(1)}; ${fit.iterations} iterations`);
@@ -662,8 +663,9 @@ async function runTrainPhase(
     const active = await loadActiveModel(supabase);
     if (active && active.feature_version === state.feature_version) {
       const test = rows.filter(r => r.as_of >= TEST_FROM);
-      const incPreds = predictBatch(test.map(r => r.row), active);
-      const inc = computeMetrics(incPreds, test.map(r => r.label), test.map(r => r.weight));
+      const incX = test.map(r => r.row);
+      const incPreds = predictBatch(incX, active);
+      const inc = computeMetrics(incPreds, test.map(r => r.label), test.map(r => r.weight), logitBatch(incX, active));
       // precision@50 is 0 for both models while positives are scarce, so it
       // cannot break ties; PR-AUC can. A low-power candidate never displaces
       // an incumbent that was validated with enough positives.

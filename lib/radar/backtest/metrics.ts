@@ -256,9 +256,23 @@ export function factorImportance(featureNames: readonly string[], contributions:
     .sort((a, b) => b.importance - a.importance);
 }
 
-/** All scorecard numbers in one call. */
-export function computeMetrics(scores: readonly number[], labels: readonly number[], weights?: Weights): BacktestMetrics {
+/**
+ * All scorecard numbers in one call.
+ *
+ * `scores` are calibrated probabilities (Brier and calibration bins need them).
+ * `rankScores` order the rows for AUC, PR-AUC, precision@k and lift; pass the
+ * raw logits, because isotonic calibration is a step function that ties whole
+ * blocks of rows (the feed orders by the logit for the same reason). Defaults
+ * to `scores`.
+ */
+export function computeMetrics(
+  scores: readonly number[],
+  labels: readonly number[],
+  weights?: Weights,
+  rankScores: readonly number[] = scores,
+): BacktestMetrics {
   assertParallel(scores, labels, weights);
+  assertParallel(rankScores, labels, weights);
   const n = scores.length;
   let positives = 0;
   let wPos = 0;
@@ -269,12 +283,12 @@ export function computeMetrics(scores: readonly number[], labels: readonly numbe
     n,
     positives,
     base_rate: baseRate,
-    roc_auc: rocAuc(scores, labels, weights),
-    pr_auc: prAuc(scores, labels, weights),
-    precision_at_50: precisionAtK(scores, labels, 50, weights),
-    precision_at_100: precisionAtK(scores, labels, 100, weights),
-    precision_top_decile: precisionTopDecile(scores, labels, weights),
-    lift_top_decile: liftTopDecile(scores, labels, weights),
+    roc_auc: rocAuc(rankScores, labels, weights),
+    pr_auc: prAuc(rankScores, labels, weights),
+    precision_at_50: precisionAtK(rankScores, labels, 50, weights),
+    precision_at_100: precisionAtK(rankScores, labels, 100, weights),
+    precision_top_decile: precisionTopDecile(rankScores, labels, weights),
+    lift_top_decile: liftTopDecile(rankScores, labels, weights),
     brier: brier(scores, labels, weights),
     // Brier of always predicting the base rate — the honest comparison point.
     brier_baseline: baseRate * (1 - baseRate),

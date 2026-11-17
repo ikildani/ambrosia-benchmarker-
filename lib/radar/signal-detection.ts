@@ -1837,6 +1837,8 @@ async function persistWave(
     score_model_version: result.modelVersion,
     // Migration 126 presentation fields; percentiles are set-based after the run.
     score_probability: result.probability,
+    // Migration 186: the raw logit orders the feed (calibration ties the top).
+    score_logit: result.logit,
     score_top_drivers: result.topDrivers,
     score_interval: result.interval,
     last_scored_at: nowIso,
@@ -1847,6 +1849,10 @@ async function persistWave(
     if (error && ['score_probability', 'score_top_drivers', 'score_interval'].some(c => isMissingColumn(error!.message, c))) {
       outcome.errors.push('clinical_assets score presentation columns missing (apply migration 126); wrote scores without them');
       ({ error } = await supabase.from('clinical_assets').upsert(without2(rows, ['score_probability', 'score_top_drivers', 'score_interval']), { onConflict: 'id' }));
+    }
+    if (error && isMissingColumn(error.message, 'score_logit')) {
+      outcome.errors.push('clinical_assets.score_logit missing (apply migration 186); wrote scores without it');
+      ({ error } = await supabase.from('clinical_assets').upsert(without(rows, 'score_logit'), { onConflict: 'id' }));
     }
     if (error && isMissingColumn(error.message, 'score_model_version')) {
       outcome.errors.push('clinical_assets.score_model_version missing (apply migration 115); wrote scores without it');

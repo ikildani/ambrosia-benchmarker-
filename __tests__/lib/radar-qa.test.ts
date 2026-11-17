@@ -78,7 +78,7 @@ function healthyStats(overrides: Partial<QaStats> = {}): QaStats {
       active_model_version: 'v3.1', scored_industry: 5800, snapshot_checked: 5700, v2_rows: 0, v3_rows: 5700,
       entries_bad: { count: 10, sample_ids: ['s1'] }, sum_bad: { count: 5, samples: [] },
       snapshot_model_version_missing: 0, asset_model_version_missing: 0, confidence_missing: 0,
-      distribution: { n: 5800, max: 92, mean: 21.4, p50: 18, p90: 55, count_ge_50: 700, count_ge_30: 2000 },
+      distribution: { n: 5800, max: 92, mean: 21.4, p50: 18, p90: 55, count_ge_50: 700, count_ge_30: 2000, prob_n: 5800, prob_p50: 0.0008, prob_p99: 0.009, logit_distinct: 4200, logit_missing: 0 },
     }),
     pipeline: normalizePipelineStats({
       duplicates: { groups: 0, sample: [] },
@@ -276,7 +276,7 @@ describe('evaluateInvariants: thresholds and severity', () => {
     expect(t.ma_in_pool).toEqual({ count: 2, sample_ids: ['x'] });
   });
 
-  it('score contract: entries / sums escalate by share; distribution blocker when nothing ≥ 30', () => {
+  it('score contract: entries / sums escalate by share; discrimination blocker on a flat probability', () => {
     const s = healthyStats();
     s.score.entries_bad.count = 120; // 2.1% of 5700
     expect(check(s, 'score_factor_entries')).toMatchObject({ passed: false, severity: 'major' });
@@ -288,10 +288,20 @@ describe('evaluateInvariants: thresholds and severity', () => {
     expect(check(s, 'score_confidence_present')).toMatchObject({ passed: false, severity: 'major' });
     s.score.snapshot_model_version_missing = 3;
     expect(check(s, 'score_model_version_present')).toMatchObject({ passed: false, severity: 'major' });
+    expect(check(s, 'score_discriminates').passed).toBe(true);
+    // The display score rounding to 0 no longer fails the check on its own.
     s.score.distribution.count_ge_30 = 0;
+    expect(check(s, 'score_discriminates').passed).toBe(true);
+    s.score.distribution.prob_p99 = 0.002; // 2.5x the median
     const d = check(s, 'score_discriminates');
     expect(d).toMatchObject({ passed: false, severity: 'blocker' });
     expect(d.details.share_ge_50_pct).toBe(12.1);
+  });
+
+  it('score_discriminates fails when calibration ties the ranking (few distinct logits)', () => {
+    const s = healthyStats();
+    s.score.distribution.logit_distinct = 300; // < min(1000, 5800/10 = 580)
+    expect(check(s, 'score_discriminates')).toMatchObject({ passed: false, severity: 'blocker' });
   });
 
   it('model_version check is skipped when no v3 model is active', () => {
