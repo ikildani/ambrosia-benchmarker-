@@ -15,6 +15,7 @@ import { XMarkIcon } from '@heroicons/react/20/solid';
 import { radarLabel } from '@/lib/radar/vocab';
 import { COMPARE_LIMIT } from '@/lib/radar/client/filter-schema';
 import type { CompareAsset } from '@/lib/radar/client/api-types';
+import { programLabel } from '@/lib/radar/types';
 import { useCompare, usePrefersReducedMotion } from '@/lib/radar/client/hooks';
 import { factorLabel, fmtInt, fmtMillions, fmtPct, fmtRange, fmtRights, fmtScore, ownerTypeLabel, shortLabel } from '@/lib/radar/client/format';
 import { ErrorState } from './FeedStates';
@@ -251,7 +252,7 @@ function CompareTable({ assets, onRemove }: { assets: CompareAsset[]; onRemove: 
               <th scope="col" key={a.id} className="min-w-[180px] p-3 text-left align-top">
                 <div className="flex items-start justify-between gap-2">
                   <Link href={`/radar/${a.id}`} className={cn('font-semibold text-neutral-900 hover:text-teal-700 dark:text-neutral-100 dark:hover:text-teal-300 rounded', FOCUS_RING)}>
-                    {a.asset_name}
+                    {programLabel(a)}
                   </Link>
                   <button type="button" onClick={() => onRemove(a.id)} aria-label={`Remove ${a.asset_name} from compare`} className={cn(BTN_GHOST, 'p-1')}>
                     <XMarkIcon className="h-4 w-4" aria-hidden />

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import type { AssetBrief } from './types';
+import { programLabel } from '@/lib/radar/types';
 import { Pill, KV, ExternalLink, scoreTone } from './ui';
 import { label, fmtAge, fmtDate, territoryLabel, signedPts } from './format';
 import { isOwnershipHiddenByDefault } from '@/lib/radar/ownership';
@@ -60,7 +61,11 @@ function evidenceHref(e: AssetBrief['partnership']['evidence'][number]): string 
 
 export function AssetHeader({ brief }: { brief: AssetBrief }) {
   const { asset, owner, drug, partnership, score, trend, freshness } = brief;
-  const aliases = (asset.asset_aliases || []).filter(a => a && a !== asset.asset_name).slice(0, 4);
+  const title = programLabel(asset);
+  // The registry arm name stays visible as an alias when the program label replaced it.
+  const aliases = [asset.asset_name, ...(asset.asset_aliases || [])]
+    .filter((a, i, all) => a && a !== title && all.indexOf(a) === i)
+    .slice(0, 4);
   const tone = scoreTone(score.score);
   const designations = asset.regulatory_designations || [];
   const disclosed = asset.asset_origin === 'filing' || !!asset.disclosure_url;
@@ -71,7 +76,7 @@ export function AssetHeader({ brief }: { brief: AssetBrief }) {
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Search & Evaluation · Deal brief</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-3xl">{asset.asset_name}</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-3xl">{title}</h1>
           {aliases.length > 0 && (
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Also known as {aliases.join(', ')}</p>
           )}
