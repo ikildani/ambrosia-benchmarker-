@@ -103,6 +103,11 @@ export interface PartnershipAsset {
   asset_name: string;
   asset_aliases?: string[] | null;
   nct_ids?: string[] | null;
+  /**
+   * Deals linked to this asset's program in radar_deal_program_links (migration 192). The ledger
+   * already established the licensor and the drug, so these skip the owner and arm-name checks.
+   */
+  linked_deal_ids?: string[] | null;
 }
 
 export interface PartnershipDeal {
@@ -281,7 +286,7 @@ export function classifyOwnerType(name: string, ctgovClass?: string | null): Own
 // ASSET NAME MATCHER
 // ═══════════════════════════════════════════════════════════════════════
 
-export type NameMatchKind = 'exact' | 'code' | 'overlap' | 'drug_master';
+export type NameMatchKind = 'exact' | 'code' | 'overlap' | 'drug_master' | 'ledger';
 
 /** Dosage-form and filler words that do not identify an asset. */
 const NAME_STOPWORDS = new Set([
@@ -652,10 +657,11 @@ export function derivePartnership(input: DerivePartnershipInput): PartnershipRes
 
   for (const deal of input.deals) {
     if (!isEligibleDeal(deal)) continue;
+    const ledger = (asset.linked_deal_ids ?? []).includes(deal.id);
     // The company must be the licensor. In-licensed assets (company is the licensee) are ignored.
     if (isOwningCompany(asset, deal.licensee_id, deal.licensee_name)) continue;
-    if (!isOwningCompany(asset, deal.licensor_id, deal.licensor_name)) continue;
-    const match = matchAssetName(assetNames, deal.asset_name);
+    if (!ledger && !isOwningCompany(asset, deal.licensor_id, deal.licensor_name)) continue;
+    const match: NameMatchKind | null = ledger ? 'ledger' : matchAssetName(assetNames, deal.asset_name);
     if (!match) continue;
 
     const inactive = INACTIVE_DEAL_STATUSES.has((deal.deal_status || '').toLowerCase());
@@ -938,6 +944,7 @@ interface AssetRow {
   deal_ids: string[] | null;
   partnership_checked_at: string | null;
   drug_master_id?: string | null;
+  program_key?: string | null;
   partnership_basis?: string | null;
 }
 
@@ -952,7 +959,7 @@ interface TrialRow {
 }
 
 const ASSET_COLUMNS =
-  'id, company_id, company_name, asset_name, asset_aliases, nct_ids, partnership_status, partner_company_name, partner_company_id, territory_rights_available, partnership_evidence, partnership_confidence, deal_ids, partnership_checked_at, partnership_basis, drug_master_id';
+  'id, company_id, company_name, asset_name, asset_aliases, nct_ids, partnership_status, partner_company_name, partner_company_id, territory_rights_available, partnership_evidence, partnership_confidence, deal_ids, partnership_checked_at, partnership_basis, drug_master_id, program_key';
 
 const DEAL_COLUMNS =
   'id, licensor_id, licensor_name, licensee_id, licensee_name, asset_name, territory, territories_included, deal_type, deal_status, exclusivity, announced_date, source_url, verification_status, is_synthetic, is_canonical';
@@ -1191,6 +1198,7 @@ async function processSlice(
 ): Promise<{ timedOut: boolean }> {
   if (assets.length === 0) return { timedOut: false };
   const dealsById = new Map<string, PartnershipDeal>();
+  const ledgerByProgram = new Map<string, string[]>();
   const trialRows: TrialRow[] = [];
   const pressRows: PressHit[] = [];
 
@@ -1238,7 +1246,21 @@ async function processSlice(
         eligibleDealsQuery(supabase).in('licensor_name', names).order('id', { ascending: true }).range(from, to));
       for (const d of rows) dealsById.set(d.id, d);
     }
-    const legacyDealIds = [...new Set(assets.flatMap(a => a.deal_ids ?? []).filter(Boolean))].filter(id => !dealsById.has(id));
+    // Ledger links (migration 192): deals tied to these programs by identifier or created from the deal.
+    const programKeys = [...new Set(assets.map(a => a.program_key).filter((k): k is string => !!k))];
+    for (const keys of chunk(programKeys, IN_CHUNK)) {
+      const res = await supabase.from('radar_deal_program_links').select('deal_id, program_key').in('program_key', keys).range(0, PAGE_SIZE - 1);
+      if (res.error) {
+        // Before migration 192 the table does not exist; partnership detection carries on without it.
+        if (!/radar_deal_program_links/.test(res.error.message)) errors.push(`deal ledger read failed: ${res.error.message}`);
+        break;
+      }
+      for (const row of (res.data ?? []) as { deal_id: string; program_key: string }[]) {
+        if (!ledgerByProgram.has(row.program_key)) ledgerByProgram.set(row.program_key, []);
+        ledgerByProgram.get(row.program_key)!.push(row.deal_id);
+      }
+    }
+    const legacyDealIds = [...new Set([...assets.flatMap(a => a.deal_ids ?? []), ...[...ledgerByProgram.values()].flat()].filter(Boolean))].filter(id => !dealsById.has(id));
     for (const ids of chunk(legacyDealIds, IN_CHUNK)) {
       const rows = await pagedSelect<PartnershipDeal>('deals by id', (from, to) =>
         eligibleDealsQuery(supabase).in('id', ids).order('id', { ascending: true }).range(from, to));
@@ -1371,13 +1393,14 @@ async function processSlice(
         asset_name: asset.asset_name,
         asset_aliases: asset.asset_aliases ?? [],
         nct_ids: asset.nct_ids ?? [],
+        linked_deal_ids: asset.program_key ? ledgerByProgram.get(asset.program_key) ?? [] : [],
       };
       const ownerNames = companyNamesOf(partnershipAsset);
 
       const candidateDeals = new Map<string, PartnershipDeal>();
       if (partnershipAsset.company_id) for (const d of dealsByLicensorId.get(partnershipAsset.company_id) ?? []) candidateDeals.set(d.id, d);
       for (const n of ownerNames) for (const d of dealsByLicensorKey.get(companyKey(n)) ?? []) candidateDeals.set(d.id, d);
-      for (const id of asset.deal_ids ?? []) { const d = dealsById.get(id); if (d) candidateDeals.set(d.id, d); }
+      for (const id of [...(asset.deal_ids ?? []), ...(partnershipAsset.linked_deal_ids ?? [])]) { const d = dealsById.get(id); if (d) candidateDeals.set(d.id, d); }
 
       const collaborators: TrialCollaborator[] = [];
       // A company that originated this asset's own drug is its licensor, so that evidence stays.

@@ -88,6 +88,20 @@ function derive(args: { deals?: PartnershipDeal[]; collaborators?: { nct_id: str
 // ═══════════════════════════════════════════════════════════════════════
 
 describe('derivePartnership', () => {
+  it('accepts a ledger-linked deal whose arm name and licensor spelling do not match (migration 192)', () => {
+    const d = deal({ id: 'deal-ledger', asset_name: 'HM17321', licensor_id: null, licensor_name: 'Acme Pharm. Co., Ltd.' });
+    expect(derive({ deals: [d] }).status).toBe('unpartnered');
+    const r = derive({ deals: [d], a: { linked_deal_ids: ['deal-ledger'] } });
+    expect(r.status).toBe('partnered');
+    expect(r.dealIds).toEqual(['deal-ledger']);
+    expect(r.evidence[0].note).toContain('asset match: ledger');
+  });
+
+  it('never accepts a ledger deal in which the company is the licensee', () => {
+    const d = deal({ id: 'deal-in', licensor_id: BIGPHARMA_ID, licensor_name: 'BigPharma AG', licensee_id: ACME_ID, licensee_name: 'Acme Therapeutics' });
+    expect(derive({ deals: [d], a: { linked_deal_ids: ['deal-in'] } }).status).toBe('unpartnered');
+  });
+
   it('global deal -> partnered, nothing available, deal evidence, high confidence', () => {
     const r = derive({ deals: [deal()] });
     expect(r.status).toBe('partnered');

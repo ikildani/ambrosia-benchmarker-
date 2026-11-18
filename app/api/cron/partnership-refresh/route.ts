@@ -65,7 +65,18 @@ export async function GET(request: NextRequest) {
   const startedAt = Date.now();
 
   try {
-    const result = await refreshPartnershipBatch(supabase, { limit, mode, timeBudgetMs });
+    // Deal -> program ledger first (migration 192): links deals to the licensor's program by drug
+    // identifier and creates deal-only programs, so this run's derive sees them. Never fails the run.
+    let dealLinks: Record<string, unknown> | null = null;
+    let dealLinksError: string | null = null;
+    {
+      const { data, error } = await supabase.rpc('radar_link_deals');
+      if (error) dealLinksError = `radar_link_deals failed (is migration 192 applied?): ${error.message}`;
+      else dealLinks = (data ?? null) as Record<string, unknown> | null;
+    }
+
+    const result = await refreshPartnershipBatch(supabase, { limit, mode, timeBudgetMs: Math.max(30_000, timeBudgetMs - (Date.now() - startedAt)) });
+    if (dealLinksError) result.errors.push(dealLinksError);
 
     // Ownership attribution rides on the same cadence: rows whose drug
     // resolution or enrichment moved since their last check get re-derived
@@ -117,6 +128,7 @@ export async function GET(request: NextRequest) {
           estimated_runs_remaining: result.backlog.estimatedRunsRemaining,
         },
         timed_out: result.timedOut,
+        deal_links: dealLinks,
         ownership,
       },
       notes: [
