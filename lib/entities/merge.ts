@@ -85,6 +85,8 @@ export const COMPANY_REFERENCING_COLUMNS: readonly ReferencingColumn[] = [
   // Added Nov 2 2026 (migrations 139 / 147 era tables that postdate the Sep 25 measurement).
   { table: 'asset_designations', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'set_null', uniqueWith: null, pk: ['id'] },
   { table: 'asset_disclosures', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'cascade', uniqueWith: ['source_id', 'program_key'], pk: ['id'] },
+  // Added Nov 17 2026 (migration 189).
+  { table: 'company_financing_events', column: 'company_id', kind: 'uuid', fk: true, onDelete: 'cascade', uniqueWith: ['source', 'source_id'], pk: ['id'] },
   // No foreign key, but the value is a companies.id.
   { table: 'radar_score_snapshots', column: 'company_id', kind: 'uuid', fk: false, onDelete: null, uniqueWith: null, pk: ['feature_version', 'as_of', 'asset_id'] },
   { table: 'portfolio_deal_pipelines', column: 'partner_company_id', kind: 'uuid', fk: false, onDelete: null, uniqueWith: null, pk: ['id'] },

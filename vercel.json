@@ -392,7 +392,7 @@
     },
     {
       "path": "/api/cron/company-financials",
-      "schedule": "20 */6 * * *"
+      "schedule": "20 */2 * * *"
     },
     {
       "path": "/api/cron/management-intent",

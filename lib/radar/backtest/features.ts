@@ -116,7 +116,22 @@ export type FeatureName =
   | 'mod_peptide'
   | 'mod_vaccine'
   | 'mod_mrna'
-  | 'mod_radiopharm';
+  | 'mod_radiopharm'
+  | CandidateFeatureName;
+
+/**
+ * Candidate features (migration 189 company signals). Computed point-in-time into every vector
+ * and stored with the backtest snapshots, but NOT part of FEATURE_NAMES: the active model, the
+ * training set, completeness and the methodology page are unchanged until a retrain promotes
+ * them (move the spec into FEATURE_SPECS and bump FEATURE_VERSION).
+ */
+export type CandidateFeatureName =
+  | 'months_since_last_financing'
+  | 'log_last_financing_usd'
+  | 'financing_count_24m'
+  | 'listed_public'
+  | 'licensing_or_review_12m'
+  | 'distress_12m';
 
 export interface FeatureSpec {
   name: FeatureName;
@@ -200,6 +215,17 @@ export const FEATURE_SPECS: readonly FeatureSpec[] = Object.freeze([
 ] as const);
 
 export const FEATURE_NAMES: readonly FeatureName[] = FEATURE_SPECS.map(s => s.name);
+
+export const CANDIDATE_FEATURE_SPECS: readonly (FeatureSpec & { name: CandidateFeatureName })[] = Object.freeze([
+  { name: 'months_since_last_financing', label: 'Months since last financing', description: 'Months since the latest primary-source financing (HKEX placing / subscription / rights issue announcement, SEC Form D) public on or before the snapshot date, capped at 36. Form D amendments do not count. Null when none was ever observed.', sources: ['company_financing_events'], sign: 0, unit: 'months' },
+  { name: 'log_last_financing_usd', label: 'Last financing size (log)', description: 'ln(1 + USD millions) of the latest financing with a stated amount (Form D totalAmountSold) public on or before the snapshot date. Null without a stated amount.', sources: ['company_financing_events'], sign: 0, unit: 'log USD m' },
+  { name: 'financing_count_24m', label: 'Financings in 24 months', description: 'Primary-source financings (amendments excluded) public in the 24 months before the snapshot date.', sources: ['company_financing_events'], sign: 0, unit: 'count' },
+  { name: 'listed_public', label: 'Listed company', description: '1 when the company filed SEC periodic financials on or before the snapshot date, filed 10-Ks until within 15 months of it (inactive filers), or is listed in Hong Kong. HKEX listing is undated and used as of today (documented residual leak).', sources: ['company_financials', 'companies'], sign: 0, unit: 'flag' },
+  { name: 'licensing_or_review_12m', label: 'Recent licensing or strategic review', description: '1 when a licensing agreement, seeking-partner, strategic-review or restructuring signal (verbatim quote) was observed in the 12 months before the snapshot date.', sources: ['company_intent_signals'], sign: 0, unit: 'flag' },
+  { name: 'distress_12m', label: 'Profit warning or going concern', description: '1 when a profit warning or going-concern signal was observed in the 12 months before the snapshot date.', sources: ['company_intent_signals'], sign: 0, unit: 'flag' },
+] as const);
+
+export const CANDIDATE_FEATURE_NAMES: readonly CandidateFeatureName[] = CANDIDATE_FEATURE_SPECS.map(s => s.name);
 
 const V4_PHASES = ['preclinical', 'early_phase_1', 'phase_1', 'phase_1_2', 'phase_2', 'phase_2_3', 'phase_3'] as const;
 const V4_TAS = ['oncology', 'immunology', 'neurology', 'metabolic', 'infectious_disease', 'rare_disease', 'cardiovascular', 'hematology', 'respiratory', 'ophthalmology', 'dermatology', 'gastroenterology'] as const;
@@ -298,6 +324,22 @@ export interface TrialRow {
   why_stopped?: string | null;
 }
 
+export interface FinancingEventFeatureRow {
+  event_type: string;
+  amount_usd?: number | string | null;
+  announced_at: string;
+  source: string;
+  source_url: string | null;
+  evidence?: string | null;
+}
+
+/** Listing identifiers from companies (migration 189 columns; undated except sec_last_10k_at). */
+export interface CompanyListingRow {
+  hkex_stock_code?: string | null;
+  sec_inactive_cik?: string | null;
+  sec_last_10k_at?: string | null;
+}
+
 export interface CompanyDealRow {
   id: string;
   announced_date: string;
@@ -337,6 +379,10 @@ export interface FeatureBundle {
   publications: PublicationRow[];
   /** The company's other assets (for portfolio position). */
   siblings: SiblingAsset[];
+  /** Primary-source financings (company_financing_events, migration 189); candidate features only. */
+  financingEvents?: FinancingEventFeatureRow[];
+  /** Listing identifiers of the owning company; candidate features only. */
+  listing?: CompanyListingRow | null;
   /** table → error; features that read a failed table are null. */
   sourceErrors: Record<string, string>;
 }
@@ -822,6 +868,8 @@ export function buildFeatureVector(bundle: FeatureBundle, asOf: Date): FeatureVe
     for (const m of V4_MODALITIES) values[`mod_${m}` as FeatureName] = asset.modality === m ? 1 : 0;
   }
 
+  Object.assign(values, buildCandidateFeatures(bundle, asOf, values, addEvidence));
+
   // Completeness counts evidence features only; the v4 transforms and indicators are always present.
   let present = 0;
   for (const name of EVIDENCE_FEATURES) if (values[name] !== null && values[name] !== undefined) present++;
@@ -836,6 +884,87 @@ export function buildFeatureVector(bundle: FeatureBundle, asOf: Date): FeatureVe
     phase_at_asof: effectivePhase,
     sources_failed: Array.from(failed).sort(),
   };
+}
+
+const AMENDMENT_TYPES = new Set(['form_d_amendment']);
+const LICENSING_INTENT_TYPES = new Set(['licensing_agreement', 'seeking_partner', 'strategic_review', 'restructuring']);
+const DISTRESS_TYPES = new Set(['profit_warning', 'going_concern_language']);
+
+/**
+ * Candidate company-signal features (migration 189). Pure and point-in-time: a financing counts
+ * from the day its document became public, an intent signal from its observed_at date. A table
+ * that failed to load yields nulls, never zeros.
+ */
+export function buildCandidateFeatures(
+  bundle: FeatureBundle,
+  asOf: Date,
+  values: Partial<Record<FeatureName, number | null>> = {},
+  addEvidence: (name: FeatureName, item: FeatureEvidence) => void = () => {},
+): Record<CandidateFeatureName, number | null> {
+  const asOfMs = asOf.getTime();
+  const failed = new Set(Object.keys(bundle.sourceErrors));
+  const out = {} as Record<CandidateFeatureName, number | null>;
+
+  // ── Financing events ──
+  if (failed.has('company_financing_events') || bundle.financingEvents === undefined) {
+    out.months_since_last_financing = null; out.log_last_financing_usd = null; out.financing_count_24m = null;
+  } else {
+    const seen = bundle.financingEvents
+      .filter(e => onOrBefore(e.announced_at, asOf))
+      .sort((a, b) => b.announced_at.localeCompare(a.announced_at));
+    const raises = seen.filter(e => !AMENDMENT_TYPES.has(e.event_type));
+    const twentyFourAgo = monthsAgoMs(asOf, 24);
+    out.financing_count_24m = raises.filter(e => parseDate(e.announced_at)! >= twentyFourAgo).length;
+    const last = raises[0];
+    if (last) {
+      const t = parseDate(last.announced_at)!;
+      out.months_since_last_financing = round2(clamp(monthsBetween(t, asOfMs), 0, 36));
+      addEvidence('months_since_last_financing', { source: 'company_financing_events', source_url: last.source_url, date: isoDay(t), text: (last.evidence ?? last.event_type).slice(0, 200) });
+    } else {
+      out.months_since_last_financing = null;
+    }
+    const sized = seen.find(e => Number(e.amount_usd) > 0);
+    if (sized) {
+      const usdM = Number(sized.amount_usd) / 1e6;
+      out.log_last_financing_usd = round2(Math.log1p(usdM));
+      addEvidence('log_last_financing_usd', { source: 'company_financing_events', source_url: sized.source_url, date: sized.announced_at, text: `US$${round2(usdM)}m: ${(sized.evidence ?? '').slice(0, 160)}` });
+    } else {
+      out.log_last_financing_usd = null;
+    }
+  }
+
+  // ── Listed ──
+  {
+    const finOk = !failed.has('company_financials');
+    const filed = finOk && bundle.financials.some(f => onOrBefore(f.fiscal_period_end, asOf) && (!f.filed_at || onOrBefore(f.filed_at, asOf)));
+    const listing = bundle.listing;
+    const hkex = !!listing?.hkex_stock_code;
+    const last10k = parseDate(listing?.sec_last_10k_at ?? null);
+    const inactiveListed = !!listing?.sec_inactive_cik && last10k !== null && asOfMs <= last10k + 15 * MS_PER_MONTH;
+    if (!finOk && listing === undefined) out.listed_public = null;
+    else out.listed_public = filed || hkex || inactiveListed ? 1 : 0;
+    if (hkex) addEvidence('listed_public', { source: 'companies', source_url: `https://www.hkexnews.hk/`, date: null, text: `HKEX ${listing!.hkex_stock_code}` });
+  }
+
+  // ── Intent: licensing / review, distress ──
+  if (failed.has('company_intent_signals')) {
+    out.licensing_or_review_12m = null; out.distress_12m = null;
+  } else {
+    const twelveAgo = monthsAgoMs(asOf, 12);
+    let lic: IntentSignalRow | null = null;
+    let distress: IntentSignalRow | null = null;
+    for (const sig of bundle.intentSignals) {
+      if (!onOrBefore(sig.observed_at, asOf) || parseDate(sig.observed_at)! < twelveAgo) continue;
+      const type = (sig.signal_type || '').toLowerCase();
+      if (!lic && LICENSING_INTENT_TYPES.has(type)) lic = sig;
+      if (!distress && DISTRESS_TYPES.has(type)) distress = sig;
+    }
+    out.licensing_or_review_12m = lic ? 1 : 0;
+    out.distress_12m = distress || values.going_concern === 1 ? 1 : 0;
+    if (lic) addEvidence('licensing_or_review_12m', { source: 'company_intent_signals', source_url: lic.source_url ?? null, date: isoDay(parseDate(lic.observed_at)!), text: lic.quote ? `"${lic.quote.slice(0, 200)}"` : lic.signal_type });
+    if (distress) addEvidence('distress_12m', { source: 'company_intent_signals', source_url: distress.source_url ?? null, date: isoDay(parseDate(distress.observed_at)!), text: distress.quote ? `"${distress.quote.slice(0, 200)}"` : distress.signal_type });
+  }
+  return out;
 }
 
 /** Vector values in FEATURE_NAMES order (for the model). */
@@ -1001,6 +1130,34 @@ export async function fetchFeatureBundles(
       ? readTable<{ id: string; owner_type: string | null }>(() => supabase.from('companies').select('id, owner_type').in('id', companyIds))
       : none<{ id: string; owner_type: string | null }>(),
   ]);
+
+  // ── Candidate sources (migration 189). Not counted in sourceErrorCounts: until 189 is applied
+  // these reads fail and only the candidate features (not scored) go null.
+  if (companyIds.length) {
+    const [fe, li] = await Promise.all([
+      readPaged<FinancingEventFeatureRow & { company_id: string }>((from, to) => supabase.from('company_financing_events')
+        .select('company_id, event_type, amount_usd, announced_at, source, source_url, evidence')
+        .in('company_id', companyIds).gte('announced_at', sinceDay).lte('announced_at', asOfDay)
+        .order('announced_at', { ascending: false }).range(from, to), maxRows),
+      readTable<CompanyListingRow & { id: string }>(() => supabase.from('companies')
+        .select('id, hkex_stock_code, sec_inactive_cik, sec_last_10k_at').in('id', companyIds)),
+    ]);
+    for (const a of allAssets) {
+      const b = bundles.get(a.id)!;
+      if (fe.error) b.sourceErrors.company_financing_events = fe.error;
+      else if (a.company_id) b.financingEvents = [];
+    }
+    if (!fe.error) {
+      for (const row of fe.rows) {
+        const g = idToGroup.get(row.company_id);
+        if (g) for (const a of g.assets) bundles.get(a.id)!.financingEvents!.push(row);
+      }
+    }
+    if (!li.error) {
+      const byId = new Map(li.rows.map(r => [r.id, r] as const));
+      for (const a of allAssets) if (a.company_id) bundles.get(a.id)!.listing = byId.get(a.company_id) ?? null;
+    }
+  }
 
   assignByCompany('company_financials', finRes, (b, r) => { b.financials.push(r); });
   assignByCompany('company_intent_signals', intentRes, (b, r) => { b.intentSignals.push(r); });

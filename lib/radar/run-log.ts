@@ -27,7 +27,8 @@ export type RadarRunSource =
   | 'score_backtest'
   | 'asset_classify'
   | 'country_backfill'
-  | 'company_enrichment';
+  | 'company_enrichment'
+  | 'company_signals';
 
 export interface RadarRunLog {
   source: RadarRunSource;
