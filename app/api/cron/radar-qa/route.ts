@@ -14,6 +14,8 @@
  *   ?mode=golden_agreement  claude-opus-4-6 re-derivation over the golden set
  *       &batch=20 &maxRequests=60 &maxCost=15
  *   ?mode=report            latest report (JSON) without running anything
+ *   ?mode=scorecard         the 0-100 Search & Evaluation scorecard (migration 190);
+ *                           writes radar_qa_runs kind 'scorecard'
  *   ?dry=1                  do not persist (invariants / golden_agreement)
  *
  * Every mode logs one data_ingestion_log row via logRadarRun with
@@ -29,11 +31,12 @@ import { logRadarRun } from '@/lib/radar/run-log';
 import { runInvariants } from '@/lib/radar/qa/invariants';
 import { runGoldenAgreement, selectGoldenSet } from '@/lib/radar/qa/golden-set';
 import { buildQaReport, renderQaReportMarkdown } from '@/lib/radar/qa/report';
+import { renderScorecardMarkdown, runScorecard } from '@/lib/radar/qa/scorecard';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
-const MODES = ['invariants', 'golden_select', 'golden_agreement', 'report'] as const;
+const MODES = ['invariants', 'golden_select', 'golden_agreement', 'report', 'scorecard'] as const;
 type Mode = (typeof MODES)[number];
 const MODEL_RE = /^claude-[a-z0-9-]{3,60}$/;
 const SEED_RE = /^[a-zA-Z0-9._-]{1,64}$/;
@@ -97,6 +100,29 @@ export async function GET(request: NextRequest) {
     if (mode === 'report') {
       const report = await buildQaReport(supabase);
       return NextResponse.json({ success: true, mode, report, markdown: renderQaReportMarkdown(report) });
+    }
+
+    if (mode === 'scorecard') {
+      const result = await runScorecard(supabase, { persist: !dry, notes: dry ? 'dry run' : 'scheduled' });
+      const logged = await logRadarRun(supabase, {
+        source: 'asset_universe',
+        startedAt,
+        status: 'completed',
+        runType: dry ? 'manual' : 'scheduled',
+        processed: result.metrics.length,
+        failed: result.metrics.filter(m => m.unmeasured).length,
+        parameters: { stage: 'radar_qa', mode, run_id: result.run_id, overall: result.overall, dimensions: result.dimensions },
+      });
+      return NextResponse.json({
+        success: true,
+        mode,
+        run_id: result.run_id,
+        overall: result.overall,
+        dimensions: result.dimensions,
+        metrics: result.metrics,
+        markdown: renderScorecardMarkdown(result),
+        log_written: logged,
+      });
     }
 
     if (mode === 'invariants') {

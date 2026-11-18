@@ -51,6 +51,17 @@ export {
 } from './golden-set';
 
 export {
+  computeScorecard,
+  runScorecard,
+  renderScorecardMarkdown,
+  scoreBetween,
+  SCORECARD_METRICS,
+  SCORECARD_WEIGHTS,
+  type ScorecardResult,
+  type ScorecardStats,
+} from './scorecard';
+
+export {
   buildQaReport,
   renderQaReportMarkdown,
   coverageRowsFromStats,
