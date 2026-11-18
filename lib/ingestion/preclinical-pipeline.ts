@@ -52,6 +52,7 @@ import {
   type TokenUsage,
 } from './management-intent';
 import { fetchSubmissions, listRecentFilings, secUserAgent, stripCik, type FilingRef } from './company-financials';
+import { assetIdentifiers, cleanProgramAssetName, identifierSpellings, isCodeIdentifier, programIdentifiers } from './program-identity';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -351,6 +352,10 @@ export function isPlaceholderProgramName(name: string): boolean {
   // A development code ("AN-018", "HFG1", "BD18") names one program even when its letters are a filler word.
   const hasCode = /\b[a-z]{1,8}-?\d+[a-z]?\b/i.test(s.replace(/\b(program|programme|discovery|research)\s+\d+\b/gi, ''));
   if (/^(multiple|various|several|other|additional|future)\b/i.test(s)) return true;
+  // A company prefix on a therapeutic area ("EMP-CNS", "ABC-I&I", "XYZ Oncology") is a bucket, not a code.
+  if (/^[A-Za-z]{2,8}[- ](cns|cvm|cvrm|cv|i ?& ?i|msk|onc|io|rare|neuro|gi|resp|derm|ophth|id|met|renal|liver|immunology|oncology|neurology|fibrosis)$/i.test(s)) return true;
+  // A delivery system or shuttle with no molecule code is a platform.
+  if (/\b(delivery system|delivery platform|shuttle platform|technology platform)\b/i.test(s) && assetIdentifiers(s).length === 0) return true;
   if (PAGE_TEXT_RE.test(s)) return true;
   // Groups: several programs, candidates or targets, a whole pipeline, or a platform with no named drug.
   if (/\b(programs|programmes|candidates|targets|assets|pipelines?|platforms)\b/i.test(s)) return true;
@@ -412,26 +417,48 @@ export interface ExistingAsset {
   data_sources: string[] | null;
 }
 
-/** Existing asset of the same company for this program: by name/alias key, then by drug_master. */
+/**
+ * Existing asset of the same company for this program: by name/alias key, then by drug_master,
+ * then by drug identifier (migration 187's reading of codes and INNs), so "HLX37" matches the
+ * registry arm "HLX37 dose1" and "Ivonescimab (AK112)" matches "AK112, docetaxel". An identifier
+ * match prefers rows whose own first identifier it is; a match anywhere in an arm name counts
+ * only for a development code (an INN deep in an arm name is usually background therapy).
+ */
 export function matchExistingAsset(
   p: DisclosedProgram,
   existing: ExistingAsset[],
   drugIdForKey: Map<string, string>,
-): { asset: ExistingAsset | null; drug_master_id: string | null } {
+): { asset: ExistingAsset | null; drug_master_id: string | null; via?: 'name' | 'drug' | 'identifier' } {
   const keys = programKeys(p);
   const byKey = new Map<string, ExistingAsset>();
   const byDrug = new Map<string, ExistingAsset>();
+  const byFirstTok = new Map<string, ExistingAsset>();
+  const byAnyCode = new Map<string, ExistingAsset>();
   for (const a of existing) {
     for (const s of [a.asset_name, ...(a.asset_aliases ?? [])]) {
       const k = normalizeKey(s);
       if (k && !byKey.has(k)) byKey.set(k, a);
     }
     if (a.drug_master_id && !byDrug.has(a.drug_master_id)) byDrug.set(a.drug_master_id, a);
+    const own = assetIdentifiers(a.asset_name);
+    if (own[0] && !byFirstTok.has(own[0])) byFirstTok.set(own[0], a);
+    for (const alias of a.asset_aliases ?? []) {
+      const t = assetIdentifiers(alias)[0];
+      if (t && !byFirstTok.has(t)) byFirstTok.set(t, a);
+    }
+    for (const t of own) if (isCodeIdentifier(t) && !byAnyCode.has(t)) byAnyCode.set(t, a);
   }
   const drugId = keys.map(k => drugIdForKey.get(k)).find(Boolean) ?? null;
   const direct = keys.map(k => byKey.get(k)).find(Boolean) ?? null;
-  if (direct) return { asset: direct, drug_master_id: direct.drug_master_id ?? drugId };
-  if (drugId && byDrug.has(drugId)) return { asset: byDrug.get(drugId)!, drug_master_id: drugId };
+  if (direct) return { asset: direct, drug_master_id: direct.drug_master_id ?? drugId, via: 'name' };
+  if (drugId && byDrug.has(drugId)) return { asset: byDrug.get(drugId)!, drug_master_id: drugId, via: 'drug' };
+  // A development code in the program's own name decides; aliases count only when the name has no
+  // code (an INN or a descriptive name). A model alias such as the parent drug of a combination
+  // ("ALDP021 = ALDP001 + steroid") is not the program.
+  const own = assetIdentifiers(p.program_name);
+  const toks = own.some(isCodeIdentifier) ? own : programIdentifiers(p);
+  const byTok = toks.map(t => byFirstTok.get(t)).find(Boolean) ?? toks.filter(isCodeIdentifier).map(t => byAnyCode.get(t)).find(Boolean) ?? null;
+  if (byTok) return { asset: byTok, drug_master_id: byTok.drug_master_id ?? drugId, via: 'identifier' };
   return { asset: null, drug_master_id: drugId };
 }
 
@@ -511,16 +538,25 @@ export interface NewAssetRow {
   disclosed_last_seen_at: string;
 }
 
-/** A new preclinical asset from a disclosed program. Only for preclinical stages. */
-export function toNewAssetRow(p: DisclosedProgram, ctx: FilingContext, drugMasterId: string | null): NewAssetRow | null {
+/** Clinical stages a disclosed program may be created at when its code is unknown to every registry (opt-in). */
+export const PROMOTABLE_CLINICAL_PHASES: ReadonlySet<string> = new Set(['phase_1', 'phase_1_2', 'phase_2', 'phase_2_3', 'phase_3']);
+
+/**
+ * A new asset from a disclosed program. Preclinical stages only, unless `allowClinical` (the
+ * caller has checked the program's development code exists nowhere in the universe), in which
+ * case Phase 1 to Phase 3 programs are created too. asset_name carries the code or INN so the
+ * program groups by identifier (migration 187).
+ */
+export function toNewAssetRow(p: DisclosedProgram, ctx: FilingContext, drugMasterId: string | null, opts: { allowClinical?: boolean } = {}): NewAssetRow | null {
   const { phase, stage_detail } = stageToPhase(p.stage);
-  if (phase !== 'preclinical') return null;
+  if (phase !== 'preclinical' && !(opts.allowClinical && phase && PROMOTABLE_CLINICAL_PHASES.has(phase))) return null;
+  if (!phase) return null;
   const nowIso = ctx.now.toISOString();
   const origin = contextOrigin(ctx);
   return {
     company_id: ctx.company_id,
     company_name: ctx.company_name,
-    asset_name: p.program_name,
+    asset_name: cleanProgramAssetName(p),
     asset_aliases: p.aliases,
     mechanism: p.mechanism_short,
     moa_short: p.mechanism_short,
@@ -720,54 +756,183 @@ export async function extractPrograms(
 }
 
 
+/** What persistPrograms decided for one program (returned for run logs and dry runs). */
+export interface ProgramDecision {
+  program: string;
+  stage: DisclosedStage;
+  action: 'matched' | 'create' | 'skip_placeholder' | 'skip_foreign_code' | 'skip_low_confidence' | 'unmatched_clinical' | 'skip_stage';
+  asset_name?: string;
+  matched_asset?: string;
+  matched_via?: string;
+  foreign_owner?: string;
+}
+
 export interface PersistResult {
   created: string[];
   matched: number;
   unmatchedClinical: number;
+  /** Programs whose code already names another company's program (not created). */
+  foreignSkipped: number;
+  /** Clinical-stage programs created because their code is unknown to every registry. */
+  clinicalCreated: number;
   disclosuresWritten: number;
+  decisions: ProgramDecision[];
   errors: string[];
+}
+
+export interface PersistOptions {
+  /** Read only: decide every program, write nothing. */
+  dryRun?: boolean;
+  /** Create Phase 1-3 programs whose development code no company in the universe has (default off). */
+  createUnknownClinical?: boolean;
+  /** Minimum model confidence to create a program (matching existing rows has no floor). Default 60. */
+  minCreateConfidence?: number;
+  /** Skip the cross-company code check (tests). */
+  skipForeignCheck?: boolean;
+}
+
+/** Below this model confidence a program is recorded but never becomes a new asset. */
+export const MIN_CREATE_CONFIDENCE = 60;
+
+/**
+ * True when a name IS a drug code (optionally with its INN or a short descriptor): "CK-089",
+ * "Deudomperidone (CIN-102)", "HPN-102 (GalNAc siRNA)". Not a combination ("ANKTIVA + CPI"), not
+ * a trial or program description ("QUILT-88 pancreatic cancer program"). Clinical-stage programs
+ * are created from disclosures only under such a name.
+ */
+export function isCodeNamedProgram(name: string): boolean {
+  const s = (name ?? '').trim();
+  if (!s || /[+&/]| with | and | plus |combination|combo|regimen|\bvs\.?\b|trial|study|program|cohort|arm\b/i.test(s)) return false;
+  const ids = assetIdentifiers(s);
+  if (!ids.some(isCodeIdentifier) || ids.length > 2) return false;
+  // What is left after removing the identifiers and a parenthetical is at most a few words.
+  const rest = s.replace(/\([^)]*\)/g, ' ').split(/[^A-Za-z0-9-]+/).filter(w => w && !ids.includes(w.replace(/-/g, '').toUpperCase()));
+  return rest.length <= 2;
+}
+
+/** Per-company decision for one program, given the company's assets and the codes other companies own. */
+export function decideProgram(
+  p: DisclosedProgram,
+  existing: ExistingAsset[],
+  drugIds: Map<string, string>,
+  foreignOwners: Map<string, string>,
+  opts: Pick<PersistOptions, 'createUnknownClinical' | 'minCreateConfidence'> = {},
+): { decision: ProgramDecision; match: ReturnType<typeof matchExistingAsset> | null; allowClinical: boolean } {
+  const base = { program: p.program_name, stage: p.stage };
+  // A chart bucket ("Other CNS Discovery Programs") is recorded as a disclosure, never as an asset.
+  if (isPlaceholderProgramName(p.program_name)) return { decision: { ...base, action: 'skip_placeholder' }, match: null, allowClinical: false };
+  const m = matchExistingAsset(p, existing, drugIds);
+  if (m.asset) return { decision: { ...base, action: 'matched', matched_asset: m.asset.asset_name, matched_via: m.via }, match: m, allowClinical: false };
+  const toks = programIdentifiers(p);
+  const foreign = toks.map(t => foreignOwners.get(t)).find(Boolean);
+  if (foreign) return { decision: { ...base, action: 'skip_foreign_code', foreign_owner: foreign }, match: m, allowClinical: false };
+  const phase = stageToPhase(p.stage).phase;
+  if (phase === 'preclinical') {
+    if (p.confidence < (opts.minCreateConfidence ?? MIN_CREATE_CONFIDENCE)) return { decision: { ...base, action: 'skip_low_confidence' }, match: m, allowClinical: false };
+    return { decision: { ...base, action: 'create', asset_name: cleanProgramAssetName(p) }, match: m, allowClinical: false };
+  }
+  if (phase && PROMOTABLE_CLINICAL_PHASES.has(phase)) {
+    // A Phase 1-3 program the registries miss is usually a naming mismatch, so it is created only
+    // when it carries a development code that no company's program uses, at high confidence.
+    const promotable = !!opts.createUnknownClinical && isCodeNamedProgram(p.program_name) && p.confidence >= 80;
+    if (promotable) return { decision: { ...base, action: 'create', asset_name: cleanProgramAssetName(p) }, match: m, allowClinical: true };
+    return { decision: { ...base, action: 'unmatched_clinical' }, match: m, allowClinical: false };
+  }
+  if (phase) return { decision: { ...base, action: 'unmatched_clinical' }, match: m, allowClinical: false };
+  return { decision: { ...base, action: 'skip_stage' }, match: m, allowClinical: false };
+}
+
+/**
+ * Codes (and INNs) among `toks` that already name a program of ANOTHER company: a pipeline page
+ * listing a partner's or parent's drug, a duplicate company row, or a website that belongs to
+ * someone else. Uses the asset_name trigram index; a hit is confirmed by reading the identifiers
+ * of the matching name, so "HLX37" does not match "HLX370".
+ */
+export async function findForeignOwners(supabase: SupabaseClient, companyId: string, toks: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  // Short codes ("AB12") are too loose for a substring search and rarely collide.
+  const wanted = [...new Set(toks)].filter(t => t.length >= 4);
+  for (let i = 0; i < wanted.length; i += 12) {
+    const chunk = wanted.slice(i, i + 12);
+    const ors = chunk.flatMap(identifierSpellings).map(s => `asset_name.ilike."%${s.replace(/["\\%_]/g, '')}%"`).join(',');
+    const { data, error } = await supabase
+      .from('clinical_assets')
+      .select('asset_name, company_name, company_id')
+      .or(ors)
+      .neq('company_id', companyId)
+      .limit(300);
+    if (error) throw new Error(`clinical_assets foreign-code read: ${error.message}`);
+    for (const r of (data ?? []) as Array<{ asset_name: string; company_name: string | null; company_id: string | null }>) {
+      if (!r.company_id) continue;
+      for (const t of assetIdentifiers(r.asset_name)) if (chunk.includes(t) && !out.has(t)) out.set(t, r.company_name ?? r.company_id);
+    }
+  }
+  return out;
 }
 
 /**
  * Write extracted programs for one company: match existing assets (patch),
- * create preclinical rows, and record every program in asset_disclosures.
- * Shared by the filing pipeline and the pipeline-page crawler.
+ * create preclinical rows (and, opt-in, Phase 1-3 rows with an unknown code),
+ * and record every program in asset_disclosures. Shared by the filing
+ * pipeline, the HKEX reader and both pipeline-page paths.
  */
-export async function persistPrograms(supabase: SupabaseClient, ctx: FilingContext, programs: DisclosedProgram[]): Promise<PersistResult> {
-  const out: PersistResult = { created: [], matched: 0, unmatchedClinical: 0, disclosuresWritten: 0, errors: [] };
+export async function persistPrograms(supabase: SupabaseClient, ctx: FilingContext, programs: DisclosedProgram[], opts: PersistOptions = {}): Promise<PersistResult> {
+  const out: PersistResult = { created: [], matched: 0, unmatchedClinical: 0, foreignSkipped: 0, clinicalCreated: 0, disclosuresWritten: 0, decisions: [], errors: [] };
   const errors = out.errors;
   const co = { id: ctx.company_id, name: ctx.company_name };
   const existing = await fetchExistingAssets(supabase, co.id);
   const drugIds = await lookupDrugIds(supabase, [...new Set(programs.flatMap(programKeys))]);
+  // Only programs that would otherwise be created need the cross-company check.
+  const unmatched = programs.filter(p => !isPlaceholderProgramName(p.program_name) && !matchExistingAsset(p, existing, drugIds).asset);
+  const foreignOwners = opts.skipForeignCheck ? new Map<string, string>() : await findForeignOwners(supabase, co.id, unmatched.flatMap(programIdentifiers));
 
   const disclosures: DisclosureRow[] = [];
   const newRows: NewAssetRow[] = [];
-  const pending: Array<{ row: NewAssetRow; program: DisclosedProgram }> = [];
+  const pending: Array<{ row: NewAssetRow; program: DisclosedProgram; clinical: boolean }> = [];
   const created = out.created;
   let matched = 0;
   for (const p of programs) {
-    // A chart bucket ("Other CNS Discovery Programs") is recorded as a disclosure, never as an asset.
-    if (isPlaceholderProgramName(p.program_name)) {
+    const { decision, match: m, allowClinical } = decideProgram(p, existing, drugIds, foreignOwners, opts);
+    out.decisions.push(decision);
+    if (decision.action === 'skip_placeholder' || decision.action === 'skip_low_confidence' || decision.action === 'skip_stage') {
       disclosures.push(toDisclosureRow(p, ctx, null, 'skipped'));
       continue;
     }
-    const m = matchExistingAsset(p, existing, drugIds);
-    if (m.asset) {
-      const { error } = await supabase.from('clinical_assets').update(toExistingAssetPatch(p, ctx, m.asset)).eq('id', m.asset.id);
-      if (error) { errors.push(`${co.name} ${p.program_name}: update ${error.message}`); continue; }
+    if (decision.action === 'skip_foreign_code') {
+      out.foreignSkipped++;
+      disclosures.push(toDisclosureRow(p, ctx, null, 'skipped'));
+      continue;
+    }
+    if (decision.action === 'matched' && m?.asset) {
+      if (!opts.dryRun) {
+        const { error } = await supabase.from('clinical_assets').update(toExistingAssetPatch(p, ctx, m.asset)).eq('id', m.asset.id);
+        if (error) { errors.push(`${co.name} ${p.program_name}: update ${error.message}`); continue; }
+      }
       disclosures.push(toDisclosureRow(p, ctx, m.asset.id, 'matched'));
       matched++;
       continue;
     }
-    const row = toNewAssetRow(p, ctx, m.drug_master_id);
+    const row = decision.action === 'create' ? toNewAssetRow(p, ctx, m?.drug_master_id ?? null, { allowClinical }) : null;
     if (!row) {
       const status: MatchStatus = stageToPhase(p.stage).phase ? 'unmatched_clinical' : 'skipped';
       if (status === 'unmatched_clinical') out.unmatchedClinical++;
       disclosures.push(toDisclosureRow(p, ctx, null, status));
       continue;
     }
+    // Two programs of one page that clean to the same asset_name are one row.
+    if (newRows.some(r => normalizeKey(r.asset_name) === normalizeKey(row.asset_name))) {
+      disclosures.push(toDisclosureRow(p, ctx, null, 'skipped'));
+      continue;
+    }
     newRows.push(row);
-    pending.push({ row, program: p });
+    pending.push({ row, program: p, clinical: allowClinical });
+  }
+
+  out.matched = matched;
+  if (opts.dryRun) {
+    out.created.push(...newRows.map(r => r.asset_name));
+    out.clinicalCreated = pending.filter(x => x.clinical).length;
+    return out;
   }
 
   if (newRows.length > 0) {
@@ -780,10 +945,11 @@ export async function persistPrograms(supabase: SupabaseClient, ctx: FilingConte
       errors.push(`${co.name}: insert ${error.message}`);
     } else {
       const idByName = new Map((inserted ?? []).map(r => [normalizeKey(String(r.asset_name)), String(r.id)]));
-      for (const { row, program } of pending) {
+      for (const { row, program, clinical } of pending) {
         const id = idByName.get(normalizeKey(row.asset_name)) ?? null;
         if (id) {
           created.push(row.asset_name);
+          if (clinical) out.clinicalCreated++;
           disclosures.push(toDisclosureRow(program, ctx, id, 'created'));
         } else {
           disclosures.push(toDisclosureRow(program, ctx, null, 'skipped'));
@@ -807,6 +973,22 @@ export async function persistPrograms(supabase: SupabaseClient, ctx: FilingConte
 // RUN
 // ═══════════════════════════════════════════════════════════════════════
 
+export type PreclinicalMode = 'filings' | 'pages' | 'hkex';
+
+/**
+ * Mode of a scheduled (parameterless) run of the preclinical cron, or null to skip. Filings keep
+ * their 6-hourly lean slot (every run while the filings backlog allowance lasts), HKEX reports run
+ * at 10:25 UTC, and server-side pipeline pages take the other slots once the owner has approved a
+ * pages allowance.
+ */
+export function scheduledPreclinicalMode(utcHour: number, s: { pagesApproved: boolean; filingsBacklog: boolean; lean: boolean }): PreclinicalMode | null {
+  if (utcHour % 6 === 0) return 'filings';
+  if (utcHour === 10) return 'hkex';
+  if (s.pagesApproved) return 'pages';
+  if (s.filingsBacklog || !s.lean) return 'filings';
+  return null;
+}
+
 interface CursorState extends Record<string, unknown> {
   companyCursor: string | null;
   /** company_id -> accession already extracted. */
@@ -824,6 +1006,10 @@ export interface PreclinicalRunOptions {
   companyIds?: string[];
   /** Re-read a filing even when the cursor says it was processed. */
   force?: boolean;
+  /** Create Phase 1-3 programs whose development code is unknown to every registry. */
+  createUnknownClinical?: boolean;
+  /** Company submissions to check per run while looking for unread filings (default companyLimit x 8). */
+  maxChecks?: number;
 }
 
 export interface PreclinicalRunResult {
@@ -834,6 +1020,8 @@ export interface PreclinicalRunResult {
   assetsCreated: number;
   assetsMatched: number;
   unmatchedClinical: number;
+  /** Programs not created because their code already names another company's program. */
+  foreignSkipped: number;
   disclosuresWritten: number;
   quotesDropped: number;
   schemaInvalid: number;
@@ -849,7 +1037,36 @@ export interface PreclinicalRunResult {
   sample: Array<{ company: string; form: string; created: string[]; matched: number }>;
 }
 
-interface CompanyRow { id: string; name: string; cik: string }
+interface CompanyRow { id: string; name: string; cik: string; active_trials_count?: number | null }
+
+/**
+ * The filer walk, in order. One company row per CIK (duplicate rows such as a
+ * parent and its "<Parent> Oncology" alias share a 10-K; reading it for each
+ * only re-matches the same programs), the row with the most active trials
+ * kept. Filers never read come first, busiest first; filers already read
+ * follow, rotated to start after the cursor so newer annual reports are
+ * picked up over successive runs.
+ */
+export function orderFilingQueue(companies: CompanyRow[], readFilings: Record<string, string>, cursor: string | null): CompanyRow[] {
+  const byCik = new Map<string, CompanyRow>();
+  for (const c of companies) {
+    const key = stripCik(c.cik);
+    const prev = byCik.get(key);
+    // Prefer the row already read (keeps the cursor's accession), then the busiest, then the shortest name.
+    const better = !prev
+      || (!!readFilings[c.id] && !readFilings[prev.id])
+      || (!!readFilings[c.id] === !!readFilings[prev.id]
+        && ((c.active_trials_count ?? 0) > (prev.active_trials_count ?? 0)
+          || ((c.active_trials_count ?? 0) === (prev.active_trials_count ?? 0) && c.name.length < prev.name.length)));
+    if (better) byCik.set(key, c);
+  }
+  const rows = [...byCik.values()];
+  const unread = rows.filter(c => !readFilings[c.id]).sort((a, b) => (b.active_trials_count ?? 0) - (a.active_trials_count ?? 0) || a.id.localeCompare(b.id));
+  const read = rows.filter(c => readFilings[c.id]).sort((a, b) => a.id.localeCompare(b.id));
+  const pivot = cursor ? read.findIndex(c => c.id > cursor) : 0;
+  const rotated = pivot > 0 ? [...read.slice(pivot), ...read.slice(0, pivot)] : read;
+  return [...unread, ...rotated];
+}
 
 async function fetchExistingAssets(supabase: SupabaseClient, companyId: string): Promise<ExistingAsset[]> {
   const out: ExistingAsset[] = [];
@@ -896,7 +1113,7 @@ export async function runPreclinicalPipeline(
   const errors: string[] = [];
   const result: PreclinicalRunResult = {
     companiesProcessed: 0, filingsRead: 0, filingsSkippedSeen: 0, programsExtracted: 0, assetsCreated: 0, assetsMatched: 0,
-    unmatchedClinical: 0, disclosuresWritten: 0, quotesDropped: 0, schemaInvalid: 0, usage, costUsd: 0, costCapUsd: costCap,
+    unmatchedClinical: 0, foreignSkipped: 0, disclosuresWritten: 0, quotesDropped: 0, schemaInvalid: 0, usage, costUsd: 0, costCapUsd: costCap,
     costCapHit: false, timedOut: false, errors, skipped: null, durationMs: 0, sample: [],
   };
   const outOfTime = () => Date.now() - started > budget;
@@ -927,10 +1144,14 @@ export async function runPreclinicalPipeline(
   const manual = Array.isArray(opts.companyIds) && opts.companyIds.length > 0;
 
   // ── Company walk ───────────────────────────────────────────────────────
+  // `limit` counts filings READ, not companies visited: a filer whose newest annual report was
+  // already extracted costs one SEC submissions fetch and does not use up the run (before Nov 18
+  // 2026 it did, so a 12-company run read 0 to 5 filings once most filers had been read).
   const limit = opts.companyLimit ?? DEFAULT_COMPANY_LIMIT;
+  const maxChecks = opts.maxChecks ?? limit * 8;
   const base = () => supabase
     .from('companies')
-    .select('id, name, cik')
+    .select('id, name, cik, active_trials_count')
     .not('cik', 'is', null)
     .eq('owner_type', 'industry')
     .is('merged_into', null)
@@ -941,27 +1162,30 @@ export async function runPreclinicalPipeline(
     if (error) errors.push(`companies read: ${error.message}`);
     companies = (data ?? []) as CompanyRow[];
   } else {
-    let q = base().limit(limit);
-    if (state.companyCursor) q = q.gt('id', state.companyCursor);
-    const { data, error } = await q;
-    if (error) errors.push(`companies read: ${error.message}`);
-    companies = (data ?? []) as CompanyRow[];
-    if (companies.length === 0 && state.companyCursor) {
-      state.companyCursor = null;
-      const again = await base().limit(limit);
-      companies = (again.data ?? []) as CompanyRow[];
+    const all: CompanyRow[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await base().range(from, from + 999);
+      if (error) { errors.push(`companies read: ${error.message}`); break; }
+      all.push(...((data ?? []) as CompanyRow[]));
+      if ((data ?? []).length < 1000) break;
     }
+    companies = orderFilingQueue(all, state.filings, state.companyCursor);
   }
 
+  let checks = 0;
   for (const co of companies) {
     if (outOfTime()) { result.timedOut = true; break; }
     if (spent() >= costCap) { result.costCapHit = true; break; }
-    if (!manual) state.companyCursor = co.id;
+    if (!manual && (result.filingsRead >= limit || checks >= maxChecks)) break;
+    checks++;
+    if (!manual && state.filings[co.id]) state.companyCursor = co.id;
     result.companiesProcessed++;
     try {
       const sub = await fetchSubmissions(co.cik);
       const filing = sub ? pickPipelineFiling(listRecentFilings(sub)) : null;
-      if (!filing) continue;
+      // No annual report or registration statement: remember it, so the filer joins the re-check
+      // rotation instead of heading the unread queue on every run.
+      if (!filing) { if (sub && !manual) state.filings[co.id] = 'none'; continue; }
       if (!opts.force && state.filings[co.id] === filing.accessionNumber) { result.filingsSkippedSeen++; continue; }
 
       const url = filingDocumentUrl(co.cik, filing);
@@ -979,6 +1203,8 @@ export async function runPreclinicalPipeline(
       addUsage(usage, ex.usage);
       result.quotesDropped += ex.dropped;
       result.schemaInvalid += ex.invalid;
+      // A billing or budget failure is not the filing's fault: stop and retry the filer next run.
+      if (ex.error && /credit balance|AI budget reached|rate_limit/i.test(ex.error)) { errors.push(`stopped: ${ex.error}`); break; }
       if (ex.error) { errors.push(`${co.name} ${filing.form}: ${ex.error}`); continue; }
       result.programsExtracted += ex.programs.length;
 
@@ -986,15 +1212,14 @@ export async function runPreclinicalPipeline(
         company_id: co.id, company_name: co.name, form: filing.form, accession: filing.accessionNumber,
         filing_date: filing.filingDate, url, model, now,
       };
-      const persisted = await persistPrograms(supabase, ctx, ex.programs);
+      const persisted = await persistPrograms(supabase, ctx, ex.programs, { createUnknownClinical: opts.createUnknownClinical });
       errors.push(...persisted.errors);
       result.unmatchedClinical += persisted.unmatchedClinical;
       result.disclosuresWritten += persisted.disclosuresWritten;
       result.assetsCreated += persisted.created.length;
       result.assetsMatched += persisted.matched;
-      const created = persisted.created;
-      const matched = persisted.matched;
-      if (result.sample.length < 10) result.sample.push({ company: co.name, form: filing.form, created: created.slice(0, 8), matched });
+      result.foreignSkipped += persisted.foreignSkipped;
+      if (result.sample.length < 10) result.sample.push({ company: co.name, form: filing.form, created: persisted.created.slice(0, 8), matched: persisted.matched });
       state.filings[co.id] = filing.accessionNumber;
     } catch (err) {
       errors.push(`${co.name}: ${err instanceof Error ? err.message.split('\n')[0].slice(0, 300) : String(err)}`);
@@ -1011,4 +1236,123 @@ export async function runPreclinicalPipeline(
   result.costUsd = Math.round(spent() * 10_000) / 10_000;
   result.durationMs = Date.now() - started;
   return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// REPLAY (re-decide recorded disclosures, no model calls)
+// ═══════════════════════════════════════════════════════════════════════
+
+/** asset_disclosures row as read back for a replay. */
+export interface StoredDisclosure {
+  id: string;
+  company_id: string;
+  program_name: string;
+  aliases: string[] | null;
+  stage: string;
+  target: string | null;
+  target_class: string | null;
+  modality: string | null;
+  therapeutic_area: string | null;
+  indication_category: string | null;
+  indication_specific: string | null;
+  mechanism_short: string | null;
+  partnered: boolean | null;
+  partner_name: string | null;
+  source_type: string;
+  source_id: string;
+  source_url: string;
+  disclosed_at: string;
+  excerpt: string;
+  confidence: number;
+  model: string | null;
+}
+
+/** A recorded disclosure back as a program (its excerpt is the verbatim quote it was stored with). */
+export function storedToProgram(d: StoredDisclosure): DisclosedProgram {
+  return {
+    program_name: d.program_name,
+    aliases: d.aliases ?? [],
+    stage: (STAGES as readonly string[]).includes(d.stage) ? (d.stage as DisclosedStage) : 'unknown',
+    target: d.target, target_class: d.target_class, modality: d.modality, therapeutic_area: d.therapeutic_area,
+    indication_category: d.indication_category, indication_specific: d.indication_specific, mechanism_short: d.mechanism_short,
+    partnered: !!d.partnered, partner_name: d.partner_name, evidence_quote: d.excerpt, confidence: d.confidence,
+  };
+}
+
+/** The persist context a recorded disclosure was written under. */
+export function storedContext(d: StoredDisclosure, companyName: string, now: Date): FilingContext {
+  const origin: DisclosureOrigin = d.source_type === 'pipeline_page' ? 'pipeline_page' : 'filing';
+  return {
+    company_id: d.company_id, company_name: companyName, form: d.source_type, accession: d.source_id, filing_date: String(d.disclosed_at).slice(0, 10),
+    url: d.source_url, model: d.model ?? PRECLINICAL_MODEL, now, origin,
+    dataSource: d.source_type === 'hkex_annual_report' ? 'hkex_filing' : undefined,
+  };
+}
+
+export interface ReplayResult {
+  disclosures: number;
+  sources: number;
+  matched: number;
+  created: number;
+  clinicalCreated: number;
+  foreignSkipped: number;
+  stillUnmatched: number;
+  errors: string[];
+  sample: Array<{ company: string; source: string; decisions: ProgramDecision[] }>;
+}
+
+/**
+ * Re-decide disclosures recorded as unmatched_clinical with today's matching (identifier
+ * matching, cross-company code guard) and, opt-in, create the Phase 1-3 programs whose code no
+ * company has. No model calls: the stored excerpt is the verbatim quote. Walks by id after
+ * `afterId`; dryRun writes nothing.
+ */
+export async function replayUnmatchedDisclosures(
+  supabase: SupabaseClient,
+  opts: { limit?: number; afterId?: string | null; dryRun?: boolean; createUnknownClinical?: boolean; now?: Date } = {},
+): Promise<ReplayResult & { lastId: string | null }> {
+  const r: ReplayResult & { lastId: string | null } = { disclosures: 0, sources: 0, matched: 0, created: 0, clinicalCreated: 0, foreignSkipped: 0, stillUnmatched: 0, errors: [], sample: [], lastId: null };
+  let q = supabase
+    .from('asset_disclosures')
+    .select('id, company_id, program_name, aliases, stage, target, target_class, modality, therapeutic_area, indication_category, indication_specific, mechanism_short, partnered, partner_name, source_type, source_id, source_url, disclosed_at, excerpt, confidence, model')
+    .eq('match_status', 'unmatched_clinical')
+    .order('id')
+    .limit(opts.limit ?? 300);
+  if (opts.afterId) q = q.gt('id', opts.afterId);
+  const { data, error } = await q;
+  if (error) { r.errors.push(`asset_disclosures read: ${error.message}`); return r; }
+  const rows = (data ?? []) as StoredDisclosure[];
+  r.disclosures = rows.length;
+  r.lastId = rows.length ? rows[rows.length - 1].id : null;
+  const companyIds = [...new Set(rows.map(d => d.company_id))];
+  const names = new Map<string, string>();
+  for (let i = 0; i < companyIds.length; i += 200) {
+    const { data: cos } = await supabase.from('companies').select('id, name').in('id', companyIds.slice(i, i + 200));
+    for (const c of (cos ?? []) as Array<{ id: string; name: string }>) names.set(c.id, c.name);
+  }
+  const groups = new Map<string, StoredDisclosure[]>();
+  for (const d of rows) {
+    const k = `${d.company_id}|${d.source_id}`;
+    groups.set(k, [...(groups.get(k) ?? []), d]);
+  }
+  const now = opts.now ?? new Date();
+  for (const group of groups.values()) {
+    const first = group[0];
+    const name = names.get(first.company_id);
+    if (!name) continue;
+    r.sources++;
+    try {
+      const persisted = await persistPrograms(supabase, storedContext(first, name, now), group.map(storedToProgram), { dryRun: opts.dryRun, createUnknownClinical: opts.createUnknownClinical });
+      r.errors.push(...persisted.errors);
+      r.matched += persisted.matched;
+      r.created += persisted.created.length;
+      r.clinicalCreated += persisted.clinicalCreated;
+      r.foreignSkipped += persisted.foreignSkipped;
+      r.stillUnmatched += persisted.unmatchedClinical;
+      if (r.sample.length < (opts.dryRun ? 2000 : 40)) r.sample.push({ company: name, source: first.source_type, decisions: persisted.decisions });
+    } catch (err) {
+      r.errors.push(`${name}: ${err instanceof Error ? err.message.split('\n')[0].slice(0, 200) : String(err)}`);
+    }
+  }
+  return r;
 }
