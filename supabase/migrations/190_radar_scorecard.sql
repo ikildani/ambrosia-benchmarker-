@@ -62,6 +62,8 @@ BEGIN
     WHERE coalesce(d.is_canonical, true) AND NOT coalesce(d.is_synthetic, false)
       AND d.announced_date >= current_date - 365
       AND d.deal_type IN ('license', 'option', 'collaboration')
+      -- Only deals that name a drug can link to a program (platform and undisclosed-target deals cannot).
+      AND cardinality(public.radar_asset_identifiers(d.asset_name)) > 0
   ),
   -- Forward check: licensed assets' standing 14+ days before the deal.
   fwd AS (
@@ -118,6 +120,8 @@ BEGIN
     'forward_top_decile_share', (SELECT avg((frac_above < 0.10)::int) FROM fwd_pct),
     -- coverage
     'deals_12m', (SELECT count(*) FROM deals12),
+    'deals_12m_all', (SELECT count(*) FROM public.deals d WHERE coalesce(d.is_canonical, true) AND NOT coalesce(d.is_synthetic, false)
+                      AND d.announced_date >= current_date - 365 AND d.deal_type IN ('license', 'option', 'collaboration')),
     'deals_12m_linked', (SELECT count(*) FROM deals12 d WHERE EXISTS (SELECT 1 FROM public.clinical_assets a WHERE a.deal_ids @> ARRAY[d.id])),
     'feed_classified_share', (SELECT avg((classification_status = 'classified')::int) FROM tmp_sc_feed),
     'feed_ta_share', (SELECT avg((therapeutic_area IS NOT NULL)::int) FROM tmp_sc_feed),

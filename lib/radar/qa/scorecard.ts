@@ -95,7 +95,7 @@ export const SCORECARD_METRICS: readonly ScorecardMetricSpec[] = [
   // ── coverage ─────────────────────────────────────────────────────────
   { key: 'universe_programs', dimension: 'coverage', label: 'Programs in the universe', poor: 100_000, target: 200_000,
     value: s => num(s.universe_programs), format: 'count' },
-  { key: 'deal_recall_12m', dimension: 'coverage', label: 'Licensing deals (12 months) linked to a program', poor: 0.2, target: 0.95,
+  { key: 'deal_recall_12m', dimension: 'coverage', label: 'Licensing deals naming a drug (12 months) linked to a program', poor: 0.2, target: 0.95,
     value: s => ratio(s.deals_12m_linked, s.deals_12m), sample: s => num(s.deals_12m) ?? 0, minSample: 50, format: 'pct' },
   { key: 'feed_classified', dimension: 'coverage', label: 'Feed programs classified', poor: 0.7, target: 0.98,
     value: s => num(s.feed_classified_share), format: 'pct' },
