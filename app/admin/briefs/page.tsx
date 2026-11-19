@@ -11,6 +11,7 @@ import type { Metadata } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
 import { dataRoomUrl, mintBriefLinks } from '@/lib/brief/delivery';
 import { BriefRequestRow, type BriefRequestView } from '@/components/admin/briefs/BriefRequestRow';
+import { requireAdminPage } from '@/lib/auth/require-admin-page';
 
 export const metadata: Metadata = { title: 'Briefs | Admin', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,7 @@ interface Row {
 }
 
 export default async function AdminBriefsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdminPage();
   const sp = await searchParams;
   const show = typeof sp.show === 'string' ? sp.show : 'open';
   const supabase = createServiceClient();

@@ -20,6 +20,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server';
 import { DealAuditRow } from '@/components/admin/DealAuditRow';
+import { requireAdminPage } from '@/lib/auth/require-admin-page';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +91,7 @@ export default async function DealAuditPage({
 }: {
   searchParams: Promise<{ source?: string; limit?: string }>;
 }) {
+  await requireAdminPage();
   const params = await searchParams;
   const limit = Math.min(parseInt(params.limit || '50', 10), 100);
   const sourceFilter = params.source || undefined;
