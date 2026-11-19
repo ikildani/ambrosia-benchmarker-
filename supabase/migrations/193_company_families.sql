@@ -804,21 +804,30 @@ BEGIN
 
   -- 0. Program keys move when programs regroup (migration 187): repoint each
   --    link to the company's program that holds its identifier now.
+  -- Families (migration 193) can fold two linked programs into one: drop the redundant link
+  -- first (keeping the one already on that key), then re-key the rest.
+  DROP TABLE IF EXISTS tmp_dl_rekey;
+  CREATE TEMP TABLE tmp_dl_rekey ON COMMIT DROP AS
+  SELECT DISTINCT ON (l2.id) l2.id, l2.deal_id, l2.program_key AS old_key, a.program_key AS new_key
+  FROM public.radar_deal_program_links l2
+  JOIN public.clinical_assets a
+    ON a.company_id = l2.company_id AND a.program_key IS NOT NULL
+   AND (a.program_key = l2.program_key
+        OR a.deal_ids @> ARRAY[l2.deal_id]
+        OR public.radar_asset_identifiers(a.asset_name) @> ARRAY[l2.identifier])
+  ORDER BY l2.id, (a.program_key = l2.program_key) DESC, a.program_primary DESC;
+
+  DELETE FROM public.radar_deal_program_links l
+  USING (SELECT id, row_number() OVER (PARTITION BY deal_id, new_key ORDER BY (old_key = new_key) DESC, id) AS rn
+         FROM tmp_dl_rekey) d
+  WHERE l.id = d.id AND d.rn > 1;
+
   UPDATE public.radar_deal_program_links l
-     SET program_key = x.program_key
-    FROM (
-      SELECT DISTINCT ON (l2.id) l2.id, a.program_key
-      FROM public.radar_deal_program_links l2
-      JOIN public.clinical_assets a
-        ON a.company_id = l2.company_id AND a.program_key IS NOT NULL
-       AND (a.program_key = l2.program_key
-            OR a.deal_ids @> ARRAY[l2.deal_id]
-            OR public.radar_asset_identifiers(a.asset_name) @> ARRAY[l2.identifier])
-      ORDER BY l2.id, (a.program_key = l2.program_key) DESC, a.program_primary DESC
-    ) x
-   WHERE l.id = x.id AND l.program_key <> x.program_key
+     SET program_key = r.new_key
+    FROM tmp_dl_rekey r
+   WHERE l.id = r.id AND r.old_key <> r.new_key
      AND NOT EXISTS (SELECT 1 FROM public.radar_deal_program_links o
-                     WHERE o.deal_id = l.deal_id AND o.program_key = x.program_key);
+                     WHERE o.deal_id = l.deal_id AND o.program_key = r.new_key AND o.id <> l.id);
 
   DROP TABLE IF EXISTS tmp_dl_new;
   CREATE TEMP TABLE tmp_dl_new (program_key text) ON COMMIT DROP;
