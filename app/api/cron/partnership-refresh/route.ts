@@ -21,13 +21,28 @@
  *   ?limit=5000               assets per run
  *   ?mode=backlog|incremental force a mode
  *   ?budget=240000            wall-clock budget in ms (max 280000)
+ *   ?mode=families            corporate families only (lib/entities/company-family-run.ts,
+ *                             migration 193); &dry_run=1 proposes without writing, &model_calls=N
+ *
+ * Corporate families also run once a day ahead of the deal ledger (the 00:45 UTC run), with a
+ * short budget and at most FAMILY_DAILY_MODEL_CALLS model adjudications.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { refreshPartnershipBatch, type RefreshMode } from '@/lib/radar/partnership';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import { withSpendGuard } from '@/lib/ai/spend-guard';
+import { runCompanyFamilies, type FamilyModelClient } from '@/lib/entities/company-family-run';
+
+const FAMILY_DAILY_MODEL_CALLS = 30;
+
+function familyClient(): FamilyModelClient | null {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  return apiKey ? (new Anthropic(withSpendGuard('company-family', { apiKey })) as unknown as FamilyModelClient) : null;
+}
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -64,7 +79,47 @@ export async function GET(request: NextRequest) {
   const manual = params.has('mode') || params.has('budget');
   const startedAt = Date.now();
 
+  if (params.get('mode') === 'families') {
+    const dryRun = params.get('dry_run') === '1' || params.get('dry_run') === 'true';
+    try {
+      const fam = await runCompanyFamilies(supabase, {
+        dryRun,
+        client: familyClient(),
+        maxModelCalls: parsePositiveInt(params.get('model_calls'), 60),
+        timeBudgetMs: timeBudgetMs - 20_000,
+      });
+      await logRadarRun(supabase, {
+        source: 'asset_universe',
+        startedAt,
+        status: deriveRunStatus({ errors: fam.errors.length, timedOut: fam.timed_out, processed: fam.written + fam.model_calls, produced: fam.written }),
+        runType: 'manual',
+        inserted: fam.written,
+        errors: fam.errors,
+        parameters: { stage: 'company_families', ...fam, sample: fam.sample.slice(0, 10) },
+      });
+      return NextResponse.json({ success: true, mode: 'families', ...fam });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await logRadarRun(supabase, { source: 'asset_universe', startedAt, status: 'failed', errors: [message], parameters: { stage: 'company_families', dry_run: dryRun } });
+      return NextResponse.json({ success: false, mode: 'families', error: message }, { status: 500 });
+    }
+  }
+
   try {
+    // Corporate families once a day, before the ledger, so deals link to a licensor's subsidiary
+    // or Chinese-name twin the same day (migration 193). Never fails the run.
+    let families: Record<string, unknown> | null = null;
+    const familyErrors: string[] = [];
+    if (!manual && new Date().getUTCHours() === 0) {
+      try {
+        const fam = await runCompanyFamilies(supabase, { client: familyClient(), maxModelCalls: FAMILY_DAILY_MODEL_CALLS, timeBudgetMs: 90_000 });
+        families = { written: fam.written, proposals: fam.proposals, model_calls: fam.model_calls, pending: fam.model_subjects_pending, families: fam.families };
+        familyErrors.push(...fam.errors.slice(0, 5).map(e => `company_families: ${e}`));
+      } catch (err) {
+        familyErrors.push(`company_families failed (is migration 193 applied?): ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     // Deal -> program ledger first (migration 192): links deals to the licensor's program by drug
     // identifier and creates deal-only programs, so this run's derive sees them. Never fails the run.
     let dealLinks: Record<string, unknown> | null = null;
@@ -77,6 +132,7 @@ export async function GET(request: NextRequest) {
 
     const result = await refreshPartnershipBatch(supabase, { limit, mode, timeBudgetMs: Math.max(30_000, timeBudgetMs - (Date.now() - startedAt)) });
     if (dealLinksError) result.errors.push(dealLinksError);
+    result.errors.push(...familyErrors);
 
     // Ownership attribution rides on the same cadence: rows whose drug
     // resolution or enrichment moved since their last check get re-derived
@@ -129,6 +185,7 @@ export async function GET(request: NextRequest) {
         },
         timed_out: result.timedOut,
         deal_links: dealLinks,
+        families,
         ownership,
       },
       notes: [
