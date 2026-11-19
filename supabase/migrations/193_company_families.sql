@@ -857,7 +857,7 @@ BEGIN
     INSERT INTO public.clinical_assets (
       company_id, company_name, asset_name, asset_origin, phase, modality, therapeutic_area,
       indication_specific, target, deal_ids, disclosure_source_type, disclosure_url, disclosure_date,
-      disclosure_excerpt, classification_status, ownership_status, ownership_evidence)
+      disclosure_excerpt, classification_status, ownership_status, ownership_evidence, confidence_score)
     SELECT DISTINCT ON (c.licensor_id, c.ids[1])
            c.licensor_id, c.company_name, btrim(c.asset_name), 'deal',
            CASE c.phase_at_signing
@@ -869,7 +869,9 @@ BEGIN
            left(c.excerpt, 1000), 'unclassified', 'unknown',
            -- The deal names the licensor, but deal records sometimes invert the parties: keep the
            -- owner unverified until ownership attribution confirms it.
-           jsonb_build_object('rule', 'deal_licensor', 'deal_id', c.id)
+           jsonb_build_object('rule', 'deal_licensor', 'deal_id', c.id),
+           -- A cited deal is a primary source like a filing (45); the scorer skips rows below 20.
+           45
     FROM candidates c
     ORDER BY c.licensor_id, c.ids[1], c.announced_date DESC
     ON CONFLICT (company_name, asset_name) DO NOTHING
@@ -1020,3 +1022,8 @@ BEGIN
   RETURN v_out;
 END;
 $function$;
+
+-- Migration 192 created deal-only programs with the column default confidence_score 0, which keeps
+-- them out of the scoring queue (confidence_score >= 20). Give them the filing level.
+UPDATE public.clinical_assets SET confidence_score = 45
+WHERE asset_origin = 'deal' AND coalesce(confidence_score, 0) < 20;
