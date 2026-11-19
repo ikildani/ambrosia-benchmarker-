@@ -202,7 +202,8 @@ BEGIN
     -- Two large-pharma rows join only on a declared name or a person's decision, never on a
     -- model, domain or acquisition-record inference (one wrong edge would fuse two majors).
     AND NOT (r.source IN ('model', 'email_domain', 'acquisition_codes')
-             AND c1.company_type = 'large_pharma' AND c2.company_type = 'large_pharma');
+             AND coalesce(c1.company_type = 'large_pharma', false)
+             AND coalesce(c2.company_type = 'large_pharma', false));
   DELETE FROM tmp_cf_edge WHERE a = b;
   INSERT INTO tmp_cf_edge SELECT b, a FROM tmp_cf_edge;
   CREATE INDEX ON tmp_cf_edge (b);
@@ -236,7 +237,7 @@ BEGIN
   LEFT JOIN sub s ON s.id = c.id
   ORDER BY l.lab,
            (coalesce(s.is_parent, false) AND NOT coalesce(s.is_child, false)) DESC,
-           (c.company_type = 'large_pharma') DESC,
+           (c.company_type = 'large_pharma') DESC NULLS LAST,
            (c.name !~ '[㐀-鿿]') DESC,
            coalesce(c.pipeline_assets_count, 0) DESC,
            c.id;
