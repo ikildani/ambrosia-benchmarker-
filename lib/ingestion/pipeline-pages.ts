@@ -17,6 +17,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { addUsage, emptyUsage, type IntentClient, type TokenUsage } from './management-intent';
+import { normalizeKey } from '@/lib/radar/drug-name';
 import {
   DisclosedProgramSchema,
   MAX_EXCERPT_CHARS,
@@ -97,6 +98,14 @@ Rules:
 
 Output: a single JSON object {"programs": [...]} matching the schema. No prose.`;
 
+/**
+ * Text-only variant (server-side fetch, no screenshot): every program must be quoted verbatim
+ * from the paragraphs, since there is no chart to read a label off.
+ */
+export const PIPELINE_PAGE_TEXT_SYSTEM = PIPELINE_PAGE_SYSTEM
+  .replace(/ You receive the page's visible text as numbered paragraphs and, when available, a screenshot of the page\. Pipeline pages are often charts[^\n]*/, " You receive the page's visible text as numbered paragraphs (no screenshot). Table rows arrive as cells joined by ' · '; a trailing '[stage hint: ...]' was read from the row's markup (a bar's class name or label) and is reliable evidence of the stage the row's bar reaches.")
+  .replace(/- evidence_quote: [^\n]*/, '- evidence_quote: ONE sentence or line copied VERBATIM from the paragraphs that names the program (at most 600 characters). Never paraphrase, never stitch lines, never invent a "[chart]" label: a program that is not named in the paragraphs is not returned.');
+
 export type ScreenshotMedia = 'image/png' | 'image/jpeg';
 
 export function buildPageUserContent(company: string, url: string, crawledAt: string, paragraphs: string[], screenshotPngBase64?: string | null, media: ScreenshotMedia = 'image/jpeg'): Anthropic.MessageParam['content'] {
@@ -110,9 +119,17 @@ export function buildPageUserContent(company: string, url: string, crawledAt: st
   return content;
 }
 
-/** Verbatim in the text, or a chart label. */
-export function pageQuoteAcceptable(quote: string, paragraphs: string[]): boolean {
-  if (quote.startsWith(CHART_PREFIX)) return quote.length > CHART_PREFIX.length + 2;
+/** True when the program's name or one of its aliases appears in the page text (normalized). */
+export function programNamedOnPage(p: Pick<DisclosedProgram, 'program_name' | 'aliases'>, pageKey: string): boolean {
+  return [p.program_name, ...p.aliases].some(n => {
+    const k = normalizeKey(n);
+    return k.length >= 3 && pageKey.includes(k);
+  });
+}
+
+/** Verbatim in the text, or a chart label (only when the model saw a screenshot). */
+export function pageQuoteAcceptable(quote: string, paragraphs: string[], allowChart = true): boolean {
+  if (quote.startsWith(CHART_PREFIX)) return allowChart && quote.length > CHART_PREFIX.length + 2;
   return quoteIsVerbatim(quote, paragraphs);
 }
 
@@ -127,6 +144,62 @@ export interface PageExtractResult {
 
 const OUTPUT_SCHEMA = buildOutputJsonSchema();
 
+/** Request for one page; text-only (no screenshot) uses PIPELINE_PAGE_TEXT_SYSTEM. Shared by the live and Batch paths. */
+export function buildPageRequestParams(
+  company: string,
+  url: string,
+  crawledAt: string,
+  paragraphs: string[],
+  screenshotPngBase64?: string | null,
+  model = PRECLINICAL_MODEL,
+): Anthropic.MessageCreateParamsNonStreaming {
+  return {
+    model,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    system: [{ type: 'text', text: screenshotPngBase64 ? PIPELINE_PAGE_SYSTEM : PIPELINE_PAGE_TEXT_SYSTEM, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: buildPageUserContent(company, url, crawledAt, paragraphs.slice(0, MAX_MODEL_PARAGRAPHS), screenshotPngBase64) }],
+    output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
+    thinking: { type: 'disabled' },
+  } as Anthropic.MessageCreateParamsNonStreaming;
+}
+
+/** The paragraphs a request actually carried (quotes are checked against these). */
+export function modelParagraphs(paragraphs: string[]): string[] {
+  return paragraphs.slice(0, MAX_MODEL_PARAGRAPHS);
+}
+
+/**
+ * A model response for one page -> validated programs. Schema-checked with zod; a program is kept
+ * only with a verbatim quote from the paragraphs (or a chart label when a screenshot was sent).
+ */
+export function parsePageResponse(
+  msg: Pick<Anthropic.Message, 'content' | 'stop_reason'>,
+  paragraphs: string[],
+  allowChart: boolean,
+): Omit<PageExtractResult, 'usage'> {
+  if (msg.stop_reason === 'refusal') return { programs: [], dropped: 0, invalid: 0, fromChart: 0, error: 'model refused the page' };
+  if (msg.stop_reason === 'max_tokens') return { programs: [], dropped: 0, invalid: 0, fromChart: 0, error: 'response truncated at max_tokens' };
+  const text = msg.content.find((b): b is Anthropic.TextBlock => b.type === 'text')?.text ?? '';
+  let json: unknown;
+  try { json = JSON.parse(text); } catch { return { programs: [], dropped: 0, invalid: 0, fromChart: 0, error: 'response is not JSON' }; }
+  const loose = z.object({ programs: z.array(z.record(z.string(), z.unknown())) }).safeParse(json);
+  if (!loose.success) return { programs: [], dropped: 0, invalid: 0, fromChart: 0, error: 'response is not {programs: [...]}' };
+  const kept: DisclosedProgram[] = [];
+  let invalid = 0, dropped = 0, fromChart = 0;
+  const pageKey = normalizeKey(paragraphs.join(' '));
+  for (const raw of loose.data.programs.slice(0, MAX_PROGRAMS)) {
+    const parsed = DisclosedProgramSchema.safeParse(raw);
+    if (!parsed.success) { invalid++; continue; }
+    if (!parsed.data.program_name || !pageQuoteAcceptable(parsed.data.evidence_quote, paragraphs, allowChart)) { dropped++; continue; }
+    // Text only: the program's name (or an alias) must be printed on the page, so a name the model
+    // composed ("p53 pathway program") never becomes an asset even when its quote is verbatim.
+    if (!allowChart && !programNamedOnPage(parsed.data, pageKey)) { dropped++; continue; }
+    if (parsed.data.evidence_quote.startsWith(CHART_PREFIX)) fromChart++;
+    kept.push({ ...parsed.data, evidence_quote: parsed.data.evidence_quote.slice(0, MAX_EXCERPT_CHARS) });
+  }
+  return { programs: dedupePrograms(kept), dropped, invalid, fromChart, error: null };
+}
+
 export async function extractProgramsFromPage(
   client: IntentClient,
   company: string,
@@ -138,30 +211,9 @@ export async function extractProgramsFromPage(
 ): Promise<PageExtractResult> {
   const usage = emptyUsage();
   try {
-    const msg = await client.messages.create({
-      model,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      system: [{ type: 'text', text: PIPELINE_PAGE_SYSTEM, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: buildPageUserContent(company, url, crawledAt, paragraphs.slice(0, MAX_MODEL_PARAGRAPHS), screenshotPngBase64) }],
-      output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
-      thinking: { type: 'disabled' },
-    } as Anthropic.MessageCreateParamsNonStreaming);
+    const msg = await client.messages.create(buildPageRequestParams(company, url, crawledAt, paragraphs, screenshotPngBase64, model));
     addUsage(usage, msg.usage as unknown as Partial<TokenUsage>);
-    if (msg.stop_reason === 'refusal') return { programs: [], dropped: 0, invalid: 0, fromChart: 0, usage, error: 'model refused the page' };
-    if (msg.stop_reason === 'max_tokens') return { programs: [], dropped: 0, invalid: 0, fromChart: 0, usage, error: 'response truncated at max_tokens' };
-    const text = msg.content.find((b): b is Anthropic.TextBlock => b.type === 'text')?.text ?? '';
-    const loose = z.object({ programs: z.array(z.record(z.string(), z.unknown())) }).safeParse(JSON.parse(text));
-    if (!loose.success) return { programs: [], dropped: 0, invalid: 0, fromChart: 0, usage, error: `response is not {programs: [...]}` };
-    const kept: DisclosedProgram[] = [];
-    let invalid = 0, dropped = 0, fromChart = 0;
-    for (const raw of loose.data.programs.slice(0, MAX_PROGRAMS)) {
-      const parsed = DisclosedProgramSchema.safeParse(raw);
-      if (!parsed.success) { invalid++; continue; }
-      if (!parsed.data.program_name || !pageQuoteAcceptable(parsed.data.evidence_quote, paragraphs)) { dropped++; continue; }
-      if (parsed.data.evidence_quote.startsWith(CHART_PREFIX)) fromChart++;
-      kept.push({ ...parsed.data, evidence_quote: parsed.data.evidence_quote.slice(0, MAX_EXCERPT_CHARS) });
-    }
-    return { programs: dedupePrograms(kept), dropped, invalid, fromChart, usage, error: null };
+    return { ...parsePageResponse(msg, paragraphs, !!screenshotPngBase64), usage };
   } catch (err) {
     return { programs: [], dropped: 0, invalid: 0, fromChart: 0, usage, error: err instanceof Error ? err.message.split('\n')[0].slice(0, 300) : String(err) };
   }

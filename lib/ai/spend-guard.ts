@@ -125,12 +125,15 @@ export function backlogPlan(env: NodeJS.ProcessEnv = process.env): BacklogPlan {
     const n = Number(v);
     return v !== undefined && v !== '' && Number.isFinite(n) && n >= 0 ? n : d;
   };
+  // Server-side pipeline pages (lib/ingestion/pipeline-pages-http.ts): off until the owner approves a
+  // share; setting AI_BACKLOG_PRECLINICAL_PAGES_USD adds it to the default total.
+  const pages = num(env.AI_BACKLOG_PRECLINICAL_PAGES_USD, 0);
   return {
     start: env.AI_BACKLOG_START || '2026-10-29',
     // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026.
-    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105),
+    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + pages),
     dailyUsd: num(env.AI_BACKLOG_DAILY_USD, 15),
-    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15 },
+    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(pages > 0 ? { 'preclinical-pages': pages } : {}) },
   };
 }
 
