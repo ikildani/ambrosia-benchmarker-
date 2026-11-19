@@ -28,6 +28,7 @@ import {
 import { OutcomeReviewRow } from '@/components/admin/outcomes/OutcomeReviewRow';
 import { ResolvedLedgerTable } from '@/components/admin/outcomes/ResolvedLedgerTable';
 import { AccuracyRollupTable } from '@/components/admin/outcomes/AccuracyRollupTable';
+import { requireAdminPage } from '@/lib/auth/require-admin-page';
 
 export const metadata: Metadata = {
   title: 'Outcome Ledger | Admin',
@@ -95,6 +96,7 @@ export default async function OutcomesAdminPage({
 }: {
   searchParams: Promise<{ tab?: string; limit?: string }>;
 }) {
+  await requireAdminPage();
   const params = await searchParams;
   const tab: Tab = params.tab === 'ledger' || params.tab === 'accuracy' ? params.tab : 'queue';
   const limit = Math.min(Math.max(parseInt(params.limit || '50', 10) || 50, 1), 200);

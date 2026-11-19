@@ -9,6 +9,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server';
 import { DedupRow } from '@/components/admin/DedupRow';
+import { requireAdminPage } from '@/lib/auth/require-admin-page';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,7 @@ interface DedupGroup {
 }
 
 export default async function DedupPage() {
+  await requireAdminPage();
   const supabase = createServiceClient();
 
   const { data: deals } = await supabase

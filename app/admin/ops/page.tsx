@@ -17,6 +17,7 @@ import { Metadata } from 'next';
 import { createServiceClient } from '@/lib/supabase/server';
 import { loadAccuracyData } from '@/lib/accuracy-dashboard-data';
 import Link from 'next/link';
+import { requireAdminPage } from '@/lib/auth/require-admin-page';
 
 export const metadata: Metadata = {
   title: 'Ops Dashboard | Admin',
@@ -103,6 +104,7 @@ async function loadOpsData() {
 }
 
 export default async function OpsDashboard() {
+  await requireAdminPage();
   const [opsData, accuracy] = await Promise.all([
     loadOpsData(),
     Promise.resolve(loadAccuracyData()),
