@@ -200,10 +200,12 @@ describe('Territory Multiplier Accuracy', () => {
     );
   });
 
-  it('china < europe', () => {
-    expect(results.china.terms.totalDealValue.median).toBeLessThan(
-      results.europe.terms.totalDealValue.median
-    );
+  // Re-measured Nov 23 2026: China-only licenses paid ~0.4x a comparable global license (25 deals
+  // 2023-2026, x0.30 of actual at the old 0.12), above Europe's unmeasured 0.25. The old "china < europe"
+  // ordering was an assumption, not data; China now sits between Japan and the US.
+  it('japan < china < us_only', () => {
+    expect(results.japan.terms.totalDealValue.median).toBeLessThan(results.china.terms.totalDealValue.median);
+    expect(results.china.terms.totalDealValue.median).toBeLessThan(results.us_only.terms.totalDealValue.median);
   });
 
   it('japan < europe', () => {

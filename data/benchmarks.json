@@ -5958,7 +5958,17 @@
       }
     }
   },
-  "_territoryNotes": "Sub-territory multipliers (europe+china+japan+row=0.54) intentionally exceed ex_us (0.45). Standalone territory deals carry a 15-20% optionality premium vs carve-outs from broader ex_us agreements \u2014 this reflects real deal economics where individual territory rights are sold at a premium to the aggregate.",
+  "modalityByTA": {
+    "_description": "Per-area modality multipliers where the TA-neutral one is wrong for an area and no calibrated row exists. A calibrated row for the same area and modality takes precedence (resolveModalityMultiplier).",
+    "oncology": {
+      "therapeuticVaccine": {
+        "multiplier": 0.5,
+        "label": "Therapeutic Vaccine (non-mRNA)",
+        "context": "Cancer vaccine licenses have paid about half the oncology upfront at the same phase (7 disclosed deals, e.g. Transgene/NEC TG4050, SurVaxM, PROSTVAC); the large payments came with randomized data"
+      }
+    }
+  },
+  "_territoryNotes": "Sub-territory multipliers (europe+china+japan+row=0.82) intentionally exceed ex_us (0.45). Standalone territory deals carry an optionality premium vs carve-outs from broader ex_us agreements \u2014 individual territory rights are sold at a premium to the aggregate. Greater China was re-measured Nov 23 2026: 25 China-only licenses (2023-2026) priced at x0.30 of the upfront paid with 0.12, so it is 0.4 (Chinese licensees pay for China rights well beyond China's share of revenue). Europe, Japan and the other sub-territories have not been re-measured.",
   "territories": {
     "global": {
       "multiplier": 1,
@@ -5981,9 +5991,10 @@
       "context": "EU5 + Nordics \u2014 HTA-driven pricing, reference pricing across markets"
     },
     "china": {
-      "multiplier": 0.12,
+      "multiplier": 0.4,
+      "revenueShare": 0.12,
       "label": "Greater China",
-      "context": "VBP pricing compression, geopolitical risk, CFIUS scrutiny"
+      "context": "China-only licenses with a disclosed upfront (2023-2026) were paid about 0.4x a comparable global license; VBP pricing and geopolitical risk are already in that discount"
     },
     "japan": {
       "multiplier": 0.09,
