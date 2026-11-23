@@ -162,7 +162,7 @@ describe('scheduled mode', () => {
     const off = backlogPlan({} as unknown as NodeJS.ProcessEnv);
     expect(backlogBlocked('preclinical-pages', {}, 0, off)).toMatch(/not a backlog source/);
     const on = backlogPlan({ AI_BACKLOG_PRECLINICAL_PAGES_USD: '300' } as unknown as NodeJS.ProcessEnv);
-    expect(on.totalUsd).toBe(405);
+    expect(on.totalUsd).toBe(415);
     expect(backlogBlocked('preclinical-pages', { 'asset-classify': 40, 'pipeline-pages': 35, 'preclinical-pipeline': 12, 'hkex-pipeline': 15 }, 0, on)).toBeNull();
   });
 });

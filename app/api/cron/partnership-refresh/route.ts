@@ -25,7 +25,8 @@
  *                             migration 193); &dry_run=1 proposes without writing, &model_calls=N
  *
  * Corporate families also run once a day ahead of the deal ledger (the 00:45 UTC run), with a
- * short budget and at most FAMILY_DAILY_MODEL_CALLS model adjudications.
+ * short budget and at most FAMILY_DAILY_MODEL_CALLS model adjudications (FAMILY_BACKLOG_MODEL_CALLS
+ * while the company-family backlog allowance lasts).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -34,10 +35,11 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { timingSafeEqual } from 'crypto';
 import { refreshPartnershipBatch, type RefreshMode } from '@/lib/radar/partnership';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
-import { withSpendGuard } from '@/lib/ai/spend-guard';
+import { backlogActive, withSpendGuard } from '@/lib/ai/spend-guard';
 import { runCompanyFamilies, type FamilyModelClient } from '@/lib/entities/company-family-run';
 
 const FAMILY_DAILY_MODEL_CALLS = 30;
+const FAMILY_BACKLOG_MODEL_CALLS = 150;
 
 function familyClient(): FamilyModelClient | null {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -112,7 +114,12 @@ export async function GET(request: NextRequest) {
     const familyErrors: string[] = [];
     if (!manual && new Date().getUTCHours() === 0) {
       try {
-        const fam = await runCompanyFamilies(supabase, { client: familyClient(), maxModelCalls: FAMILY_DAILY_MODEL_CALLS, timeBudgetMs: 90_000 });
+        const backlog = await backlogActive('company-family').catch(() => false);
+        const fam = await runCompanyFamilies(supabase, {
+          client: familyClient(),
+          maxModelCalls: backlog ? FAMILY_BACKLOG_MODEL_CALLS : FAMILY_DAILY_MODEL_CALLS,
+          timeBudgetMs: backlog ? 150_000 : 90_000,
+        });
         families = { written: fam.written, proposals: fam.proposals, model_calls: fam.model_calls, pending: fam.model_subjects_pending, families: fam.families };
         familyErrors.push(...fam.errors.slice(0, 5).map(e => `company_families: ${e}`));
       } catch (err) {
