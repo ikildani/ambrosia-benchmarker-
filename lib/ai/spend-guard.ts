@@ -128,12 +128,15 @@ export function backlogPlan(env: NodeJS.ProcessEnv = process.env): BacklogPlan {
   // Server-side pipeline pages (lib/ingestion/pipeline-pages-http.ts): off until the owner approves a
   // share; setting AI_BACKLOG_PRECLINICAL_PAGES_USD adds it to the default total.
   const pages = num(env.AI_BACKLOG_PRECLINICAL_PAGES_USD, 0);
+  // Corporate-family model adjudication (lib/entities/company-family-run.ts): $10 approved Nov 23 2026
+  // to clear the ~850-subject backlog in about a week instead of a month on the lean bulk lane.
+  const families = num(env.AI_BACKLOG_COMPANY_FAMILY_USD, 10);
   return {
     start: env.AI_BACKLOG_START || '2026-10-29',
-    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026.
-    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + pages),
+    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026; + families + pages.
+    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + families + pages),
     dailyUsd: num(env.AI_BACKLOG_DAILY_USD, 15),
-    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(pages > 0 ? { 'preclinical-pages': pages } : {}) },
+    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(families > 0 ? { 'company-family': families } : {}), ...(pages > 0 ? { 'preclinical-pages': pages } : {}) },
   };
 }
 
