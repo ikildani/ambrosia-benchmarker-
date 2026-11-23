@@ -1,4 +1,4 @@
-import { getBenchmarksSync } from '@/lib/benchmarks';
+import { getBenchmarksSync, resolveModalityMultiplier } from '@/lib/benchmarks';
 import { POS_BY_THERAPEUTIC_AREA } from '@/lib/financial/pos-tables';
 import { DEFAULT_DISCOUNT_RATES } from '@/lib/financial/discount-rates';
 import { getIndicationTypicalAssetPeak } from '@/lib/financial/index-drugs';
@@ -1220,9 +1220,10 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const phaseConfig = phaseConfigMap[input.therapeuticArea] || benchmarks.phaseConfig;
 
   // Get multipliers from benchmarks
-  const modalityData = benchmarks.modalities[input.modality];
-  const modalityMultiplier = modalityData?.multiplier ?? 1.0;
-  modifiers.push({ name: modalityData?.label ?? input.modality, multiplier: modalityMultiplier, context: modalityData?.context });
+  // Calibrated for the deal's own therapeutic area, else a static per-area override, else TA-neutral.
+  const modalityData = resolveModalityMultiplier(benchmarks, input.therapeuticArea, input.modality);
+  const modalityMultiplier = modalityData.multiplier;
+  modifiers.push({ name: modalityData.label ?? input.modality, multiplier: modalityMultiplier, context: modalityData.context });
 
   // Get indication multiplier
   const category = getIndicationCategory(input.indication, input.therapeuticArea);
@@ -1834,9 +1835,16 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     const userPeak = ca?.peakSalesOverride?.median ?? input.peakSalesOverrideM ?? null;
     if (userPeak != null && Number.isFinite(userPeak) && userPeak > 0) {
       const typicalPeak = getIndicationTypicalAssetPeak(String(input.indication));
+      // The indication's typical peak is a worldwide number. For a regional deal the user enters peak sales in
+      // that territory, so compare like with like: scale the worldwide default by the territory's share of
+      // sales. Without this a China-only run was cut twice, once by the territory multiplier and again by the
+      // peak-sales modifier (a $100M China peak against a $3.0B worldwide default hit the 0.5x floor).
+      const territoryShare = input.territory && input.territory !== 'global'
+        ? (territoryData?.revenueShare ?? territoryMultiplier)
+        : 1;
       const referencePeak =
         (input.referencePeakSalesM != null && input.referencePeakSalesM > 0 ? input.referencePeakSalesM : null)
-        ?? (typicalPeak != null && typicalPeak > 0 ? typicalPeak : null)
+        ?? (typicalPeak != null && typicalPeak > 0 ? typicalPeak * territoryShare : null)
         ?? totalDealValue.median * (PEAK_SALES_MULTIPLE_MEDIAN[input.phase] ?? 5);
       if (referencePeak > 0) {
         const m = clampMultiplier(Math.pow(userPeak / referencePeak, 0.5), 0.5, 2.0);

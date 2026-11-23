@@ -1,7 +1,7 @@
 // Server-side SVG chart renderer for embeddable widgets.
 // Pure string-based SVG generation — no external dependencies.
 
-import { getBenchmarksSync } from '@/lib/benchmarks';
+import { getBenchmarksSync, resolveModalityMultiplier } from '@/lib/benchmarks';
 
 export interface ChartRenderParams {
   type: 'phase-upfront' | 'ta-comparison' | 'modality-premium' | 'territory-split';
@@ -123,8 +123,8 @@ function getModalityPremiumData(): BarItem[] {
   ];
 
   return modalities.map((m, i) => {
-    const mod = benchmarks.modalities[m.key];
-    const val = mod?.multiplier ?? 1;
+    // These are oncology modalities: show the oncology multiplier, not another area's calibration.
+    const val = resolveModalityMultiplier(benchmarks, 'oncology', m.key).multiplier;
     return {
       label: m.label,
       value: val,

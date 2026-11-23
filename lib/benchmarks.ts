@@ -27,6 +27,11 @@ export interface MultiplierOption {
   multiplier: number;
   label: string;
   context?: string;
+  /**
+   * Territories only: share of worldwide sales, when it differs from the deal-value multiplier
+   * (Greater China licenses pay well above China's share of revenue).
+   */
+  revenueShare?: number;
 }
 
 /** A multiplier config category is a map of option-key → MultiplierOption. */
@@ -86,7 +91,15 @@ export interface Benchmarks {
   gastroenterologyPhaseConfig: PhaseConfig;
 
   // Modalities & territories
+  /** TA-neutral modality multipliers (static JSON). Read through resolveModalityMultiplier, not directly. */
   modalities: Record<string, MultiplierOption>;
+  /**
+   * Static per-area modality overrides with evidence notes (e.g. oncology therapeutic vaccines).
+   * A calibrated row for the same area and modality takes precedence.
+   */
+  modalityByTA?: Record<string, Record<string, MultiplierOption>>;
+  /** Calibrated modality multipliers keyed by therapeutic area, then modality (filled by getBenchmarksSync). */
+  calibratedModalityByTA?: Record<string, Record<string, { multiplier: number; sampleSize: number }>>;
   territories: Record<string, MultiplierOption>;
 
   // Indications by category
@@ -389,15 +402,114 @@ export function getBenchmarksSync(): Benchmarks {
       };
     }
 
-    if (cal.calibration_type === 'modality_multiplier' && cal.modality && cal.multiplier !== null) {
+    if (cal.calibration_type === 'modality_multiplier' && cal.modality && cal.multiplier !== null && cal.therapeutic_area) {
       if (!merged.modalities[cal.modality]) continue;
+      // Calibrated multipliers are measured per therapeutic area. Until Nov 23 2026 every row was written
+      // onto the one TA-neutral map, so whichever area came back last won: oncology vaccines priced with
+      // the infectious-disease vaccine multiplier (2.16, x8.5 the upfront actually paid) and every area's
+      // antibodies with dermatology's 3.0. They are now kept per area and read by resolveModalityMultiplier.
       // The calibrated phase baselines already reflect each area's modality mix, so a raw multiplier
       // below MODALITY_MULTIPLIER_FLOOR double-counts it: small molecules priced at x0.46 of the upfront
       // actually paid on 121 global licenses (Nov 5 2026), x0.92 with the floor. No cap: raising the
       // ceiling or harmonising phase ladders (#110, reverted in #114) inflated late-stage terms 2-3x.
-      merged.modalities[cal.modality].multiplier = Math.max(MODALITY_MULTIPLIER_FLOOR, cal.multiplier);
+      const byTA = (merged.calibratedModalityByTA ??= {});
+      (byTA[cal.therapeutic_area] ??= {})[cal.modality] = {
+        multiplier: Math.max(MODALITY_MULTIPLIER_FLOOR, cal.multiplier),
+        sampleSize: cal.sample_size,
+      };
     }
   }
 
+  for (const key of Object.keys(merged) as Array<keyof Benchmarks>) {
+    if (/^(phaseBaselines|\w+PhaseBaselines)$/.test(String(key))) monotonePhaseLadder(merged[key] as unknown as PhaseBaselines);
+  }
+
   return merged;
+}
+
+/**
+ * The modality multiplier for one deal: the calibrated row for the deal's own therapeutic area, then a static
+ * per-area override (modalityByTA), then the TA-neutral static multiplier. Never another area's calibration.
+ */
+export function resolveModalityMultiplier(
+  b: Benchmarks,
+  therapeuticArea: string | undefined,
+  modality: string,
+): { multiplier: number; label?: string; context?: string; source: 'calibrated' | 'area' | 'static' | 'none' } {
+  const base = b.modalities[modality];
+  const ta = therapeuticArea ?? 'oncology';
+  const cal = b.calibratedModalityByTA?.[ta]?.[modality];
+  if (cal && base) {
+    return { multiplier: cal.multiplier, label: base.label, context: base.context, source: 'calibrated' };
+  }
+  const area = b.modalityByTA?.[ta]?.[modality];
+  if (area) return { multiplier: area.multiplier, label: area.label ?? base?.label, context: area.context ?? base?.context, source: 'area' };
+  if (base) return { multiplier: base.multiplier, label: base.label, context: base.context, source: 'static' };
+  return { multiplier: 1, source: 'none' };
+}
+
+/** Development phases whose calibrated medians must not fall as a program advances. */
+const LADDER_PHASES = ['preclinical', 'phase1', 'phase1_2', 'phase2', 'phase2_3', 'phase3'] as const;
+
+function scaleEntry(e: PhaseBaselineEntry, part: 'upfront' | 'totalValue', median: number): void {
+  const old = e[part].median;
+  if (!(old > 0) || !(median > 0)) return;
+  const f = median / old;
+  const round = (x: number) => Math.round(x * 10) / 10;
+  e[part] = { low: round(e[part].low * f), median: round(median), high: round(e[part].high * f) };
+}
+
+/**
+ * Make one area's phase ladder monotone (mutates `baselines`). Calibrated cells come from small, differently
+ * composed samples, and uncalibrated cells are static numbers on another scale, so the mixed ladder zig-zagged:
+ * oncology ran preclinical $10M, Phase 1 $60M, Phase 1/2 $90M (static), Phase 2 $35M, Phase 2/3 $235M (static),
+ * Phase 3 $98M, and a Phase 2 asset priced below a Phase 1 one.
+ *
+ *  1. Calibrated development-phase medians (upfront and total value separately) are fitted by weighted isotonic
+ *     regression in log space (pool-adjacent-violators, weights = sample size). Violating neighbours are pooled
+ *     to their weighted geometric mean, so the fit is not biased up or down. #110's "never fall" floor lifted
+ *     every later cell to the highest earlier one, which is what inflated late-stage terms 2-3x.
+ *  2. An uncalibrated half-step (Phase 1/2, Phase 2/3) between two calibrated phases takes their geometric mean.
+ *  3. An uncalibrated discovery cell is capped at the preclinical value.
+ * Low/high scale with the median. NDA-filed and approved cells are left alone: approved-asset deals are mostly
+ * regional commercial licenses, a different population.
+ */
+export function monotonePhaseLadder(baselines: PhaseBaselines): void {
+  if (!baselines) return;
+  const isCal = (p: string) => baselines[p]?.meta?.source === 'calibrated';
+
+  for (const part of ['upfront', 'totalValue'] as const) {
+    // 1. Weighted PAV over calibrated cells, in ladder order.
+    type Block = { phases: string[]; w: number; v: number };
+    const blocks: Block[] = [];
+    for (const p of LADDER_PHASES) {
+      const e = baselines[p];
+      if (!e || !isCal(p) || !(e[part].median > 0)) continue;
+      blocks.push({ phases: [p], w: Math.max(1, e.meta?.sampleSize ?? 1), v: Math.log(e[part].median) });
+      while (blocks.length > 1 && blocks[blocks.length - 2].v > blocks[blocks.length - 1].v) {
+        const b = blocks.pop()!;
+        const a = blocks.pop()!;
+        blocks.push({ phases: [...a.phases, ...b.phases], w: a.w + b.w, v: (a.v * a.w + b.v * b.w) / (a.w + b.w) });
+      }
+    }
+    for (const b of blocks) {
+      if (b.phases.length < 2) continue;
+      for (const p of b.phases) scaleEntry(baselines[p], part, Math.exp(b.v));
+    }
+
+    // 2. Uncalibrated half-steps between calibrated neighbours.
+    for (const [half, prev, next] of [['phase1_2', 'phase1', 'phase2'], ['phase2_3', 'phase2', 'phase3']] as const) {
+      const e = baselines[half];
+      if (!e || isCal(half) || !isCal(prev) || !isCal(next)) continue;
+      const a = baselines[prev][part];
+      const c = baselines[next][part];
+      const geo = (x: number, y: number) => Math.round(Math.sqrt(Math.max(x, 0) * Math.max(y, 0)) * 10) / 10;
+      e[part] = { low: geo(a.low, c.low), median: geo(a.median, c.median), high: geo(a.high, c.high) };
+    }
+
+    // 3. Uncalibrated discovery never above preclinical.
+    const disc = baselines.discovery;
+    const pre = baselines.preclinical;
+    if (disc && pre && !isCal('discovery') && disc[part].median > pre[part].median) scaleEntry(disc, part, pre[part].median);
+  }
 }
