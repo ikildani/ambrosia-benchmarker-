@@ -77,6 +77,7 @@ interface DealRow {
   press_release_url: string | null;
   source_type: string | null;
   source_filing_id: string | null;
+  deal_subtype?: string | null;
 }
 
 export function toCandidate(d: DealRow): CompCandidateRow | null {
@@ -109,6 +110,7 @@ export function toCandidate(d: DealRow): CompCandidateRow | null {
     royaltyHighPct: num(d.royalty_high_pct),
     sourceUrl: link.url,
     sourceLabel: link.label,
+    dealSubtype: d.deal_subtype ?? null,
   };
 }
 
@@ -120,7 +122,7 @@ async function loadRows(therapeuticArea: string): Promise<CompCandidateRow[]> {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('deals_verified')
-    .select('id, licensor_name, licensee_name, asset_name, announced_date, therapeutic_area, phase_at_signing, modality, indication_category, indication_specific, deal_type, territory, upfront_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, press_release_url, source_type, source_filing_id')
+    .select('id, licensor_name, licensee_name, asset_name, announced_date, therapeutic_area, phase_at_signing, modality, indication_category, indication_specific, deal_type, territory, upfront_usd, total_deal_value_usd, royalty_low_pct, royalty_high_pct, source_url, press_release_url, source_type, source_filing_id, deal_subtype')
     .eq('therapeutic_area', therapeuticArea)
     .gt('upfront_usd', 0)
     .or('source_filing_id.not.is.null,press_release_url.not.is.null')

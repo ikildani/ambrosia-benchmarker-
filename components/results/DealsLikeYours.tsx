@@ -37,6 +37,11 @@ export interface VerifiedCompsResponse {
   rung: CompRung | null;
   relaxed: boolean;
   limited: boolean;
+  headlineBasis?: 'all' | 'asset_purchases';
+  assetPurchaseCount?: number;
+  companyAcquisitionCount?: number;
+  acquisitionNote?: string | null;
+  confidenceCap?: ConfidenceResult['level'] | null;
 }
 
 export type VerifiedCompsState =
@@ -86,7 +91,7 @@ export function useVerifiedComps(inputs: Partial<CalculationInput> | undefined):
 export function verifiedConfidence(state: VerifiedCompsState, result: CalculationResult): ConfidenceResult | null {
   if (state.status !== 'ready') return null;
   const b = result.drillDown?.upfront?.baseline;
-  return computeConfidence(state.data.closeCount, b ? { source: b.source, sampleSize: b.sampleSize } : null);
+  return computeConfidence(state.data.closeCount, b ? { source: b.source, sampleSize: b.sampleSize } : null, state.data.confidenceCap);
 }
 
 const CONFIDENCE_STYLE: Record<ConfidenceResult['level'], { label: string; cls: string; dot: string }> = {
@@ -100,14 +105,21 @@ const TERRITORY_SHORT: Record<string, string> = {
   japan: 'Japan', europe: 'Europe', regional: 'Regional', asia_pacific: 'Asia-Pacific', ex_china: 'Ex-China', us_eu: 'US + EU',
 };
 
+const ACQUISITION_KIND_LABEL: Record<string, string> = {
+  asset: 'Asset purchase',
+  company: 'Company acquisition',
+  unknown: 'Acquisition, type not stated',
+};
+
 function territoryText(c: VerifiedComp): string | null {
-  if (c.dealType && /acqui|merger/i.test(c.dealType)) return 'Acquisition';
+  if (c.dealType && /acqui|merger/i.test(c.dealType)) return null;
   const t = (c.territory ?? '').trim();
   if (!t || t === 'other') return null;
   return TERRITORY_SHORT[t] ?? (t.length > 28 ? `${t.slice(0, 26)}…` : t);
 }
 
-function dealTypeText(dt: string | null): string {
+function dealTypeText(dt: string | null, kind?: VerifiedComp['acquisitionKind']): string {
+  if (kind) return ACQUISITION_KIND_LABEL[kind];
   const map: Record<string, string> = {
     license: 'License', licensing: 'License', acquisition: 'Acquisition', merger: 'Acquisition', option: 'Option',
     collaboration: 'Collaboration', co_development: 'Co-development', co_promotion: 'Co-promotion',
@@ -130,7 +142,7 @@ function exportCsv(comps: VerifiedComp[], filename: string) {
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [header, ...comps.map(c => [
-    c.licensor, c.licensee, c.asset, c.year, phaseName(c.phase), dealTypeText(c.dealType), c.territory,
+    c.licensor, c.licensee, c.asset, c.year, phaseName(c.phase), dealTypeText(c.dealType, c.acquisitionKind), c.territory,
     c.upfrontM, c.totalM, c.royaltyLowPct, c.royaltyHighPct, c.sourceLabel, c.sourceUrl,
   ])].map(row => row.map(esc).join(','));
   const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
@@ -154,7 +166,7 @@ function CompRow({ c }: { c: VerifiedComp }) {
           </p>
           {c.asset && <p className="mt-0.5 text-xs text-neutral-600 dark:text-slate-300 break-words line-clamp-2">{c.asset}</p>}
           <p className="mt-1 text-[11px] text-neutral-500 dark:text-slate-400">
-            {[String(c.year), phaseName(c.phase), dealTypeText(c.dealType), territory].filter(Boolean).join(' · ')}
+            {[String(c.year), phaseName(c.phase), dealTypeText(c.dealType, c.acquisitionKind), territory].filter(Boolean).join(' · ')}
           </p>
         </div>
         <div className="flex sm:flex-col items-baseline sm:items-end gap-x-3 gap-y-0.5 sm:text-right flex-shrink-0">
@@ -235,7 +247,12 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
     );
   }
 
-  const visible = data ? (data.limited ? data.comps : showAll ? data.comps : data.comps.slice(0, INITIAL_PRO_ROWS)) : [];
+  // Acquisition queries with enough asset purchases: whole-company buyouts get their own group.
+  const splitCompanies = data?.headlineBasis === 'asset_purchases';
+  const mainComps = data ? (splitCompanies ? data.comps.filter(c => c.acquisitionKind !== 'company') : data.comps) : [];
+  const companyComps = data && splitCompanies ? data.comps.filter(c => c.acquisitionKind === 'company') : [];
+  const visible = data ? (data.limited ? mainComps : showAll ? mainComps : mainComps.slice(0, INITIAL_PRO_ROWS)) : [];
+  const hiddenCompanies = data && splitCompanies && data.limited ? Math.max(0, (data.companyAcquisitionCount ?? 0) - companyComps.length) : 0;
   const hiddenForFree = data && data.limited ? Math.max(0, data.totalComps - data.comps.length) : 0;
   const s = data?.summary;
   const style = confidence ? CONFIDENCE_STYLE[confidence.level] : null;
@@ -276,7 +293,7 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
           <>
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="col-span-2 sm:col-span-1">
-                <p className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-slate-400">Median upfront paid</p>
+                <p className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-slate-400">{splitCompanies ? 'Median asset purchase price' : 'Median upfront paid'}</p>
                 <p className="mt-0.5 font-mono text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white" data-testid="comp-median">{formatCurrency(s.medianUpfrontM)}</p>
               </div>
               <div>
@@ -286,7 +303,7 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
                 </p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-slate-400">Deals</p>
+                <p className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-slate-400">{splitCompanies ? 'Asset purchases' : 'Deals'}</p>
                 <p className="mt-1 font-mono text-sm sm:text-base font-semibold text-neutral-800 dark:text-slate-100" data-testid="comp-n">{s.n}</p>
               </div>
               {s.medianTotalM != null && s.nTotal >= 3 && (
@@ -299,18 +316,23 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
             <p className="mt-2 text-[11px] text-neutral-500 dark:text-slate-400">
               What was actually paid, from each deal&apos;s filing or press release. Every deal below links to its source.
             </p>
+            {data.acquisitionNote && (
+              <p className={`mt-2 text-xs ${data.confidenceCap === 'low' ? 'rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-800 dark:text-amber-200' : 'text-neutral-600 dark:text-slate-300'}`} data-testid="acquisition-note">
+                {data.acquisitionNote}
+              </p>
+            )}
 
             <ul className="mt-4 space-y-2" data-testid="comp-list">
               {visible.map(c => <CompRow key={c.id} c={c} />)}
             </ul>
 
-            {!data.limited && data.comps.length > INITIAL_PRO_ROWS && (
+            {!data.limited && mainComps.length > INITIAL_PRO_ROWS && (
               <button
                 type="button"
                 onClick={() => setShowAll(v => !v)}
                 className="mt-3 rounded-full border border-neutral-300 dark:border-slate-600 px-4 py-1.5 text-xs font-medium text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-800 transition-colors"
               >
-                {showAll ? 'Show fewer' : `Show all ${data.comps.length} deals`}
+                {showAll ? 'Show fewer' : `Show all ${mainComps.length} deals`}
               </button>
             )}
 
@@ -328,6 +350,21 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
                 </button>
               )}
             </div>
+
+            {(companyComps.length > 0 || hiddenCompanies > 0) && (
+              <div className="mt-5" data-testid="company-acquisitions">
+                <h4 className="text-xs font-semibold text-neutral-700 dark:text-slate-200">Whole-company acquisitions</h4>
+                <p className="mt-0.5 text-[11px] text-neutral-500 dark:text-slate-400">Usually priced well above an asset sale. Not included in the median above.</p>
+                {companyComps.length > 0 && (
+                  <ul className="mt-2 space-y-2 opacity-90">
+                    {companyComps.map(c => <CompRow key={c.id} c={c} />)}
+                  </ul>
+                )}
+                {hiddenCompanies > 0 && (
+                  <p className="mt-2 text-[11px] text-neutral-500 dark:text-slate-400">{hiddenCompanies} whole-company {hiddenCompanies === 1 ? 'acquisition' : 'acquisitions'} in Pro.</p>
+                )}
+              </div>
+            )}
 
             {hiddenForFree > 0 && (
               <div className="mt-3 rounded-xl border border-teal-500/30 bg-teal-500/5 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

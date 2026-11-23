@@ -14,6 +14,8 @@ import {
   topDrivers,
   adjacentPhaseRange,
   COMP_LADDER,
+  classifyAcquisition,
+  coreCompanyName,
   type CompCandidateRow,
 } from '@/lib/comps/verified-comps';
 import { pickSourceLink, toCandidate } from '@/lib/comps/verified-comps.server';
@@ -119,6 +121,9 @@ describe('selectVerifiedComps: ranking and relaxation', () => {
     expect(s.comps.every(c => c.dealType === 'acquisition')).toBe(true);
     expect(s.summary.medianUpfrontM).toBe(900);
     expect(s.closeCount).toBe(0);
+    // No asset purchases among them: confidence is capped at Low and the note says why.
+    expect(s.confidenceCap).toBe('low');
+    expect(s.acquisitionNote).toMatch(/Fewer than 3/);
   });
 
   it('falls back to the whole therapeutic area when nothing closer reaches the minimum', () => {
@@ -254,5 +259,73 @@ describe('source links', () => {
     };
     expect(toCandidate(base)).toBeNull();
     expect(toCandidate({ ...base, source_filing_id: '0001-24-1' })).toMatchObject({ upfrontM: 50, totalM: 500, sourceUrl: 'https://example.com/pr/1' });
+  });
+});
+
+describe('acquisitions: asset purchase vs whole-company buyout', () => {
+  const ACQ_P2 = { therapeuticArea: 'oncology', phase: 'phase2', modality: 'peptide', indication: 'prostate', dealType: 'acquisition', territory: 'global' };
+
+  it('classifies from deal_subtype when set', () => {
+    expect(classifyAcquisition({ dealType: 'acquisition', dealSubtype: 'asset_purchase', asset: 'Pracinostat', licensor: 'S*BIO Pte Ltd' })).toBe('asset');
+    expect(classifyAcquisition({ dealType: 'acquisition', dealSubtype: 'asset_purchase', asset: 'pacritinib', licensor: 'S*BIO Pte Ltd' })).toBe('asset');
+    expect(classifyAcquisition({ dealType: 'acquisition', dealSubtype: 'company_acquisition', asset: 'ONC201', licensor: 'Oncoceutics, Inc.' })).toBe('company');
+  });
+
+  it('treats an asset text naming the target company as a whole-company acquisition', () => {
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: 'Biotheus (BNT327/PM8002, PD-L1 x VEGF-A bispecific)', licensor: 'Biotheus' })).toBe('company');
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: 'ProfoundBio (rinatabart sesutecan / Rina-S, FRa ADC)', licensor: 'ProfoundBio' })).toBe('company');
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: 'Mirati Therapeutics (full company acquisition; key assets include adagrasib)', licensor: 'Mirati Therapeutics' })).toBe('company');
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: 'Seagen oncology portfolio (full acquisition)', licensor: 'Seagen' })).toBe('company');
+  });
+
+  it('keeps named asset sales as assets and everything else unknown', () => {
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: 'Atreca antibody-related assets (including APN-497444)', licensor: 'Atreca, Inc.' })).toBe('asset');
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: 'Bemarituzumab', licensor: 'Five Prime Therapeutics' })).toBe('unknown');
+    expect(classifyAcquisition({ dealType: 'acquisition', asset: null, licensor: '2seventy bio' })).toBe('unknown');
+    expect(classifyAcquisition({ dealType: 'license', asset: 'Biotheus (x)', licensor: 'Biotheus' })).toBeNull();
+  });
+
+  it('strips legal suffixes for the company-name match', () => {
+    expect(coreCompanyName('S*BIO Pte Ltd')).toBe('s*bio');
+    expect(coreCompanyName('Mirati Therapeutics, Inc.')).toBe('mirati');
+    expect(coreCompanyName('Co')).toBe('');
+  });
+
+  it('computes the headline from asset purchases and lists whole-company buyouts after them', () => {
+    const rows = [
+      deal({ dealType: 'acquisition', licensor: 'Biotheus', asset: 'Biotheus (BNT327)', upfrontM: 800, announcedDate: '2024-11-13' }),
+      deal({ dealType: 'acquisition', licensor: 'ProfoundBio', asset: 'ProfoundBio (Rina-S)', upfrontM: 1800, announcedDate: '2024-04-03' }),
+      deal({ dealType: 'acquisition', licensor: 'S*BIO Pte Ltd', asset: 'Pracinostat', dealSubtype: 'asset_purchase', upfrontM: 0.5, announcedDate: '2012-08-09' }),
+      deal({ dealType: 'acquisition', licensor: 'S*BIO Pte Ltd', asset: 'pacritinib', dealSubtype: 'asset_purchase', upfrontM: 15, announcedDate: '2012-05-01' }),
+      deal({ dealType: 'acquisition', licensor: 'X Bio', asset: 'XB-1', dealSubtype: 'asset_purchase', upfrontM: 10, announcedDate: '2020-01-01' }),
+      deal({ dealType: 'acquisition', licensor: 'Five Prime Therapeutics', asset: 'Bemarituzumab', upfrontM: 1900, announcedDate: '2021-03-04' }),
+    ];
+    const s = selectVerifiedComps(ACQ_P2, rows);
+    expect(s.headlineBasis).toBe('asset_purchases');
+    expect(s.assetPurchaseCount).toBe(3);
+    expect(s.companyAcquisitionCount).toBe(2);
+    expect(s.summary.n).toBe(3);
+    expect(s.summary.medianUpfrontM).toBe(10);
+    expect(s.confidenceCap).toBeNull();
+    expect(s.comps.map(c => c.acquisitionKind)).toEqual(['asset', 'asset', 'asset', 'unknown', 'company', 'company']);
+  });
+
+  it('widens phase (still acquisitions) to reach 3 asset purchases', () => {
+    const rows = [
+      ...Array.from({ length: 5 }, (_, i) => deal({ dealType: 'acquisition', licensor: `Co${i}`, asset: `Co${i} (lead)`, upfrontM: 900 })),
+      ...Array.from({ length: 3 }, () => deal({ dealType: 'acquisition', phase: 'phase_1', dealSubtype: 'asset_purchase', upfrontM: 12 })),
+    ];
+    const s = selectVerifiedComps(ACQ_P2, rows);
+    expect(COMP_LADDER[s.rungIndex!].phase).toBe('adjacent');
+    expect(s.headlineBasis).toBe('asset_purchases');
+    expect(s.summary.medianUpfrontM).toBe(12);
+  });
+
+  it('caps confidence at Low when most acquisition comps are company buyouts', () => {
+    const rows = Array.from({ length: 5 }, (_, i) => deal({ dealType: 'acquisition', licensor: `Co${i}`, asset: `Co${i} (lead)`, upfrontM: 900 }));
+    const s = selectVerifiedComps(ACQ_P2, rows);
+    expect(s.headlineBasis).toBe('all');
+    expect(s.acquisitionNote).toMatch(/^Most of these are whole-company acquisitions/);
+    expect(computeConfidence(20, { source: 'calibrated', sampleSize: 50 }, s.confidenceCap).level).toBe('low');
   });
 });

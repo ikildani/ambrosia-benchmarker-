@@ -95,6 +95,8 @@ export interface CompCandidateRow {
   royaltyHighPct: number | null;
   sourceUrl: string;
   sourceLabel: string;
+  /** deals.deal_subtype: 'asset_purchase' | 'company_acquisition' | null. */
+  dealSubtype?: string | null;
 }
 
 export interface CompMatch {
@@ -111,6 +113,8 @@ export interface VerifiedComp extends CompCandidateRow {
   rung: number;
   /** True when the deal counts toward the confidence label. */
   close: boolean;
+  /** Acquisitions only: asset purchase, whole-company acquisition, or not stated. Null for licenses. */
+  acquisitionKind: AcquisitionKind | null;
 }
 
 export interface CompsSummary {
@@ -131,6 +135,17 @@ export interface CompsSelection {
   /** True when the pool needed widening past an exact match. */
   relaxed: boolean;
   closeCount: number;
+  /**
+   * Acquisition queries: 'asset_purchases' when the headline stats come from
+   * asset purchases only (3 or more in the pool); otherwise 'all'.
+   */
+  headlineBasis: 'all' | 'asset_purchases';
+  assetPurchaseCount: number;
+  companyAcquisitionCount: number;
+  /** Plain note about the acquisition mix, or null. */
+  acquisitionNote: string | null;
+  /** Set when the comp mix itself limits confidence (acquisitions with < 3 asset purchases). */
+  confidenceCap: ConfidenceLevel | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -221,6 +236,48 @@ export function isCloseComp(m: CompMatch): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Acquisitions: asset purchase vs whole-company buyout
+// ---------------------------------------------------------------------------
+
+export type AcquisitionKind = 'asset' | 'company' | 'unknown';
+
+/** Minimum asset purchases before the headline is computed from them alone. */
+export const MIN_ASSET_PURCHASES = 3;
+
+const LEGAL_SUFFIXES = /\b(inc|incorporated|corp|corporation|co|company|ltd|limited|llc|plc|gmbh|ag|sa|s\.a|nv|n\.v|bv|b\.v|pte|pty|kk|holdings?|group|therapeutics|pharmaceuticals?|pharma|biosciences?|biotherapeutics|biotech(nology)?|biopharma(ceuticals)?|sciences?|medical|labs?|laboratories)\b\.?/gi;
+
+/** "Biotheus Inc." -> "biotheus"; "S*BIO Pte Ltd" -> "s*bio". Empty when nothing distinctive is left. */
+export function coreCompanyName(name: string | null | undefined): string {
+  const first = (name ?? '').split(/\s*[/(,;]\s*/)[0];
+  const core = first.replace(LEGAL_SUFFIXES, ' ').replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  return core.length >= 3 ? core : '';
+}
+
+/**
+ * Asset purchase vs whole-company acquisition.
+ *  1. `deal_subtype` when set.
+ *  2. Company when the asset text names the target company ("Biotheus (BNT327 ...)",
+ *     "ProfoundBio (Rina-S)") or says so ("full company acquisition", "portfolio").
+ *     An asset text that says "assets" ("Atreca antibody-related assets") is an asset purchase.
+ *  3. Otherwise unknown.
+ */
+export function classifyAcquisition(deal: { dealType: string | null; dealSubtype?: string | null; asset: string | null; licensor: string | null }): AcquisitionKind | null {
+  if (!isAcquisitionType(deal.dealType)) return null;
+  const sub = (deal.dealSubtype ?? '').toLowerCase();
+  if (sub === 'asset_purchase') return 'asset';
+  if (sub === 'company_acquisition') return 'company';
+  const asset = (deal.asset ?? '').toLowerCase();
+  if (!asset) return 'unknown';
+  if (/\bassets?\b/.test(asset) && !/full (company )?acquisition/.test(asset)) return 'asset';
+  if (/full (company )?acquisition|company acquisition|\bportfolio\b|\bpipeline\b/.test(asset)) return 'company';
+  const core = coreCompanyName(deal.licensor);
+  if (core && asset.includes(core)) return 'company';
+  return 'unknown';
+}
+
+const KIND_RANK: Record<AcquisitionKind, number> = { asset: 0, unknown: 1, company: 2 };
+
+// ---------------------------------------------------------------------------
 // Stats
 // ---------------------------------------------------------------------------
 
@@ -261,46 +318,84 @@ export function selectVerifiedComps(query: CompsQuery, rows: CompCandidateRow[],
   const minComps = opts.minComps ?? MIN_COMPS;
   const ta = query.therapeuticArea.toLowerCase();
 
+  const acquisitionQuery = isAcquisitionType(query.dealType);
+
   const tagged: VerifiedComp[] = rows
     .filter(d => (d.therapeuticArea ?? '').toLowerCase() === ta)
     .filter(d => d.upfrontM > 0)
     .filter(d => !shouldExcludeForStage(query.phase, d.phase, d.dealType))
     .map(d => {
       const match = matchComp(query, d);
-      return { ...d, match, rung: narrowestRung(match), close: isCloseComp(match) };
+      return { ...d, match, rung: narrowestRung(match), close: isCloseComp(match), acquisitionKind: classifyAcquisition(d) };
     });
 
+  const inRung = (i: number) => tagged.filter(d => satisfiesRung(d.match, COMP_LADDER[i]));
   let rungIndex: number | null = null;
   let firstNonEmpty: number | null = null;
   for (let i = 0; i < COMP_LADDER.length; i++) {
-    const count = tagged.filter(d => satisfiesRung(d.match, COMP_LADDER[i])).length;
+    const count = inRung(i).length;
     if (count > 0 && firstNonEmpty == null) firstNonEmpty = i;
     if (count >= minComps) { rungIndex = i; break; }
+  }
+  // Acquisition query: an asset sale is priced off asset purchases, so keep
+  // widening (while still holding acquisitions) until 3 asset purchases appear.
+  if (acquisitionQuery && rungIndex != null) {
+    for (let i = rungIndex; i < COMP_LADDER.length && COMP_LADDER[i].structure; i++) {
+      if (inRung(i).filter(d => d.acquisitionKind === 'asset').length >= MIN_ASSET_PURCHASES) { rungIndex = i; break; }
+    }
   }
   // Nothing reached the minimum: take the widest rung with anything in it.
   if (rungIndex == null && firstNonEmpty != null) rungIndex = COMP_LADDER.length - 1;
 
   if (rungIndex == null) {
-    return { comps: [], summary: summarizeComps([]), rungIndex: null, rung: null, relaxed: false, closeCount: 0 };
+    return {
+      comps: [], summary: summarizeComps([]), rungIndex: null, rung: null, relaxed: false, closeCount: 0,
+      headlineBasis: 'all', assetPurchaseCount: 0, companyAcquisitionCount: 0, acquisitionNote: null, confidenceCap: null,
+    };
   }
 
   const rung = COMP_LADDER[rungIndex];
-  const pool = tagged
-    .filter(d => satisfiesRung(d.match, rung))
+  const kindRank = (d: VerifiedComp) => (acquisitionQuery && d.acquisitionKind ? KIND_RANK[d.acquisitionKind] : 0);
+  const pool = inRung(rungIndex)
     .sort((a, b) =>
+      kindRank(a) - kindRank(b) ||
       a.rung - b.rung ||
       Number(b.close) - Number(a.close) ||
       (b.announcedDate ?? String(b.year)).localeCompare(a.announcedDate ?? String(a.year)),
     )
     .slice(0, maxPool);
 
+  const assets = pool.filter(d => d.acquisitionKind === 'asset');
+  const companies = pool.filter(d => d.acquisitionKind === 'company');
+  let headline = pool;
+  let headlineBasis: CompsSelection['headlineBasis'] = 'all';
+  let acquisitionNote: string | null = null;
+  let confidenceCap: ConfidenceLevel | null = null;
+  if (acquisitionQuery && pool.length > 0) {
+    if (assets.length >= MIN_ASSET_PURCHASES) {
+      headline = assets;
+      headlineBasis = 'asset_purchases';
+      acquisitionNote = `Median and range from the ${assets.length} asset purchases. Whole-company acquisitions are listed separately.`;
+    } else {
+      confidenceCap = 'low';
+      acquisitionNote = companies.length * 2 > pool.length
+        ? `Most of these are whole-company acquisitions, which are usually priced well above an asset sale. Fewer than ${MIN_ASSET_PURCHASES} asset purchases match.`
+        : `Fewer than ${MIN_ASSET_PURCHASES} of these are confirmed asset purchases; the rest may be whole-company acquisitions, which are usually priced well above an asset sale.`;
+    }
+  }
+
   return {
     comps: pool,
-    summary: summarizeComps(pool),
+    summary: summarizeComps(headline),
     rungIndex,
     rung,
     relaxed: rungIndex > 0,
-    closeCount: pool.filter(d => d.close).length,
+    closeCount: headline.filter(d => d.close).length,
+    headlineBasis,
+    assetPurchaseCount: assets.length,
+    companyAcquisitionCount: companies.length,
+    acquisitionNote,
+    confidenceCap,
   };
 }
 
@@ -327,7 +422,13 @@ export interface ConfidenceResult {
  *  - 8+ close comps and a measured starting point   → High
  *  - otherwise                                      → Medium
  */
-export function computeConfidence(closeCount: number, baseline: BaselineInfo | null | undefined): ConfidenceResult {
+export function computeConfidence(closeCount: number, baseline: BaselineInfo | null | undefined, cap?: ConfidenceLevel | null): ConfidenceResult {
+  if (cap === 'low') {
+    return {
+      level: 'low',
+      reason: 'Few comparable asset purchases; most acquisitions with disclosed prices bought a whole company. Lean on the deals below, not the estimate.',
+    };
+  }
   const calibrated = baseline?.source === 'calibrated' && (baseline.sampleSize ?? 0) >= MIN_CALIBRATED_SAMPLE;
   if (closeCount < LOW_CONFIDENCE_CLOSE_COMPS) {
     return {
