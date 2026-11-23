@@ -169,7 +169,7 @@ export const stripeWebhookCheck: MonitorCheck = {
       if (ev.created > cutoff) return false;
       // Only events we can attribute to Solidus: other products may share the
       // Stripe account, and invoices carry no product metadata.
-      const product = (ev.data.object as { metadata?: Record<string, string> | null }).metadata?.product;
+      const product = (ev.data.object as unknown as { metadata?: Record<string, string> | null }).metadata?.product;
       return product ? OUR_PRODUCTS.has(product) : false;
     });
     if (relevant.length > 0) {

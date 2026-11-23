@@ -119,15 +119,16 @@ export const passwordResetCheck: MonitorCheck = {
       return fail(`generateLink failed: ${errMsg(first.error.message)}`);
     }
     const parts: CheckOutcome[] = [];
-    const cbRedirect = redirectOf(first.data.properties.action_link);
+    const cbRedirect = redirectOf(first.data.properties?.action_link ?? '');
     if (cbRedirect !== callback) parts.push(fail(`/auth/callback not allow-listed (GoTrue redirects to ${cbRedirect ?? 'nothing'})`));
 
     // 2. Recovery link for the reset page. This overwrites the first token.
     const link = await service.auth.admin.generateLink({ type: 'recovery', email, options: { redirectTo: resetUrl } });
     if (link.error) return fail(`recovery generateLink failed: ${errMsg(link.error.message)}`);
-    const rsRedirect = redirectOf(link.data.properties.action_link);
+    const rsRedirect = redirectOf(link.data.properties?.action_link ?? '');
     if (rsRedirect !== resetUrl) parts.push(fail(`/auth/reset-password not allow-listed (GoTrue redirects to ${rsRedirect ?? 'nothing'})`));
-    const tokenHash = link.data.properties.hashed_token;
+    const tokenHash = link.data.properties?.hashed_token ?? '';
+    if (!tokenHash) return fail('generateLink returned no token');
 
     // 3. The URL the email template sends lands on the reset page. The page only
     //    verifies on submit, so loading it does not burn the token.
