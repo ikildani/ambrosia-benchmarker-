@@ -333,6 +333,15 @@ export async function ensureBenchmarksLoaded(): Promise<void> {
   }
 }
 
+/**
+ * Pin the calibration overlay to the given rows without Supabase (offline backtest, tests). The rows never expire,
+ * so no refresh is attempted. Pass null to drop the pin and return to normal loading.
+ */
+export function setCalibrationRowsForTesting(rows: Array<Record<string, unknown>> | null): void {
+  calibrationCache = rows === null ? null : ((rows as unknown) as CalibrationRow[]);
+  cacheTimestamp = rows === null ? 0 : Number.POSITIVE_INFINITY;
+}
+
 /** Lowest calibrated modality multiplier applied (see getBenchmarksSync). */
 export const MODALITY_MULTIPLIER_FLOOR = 0.6;
 
