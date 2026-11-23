@@ -453,6 +453,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     const urlIndication = params.get('indication');
     const urlTA = params.get('therapeuticArea');
     const urlDealType = params.get('dealType');
+    const urlTerritory = params.get('territory');
 
     if (urlPhase || urlModality || urlIndication) {
       const patch: Partial<CalculatorFormState> = { showTemplates: false, quickMode: false };
@@ -461,6 +462,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       if (urlDealType) patch.dealType = urlDealType as DealType;
       if (urlModality) patch.modality = urlModality as Modality;
       if (urlIndication) patch.indication = urlIndication as Indication;
+      if (urlTerritory) patch.territory = urlTerritory as Territory;
       actions.bulkSet(patch);
 
       const patchedState = {
@@ -470,12 +472,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         ...(urlDealType ? { dealType: urlDealType as DealType } : {}),
         ...(urlModality ? { modality: urlModality as Modality } : {}),
         ...(urlIndication ? { indication: urlIndication as Indication } : {}),
+        ...(urlTerritory ? { territory: urlTerritory as Territory } : {}),
       };
       calc.setResult(calculateDealTerms(buildCalculationInput(patchedState)));
 
       // Clean up URL params after applying
       const url = new URL(window.location.href);
-      ['therapeuticArea', 'phase', 'dealType', 'modality', 'indication'].forEach(p => url.searchParams.delete(p));
+      ['therapeuticArea', 'phase', 'dealType', 'modality', 'indication', 'territory'].forEach(p => url.searchParams.delete(p));
       window.history.replaceState({}, '', url.pathname + (url.search || ''));
       return;
     }
