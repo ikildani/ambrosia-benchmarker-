@@ -272,6 +272,30 @@ const ModelGroup = z.object({
 export const ModelAnswer = z.object({ groups: z.array(ModelGroup).max(20) });
 export type ModelAnswerT = z.infer<typeof ModelAnswer>;
 
+/** JSON schema for output_config.format (structured outputs); ModelAnswer still validates ranges after. */
+export const MODEL_ANSWER_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['groups'],
+  properties: {
+    groups: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['members', 'parent', 'relation', 'confidence', 'reason'],
+        properties: {
+          members: { type: 'array', items: { type: 'integer' } },
+          parent: { type: 'integer' },
+          relation: { type: 'string', enum: ['same_entity', 'subsidiary'] },
+          confidence: { type: 'number' },
+          reason: { type: 'string' },
+        },
+      },
+    },
+  },
+} as const;
+
 /** Turn a validated model answer into proposals; drops out-of-range indexes and low confidence. */
 export function proposalsFromAnswer(s: ReviewSubject, answer: ModelAnswerT, model: string): RelationProposal[] {
   const out: RelationProposal[] = [];

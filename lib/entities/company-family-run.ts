@@ -15,6 +15,7 @@ import { parseJsonResponse } from '@/lib/ai/parse-json';
 import { resolveCompany } from './resolve';
 import {
   FAMILY_SYSTEM_PROMPT,
+  MODEL_ANSWER_JSON_SCHEMA,
   ModelAnswer,
   SERVICE_DOMAINS,
   acquisitionProposal,
@@ -44,7 +45,8 @@ export interface FamilyModelClient {
       max_tokens: number;
       system: string;
       messages: { role: 'user'; content: string }[];
-    }): Promise<{ content: { type: string; text?: string }[] }>;
+      output_config?: { effort?: 'low' | 'medium' | 'high'; format?: { type: 'json_schema'; schema: unknown } };
+    }): Promise<{ content: { type: string; text?: string }[]; stop_reason?: string | null }>;
   };
 }
 
@@ -288,11 +290,15 @@ export async function runCompanyFamilies(db: Db, opts: FamilyRunOptions = {}): P
       try {
         const res = await client.messages.create({
           model,
-          max_tokens: 800,
+          // Thinking counts against max_tokens (claude-opus-5 thinks by default): 800 left ~27% of answers
+          // with no text at all. Low effort + room + a schema-constrained answer.
+          max_tokens: 4000,
           system: FAMILY_SYSTEM_PROMPT,
           messages: [{ role: 'user', content: buildReviewPrompt(s) }],
+          output_config: { effort: 'low', format: { type: 'json_schema', schema: MODEL_ANSWER_JSON_SCHEMA } },
         });
         const text = res.content.filter(c => c.type === 'text').map(c => c.text ?? '').join('');
+        if (!text.trim()) throw new Error(`empty answer for ${s.subject} (stop ${res.stop_reason ?? 'unknown'})`);
         const parsed = ModelAnswer.safeParse(parseJsonResponse<unknown>(text));
         if (!parsed.success) throw new Error(`invalid answer for ${s.subject}`);
         const props = proposalsFromAnswer(s, parsed.data, model);
