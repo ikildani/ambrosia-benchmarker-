@@ -4,43 +4,12 @@ import { findComparableDealsWithDB, findEnrichedComparableDeals } from '@/lib/co
 import { findSimilarDeals } from '@/lib/embeddings';
 import { captureApiError } from '@/lib/sentry-api';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
-import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { isProEmailClient } from '@/lib/config/authorized-emails.client';
-import type { UserTier } from '@/types/tier';
+import { getRequestUserTier } from '@/lib/auth/request-tier';
 
 export const dynamic = 'force-dynamic';
 
 const FREE_DEAL_LIMIT = 3;
-
-// Server-side tier verification for comparable deals
-async function getUserTier(): Promise<UserTier> {
-  try {
-    const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user?.email) return 'free';
-
-    // Check email allowlist first
-    if (isProEmailClient(user.email)) return 'pro';
-
-    // Check database tier (set by Stripe webhook)
-    const serviceClient = createServiceClient();
-    const { data: profile } = await serviceClient
-      .from('user_profiles')
-      .select('tier')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.tier === 'pro' || profile?.tier === 'report' || profile?.tier === 'portfolio') {
-      return profile.tier as UserTier;
-    }
-
-    return 'free';
-  } catch {
-    return 'free';
-  }
-}
 
 export async function GET(request: NextRequest) {
   // Rate limiting
@@ -66,7 +35,7 @@ export async function GET(request: NextRequest) {
     const enriched = params.get('enriched') === 'true';
 
     // Verify tier server-side to prevent free users from accessing all deals via API
-    const tier = await getUserTier();
+    const tier = await getRequestUserTier();
     const hasFullAccess = tier === 'pro' || tier === 'report' || tier === 'portfolio';
 
     // Enriched mode: always return full deal set — client handles tier gating
