@@ -1,11 +1,13 @@
 name: Monthly backtest
 
-# The deal-terms backtest (what /accuracy reads) and the per-factor
-# regression only ran when someone remembered to run them: Apr 17 and
-# Sep 7 2026. Both use the static corpus in data/, so they need no
-# database. This runs them on the first of every month and opens a PR
-# with the refreshed report, so the run date on /accuracy is never more
-# than a month old and every change to the numbers is reviewed.
+# Refreshes the live-deal backtest that /accuracy publishes and the CI accuracy gate protects:
+#   1. snapshot primary-sourced deals_verified licenses + active benchmark_calibrations into
+#      data/backtest/terms-backtest-fixture.json (read-only; repo secrets NEXT_PUBLIC_SUPABASE_URL and
+#      SUPABASE_SERVICE_ROLE_KEY);
+#   2. re-run the backtest offline on that fixture and write data/backtest/terms-backtest-baseline.json;
+#   3. open a PR with both, so every change to the published numbers and the gate's baseline is reviewed.
+# The April 2026 static-corpus backtest (scripts/run-deal-backtest.ts) and the per-factor regression still run for
+# the archived section of /accuracy and /methodology/preclinical.
 #
 # Repo setting required once: Settings → Actions → General →
 # "Allow GitHub Actions to create and approve pull requests".
@@ -21,7 +23,7 @@ permissions:
 
 jobs:
   backtest:
-    name: Deal-terms backtest + per-factor regression
+    name: Live-deal backtest refresh + legacy backtest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,22 +32,35 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
-      - name: Deal-terms backtest (writes __tests__/backtest/baseline-errors.json)
+      - name: Snapshot verified deals + calibrations (writes data/backtest/terms-backtest-fixture.json)
+        run: npx tsx scripts/terms-backtest-snapshot.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Offline backtest vs the previous baseline (informational)
+        run: npx tsx scripts/terms-backtest.ts --fixture data/backtest/terms-backtest-fixture.json --check data/backtest/terms-backtest-baseline.json | tee backtest-check.txt
+        continue-on-error: true
+      - name: Write the new baseline (data/backtest/terms-backtest-baseline.json)
+        run: npx tsx scripts/terms-backtest.ts --fixture data/backtest/terms-backtest-fixture.json --write-baseline
+      - name: Legacy static-corpus backtest (writes __tests__/backtest/baseline-errors.json)
         run: NODE_OPTIONS=--max-old-space-size=6144 npx tsx scripts/run-deal-backtest.ts
+        continue-on-error: true
       - name: Per-factor regression (writes docs/calibration-per-factor-*.md)
         run: NODE_OPTIONS=--max-old-space-size=6144 npm run calibration:per-factor
         continue-on-error: true
       - name: Summary
         run: |
-          node -e "const j=require('./__tests__/backtest/baseline-errors.json'); console.log('runAt', j.runAt, 'full n', j.fullScope.totalDeals ?? j.fullScope.n, 'core hit50', j.coreScope?.hitRate50 ?? j.coreScope?.hit50)"
-      - name: Open a PR with the refreshed report
+          node -e "const j=require('./data/backtest/terms-backtest-baseline.json'); console.log('live backtest', j.generatedAt, 'n', j.overall.n, 'within2x', j.overall.within2x, 'mdaeLog', j.overall.mdaeLog)"
+      - name: Open a PR with the refreshed backtest
         uses: peter-evans/create-pull-request@v6
         with:
           branch: chore/monthly-backtest
           delete-branch: true
-          title: 'chore(backtest): monthly deal-terms backtest refresh'
-          commit-message: 'chore(backtest): monthly deal-terms backtest and per-factor regression'
+          title: 'chore(backtest): monthly live-deal backtest refresh'
+          commit-message: 'chore(backtest): refresh deal snapshot, backtest baseline and legacy backtest'
           body: |
-            Automated monthly run of `scripts/run-deal-backtest.ts` and `npm run calibration:per-factor`.
-            Review the diff of `__tests__/backtest/baseline-errors.json` (hit rates, worst misses) before merging; `/accuracy` and `/methodology/preclinical` read this file.
+            Automated monthly refresh.
+            - `data/backtest/terms-backtest-fixture.json`: new snapshot of primary-sourced `deals_verified` licenses and active `benchmark_calibrations`.
+            - `data/backtest/terms-backtest-baseline.json`: backtest summary on that snapshot. `/accuracy` publishes it and the CI accuracy gate compares every PR with it.
+            Review the change in overall within-2x / MdAE(log) and by territory and phase (see the "Offline backtest vs the previous baseline" step log) before merging. A drop here comes from new deals or new calibration rows, not from a code change.
           labels: backtest
