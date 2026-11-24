@@ -275,7 +275,16 @@ export async function runAsxIngestion(supabase: SupabaseClient, opts: AsxRunOpti
   // 1. Daily: latest five per code from the research API (cheap, ~0.7 s each).
   for (const code of codes) {
     if (Date.now() - start > budget * 0.4) { funnel.count('time_budget', 'codes_remaining'); break; }
-    const { rows, status } = await listAsxAnnouncements(code, DAILY_COUNT);
+    // One slow code (fetchWithTimeout aborts after its retries) must not fail the whole run: six runs
+    // logged 'failed' with "AbortError: This operation was aborted" between Nov 9 and Nov 22 2026.
+    let listed: Awaited<ReturnType<typeof listAsxAnnouncements>>;
+    try {
+      listed = await listAsxAnnouncements(code, DAILY_COUNT);
+    } catch (e) {
+      errors.push(`ASX ${code}: ${String(e).slice(0, 120)}`);
+      continue;
+    }
+    const { rows, status } = listed;
     if (status !== 200) { errors.push(`ASX ${code}: HTTP ${status}`); continue; }
     codesScanned++;
     announcements += rows.length;
@@ -292,8 +301,16 @@ export async function runAsxIngestion(supabase: SupabaseClient, opts: AsxRunOpti
       const code = codes[Math.floor(step / years)];
       const year = ASX_FROM_YEAR + (step % years);
       deepCode = `${code}:${year}`;
-      const { rows, status } = await listAsxYear(code, year);
-      if (status !== 200) { errors.push(`ASX ${code} ${year}: HTTP ${status}`); }
+      let yearListed: Awaited<ReturnType<typeof listAsxYear>>;
+      try {
+        yearListed = await listAsxYear(code, year);
+      } catch (e) {
+        yearListed = { rows: [], status: 0 };
+        errors.push(`ASX ${code} ${year}: ${String(e).slice(0, 120)}`);
+      }
+      const { rows, status } = yearListed;
+      if (status === 0) { /* fetch error recorded above */ }
+      else if (status !== 200) { errors.push(`ASX ${code} ${year}: HTTP ${status}`); }
       else {
         announcements += rows.length;
         for (const r of rows) { funnel.count('fetched'); if (isAsxDealHeadline(r.headline)) candidates.push(r); else funnel.count('keyword_filtered', 'headline'); }

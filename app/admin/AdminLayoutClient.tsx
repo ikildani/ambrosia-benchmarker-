@@ -68,6 +68,7 @@ export default function AdminLayoutClient({
     { href: '/admin/generate', icon: Sparkles, label: 'Generate' },
     { href: '/admin/outcomes', icon: ClipboardCheck, label: 'Outcomes' },
     { href: '/admin/briefs', icon: FileText, label: 'Briefs' },
+    { href: '/admin/radar-audit', icon: ClipboardCheck, label: 'S&E audit' },
   ];
 
   return (
