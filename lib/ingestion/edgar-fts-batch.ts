@@ -14,6 +14,7 @@
  * and rewritten with the final outcome when the batch is drained.
  */
 
+import { replyText } from '@/lib/ai/response-text';
 import Anthropic from '@anthropic-ai/sdk';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { buildDealExtractionRequest, parseDealExtraction } from './sec-edgar';
@@ -133,8 +134,8 @@ export async function drainExtractionBatches(
         if (!stored) { bump('unknown_custom_id'); continue; }
         let outcome = 'skipped';
         if (result.result.type === 'succeeded') {
-          const first = result.result.message.content[0];
-          const text = first && first.type === 'text' ? first.text : '';
+          // Nov 23 2026: read the text blocks; a leading thinking block is not "not a deal".
+          const text = replyText(result.result.message.content);
           const deal = parseDealExtraction(text);
           if (!deal) {
             opts.funnel.count('not_a_deal', stored.doc.fileType || 'unknown', `${stored.doc.companyName} ${stored.accession}`);
