@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
       }
       metrics.fetched++;
 
-      const extracted = await extractDealFromFiling(text, anthropicApiKey);
+      const extracted = await extractDealFromFiling(text, anthropicApiKey, 're-extract-pending');
       if (!extracted) {
         // Extractor returned null — not a deal, or parse failure.
         // Mark rejected so we don't keep retrying.

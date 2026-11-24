@@ -4,6 +4,10 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { withSpendGuard } from '@/lib/ai/spend-guard';
+import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
+import { noThinking, replyText } from '@/lib/ai/response-text';
+import { prefilterDocument, screenTitle } from './deal-prefilter';
+import { alreadyJudged, rememberVerdict, forgetVerdict, flushDocMemories } from './doc-memory';
 import { createHash } from 'crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ExtractedDeal } from './sec-edgar';
@@ -618,13 +622,23 @@ export async function fetchArticleContent(url: string): Promise<string> {
 
 // === Deal Extraction (reuses SEC EDGAR pattern) ===
 
+/**
+ * Newswire extraction model. Nov 23 2026: follows the lean-mode rule the filing extractor
+ * has followed since Oct 29 (Opus 4.6 -> Sonnet 5, about a third of the cost per call);
+ * every row is still checked against its primary document on Opus before it counts.
+ * PRESS_EXTRACTION_MODEL overrides.
+ */
+export const PRESS_EXTRACTION_MODEL = budgetModel(process.env.PRESS_EXTRACTION_MODEL, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL);
+
 export async function extractDealFromArticle(
   title: string,
   content: string,
   source: string,
-  anthropicApiKey: string
+  anthropicApiKey: string,
+  /** Spend label: 'press-releases' (live feeds, reserved core budget) or 'wire-archive' (historical walk, bulk). */
+  spendSource: 'press-releases' | 'wire-archive' = 'press-releases',
 ): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic(withSpendGuard('press-releases', { apiKey: anthropicApiKey }));
+  const anthropic = new Anthropic(withSpendGuard(spendSource, { apiKey: anthropicApiKey }));
 
   const systemPrompt = `You are an expert biopharma deal analyst extracting licensing, collaboration and M&A deal information from press releases and news articles. You extract deal terms at the depth a BD professional needs for benchmarking and term sheet structuring.
 
@@ -707,16 +721,15 @@ ${content}`;
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-opus-4-6',
+      model: PRESS_EXTRACTION_MODEL,
       max_tokens: 4000,
+      ...noThinking(PRESS_EXTRACTION_MODEL),
       messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
     });
 
-    const textContent = response.content[0];
-    if (textContent.type !== 'text') return null;
-
-    const json = firstJsonObject(textContent.text);
+    // Read the text blocks: a reply that opens with a thinking block is not "not a deal".
+    const json = firstJsonObject(replyText(response.content));
     if (!json) throw new ExtractionParseError(`no JSON object in the model reply for "${title}"`);
     let parsed: Record<string, unknown>;
     try {
@@ -888,6 +901,12 @@ export async function runPressReleaseIngestion(
             .single();
 
                     if (existing) { funnel.count('already_in_table'); continue; }
+          // Nov 23 2026: feeds repeat items for days; judge each link once (lib/ingestion/doc-memory.ts),
+          // and screen the title for free before fetching the article.
+          const memKey = item.link || guid;
+          if (memKey && await alreadyJudged(supabase, 'press', memKey)) { funnel.count('already_judged'); continue; }
+          const titleScreen = screenTitle(item.title);
+          if (!titleScreen.keep) { funnel.count('prefiltered', titleScreen.reason, item.title); continue; }
           // Fetch full article content for better extraction
           let content = item.description;
           let articleFetched = false;
@@ -900,9 +919,12 @@ export async function runPressReleaseIngestion(
           }
           if (!articleFetched) funnel.count('content_unavailable', source.family, item.link);
           if (content.length < 100) { funnel.count('content_too_short', articleFetched ? 'article' : 'rss_only', item.title); continue; }
+          const bodyScreen = prefilterDocument({ text: `${item.title}\n${content}` });
+          if (!bodyScreen.keep) { funnel.count('prefiltered', bodyScreen.reason, item.title); continue; }
 
           // Extract deal using Claude
                     const deal = await extractDealFromArticle(item.title, content, source.name, anthropicApiKey);
+          if (memKey && !dryRun) await rememberVerdict(supabase, 'press', memKey, deal ? 'extracted' : 'not_a_deal');
           // Confidence gate (Sep 2026). The old single threshold of 85 dropped
           // real, article-backed deals at 60-84 on the floor (Orbis → Novo at
           // 60, Chimagen → GSK at 72, Sironax → Novartis at 65 in one dry run)
@@ -954,6 +976,7 @@ export async function runPressReleaseIngestion(
             } else {
               funnel.count('insert_error', insertResult.outcome, insertResult.error);
               errors.push(`Insert error: ${insertResult.error}`);
+              if (memKey) await forgetVerdict(supabase, 'press', memKey);
             }
           }
 
@@ -995,6 +1018,7 @@ export async function runPressReleaseIngestion(
 
   console.log(`[press-releases] Done: ${articlesFound} articles, ${persisted} persisted, ${potentialDeals} potential deals, ${dealsExtracted} extracted, ${dealsInserted} inserted`);
 
+  await flushDocMemories(supabase, { dryRun });
   return {
     sources_checked: FEED_SOURCES.length,
     articles_found: articlesFound,
@@ -1161,7 +1185,7 @@ export async function persistExtractedPressDeal(
     sourceType: 'press_release',
     sourceUrl: link,
     sourceFilingId: guid,
-    extractionModel: 'claude-opus-4-6',
+    extractionModel: PRESS_EXTRACTION_MODEL,
     row: {
     licensor_name: deal.licensor,
     licensor_id: licensorId,

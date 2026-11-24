@@ -13,6 +13,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '../../fetch-with-timeout';
 import { FunnelCounter } from '../funnel';
 import { processFilingText, type AdapterRunResult } from './shared';
+import { flushDocMemories } from '../doc-memory';
 
 export const MFN_FEED_URL = 'https://mfn.se/all/s.rss';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -104,6 +105,7 @@ export async function runMfnIngestion(supabase: SupabaseClient, opts: MfnRunOpti
       const outcome = await processFilingText(supabase, {
         filingId: `mfn:${id}`, sourceType: 'mfn', sourceUrl: it.link, text: `${it.title}. ${it.description}`, announcedDate: it.dateIso,
         provenanceNote: `MFN regulatory release: ${it.title.slice(0, 120)}`, label: it.title.slice(0, 80),
+        title: it.title, scope: 'mfn',
       }, { anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel });
       if (outcome === 'inserted') inserted++;
       if (outcome === 'error') errors.push(`insert error ${id}`);
@@ -114,5 +116,6 @@ export async function runMfnIngestion(supabase: SupabaseClient, opts: MfnRunOpti
   }
   const summary = funnel.summary();
   console.log(`[mfn] items=${items.length} candidates=${candidates.length} ${summary}${dryRun ? ' (dry run)' : ''}`);
+  await flushDocMemories(supabase, { dryRun });
   return { fetched: items.length, candidates: candidates.length, extracted, inserted, errors, funnel: funnel.toJSON(), summary, expectRecords: true };
 }
