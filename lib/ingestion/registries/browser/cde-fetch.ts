@@ -63,6 +63,13 @@ export interface CdeFetchOptions {
   rateLimitMs?: number;
   sleep?: (ms: number) => Promise<void>;
   now?: () => Date;
+  /**
+   * Waits before each re-challenge when the WAF shell comes back (default 15 s, 45 s, 90 s).
+   * From GitHub Actions the WAF challenged after ~5 detail pages and the walk stopped for the
+   * run (Oct 8 – Nov 23 2026: ~40 records a day, stuck on page 161); a residential connection
+   * read 40 pages in a row without a challenge.
+   */
+  challengeBackoffMs?: number[];
 }
 
 export function createCdeFetchPage(session: CdeSession, opts: CdeFetchOptions = {}) {
@@ -70,13 +77,19 @@ export function createCdeFetchPage(session: CdeSession, opts: CdeFetchOptions = 
   const sleep = opts.sleep ?? (ms => new Promise<void>(r => setTimeout(r, ms)));
   const nowFn = opts.now ?? (() => new Date());
 
+  const backoff = opts.challengeBackoffMs ?? [15_000, 45_000, 90_000];
+
   async function postChecked(path: string, form: Record<string, string>, what: string): Promise<string> {
     let res = await session.post(path, form);
     if (res.status === 200 && !looksLikeCdeChallenge(res.text)) return res.text;
-    // Challenge cookie expired or never set: one refresh, then give up for this run.
-    await session.refresh();
-    res = await session.post(path, form);
-    if (res.status === 200 && !looksLikeCdeChallenge(res.text)) return res.text;
+    // Challenge cookie expired or the WAF throttled us: refresh the session after a growing
+    // pause, a few times, before giving up for this run.
+    for (const waitMs of [0, ...backoff]) {
+      if (waitMs > 0) await sleep(waitMs);
+      await session.refresh();
+      res = await session.post(path, form);
+      if (res.status === 200 && !looksLikeCdeChallenge(res.text)) return res.text;
+    }
     throw new RegistryUnavailableError('cde', `${what}: HTTP ${res.status}${looksLikeCdeChallenge(res.text) ? ' (WAF challenge)' : ''}`);
   }
 

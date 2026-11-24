@@ -177,6 +177,25 @@ describe('CDE fetchPage over a fake session', () => {
     await expect(createCdeFetchPage(blocked, { rateLimitMs: 0, sleep: async () => undefined })(null, { limit: 1 })).rejects.toThrow(/unavailable/);
   });
 
+  it('re-challenges with growing pauses before giving up, and recovers when the WAF lets go', async () => {
+    const waits: number[] = [];
+    let refreshes = 0;
+    const blocked: CdeSession = { async post() { return { status: 202, text: '<script>challenge</script>' }; }, async refresh() { refreshes++; } };
+    await expect(createCdeFetchPage(blocked, { rateLimitMs: 0, sleep: async ms => { waits.push(ms); } })(null, { limit: 1 })).rejects.toThrow(/WAF challenge/);
+    expect(refreshes).toBe(4);
+    expect(waits).toEqual([15_000, 45_000, 90_000]);
+
+    // Third refresh gets through: the listing is read and the walk goes on.
+    const { session } = fakeSession({ 1: ['CTR20263723'] });
+    let n = 0;
+    const flaky: CdeSession = {
+      async post(path, form) { n++; return n <= 3 ? { status: 202, text: '<script>challenge</script>' } : session.post(path, form); },
+      async refresh() {},
+    };
+    const p = await createCdeFetchPage(flaky, { rateLimitMs: 0, sleep: async () => undefined })(null, { limit: 5 });
+    expect(p.records.map(r => r.registry_id)).toEqual(['CTR20263723']);
+  });
+
   it('ends an incremental sweep once a whole page is older than since', async () => {
     const { session } = fakeSession({ 1: Array.from({ length: 20 }, (_, i) => `CTR2026${String(3723 - i).padStart(4, '0')}`), 2: ['CTR20263000'] });
     const fetchPage = createCdeFetchPage(session, { rateLimitMs: 0, sleep: async () => undefined });
