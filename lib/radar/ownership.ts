@@ -48,6 +48,17 @@ export interface OwnershipInput {
   sharedWithOtherCompanies?: boolean;
   /** The drug node is a combination (migration 173: marketed_shared applies to single agents only). */
   drugIsCombination?: boolean;
+  /** The drug's originator is in this row's corporate family (migration 193). */
+  originatorInFamily?: boolean;
+  /** Where the row came from (migration 197: disclosure and designation rows). */
+  assetOrigin?: 'registry' | 'filing' | 'pipeline_page' | 'press' | 'designation' | 'user' | 'deal' | null;
+  /**
+   * Another same-script corporate family sponsored this single-agent, unapproved drug >= 180 days
+   * earlier and holds it as originator (migration 197).
+   */
+  laterSponsor?: boolean;
+  /** A reviewer's correction from /admin/radar-audit (radar_ownership_overrides). */
+  overrideStatus?: OwnershipStatus | null;
 }
 
 export type OwnershipRule =
@@ -61,6 +72,12 @@ export type OwnershipRule =
   | 'marketed_shared'
   | 'arm_comparator'
   | 'sponsor_default'
+  | 'later_sponsor'
+  | 'filing_disclosure'
+  | 'pipeline_page_disclosure'
+  | 'designation_sponsor'
+  | 'sponsor_unknown_arm'
+  | 'manual_override'
   | 'no_arm_evidence';
 
 export interface OwnershipResult {
@@ -70,10 +87,15 @@ export interface OwnershipResult {
 }
 
 /** "Comparators: simvastatin and ezetimibe", "Placebo", "Standard of care": the row names a comparator, not a program. */
-export const COMPARATOR_NAME_RE = /^(comparators?\b|placebo\b|standard[- ]of[- ]care|soc\b|control\b|vehicle\b|sham\b|best supportive care|no intervention|usual care|background therapy)/i;
+export const COMPARATOR_NAME_RE = /^(comparators?\b|placebo\b|standard[- ]of[- ]care|soc\b|control\b|vehicle\b|sham\b|best supportive care|no intervention|usual care|background therapy|watchful waiting|active surveillance|observation\b)/i;
 
+/** "Daridorexant matching placebo", "Tablets matching VQ-101", "The placebo presentation is ..." (migration 197). */
+export const PLACEBO_TEXT_RE = /(matching placebo|placebo[- ]matching|placebo to match|matched placebo|^the placebo\b|placebo presentation|^(tablets?|capsules?|injections?|solution|vials?) matching\b)/i;
+
+/** Mirrors radar_is_comparator_named() without its placeholder-name branch. */
 export function isComparatorNamed(name: string | null | undefined): boolean {
-  return COMPARATOR_NAME_RE.test(name ?? '');
+  const n = name ?? '';
+  return COMPARATOR_NAME_RE.test(n) || PLACEBO_TEXT_RE.test(n);
 }
 
 /**
@@ -116,9 +138,19 @@ export const CODE_PREFIX_MIN_ORIGINATORS = 2;
  *                        name carries no development code: a backbone, comparator, DDI
  *                        probe or generic, not the sponsor's program
  *   arm_comparator       no trusted originator; every matched arm is a comparator
+ *   later_sponsor        (migration 197) another same-script family sponsored this single-agent,
+ *                        unapproved drug >= 180 days earlier and holds it as originator: 'unknown',
+ *                        and availability marks it originator_elsewhere
  *   sponsor_default      no trusted originator; at least one experimental arm
  *   code_prefix_match    (again) no arms, but the code series is the company's own
+ *   filing_disclosure / pipeline_page_disclosure
+ *                        (migration 197) the company's own filing or pipeline page lists it and no
+ *                        other company holds the drug
+ *   designation_sponsor  (migration 197) sponsor of an FDA orphan designation, drug not held elsewhere
+ *   sponsor_unknown_arm  (migration 197) sponsored trial, arm role unrecorded, own development code,
+ *                        drug not held elsewhere
  *   no_arm_evidence      nothing matched
+ * A reviewer's correction (manual_override) comes before every rule.
  */
 export function deriveOwnership(input: OwnershipInput): OwnershipResult {
   const drug = input.drug;
@@ -131,11 +163,15 @@ export function deriveOwnership(input: OwnershipInput): OwnershipResult {
   const codePrefix = codePrefixOf(input.assetName);
   const seriesOwned = codePrefix !== null && (input.codePrefixOriginators ?? 0) >= CODE_PREFIX_MIN_ORIGINATORS;
 
+  const shared = !!input.sharedWithOtherCompanies;
+
   let rule: OwnershipRule;
   let status: OwnershipStatus;
-  if (isComparatorNamed(input.assetName)) {
+  if (input.overrideStatus) {
+    rule = 'manual_override'; status = input.overrideStatus;
+  } else if (isComparatorNamed(input.assetName)) {
     rule = 'comparator_named'; status = 'comparator_or_background';
-  } else if (trustedOriginator && drug!.originatorCompanyId === input.companyId) {
+  } else if (trustedOriginator && (drug!.originatorCompanyId === input.companyId || input.originatorInFamily)) {
     rule = 'originator_match'; status = 'originator';
   } else if (input.ownerRole) {
     rule = 'drug_owner_role'; status = input.ownerRole;
@@ -151,10 +187,20 @@ export function deriveOwnership(input: OwnershipInput): OwnershipResult {
     rule = 'marketed_shared'; status = 'marketed_other';
   } else if (matched > 0 && experimental === 0 && comparator > 0) {
     rule = 'arm_comparator'; status = 'comparator_or_background';
+  } else if (input.laterSponsor && !seriesOwned) {
+    rule = 'later_sponsor'; status = 'unknown';
   } else if (experimental > 0) {
     rule = 'sponsor_default'; status = 'originator';
   } else if (seriesOwned) {
     rule = 'code_prefix_match'; status = 'originator';
+  } else if (input.assetOrigin === 'filing' && !shared) {
+    rule = 'filing_disclosure'; status = 'originator';
+  } else if (input.assetOrigin === 'pipeline_page' && !shared) {
+    rule = 'pipeline_page_disclosure'; status = 'originator';
+  } else if (input.assetOrigin === 'designation' && !shared) {
+    rule = 'designation_sponsor'; status = 'originator';
+  } else if (unknownArms > 0 && experimental === 0 && comparator === 0 && hasDevelopmentCode(input.assetName) && !shared) {
+    rule = 'sponsor_unknown_arm'; status = 'originator';
   } else {
     rule = 'no_arm_evidence'; status = 'unknown';
   }
