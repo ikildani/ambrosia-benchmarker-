@@ -100,6 +100,8 @@ export interface ParsedIntervention {
   /** Every arm role the intervention appears under (an intervention can sit in several arms). */
   armRoles: ArmRole[];
   isPrimaryAsset: boolean;
+  /** Set when isPrimaryAsset comes from the development-code rescue, not the arm-role rule (migration 195). */
+  primaryBasis?: 'dev_code_rescue';
 }
 
 export interface ParsedStudy {
@@ -534,6 +536,40 @@ export function computeIsPrimaryAsset(
   return true;
 }
 
+/** Same pattern as radar_has_dev_code (SQL): letters, optional hyphen/space, 2-8 digits. */
+const DEV_CODE_RE = /(^|[^A-Za-z0-9])[A-Z]{1,6}(-[A-Z])?[- ]?[0-9]{2,8}[A-Za-z]{0,2}([^A-Za-z0-9]|$)/;
+const RESCUE_PLACEBO_RE = /(placebo|vehicle|saline|sham|standard of care|best supportive care|usual care|matching|dummy)/i;
+const COMPARATOR_NAMED_RE = /^(comparators?\b|placebo\b|standard[- ]of[- ]care|soc\b|control\b|vehicle\b|sham\b|best supportive care|no intervention|usual care|background therapy)/i;
+export const MAX_RESCUED_PER_TRIAL = 3;
+
+export function hasDevCode(name: string): boolean {
+  return DEV_CODE_RE.test(name || '');
+}
+
+/**
+ * Sponsors label their own drug "active comparator" in dose-ranging and crossover designs, or
+ * list it in the placebo arm's open-label extension, which leaves an industry trial with no
+ * primary asset under computeIsPrimaryAsset. Then the drug-class interventions that carry a
+ * development code (not placebo / comparator / a known approved backbone) are the sponsor's
+ * asset, as long as there are at most three of them. Mirrors radar_rescue_primary_interventions
+ * (migration 195), which also skips codes another corporate family owns.
+ */
+export function rescuePrimaryInterventions(
+  interventions: Array<Pick<ParsedIntervention, 'name' | 'type' | 'isPrimaryAsset'>>,
+  industrySponsored: boolean,
+): number[] {
+  if (!industrySponsored || interventions.some(iv => iv.isPrimaryAsset)) return [];
+  const idx: number[] = [];
+  interventions.forEach((iv, i) => {
+    if (!isDrugType(iv.type)) return;
+    if (RESCUE_PLACEBO_RE.test(iv.name) || COMPARATOR_NAMED_RE.test(iv.name.trim())) return;
+    if (isBackgroundComparatorName(iv.name)) return;
+    if (!hasDevCode(iv.name)) return;
+    idx.push(i);
+  });
+  return idx.length <= MAX_RESCUED_PER_TRIAL ? idx : [];
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // STUDY PARSING
 // ═══════════════════════════════════════════════════════════════════════
@@ -645,6 +681,11 @@ export function parseStudy(raw: RawStudy): ParsedStudy | null {
   ).length;
   for (const iv of interventions) {
     iv.isPrimaryAsset = computeIsPrimaryAsset(iv, { experimentalDrugCount, hasArmGroups });
+  }
+  const industrySponsored = [sponsor?.leadSponsor, ...(sponsor?.collaborators ?? [])].some(x => (x?.class ?? '').toUpperCase() === 'INDUSTRY');
+  for (const i of rescuePrimaryInterventions(interventions, industrySponsored)) {
+    interventions[i].isPrimaryAsset = true;
+    interventions[i].primaryBasis = 'dev_code_rescue';
   }
 
   const locationCountries: string[] = [];
@@ -1151,6 +1192,7 @@ export function buildInterventionRows(study: ParsedStudy, companyId: string | nu
     other_names: iv.otherNames,
     description: iv.description,
     is_primary_asset: iv.isPrimaryAsset,
+    primary_basis: iv.primaryBasis ?? null,
     updated_at: nowIso,
   }));
 }
