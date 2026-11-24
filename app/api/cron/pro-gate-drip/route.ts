@@ -34,6 +34,7 @@ import {
   buildProGateEmail6,
   buildProGateEmail7,
   buildProGateEmail8,
+  SOLIDUS_DRIP_SOURCES,
   type LeadContext,
 } from '@/lib/email/pro-gate-drip';
 import { getProgrammaticPageData, formatCurrency } from '@/lib/seo/programmatic-pages';
@@ -160,10 +161,14 @@ export async function GET(request: NextRequest) {
       .select('id', { count: 'exact', head: true })
       .eq('tier', 'pro');
 
-    // Fetch unconverted leads that haven't finished the drip
+    // Fetch unconverted leads that haven't finished the drip. Only leads that
+    // Solidus itself captured: the advisory site (ambrosiaventures.co) writes
+    // its contact-form and newsletter leads to the same table, and those people
+    // must never receive the Solidus Pro sequence.
     const { data: leads, error: fetchError } = await supabase
       .from('leads')
       .select('id, email, captured_at, page, converted_at, drip_1_sent, drip_2_sent, drip_3_sent, drip_4_sent, drip_5_sent, drip_6_sent, drip_7_sent, drip_8_sent, drip_completed')
+      .in('source', [...SOLIDUS_DRIP_SOURCES])
       .is('converted_at', null)
       .or('drip_completed.is.null,drip_completed.eq.false');
 
