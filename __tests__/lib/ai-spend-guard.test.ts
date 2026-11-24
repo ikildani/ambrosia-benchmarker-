@@ -87,6 +87,15 @@ describe('AI spend guard', () => {
     expect(backlogPlan({ AI_BACKLOG_COMPANY_FAMILY_USD: '0' } as unknown as NodeJS.ProcessEnv).sources['company-family']).toBeUndefined();
   });
 
+  it('feed classification allowance is off by default and extends the classifier share when set', () => {
+    expect(backlogPlan({} as unknown as NodeJS.ProcessEnv).sources['asset-classify']).toBe(40);
+    const on = backlogPlan({ AI_BACKLOG_CLASSIFY_FEED_USD: '10' } as unknown as NodeJS.ProcessEnv);
+    expect(on.sources['asset-classify']).toBe(50);
+    expect(on.totalUsd).toBe(125);
+    expect(backlogBlocked('asset-classify', { 'asset-classify': 40.29 }, 0, on)).toBeNull();
+    expect(backlogBlocked('asset-classify', { 'asset-classify': 50 }, 0, on)).toMatch(/share/);
+  });
+
   it('charges a backlog source to the backlog lane while it has allowance', async () => {
     rpc.mockImplementation(async (fn: string) => {
       if (fn === 'ai_spend_today') return { data: [{ lane: 'bulk', usd: 99 }], error: null };

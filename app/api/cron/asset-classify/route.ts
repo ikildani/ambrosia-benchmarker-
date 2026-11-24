@@ -97,32 +97,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: report.errors.length === 0, mode: 'validate', ...report });
     }
 
-    // Stop for the day once the bulk AI budget is spent; lean mode also caps requests per run
-    // (10 x 20 assets every 30 min still clears ~9,600 new assets a day).
+    const dry = params.get('dry') === '1';
+    // Rule-based therapeutic area for visible programs the model left empty (migration 197b): trial
+    // conditions, indication text, the drug's other programs, the name. No AI spend; hourly.
+    let taInference: unknown = null;
+    if (!dry && new Date().getUTCMinutes() < 30) {
+      const { data, error } = await supabase.rpc('radar_infer_ta', { p_limit: 20000 });
+      taInference = error ? { error: error.message } : data;
+    }
+
+    // Once the AI budget is spent for the day the model stage stops, but rule skips and drug_master
+    // reuse need no model: run them on a short queue so rows that need no model call are still
+    // classified (and the run log says whether anything was). Lean mode also caps requests per run.
     const budget = await aiBudgetAvailable('asset-classify');
-    if (!budget.ok) return NextResponse.json({ success: true, mode: 'classify', skipped: 'ai_budget', reason: budget.reason });
     const requestedMax = parsePositiveInt(params.get('maxRequests'), undefined);
     // Backlog allowance (Oct 29 2026): 40 requests a run across the whole industry queue (core first)
-    // until the classifier's $40 share is spent; then back to the lean 10 a run, core only.
-    const backlog = await backlogActive('asset-classify');
+    // until the classifier's share is spent; then back to the lean 10 a run, core only.
+    const backlog = budget.ok && await backlogActive('asset-classify');
     const leanMax = backlog ? 40 : 10;
     const result = await classifyAssetsBatch(supabase, {
-      limit: parsePositiveInt(params.get('limit'), undefined),
+      limit: budget.ok ? parsePositiveInt(params.get('limit'), undefined) : 200,
       batchSize: parsePositiveInt(params.get('batch'), undefined),
       concurrency: parsePositiveInt(params.get('concurrency'), undefined),
-      maxRequests: isLean() ? Math.min(requestedMax ?? leanMax, leanMax) : requestedMax,
+      maxRequests: !budget.ok ? 0 : isLean() ? Math.min(requestedMax ?? leanMax, leanMax) : requestedMax,
       model: parseModel(params.get('model'), DEFAULT_MODEL),
       onlyStatuses: parseStatuses(params.get('only')),
       scope: params.get('scope') === 'all' || (backlog && params.get('scope') !== 'core') ? 'all' : 'core',
       dedupeByDrug: params.get('dedupe') !== '0',
-      dryRun: params.get('dry') === '1',
+      dryRun: dry,
       timeBudgetMs,
-      runType: params.get('dry') === '1' ? 'manual' : 'scheduled',
+      runType: dry ? 'manual' : 'scheduled',
     });
 
     return NextResponse.json({
       success: true,
       mode: 'classify',
+      ai_budget: budget.ok ? 'available' : budget.reason,
+      ta_inference: taInference,
       model: result.model,
       fetched: result.fetched,
       processed: result.processed,

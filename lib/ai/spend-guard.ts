@@ -131,12 +131,17 @@ export function backlogPlan(env: NodeJS.ProcessEnv = process.env): BacklogPlan {
   // Corporate-family model adjudication (lib/entities/company-family-run.ts): $10 approved Nov 23 2026
   // to clear the ~850-subject backlog in about a week instead of a month on the lean bulk lane.
   const families = num(env.AI_BACKLOG_COMPANY_FAMILY_USD, 10);
+  // Feed classification backlog (migration 197b re-queued ~1,500 wrongly skipped feed programs on top of
+  // ~600 unclassified): measured $0.066 per 20-asset request (608 requests, $40.29, Oct 29-31 2026), about
+  // $0.0033 per asset, so ~$7 clears it; ~$10 with retries. Off until the owner sets it; it extends the
+  // classifier's spent $40 share.
+  const classifyFeed = num(env.AI_BACKLOG_CLASSIFY_FEED_USD, 0);
   return {
     start: env.AI_BACKLOG_START || '2026-10-29',
-    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026; + families + pages.
-    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + families + pages),
+    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026; + families + pages + feed classification.
+    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + families + pages + classifyFeed),
     dailyUsd: num(env.AI_BACKLOG_DAILY_USD, 15),
-    sources: { 'asset-classify': 40, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(families > 0 ? { 'company-family': families } : {}), ...(pages > 0 ? { 'preclinical-pages': pages } : {}) },
+    sources: { 'asset-classify': 40 + classifyFeed, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(families > 0 ? { 'company-family': families } : {}), ...(pages > 0 ? { 'preclinical-pages': pages } : {}) },
   };
 }
 

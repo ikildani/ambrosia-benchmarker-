@@ -37,6 +37,7 @@ import {
   planAssetPatch,
   planDrugMasterPatch,
   preClassify,
+  classifyRunStatus,
   supportsTemperature,
   validateClassificationSample,
   type AssetPatch,
@@ -344,6 +345,12 @@ describe('preClassify', () => {
     expect(preClassify({ asset_name: 'ABC-123' })).toBeNull();
     expect(preClassify({ asset_name: 'MK-3475 (pembrolizumab)' })).toBeNull();
   });
+
+  it('sends a row whose skip was overridden (migration 197b) to the model', () => {
+    const name = 'human IgG4 bispecific antibody recognizing factor VIIa and TLT-1';
+    expect(preClassify({ asset_name: name })).toBe('placebo_or_generic');
+    expect(preClassify({ asset_name: name, classification_evidence: { rule_skip_overridden: true } })).toBeNull();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -522,7 +529,7 @@ describe('fetchClassificationQueue', () => {
     const coreQuery = ops[0].calls;
     expect(String(coreQuery[0].args[0])).toContain('companies!clinical_assets_company_id_fkey!inner(owner_type)');
     expect(has(coreQuery, 'eq', 'companies.owner_type', 'industry')).toBe(true);
-    expect(has(coreQuery, 'in', 'partnership_status', ['unpartnered', 'partially_partnered'])).toBe(true);
+    expect(has(coreQuery, 'in', 'partnership_status', ['unpartnered', 'partially_partnered', 'partnered'])).toBe(true);
     // Core = the phases a buyer can license before approval; phase_4 is never in it.
     const phases = coreQuery.find(c => c.method === 'in' && c.args[0] === 'phase')?.args[1] as string[];
     expect(phases).toContain('phase_2');
@@ -721,7 +728,7 @@ describe('classifyAssetsBatch', () => {
 
   it('stops at the request cap and leaves the remainder for the next run', async () => {
     const queue = [asset({ id: 'a1' }), asset({ id: 'a2', asset_name: 'ACM-202' }), asset({ id: 'a3', asset_name: 'ACM-303' })];
-    const { client: supabase } = stubSupabase(e2eHandler(queue));
+    const { client: supabase, ops } = stubSupabase(e2eHandler(queue));
     const client = stubClient([message([item({ asset_id: 'a1' })]), message([item({ asset_id: 'a2' })]), message([item({ asset_id: 'a3' })])]);
 
     const result = await classifyAssetsBatch(supabase, { client, limit: 10, batchSize: 1, concurrency: 1, maxRequests: 1, now: () => NOW_MS });
@@ -730,8 +737,12 @@ describe('classifyAssetsBatch', () => {
     expect(result.requestCapHit).toBe(true);
     expect(result.classified).toBe(1);
     expect(result.processed).toBe(1);
-    expect(result.errors.some(e => /request cap/.test(e))).toBe(true);
     expect(result.logged).toBe(true);
+    // A capped run that made progress without errors is a success with a backlog, not a partial run.
+    expect(result.errors).toEqual([]);
+    const log = ops.find(o => o.table === 'data_ingestion_log')!.calls[0].args[0] as { status: string; notes: string };
+    expect(log.status).toBe('completed');
+    expect(log.notes).toMatch(/request cap reached \(1\); 2 batch\(es\) left/);
   });
 
   it('marks the run partial and retries next time when a batch fails after retries', async () => {
@@ -829,5 +840,19 @@ describe('classify-prompt: zod gate clips over-long strings instead of rejecting
     expect(parsed.data.moa_short).toHaveLength(80);
     expect(parsed.data.target).toHaveLength(40);
     expect(parsed.data.indication_specific).toHaveLength(60);
+  });
+});
+
+describe('classifyRunStatus', () => {
+  it('a capped or timed-out run that wrote rows without errors is completed', () => {
+    expect(classifyRunStatus({ errors: 0, timedOut: false, requestCapHit: true, fetched: 400, produced: 200 })).toBe('completed');
+    expect(classifyRunStatus({ errors: 0, timedOut: true, requestCapHit: false, fetched: 400, produced: 120 })).toBe('completed');
+  });
+  it('errors or a run that wrote nothing stay partial', () => {
+    expect(classifyRunStatus({ errors: 1, timedOut: false, requestCapHit: false, fetched: 10, produced: 9 })).toBe('partial');
+    expect(classifyRunStatus({ errors: 0, timedOut: false, requestCapHit: true, fetched: 400, produced: 0 })).toBe('partial');
+  });
+  it('an empty queue is completed', () => {
+    expect(classifyRunStatus({ errors: 0, timedOut: false, requestCapHit: false, fetched: 0, produced: 0 })).toBe('completed');
   });
 });
