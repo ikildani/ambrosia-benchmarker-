@@ -57,6 +57,7 @@ import { cdeAdapter } from './cde';
 import { chictrAdapter } from './chictr';
 import { ctriAdapter } from './ctri';
 import { crisAdapter } from './cris';
+import { euctrAdapter } from './euctr';
 
 export { companyTrialKey } from './shared';
 export type { RegistryAdapter, RegistryId, RegistryRecord } from './types';
@@ -80,6 +81,7 @@ export const REGISTRY_ADAPTERS: Record<RegistryId, AnyRegistryAdapter> = {
   chictr: chictrAdapter,
   ctri: ctriAdapter,
   cris: crisAdapter,
+  euctr: euctrAdapter,
 };
 
 export function getRegistryAdapter(id: string | null | undefined): AnyRegistryAdapter | null {
