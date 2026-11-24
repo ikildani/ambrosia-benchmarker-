@@ -233,11 +233,22 @@ describe('estimate vs comps', () => {
   it('orders drivers by size of effect and drops neutral ones', () => {
     expect(topDrivers(mods)).toEqual([{ name: 'Peptide', pct: 25 }, { name: 'Prostate', pct: -8 }]);
   });
-  it('explains the gap with the biggest factor pushing the same way', () => {
-    expect(estimateVsComps(180, 100, mods).sentence).toBe('1.8x the comparable median, mainly because of Peptide (+25%).');
-    expect(estimateVsComps(50, 100, mods).sentence).toBe('50% of the comparable median, mainly because of Prostate (-8%).');
+  it('explains the gap with the biggest factor pushing the same way when the factors account for it', () => {
+    expect(estimateVsComps(140, 100, mods).sentence).toBe('1.4x the comparable median, mainly because of Peptide (+25%).');
+    expect(estimateVsComps(85, 100, mods).sentence).toBe('85% of the comparable median, mainly because of Prostate (-8%).');
     expect(estimateVsComps(105, 100, mods).sentence).toBe('In line with the comparable median.');
     expect(estimateVsComps(100, null, mods).ratio).toBeNull();
+  });
+  it('does not blame a small factor for a large gap (a +17% factor cannot explain 5.2x)', () => {
+    const china = [
+      { name: 'Greater China', multiplier: 0.4 },
+      { name: 'Lung (NSCLC)', multiplier: 1.17 },
+      { name: 'Some combo potential', multiplier: 1.07 },
+    ];
+    const s = estimateVsComps(104, 20, china).sentence!;
+    expect(s).toMatch(/^5\.2x the comparable median\. Most of the gap is in the starting point for this stage, which sits above/);
+    expect(s).not.toMatch(/mainly because/);
+    expect(estimateVsComps(50, 100, mods).sentence).toMatch(/^50% of the comparable median\. Most of the gap .* sits below/);
   });
 });
 

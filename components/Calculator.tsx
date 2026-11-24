@@ -167,8 +167,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // first calculateDealTerms() in a fresh tab uses the same calibrated
   // baselines as every later run. useCalculation also awaits it before each
   // calculation, so a fast user cannot beat the warm-up.
+  // calibrationReady re-runs the live preview once the overlay lands: before it, the preview was
+  // computed from static baselines and stayed that way until the user changed an input.
+  const [calibrationReady, setCalibrationReady] = useState(false);
   useEffect(() => {
-    void ensureBenchmarksLoaded();
+    let alive = true;
+    void ensureBenchmarksLoaded().finally(() => { if (alive) setCalibrationReady(true); });
+    return () => { alive = false; };
   }, []);
 
   // Show toast when form was restored from localStorage
@@ -194,7 +199,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // Live preview: recalculate deal terms on every input change (~1ms, pure sync)
   const previewResult = useMemo(() => {
     return calculateDealTerms(buildCalculationInput(state));
-  }, [state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- calibrationReady recomputes once the overlay loads
+  }, [state, calibrationReady]);
 
   // Peak-sales baseline shared by PeakSalesOverrideInput (asset step) and the
   // CustomAssumptionsPanel "Peak Sales" section (deal step). With the
@@ -295,7 +301,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 try {
                   const fullState = { ...state, ...patch };
                   const calcInput = buildCalculationInput(fullState as typeof state);
-                  calc.setResult(calculateDealTerms(calcInput));
+                  // Wait for the calibration overlay: computing on mount priced prefilled links off static baselines.
+                  void ensureBenchmarksLoaded().finally(() => calc.setResult(calculateDealTerms(calcInput)));
                 } catch { /* Calculation will be triggered manually */ }
               }
             }
@@ -474,7 +481,9 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         ...(urlIndication ? { indication: urlIndication as Indication } : {}),
         ...(urlTerritory ? { territory: urlTerritory as Territory } : {}),
       };
-      calc.setResult(calculateDealTerms(buildCalculationInput(patchedState)));
+      // Wait for the calibration overlay: computing on mount priced URL-prefilled links (outreach, share,
+      // SEO pages) off static baselines, often 3-5x off the calibrated result.
+      void ensureBenchmarksLoaded().finally(() => calc.setResult(calculateDealTerms(buildCalculationInput(patchedState))));
 
       // Clean up URL params after applying
       const url = new URL(window.location.href);

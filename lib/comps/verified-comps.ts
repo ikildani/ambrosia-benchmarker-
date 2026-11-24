@@ -559,6 +559,15 @@ export function estimateVsComps(estimateM: number, compMedianM: number | null, m
   else if (ratio <= 1 / 1.15) head = `${Math.round(ratio * 100)}% of the comparable median`;
   else return { ratio, sentence: 'In line with the comparable median.' };
   const same = drivers.find(d => (ratio > 1 ? d.pct > 0 : d.pct < 0));
-  const why = same ? `, mainly because of ${same.name} (${same.pct > 0 ? '+' : ''}${same.pct}%)` : '';
-  return { ratio, sentence: `${head}${why}.` };
+  // Only blame a factor when the factors pushing that way explain at least half the gap (in log terms).
+  // A +17% factor cannot explain 5.2x; then the gap is in the starting point for the stage, so say that.
+  const pushing = modifiers
+    .map(m => m.applied ?? m.multiplier)
+    .filter(e => Number.isFinite(e) && e > 0 && (ratio > 1 ? e > 1 : e < 1));
+  const explained = pushing.reduce((acc, e) => acc + Math.log(e), 0);
+  if (same && Math.abs(explained) >= Math.abs(Math.log(ratio)) / 2) {
+    return { ratio, sentence: `${head}, mainly because of ${same.name} (${same.pct > 0 ? '+' : ''}${same.pct}%).` };
+  }
+  const where = ratio > 1 ? 'above' : 'below';
+  return { ratio, sentence: `${head}. Most of the gap is in the starting point for this stage, which sits ${where} what these deals paid, so lean on the deals.` };
 }

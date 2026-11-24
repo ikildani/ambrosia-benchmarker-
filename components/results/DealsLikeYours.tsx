@@ -20,6 +20,7 @@ import {
   computeConfidence,
   describeSelection,
   estimateVsComps,
+  summarizeComps,
   topDrivers,
   phaseName,
   type CompRung,
@@ -255,6 +256,7 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
   const hiddenCompanies = data && splitCompanies && data.limited ? Math.max(0, (data.companyAcquisitionCount ?? 0) - companyComps.length) : 0;
   const hiddenForFree = data && data.limited ? Math.max(0, data.totalComps - data.comps.length) : 0;
   const s = data?.summary;
+  const companyMedianM = companyComps.length >= 3 ? summarizeComps(companyComps).medianUpfrontM : null;
   const style = confidence ? CONFIDENCE_STYLE[confidence.level] : null;
 
   return (
@@ -405,6 +407,13 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
         {hasFullAccess ? (
           <>
             {vs.sentence && <p className="mt-2 text-sm text-neutral-800 dark:text-slate-100" data-testid="estimate-vs-comps">{vs.sentence}</p>}
+            {splitCompanies && (
+              <p className="mt-1 text-xs text-neutral-600 dark:text-slate-400" data-testid="acquisition-basis-note">
+                This estimate prices a whole-company acquisition
+                {companyMedianM != null ? <>, where comparable buyouts have a median upfront of {formatCurrency(companyMedianM)}</> : null}
+                . For the sale of a single asset, the asset purchases above are the better guide.
+              </p>
+            )}
             {drivers.length > 0 && (
               <div className="mt-3">
                 <p className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-slate-400">What moved the estimate</p>
