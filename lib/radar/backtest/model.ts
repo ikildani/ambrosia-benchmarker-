@@ -18,6 +18,8 @@
  * exactly, and a test asserts Σ contribution + intercept === logit.
  */
 
+import { gamTerm, type GamParams } from '@/lib/radar/backtest/gam';
+
 // ═══════════════════════════════════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════
@@ -54,6 +56,18 @@ export interface ModelParams {
   positives_train: number;
   iterations: number;
   final_loss: number;
+  /**
+   * 'logistic' (default; v3/v4 models have no field) or 'gam' (v5, gam.ts): an additive
+   * boosted-stump model whose per-feature tables replace means / stds / weights. The waterfall
+   * contract is the same: logit = intercept + Σ contribution.
+   */
+  model_type?: 'logistic' | 'gam';
+  gam?: GamParams;
+}
+
+/** True when the params carry an additive table model. */
+export function isGamModel(p: Pick<ModelParams, 'model_type' | 'gam'>): p is Pick<ModelParams, 'model_type'> & { gam: GamParams } {
+  return p.model_type === 'gam' && !!p.gam;
 }
 
 export interface TrainOptions {
@@ -442,6 +456,30 @@ export function scoreFromFeatures(vector: Record<string, number | null | undefin
   const contributions: FeatureContribution[] = new Array(d);
   let sum = 0;
   let present = 0;
+  if (isGamModel(params)) {
+    // Additive table model: contribution_j = f_j(x_j). "standardized" is 1 and "weight" carries the
+    // contribution so weight × standardized = contribution, as for the linear model.
+    for (let j = 0; j < d; j++) {
+      const name = params.feature_names[j];
+      const raw = vector[name];
+      const imputed = raw === null || raw === undefined || !Number.isFinite(raw);
+      if (!imputed) present++;
+      const contribution = gamTerm(params.gam, j, imputed ? null : (raw as number));
+      sum += contribution;
+      contributions[j] = { feature: name, value: imputed ? 0 : (raw as number), imputed, standardized: 1, weight: contribution, contribution };
+    }
+    const interceptG = params.bias + params.prior_correction;
+    const zG = interceptG + sum;
+    const rawG = sigmoid(zG);
+    return {
+      probability: applyCalibration(params.calibration, zG, rawG),
+      raw_probability: rawG,
+      logit: zG,
+      intercept: interceptG,
+      contributions,
+      completeness: d > 0 ? present / d : 0,
+    };
+  }
   for (let j = 0; j < d; j++) {
     const name = params.feature_names[j];
     const raw = vector[name];
@@ -470,6 +508,7 @@ export function scoreFromFeatures(vector: Record<string, number | null | undefin
 
 /** Standardized design matrix + per-row contribution matrix (for importance). */
 export function contributionMatrix(X: readonly (readonly (number | null)[])[], params: ModelParams): number[][] {
+  if (isGamModel(params)) return X.map(row => row.map((v, j) => gamTerm(params.gam, j, v)));
   return X.map(row => {
     const z = standardizeRow(row, params.means, params.stds);
     return z.map((v, j) => v * params.weights[j]);
@@ -478,6 +517,7 @@ export function contributionMatrix(X: readonly (readonly (number | null)[])[], p
 
 /** Probabilities for a batch (calibrated). */
 export function predictBatch(X: readonly (readonly (number | null)[])[], params: ModelParams): number[] {
+  if (isGamModel(params)) return logitBatch(X, params).map(z => applyCalibration(params.calibration, z, sigmoid(z)));
   const intercept = params.bias + params.prior_correction;
   return X.map(row => {
     const z = standardizeRow(row, params.means, params.stds);
@@ -488,8 +528,19 @@ export function predictBatch(X: readonly (readonly (number | null)[])[], params:
 }
 
 /** Uncalibrated logits for a batch (used to fit calibration on a holdout slice). */
-export function logitBatch(X: readonly (readonly (number | null)[])[], params: Pick<ModelParams, 'means' | 'stds' | 'weights' | 'bias' | 'prior_correction'>): number[] {
+export function logitBatch(
+  X: readonly (readonly (number | null)[])[],
+  params: Pick<ModelParams, 'means' | 'stds' | 'weights' | 'bias' | 'prior_correction'> & Partial<Pick<ModelParams, 'model_type' | 'gam'>>,
+): number[] {
   const intercept = params.bias + params.prior_correction;
+  if (isGamModel(params)) {
+    const gam = params.gam;
+    return X.map(row => {
+      let s = intercept;
+      for (let j = 0; j < gam.edges.length; j++) s += gamTerm(gam, j, row[j]);
+      return s;
+    });
+  }
   return X.map(row => {
     const z = standardizeRow(row, params.means, params.stds);
     let s = intercept;
