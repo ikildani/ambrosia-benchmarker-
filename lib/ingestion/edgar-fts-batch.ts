@@ -136,7 +136,18 @@ export async function drainExtractionBatches(
         if (result.result.type === 'succeeded') {
           // Nov 23 2026: read the text blocks; a leading thinking block is not "not a deal".
           const text = replyText(result.result.message.content);
-          const deal = parseDealExtraction(text);
+          let deal: ReturnType<typeof parseDealExtraction>;
+          try {
+            deal = parseDealExtraction(text);
+          } catch (e) {
+            // Nov 24 2026: a garbled reply is not a verdict. Forget the accession (as for expired
+            // results) so a later walk resubmits it, instead of ledgering it as not_a_deal for good.
+            opts.funnel.count('extraction_error', 'parse', `${stored.accession}: ${String(e).slice(0, 80)}`);
+            if (!opts.dryRun) await supabase.from(PROCESSED_TABLE).delete().eq('accession', stored.accession);
+            bump('parse_error');
+            byAccession.delete(result.custom_id);
+            continue;
+          }
           if (!deal) {
             opts.funnel.count('not_a_deal', stored.doc.fileType || 'unknown', `${stored.doc.companyName} ${stored.accession}`);
             outcome = 'not_a_deal';
