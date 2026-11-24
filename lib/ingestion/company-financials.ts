@@ -49,6 +49,15 @@ const NET_INCOME_TAGS = ['NetIncomeLoss', 'ProfitLoss'];
 const SHARES_TAGS_GAAP = ['CommonStockSharesOutstanding'];
 const SHARES_TAGS_DEI = ['EntityCommonStockSharesOutstanding'];
 
+// 20-F / 40-F filers report under IFRS in their own currency (migration 198).
+const IFRS_CASH_TAGS = ['CashAndCashEquivalents'];
+const IFRS_STI_TAGS = ['CurrentInvestments', 'ShorttermDepositsNotClassifiedAsCashEquivalents', 'OtherCurrentFinancialAssets'];
+const IFRS_OCF_TAGS = ['CashFlowsFromUsedInOperatingActivities'];
+const IFRS_NET_INCOME_TAGS = ['ProfitLoss', 'ProfitLossAttributableToOwnersOfParent'];
+const IFRS_SHARES_TAGS = ['NumberOfSharesOutstanding'];
+const PERIOD_FORMS = new Set(['10-K', '10-Q', '10-K/A', '10-Q/A', '20-F', '20-F/A', '40-F', '40-F/A', '6-K']);
+export const FX_RATES_URL = 'https://api.frankfurter.dev/v1';
+
 const SHELF_FORMS = new Set(['S-3', 'S-3ASR', 'S-3/A', '424B5']);
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -72,6 +81,7 @@ export interface CompanyFacts {
   entityName?: string;
   facts?: {
     'us-gaap'?: Record<string, { units?: Record<string, XbrlFact[]> }>;
+    'ifrs-full'?: Record<string, { units?: Record<string, XbrlFact[]> }>;
     dei?: Record<string, { units?: Record<string, XbrlFact[]> }>;
   };
 }
@@ -116,6 +126,11 @@ export interface FinancialRow {
   source_url: string;
   filed_at: string | null;
   fetched_at: string;
+  /** Currency the filer reported in; amounts are USD once the runner has converted them (migration 198). */
+  reporting_currency: string;
+  /** USD per unit of reporting_currency at fiscal_period_end; null until converted. */
+  fx_rate_to_usd: number | null;
+  taxonomy: 'us-gaap' | 'ifrs-full';
 }
 
 export interface QuarterlyFlow {
@@ -351,7 +366,7 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-function unitsFor(facts: CompanyFacts, taxonomy: 'us-gaap' | 'dei', tags: string[], unit: string): XbrlFact[] {
+function unitsFor(facts: CompanyFacts, taxonomy: 'us-gaap' | 'ifrs-full' | 'dei', tags: string[], unit: string): XbrlFact[] {
   const tax = facts.facts?.[taxonomy] as Record<string, { units?: Record<string, XbrlFact[]> }> | undefined;
   if (!tax) return [];
   for (const tag of tags) {
@@ -386,6 +401,57 @@ function sharesNear(deiFacts: XbrlFact[], gaapFacts: XbrlFact[], end: string): n
   return best ? best.val : null;
 }
 
+/**
+ * Which taxonomy and currency a filer reports cash in: US GAAP in USD when present, else IFRS
+ * (20-F / 40-F filers) in the currency of its most recent cash fact. Null when neither exists.
+ */
+export function reportingBasis(facts: CompanyFacts): { taxonomy: 'us-gaap' | 'ifrs-full'; currency: string } | null {
+  if (unitsFor(facts, 'us-gaap', CASH_TAGS, 'USD').length) return { taxonomy: 'us-gaap', currency: 'USD' };
+  const ifrs = facts.facts?.['ifrs-full'];
+  if (!ifrs) return null;
+  let best: { currency: string; end: string } | null = null;
+  for (const tag of IFRS_CASH_TAGS) {
+    for (const [unit, list] of Object.entries(ifrs[tag]?.units ?? {})) {
+      if (!/^[A-Z]{3}$/.test(unit)) continue;
+      for (const f of list) if (!best || f.end > best.end) best = { currency: unit, end: f.end };
+    }
+  }
+  return best ? { taxonomy: 'ifrs-full', currency: best.currency } : null;
+}
+
+const MONEY_FIELDS = ['cash_and_equivalents', 'short_term_investments', 'total_liquidity', 'operating_cash_flow', 'net_loss', 'quarterly_burn'] as const;
+
+/** Convert a row's amounts to USD at `rate` (USD per unit); runway is a ratio and stays. */
+export function convertRowToUsd(row: FinancialRow, rate: number): FinancialRow {
+  const out: FinancialRow = { ...row, fx_rate_to_usd: rate };
+  for (const k of MONEY_FIELDS) {
+    const v = row[k];
+    out[k] = v == null ? null : Math.round(v * rate * 100) / 100;
+  }
+  return out;
+}
+
+const fxCache = new Map<string, number | null>();
+
+/** ECB reference rate (USD per unit of `currency`) on or before `date`; null when unavailable. */
+export async function fxRateToUsd(currency: string, date: string): Promise<number | null> {
+  if (currency === 'USD') return 1;
+  const key = `${currency}|${date}`;
+  if (fxCache.has(key)) return fxCache.get(key)!;
+  let rate: number | null = null;
+  try {
+    const res = await fetchWithTimeout(`${FX_RATES_URL}/${date}?base=${encodeURIComponent(currency)}&symbols=USD`, { timeoutMs: 10_000, retries: 1 });
+    if (res.ok) {
+      const j = (await res.json()) as { rates?: { USD?: number } };
+      rate = typeof j.rates?.USD === 'number' && j.rates.USD > 0 ? j.rates.USD : null;
+    }
+  } catch {
+    rate = null;
+  }
+  fxCache.set(key, rate);
+  return rate;
+}
+
 export interface ExtractOptions {
   /** Only periods ending after this date (cursor). */
   afterPeriodEnd?: string | null;
@@ -406,11 +472,15 @@ export function extractFinancialRows(
   cik: string,
   opts: ExtractOptions = {},
 ): FinancialRow[] {
-  const cash = dedupeFacts(unitsFor(facts, 'us-gaap', CASH_TAGS, 'USD'));
-  const sti = dedupeFacts(unitsFor(facts, 'us-gaap', STI_TAGS, 'USD'));
-  const ocf = unitsFor(facts, 'us-gaap', OCF_TAGS, 'USD');
-  const netIncome = unitsFor(facts, 'us-gaap', NET_INCOME_TAGS, 'USD');
-  const sharesGaap = unitsFor(facts, 'us-gaap', SHARES_TAGS_GAAP, 'shares');
+  const basis = reportingBasis(facts);
+  if (!basis) return [];
+  const { taxonomy, currency } = basis;
+  const ifrs = taxonomy === 'ifrs-full';
+  const cash = dedupeFacts(unitsFor(facts, taxonomy, ifrs ? IFRS_CASH_TAGS : CASH_TAGS, currency));
+  const sti = dedupeFacts(unitsFor(facts, taxonomy, ifrs ? IFRS_STI_TAGS : STI_TAGS, currency));
+  const ocf = unitsFor(facts, taxonomy, ifrs ? IFRS_OCF_TAGS : OCF_TAGS, currency);
+  const netIncome = unitsFor(facts, taxonomy, ifrs ? IFRS_NET_INCOME_TAGS : NET_INCOME_TAGS, currency);
+  const sharesGaap = unitsFor(facts, taxonomy, ifrs ? IFRS_SHARES_TAGS : SHARES_TAGS_GAAP, 'shares');
   const sharesDei = unitsFor(facts, 'dei', SHARES_TAGS_DEI, 'shares');
 
   const quarterlyOcf = deriveQuarterlyFlows(ocf);
@@ -421,7 +491,7 @@ export function extractFinancialRows(
   const periods = new Map<string, XbrlFact>();
   for (const f of cash) {
     if (f.start) continue;
-    if (!['10-K', '10-Q', '10-K/A', '10-Q/A', '20-F', '40-F'].includes(f.form)) continue;
+    if (!PERIOD_FORMS.has(f.form)) continue;
     if (opts.afterPeriodEnd && f.end <= opts.afterPeriodEnd) continue;
     const prev = periods.get(f.end);
     if (!prev || (f.filed ?? '') > (prev.filed ?? '')) periods.set(f.end, f);
@@ -462,6 +532,9 @@ export function extractFinancialRows(
         : `${SEC_COMPANYFACTS_URL}/CIK${padded}.json`,
       filed_at: cashFact.filed ?? null,
       fetched_at: fetchedAt,
+      reporting_currency: currency,
+      fx_rate_to_usd: currency === 'USD' ? 1 : null,
+      taxonomy,
     });
   }
   // Going-concern / ATM flags describe the present; only stamp the newest row.
@@ -797,12 +870,20 @@ export async function runCompanyFinancials(
         errors.push(`efts ${c.name}: ${errMsg(err)}`);
       }
       const after = state.byCompany?.[c.id] ?? null;
-      const rows = extractFinancialRows(facts, c.id, cik, {
+      const extracted = extractFinancialRows(facts, c.id, cik, {
         afterPeriodEnd: after,
         goingConcern,
         atmOrShelf: atm.filed,
         now,
       });
+      // IFRS filers report in their own currency: store USD at the period-end ECB rate, and drop
+      // a period whose rate is unavailable rather than store a non-USD amount.
+      const rows: FinancialRow[] = [];
+      for (const row of extracted) {
+        if (row.reporting_currency === 'USD') { rows.push(row); continue; }
+        const rate = await fxRateToUsd(row.reporting_currency, row.fiscal_period_end);
+        if (rate) rows.push(convertRowToUsd(row, rate));
+      }
       if (rows.length === 0) {
         // Nothing new; still refresh the present-tense flags on the newest stored row.
         if (after) {
