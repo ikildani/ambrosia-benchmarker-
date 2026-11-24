@@ -33,6 +33,8 @@ import {
   resolveSponsorGeography,
   SWEEP_EPOCH,
   SWEEP_FIELDS,
+  hasDevCode,
+  rescuePrimaryInterventions,
 } from '../../lib/ingestion/ctgov-sweep';
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -411,6 +413,57 @@ describe('buildTrialRow', () => {
     const orphan = buildTrialRow(study, { companyId: null, companyName: null });
     expect(orphan.company_id).toBeNull();
     expect(orphan.company_name).toBe('Acme Oncology, Inc.');
+  });
+});
+
+describe('development-code rescue (migration 195)', () => {
+  const dose = (role: string, label: string) => ({ label, type: role, interventionNames: [`Drug: ${label.split(' ')[0]}`] });
+  const DOSE_STUDY = {
+    protocolSection: {
+      identificationModule: { nctId: 'NCT09990009', briefTitle: 'ATI-501 Oral Suspension Compared to Placebo' },
+      sponsorCollaboratorsModule: { leadSponsor: { name: 'Aclaris Therapeutics', class: 'INDUSTRY' } },
+      designModule: { studyType: 'INTERVENTIONAL', phases: ['PHASE2'] },
+      armsInterventionsModule: {
+        armGroups: [dose('ACTIVE_COMPARATOR', 'ATI-501 low'), dose('ACTIVE_COMPARATOR', 'ATI-501 high'), { label: 'Placebo', type: 'PLACEBO_COMPARATOR', interventionNames: ['Drug: Placebo'] }],
+        interventions: [
+          { type: 'DRUG', name: 'ATI-501', armGroupLabels: ['ATI-501 low', 'ATI-501 high'] },
+          { type: 'DRUG', name: 'Placebo', armGroupLabels: ['Placebo'] },
+        ],
+      },
+    },
+  };
+
+  it('makes the sponsor\'s coded drug primary when the arm-role rule found none', () => {
+    const study = parseStudy(DOSE_STUDY)!;
+    const rows = buildInterventionRows(study, 'c-9');
+    expect(rows.map(r => [r.name, r.is_primary_asset, r.primary_basis])).toEqual([
+      ['ATI-501', true, 'dev_code_rescue'],
+      ['Placebo', false, null],
+    ]);
+  });
+
+  it('leaves academic trials, backbones and crowded trials alone', () => {
+    const iv = (name: string, type = 'DRUG') => ({ name, type, isPrimaryAsset: false });
+    expect(rescuePrimaryInterventions([iv('ATI-501')], false)).toEqual([]);
+    expect(rescuePrimaryInterventions([iv('Pembrolizumab (MK-3475)', 'BIOLOGICAL'), iv('XYZ-12')], true)).toEqual([1]);
+    expect(rescuePrimaryInterventions([iv('CTP-543 matching placebo'), iv('CTP-543')], true)).toEqual([1]);
+    expect(rescuePrimaryInterventions([iv('AB-11'), iv('AB-12'), iv('AB-13'), iv('AB-14')], true)).toEqual([]);
+    expect(rescuePrimaryInterventions([iv('topotecan'), iv('carboplatin')], true)).toEqual([]);
+    expect(rescuePrimaryInterventions([{ name: 'ACM-101', type: 'DRUG', isPrimaryAsset: true }, iv('XYZ-12')], true)).toEqual([]);
+    expect(rescuePrimaryInterventions([iv('ZX-100 device', 'DEVICE')], true)).toEqual([]);
+  });
+
+  it('reads development codes like radar_has_dev_code', () => {
+    expect(hasDevCode('LY900014')).toBe(true);
+    expect(hasDevCode('BMS-986165')).toBe(true);
+    expect(hasDevCode('GRC 8200')).toBe(true);
+    expect(hasDevCode('OpSCF')).toBe(false);
+    expect(hasDevCode('givosiran')).toBe(false);
+  });
+
+  it('does not touch a study whose arm-role rule already found the asset', () => {
+    const rows = buildInterventionRows(parseStudy(COMBO_STUDY)!, 'c-1');
+    expect(rows.every(r => r.primary_basis === null)).toBe(true);
   });
 });
 
