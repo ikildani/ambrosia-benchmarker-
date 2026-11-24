@@ -40,6 +40,10 @@ import type { SignConstraint } from '@/lib/radar/backtest/model';
 // ═══════════════════════════════════════════════════════════════════════
 
 /**
+ * v5.0 (2026-11-24): same vector; the backtest snapshots are rebuilt because the population
+ * (industry programs, primary rows), the labels (ledger + family + program propagation) and the
+ * negative sampling rate changed, and the model (gam.ts) reads MODEL_FEATURE_NAMES.
+ *
  * v4.0 (2026-09-29): log transforms of the heavy-tailed counts, recency and
  * deal-history indicators, and phase / therapeutic-area / modality
  * indicators, so the linear model can learn that deal rates differ by area
@@ -47,7 +51,7 @@ import type { SignConstraint } from '@/lib/radar/backtest/model';
  * 268 positive months): share of licensed programs in the top 1% of the
  * universe 10% -> 21%, top 5% 31% -> 44%, AUC unchanged (0.70).
  */
-export const FEATURE_VERSION = 'v4.0';
+export const FEATURE_VERSION = 'v5.0';
 
 export type FeatureName =
   | 'runway_months'
@@ -120,10 +124,10 @@ export type FeatureName =
   | CandidateFeatureName;
 
 /**
- * Candidate features (migration 189 company signals). Computed point-in-time into every vector
- * and stored with the backtest snapshots, but NOT part of FEATURE_NAMES: the active model, the
- * training set, completeness and the methodology page are unchanged until a retrain promotes
- * them (move the spec into FEATURE_SPECS and bump FEATURE_VERSION).
+ * Company-signal features (migration 189). Computed point-in-time into every vector and stored
+ * with the backtest snapshots. Not in FEATURE_NAMES (completeness and the v3/v4 logistic path
+ * are unchanged), but promoted into the v5 model inputs (MODEL_FEATURE_NAMES): on the Nov 2026
+ * rebuild they lift feed AUC 0.789 -> 0.812 (listed_public carries most of it).
  */
 export type CandidateFeatureName =
   | 'months_since_last_financing'
@@ -226,6 +230,23 @@ export const CANDIDATE_FEATURE_SPECS: readonly (FeatureSpec & { name: CandidateF
 ] as const);
 
 export const CANDIDATE_FEATURE_NAMES: readonly CandidateFeatureName[] = CANDIDATE_FEATURE_SPECS.map(s => s.name);
+
+/**
+ * Vector features the v5 model may not use (Nov 2026 audit, measured on the 2022-2025 snapshots):
+ *   availability    read from TODAY's partnership status, so licensed programs (the positives) are
+ *                   partnered now: mean 0.49 on positive rows vs 0.95 on negatives. An unconstrained
+ *                   model reaches AUC 0.92 / precision@100 0.41 on it alone; that is the leak, not skill.
+ *   designations_n  undated (today's designations); licensees file for them after the deal.
+ *   owner_industry  constant inside the v5 population (industry programs only).
+ * They stay in the vector (the scorer still multiplies by availability and the UI shows them).
+ */
+export const MODEL_EXCLUDED_FEATURES: ReadonlySet<string> = new Set(['availability', 'designations_n', 'owner_industry']);
+
+/** Inputs of the v5 additive model: the v4 set minus the exclusions, plus the promoted company-signal features. */
+export const MODEL_FEATURE_NAMES: readonly FeatureName[] = [
+  ...FEATURE_NAMES.filter(n => !MODEL_EXCLUDED_FEATURES.has(n)),
+  ...CANDIDATE_FEATURE_NAMES,
+];
 
 const V4_PHASES = ['preclinical', 'early_phase_1', 'phase_1', 'phase_1_2', 'phase_2', 'phase_2_3', 'phase_3'] as const;
 const V4_TAS = ['oncology', 'immunology', 'neurology', 'metabolic', 'infectious_disease', 'rare_disease', 'cardiovascular', 'hematology', 'respiratory', 'ophthalmology', 'dermatology', 'gastroenterology'] as const;
@@ -361,6 +382,8 @@ export interface SiblingAsset {
   therapeutic_area: string | null;
   first_posted_date?: string | null;
   nct_ids?: string[] | null;
+  /** Program identity (migration 187): rows of the asset's own program are not siblings. */
+  program_key?: string | null;
 }
 
 export interface FeatureBundle {
@@ -813,7 +836,10 @@ export function buildFeatureVector(bundle: FeatureBundle, asOf: Date): FeatureVe
 
   // ── Portfolio position (siblings existing at asOf) ──
   {
-    const siblingsAtAsOf = bundle.siblings.filter(s => s.id !== asset.id && onOrBefore(s.first_posted_date, asOf));
+    // Other rows of the same program (dose arms, regional twins) carry TODAY's phase of this very
+    // program: a program a licensee later took to Phase 3 would rank "behind itself" at as_of.
+    const ownKey = bundle.siblings.find(s => s.id === asset.id)?.program_key ?? null;
+    const siblingsAtAsOf = bundle.siblings.filter(s => s.id !== asset.id && !(ownKey && s.program_key === ownKey) && onOrBefore(s.first_posted_date, asOf));
     const ownRank = effectivePhase ? phaseRank(effectivePhase) : null;
     if (ownRank === null) {
       values.pipeline_rank = null;
@@ -1123,7 +1149,7 @@ export async function fetchFeatureBundles(
       : none<CompanyDealRow & { licensor_id: string | null; licensor_name: string | null }>(),
     companyIds.length
       ? readPaged<SiblingAsset & { company_id: string }>((from, to) => supabase.from('clinical_assets')
-          .select('id, company_id, phase, therapeutic_area, first_posted_date')
+          .select('id, company_id, phase, therapeutic_area, first_posted_date, program_key')
           .in('company_id', companyIds).range(from, to), maxRows)
       : none<SiblingAsset & { company_id: string }>(),
     companyIds.length
