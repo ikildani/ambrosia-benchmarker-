@@ -9,7 +9,7 @@ describe('radar functions are safe-update clean', () => {
   const latest = new Map<string, string>();
   for (const f of readdirSync(dir).filter(f => /^\d+/.test(f) && parseInt(f, 10) >= 187).sort()) {
     const sql = readFileSync(join(dir, f), 'utf8');
-    const re = /CREATE OR REPLACE FUNCTION public\.(radar_\w+)\([\s\S]*?\n\$(\w*)\$;/g;
+    const re = /CREATE OR REPLACE FUNCTION public\.((?:radar|company_signal)_\w+)\([\s\S]*?\n\$(\w*)\$;/g;
     for (const m of sql.matchAll(re)) latest.set(m[1], m[0]);
   }
 

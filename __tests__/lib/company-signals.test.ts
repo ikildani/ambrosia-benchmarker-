@@ -390,7 +390,8 @@ describe('company-signals helpers', () => {
   });
 
   it('rotates the unparameterized cron run by UTC hour', () => {
-    expect([0, 6, 12, 18].map(modeForHour)).toEqual(['financials', 'financials', 'financials', 'financials']);
+    expect([0, 12].map(modeForHour)).toEqual(['financials', 'financials']);
+    expect([6, 18].map(modeForHour)).toEqual(['enrich', 'enrich']);
     expect([2, 8, 14, 20].map(modeForHour)).toEqual(['hkex', 'hkex', 'hkex', 'hkex']);
     expect([4, 10, 16, 22].map(modeForHour)).toEqual(['form_d', 'form_d', 'form_d', 'form_d']);
     expect(modeForHour(3)).toBe('financials');
