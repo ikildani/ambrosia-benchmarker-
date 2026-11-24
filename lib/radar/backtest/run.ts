@@ -5,17 +5,25 @@
  * (source 'score_backtest'). Phases:
  *
  *   labels     Build radar_score_label_events from the deals table (deals-first:
- *              every canonical license/option/acquisition/co_development deal is
- *              matched to the licensor's assets by company + asset name).
- *   snapshots  Walk clinical_assets by company; for every kept asset (all
- *              positive assets + a deterministic 3 % sample of the rest) fetch
+ *              every canonical license/option/acquisition/co_development/collaboration
+ *              deal is matched to the licensor family's assets by company + asset
+ *              name), plus the deal ledger (radar_deal_program_links), propagated to
+ *              every row of the matched program.
+ *   snapshots  Walk clinical_assets by company; for every kept asset of the feed
+ *              population (all positive programs + a deterministic 8 % sample of
+ *              the rest; industry owners, primary rows) fetch
  *              the company evidence once and build one feature vector per
  *              monthly as_of (2022-01 .. 2025-09) with the pure builder.
  *              Resumable: cursor = last fully processed company_id.
- *   train      Load the snapshots, train on as_of <= 2024-06, calibrate on
- *              (2024-06, 2024-12], test on 2025; write radar_score_backtests;
- *              activate the model only if it beats the active one on the same
- *              test window (precision@50 and ROC-AUC), or none is active.
+ *   train      Load the snapshots, fit the additive boosted-stump model (gam.ts) on
+ *              as_of <= 2024-06 with early stopping + Platt calibration on
+ *              (2024-06, 2024-12], test on 2025 by the feed protocol (industry
+ *              programs, primary rows, ranked per month); write radar_score_models
+ *              and radar_score_backtests. The gate (gateDecision) passes only when
+ *              the candidate beats the active model on precision@100, top-decile
+ *              lift AND AUC on the same rows; activation needs activate=1 (or
+ *              activateStoredModel), never a scheduled run alone. dry_run=1 trains
+ *              and reports without writing.
  *   done       No-op until reset (?reset=1) or retrain (?phase=train).
  *
  * Time budget per invocation is enforced by the caller (maxDuration 300 s,
@@ -25,20 +33,25 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 import {
-  FEATURE_VERSION, FEATURE_NAMES, FEATURE_SPECS, SIGN_CONSTRAINTS,
+  FEATURE_VERSION, FEATURE_SPECS, CANDIDATE_FEATURE_SPECS, MODEL_FEATURE_NAMES,
   buildFeatureVector, fetchFeatureBundles,
   type FeatureAsset, type FeatureBundle, type CompanyGroup, type TrialRow,
 } from '@/lib/radar/backtest/features';
 import {
   buildLabelEvents, dealNameKeys, labelSnapshot, monthlySnapshotDates, keepNegativeAsset,
+  ledgerEvents, mergeAndPropagate,
   SNAPSHOT_FROM, SNAPSHOT_TO, POSITIVE_DEAL_TYPES, LABEL_WINDOW_MONTHS,
-  type LabelAsset, type LabelDeal, type LabelEvent,
+  type LabelAsset, type LabelDeal, type LabelEvent, type LedgerLink,
 } from '@/lib/radar/backtest/labels';
 import {
-  trainLogistic, fitPlatt, fitIsotonic, buildModelParams, predictBatch, logitBatch, contributionMatrix,
-  type ModelParams, type CalibrationParams,
+  fitPlatt, buildModelParams, logitBatch, contributionMatrix, applyCalibration, isGamModel,
+  type ModelParams,
 } from '@/lib/radar/backtest/model';
-import { computeMetrics, factorImportance, toBacktestSummary, MIN_POSITIVES_FOR_POWER } from '@/lib/radar/backtest/metrics';
+import { trainGam } from '@/lib/radar/backtest/gam';
+import {
+  computeMetrics, computeMonthlyMetrics, factorImportance, gateDecision, toBacktestSummary,
+  EVAL_PROTOCOL, MIN_POSITIVES_FOR_POWER, type MonthlyFeedMetrics,
+} from '@/lib/radar/backtest/metrics';
 import type { ScoreBacktestSummary } from '@/lib/radar/types';
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -46,14 +59,17 @@ import type { ScoreBacktestSummary } from '@/lib/radar/types';
 // ═══════════════════════════════════════════════════════════════════════
 
 export const BACKTEST_CURSOR_SOURCE = 'score_backtest';
-/** Asset-level negative subsampling; positives are always kept. */
-export const NEGATIVE_ASSET_SAMPLING_RATE = 0.03;
+/**
+ * Asset-level negative subsampling; positives are always kept. 0.08 since v5 (was 0.03 over
+ * all owners): restricted to the feed population this is a similar number of assets, and a
+ * negative row now weighs 12.5 programs instead of 33, so "top 100" spans ~8 sampled negatives
+ * rather than 3 and precision@100 stops being a coin flip.
+ */
+export const NEGATIVE_ASSET_SAMPLING_RATE = 0.08;
 /** Train on as_of <= TRAIN_TO, calibrate on (TRAIN_TO, CALIB_TO], test on > CALIB_TO. */
 export const TRAIN_TO = '2024-06-01';
 export const CALIB_TO = '2024-12-01';
 export const TEST_FROM = '2025-01-01';
-/** 0.1 since v4.0: 72 features, many sparse indicators; chosen on the 2025 holdout (0.05 / 0.1 / 0.2). */
-export const L2_LAMBDA = 0.1;
 /** ROC-AUC below this never activates, whatever the incumbent. */
 export const MIN_AUC_TO_ACTIVATE = 0.55;
 const MAX_RUNTIME_MS = 240_000;
@@ -84,6 +100,10 @@ export interface BacktestCursorState {
   trained_at?: string | null;
   /** Source-table row counts at the last train; drives the density-based rebuild. */
   source_counts_at_train?: SourceCounts | null;
+  /** Where the positives came from (v5 labels phase). */
+  label_sources?: { name_match: number; ledger_links: number; events: number; by_kind: Record<string, number> } | null;
+  /** Population counters of the snapshots phase (v5). */
+  population?: { kept_positive: number; kept_negative: number; skipped_owner: number; skipped_non_primary: number } | null;
 }
 
 /** Row counts of the tables that feed the feature vector and the labels. */
@@ -142,6 +162,10 @@ async function sourceCounts(supabase: SupabaseClient): Promise<SourceCounts> {
 }
 
 export interface BacktestRunResult {
+  dry_run?: boolean;
+  gate_passed?: boolean;
+  gate?: string[];
+  incumbent?: Record<string, number | string> | null;
   phase_before: BacktestPhase;
   phase_after: BacktestPhase;
   processed: number;
@@ -163,6 +187,14 @@ export interface BacktestRunOptions {
   reset?: boolean;
   runType?: 'scheduled' | 'manual' | 'backfill';
   now?: Date;
+  /** Train on the stored snapshots and report the gate without writing anything (phase 'train' only). */
+  dryRun?: boolean;
+  /**
+   * Activate the trained model when it passes the gate. Off by default since v5: a scheduled run
+   * stores the model and the verdict, and activation is a rollout step (activate=1 or
+   * activateStoredModel).
+   */
+  activate?: boolean;
 }
 
 function defaultState(): BacktestCursorState {
@@ -247,13 +279,52 @@ async function fetchAllDeals(supabase: SupabaseClient): Promise<LabelDeal[]> {
   return out;
 }
 
-async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelDeal[]): Promise<LabelAsset[]> {
+const LABEL_ASSET_COLUMNS = 'id, company_id, company_name, asset_name, asset_aliases, drug_master_id, program_key';
+
+function toLabelAsset(a: Record<string, unknown>, variations: ReadonlyMap<string, string[]>, family: ReadonlyMap<string, string | null>): LabelAsset {
+  const cid = a.company_id as string | null;
+  return {
+    id: a.id as string,
+    company_id: cid,
+    company_name: a.company_name as string,
+    company_name_variations: cid ? variations.get(cid) ?? [] : [],
+    asset_name: a.asset_name as string,
+    asset_aliases: (a.asset_aliases as string[] | null) ?? [],
+    drug_master_id: (a.drug_master_id as string | null) ?? null,
+    family_id: cid ? family.get(cid) ?? null : null,
+    program_key: (a.program_key as string | null) ?? null,
+  };
+}
+
+/** Licensor company -> family root, and every member company of those families (migration 193). */
+async function fetchLicensorFamilies(supabase: SupabaseClient, deals: LabelDeal[]): Promise<Set<string>> {
+  const licensorIds = Array.from(new Set(deals.map(d => d.licensor_id).filter((x): x is string => !!x)));
+  const familyOf = new Map<string, string>();
+  for (const ids of chunk(licensorIds, 200)) {
+    const { data, error } = await supabase.from('companies').select('id, family_id').in('id', ids).not('family_id', 'is', null);
+    // family_id arrives with migration 193; without it, labels fall back to company matching.
+    if (error) { if (/family_id/.test(error.message)) return new Set(); throw new Error(`licensor families: ${error.message}`); }
+    for (const r of data ?? []) familyOf.set(r.id as string, r.family_id as string);
+  }
+  for (const d of deals) if (d.licensor_id && familyOf.has(d.licensor_id)) d.licensor_family_id = familyOf.get(d.licensor_id);
+  const families = Array.from(new Set(familyOf.values()));
+  const members = new Set<string>();
+  for (const fams of chunk(families, 200)) {
+    const { data, error } = await supabase.from('companies').select('id').in('family_id', fams);
+    if (error) throw new Error(`family members: ${error.message}`);
+    for (const r of data ?? []) members.add(r.id as string);
+  }
+  return members;
+}
+
+async function fetchLabelAssets(supabase: SupabaseClient, deals: LabelDeal[]): Promise<LabelAsset[]> {
   const companyIds = new Set<string>();
   const licensorNames = new Set<string>();
   for (const d of deals) {
     if (d.licensor_id) companyIds.add(d.licensor_id);
     else if (d.licensor_name) licensorNames.add(d.licensor_name);
   }
+  for (const id of await fetchLicensorFamilies(supabase, deals)) companyIds.add(id);
   // Resolve unlinked licensor names through companies.name / name_variations.
   const nameList = Array.from(licensorNames);
   for (const names of chunk(nameList, 200)) {
@@ -262,35 +333,63 @@ async function fetchLabelAssets(supabase: SupabaseClient, deals: readonly LabelD
     for (const row of data ?? []) companyIds.add(row.id as string);
   }
   const variations = new Map<string, string[]>();
+  const family = new Map<string, string | null>();
   const assets: LabelAsset[] = [];
   for (const ids of chunk(Array.from(companyIds), 150)) {
-    const companiesRes = await supabase.from('companies').select('id, name_variations').in('id', ids);
+    const companiesRes = await supabase.from('companies').select('id, name_variations, family_id').in('id', ids);
     if (companiesRes.error) throw new Error(`companies variations: ${companiesRes.error.message}`);
-    for (const c of companiesRes.data ?? []) variations.set(c.id as string, (c.name_variations as string[] | null) ?? []);
+    for (const c of companiesRes.data ?? []) {
+      variations.set(c.id as string, (c.name_variations as string[] | null) ?? []);
+      family.set(c.id as string, (c.family_id as string | null) ?? null);
+    }
     // Paged: a 150-company chunk holds 1,500-6,700 assets and PostgREST returns at most 1,000 rows per
     // request, so the old `.limit(5000)` read dropped ~25k of 34k licensor assets. Their deals never became
     // labels (107 of 1,197 eligible deals, Nov 3 2026) and licensed assets were scored as negatives.
     const rows: Array<Record<string, unknown>> = [];
     for (let from = 0; ; from += ASSET_PAGE) {
-      const { data, error } = await supabase.from('clinical_assets').select('id, company_id, company_name, asset_name, asset_aliases, drug_master_id')
+      const { data, error } = await supabase.from('clinical_assets').select(LABEL_ASSET_COLUMNS)
         .in('company_id', ids).order('id', { ascending: true }).range(from, from + ASSET_PAGE - 1);
       if (error) throw new Error(`clinical_assets by company: ${error.message}`);
       rows.push(...(data ?? []));
       if ((data ?? []).length < ASSET_PAGE) break;
     }
-    for (const a of rows) {
-      assets.push({
-        id: a.id as string,
-        company_id: a.company_id as string | null,
-        company_name: a.company_name as string,
-        company_name_variations: a.company_id ? variations.get(a.company_id as string) ?? [] : [],
-        asset_name: a.asset_name as string,
-        asset_aliases: (a.asset_aliases as string[] | null) ?? [],
-        drug_master_id: (a.drug_master_id as string | null) ?? null,
-      });
-    }
+    for (const a of rows) assets.push(toLabelAsset(a, variations, family));
   }
   return assets;
+}
+
+/** Every row of the given programs (for ledger events and program propagation). */
+async function fetchAssetsByProgram(supabase: SupabaseClient, programKeys: readonly string[]): Promise<Map<string, LabelAsset[]>> {
+  const out = new Map<string, LabelAsset[]>();
+  const empty = new Map<string, string[]>();
+  const noFamily = new Map<string, string | null>();
+  for (const keys of chunk(Array.from(new Set(programKeys)), 150)) {
+    for (let from = 0; ; from += ASSET_PAGE) {
+      const { data, error } = await supabase.from('clinical_assets').select(LABEL_ASSET_COLUMNS)
+        .in('program_key', keys).order('id', { ascending: true }).range(from, from + ASSET_PAGE - 1);
+      if (error) throw new Error(`clinical_assets by program: ${error.message}`);
+      for (const a of data ?? []) {
+        const la = toLabelAsset(a as Record<string, unknown>, empty, noFamily);
+        const list = out.get(la.program_key as string) ?? [];
+        list.push(la);
+        out.set(la.program_key as string, list);
+      }
+      if ((data ?? []).length < ASSET_PAGE) break;
+    }
+  }
+  return out;
+}
+
+/** radar_deal_program_links (migration 192); absent table -> no ledger events. */
+async function fetchLedgerLinks(supabase: SupabaseClient): Promise<LedgerLink[]> {
+  const out: LedgerLink[] = [];
+  for (let from = 0; ; from += ASSET_PAGE) {
+    const { data, error } = await supabase.from('radar_deal_program_links').select('deal_id, program_key').order('id').range(from, from + ASSET_PAGE - 1);
+    if (error) { if (/radar_deal_program_links/.test(error.message)) return []; throw new Error(`deal ledger: ${error.message}`); }
+    out.push(...((data ?? []) as LedgerLink[]));
+    if ((data ?? []).length < ASSET_PAGE) break;
+  }
+  return out;
 }
 
 /** drug_aliases lookup for every segment of every deal's asset name (brand / INN / code -> drug_master). */
@@ -309,11 +408,48 @@ async function fetchDealDrugIds(supabase: SupabaseClient, deals: readonly LabelD
   return out;
 }
 
+export interface BuiltLabels {
+  events: LabelEvent[];
+  horizon: string;
+  sources: NonNullable<BacktestCursorState['label_sources']>;
+}
+
+/** Read-only: every positive (asset, deal) event and the label horizon. */
+export async function buildLabelsFromDb(supabase: SupabaseClient, now: Date): Promise<BuiltLabels> {
+  const deals = await fetchAllDeals(supabase);
+  const [assets, drugIdByKey, links] = await Promise.all([fetchLabelAssets(supabase, deals), fetchDealDrugIds(supabase, deals), fetchLedgerLinks(supabase)]);
+  const nameEvents = buildLabelEvents(assets, deals, { drugIdByKey });
+  // Ledger + program propagation (v5): every row of a licensed program is a positive.
+  const dealById = new Map(deals.map(d => [d.id, d] as const));
+  const assetById = new Map(assets.map(a => [a.id, a] as const));
+  const programKeys = new Set<string>(links.filter(l => dealById.has(l.deal_id)).map(l => l.program_key));
+  for (const e of nameEvents) { const pk = assetById.get(e.asset_id)?.program_key; if (pk) programKeys.add(pk); }
+  const assetsByProgram = await fetchAssetsByProgram(supabase, Array.from(programKeys));
+  const programOf = new Map<string, string | null>();
+  for (const a of assets) programOf.set(a.id, a.program_key ?? null);
+  for (const list of assetsByProgram.values()) for (const a of list) programOf.set(a.id, a.program_key ?? null);
+  const events = mergeAndPropagate([nameEvents, ledgerEvents(links, dealById, assetsByProgram)], programOf, assetsByProgram);
+
+  // Label horizon: the newest announced_date in the whole (eligible) deals
+  // table, capped at today. Windows ending after it are unobservable.
+  const horizonRes = await supabase.from('deals').select('announced_date').not('announced_date', 'is', null).lte('announced_date', now.toISOString().slice(0, 10)).order('announced_date', { ascending: false }).limit(1).maybeSingle();
+  const horizon = (horizonRes.data?.announced_date as string | undefined) ?? now.toISOString().slice(0, 10);
+  return {
+    events,
+    horizon,
+    sources: {
+      name_match: nameEvents.length,
+      ledger_links: links.length,
+      events: events.length,
+      by_kind: events.reduce<Record<string, number>>((acc, e) => { acc[e.match_kind] = (acc[e.match_kind] ?? 0) + 1; return acc; }, {}),
+    },
+  };
+}
+
 async function runLabelsPhase(supabase: SupabaseClient, state: BacktestCursorState, now: Date): Promise<{ written: number; errors: string[] }> {
   const errors: string[] = [];
-  const deals = await fetchAllDeals(supabase);
-  const [assets, drugIdByKey] = await Promise.all([fetchLabelAssets(supabase, deals), fetchDealDrugIds(supabase, deals)]);
-  const events = buildLabelEvents(assets, deals, { drugIdByKey });
+  const { events, horizon, sources } = await buildLabelsFromDb(supabase, now);
+  state.label_sources = sources;
 
   // Replace the table wholesale so a rebuild never leaves stale pairs.
   const del = await supabase.from('radar_score_label_events').delete().gte('announced_date', '1900-01-01');
@@ -325,12 +461,8 @@ async function runLabelsPhase(supabase: SupabaseClient, state: BacktestCursorSta
     else written += rows.length;
   }
 
-  // Label horizon: the newest announced_date in the whole (eligible) deals
-  // table, capped at today. Windows ending after it are unobservable.
-  const horizonRes = await supabase.from('deals').select('announced_date').not('announced_date', 'is', null).lte('announced_date', now.toISOString().slice(0, 10)).order('announced_date', { ascending: false }).limit(1).maybeSingle();
-  const horizon = (horizonRes.data?.announced_date as string | undefined) ?? now.toISOString().slice(0, 10);
-
   state.label_horizon = horizon;
+  state.population = null;
   state.label_events = events.length;
   state.positive_assets = new Set(events.map(e => e.asset_id)).size;
   state.phase = 'snapshots';
@@ -347,7 +479,16 @@ async function runLabelsPhase(supabase: SupabaseClient, state: BacktestCursorSta
 // ═══════════════════════════════════════════════════════════════════════
 
 const ASSET_COLUMNS =
-  'id, company_id, company_name, asset_name, asset_aliases, phase, therapeutic_area, indication_category, modality, partnership_status, territory_rights_available, nct_ids, first_posted_date, regulatory_designations, originator_region';
+  'id, company_id, company_name, asset_name, asset_aliases, phase, therapeutic_area, indication_category, modality, partnership_status, territory_rights_available, nct_ids, first_posted_date, regulatory_designations, originator_region, program_primary, owner_type';
+
+/**
+ * v5 population = what the default feed ranks: industry-owned programs, one (primary) row per
+ * program. Academic / hospital sponsors made v3-v4 negatives easy (owner_industry alone separated
+ * them) and duplicate rows of one program split its label.
+ */
+export function inFeedPopulation(asset: { program_primary?: boolean | null; owner_type?: string | null }): boolean {
+  return asset.program_primary === true && (asset.owner_type ?? '').toLowerCase() === 'industry';
+}
 
 interface SnapshotRow {
   asset_id: string;
@@ -398,7 +539,8 @@ export function snapshotRowsForAsset(
     const lab = labelSnapshot(events, asOf, labelHorizon);
     if (!lab.unpartnered_at_asof || !lab.observable) continue;
     const vec = buildFeatureVector(bundle, new Date(`${asOf}T00:00:00Z`));
-    if (!vec.eligible) continue;
+    // Approved molecules are not in the feed (phase_4 is hidden), so they are not ranked here either.
+    if (!vec.eligible || vec.phase_at_asof === 'phase_4') continue;
     rows.push({
       asset_id: asset.id,
       as_of: asOf,
@@ -450,7 +592,16 @@ async function runSnapshotsPhase(
     if (page.length === ASSET_PAGE && page[0].company_id !== lastCompany) {
       rows = page.filter(a => a.company_id !== lastCompany);
     }
-    const kept = rows.filter(a => eventsByAsset.has(a.id) || keepNegativeAsset(a.id, state.sampling_rate));
+    // The feed shows industry programs, one primary row each (clinical_assets.owner_type / program_primary).
+    const pop = state.population ?? { kept_positive: 0, kept_negative: 0, skipped_owner: 0, skipped_non_primary: 0 };
+    const kept: typeof rows = [];
+    for (const a of rows) {
+      if ((a as { program_primary?: boolean | null }).program_primary !== true) { pop.skipped_non_primary++; continue; }
+      if (!inFeedPopulation(a as FeatureAsset & { program_primary?: boolean | null })) { pop.skipped_owner++; continue; }
+      if (eventsByAsset.has(a.id)) { kept.push(a); pop.kept_positive++; }
+      else if (keepNegativeAsset(a.id, state.sampling_rate)) { kept.push(a); pop.kept_negative++; }
+    }
+    state.population = pop;
     processed += rows.length;
     const writtenBeforePage = written;
 
@@ -517,9 +668,15 @@ async function runSnapshotsPhase(
 export interface LoadedSnapshot {
   asset_id: string;
   as_of: string;
-  row: (number | null)[];
+  /** Every stored feature (models pick their own feature_names). */
+  features: Record<string, number | null>;
   label: 0 | 1;
   weight: number;
+}
+
+/** Feature row in a model's order; missing names are null (imputed / missing bin). */
+export function rowFor(features: Record<string, number | null>, names: readonly string[], neutralize: ReadonlySet<string> = new Set()): (number | null)[] {
+  return names.map(n => (!neutralize.has(n) && typeof features[n] === 'number' ? (features[n] as number) : null));
 }
 
 async function loadSnapshots(supabase: SupabaseClient, featureVersion: string): Promise<LoadedSnapshot[]> {
@@ -533,12 +690,11 @@ async function loadSnapshots(supabase: SupabaseClient, featureVersion: string): 
       .range(from, from + ASSET_PAGE - 1);
     if (error) throw new Error(`snapshots read: ${error.message}`);
     for (const r of data ?? []) {
-      const features = (r.features ?? {}) as Record<string, number | null>;
       const rate = Number(r.sampling_rate) || 1;
       out.push({
         asset_id: r.asset_id as string,
         as_of: r.as_of as string,
-        row: FEATURE_NAMES.map(name => (typeof features[name] === 'number' ? (features[name] as number) : null)),
+        features: (r.features ?? {}) as Record<string, number | null>,
         label: r.label === 1 ? 1 : 0,
         weight: r.label === 1 ? 1 : 1 / rate,
       });
@@ -548,76 +704,119 @@ async function loadSnapshots(supabase: SupabaseClient, featureVersion: string): 
   return out;
 }
 
+export interface GamSettings { learningRate: number; lambda: number; maxBins: number; maxRounds: number; patience: number }
+
+/**
+ * Boosting settings. Rounds are chosen by early stopping on the 2024-H2 slice; the rest were
+ * checked for stability, not tuned to the test months (Nov 2026 rebuild: lr 0.05 / λ 10 / 16 bins
+ * all within ±0.002 AUC of these).
+ */
+export const GAM_SETTINGS: Readonly<GamSettings> = { learningRate: 0.1, lambda: 1, maxBins: 24, maxRounds: 800, patience: 60 };
+
+/**
+ * Features zeroed when an incumbent v3/v4 model is re-scored on v5 snapshots. availability reads
+ * today's partnership status (MODEL_EXCLUDED_FEATURES); feeding it would score the incumbent on the
+ * leak instead of on what it saw in training (a constant 1.0).
+ */
+const INCUMBENT_NEUTRALIZED: ReadonlySet<string> = new Set(['availability']);
+
 export interface TrainOutcome {
   params: ModelParams;
   summary: ReturnType<typeof toBacktestSummary>;
+  monthly: MonthlyFeedMetrics;
   testPredictions: Array<{ asset_id: string; as_of: string; prediction: number }>;
   notes: string[];
 }
 
 /**
- * Pure given the loaded rows: split, train, calibrate, evaluate.
+ * Pure given the loaded rows: time split, fit the additive model with early stopping on the
+ * validation slice, Platt-calibrate on the same slice, evaluate on the test slice by the feed
+ * protocol. The deployed model is exactly the evaluated one (no refit on the test months).
  * Exported so the test suite can run it on synthetic data.
  */
-export function trainAndEvaluate(rows: readonly LoadedSnapshot[], version: string, now: Date): TrainOutcome {
+export function trainAndEvaluate(
+  rows: readonly LoadedSnapshot[],
+  version: string,
+  now: Date,
+  opts: { featureNames?: readonly string[]; settings?: Partial<GamSettings> } = {},
+): TrainOutcome {
+  const names = [...(opts.featureNames ?? MODEL_FEATURE_NAMES)];
+  const settings = { ...GAM_SETTINGS, ...(opts.settings ?? {}) };
   const train = rows.filter(r => r.as_of <= TRAIN_TO);
   const calib = rows.filter(r => r.as_of > TRAIN_TO && r.as_of <= CALIB_TO);
   const test = rows.filter(r => r.as_of >= TEST_FROM);
   const notes: string[] = [];
   if (train.length === 0) throw new Error('trainAndEvaluate: no training rows');
+  const X = (rs: readonly LoadedSnapshot[]) => rs.map(r => rowFor(r.features, names));
 
   const posTrain = train.filter(r => r.label === 1).length;
-  const fit = trainLogistic(train.map(r => r.row), train.map(r => r.label), {
-    l2: L2_LAMBDA,
+  const calibX = X(calib);
+  const fit = trainGam(X(train), train.map(r => r.label), {
+    learningRate: settings.learningRate,
+    lambda: settings.lambda,
+    maxBins: settings.maxBins,
+    maxRounds: settings.maxRounds,
+    patience: settings.patience,
+    rowWeights: train.map(r => r.weight),
     classWeightPos: 'balanced',
-    signConstraints: [...SIGN_CONSTRAINTS],
-    maxIterations: 600,
+    valid: calib.length ? { X: calibX, y: calib.map(r => r.label), w: calib.map(r => r.weight) } : undefined,
   });
-  const baseParams = { means: fit.means, stds: fit.stds, weights: fit.weights, bias: fit.bias, prior_correction: Math.log(NEGATIVE_ASSET_SAMPLING_RATE) };
+  // Training weights = class weight × (1 / sampling rate); ln(class weight) moves the intercept back
+  // to the universe's odds before calibration.
+  const priorCorrection = -Math.log(fit.classWeightPos || 1);
+  const d = names.length;
+  const params: ModelParams = {
+    ...buildModelParams({
+      version,
+      featureVersion: FEATURE_VERSION,
+      featureNames: names,
+      signConstraints: names.map(() => 0 as const),
+      fit: { weights: new Array(d).fill(0), bias: fit.bias, means: new Array(d).fill(0), stds: new Array(d).fill(1), iterations: fit.rounds, finalLoss: fit.bestValidLoss ?? 0, classWeightPos: fit.classWeightPos },
+      calibration: { type: 'none' },
+      samplingRate: 1,
+      l2: settings.lambda,
+      trainWindow: { from: train[0].as_of, to: train[train.length - 1].as_of },
+      testWindow: { from: test[0]?.as_of ?? TEST_FROM, to: test[test.length - 1]?.as_of ?? TEST_FROM },
+      nTrain: train.length,
+      positivesTrain: posTrain,
+      trainedAt: now,
+    }),
+    prior_correction: priorCorrection,
+    model_type: 'gam',
+    gam: fit.params,
+  };
+  notes.push(`additive boosted stumps: ${fit.rounds} rounds (lr ${settings.learningRate}, λ ${settings.lambda}, ${settings.maxBins} bins), early stopping on ${calib.length} rows of ${TRAIN_TO.slice(0, 7)}..${CALIB_TO.slice(0, 7)}`);
 
-  // Calibration on the slice after training, sample-weighted to undo subsampling.
-  let calibration: CalibrationParams = { type: 'none' };
-  const calibSet = calib.length >= 200 ? calib : train;
-  if (calibSet === train) notes.push('calibration fitted in-sample (fewer than 200 rows in the calibration slice)');
-  const calibLogits = logitBatch(calibSet.map(r => r.row), baseParams);
-  const calibY = calibSet.map(r => r.label);
-  const calibW = calibSet.map(r => r.weight);
-  const calibPos = calibY.filter(v => v === 1).length;
-  if (calibPos >= 100) {
-    calibration = fitIsotonic(calibLogits.map(z => 1 / (1 + Math.exp(-z))), calibY, calibW);
-    notes.push(`isotonic calibration on ${calibSet.length} rows / ${calibPos} positives`);
-  } else if (calibPos >= 5) {
-    calibration = fitPlatt(calibLogits, calibY, calibW);
-    notes.push(`Platt calibration on ${calibSet.length} rows / ${calibPos} positives`);
+  // Platt (monotone, no ties) on the validation slice, weighted to undo subsampling.
+  const calibPos = calib.filter(r => r.label === 1).length;
+  if (calibPos >= 5) {
+    params.calibration = fitPlatt(logitBatch(calibX, params), calib.map(r => r.label), calib.map(r => r.weight));
+    notes.push(`Platt calibration on ${calib.length} rows / ${calibPos} positives`);
   } else {
-    notes.push(`no calibration (only ${calibPos} positives available)`);
+    notes.push(`no calibration (only ${calibPos} validation positives)`);
   }
 
-  const params = buildModelParams({
-    version,
-    featureVersion: FEATURE_VERSION,
-    featureNames: [...FEATURE_NAMES],
-    signConstraints: [...SIGN_CONSTRAINTS],
-    fit,
-    calibration,
-    samplingRate: NEGATIVE_ASSET_SAMPLING_RATE,
-    l2: L2_LAMBDA,
-    trainWindow: { from: train[0].as_of, to: train[train.length - 1].as_of },
-    testWindow: { from: test[0]?.as_of ?? TEST_FROM, to: test[test.length - 1]?.as_of ?? TEST_FROM },
-    nTrain: train.length,
-    positivesTrain: posTrain,
-    trainedAt: now,
-  });
+  const testX = X(test);
+  const logits = logitBatch(testX, params);
+  const preds = logits.map(z => applyCalibration(params.calibration, z, 1 / (1 + Math.exp(-z))));
+  const labels = test.map(r => r.label);
+  const weights = test.map(r => r.weight);
+  const pooled = computeMetrics(preds, labels, weights, logits);
+  const monthly = computeMonthlyMetrics(test.map(r => r.as_of), logits, labels, weights);
+  const importance = factorImportance(names, contributionMatrix(testX, params));
+  notes.push(`population: industry programs, primary rows; negatives subsampled at ${NEGATIVE_ASSET_SAMPLING_RATE}; metrics ranked per month (${EVAL_PROTOCOL})`);
+  notes.push(`train positives ${posTrain} / ${train.length} rows; class weight ${fit.classWeightPos.toFixed(1)}`);
+  notes.push(`pooled (v4 protocol) auc ${pooled.roc_auc.toFixed(4)} p@100 ${pooled.precision_at_100.toFixed(4)} lift ${pooled.lift_top_decile.toFixed(3)}`);
+  if (pooled.positives < MIN_POSITIVES_FOR_POWER) notes.push('holdout has too few positives for a stable ranking estimate');
 
-  const testX = test.map(r => r.row);
-  const preds = predictBatch(testX, params);
-  // Rank on logits: calibration ties the top block (see computeMetrics).
-  const metrics = computeMetrics(preds, test.map(r => r.label), test.map(r => r.weight), logitBatch(testX, params));
-  const importance = factorImportance(FEATURE_NAMES, contributionMatrix(testX, params));
-  notes.push(`negatives subsampled at ${NEGATIVE_ASSET_SAMPLING_RATE} per asset; metrics weighted back to the full universe`);
-  notes.push(`train positives ${posTrain} / ${train.length} rows; class weight ${fit.classWeightPos.toFixed(1)}; ${fit.iterations} iterations`);
-  if (metrics.positives < MIN_POSITIVES_FOR_POWER) notes.push('holdout has too few positives for a stable ranking estimate');
-
+  // Ranking columns carry the feed protocol; Brier / calibration / PR-AUC stay pooled.
+  const metrics = {
+    ...pooled,
+    roc_auc: monthly.roc_auc,
+    precision_at_50: monthly.precision_at_50,
+    precision_at_100: monthly.precision_at_100,
+    lift_top_decile: monthly.lift_top_decile,
+  };
   const summary = toBacktestSummary({
     modelVersion: version,
     runAt: now,
@@ -631,9 +830,17 @@ export function trainAndEvaluate(rows: readonly LoadedSnapshot[], version: strin
   return {
     params,
     summary,
+    monthly,
     testPredictions: test.map((r, i) => ({ asset_id: r.asset_id, as_of: r.as_of, prediction: preds[i] })),
     notes,
   };
+}
+
+/** Re-score a stored model (any version) on the v5 test rows by the same protocol. */
+export function evaluateModelOnRows(params: ModelParams, rows: readonly LoadedSnapshot[]): MonthlyFeedMetrics {
+  const test = rows.filter(r => r.as_of >= TEST_FROM);
+  const X = test.map(r => rowFor(r.features, params.feature_names, isGamModel(params) ? new Set() : INCUMBENT_NEUTRALIZED));
+  return computeMonthlyMetrics(test.map(r => r.as_of), logitBatch(X, params), test.map(r => r.label), test.map(r => r.weight));
 }
 
 export async function loadActiveModel(supabase: SupabaseClient): Promise<ModelParams | null> {
@@ -644,83 +851,96 @@ export async function loadActiveModel(supabase: SupabaseClient): Promise<ModelPa
   return { ...params, version: (data.version as string) ?? params.version };
 }
 
+export interface TrainPhaseResult {
+  errors: string[];
+  modelVersion: string;
+  backtestId?: string;
+  activated: boolean;
+  gatePassed: boolean;
+  metrics: Record<string, number | boolean>;
+  incumbent?: MonthlyFeedMetrics & { version: string };
+  gate: string[];
+}
+
 async function runTrainPhase(
   supabase: SupabaseClient,
   state: BacktestCursorState,
   now: Date,
-): Promise<{ errors: string[]; modelVersion: string; backtestId?: string; activated: boolean; metrics: Record<string, number | boolean> }> {
+  opts: { dryRun: boolean; activate: boolean },
+): Promise<TrainPhaseResult> {
   const errors: string[] = [];
   const rows = await loadSnapshots(supabase, state.feature_version);
   if (rows.length === 0) throw new Error('train: no snapshots for this feature version');
   const stamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 12);
-  const version = `v3.${stamp}`;
+  const version = `v5.${stamp}`;
   const outcome = trainAndEvaluate(rows, version, now);
 
-  // Compare with the incumbent on the same test rows.
-  let activated = false;
-  let incumbentNote = 'no active model; activating';
+  // Gate: re-score the incumbent on the same rows by the same protocol.
+  let incumbent: (MonthlyFeedMetrics & { version: string }) | undefined;
+  let gate = { activate: false, reasons: [] as string[] };
   try {
     const active = await loadActiveModel(supabase);
-    if (active && active.feature_version === state.feature_version) {
-      const test = rows.filter(r => r.as_of >= TEST_FROM);
-      const incX = test.map(r => r.row);
-      const incPreds = predictBatch(incX, active);
-      const inc = computeMetrics(incPreds, test.map(r => r.label), test.map(r => r.weight), logitBatch(incX, active));
-      // precision@50 is 0 for both models while positives are scarce, so it
-      // cannot break ties; PR-AUC can. A low-power candidate never displaces
-      // an incumbent that was validated with enough positives.
-      const candidateLowPower = outcome.summary.positives_test < MIN_POSITIVES_FOR_POWER;
-      const incumbentLowPower = inc.positives < MIN_POSITIVES_FOR_POWER;
-      let better: boolean;
-      let why: string;
-      if (candidateLowPower && !incumbentLowPower) {
-        better = false;
-        why = 'candidate is low-power, incumbent is not';
-      } else {
-        better = outcome.summary.roc_auc > inc.roc_auc && outcome.summary.pr_auc > inc.pr_auc;
-        why = better ? 'better AUC and PR-AUC' : 'not better on both AUC and PR-AUC';
-      }
-      incumbentNote = `incumbent ${active.version}: auc ${inc.roc_auc.toFixed(4)} pr-auc ${inc.pr_auc.toFixed(4)} p@50 ${inc.precision_at_50.toFixed(4)}; candidate auc ${outcome.summary.roc_auc.toFixed(4)} pr-auc ${outcome.summary.pr_auc.toFixed(4)} p@50 ${outcome.summary.precision_at_50.toFixed(4)} → ${better ? 'replaces' : 'kept incumbent'} (${why})`;
-      activated = better;
-    } else if (active) {
-      incumbentNote = `incumbent ${active.version} uses feature version ${active.feature_version}; candidate activates on feature version ${state.feature_version}`;
-      activated = true;
+    if (active) {
+      incumbent = { ...evaluateModelOnRows(active, rows), version: active.version };
+      gate = gateDecision(outcome.monthly, incumbent);
     } else {
-      activated = true;
+      gate = gateDecision(outcome.monthly, null);
     }
   } catch (e) {
     errors.push(`incumbent comparison: ${errMsg(e)}`);
   }
-  if (outcome.summary.roc_auc < MIN_AUC_TO_ACTIVATE) {
-    activated = false;
-    incumbentNote += ` | auc below ${MIN_AUC_TO_ACTIVATE}: not activated`;
+  if (outcome.monthly.roc_auc < MIN_AUC_TO_ACTIVATE) {
+    gate.activate = false;
+    gate.reasons.push(`auc below ${MIN_AUC_TO_ACTIVATE}`);
+  }
+  if (outcome.summary.low_power) {
+    gate.activate = false;
+    gate.reasons.push('low power');
+  }
+  const gatePassed = gate.activate;
+  const activate = gatePassed && opts.activate && !opts.dryRun;
+  const gateNote = `gate ${gatePassed ? 'PASSED' : 'failed'} vs ${incumbent?.version ?? 'none'} (${gate.reasons.join('; ')})${gatePassed && !activate ? '; not activated (run with activate=1)' : ''}`;
+
+  const metrics: Record<string, number | boolean> = {
+    roc_auc: outcome.monthly.roc_auc,
+    precision_at_100: outcome.monthly.precision_at_100,
+    precision_at_50: outcome.monthly.precision_at_50,
+    lift_at_100: outcome.monthly.lift_at_100,
+    lift_top_decile: outcome.monthly.lift_top_decile,
+    base_rate: outcome.monthly.base_rate,
+    recall_top_1pct: outcome.monthly.recall_top_1pct,
+    pr_auc: outcome.summary.pr_auc,
+    brier: outcome.summary.brier,
+    n_train: outcome.summary.n_train,
+    n_test: outcome.summary.n_test,
+    positives_test: outcome.summary.positives_test,
+    low_power: outcome.summary.low_power,
+    gate_passed: gatePassed,
+  };
+  if (opts.dryRun) {
+    return { errors, modelVersion: version, activated: false, gatePassed, metrics, incumbent, gate: gate.reasons };
   }
 
-  // Persist the model.
   const modelRow = {
     version,
     trained_at: now.toISOString(),
     params: outcome.params,
-    feature_names: [...FEATURE_NAMES],
+    feature_names: [...outcome.params.feature_names],
     train_window: outcome.params.train_window,
     test_window: outcome.params.test_window,
     is_active: false,
-    notes: [incumbentNote, ...outcome.notes].join(' | '),
+    notes: [gateNote, ...outcome.notes].join(' | '),
   };
+  let activated = false;
   const ins = await supabase.from('radar_score_models').insert(modelRow);
-  if (ins.error) { errors.push(`model insert: ${ins.error.message}`); activated = false; }
-
-  if (activated) {
-    const off = await supabase.from('radar_score_models').update({ is_active: false }).eq('is_active', true);
-    if (off.error) errors.push(`deactivate incumbent: ${off.error.message}`);
-    const on = await supabase.from('radar_score_models').update({ is_active: true }).eq('version', version);
-    if (on.error) { errors.push(`activate ${version}: ${on.error.message}`); activated = false; }
-  }
+  if (ins.error) errors.push(`model insert: ${ins.error.message}`);
+  else if (activate) activated = await activateModel(supabase, version, errors);
 
   // Raw predictions sample: top 2,000 by score + every positive, stored on the snapshot rows.
   const sample = [...outcome.testPredictions].sort((a, b) => b.prediction - a.prediction).slice(0, 2000);
   const positives = new Set(rows.filter(r => r.as_of >= TEST_FROM && r.label === 1).map(r => `${r.asset_id}:${r.as_of}`));
-  for (const p of outcome.testPredictions) if (positives.has(`${p.asset_id}:${p.as_of}`) && !sample.includes(p)) sample.push(p);
+  const inSample = new Set(sample.map(p => `${p.asset_id}:${p.as_of}`));
+  for (const p of outcome.testPredictions) if (positives.has(`${p.asset_id}:${p.as_of}`) && !inSample.has(`${p.asset_id}:${p.as_of}`)) sample.push(p);
   // UPDATE in place (RPC, migration 144): a partial upsert fails the NOT NULL
   // check on `features` before ON CONFLICT is considered.
   for (const batch of chunk(sample, 500)) {
@@ -735,32 +955,66 @@ async function runTrainPhase(
     ...outcome.summary,
     activated,
     raw_predictions_path: `radar_score_snapshots.prediction where prediction_model = '${version}' (${sample.length} rows)`,
-    notes: [outcome.summary.notes, incumbentNote].filter(Boolean).join(' | '),
+    notes: [outcome.summary.notes, gateNote].filter(Boolean).join(' | '),
+    // Migration 196 columns.
+    base_rate: round6(outcome.monthly.base_rate),
+    lift_at_100: Math.round(outcome.monthly.lift_at_100 * 1000) / 1000,
+    eval_protocol: EVAL_PROTOCOL,
+    metrics: { monthly: outcome.monthly, incumbent: incumbent ?? null, gate: gate.reasons, gate_passed: gatePassed, label_sources: state.label_sources ?? null, population: state.population ?? null },
   };
-  const bt = await supabase.from('radar_score_backtests').insert(backtestRow).select('id').single();
+  let bt = await supabase.from('radar_score_backtests').insert(backtestRow).select('id').single();
+  if (bt.error && /base_rate|lift_at_100|eval_protocol|metrics/.test(bt.error.message)) {
+    // Before migration 196: keep the row, drop the new columns.
+    const { base_rate: _b, lift_at_100: _l, eval_protocol: _e, metrics: _m, ...legacy } = backtestRow;
+    bt = await supabase.from('radar_score_backtests').insert(legacy).select('id').single();
+  }
   if (bt.error) errors.push(`backtest insert: ${bt.error.message}`);
 
   state.phase = 'done';
   state.last_model_version = version;
   state.last_backtest_id = (bt.data?.id as string | undefined) ?? null;
-  return {
-    errors,
-    modelVersion: version,
-    backtestId: state.last_backtest_id ?? undefined,
-    activated,
-    metrics: {
-      roc_auc: outcome.summary.roc_auc,
-      pr_auc: outcome.summary.pr_auc,
-      precision_at_50: outcome.summary.precision_at_50,
-      precision_at_100: outcome.summary.precision_at_100,
-      lift_top_decile: outcome.summary.lift_top_decile,
-      brier: outcome.summary.brier,
-      n_train: outcome.summary.n_train,
-      n_test: outcome.summary.n_test,
-      positives_test: outcome.summary.positives_test,
-      low_power: outcome.summary.low_power,
-    },
-  };
+  return { errors, modelVersion: version, backtestId: state.last_backtest_id ?? undefined, activated, gatePassed, metrics, incumbent, gate: gate.reasons };
+}
+
+/** Make `version` the only active model. */
+export async function activateModel(supabase: SupabaseClient, version: string, errors: string[]): Promise<boolean> {
+  const off = await supabase.from('radar_score_models').update({ is_active: false }).eq('is_active', true);
+  if (off.error) { errors.push(`deactivate incumbent: ${off.error.message}`); return false; }
+  const on = await supabase.from('radar_score_models').update({ is_active: true }).eq('version', version);
+  if (on.error) { errors.push(`activate ${version}: ${on.error.message}`); return false; }
+  const bt = await supabase.from('radar_score_backtests').update({ activated: true }).eq('model_version', version);
+  if (bt.error) errors.push(`backtest activated flag: ${bt.error.message}`);
+  return true;
+}
+
+function round6(v: number): number {
+  return Math.round(v * 1e6) / 1e6;
+}
+
+/**
+ * Rollout step: activate a stored model whose backtest passed the v5 gate. Refuses models
+ * without a passing feed-protocol backtest unless `force` (the gate verdict is in the
+ * backtest row, so a reviewer can see what was overridden).
+ */
+export async function activateStoredModel(
+  supabase: SupabaseClient,
+  version: string,
+  opts: { force?: boolean } = {},
+): Promise<{ activated: boolean; errors: string[]; gate_passed: boolean | null }> {
+  const errors: string[] = [];
+  const { data: model, error } = await supabase.from('radar_score_models').select('version, is_active').eq('version', version).maybeSingle();
+  if (error) return { activated: false, errors: [`model read: ${error.message}`], gate_passed: null };
+  if (!model) return { activated: false, errors: [`no stored model ${version}`], gate_passed: null };
+  if (model.is_active) return { activated: true, errors: [], gate_passed: null };
+  const { data: bt, error: btErr } = await supabase.from('radar_score_backtests').select('metrics, eval_protocol')
+    .eq('model_version', version).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  if (btErr) return { activated: false, errors: [`backtest read: ${btErr.message}`], gate_passed: null };
+  const gatePassed = (bt?.metrics as { gate_passed?: boolean } | null)?.gate_passed === true && bt?.eval_protocol === EVAL_PROTOCOL;
+  if (!gatePassed && !opts.force) {
+    return { activated: false, errors: [`${version} has no passing ${EVAL_PROTOCOL} gate (pass force=1 to override)`], gate_passed: gatePassed };
+  }
+  const activated = await activateModel(supabase, version, errors);
+  return { activated, errors, gate_passed: gatePassed };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -777,6 +1031,10 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
   let timedOut = false;
   let extra: Partial<BacktestRunResult> = {};
 
+  const dryRun = options.dryRun === true;
+  if (dryRun && (options.reset || options.phase !== 'train')) {
+    throw new Error('dry_run supports only phase=train (training on the stored snapshots); other phases write by design');
+  }
   let state: BacktestCursorState;
   if (options.reset) {
     state = defaultState();
@@ -796,7 +1054,7 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
   // only a rebuild from labels lets the model see new history).
   let rebuildReason: string | null = null;
   let countsNow: SourceCounts | null = null;
-  if (state.phase === 'done' && !options.phase && !options.reset) {
+  if (state.phase === 'done' && !options.phase && !options.reset && !dryRun) {
     try {
       countsNow = await sourceCounts(supabase);
       const decision = rebuildDecision({ countsNow, countsThen: state.source_counts_at_train, trainedAt: state.trained_at, now });
@@ -824,16 +1082,22 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
       const r = await runSnapshotsPhase(supabase, state, now, startMs);
       processed += r.processed; written += r.written; errors.push(...r.errors); timedOut = r.timedOut;
     } else if (state.phase === 'train') {
-      const r = await runTrainPhase(supabase, state, now);
+      const r = await runTrainPhase(supabase, state, now, { dryRun, activate: options.activate === true });
       errors.push(...r.errors);
-      extra = { model_version: r.modelVersion, backtest_id: r.backtestId, activated: r.activated, metrics: r.metrics };
+      extra = {
+        model_version: r.modelVersion, backtest_id: r.backtestId, activated: r.activated, metrics: r.metrics,
+        dry_run: dryRun, gate_passed: r.gatePassed, gate: r.gate,
+        incumbent: r.incumbent ? { version: r.incumbent.version, roc_auc: r.incumbent.roc_auc, precision_at_100: r.incumbent.precision_at_100, lift_at_100: r.incumbent.lift_at_100, lift_top_decile: r.incumbent.lift_top_decile } : null,
+      };
       processed = r.metrics.n_train as number;
-      written = 1;
-      state.trained_at = now.toISOString();
-      try {
-        state.source_counts_at_train = await sourceCounts(supabase);
-      } catch (e) {
-        errors.push(`source counts: ${errMsg(e)}`);
+      written = dryRun ? 0 : 1;
+      if (!dryRun) {
+        state.trained_at = now.toISOString();
+        try {
+          state.source_counts_at_train = await sourceCounts(supabase);
+        } catch (e) {
+          errors.push(`source counts: ${errMsg(e)}`);
+        }
       }
     }
     state.last_error = errors.length ? errors[0] : null;
@@ -843,6 +1107,12 @@ export async function runScoreBacktest(supabase: SupabaseClient, options: Backte
     state.last_error = msg;
   }
 
+  if (dryRun) {
+    return {
+      phase_before: phaseBefore, phase_after: phaseBefore, processed, written: 0, errors, timed_out: false,
+      duration_ms: Date.now() - startMs, logged: false, ...extra,
+    };
+  }
   const cursorErr = await saveCursor(supabase, state, now);
   if (cursorErr) errors.push(`cursor save: ${cursorErr}`);
 
@@ -963,7 +1233,15 @@ export async function loadMethodologySummary(supabase: SupabaseClient, opts: { i
     for (const f of (activeBacktest.factor_importance ?? []) as { factor: string; importance: number }[]) importanceByFactor.set(f.factor, f.importance);
   }
   const weightByFeature = new Map<string, number>();
-  if (params) params.feature_names.forEach((name, j) => weightByFeature.set(name, params.weights[j]));
+  if (params && isGamModel(params)) {
+    // Additive model: report each feature's table range (largest swing in log-odds it can cause).
+    params.feature_names.forEach((name, j) => {
+      const v = [...params.gam.values[j], params.gam.missing[j]];
+      weightByFeature.set(name, Math.max(...v) - Math.min(...v));
+    });
+  } else if (params) {
+    params.feature_names.forEach((name, j) => weightByFeature.set(name, params.weights[j]));
+  }
 
   const toSummary = (b: Record<string, unknown>): ScoreBacktestSummary & { low_power: boolean; activated: boolean } => ({
     id: String(b.id),
@@ -992,11 +1270,14 @@ export async function loadMethodologySummary(supabase: SupabaseClient, opts: { i
     feature_version: FEATURE_VERSION,
     label: {
       definition:
-        `A canonical, non-rejected deal in the Solidus deals table in which the licensor is the asset's owning company ` +
-        `(by company id, or by legal-suffix-insensitive name match against the company's recorded name variations), ` +
-        `the deal's asset name matches the asset (exact, development-code or ≥80% word-overlap match), the deal type is ` +
+        `A canonical, non-rejected deal in the Solidus deals table in which the licensor is the program's owning company or ` +
+        `a member of its corporate family (by company id, family, or legal-suffix-insensitive name match), ` +
+        `the deal's asset name matches the program (exact, development-code, drug-alias or ≥80% word-overlap match) or the deal ` +
+        `is linked to the program in the deal ledger, the deal type is ` +
         `${Array.from(POSITIVE_DEAL_TYPES).join(', ')}, and the announcement date falls in the ${LABEL_WINDOW_MONTHS} months after the snapshot date. ` +
-        `Negatives are assets that existed at the snapshot date with no such deal on or before it and none in the window.`,
+        `A match on any row of a program counts for the whole program. The evaluated population is what the feed ranks: industry-owned ` +
+        `programs, one row per program, not approved. Negatives are programs that existed at the snapshot date with no such deal on or ` +
+        `before it and none in the window. Ranking metrics are computed within each month and averaged.`,
       window_months: LABEL_WINDOW_MONTHS,
       positive_deal_types: Array.from(POSITIVE_DEAL_TYPES),
       snapshot_range: { from: SNAPSHOT_FROM, to: SNAPSHOT_TO },
@@ -1025,7 +1306,7 @@ export async function loadMethodologySummary(supabase: SupabaseClient, opts: { i
       const s = toSummary(b as Record<string, unknown>);
       return { model_version: s.model_version, run_at: s.run_at, roc_auc: s.roc_auc, pr_auc: s.pr_auc, precision_at_50: s.precision_at_50, brier: s.brier, positives_test: s.positives_test, activated: s.activated, low_power: s.low_power };
     }),
-    features: FEATURE_SPECS.map(spec => ({
+    features: [...FEATURE_SPECS, ...CANDIDATE_FEATURE_SPECS].map(spec => ({
       name: spec.name,
       label: spec.label,
       description: spec.description,

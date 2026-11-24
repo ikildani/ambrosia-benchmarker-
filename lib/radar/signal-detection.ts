@@ -2016,7 +2016,33 @@ export async function detectLicensingSignals(
   // so the queue is paged with .range() up to the requested limit.
   const assets: AssetForScoring[] = [];
   const QUEUE_PAGE = 1000;
-  for (let from = 0; from < limit; from += QUEUE_PAGE) {
+
+  // After a model switch, feed rows still carrying another model's logit go first, best-ranked
+  // first: logits of two models are not on one scale, so the head of the feed must move to the
+  // new model before the long tail (175k rows take ~7 days at the normal cadence, the 55k feed
+  // rows ~2.5 days this way).
+  if (modelParams && !options?.assetIds?.length) {
+    for (let from = 0; from < limit; from += QUEUE_PAGE) {
+      const to = Math.min(from + QUEUE_PAGE, limit) - 1;
+      const { data: pageRows, error: staleError } = await supabase
+        .from('clinical_assets')
+        .select(ASSET_COLUMNS)
+        .gte('confidence_score', 20)
+        .not('ownership_status', 'in', OWNERSHIP_EXCLUDED_IN)
+        .eq('program_primary', true)
+        .eq('owner_type', 'industry')
+        .or(`score_model_version.is.null,score_model_version.neq."${modelParams.version}"`)
+        .order('score_logit', { ascending: false, nullsFirst: false })
+        .order('id', { ascending: true })
+        .range(from, to);
+      if (staleError) { errors.push(`model-switch queue: ${staleError.message}`); break; }
+      const page = (pageRows ?? []) as AssetForScoring[];
+      assets.push(...page);
+      if (page.length < to - from + 1) break;
+    }
+  }
+  const queued = new Set(assets.map(a => a.id));
+  for (let from = 0; assets.length < limit && from < limit; from += QUEUE_PAGE) {
     const to = Math.min(from + QUEUE_PAGE, limit) - 1;
     const { data: pageRows, error: assetError } = await assetQuery.range(from, to);
     if (assetError) {
@@ -2025,7 +2051,7 @@ export async function detectLicensingSignals(
       break;
     }
     const page = (pageRows ?? []) as AssetForScoring[];
-    assets.push(...page);
+    for (const a of page) if (!queued.has(a.id) && assets.length < limit) { queued.add(a.id); assets.push(a); }
     if (page.length < to - from + 1) break;
   }
   if (assets.length === 0) return finish(0, 'queue empty');
