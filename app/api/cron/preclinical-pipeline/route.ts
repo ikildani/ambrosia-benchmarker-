@@ -12,13 +12,17 @@
  *            (lib/ingestion/pipeline-pages-http.ts).
  *   hkex     annual reports of HKEX-listed companies with companies.hkex_stock_id
  *            (lib/ingestion/hkex-pipeline.ts).
+ *   nih      NIH SBIR/STTR awards naming a development code (lib/ingestion/nih-sbir.ts). Rules
+ *            only, no model calls and no AI budget; 04:25 and 16:25 UTC while the FY2008+
+ *            backfill or the weekly re-read of the two latest fiscal years is due.
+ *            ?mode=nih&dry_run=1 extracts without writing; ?fy=2024 reads one fiscal year.
  *
  * Every source: claude-sonnet-5 with a structured-output schema, a verbatim excerpt
  * and source URL for every program, matching by name / drug / identifier, a cross-
  * company code guard, and preclinical assets created only when unmatched.
  *
  * Schedule: every 2 hours at :25. Without query params the UTC hour picks the mode
- * (scheduledPreclinicalMode): filings at 00/06/12/18, HKEX at 10, pages at the other hours once
+ * (scheduledPreclinicalMode): filings at 00/06/12/18, HKEX at 10, NIH at 04/16 while due, pages at the other hours once
  * the owner has approved a pages allowance (AI_BACKLOG_PRECLINICAL_PAGES_USD).
  *
  * Manual only: ?mode=replay&limit=500[&clinical=1][&dry_run=1] re-decides asset_disclosures rows
@@ -43,6 +47,7 @@ import { runPipelinePagesHttp, type PagesClient } from '@/lib/ingestion/pipeline
 import { runHkexPipeline, type HkexIssuer } from '@/lib/ingestion/hkex-pipeline';
 import type { IntentClient } from '@/lib/ingestion/management-intent';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
+import { nihSbirDue, runNihSbir, SYNC_SOURCE as NIH_SYNC_SOURCE, type NihSbirState } from '@/lib/ingestion/nih-sbir';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -85,16 +90,19 @@ export async function GET(request: NextRequest) {
   const requested = params.get('mode');
   let mode: Mode | null;
   if (requested === 'replay') return await runReplayMode(request, { companyLimit, createUnknownClinical, startedAt });
-  if (requested === 'filings' || requested === 'pages' || requested === 'hkex') mode = requested;
+  if (requested === 'filings' || requested === 'pages' || requested === 'hkex' || requested === 'nih') mode = requested;
   else if (params.size > 0) mode = 'filings';
   else {
+    const nihCursor = await readSyncCursor<NihSbirState>(supabase, NIH_SYNC_SOURCE).catch(() => null);
     mode = scheduledPreclinicalMode(new Date().getUTCHours(), {
       pagesApproved: await backlogActive('preclinical-pages'),
       filingsBacklog,
       lean: isLean(),
+      nihDue: nihCursor ? nihSbirDue(nihCursor.state, nihCursor.cursor, new Date()) : false,
     });
   }
   if (!mode) return NextResponse.json({ success: true, skipped: 'lean_mode_slot' });
+  if (mode === 'nih') return await runNihMode(request, { startedAt });
 
   const source = mode === 'pages' ? 'preclinical-pages' : mode === 'hkex' ? 'hkex-pipeline' : 'preclinical-pipeline';
   const budget = await aiBudgetAvailable(source);
@@ -324,4 +332,38 @@ async function runReplayMode(request: NextRequest, o: { companyLimit?: number; c
   }
   const { sample, ...totals } = r;
   return NextResponse.json({ success: true, mode: 'replay', dry_run: dryRun, ...totals, errors: r.errors.slice(0, 10), sample: sample.slice(0, 20) });
+}
+
+/** NIH SBIR/STTR awards (rules only, no AI budget). */
+async function runNihMode(request: NextRequest, opts: { startedAt: number }) {
+  const supabase = createServiceClient();
+  const params = request.nextUrl.searchParams;
+  const dryRun = params.get('dry_run') === '1';
+  const fy = parsePositiveNumber(params.get('fy'));
+  try {
+    const r = await runNihSbir(supabase, { timeBudgetMs: 240_000, dryRun, fiscalYear: fy ? Math.floor(fy) : undefined });
+    const logged = dryRun ? false : await logRadarRun(supabase, {
+      source: 'asset_universe',
+      startedAt: opts.startedAt,
+      status: deriveRunStatus({ errors: r.errors.length, timedOut: r.timedOut, processed: r.projectsWithCodes, produced: r.created + r.matched }),
+      runType: params.size > 0 ? 'manual' : 'scheduled',
+      fetched: r.projects,
+      processed: r.projectsWithCodes,
+      inserted: r.created,
+      updated: r.matched,
+      skipped: r.foreignSkipped,
+      failed: r.errors.length,
+      errors: r.errors.slice(0, 20),
+      parameters: {
+        stage: 'nih_sbir', mode: 'nih', pages: r.pages, programs: r.programs, companies_created: r.companiesCreated,
+        cursor: r.cursor, done: r.done, timed_out: r.timedOut, sample: r.sample.slice(0, 15),
+      },
+      notes: `NIH SBIR/STTR: ${r.created} programs created, ${r.matched} matched, ${r.foreignSkipped} foreign codes skipped over ${r.projects} awards (${r.projectsWithCodes} naming a code)`,
+    });
+    return NextResponse.json({ success: true, stage: 'nih_sbir', dry_run: dryRun, ...r, sample: r.sample, errors: r.errors.slice(0, 10), error_count: r.errors.length, logged });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    await logRadarRun(supabase, { source: 'asset_universe', startedAt: opts.startedAt, status: 'failed', errors: [message], parameters: { stage: 'nih_sbir', mode: 'nih' } });
+    return NextResponse.json({ success: false, mode: 'nih', error: message }, { status: 500 });
+  }
 }
