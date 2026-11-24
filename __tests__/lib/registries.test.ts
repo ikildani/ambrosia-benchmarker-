@@ -432,9 +432,9 @@ describe('shared: dates, countries, ids, sponsor class', () => {
 // ─── Adapters ────────────────────────────────────────────────────────────────
 
 describe('adapter registry', () => {
-  it('exposes all 15 adapters with the required metadata', () => {
+  it('exposes all 16 adapters with the required metadata', () => {
     const ids = Object.keys(REGISTRY_ADAPTERS).sort();
-    expect(ids).toEqual(['anzctr', 'cde', 'chictr', 'cris', 'ctis', 'ctri', 'drks', 'health_canada', 'irct', 'isrctn', 'jrct', 'mfds', 'mytrial', 'pactr', 'rebec']);
+    expect(ids).toEqual(['anzctr', 'cde', 'chictr', 'cris', 'ctis', 'ctri', 'drks', 'euctr', 'health_canada', 'irct', 'isrctn', 'jrct', 'mfds', 'mytrial', 'pactr', 'rebec']);
     for (const a of Object.values(REGISTRY_ADAPTERS) as AnyRegistryAdapter[]) {
       expect(a.countryScope.length).toBeGreaterThan(0);
       expect(a.license).toBeTruthy();
@@ -448,7 +448,7 @@ describe('adapter registry', () => {
 
   it('sweepable adapters exclude scrape_required and env-gated ones', () => {
     const ids = sweepableAdapters({} as NodeJS.ProcessEnv).map(a => a.registry).sort();
-    expect(ids).toEqual(['cris', 'ctis', 'drks', 'health_canada', 'irct', 'isrctn', 'jrct', 'rebec']);
+    expect(ids).toEqual(['cris', 'ctis', 'drks', 'euctr', 'health_canada', 'irct', 'isrctn', 'jrct', 'rebec']);
     const withKeys = sweepableAdapters({ MFDS_API_KEY: 'k', ANZCTR_API_USER: 'u', ANZCTR_API_PASSWORD: 'p' } as NodeJS.ProcessEnv).map(a => a.registry);
     expect(withKeys).toEqual(expect.arrayContaining(['mfds', 'anzctr']));
   });

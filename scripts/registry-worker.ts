@@ -78,6 +78,8 @@ async function cdeSession(ctx: BrowserContext): Promise<CdeSession> {
     },
     async refresh() {
       console.log(new Date().toISOString(), 'cde session refresh');
+      // A fresh cookie jar: the WAF's throttle is tied to its cookie, not only the IP.
+      await ctx.clearCookies().catch(() => undefined);
       await bootstrap();
     },
   };
@@ -112,6 +114,7 @@ async function main() {
 
     const supabase = createServiceClient();
     const budgetMs = minutes * 60_000;
+    let unavailableStreak = 0;
     const totals = { pages: 0, fetched: 0, stored: 0, bridged: 0, mapped: 0, skipped: 0, companies: 0, errors: [] as string[], warnings: [] as string[], done: false, unavailable: null as string | null, cursor: null as string | null };
     while (Date.now() - started < budgetMs) {
       const remaining = budgetMs - (Date.now() - started);
@@ -121,7 +124,17 @@ async function main() {
       totals.errors.push(...r.errors); totals.warnings.push(...r.warnings); totals.cursor = r.cursor;
       console.log(new Date().toISOString(), JSON.stringify({ pages: r.pages, fetched: r.fetched, stored: r.stored, mapped: r.mapped, bridged: r.bridged, skipped: r.skipped, companies: r.companiesCreated, done: r.done, unavailable: r.unavailable ?? null, errors: r.errors.slice(0, 2), warnings: r.warnings.slice(0, 2) }));
       if (r.done) { totals.done = true; break; }
-      if (r.unavailable) { totals.unavailable = r.unavailable; break; }
+      if (r.unavailable) {
+        totals.unavailable = r.unavailable;
+        // The WAF throttles bursts; a run that made progress cools down and carries on.
+        unavailableStreak = r.fetched > 0 ? 1 : unavailableStreak + 1;
+        if (unavailableStreak >= 3 || budgetMs - (Date.now() - started) < 5 * 60_000) break;
+        console.log(new Date().toISOString(), `cde unavailable (streak ${unavailableStreak}); cooling down 3 min`);
+        await new Promise(res => setTimeout(res, 3 * 60_000));
+        await session.refresh().catch(err => console.log('refresh failed', err instanceof Error ? err.message : err));
+        continue;
+      }
+      unavailableStreak = 0;
       if (r.errors.length >= 5) break;
     }
 
