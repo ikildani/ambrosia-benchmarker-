@@ -33,7 +33,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logRadarRun, deriveRunStatus } from '@/lib/radar/run-log';
 import {
-  FEATURE_VERSION, FEATURE_SPECS, CANDIDATE_FEATURE_SPECS, MODEL_FEATURE_NAMES, MODEL_EXCLUDED_FEATURES,
+  FEATURE_VERSION, FEATURE_SPECS, CANDIDATE_FEATURE_SPECS, MODEL_FEATURE_NAMES,
   buildFeatureVector, fetchFeatureBundles,
   type FeatureAsset, type FeatureBundle, type CompanyGroup, type TrialRow,
 } from '@/lib/radar/backtest/features';
