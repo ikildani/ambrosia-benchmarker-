@@ -3,6 +3,7 @@
 
 import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
 import { noThinking, replyText } from '@/lib/ai/response-text';
+import { ExtractionParseError, firstJsonObject } from './json-object';
 import Anthropic from '@anthropic-ai/sdk';
 import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
@@ -618,17 +619,26 @@ ${filingText}`;
   };
 }
 
-/** Parse the extractor's reply. Null when it is not a deal or not parseable. */
+/**
+ * Parse the extractor's reply. Null only for an explicit `is_deal: false` verdict.
+ *
+ * Nov 24 2026: a reply with no JSON object, or JSON that does not parse, throws
+ * ExtractionParseError instead of returning null. Null is recorded as "not a deal":
+ * the judge-once memory (doc-memory.ts) keeps that verdict for 45 days and the EFTS
+ * ledger keeps it for good, so a garbled reply used to lose the filing. The greedy
+ * /\{[\s\S]*\}/ also broke on notes containing braces (the press-release bug fixed
+ * Sep 29); firstJsonObject() reads the first balanced object.
+ */
 export function parseDealExtraction(text: string): ExtractedDeal | null {
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return null;
+  const json = firstJsonObject(text);
+  if (!json) throw new ExtractionParseError(`no JSON object in the extractor reply: ${text.slice(0, 120)}`);
   let parsed;
   try {
-    parsed = JSON.parse(jsonMatch[0]);
+    parsed = JSON.parse(json);
   } catch (parseError) {
-    console.error(`JSON parse failed for extracted deal. Raw: ${jsonMatch[0].substring(0, 200)}`, parseError);
-    return null;
+    throw new ExtractionParseError(`unparseable extractor JSON: ${String(parseError).slice(0, 120)}; raw ${json.slice(0, 120)}`);
   }
+  if (!parsed || typeof parsed !== 'object') throw new ExtractionParseError(`extractor JSON is not an object: ${json.slice(0, 120)}`);
   if (parsed.is_deal === false) {
     console.log(`Not a deal: ${parsed.reason}`);
     return null;

@@ -33,13 +33,13 @@ describe('AI spend guard', () => {
 
   it('stops bulk before core, and never lets background spend touch the interactive pool', () => {
     const caps = { background: 12, bulk: 6, interactive: 5, search: 1, coreReserve: 0, exchange: 12 };
-    const t = { interactive: 0, search: 0, core: 3, bulk: 6 };
+    const t = { interactive: 0, search: 0, core: 3, bulk: 6, backlog: 0 };
     expect(overCap('bulk', t, caps)).toMatch(/^bulk/);
     expect(overCap('core', t, caps)).toBeNull();
     expect(overCap('core', { ...t, core: 6 }, caps)).toMatch(/^background/);
-    expect(overCap('interactive', { interactive: 1, search: 99, core: 99, bulk: 99 }, caps)).toBeNull();
-    expect(overCap('interactive', { interactive: 5, search: 0, core: 0, bulk: 0 }, caps)).toMatch(/^interactive/);
-    expect(overCap('search', { interactive: 0, search: 1, core: 0, bulk: 0 }, caps)).toMatch(/^search/);
+    expect(overCap('interactive', { interactive: 1, search: 99, core: 99, bulk: 99, backlog: 0 }, caps)).toBeNull();
+    expect(overCap('interactive', { interactive: 5, search: 0, core: 0, bulk: 0, backlog: 0 }, caps)).toMatch(/^interactive/);
+    expect(overCap('search', { interactive: 0, search: 1, core: 0, bulk: 0, backlog: 0 }, caps)).toMatch(/^search/);
   });
 
   it('labels every ingestion source and groups them for the reserve and the exchange cap', () => {
@@ -56,7 +56,7 @@ describe('AI spend guard', () => {
 
   describe('reserved slice for EDGAR, newswires and verification (lean $6, $2 reserved, exchanges $1.50)', () => {
     const caps = spendCaps({} as unknown as NodeJS.ProcessEnv);
-    const lanes = (core: number, bulk: number) => ({ interactive: 0, search: 0, core, bulk });
+    const lanes = (core: number, bulk: number) => ({ interactive: 0, search: 0, core, bulk, backlog: 0 });
 
     it('stops exchange and bulk sources $2 short of the cap while EDGAR/newswires have not spent', () => {
       // Exchanges $1.50 + bulk $2.00 + other core $0.50 = $4.00 = cap - reserve.
