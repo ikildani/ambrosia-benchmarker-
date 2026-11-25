@@ -72,16 +72,39 @@ export async function companySignalsSchemaReady(supabase: SupabaseClient): Promi
   return { ready: true };
 }
 
-export type CompanySignalsMode = 'financials' | 'hkex' | 'hkex_match' | 'hkex_announcements' | 'form_d';
-export const COMPANY_SIGNAL_MODES: readonly CompanySignalsMode[] = ['financials', 'hkex', 'hkex_match', 'hkex_announcements', 'form_d'];
+export type CompanySignalsMode =
+  | 'financials' | 'hkex' | 'hkex_match' | 'hkex_announcements' | 'form_d'
+  // 198: company signals v2
+  | 'enrich' | 'deal_signals' | 'listings' | 'edgar_index' | 'nih_grants';
+export const COMPANY_SIGNAL_MODES: readonly CompanySignalsMode[] = [
+  'financials', 'hkex', 'hkex_match', 'hkex_announcements', 'form_d',
+  'enrich', 'deal_signals', 'listings', 'edgar_index', 'nih_grants',
+];
 
 /**
  * Mode of an unparameterized /api/cron/company-financials run (every 2 h at :20) by UTC hour:
- * financials keeps its four runs a day (00, 06, 12, 18), HKEX and Form D take the hours between.
+ * financials at 00 and 12, the v2 enrichment pass (deal signals + one of listings / EDGAR filer
+ * index / NIH grants, migration 198) at 06 and 18, HKEX and Form D in the hours between.
  */
 export function modeForHour(hour: number): CompanySignalsMode {
   const h = ((Math.trunc(hour) % 24) + 24) % 24;
   if (h % 6 === 2) return 'hkex';
   if (h % 6 === 4) return 'form_d';
+  if (h === 6 || h === 18) return 'enrich';
   return 'financials';
+}
+
+export const LISTINGS_CURSOR = 'company_listings';
+export const LISTINGS_REFRESH_DAYS = 7;
+
+/**
+ * Which slow source an 'enrich' run takes after the deal signals: the weekly exchange-list
+ * refresh when due; else the 18:00 run takes NIH grants and the 06:00 run the EDGAR filer index
+ * while never-checked companies remain (NIH otherwise).
+ */
+export function enrichStep(state: { listingsRunAt?: string | null; edgarPending: number }, now = new Date()): 'listings' | 'edgar_index' | 'nih_grants' {
+  const last = state.listingsRunAt ? Date.parse(state.listingsRunAt) : 0;
+  if (!last || now.getTime() - last > LISTINGS_REFRESH_DAYS * 86_400_000) return 'listings';
+  if (now.getUTCHours() >= 12) return 'nih_grants';
+  return state.edgarPending > 0 ? 'edgar_index' : 'nih_grants';
 }

@@ -5,19 +5,24 @@ import { HitRateCards } from '@/components/accuracy/HitRateCards';
 import { SliceTable } from '@/components/accuracy/SliceTable';
 import { CalibrationTimeline } from '@/components/accuracy/CalibrationTimeline';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
+import { LiveBacktest, formatRunDate, typicalMiss } from '@/components/accuracy/LiveBacktest';
+import type { BacktestSummary } from '@/lib/backtest/terms-backtest-core';
+import liveBacktestJson from '@/data/backtest/terms-backtest-baseline.json';
+
+/** Live-deal backtest summary (scripts/terms-backtest.ts; refreshed monthly by backtest-monthly.yml). */
+const live = liveBacktestJson as unknown as BacktestSummary;
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
 /**
- * Metadata reads the live backtest n so the description never drifts from
- * the number rendered on the page.
+ * Metadata reads the live-deal backtest so the description never drifts from the numbers rendered on the page.
  */
 export function generateMetadata(): Metadata {
-  const data = loadAccuracyData();
-  const n = data ? data.fullScope.n.toLocaleString() : 'real';
+  const n = live.overall.n.toLocaleString();
+  const within = Math.round(live.overall.within2x * 100);
   const description =
-    `Published validation of the Solidus benchmark engine: live backtest against ${n} disclosed deals from 2017-2026, hit rates by scope, held-out split, and the full calibration log.`;
-  const short = `Benchmark validation against ${n} disclosed deals, published in full.`;
+    `How accurate is the Solidus deal-terms calculator? Backtest on ${n} verified, primary-sourced licensing deals: ${within}% priced within 2x of the upfront actually paid, with the breakdown by stage and territory and the method in full.`;
+  const short = `${within}% of ${n} real licensing deals priced within 2x of the upfront paid, published in full.`;
   return {
     title: 'Benchmark Accuracy | Solidus',
     description,
@@ -36,7 +41,7 @@ export function generateMetadata(): Metadata {
       siteName: 'Solidus',
       images: [
         {
-          url: `/api/og?title=Benchmark%20Accuracy&subtitle=${encodeURIComponent(`Published validation vs ${n} disclosed deals`)}`,
+          url: `/api/og?title=Benchmark%20Accuracy&subtitle=${encodeURIComponent(`Backtest on ${n} verified licensing deals`)}`,
           width: 1200,
           height: 630,
           alt: 'Solidus accuracy dashboard',
@@ -59,17 +64,6 @@ export function generateMetadata(): Metadata {
 export const dynamic = 'force-dynamic';
 
 const TARGETS = { hit25: 0.60, hit35: 0.70, hit50: 0.80 };
-
-/**
- * The deal-terms backtest runs on the first of every month
- * (.github/workflows/backtest-monthly.yml) and lands as a reviewed PR, so the
- * next run is the first day of the month after the last run.
- */
-function nextMonthlyRun(lastRunIso: string): string {
-  const d = new Date(lastRunIso);
-  if (Number.isNaN(d.getTime())) return lastRunIso;
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString();
-}
 
 function formatDate(iso: string): string {
   try {
@@ -115,26 +109,23 @@ function RawCounts({ bucket }: { bucket: BucketSummary }) {
 
 export default function AccuracyDashboard() {
   const data = loadAccuracyData();
+  const o = live.overall;
 
-  if (!data) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-slate-100">
-        <div className="mx-auto max-w-4xl px-6 py-16">
-          <h1 className="text-2xl font-semibold">Accuracy data not yet available</h1>
-          <p className="mt-4 text-slate-400">
-            The calibration run has not completed. Check back shortly.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  const activeFlags = Object.entries(data.featureFlags)
-    .filter(([, v]) => v)
-    .map(([k]) => k);
+  const datasetLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'Solidus deal-terms calculator backtest',
+    description: `Calculator upfront vs upfront actually paid on ${o.n} verified, primary-sourced biopharma licensing deals announced ${live.window.from} to ${live.window.to}.`,
+    url: `${BASE_URL}/accuracy`,
+    dateModified: live.generatedAt,
+    temporalCoverage: `${live.window.from}/${live.window.to}`,
+    creator: { '@type': 'Organization', name: 'Ambrosia Ventures', url: 'https://ambrosiaventures.co' },
+    variableMeasured: ['Share of deals within 2x of the upfront paid', 'Typical miss (median absolute log error)'],
+  };
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetLd) }} />
       <InstitutionalNav activePath="/accuracy" />
       {/* Hero */}
       <section className="border-b border-slate-800/60 bg-gradient-to-b from-slate-900/50 to-slate-950">
@@ -143,60 +134,72 @@ export default function AccuracyDashboard() {
             Benchmark Accuracy, Published in Full
           </h1>
           <p className="mt-4 max-w-3xl text-lg text-slate-400">
-            Solidus is a directional tool for BD professionals: it shows where your
-            deal sits in the distribution of real comparable transactions, not a prediction
-            of a specific dollar amount. Below is the validation record against{' '}
-            <span className="text-slate-200">{data.fullScope.n} real disclosed licensing, co-development, and acquisition deals</span>{' '}
-            from 2017&ndash;2026: every scope, every calibration round, the held-out split and the largest errors. Publishing it is the standard the engine is held to.
-          </p>
-          <p className="mt-4 max-w-3xl text-sm text-slate-500">
-            <span className="text-teal-400 font-semibold">How to read this page:</span>{' '}
-            Solidus shows a directional range from real comparable deals, not a
-            point prediction. Comparable-deal upfronts genuinely span $20M&ndash;$1B+ within
-            any TA segment — the wide range IS the market reality, not a modeling deficiency.
-            For deal-specific predictive forecasting, see AlaricAI.
+            Solidus is a directional tool for BD professionals: it shows where a deal sits among real comparable
+            transactions, not a prediction of one dollar amount. This page shows how close the calculator gets on{' '}
+            <span className="text-slate-200">{o.n} real licensing deals</span>: today it prices{' '}
+            <span className="text-slate-200">{Math.round(o.within2x * 100)}%</span> of them within 2&times; of the
+            upfront actually paid, with a typical miss of {typicalMiss(o).toFixed(1)}&times;.
           </p>
           <div className="mt-6 inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-slate-200">
             <span>
-              Benchmarks updated{' '}
-              <span className="font-mono text-amber-200">{data.benchmarks.lastUpdated}</span>{' '}
-              (v{data.benchmarks.version})
+              Backtest run{' '}
+              <span className="font-mono text-amber-200">{formatRunDate(live.generatedAt)}</span>
             </span>
             <span className="text-slate-500">·</span>
             <span>
-              Backtest last run{' '}
-              <span className="font-mono text-amber-200">{formatDate(data.runAt)}</span>
+              Deal snapshot{' '}
+              <span className="font-mono text-amber-200">{formatRunDate(live.fixtureSnapshotAt)}</span>
             </span>
             <span className="text-slate-500">·</span>
-            <span>
-              Next scheduled run{' '}
-              <span className="font-mono text-amber-200">{formatDate(nextMonthlyRun(data.runAt))}</span>
-            </span>
-            <span className="text-slate-500">·</span>
-            <span>Engine v{data.engineVersion}</span>
+            <span>Refreshed monthly, each refresh reviewed</span>
           </div>
-          <p className="mt-3 max-w-3xl text-xs text-slate-500">
-            Every figure below comes from the backtest run dated above; the run repeats
-            monthly and each refresh is reviewed before it lands. Benchmark tables changed
-            after that run are not yet reflected in these numbers.
-          </p>
-          <p className="mt-4 text-sm text-slate-500">
-            All hit rates on this page are recency-weighted ({data.recencyHalfLifeYears}-year
-            half-life: a deal signed 24 months ago counts {data.recencyWeightAt24Months.toFixed(2)}×
-            a deal signed this year). Raw, unweighted k / n counts are shown alongside wherever
-            the per-case rows allow.
-            {activeFlags.length > 0 ? (
-              <>
-                {' · '}
-                Active features: {activeFlags.join(', ')}
-              </>
-            ) : (
-              <> · All calibration features default-off pending validation</>
-            )}
-          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#live-backtest" className="rounded-full bg-teal-500/15 px-5 py-2 text-sm font-medium text-teal-200 ring-1 ring-teal-500/40 hover:bg-teal-500/25">
+              See the results
+            </a>
+            <a href="#method" className="rounded-full px-5 py-2 text-sm font-medium text-slate-300 ring-1 ring-slate-700 hover:bg-slate-800/60">
+              Read the method
+            </a>
+          </div>
         </div>
       </section>
 
+      <LiveBacktest summary={live} />
+
+      {data && <ArchivedStaticBacktest data={data} />}
+    </main>
+  );
+}
+
+/**
+ * The April 2026 static-corpus backtest (scripts/run-deal-backtest.ts over data/comparable-deals-supabase.ts). Kept
+ * for the record, collapsed and labelled as superseded: only 78 of that corpus's 541 database rows pass today's
+ * deal-quality filter, so its numbers are not current.
+ */
+function ArchivedStaticBacktest({ data }: { data: NonNullable<ReturnType<typeof loadAccuracyData>> }) {
+  const activeFlags = Object.entries(data.featureFlags)
+    .filter(([, v]) => v)
+    .map(([k]) => k);
+
+  return (
+    <details className="group border-b border-slate-800/60">
+      <summary className="mx-auto flex max-w-6xl cursor-pointer list-none flex-wrap items-center gap-3 px-6 py-8">
+        <span className="rounded-full px-4 py-1.5 text-sm font-medium text-slate-300 ring-1 ring-slate-700 group-open:bg-slate-800/60">
+          Archive
+        </span>
+        <span className="text-base text-slate-300">
+          Earlier static-corpus backtest (run {formatDate(data.runAt)}), superseded
+        </span>
+      </summary>
+      <div className="mx-auto max-w-6xl px-6 pb-4">
+        <p className="max-w-3xl rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-slate-300">
+          These figures come from a fixed corpus assembled in April 2026. Most of its database rows have since been
+          removed from our counts as duplicates, unverified or without a primary source (only 78 of 541 still pass),
+          so they are not a current measure of accuracy. The live-deal backtest above replaces them. Engine
+          v{data.engineVersion}; recency-weighted with a {data.recencyHalfLifeYears}-year half-life
+          {activeFlags.length > 0 ? <>; active features: {activeFlags.join(', ')}</> : null}.
+        </p>
+      </div>
       {/* Engine-range coverage — computed from per-case backtest rows */}
       <section className="border-b border-slate-800/60 bg-teal-500/5">
         <div className="mx-auto max-w-6xl px-6 py-10">
@@ -621,6 +624,6 @@ export default function AccuracyDashboard() {
         </div>
       </section>
 
-    </main>
+    </details>
   );
 }

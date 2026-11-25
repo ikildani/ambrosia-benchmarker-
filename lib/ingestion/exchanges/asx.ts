@@ -24,6 +24,8 @@ import { readSyncCursor, writeSyncCursor } from '../../radar/sync-cursor';
 import { FunnelCounter } from '../funnel';
 import { insertCitedDeal } from '../insert-deal';
 import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea } from '../sec-edgar';
+import { prefilterDocument, screenTitle } from '../deal-prefilter';
+import { alreadyJudged, rememberVerdict, forgetVerdict, flushDocMemories } from '../doc-memory';
 import { validateExtractedDeal } from '../deal-extraction-validator';
 import { classifyAndEnrichDeal } from '../company-geography';
 
@@ -173,12 +175,18 @@ export async function processAsxAnnouncement(
   const filingId = `asx:${a.idsId}`;
   const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', filingId).limit(1).maybeSingle();
   if (existing) { funnel.count('already_in_table'); return 'skipped'; }
+  if (await alreadyJudged(supabase, 'asx', filingId)) { funnel.count('already_judged'); return 'skipped'; }
+  const titleScreen = screenTitle(a.headline);
+  if (!titleScreen.keep) { funnel.count('prefiltered', titleScreen.reason, `${a.code} ${a.headline.slice(0, 80)}`); return 'skipped'; }
   const pdfUrl = await resolveAsxPdfUrl(a.idsId);
   if (!pdfUrl) { funnel.count('content_unavailable', 'no_pdf_url', `${a.code} ${a.headline.slice(0, 60)}`); return 'skipped'; }
   const pdf = await fetchAsxPdfText(pdfUrl);
   if (!pdf.ok) { funnel.count('content_unavailable', `http_${pdf.status}`, pdfUrl); return 'skipped'; }
   if (pdf.text.length < 500) { funnel.count('content_too_short', 'pdf', a.headline); return 'skipped'; }
-  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey);
+  const bodyScreen = prefilterDocument({ text: pdf.text });
+  if (!bodyScreen.keep) { funnel.count('prefiltered', bodyScreen.reason, `${a.code} ${a.headline.slice(0, 80)}`); return 'skipped'; }
+  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey, 'asx');
+  if (!dryRun) await rememberVerdict(supabase, 'asx', filingId, deal ? 'extracted' : 'not_a_deal');
   if (!deal) { funnel.count('not_a_deal', 'asx', `${a.companyName}: ${a.headline.slice(0, 80)}`); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }
@@ -228,6 +236,7 @@ export async function processAsxAnnouncement(
   if (result.outcome === 'inserted') { funnel.count(dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`); return 'inserted'; }
   if (result.outcome === 'duplicate') { funnel.count('insert_duplicate'); return 'skipped'; }
   funnel.count('insert_error', result.outcome, result.error);
+  await forgetVerdict(supabase, 'asx', filingId);
   return 'error';
 }
 
@@ -275,7 +284,16 @@ export async function runAsxIngestion(supabase: SupabaseClient, opts: AsxRunOpti
   // 1. Daily: latest five per code from the research API (cheap, ~0.7 s each).
   for (const code of codes) {
     if (Date.now() - start > budget * 0.4) { funnel.count('time_budget', 'codes_remaining'); break; }
-    const { rows, status } = await listAsxAnnouncements(code, DAILY_COUNT);
+    // One slow code (fetchWithTimeout aborts after its retries) must not fail the whole run: six runs
+    // logged 'failed' with "AbortError: This operation was aborted" between Nov 9 and Nov 22 2026.
+    let listed: Awaited<ReturnType<typeof listAsxAnnouncements>>;
+    try {
+      listed = await listAsxAnnouncements(code, DAILY_COUNT);
+    } catch (e) {
+      errors.push(`ASX ${code}: ${String(e).slice(0, 120)}`);
+      continue;
+    }
+    const { rows, status } = listed;
     if (status !== 200) { errors.push(`ASX ${code}: HTTP ${status}`); continue; }
     codesScanned++;
     announcements += rows.length;
@@ -292,8 +310,16 @@ export async function runAsxIngestion(supabase: SupabaseClient, opts: AsxRunOpti
       const code = codes[Math.floor(step / years)];
       const year = ASX_FROM_YEAR + (step % years);
       deepCode = `${code}:${year}`;
-      const { rows, status } = await listAsxYear(code, year);
-      if (status !== 200) { errors.push(`ASX ${code} ${year}: HTTP ${status}`); }
+      let yearListed: Awaited<ReturnType<typeof listAsxYear>>;
+      try {
+        yearListed = await listAsxYear(code, year);
+      } catch (e) {
+        yearListed = { rows: [], status: 0 };
+        errors.push(`ASX ${code} ${year}: ${String(e).slice(0, 120)}`);
+      }
+      const { rows, status } = yearListed;
+      if (status === 0) { /* fetch error recorded above */ }
+      else if (status !== 200) { errors.push(`ASX ${code} ${year}: HTTP ${status}`); }
       else {
         announcements += rows.length;
         for (const r of rows) { funnel.count('fetched'); if (isAsxDealHeadline(r.headline)) candidates.push(r); else funnel.count('keyword_filtered', 'headline'); }
@@ -325,5 +351,6 @@ export async function runAsxIngestion(supabase: SupabaseClient, opts: AsxRunOpti
   }
   const summary = funnel.summary();
   console.log(`[asx] codes=${codesScanned} deep=${deepCode ?? '-'} announcements=${announcements} deals=${candidates.length} ${summary}${dryRun ? ' (dry run)' : ''}`);
+  await flushDocMemories(supabase, { dryRun });
   return { codesScanned, deepCode, announcements, dealHeadlines: candidates.length, extracted, inserted, errors, funnel: funnel.toJSON(), summary };
 }

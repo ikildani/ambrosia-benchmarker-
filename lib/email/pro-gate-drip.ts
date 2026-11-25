@@ -13,6 +13,15 @@
 
 import { DEAL_STATS } from '@/lib/config/constants';
 
+/**
+ * Lead sources that Solidus captures and that may receive this sequence.
+ * The `leads` table is shared with the advisory site, whose sources
+ * (website_contact_form, exit_intent, deal_guide, insights, ...) are
+ * advisory prospects and must never get Solidus Pro emails. Allowlist, not
+ * denylist, so a new advisory-site source is excluded by default.
+ */
+export const SOLIDUS_DRIP_SOURCES = ['pro_gate', 'share_view'] as const;
+
 export interface LeadContext {
   ta: string;
   phase: string;

@@ -15,7 +15,11 @@
 export type FunnelStage =
   | 'fetched'
   | 'keyword_filtered'
+  /** Nov 23 2026: dropped by the free pre-filter (lib/ingestion/deal-prefilter.ts). */
+  | 'prefiltered'
   | 'already_in_table'
+  /** Nov 23 2026: the extractor already gave this document a verdict (lib/ingestion/doc-memory.ts). */
+  | 'already_judged'
   | 'content_unavailable'
   | 'content_too_short'
   | 'gate_rejected'

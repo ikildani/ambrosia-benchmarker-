@@ -27,6 +27,8 @@ import { classifyAndEnrichDeal } from '../company-geography';
 import { FunnelCounter } from '../funnel';
 import { insertCitedDeal } from '../insert-deal';
 import { readSyncCursor, writeSyncCursor } from '../../radar/sync-cursor';
+import { prefilterDocument, screenTitle } from '../deal-prefilter';
+import { alreadyJudged, rememberVerdict, forgetVerdict, flushDocMemories } from '../doc-memory';
 
 export const HKEX_BASE = 'https://www1.hkexnews.hk';
 const SERVLET = `${HKEX_BASE}/search/titleSearchServlet.do`;
@@ -192,16 +194,22 @@ function addDays(iso: string, days: number): string {
 export async function processHkexAnnouncement(
   supabase: SupabaseClient,
   a: HkexAnnouncement,
-  opts: { anthropicApiKey: string; dryRun: boolean; minConfidence: number; funnel: FunnelCounter },
+  opts: { anthropicApiKey: string; dryRun: boolean; minConfidence: number; funnel: FunnelCounter; aiSource?: 'hkex' | 'hkex-backfill' },
 ): Promise<'inserted' | 'skipped' | 'error'> {
   const { funnel, dryRun } = opts;
   const filingId = `hkex:${a.newsId}`;
   const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', filingId).limit(1).maybeSingle();
   if (existing) { funnel.count('already_in_table'); return 'skipped'; }
+  if (await alreadyJudged(supabase, 'hkex', filingId)) { funnel.count('already_judged'); return 'skipped'; }
+  const titleScreen = screenTitle(a.title);
+  if (!titleScreen.keep) { funnel.count('prefiltered', titleScreen.reason, `${a.stockName}: ${a.title.slice(0, 80)}`); return 'skipped'; }
   const pdf = await fetchHkexPdfText(a.url);
   if (!pdf.ok) { funnel.count('content_unavailable', `http_${pdf.status}`, a.url); return 'skipped'; }
   if (pdf.text.length < 500) { funnel.count('content_too_short', 'pdf', a.title); return 'skipped'; }
-  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey);
+  const bodyScreen = prefilterDocument({ text: pdf.text });
+  if (!bodyScreen.keep) { funnel.count('prefiltered', bodyScreen.reason, `${a.stockName}: ${a.title.slice(0, 80)}`); return 'skipped'; }
+  const deal = await extractDealFromFiling(pdf.text.substring(0, 12_000), opts.anthropicApiKey, opts.aiSource ?? 'hkex');
+  if (!dryRun) await rememberVerdict(supabase, 'hkex', filingId, deal ? 'extracted' : 'not_a_deal');
   if (!deal) { funnel.count('not_a_deal', 'hkex', `${a.stockName}: ${a.title.slice(0, 80)}`); return 'skipped'; }
   if (deal.confidence_score < opts.minConfidence) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }
   if (!deal.licensor?.trim() || !deal.licensee?.trim()) { funnel.count('missing_parties'); return 'skipped'; }
@@ -248,6 +256,7 @@ export async function processHkexAnnouncement(
   if (result.outcome === 'inserted') { funnel.count(dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`); return 'inserted'; }
   if (result.outcome === 'duplicate') { funnel.count('insert_duplicate'); return 'skipped'; }
   funnel.count('insert_error', result.outcome, result.error);
+  await forgetVerdict(supabase, 'hkex', filingId);
   return 'error';
 }
 
@@ -315,7 +324,7 @@ export async function runHkexIngestion(supabase: SupabaseClient, opts: HkexRunOp
       if (extracted >= maxExtractions) { funnel.count('time_budget', 'extraction_cap'); windowComplete = false; break; }
       try {
         extracted++;
-        const outcome = await processHkexAnnouncement(supabase, a, { anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel });
+        const outcome = await processHkexAnnouncement(supabase, a, { anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel, aiSource: opts.mode === 'backfill' ? 'hkex-backfill' : 'hkex' });
         if (outcome === 'inserted') inserted++;
         if (outcome === 'error') errors.push(`insert error ${a.newsId}`);
       } catch (e) {
@@ -348,5 +357,6 @@ export async function runHkexIngestion(supabase: SupabaseClient, opts: HkexRunOp
   const summary = funnel.summary();
   const window = { fromIso: firstWindow!.fromIso, toIso: lastWindow!.toIso };
   console.log(`[hkex] ${opts.mode} ${window.fromIso}..${window.toIso} windows=${windows} announcements=${announcementsTotal} deals=${dealTitlesTotal} ${summary}${throttled ? ' THROTTLED' : ''}${dryRun ? ' (dry run)' : ''}`);
+  await flushDocMemories(supabase, { dryRun });
   return { mode: opts.mode, window, announcements: announcementsTotal, dealTitles: dealTitlesTotal, extracted, inserted, throttled, errors, funnel: funnel.toJSON(), summary, next };
 }

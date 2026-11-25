@@ -1,88 +1,90 @@
 /**
- * Deal-terms backtest: price real licenses with the live calculator and compare to the upfront paid.
+ * Deal-terms backtest: price real licenses with the calculator and compare to the upfront paid.
  *
- *   npx tsx scripts/terms-backtest.ts [--out file.json]
+ *   npx tsx scripts/terms-backtest.ts [--fixture data/backtest/terms-backtest-fixture.json]
+ *                                     [--summary-out file.json] [--out rows.json]
+ *                                     [--check data/backtest/terms-backtest-baseline.json]
+ *                                     [--write-baseline [data/backtest/terms-backtest-baseline.json]]
  *
- * Reads `deals_verified` (license / collaboration / option, disclosed upfront, announced 2023-01 to 2026-09,
- * global or Greater China rights) with the service-role key, loads the production calibration overlay, runs
- * calculateDealTerms with neutral inputs (the deal's phase, area, modality, territory and deal type; every other
- * factor at its default), and reports calculator / actual upfront by phase, territory and modality.
- * Read-only. Neutral inputs mean absolute ratios carry the default-indication bias; compare runs, not levels.
+ * Inputs: primary-sourced `deals_verified` licenses / collaborations / options with a disclosed upfront
+ * (2023-01 to 2026-09) and the active `benchmark_calibrations` overlay. With --fixture both come from the committed
+ * snapshot (scripts/terms-backtest-snapshot.ts) and nothing touches the network; without it they are read live
+ * (service-role key, read-only).
+ *
+ * Each deal is priced with neutral inputs (its phase, area, modality, territory and deal type; every other factor
+ * at its default). Territories: global, Greater China, Japan, Europe, US, US + Europe, ex-US and South Korea where
+ * the deal's territory text maps cleanly (lib/backtest/terms-backtest-core.ts mapTerritory); carve-outs are skipped.
+ * Neutral inputs mean absolute ratios carry the default-indication bias; compare runs, not levels.
+ *
+ * --check exits 1 when overall within-2x falls by more than 1 point or MdAE(log) rises by more than 0.02 against
+ * the baseline (the CI accuracy gate). --write-baseline writes the summary as the new baseline: do that only on
+ * purpose, commit it in the same PR, and explain the change in the PR body.
  */
-import { createClient } from '@supabase/supabase-js';
-import { writeFileSync } from 'fs';
-import { calculateDealTerms } from '../lib/calculations';
-import { ensureBenchmarksLoaded, staticBenchmarks } from '../lib/benchmarks';
+import { readFileSync, writeFileSync } from 'fs';
+import {
+  checkAgainstBaseline, runFixture,
+  type BacktestFixture, type BacktestSummary, type GroupStats,
+} from '../lib/backtest/terms-backtest-core';
 
-const PHASE: Record<string, string> = {
-  discovery: 'discovery', preclinical: 'preclinical', phase_1: 'phase1', phase1: 'phase1', phase_1_2: 'phase1_2', phase1_2: 'phase1_2',
-  phase_2: 'phase2', phase2: 'phase2', phase_2_3: 'phase2_3', phase2_3: 'phase2_3', phase_3: 'phase3', phase3: 'phase3',
-};
-const MODALITY: Record<string, string> = {
-  small_molecule: 'smallMolecule', smallMolecule: 'smallMolecule', antibody: 'mab', mab: 'mab', bispecific: 'bispecific', adc: 'adc',
-  oligonucleotide: 'oligonucleotide', peptide: 'peptide', gene_therapy: 'geneTherapy', cell_therapy: 'cellTherapy',
-  radiopharm: 'radiopharmaceutical', mrna: 'mrna', vaccine: 'therapeuticVaccine',
-};
-const DEAL_TYPE: Record<string, string> = { license: 'licensing', licensing: 'licensing', collaboration: 'licensing', option: 'option' };
-const TA_CATEGORY: Record<string, string> = {
-  oncology: 'solidTumor', neurology: 'neurology', immunology: 'immunology', metabolic: 'metabolic', cardiovascular: 'cardiovascular',
-  infectiousDisease: 'infectiousDisease', ophthalmology: 'ophthalmology', womensHealth: 'womensHealth', rareDisease: 'rareDisease',
-  hematology: 'hematology', dermatology: 'dermatology', gastroenterology: 'gastroenterology',
-};
+const DEFAULT_BASELINE = 'data/backtest/terms-backtest-baseline.json';
 
-const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); const n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : NaN; };
-const r2 = (x: number) => Math.round(x * 100) / 100;
+function arg(name: string): string | undefined {
+  const i = process.argv.indexOf(name);
+  if (i < 0) return undefined;
+  const v = process.argv[i + 1];
+  return v && !v.startsWith('--') ? v : '';
+}
+
+const r2 = (x: number) => (Math.round(x * 100) / 100).toFixed(2);
+function print(label: string, groups: Record<string, GroupStats>) {
+  console.log(`\n${label}`);
+  for (const [k, g] of Object.entries(groups)) {
+    console.log(`  ${k.padEnd(20)} n=${String(g.n).padStart(3)}  median calc/actual x${r2(g.medianRatio)}  within 2x ${(g.within2x * 100).toFixed(0).padStart(3)}%  MdAE(log) ${r2(g.mdaeLog)}`);
+  }
+}
 
 async function main() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const db = createClient(url, key, { auth: { persistSession: false } });
-  const { data, error } = await db
-    .from('deals_verified')
-    .select('licensor_name, licensee_name, therapeutic_area, modality, phase_at_signing, deal_type, territory, upfront_usd, announced_date')
-    .gt('upfront_usd', 0)
-    .gte('announced_date', '2023-01-01')
-    .lte('announced_date', '2026-09-30')
-    .in('deal_type', ['license', 'licensing', 'collaboration', 'option']);
-  if (error) throw new Error(error.message);
+  const fixturePath = arg('--fixture');
+  let fixture: BacktestFixture;
+  if (fixturePath) {
+    fixture = JSON.parse(readFileSync(fixturePath, 'utf8'));
+  } else {
+    const { fetchBacktestFixture } = await import('../lib/backtest/terms-backtest-fetch');
+    const { inWindow: _inWindow, ...live } = await fetchBacktestFixture();
+    fixture = live;
+  }
+  const { rows, summary } = runFixture(fixture);
+  console.log(`Fixture ${fixture.snapshotAt}: ${fixture.deals.length} deals, ${rows.length} priced, ${fixture.calibrations.length} calibration rows`);
+  print('All', { all: summary.overall });
+  print('By territory', summary.byTerritory);
+  print('By phase', summary.byPhase);
+  print('By TA', summary.byTA);
+  print('By modality', summary.byModality);
 
-  await ensureBenchmarksLoaded();
-  const rows: Array<Record<string, unknown>> = [];
-  for (const d of data ?? []) {
-    const phase = PHASE[String(d.phase_at_signing)];
-    const modality = MODALITY[String(d.modality)];
-    const category = TA_CATEGORY[String(d.therapeutic_area)];
-    const terr = String(d.territory ?? '').toLowerCase();
-    const territory = terr === 'global' ? 'global' : terr.includes('china') ? 'china' : null;
-    if (!phase || !modality || !category || !territory) continue;
-    const indication = Object.keys((staticBenchmarks.indications as Record<string, Record<string, unknown>>)[category])[0];
-    const r = calculateDealTerms({
-      phase, modality, territory, indication, therapeuticArea: d.therapeutic_area, dealType: DEAL_TYPE[String(d.deal_type)] ?? 'licensing',
-      biomarker: 'unselected', lineOfTherapy: '2L', dataQuality: 'promising', competitivePosition: 'racing',
-      combinationPotential: 'standalone', treatmentApproach: 'symptomatic',
-      regulatoryDesignations: { prime: false, orphan: false, fastTrack: false, breakthrough: false },
-    } as never);
-    const actual = Number(d.upfront_usd) / 1e6;
-    rows.push({ deal: `${d.licensor_name} / ${d.licensee_name}`, ta: d.therapeutic_area, phase, modality, territory, actual, calc: r.terms.upfront.median, ratio: r.terms.upfront.median / actual });
+  const out = arg('--out');
+  if (out) writeFileSync(out, JSON.stringify(rows, null, 1));
+  const summaryOut = arg('--summary-out');
+  if (summaryOut) writeFileSync(summaryOut, JSON.stringify(summary, null, 2) + '\n');
+
+  const wb = arg('--write-baseline');
+  if (wb !== undefined) {
+    const p = wb || DEFAULT_BASELINE;
+    writeFileSync(p, JSON.stringify(summary, null, 2) + '\n');
+    console.log(`\nWrote baseline ${p}`);
   }
 
-  const group = (label: string, pick: (r: Record<string, unknown>) => string) => {
-    const by = new Map<string, number[]>();
-    for (const r of rows) { const k = pick(r); by.set(k, [...(by.get(k) ?? []), Number(r.ratio)]); }
-    console.log(`\n${label}`);
-    for (const [k, v] of [...by.entries()].sort()) {
-      const within2x = v.filter((x) => x >= 0.5 && x <= 2).length / v.length;
-      const mdae = median(v.map((x) => Math.abs(Math.log(x))));
-      console.log(`  ${k.padEnd(28)} n=${String(v.length).padStart(3)}  median calc/actual x${r2(median(v))}  within 2x ${Math.round(within2x * 100)}%  MdAE(log) ${r2(mdae)}`);
+  const check = arg('--check');
+  if (check !== undefined) {
+    const baseline: BacktestSummary = JSON.parse(readFileSync(check || DEFAULT_BASELINE, 'utf8'));
+    const res = checkAgainstBaseline(summary, baseline);
+    console.log(`\nAccuracy gate vs ${check || DEFAULT_BASELINE}: within 2x ${(baseline.overall.within2x * 100).toFixed(1)}% -> ${(summary.overall.within2x * 100).toFixed(1)}%, MdAE(log) ${baseline.overall.mdaeLog.toFixed(3)} -> ${summary.overall.mdaeLog.toFixed(3)}`);
+    if (!res.ok) {
+      for (const m of res.messages) console.error(`  FAIL: ${m}`);
+      console.error('\nIf the change is intended, regenerate the baseline with --write-baseline, commit it in the same PR and explain why in the PR body.');
+      process.exit(1);
     }
-  };
-  group('All', () => 'all');
-  group('By territory', (r) => String(r.territory));
-  group('By phase (global)', (r) => (r.territory === 'global' ? String(r.phase) : 'z_china'));
-  group('By TA (global)', (r) => (r.territory === 'global' ? String(r.ta) : 'z_china'));
-  group('By modality (global)', (r) => (r.territory === 'global' ? String(r.modality) : 'z_china'));
-
-  const out = process.argv.indexOf('--out');
-  if (out > 0) writeFileSync(process.argv[out + 1], JSON.stringify(rows, null, 1));
+    console.log('  PASS');
+  }
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+
+if (require.main === module) main().catch((e) => { console.error(e); process.exit(1); });

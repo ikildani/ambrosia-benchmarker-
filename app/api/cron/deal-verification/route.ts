@@ -21,7 +21,8 @@ import { autoAcceptVerifiedDeals, autoRejectLowConfidenceDeals } from '@/lib/ing
 import { runCronIntelligence, getCronIntelligenceBus } from '@/lib/cron-intelligence';
 import { runOutcomePhase } from '@/lib/outcomes/cron';
 import { buildFlagResolutionSlack } from '@/lib/ingestion/flag-resolution-report';
-import { fixFlaggedDeals, type FlagFixResult } from '@/lib/ingestion/flag-fixer';
+import { fixFlaggedDeals, verifyPendingFromPrimary, type FlagFixResult, type PrimaryVerifyResult } from '@/lib/ingestion/flag-fixer';
+import { errorsShowPerplexityOutage, markPerplexityDown, perplexityDown } from '@/lib/ingestion/perplexity-health';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -63,13 +64,18 @@ export async function GET(request: NextRequest) {
 
   if (!isValid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
+  // Nov 23 2026: Perplexity is optional. Primary-document verification needs only Anthropic.
+  const perplexityKeyConfigured = process.env.PERPLEXITY_API_KEY || null;
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-  if (!perplexityApiKey || !anthropicApiKey) {
-    return NextResponse.json({ error: 'API keys not configured' }, { status: 500 });
+  if (!anthropicApiKey) {
+    return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
   }
 
   const supabase = createServiceClient();
+  // Perplexity marked down after a quota/auth failure (lib/ingestion/perplexity-health.ts): skip it
+  // until the mark expires instead of failing every row (8,300 failed calls in the week to Nov 23).
+  const pxDown = perplexityKeyConfigured ? await perplexityDown(supabase) : true;
+  const perplexityApiKey = perplexityKeyConfigured && !pxDown ? perplexityKeyConfigured : null;
 
   // Lean mode (Oct 28 2026): the :20 run is skipped (2 runs an hour instead of 3); the :40 run
   // still carries the flag-fixer. Every run stops once the daily AI budget for core work is spent.
@@ -122,7 +128,17 @@ export async function GET(request: NextRequest) {
   const statusSlots = params.has('dealStatus') && Number.isFinite(statusParam) && statusParam > 0 ? Math.min(60, statusParam) : weeklyWindow ? 40 : 0;
   let statusResult: DealStatusResult | null = null;
   const passStart = Date.now();
-  if (statusSlots > 0) {
+
+  // Primary-document verification first, newest pending deals first (Nov 23 2026). Rows it
+  // cannot support are flagged and handed to the fixer below like any other flag.
+  let primary: PrimaryVerifyResult | null = null;
+  try {
+    primary = await verifyPendingFromPrimary(supabase, anthropicApiKey, { maxDeals: 6, timeBudgetMs: 90_000 });
+  } catch (e) {
+    console.error('[primary-verify] failed:', e instanceof Error ? e.message : e);
+  }
+
+  if (statusSlots > 0 && perplexityApiKey) {
     try {
       statusResult = await checkDealStatuses(supabase, perplexityApiKey, anthropicApiKey, { maxDeals: statusSlots, timeBudgetMs: 120_000 });
       console.log(`[deal-status] checked ${statusResult.checked}, updated ${statusResult.updated}`, statusResult.byStatus);
@@ -140,14 +156,25 @@ export async function GET(request: NextRequest) {
     : nowUtc.getUTCMinutes() >= 40 ? 4 : 0;
   const FLAG_FIX_BUDGET_MS = 110_000;
 
-  const result = await verifyPendingDeals(supabase, perplexityApiKey, anthropicApiKey, {
+  // Perplexity pass: rows without a primary citation (and re-adjudication), only while Perplexity is up.
+  const emptyPass = { verified: 0, flagged: 0, unchanged: 0, sourceUrlsAdded: 0, reverified: 0, regressions: 0, rolesSwapped: 0, flaggedDeals: [] as Array<{ id: string; label: string; reason: string }>, errors: [] as string[] };
+  const result = perplexityApiKey ? await verifyPendingDeals(supabase, perplexityApiKey, anthropicApiKey, {
     maxDeals: 50,
     timeBudgetMs: Math.max(60_000, 250_000 - (flagFixSlots > 0 ? FLAG_FIX_BUDGET_MS : 0) - (Date.now() - passStart)),
     priorityTAs,
     // Fill source_url on already-verified deals with leftover budget (URL-only, verdict untouched)
     sourceBackfillSlots,
     flaggedRetryAfterDays,
-  });
+  }) : emptyPass;
+  let perplexityMarkedDown: string | null = null;
+  if (perplexityApiKey && errorsShowPerplexityOutage(result.errors)) {
+    perplexityMarkedDown = await markPerplexityDown(supabase, result.errors.find(e => /Perplexity/.test(e)) ?? 'quota');
+  }
+  if (primary) {
+    result.verified += primary.verified;
+    result.flaggedDeals.push(...primary.flaggedDeals);
+    result.errors.push(...primary.errors);
+  }
 
   // Every deal flagged in this pass is handed to the flag-fixer now, not posted for review
   // (Issa, Sep 29 2026: "I shouldn't have to review it"). Whatever the budget does not reach
@@ -190,7 +217,7 @@ export async function GET(request: NextRequest) {
   // recompute_deal_dedupe() promotes the best row of each dedupe group. Nothing
   // called it after Sep 25 2026, so 2,300 rows (911 verified) sat outside the
   // comparable pool. Run it whenever a verdict changed.
-  if (result.verified + result.reverified + result.flagged + acceptResult.fixed + (flagFix ? flagFix.fixed + flagFix.duplicates : 0) > 0 || (statusResult?.updated ?? 0) > 0) {
+  if (result.verified + result.reverified + result.flagged + (primary ? primary.duplicates + primary.flagged : 0) + acceptResult.fixed + (flagFix ? flagFix.fixed + flagFix.duplicates : 0) > 0 || (statusResult?.updated ?? 0) > 0) {
     const { error: recomputeErr } = await supabase.rpc('recompute_deal_dedupe');
     if (recomputeErr) console.error('[deal-verification] recompute_deal_dedupe failed:', recomputeErr.message);
   }
@@ -212,7 +239,10 @@ export async function GET(request: NextRequest) {
     processed: result.verified + result.flagged,
     inserted: result.verified,
     errors: result.errors,
-    parameters: { maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped, dealStatus: statusResult ? { checked: statusResult.checked, updated: statusResult.updated, byStatus: statusResult.byStatus, errors: statusResult.errors.length } : null, flagFix: flagFix ? { attempted: flagFix.attempted, fixed: flagFix.fixed, duplicates: flagFix.duplicates, unresolved: flagFix.unresolved, errors: flagFix.errors.length } : null },
+    parameters: {
+      primaryVerify: primary ? { attempted: primary.attempted, verified: primary.verified, duplicates: primary.duplicates, flagged: primary.flagged, deferred: primary.deferred, errors: primary.errors.length } : null,
+      perplexity: !perplexityKeyConfigured ? 'not_configured' : pxDown ? 'down' : perplexityMarkedDown ? `marked_down_until_${perplexityMarkedDown}` : 'up',
+      maxDeals: 50, timeBudgetMs: 250_000, sourceBackfillSlots: 15, sourceUrlsAdded: result.sourceUrlsAdded, reverified: result.reverified, regressions: result.regressions, rolesSwapped: result.rolesSwapped, dealStatus: statusResult ? { checked: statusResult.checked, updated: statusResult.updated, byStatus: statusResult.byStatus, errors: statusResult.errors.length } : null, flagFix: flagFix ? { attempted: flagFix.attempted, fixed: flagFix.fixed, duplicates: flagFix.duplicates, unresolved: flagFix.unresolved, errors: flagFix.errors.length } : null },
     notes: result.regressions > 0 ? `BACKTEST: ${result.regressions} previously verified row(s) no longer hold` : undefined,
   });
 

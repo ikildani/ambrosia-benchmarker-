@@ -126,7 +126,9 @@ describe('deriveOwnership', () => {
     const noArms = deriveOwnership(input({ companyId: 'c-pfizer', assetName: 'CP-742,033', armRoles: ['unknown'], codePrefixOriginators: 12 }));
     expect(noArms.rule).toBe('code_prefix_match');
     // One sibling is not a series; an INN is never a code.
-    expect(deriveOwnership(input({ assetName: 'NB002', armRoles: ['unknown'], codePrefixOriginators: 1 })).rule).toBe('no_arm_evidence');
+    expect(deriveOwnership(input({ assetName: 'NB002', armRoles: [], codePrefixOriginators: 1 })).rule).toBe('no_arm_evidence');
+    // (with an unrecorded arm on its own trial the code still counts: migration 197 sponsor_unknown_arm)
+    expect(deriveOwnership(input({ assetName: 'NB002', armRoles: ['unknown'], codePrefixOriginators: 1 })).rule).toBe('sponsor_unknown_arm');
     expect(deriveOwnership(input({ assetName: 'Dotinurad', armRoles: ['unknown'], codePrefixOriginators: 9 })).rule).toBe('no_arm_evidence');
     expect(codePrefixOf('JDQ443')).toBe('JDQ');
     expect(codePrefixOf('CP-742,033')).toBe('CP');
@@ -140,6 +142,58 @@ describe('deriveOwnership', () => {
   it('evidence omits drug fields when there is no drug', () => {
     const r = deriveOwnership(input({ armRoles: ['experimental'] }));
     expect(r.evidence).toEqual({ rule: 'sponsor_default', arms: { experimental: 1, comparator: 0, unknown: 0 }, matched_interventions: 1 });
+  });
+});
+
+describe('deriveOwnership: migration 197 rules', () => {
+  const noOrig = { id: 'd9', originatorCompanyId: null, confidence: 92, maxPhase: 'phase_2' };
+
+  it('a program from the company\'s own filing or pipeline page stays originator after re-checks', () => {
+    expect(deriveOwnership(input({ assetName: 'IMM7220', assetOrigin: 'filing' })).rule).toBe('filing_disclosure');
+    const r = deriveOwnership(input({ assetName: 'IDP-002', assetOrigin: 'pipeline_page' }));
+    expect(r).toMatchObject({ status: 'originator', rule: 'pipeline_page_disclosure' });
+  });
+
+  it('a disclosure of a drug another company also holds is not claimed', () => {
+    const r = deriveOwnership(input({ assetName: 'Novartis HD Program', assetOrigin: 'filing', drug: noOrig, sharedWithOtherCompanies: true }));
+    expect(r).toMatchObject({ status: 'unknown', rule: 'no_arm_evidence' });
+  });
+
+  it('the sponsor of an orphan designation owns it when nobody else holds the drug', () => {
+    expect(deriveOwnership(input({ assetName: 'human IgG4 bispecific antibody recognizing factor VIIa and TLT-1', assetOrigin: 'designation' })))
+      .toMatchObject({ status: 'originator', rule: 'designation_sponsor' });
+  });
+
+  it('a sponsored trial with an unrecorded arm role counts only for the company\'s own code', () => {
+    expect(deriveOwnership(input({ assetName: 'OCUL101', armRoles: ['unknown'] }))).toMatchObject({ status: 'originator', rule: 'sponsor_unknown_arm' });
+    expect(deriveOwnership(input({ assetName: 'Humulin L', armRoles: ['unknown'] }))).toMatchObject({ status: 'unknown', rule: 'no_arm_evidence' });
+    expect(deriveOwnership(input({ assetName: 'GS030-DP', armRoles: ['unknown'], drug: noOrig, sharedWithOtherCompanies: true })).rule).toBe('no_arm_evidence');
+  });
+
+  it('a later sponsor of another family\'s drug is not a second originator (Corxel aceclidine after LENZ)', () => {
+    const r = deriveOwnership(input({ assetName: 'Aceclidine ophthalmic solution', armRoles: ['experimental'], drug: noOrig, laterSponsor: true }));
+    expect(r).toMatchObject({ status: 'unknown', rule: 'later_sponsor' });
+    // the company's own code series still wins
+    expect(deriveOwnership(input({ assetName: 'VSA003', armRoles: ['experimental'], drug: noOrig, laterSponsor: true, codePrefixOriginators: 3 })).rule)
+      .toBe('sponsor_default');
+  });
+
+  it('an originator in the same corporate family is a match', () => {
+    const r = deriveOwnership(input({ drug: { id: 'd1', originatorCompanyId: MERCK, confidence: 90, maxPhase: 'phase_2' }, originatorInFamily: true, armRoles: ['experimental'] }));
+    expect(r.rule).toBe('originator_match');
+  });
+
+  it('placebo and non-treatment arm text is comparator-named', () => {
+    for (const n of ['Daridorexant matching placebo', 'Tablets matching VQ-101', 'Watchful waiting', 'The placebo presentation is a pre-filled syringe', 'Momelotinib Tablets Placebo to Match']) {
+      expect(isComparatorNamed(n)).toBe(true);
+    }
+    expect(isComparatorNamed('Placebo-controlled VX-548')).toBe(true);
+    expect(isComparatorNamed('Obicetrapib')).toBe(false);
+  });
+
+  it('a reviewer correction beats every rule', () => {
+    const r = deriveOwnership(input({ assetName: 'IMM7220', assetOrigin: 'filing', overrideStatus: 'licensee' }));
+    expect(r).toMatchObject({ status: 'licensee', rule: 'manual_override' });
   });
 });
 

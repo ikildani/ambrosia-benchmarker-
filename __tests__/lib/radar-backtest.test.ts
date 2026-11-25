@@ -20,6 +20,7 @@ import {
   rocAuc, prAuc, precisionAtK, liftTopDecile, brier, calibrationBins, computeMetrics, factorImportance, toBacktestSummary,
 } from '@/lib/radar/backtest/metrics';
 import { trainAndEvaluate, type LoadedSnapshot, rebuildDecision } from '@/lib/radar/backtest/run';
+import { MODEL_FEATURE_NAMES } from '@/lib/radar/backtest/features';
 import { matchAssetName } from '@/lib/radar/partnership';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────
@@ -298,6 +299,20 @@ describe('features — as_of cutoffs (leakage controls)', () => {
     expect(v.values.ta_matches_company_focus).toBe(0); // neurology is the modal TA among siblings
   });
 
+  test('rows of the same program are not siblings (their phase is today\'s phase of this program)', () => {
+    const siblings = [
+      { id: 'a1', phase: 'phase_3', therapeutic_area: 'oncology', first_posted_date: '2020-01-10', program_key: 'c1:t:X1' },
+      { id: 'a1-dose2', phase: 'phase_3', therapeutic_area: 'oncology', first_posted_date: '2020-02-10', program_key: 'c1:t:X1' },
+      { id: 'other', phase: 'phase_1', therapeutic_area: 'oncology', first_posted_date: '2019-01-01', program_key: 'c1:t:Y2' },
+    ];
+    const asOf = new Date('2023-06-01T00:00:00Z'); // the asset is Phase 2 here (NCT002), Phase 3 only from 2024
+    const keyed = buildFeatureVector(bundle({ siblings }), asOf);
+    const unkeyed = buildFeatureVector(bundle({ siblings: siblings.map(s => ({ ...s, program_key: null })) }), asOf);
+    expect(keyed.phase_at_asof).toBe('phase_2');
+    expect(keyed.values.pipeline_rank).toBe(1);
+    expect(unkeyed.values.pipeline_rank).toBe(2);
+  });
+
   test('a failed source yields null features (not zero) and lowers completeness', () => {
     const b = bundle();
     b.sourceErrors.company_financials = 'relation "company_financials" does not exist';
@@ -545,44 +560,43 @@ describe('metrics — known vectors', () => {
 
 // ── End-to-end pure training ──────────────────────────────────────────────
 
-describe('trainAndEvaluate — temporal split on synthetic snapshots', () => {
-  test('trains on ≤ 2024-06, calibrates on the next six months, tests on 2025, and reports honestly', () => {
+describe('trainAndEvaluate — temporal split on synthetic snapshots (v5 additive model)', () => {
+  test('trains on ≤ 2024-06, early-stops and calibrates on the next six months, tests on 2025 per month', () => {
     const rnd = mulberry32(21);
     const months = monthlySnapshotDates('2022-01', '2025-09');
     const rows: LoadedSnapshot[] = [];
-    const d = FEATURE_NAMES.length;
-    const idxRunway = FEATURE_NAMES.indexOf('runway_under_12');
-    const idxBearish = FEATURE_NAMES.indexOf('intent_bearish');
-    for (let a = 0; a < 120; a++) {
-      const positiveAsset = a < 20;
+    for (let a = 0; a < 160; a++) {
+      const positiveAsset = a < 25;
       for (const asOf of months) {
-        const row: (number | null)[] = Array.from({ length: d }, () => (rnd() > 0.85 ? null : rnd()));
+        const features: Record<string, number | null> = {};
+        for (const n of MODEL_FEATURE_NAMES) features[n] = rnd() > 0.85 ? null : rnd();
         const pressure = positiveAsset ? (rnd() > 0.3 ? 1 : 0) : (rnd() > 0.8 ? 1 : 0);
-        row[idxRunway] = pressure;
-        row[idxBearish] = positiveAsset ? rnd() * 0.3 : rnd();
+        features.runway_under_12 = pressure;
+        features.intent_bearish = positiveAsset ? rnd() * 0.3 : rnd();
+        // Leaky column present in the snapshot must not reach the model.
+        features.availability = positiveAsset ? 0.3 : 1;
         const label: 0 | 1 = positiveAsset && pressure === 1 && rnd() > 0.4 ? 1 : 0;
-        rows.push({ asset_id: `asset-${a}`, as_of: asOf, row, label, weight: positiveAsset ? 1 : 1 / 0.03 });
+        rows.push({ asset_id: `asset-${a}`, as_of: asOf, features, label, weight: positiveAsset ? 1 : 1 / 0.08 });
       }
     }
-    const out = trainAndEvaluate(rows, 'v3.test', new Date('2026-09-15T00:00:00Z'));
-    expect(out.params.version).toBe('v3.test');
-    expect(out.params.feature_names).toEqual([...FEATURE_NAMES]);
+    const out = trainAndEvaluate(rows, 'v5.test', new Date('2026-11-24T00:00:00Z'), { settings: { maxRounds: 120 } });
+    expect(out.params.version).toBe('v5.test');
+    expect(out.params.model_type).toBe('gam');
+    expect(out.params.feature_names).toEqual([...MODEL_FEATURE_NAMES]);
+    expect(out.params.feature_names).not.toContain('availability');
     expect(out.params.train_window.to <= '2024-06-01').toBe(true);
     expect(out.params.test_window.from >= '2025-01-01').toBe(true);
     expect(out.summary.n_train).toBe(rows.filter(r => r.as_of <= '2024-06-01').length);
     expect(out.summary.n_test).toBe(rows.filter(r => r.as_of >= '2025-01-01').length);
-    expect(out.summary.roc_auc).toBeGreaterThan(0.6);
+    expect(out.monthly.months).toBe(9);
+    expect(out.monthly.roc_auc).toBeGreaterThan(0.6);
+    expect(out.summary.roc_auc).toBeCloseTo(out.monthly.roc_auc, 4);
+    expect(out.monthly.lift_at_100).toBeCloseTo(out.monthly.precision_at_100 / out.monthly.base_rate, 6);
     expect(out.summary.calibration_bins).toHaveLength(10);
-    expect(out.summary.factor_importance.length).toBe(d);
+    expect(out.summary.factor_importance.length).toBe(MODEL_FEATURE_NAMES.length);
     expect(out.testPredictions.length).toBe(out.summary.n_test);
-    // Sign constraints carried into the fitted model
-    FEATURE_NAMES.forEach((name, j) => {
-      const sign = SIGN_CONSTRAINTS[j];
-      if (sign === 1) expect(out.params.weights[j]).toBeGreaterThanOrEqual(0);
-      if (sign === -1) expect(out.params.weights[j]).toBeLessThanOrEqual(0);
-      void name;
-    });
-    expect(out.notes.join(' ')).toMatch(/calibration/);
+    expect(out.params.calibration.type).toBe('platt');
+    expect(out.notes.join(' ')).toMatch(/Platt calibration/);
   });
 });
 

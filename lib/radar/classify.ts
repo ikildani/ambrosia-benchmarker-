@@ -367,8 +367,12 @@ export const CORE_UNIVERSE_PHASES: readonly string[] = RADAR_PHASE_OPTIONS
   .map(o => o.value)
   .filter(v => v !== 'phase_4');
 
-/** Partnership states that leave rights on the table. */
-export const CORE_UNIVERSE_PARTNERSHIP: readonly string[] = ['unpartnered', 'partially_partnered'];
+/**
+ * Partnership states the default feed shows. Partnered programs rank lower but are still listed
+ * (and counted by the scorecard), so they are classified too (migration 197: 58 feed rows waited
+ * in 'unclassified' because the core queue skipped them).
+ */
+export const CORE_UNIVERSE_PARTNERSHIP: readonly string[] = ['unpartnered', 'partially_partnered', 'partnered'];
 
 /**
  * Queue order: the core universe (industry-owned, unpartnered or partially
@@ -481,8 +485,13 @@ export async function fetchClassificationQueue(
 
 export type SkipReason = 'non_drug' | 'placebo_or_generic';
 
-/** Names that are not a drug are marked skipped without spending a model call. */
-export function preClassify(asset: Pick<QueuedAsset, 'asset_name'>): SkipReason | null {
+/**
+ * Names that are not a drug are marked skipped without spending a model call. A row whose skip was
+ * overridden (migration 197b: descriptive program names such as "human IgG4 bispecific antibody
+ * recognizing factor VIIa and TLT-1" were skipped as generic) goes to the model.
+ */
+export function preClassify(asset: Pick<QueuedAsset, 'asset_name'> & { classification_evidence?: Record<string, unknown> | null }): SkipReason | null {
+  if (asset.classification_evidence?.rule_skip_overridden === true) return null;
   const name = asset.asset_name ?? '';
   if (isNonDrugIntervention(name)) return 'non_drug';
   if (isPlaceboOrGeneric(name)) return 'placebo_or_generic';
@@ -1077,6 +1086,8 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
     errors, logged: false, dryRun,
   };
   const samplePatches: AssetPatch[] = [];
+  /** Set when the per-run request cap stopped the model stage: a backlog, not an error. */
+  let backlogNote: string | null = null;
 
   const finish = async (status: 'completed' | 'partial' | 'failed', notes?: string) => {
     result.requests = budget.requests;
@@ -1225,8 +1236,8 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
         outcome = await classifyBatchWithModel(client, model, batchInputs, budget, sleep);
       } catch (err) {
         if (err instanceof RequestCapError) {
+          if (!result.requestCapHit) backlogNote = `${err.message}; ${batches.length - index} batch(es) left for the next run`;
           result.requestCapHit = true;
-          errors.push(`${err.message}; ${batches.length - index} batch(es) left for the next run`);
           return;
         }
         const message = err instanceof Error ? err.message : String(err);
@@ -1262,13 +1273,27 @@ export async function classifyAssetsBatch(supabase: SupabaseClient, opts: Classi
 
   await Promise.all(Array.from({ length: Math.min(concurrency, batches.length) }, () => worker()));
 
-  const status = deriveRunStatus({
+  const status = classifyRunStatus({
     errors: errors.length,
-    timedOut: result.timedOut || result.requestCapHit,
-    processed: result.fetched,
+    timedOut: result.timedOut,
+    requestCapHit: result.requestCapHit,
+    fetched: result.fetched,
     produced: result.processed,
   });
-  return finish(status);
+  const notes = [backlogNote, result.timedOut ? 'time budget reached; the rest waits for the next run' : null].filter(Boolean).join('; ');
+  return finish(status, notes || undefined);
+}
+
+/**
+ * Run status for the log (and so for the scorecard's "hours since the classifier last succeeded").
+ * Reaching the per-run request cap or the time budget is the designed way a run ends while a backlog
+ * remains, not a failure: such a run is 'completed' when it wrote rows and hit no errors, with the
+ * backlog in notes. Errors, or a run that wrote nothing although rows were queued, stay 'partial'.
+ */
+export function classifyRunStatus(args: { errors: number; timedOut: boolean; requestCapHit: boolean; fetched: number; produced: number }): 'completed' | 'partial' {
+  if (args.errors > 0) return 'partial';
+  if (args.fetched > 0 && args.produced === 0) return 'partial';
+  return deriveRunStatus({ errors: 0, timedOut: false, processed: args.fetched, produced: args.produced });
 }
 
 // ═══════════════════════════════════════════════════════════════════════

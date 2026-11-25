@@ -56,7 +56,7 @@ import type {
   EndoscopicEndpoint,
 } from '@/lib/calculations';
 import {
-  calculateDealTerms, phaseOptions, dealTypeOptions,
+  calculateDealTerms, phaseOptions, dealTypeOptions, acquisitionScopeOptions, type AcquisitionScope,
   modalityOptions, neurologyModalityOptions, immunologyModalityOptions,
   metabolicModalityOptions, cardiovascularModalityOptions, infectiousDiseaseModalityOptions,
   ophthalmologyModalityOptions, womensHealthModalityOptions, rareDiseaseModalityOptions,
@@ -167,8 +167,13 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // first calculateDealTerms() in a fresh tab uses the same calibrated
   // baselines as every later run. useCalculation also awaits it before each
   // calculation, so a fast user cannot beat the warm-up.
+  // calibrationReady re-runs the live preview once the overlay lands: before it, the preview was
+  // computed from static baselines and stayed that way until the user changed an input.
+  const [calibrationReady, setCalibrationReady] = useState(false);
   useEffect(() => {
-    void ensureBenchmarksLoaded();
+    let alive = true;
+    void ensureBenchmarksLoaded().finally(() => { if (alive) setCalibrationReady(true); });
+    return () => { alive = false; };
   }, []);
 
   // Show toast when form was restored from localStorage
@@ -194,7 +199,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
   // Live preview: recalculate deal terms on every input change (~1ms, pure sync)
   const previewResult = useMemo(() => {
     return calculateDealTerms(buildCalculationInput(state));
-  }, [state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- calibrationReady recomputes once the overlay loads
+  }, [state, calibrationReady]);
 
   // Peak-sales baseline shared by PeakSalesOverrideInput (asset step) and the
   // CustomAssumptionsPanel "Peak Sales" section (deal step). With the
@@ -295,7 +301,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                 try {
                   const fullState = { ...state, ...patch };
                   const calcInput = buildCalculationInput(fullState as typeof state);
-                  calc.setResult(calculateDealTerms(calcInput));
+                  // Wait for the calibration overlay: computing on mount priced prefilled links off static baselines.
+                  void ensureBenchmarksLoaded().finally(() => calc.setResult(calculateDealTerms(calcInput)));
                 } catch { /* Calculation will be triggered manually */ }
               }
             }
@@ -453,6 +460,9 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     const urlIndication = params.get('indication');
     const urlTA = params.get('therapeuticArea');
     const urlDealType = params.get('dealType');
+    const urlTerritory = params.get('territory');
+    const urlScope = params.get('acquisitionScope');
+    const scopeFromUrl: AcquisitionScope | null = urlScope === 'asset' || urlScope === 'company' ? urlScope : null;
 
     if (urlPhase || urlModality || urlIndication) {
       const patch: Partial<CalculatorFormState> = { showTemplates: false, quickMode: false };
@@ -461,6 +471,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       if (urlDealType) patch.dealType = urlDealType as DealType;
       if (urlModality) patch.modality = urlModality as Modality;
       if (urlIndication) patch.indication = urlIndication as Indication;
+      if (urlTerritory) patch.territory = urlTerritory as Territory;
+      if (scopeFromUrl) patch.acquisitionScope = scopeFromUrl;
       actions.bulkSet(patch);
 
       const patchedState = {
@@ -470,12 +482,16 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         ...(urlDealType ? { dealType: urlDealType as DealType } : {}),
         ...(urlModality ? { modality: urlModality as Modality } : {}),
         ...(urlIndication ? { indication: urlIndication as Indication } : {}),
+        ...(urlTerritory ? { territory: urlTerritory as Territory } : {}),
+        ...(scopeFromUrl ? { acquisitionScope: scopeFromUrl } : {}),
       };
-      calc.setResult(calculateDealTerms(buildCalculationInput(patchedState)));
+      // Wait for the calibration overlay: computing on mount priced URL-prefilled links (outreach, share,
+      // SEO pages) off static baselines, often 3-5x off the calibrated result.
+      void ensureBenchmarksLoaded().finally(() => calc.setResult(calculateDealTerms(buildCalculationInput(patchedState))));
 
       // Clean up URL params after applying
       const url = new URL(window.location.href);
-      ['therapeuticArea', 'phase', 'dealType', 'modality', 'indication'].forEach(p => url.searchParams.delete(p));
+      ['therapeuticArea', 'phase', 'dealType', 'acquisitionScope', 'modality', 'indication', 'territory'].forEach(p => url.searchParams.delete(p));
       window.history.replaceState({}, '', url.pathname + (url.search || ''));
       return;
     }
@@ -639,6 +655,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   options={dealTypeOptions}
                   placeholder="Select deal type..."
                 />
+                {state.dealType === 'acquisition' && (
+                  <CustomSelect
+                    label="Acquiring"
+                    value={state.acquisitionScope}
+                    onChange={(v) => { trackParameterChange('acquisitionScope', state.acquisitionScope, v); actions.setAcquisitionScope(v as AcquisitionScope); }}
+                    options={acquisitionScopeOptions}
+                    placeholder="Whole company or single asset"
+                  />
+                )}
               </div>
 
               {/* Calculate button */}
@@ -821,6 +846,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           phase={(state.phase || '') as Phase}
                           dealType={(state.dealType || '') as DealType}
                           reformulationSubType={state.reformulationSubType}
+                          acquisitionScope={state.acquisitionScope}
                           modality={(state.modality || '') as Modality}
                           indication={(state.indication || '') as Indication}
                           biomarker={state.biomarker}
@@ -830,6 +856,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           onPhaseChange={(newValue) => { trackParameterChange('phase', state.phase, newValue); actions.setPhase(newValue); }}
                           onDealTypeChange={(newValue: DealType) => { trackParameterChange('dealType', state.dealType, newValue); actions.setDealType(newValue); }}
                           onReformulationSubTypeChange={(newValue) => { actions.setReformulationSubType(newValue); }}
+                          onAcquisitionScopeChange={(newValue) => { trackParameterChange('acquisitionScope', state.acquisitionScope, newValue); actions.setAcquisitionScope(newValue); }}
                           onModalityChange={(newValue) => { trackParameterChange('modality', state.modality, newValue); actions.setModality(newValue); }}
                           onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
                           onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}

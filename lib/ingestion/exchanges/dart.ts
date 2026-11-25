@@ -17,6 +17,8 @@ import { fetchWithTimeout } from '../../fetch-with-timeout';
 import { FunnelCounter } from '../funnel';
 import { insertCitedDeal } from '../insert-deal';
 import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea } from '../sec-edgar';
+import { prefilterDocument, screenTitle } from '../deal-prefilter';
+import { alreadyJudged, rememberVerdict, forgetVerdict, flushDocMemories } from '../doc-memory';
 import { validateExtractedDeal } from '../deal-extraction-validator';
 import { classifyAndEnrichDeal } from '../company-geography';
 
@@ -127,10 +129,16 @@ export async function processDartDisclosure(
   const filingId = `dart:${a.rcept_no}`;
   const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', filingId).limit(1).maybeSingle();
   if (existing) { funnel.count('already_in_table'); return 'skipped'; }
+  if (await alreadyJudged(supabase, 'dart', filingId)) { funnel.count('already_judged'); return 'skipped'; }
+  const titleScreen = screenTitle(a.report_nm);
+  if (!titleScreen.keep) { funnel.count('prefiltered', titleScreen.reason, `${a.corp_name}: ${a.report_nm.slice(0, 80)}`); return 'skipped'; }
   const doc = await fetchDartDocumentText(a.rcept_no);
   if (!doc.ok) { funnel.count('content_unavailable', `http_${doc.status}`, a.viewerUrl); return 'skipped'; }
   if (doc.text.length < 300) { funnel.count('content_too_short', 'xml', a.report_nm); return 'skipped'; }
-  const deal = await extractDealFromFiling(doc.text.substring(0, 12_000), opts.anthropicApiKey);
+  const bodyScreen = prefilterDocument({ text: doc.text });
+  if (!bodyScreen.keep) { funnel.count('prefiltered', bodyScreen.reason, `${a.corp_name}: ${a.report_nm.slice(0, 80)}`); return 'skipped'; }
+  const deal = await extractDealFromFiling(doc.text.substring(0, 12_000), opts.anthropicApiKey, 'dart');
+  if (!dryRun) await rememberVerdict(supabase, 'dart', filingId, deal ? 'extracted' : 'not_a_deal');
   if (!deal) { funnel.count('not_a_deal', 'dart', `${a.corp_name}: ${a.report_nm.slice(0, 80)}`); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }
@@ -180,6 +188,7 @@ export async function processDartDisclosure(
   if (result.outcome === 'inserted') { funnel.count(dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`); return 'inserted'; }
   if (result.outcome === 'duplicate') { funnel.count('insert_duplicate'); return 'skipped'; }
   funnel.count('insert_error', result.outcome, result.error);
+  await forgetVerdict(supabase, 'dart', filingId);
   return 'error';
 }
 
@@ -241,5 +250,6 @@ export async function runDartIngestion(supabase: SupabaseClient, opts: DartRunOp
   }
   const summary = funnel.summary();
   console.log(`[dart] ${window.fromIso}..${window.toIso} configured=${configured} disclosures=${rows.length} deals=${candidates.length} ${summary}${dryRun ? ' (dry run)' : ''}`);
+  await flushDocMemories(supabase, { dryRun });
   return { window, configured, disclosures: rows.length, dealReports: candidates.length, extracted, inserted, errors, funnel: funnel.toJSON(), summary };
 }

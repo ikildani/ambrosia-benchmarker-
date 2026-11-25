@@ -14,6 +14,7 @@
  * and rewritten with the final outcome when the batch is drained.
  */
 
+import { replyText } from '@/lib/ai/response-text';
 import Anthropic from '@anthropic-ai/sdk';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { buildDealExtractionRequest, parseDealExtraction } from './sec-edgar';
@@ -133,9 +134,20 @@ export async function drainExtractionBatches(
         if (!stored) { bump('unknown_custom_id'); continue; }
         let outcome = 'skipped';
         if (result.result.type === 'succeeded') {
-          const first = result.result.message.content[0];
-          const text = first && first.type === 'text' ? first.text : '';
-          const deal = parseDealExtraction(text);
+          // Nov 23 2026: read the text blocks; a leading thinking block is not "not a deal".
+          const text = replyText(result.result.message.content);
+          let deal: ReturnType<typeof parseDealExtraction>;
+          try {
+            deal = parseDealExtraction(text);
+          } catch (e) {
+            // Nov 24 2026: a garbled reply is not a verdict. Forget the accession (as for expired
+            // results) so a later walk resubmits it, instead of ledgering it as not_a_deal for good.
+            opts.funnel.count('extraction_error', 'parse', `${stored.accession}: ${String(e).slice(0, 80)}`);
+            if (!opts.dryRun) await supabase.from(PROCESSED_TABLE).delete().eq('accession', stored.accession);
+            bump('parse_error');
+            byAccession.delete(result.custom_id);
+            continue;
+          }
           if (!deal) {
             opts.funnel.count('not_a_deal', stored.doc.fileType || 'unknown', `${stored.doc.companyName} ${stored.accession}`);
             outcome = 'not_a_deal';

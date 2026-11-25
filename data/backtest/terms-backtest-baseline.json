@@ -1,0 +1,256 @@
+{
+  "generatedAt": "2026-11-23T23:23:48.131Z",
+  "fixtureSnapshotAt": "2026-11-23T23:16:18.263Z",
+  "window": {
+    "from": "2023-01-01",
+    "to": "2026-09-30"
+  },
+  "overall": {
+    "n": 252,
+    "medianRatio": 1.4688,
+    "within2x": 0.373,
+    "mdaeLog": 1.0144
+  },
+  "byTerritory": {
+    "australia": {
+      "n": 1,
+      "medianRatio": 0.3067,
+      "within2x": 0,
+      "mdaeLog": 1.1817
+    },
+    "china": {
+      "n": 19,
+      "medianRatio": 1.9218,
+      "within2x": 0.4737,
+      "mdaeLog": 0.7148
+    },
+    "europe": {
+      "n": 3,
+      "medianRatio": 1.8667,
+      "within2x": 0.3333,
+      "mdaeLog": 0.9963
+    },
+    "ex_us": {
+      "n": 14,
+      "medianRatio": 0.9492,
+      "within2x": 0.5,
+      "mdaeLog": 0.7044
+    },
+    "global": {
+      "n": 190,
+      "medianRatio": 1.3045,
+      "within2x": 0.3579,
+      "mdaeLog": 1.115
+    },
+    "japan": {
+      "n": 10,
+      "medianRatio": 1.405,
+      "within2x": 0.5,
+      "mdaeLog": 0.6879
+    },
+    "latam": {
+      "n": 1,
+      "medianRatio": 1.6667,
+      "within2x": 1,
+      "mdaeLog": 0.5108
+    },
+    "mena": {
+      "n": 1,
+      "medianRatio": 1.5,
+      "within2x": 1,
+      "mdaeLog": 0.4055
+    },
+    "south_korea": {
+      "n": 2,
+      "medianRatio": 8.2,
+      "within2x": 0,
+      "mdaeLog": 1.7573
+    },
+    "us_eu": {
+      "n": 2,
+      "medianRatio": 2.5,
+      "within2x": 0.5,
+      "mdaeLog": 0.6931
+    },
+    "us_only": {
+      "n": 9,
+      "medianRatio": 5,
+      "within2x": 0.1111,
+      "mdaeLog": 1.9979
+    }
+  },
+  "byPhase": {
+    "discovery": {
+      "n": 37,
+      "medianRatio": 0.6667,
+      "within2x": 0.3514,
+      "mdaeLog": 0.9163
+    },
+    "phase1": {
+      "n": 49,
+      "medianRatio": 1.6286,
+      "within2x": 0.449,
+      "mdaeLog": 0.8873
+    },
+    "phase2": {
+      "n": 32,
+      "medianRatio": 1.3045,
+      "within2x": 0.4375,
+      "mdaeLog": 1.1442
+    },
+    "phase3": {
+      "n": 54,
+      "medianRatio": 2.2875,
+      "within2x": 0.2593,
+      "mdaeLog": 1.1634
+    },
+    "preclinical": {
+      "n": 80,
+      "medianRatio": 1.5286,
+      "within2x": 0.3875,
+      "mdaeLog": 0.9722
+    }
+  },
+  "byTA": {
+    "cardiovascular": {
+      "n": 15,
+      "medianRatio": 0.9077,
+      "within2x": 0.3333,
+      "mdaeLog": 1.2208
+    },
+    "dermatology": {
+      "n": 4,
+      "medianRatio": 13.1,
+      "within2x": 0,
+      "mdaeLog": 2.3376
+    },
+    "gastroenterology": {
+      "n": 6,
+      "medianRatio": 4.23,
+      "within2x": 0.3333,
+      "mdaeLog": 1.4414
+    },
+    "hematology": {
+      "n": 7,
+      "medianRatio": 4.9714,
+      "within2x": 0.2857,
+      "mdaeLog": 1.6037
+    },
+    "immunology": {
+      "n": 36,
+      "medianRatio": 1.7942,
+      "within2x": 0.3056,
+      "mdaeLog": 1.1576
+    },
+    "infectiousDisease": {
+      "n": 13,
+      "medianRatio": 1.4,
+      "within2x": 0.3846,
+      "mdaeLog": 1.273
+    },
+    "metabolic": {
+      "n": 17,
+      "medianRatio": 0.8667,
+      "within2x": 0.4118,
+      "mdaeLog": 0.8755
+    },
+    "neurology": {
+      "n": 37,
+      "medianRatio": 0.9667,
+      "within2x": 0.4865,
+      "mdaeLog": 0.7148
+    },
+    "oncology": {
+      "n": 79,
+      "medianRatio": 1.3091,
+      "within2x": 0.4304,
+      "mdaeLog": 0.8673
+    },
+    "ophthalmology": {
+      "n": 13,
+      "medianRatio": 3.3951,
+      "within2x": 0.1538,
+      "mdaeLog": 1.4351
+    },
+    "rareDisease": {
+      "n": 23,
+      "medianRatio": 1.9,
+      "within2x": 0.3043,
+      "mdaeLog": 1.7339
+    },
+    "womensHealth": {
+      "n": 2,
+      "medianRatio": 1.7247,
+      "within2x": 0.5,
+      "mdaeLog": 0.6547
+    }
+  },
+  "byModality": {
+    "adc": {
+      "n": 18,
+      "medianRatio": 1.5142,
+      "within2x": 0.8333,
+      "mdaeLog": 0.4276
+    },
+    "bispecific": {
+      "n": 27,
+      "medianRatio": 1.6,
+      "within2x": 0.2593,
+      "mdaeLog": 1.1314
+    },
+    "cellTherapy": {
+      "n": 13,
+      "medianRatio": 0.8219,
+      "within2x": 0.6154,
+      "mdaeLog": 0.4595
+    },
+    "geneTherapy": {
+      "n": 11,
+      "medianRatio": 1.05,
+      "within2x": 0.3636,
+      "mdaeLog": 1.4917
+    },
+    "mab": {
+      "n": 33,
+      "medianRatio": 1.9,
+      "within2x": 0.3939,
+      "mdaeLog": 0.9676
+    },
+    "mrna": {
+      "n": 3,
+      "medianRatio": 0.2333,
+      "within2x": 0.3333,
+      "mdaeLog": 1.4553
+    },
+    "oligonucleotide": {
+      "n": 20,
+      "medianRatio": 0.9705,
+      "within2x": 0.25,
+      "mdaeLog": 1.2809
+    },
+    "peptide": {
+      "n": 10,
+      "medianRatio": 2.0857,
+      "within2x": 0.3,
+      "mdaeLog": 1.7467
+    },
+    "radiopharmaceutical": {
+      "n": 5,
+      "medianRatio": 2.4286,
+      "within2x": 0.2,
+      "mdaeLog": 0.8873
+    },
+    "smallMolecule": {
+      "n": 107,
+      "medianRatio": 1.41,
+      "within2x": 0.3271,
+      "mdaeLog": 1.0896
+    },
+    "therapeuticVaccine": {
+      "n": 5,
+      "medianRatio": 5.8182,
+      "within2x": 0.4,
+      "mdaeLog": 1.761
+    }
+  }
+}

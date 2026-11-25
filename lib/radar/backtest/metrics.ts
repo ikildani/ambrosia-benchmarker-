@@ -343,3 +343,102 @@ export function toBacktestSummary(args: {
 function round4(x: number): number {
   return Math.round(x * 1e4) / 1e4;
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEED PROTOCOL (v5): rank within each as-of month, average across months
+// ═══════════════════════════════════════════════════════════════════════
+
+export const EVAL_PROTOCOL = 'feed_monthly_v1';
+
+export interface MonthlyFeedMetrics {
+  months: number;
+  /** Months that had at least one positive (the averages run over these). */
+  months_with_positives: number;
+  roc_auc: number;
+  precision_at_50: number;
+  precision_at_100: number;
+  /** Mean sampling-weighted positive rate. */
+  base_rate: number;
+  /** precision_at_100 / base_rate. */
+  lift_at_100: number;
+  lift_top_decile: number;
+  /** Mean share of the month's positives found in the top 1 % of the weighted universe. */
+  recall_top_1pct: number;
+}
+
+/**
+ * The feed shows one list per day, so the honest top-of-list numbers rank one month's
+ * population at a time: "top 100" is the top 100 programs of that month's universe (weights undo
+ * negative subsampling), not the top 100 rows of nine months pooled. Every metric is the mean
+ * over months with at least one positive; lift_at_100 divides the mean precision by the mean
+ * base rate on the same rows.
+ */
+export function computeMonthlyMetrics(
+  months: readonly string[],
+  rankScores: readonly number[],
+  labels: readonly number[],
+  weights?: Weights,
+): MonthlyFeedMetrics {
+  assertParallel(rankScores, labels, weights);
+  if (months.length !== labels.length) throw new Error('computeMonthlyMetrics: months and labels differ in length');
+  const byMonth = new Map<string, number[]>();
+  months.forEach((m, i) => {
+    const list = byMonth.get(m);
+    if (list) list.push(i); else byMonth.set(m, [i]);
+  });
+  let n = 0;
+  const acc = { auc: 0, p50: 0, p100: 0, base: 0, lift: 0, r1: 0 };
+  for (const idx of byMonth.values()) {
+    const y = idx.map(i => labels[i]);
+    if (!y.some(v => v === 1)) continue;
+    const s = idx.map(i => rankScores[i]);
+    const ww = idx.map(i => w(weights, i));
+    let wp = 0;
+    let wt = 0;
+    for (let k = 0; k < idx.length; k++) { wt += ww[k]; if (y[k] === 1) wp += ww[k]; }
+    n++;
+    acc.auc += rocAuc(s, y, ww);
+    acc.p50 += precisionAtK(s, y, 50, ww);
+    acc.p100 += precisionAtK(s, y, 100, ww);
+    acc.base += wt > 0 ? wp / wt : 0;
+    acc.lift += liftTopDecile(s, y, ww);
+    const k1 = Math.max(1, wt / 100);
+    acc.r1 += wp > 0 ? (precisionAtK(s, y, k1, ww) * Math.min(k1, wt)) / wp : 0;
+  }
+  const mean = (v: number) => (n ? v / n : 0);
+  const base = mean(acc.base);
+  return {
+    months: byMonth.size,
+    months_with_positives: n,
+    roc_auc: mean(acc.auc),
+    precision_at_50: mean(acc.p50),
+    precision_at_100: mean(acc.p100),
+    base_rate: base,
+    lift_at_100: base > 0 ? mean(acc.p100) / base : 0,
+    lift_top_decile: mean(acc.lift),
+    recall_top_1pct: mean(acc.r1),
+  };
+}
+
+export interface GateMetrics {
+  roc_auc: number;
+  precision_at_100: number;
+  lift_top_decile: number;
+}
+
+/**
+ * Activation gate (v5): a candidate replaces the incumbent only when it is strictly better on
+ * precision@100, top-decile lift AND ROC AUC, measured by the same protocol on the same rows.
+ * A tie at zero precision@100 is not an improvement.
+ */
+export function gateDecision(candidate: GateMetrics, incumbent: GateMetrics | null): { activate: boolean; reasons: string[] } {
+  if (!incumbent) return { activate: true, reasons: ['no comparable incumbent'] };
+  const reasons: string[] = [];
+  const cmp = (name: keyof GateMetrics) => {
+    const ok = candidate[name] > incumbent[name] + 1e-9;
+    reasons.push(`${name} ${candidate[name].toFixed(4)} vs ${incumbent[name].toFixed(4)} ${ok ? 'better' : 'not better'}`);
+    return ok;
+  };
+  const results = [cmp('precision_at_100'), cmp('lift_top_decile'), cmp('roc_auc')];
+  return { activate: results.every(Boolean), reasons };
+}

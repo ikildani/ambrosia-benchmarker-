@@ -77,6 +77,8 @@ const MODALITY_ALIASES: Record<string, string> = {
   molecularglue: 'protac',
   smallmolecule: 'smallmolecule',
   oligo: 'oligonucleotide',
+  therapeuticvaccine: 'vaccine',
+  cancervaccine: 'vaccine',
   aso: 'oligonucleotide',
   antisense: 'oligonucleotide',
 };

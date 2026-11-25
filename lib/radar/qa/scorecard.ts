@@ -84,8 +84,10 @@ export const SCORECARD_METRICS: readonly ScorecardMetricSpec[] = [
   { key: 'feed_drug_resolved', dimension: 'accuracy', label: 'Feed programs matched to a known drug', poor: 0.5, target: 0.9,
     value: s => num(s.feed_drug_resolved_share), format: 'pct' },
   // ── ranking ──────────────────────────────────────────────────────────
+  // Feed-protocol backtests (migration 196) store lift_at_100 on the same weighted population;
+  // older rows fall back to precision / base rate.
   { key: 'backtest_lift_at_100', dimension: 'ranking', label: 'Top-100 hit rate vs. base rate (backtest)', poor: 1, target: 10,
-    value: s => ratio(s.backtest_precision_at_100, s.backtest_base_rate), format: 'ratio' },
+    value: s => num(s.backtest_lift_at_100) ?? ratio(s.backtest_precision_at_100, s.backtest_base_rate), format: 'ratio' },
   { key: 'backtest_lift_top_decile', dimension: 'ranking', label: 'Top-decile lift (backtest)', poor: 2, target: 8,
     value: s => num(s.backtest_lift_top_decile), format: 'ratio' },
   { key: 'backtest_auc', dimension: 'ranking', label: 'Discrimination, ROC AUC (backtest)', poor: 0.7, target: 0.92,

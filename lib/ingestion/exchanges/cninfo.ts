@@ -18,6 +18,8 @@ import { readSyncCursor, writeSyncCursor } from '../../radar/sync-cursor';
 import { FunnelCounter } from '../funnel';
 import { quartersSince } from '../edgar-fts';
 import { processFilingText, type AdapterRunResult } from './shared';
+import { screenTitle } from '../deal-prefilter';
+import { alreadyJudged, flushDocMemories } from '../doc-memory';
 
 const QUERY_URL = 'http://www.cninfo.com.cn/new/hisAnnouncement/query';
 const STATIC_BASE = 'https://static.cninfo.com.cn/';
@@ -180,12 +182,17 @@ export async function runCninfoIngestion(supabase: SupabaseClient, opts: CninfoR
       const filingId = `cninfo:${a.announcementId}`;
       const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', filingId).limit(1).maybeSingle();
       if (existing) { funnel.count('already_in_table'); continue; }
+      // Nov 23 2026: memory and title screen before the PDF fetch (processFilingText repeats both).
+      if (await alreadyJudged(supabase, 'cninfo', filingId)) { funnel.count('already_judged'); continue; }
+      const titleScreen = screenTitle(a.title);
+      if (!titleScreen.keep) { funnel.count('prefiltered', titleScreen.reason, `${a.secName}: ${a.title.slice(0, 80)}`); continue; }
       const pdf = await fetchCninfoPdfText(a.pdfUrl);
       if (!pdf.ok) { funnel.count('content_unavailable', `http_${pdf.status}`, a.pdfUrl); continue; }
       const outcome = await processFilingText(supabase, {
         filingId, sourceType: 'cninfo', sourceUrl: a.pdfUrl, text: pdf.text, announcedDate: a.dateIso,
         provenanceNote: `cninfo ${a.secCode} ${a.secName}: ${a.title.slice(0, 120)}`,
         defaultLicensorCountry: 'CN', defaultLicensorRegion: 'china', label: `${a.secName}: ${a.title.slice(0, 80)}`,
+        title: a.title, scope: 'cninfo',
       }, { anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel });
       if (outcome === 'inserted') inserted++;
       if (outcome === 'error') errors.push(`insert error ${a.announcementId}`);
@@ -196,5 +203,6 @@ export async function runCninfoIngestion(supabase: SupabaseClient, opts: CninfoR
   }
   const summary = funnel.summary();
   console.log(`[cninfo] fetched=${fetched} candidates=${candidates.size} deep=${deepStep ?? '-'} ${summary}${dryRun ? ' (dry run)' : ''}`);
+  await flushDocMemories(supabase, { dryRun });
   return { fetched, candidates: candidates.size, extracted, inserted, errors, funnel: funnel.toJSON(), summary, parameters: { deepStep, dailyDays: DAILY_DAYS }, expectRecords: true };
 }
