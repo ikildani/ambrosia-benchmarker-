@@ -74,6 +74,7 @@ import { computeTornadoSensitivities } from '@/lib/financial/tornado-sensitivity
 import epiData from '@/data/epidemiology.json';
 import { computePeerBenchmark, toOfflineSample, type PeerBenchmarkSummary } from '@/lib/peer-benchmark';
 import { PeerBenchmarkContext } from './results/PeerBenchmarkContext';
+import DealsLikeYours, { useVerifiedComps, verifiedConfidence } from './results/DealsLikeYours';
 import type { UserTier } from '@/types/tier';
 
 // Dynamic import for TornadoChart (Recharts-heavy, below the fold)
@@ -628,13 +629,20 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
   // Confidence for the headline cards, derived from peer-benchmark breadth
   // rather than hardcoded: n >= 15 on a strict match → high, n >= 5 (not
   // global) → medium, else low. Milestone cards step down from there.
+  // Verified comparable deals ("Deals like yours", top of the summary tab).
+  // Once loaded, their confidence label is the page's confidence so the
+  // headline cards never say "high" while the comps block says "low".
+  const verifiedComps = useVerifiedComps(fullInputs);
+  const compsConfidence = verifiedConfidence(verifiedComps, result);
+
   const peerConfidence: 'high' | 'medium' | 'low' = useMemo(() => {
+    if (compsConfidence) return compsConfidence.level;
     if (!peerBenchmark) return 'low';
     const { n, matchLevel } = peerBenchmark;
     if (n >= 15 && matchLevel === 'strict') return 'high';
     if (n >= 5 && matchLevel !== 'global') return 'medium';
     return 'low';
-  }, [peerBenchmark]);
+  }, [peerBenchmark, compsConfidence]);
   const stepDownConfidence = (l: 'high' | 'medium' | 'low'): 'high' | 'medium' | 'low' => (l === 'high' ? 'medium' : 'low');
   const milestoneConfidence = stepDownConfidence(peerConfidence);
   const commercialConfidence = stepDownConfidence(milestoneConfidence);
@@ -1382,6 +1390,16 @@ export default function Results({ result, tier = 'free', onUpgrade, onBuyReport,
         {/* ═══ TAB 1: SUMMARY ═══ */}
         {activeTab === 'summary' && (
         <>
+        {/* Deals like yours: real comparable deals first, the estimate second */}
+        <DealsLikeYours
+          state={verifiedComps}
+          result={result}
+          inputs={fullInputs}
+          hasFullAccess={hasFullAccess}
+          onUpgrade={onUpgrade}
+          upfrontLabel={dtl?.upfrontLabel}
+        />
+
         {/* Deal Structure Recommendation */}
         <div className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5 xl:p-6 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
           <div className="flex items-start gap-3 sm:gap-4">

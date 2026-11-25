@@ -4,6 +4,7 @@ import type {
   Phase,
   DealType,
   ReformulationSubType,
+  AcquisitionScope,
   Modality,
   Indication,
   BiomarkerStatus,
@@ -13,6 +14,8 @@ import {
   dealTypeOptions,
   dealTypeDescriptions,
   reformulationSubTypeOptions,
+  acquisitionScopeOptions,
+  acquisitionScopeDescriptions,
   reformulationSubTypeDescriptions,
   modalityOptions,
   neurologyModalityOptions,
@@ -54,6 +57,7 @@ interface AssetDetailsSectionProps {
   phase: Phase;
   dealType: DealType;
   reformulationSubType: ReformulationSubType;
+  acquisitionScope?: AcquisitionScope;
   modality: Modality;
   indication: Indication;
   biomarker: BiomarkerStatus;
@@ -63,6 +67,7 @@ interface AssetDetailsSectionProps {
   onPhaseChange: (value: Phase) => void;
   onDealTypeChange: (value: DealType) => void;
   onReformulationSubTypeChange: (value: ReformulationSubType) => void;
+  onAcquisitionScopeChange?: (value: AcquisitionScope) => void;
   onModalityChange: (value: Modality) => void;
   onIndicationChange: (value: Indication) => void;
   onBiomarkerChange: (value: BiomarkerStatus) => void;
@@ -76,6 +81,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   phase,
   dealType,
   reformulationSubType,
+  acquisitionScope = 'company',
   modality,
   indication,
   biomarker,
@@ -85,6 +91,7 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
   onPhaseChange,
   onDealTypeChange,
   onReformulationSubTypeChange,
+  onAcquisitionScopeChange,
   onModalityChange,
   onIndicationChange,
   onBiomarkerChange,
@@ -263,6 +270,19 @@ const AssetDetailsSection = React.memo(function AssetDetailsSection({
           highlighted={highlightedFields.has('dealType')}
           columns={5}
         />
+
+        {dealType === 'acquisition' && onAcquisitionScopeChange && (
+          <OptionCardGroup
+            id="acquisition-scope-select"
+            label="What is being acquired"
+            helpText="Buying a whole company and buying one program are priced very differently. Company buyouts are mostly cash at closing; single-asset purchases pay a small amount at closing and the rest as milestones."
+            options={acquisitionScopeOptions}
+            descriptions={acquisitionScopeDescriptions}
+            value={acquisitionScope}
+            onChange={(v) => onAcquisitionScopeChange(v as AcquisitionScope)}
+            columns={3}
+          />
+        )}
 
         {dealType === 'reformulation' && (
           <OptionCardGroup
