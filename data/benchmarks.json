@@ -5968,7 +5968,7 @@
       }
     }
   },
-  "_territoryNotes": "Sub-territory multipliers (europe+china+japan+row=0.82) intentionally exceed ex_us (0.45). Standalone territory deals carry an optionality premium vs carve-outs from broader ex_us agreements \u2014 individual territory rights are sold at a premium to the aggregate. Greater China was re-measured Nov 23 2026: 25 China-only licenses (2023-2026) priced at x0.30 of the upfront paid with 0.12, so it is 0.4 (Chinese licensees pay for China rights well beyond China's share of revenue). Europe, Japan and the other sub-territories have not been re-measured.",
+  "_territoryNotes": "Sub-territory multipliers (europe+china+japan+row=0.82) intentionally exceed ex_us (0.45). Standalone territory deals carry an optionality premium vs carve-outs from broader ex_us agreements \u2014 individual territory rights are sold at a premium to the aggregate. Greater China was re-measured Nov 23 2026: 25 China-only licenses (2023-2026) priced at x0.30 of the upfront paid with 0.12, so it is 0.4 (Chinese licensees pay for China rights well beyond China's share of revenue). Re-measured Nov 23 2026 with the widened backtest (scripts/terms-backtest.ts, primary-sourced deals_verified licenses with a disclosed upfront, announced 2023-01 to 2026-09, neutral inputs; global median calculator/actual x1.30, n=190): Japan 0.09 -> 0.14 (n=10, x0.86 -> x1.41; phase-matched the gap is x1.9, and on 2017-2026 deals, n=16, Japan still prices at x0.85 against x1.41 global at 0.14, so 0.14 is conservative). Left unchanged: Greater China 0.4 (n=19, x1.92 raw but x1.17 of global phase for phase, interval includes 1), ex_us 0.45 (n=14, x0.95; several rows labelled ex-US are ex-China licenses), Europe 0.25 (only 3 phase-priceable Europe-only licenses 2023-2026, 5 since 2017: not measurable), us_only 0.55 (n=9 in the window; on 2017-2026 deals, n=27, US-only licenses price at about x2.5-3 of global phase for phase, so 0.55 looks high, but US-only deals are mostly small late-stage specialty-pharma licenses and the change needs a larger sample). Other sub-territories have under 10 deals.",
   "territories": {
     "global": {
       "multiplier": 1,
@@ -5997,9 +5997,10 @@
       "context": "China-only licenses with a disclosed upfront (2023-2026) were paid about 0.4x a comparable global license; VBP pricing and geopolitical risk are already in that discount"
     },
     "japan": {
-      "multiplier": 0.09,
+      "multiplier": 0.14,
+      "revenueShare": 0.06,
       "label": "Japan",
-      "context": "~6% of global revenue, NHI price controls, aging population"
+      "context": "Japan-only licenses with a disclosed upfront (10 primary-sourced, 2023-2026) priced at x0.86 of the upfront paid with 0.09, against x1.30 for global licenses; 0.14 brings them level. Japan is ~6% of worldwide sales (revenueShare); Japanese licensees pay above that share"
     },
     "row": {
       "multiplier": 0.08,

@@ -19,6 +19,28 @@ jobs:
           continue-on-error: true                                                      
         - run: npm test -- --ci --coverage                                             
                                                                                        
+    accuracy-gate:
+      name: Deal-terms accuracy gate
+      runs-on: ubuntu-latest
+      timeout-minutes: 5
+      # Offline and secret-free: prices the committed fixture (data/backtest/terms-backtest-fixture.json) with its
+      # committed calibration rows and fails when overall within-2x falls by more than 1 point or MdAE(log) rises by
+      # more than 0.02 against data/backtest/terms-backtest-baseline.json. To change the baseline on purpose:
+      #   npx tsx scripts/terms-backtest.ts --fixture data/backtest/terms-backtest-fixture.json --write-baseline
+      # then commit the baseline in the same PR and explain the change in the PR body.
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+            cache: 'npm'
+        - run: npm ci
+        - name: Offline backtest vs committed baseline
+          run: npx tsx scripts/terms-backtest.ts --fixture data/backtest/terms-backtest-fixture.json --check data/backtest/terms-backtest-baseline.json
+          env:
+            NEXT_PUBLIC_SUPABASE_URL: ''
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: ''
+
     build:                                                                             
       name: Build                                                                      
       runs-on: ubuntu-latest                                                           
