@@ -357,6 +357,10 @@ export async function runCompanyFamilies(db: Db, opts: FamilyRunOptions = {}): P
       if (error) throw new Error(`company_relations upsert: ${error.message}`);
       result.written += chunk.length;
     }
+    // Migration 199b: rows that differ only by legal suffix or punctuation ("AFT Pharmaceuticals" /
+    // "Aft Pharmaceuticals Limited") get a name_stem relation before families are recomputed.
+    const stem = await db.rpc('radar_link_name_stem_relations');
+    if (stem.error) result.errors.push(`radar_link_name_stem_relations: ${stem.error.message}`);
     const { data, error } = await db.rpc('radar_refresh_company_families');
     if (error) result.errors.push(`radar_refresh_company_families: ${error.message}`);
     else result.families = (data ?? null) as Record<string, unknown> | null;
