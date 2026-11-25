@@ -137,17 +137,21 @@ export interface MatchSubject {
 }
 
 /** Load every match subject (company_signal_match_subjects, migration 198). */
+export const MATCH_SUBJECTS_PAGE = 1000;
+
 export async function loadMatchSubjects(
   supabase: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string } | null }> },
 ): Promise<MatchSubject[]> {
   const out: MatchSubject[] = [];
   let after: string | null = null;
-  for (let page = 0; page < 20; page++) {
-    const { data, error } = await supabase.rpc('company_signal_match_subjects', { p_after: after, p_limit: 5000 });
+  // PostgREST caps every response at 1,000 rows (max_rows), whatever p_limit asks for, so page by
+  // keyset until a page comes back empty; never treat a short page as the end.
+  for (let page = 0; page < 100; page++) {
+    const { data, error } = await supabase.rpc('company_signal_match_subjects', { p_after: after, p_limit: MATCH_SUBJECTS_PAGE });
     if (error) throw new Error(`match subjects: ${error.message}`);
     const rows = (data ?? []) as MatchSubject[];
+    if (rows.length === 0) break;
     out.push(...rows);
-    if (rows.length < 5000) break;
     after = rows[rows.length - 1].id;
   }
   return out;
