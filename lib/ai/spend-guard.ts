@@ -20,8 +20,19 @@
  *                pages. Each of those sources draws on its own share until it is spent, at most
  *                AI_BACKLOG_DAILY_USD a day, then falls back to the bulk lane.
  *
+ * Inside the background pool (Nov 23 2026), two groups so the exchange scanners cannot
+ * starve the US sources and verification again:
+ *   reserved     EDGAR 8-K/6-K realtime, newswire press releases, the deal gate and
+ *                verification (deal-verifier, primary-verify, flag-fixer). Until they have
+ *                spent AI_CORE_RESERVE_USD today, every other background source stops that
+ *                much short of the background cap. The reserve is a floor for them, not extra
+ *                money: total background spend still never exceeds AI_DAILY_CAP_USD.
+ *   exchanges    HKEX (daily + backfill), ASX, DART, CNINFO, TDnet, MFN: capped together at
+ *                AI_EXCHANGE_DAILY_USD.
+ *
  * Caps (USD per UTC day): AI_DAILY_CAP_USD (core + bulk), AI_BULK_SHARE (share of it
- * bulk may use), AI_INTERACTIVE_DAILY_CAP_USD, AI_SEARCH_DAILY_CAP_USD. Lean defaults are deliberately low;
+ * bulk may use), AI_CORE_RESERVE_USD, AI_EXCHANGE_DAILY_USD, AI_INTERACTIVE_DAILY_CAP_USD,
+ * AI_SEARCH_DAILY_CAP_USD. Lean defaults are deliberately low;
  * AI_BUDGET_MODE=full raises them. Ledger errors fail open: a database hiccup must
  * not stop the product, and the per-run caps in each job still apply.
  */
@@ -49,9 +60,14 @@ const INTERACTIVE_SOURCES = new Set([
   'query', 'mcp', 'deals-enrich', 'deal-memo', 'playbook',
   'objection', 'comparable-narrator', 'admin-deal-ingest', 'admin-bulk-ingest', 'outreach-generator',
 ]);
+/** Exchange announcement scanners: one spend label each (lib/ingestion/sec-edgar.ts ExtractionSource), capped together. */
+export const EXCHANGE_SOURCES: ReadonlySet<string> = new Set(['hkex', 'hkex-backfill', 'asx', 'dart', 'cninfo', 'tdnet', 'mfn']);
+/** Highest-yield new-deal sources and verification: they get the reserved slice of the background pool. */
+export const RESERVED_SOURCES: ReadonlySet<string> = new Set(['edgar-realtime', 'press-releases', 'deal-gate', 'deal-verifier', 'primary-verify', 'flag-fixer']);
 const CORE_SOURCES = new Set([
   'sec-edgar', 'deal-gate', 'press-releases', 'perplexity-deals', 'deal-verifier', 'ftc-premerger',
   'deal-status', 'flag-fixer', 'qa-health-check',
+  'edgar-realtime', 'primary-verify', 're-extract-pending', ...EXCHANGE_SOURCES,
 ]);
 
 export function laneFor(source: string): SpendLane {
@@ -92,6 +108,16 @@ export interface SpendCaps {
   bulk: number;
   interactive: number;
   search: number;
+  /** Part of `background` held for RESERVED_SOURCES until they have spent it. */
+  coreReserve: number;
+  /** Cap on EXCHANGE_SOURCES together. */
+  exchange: number;
+}
+
+/** Today's spend by group, read from the per-source ledger rows. */
+export interface GroupTotals {
+  reserved: number;
+  exchange: number;
 }
 
 export function spendCaps(env: NodeJS.ProcessEnv = process.env): SpendCaps {
@@ -107,6 +133,9 @@ export function spendCaps(env: NodeJS.ProcessEnv = process.env): SpendCaps {
     bulk: background * share,
     interactive: num(env.AI_INTERACTIVE_DAILY_CAP_USD, lean ? 5 : 50),
     search: num(env.AI_SEARCH_DAILY_CAP_USD, lean ? 1 : 20),
+    // Lean $6: $2 held for EDGAR, newswires and verification; exchanges at most $1.50; bulk at most $2.
+    coreReserve: Math.min(background, num(env.AI_CORE_RESERVE_USD, lean ? 2 : 30)),
+    exchange: Math.min(background, num(env.AI_EXCHANGE_DAILY_USD, lean ? 1.5 : 50)),
   };
 }
 
@@ -156,8 +185,12 @@ export function backlogBlocked(source: string, spentBySource: Record<string, num
   return null;
 }
 
-/** Null when the lane may spend; otherwise why not. */
-export function overCap(lane: SpendLane, t: LaneTotals, caps: SpendCaps): string | null {
+/**
+ * Null when the lane may spend; otherwise why not. With `ctx` (the calling source and today's
+ * group totals) the reserved slice and the exchange cap apply too; with groups null (ledger rows
+ * unreadable) only the lane caps do, which fails open like the rest of the guard.
+ */
+export function overCap(lane: SpendLane, t: LaneTotals, caps: SpendCaps, ctx?: { source: string; groups: GroupTotals | null }): string | null {
   if (lane === 'backlog') return null; // gated by backlogBlocked()
   if (lane === 'search') {
     return t.search >= caps.search ? `search $${t.search.toFixed(2)} of $${caps.search.toFixed(2)}` : null;
@@ -167,7 +200,25 @@ export function overCap(lane: SpendLane, t: LaneTotals, caps: SpendCaps): string
   }
   const background = t.core + t.bulk;
   if (background >= caps.background) return `background $${background.toFixed(2)} of $${caps.background.toFixed(2)}`;
+  const groups = ctx?.groups;
+  if (ctx && groups && !RESERVED_SOURCES.has(ctx.source)) {
+    const held = Math.max(0, (caps.coreReserve ?? 0) - groups.reserved);
+    if (held > 0 && background >= caps.background - held) {
+      return `background $${background.toFixed(2)} of $${caps.background.toFixed(2)} ($${held.toFixed(2)} held for EDGAR, newswires and verification)`;
+    }
+  }
   if (lane === 'bulk' && t.bulk >= caps.bulk) return `bulk $${t.bulk.toFixed(2)} of $${caps.bulk.toFixed(2)}`;
+  if (ctx && groups && EXCHANGE_SOURCES.has(ctx.source) && groups.exchange >= (caps.exchange ?? Infinity)) {
+    return `exchanges $${groups.exchange.toFixed(2)} of $${caps.exchange.toFixed(2)}`;
+  }
+  return null;
+}
+
+/** Group of a ledger source label (batch submits are booked as '<source>:batch'). */
+export function groupOf(source: string): keyof GroupTotals | null {
+  const s = source.replace(/:batch$/, '');
+  if (RESERVED_SOURCES.has(s)) return 'reserved';
+  if (EXCHANGE_SOURCES.has(s)) return 'exchange';
   return null;
 }
 
@@ -187,6 +238,8 @@ function ledger(): SupabaseClient {
 }
 let cached: { at: number; day: string; totals: LaneTotals } | null = null;
 let localSince: LaneTotals = { interactive: 0, search: 0, core: 0, bulk: 0, backlog: 0 };
+let groupCache: { at: number; day: string; groups: GroupTotals } | null = null;
+let groupLocal: GroupTotals = { reserved: 0, exchange: 0 };
 
 const utcDay = () => new Date().toISOString().slice(0, 10);
 
@@ -207,6 +260,28 @@ async function todayTotals(): Promise<LaneTotals | null> {
     console.warn('[spend-guard] ledger read failed, allowing call:', err instanceof Error ? err.message : String(err));
     return null;
   }
+}
+
+/** Today's reserved / exchange spend from the per-source ledger rows (core + bulk lanes). Null when unreadable. */
+async function todayGroups(): Promise<GroupTotals | null> {
+  const day = utcDay();
+  if (!groupCache || groupCache.day !== day || Date.now() - groupCache.at >= REFRESH_MS) {
+    try {
+      const { data, error } = await ledger().from('ai_spend_daily').select('source, usd').eq('day', day).in('lane', ['core', 'bulk']);
+      if (error) throw new Error(error.message);
+      const groups: GroupTotals = { reserved: 0, exchange: 0 };
+      for (const r of (data ?? []) as { source: string; usd: number | string }[]) {
+        const g = groupOf(r.source);
+        if (g) groups[g] += Number(r.usd) || 0;
+      }
+      groupCache = { at: Date.now(), day, groups };
+      groupLocal = { reserved: 0, exchange: 0 };
+    } catch (err) {
+      console.warn('[spend-guard] group ledger read failed, lane caps only:', err instanceof Error ? err.message : String(err));
+      return null;
+    }
+  }
+  return { reserved: groupCache.groups.reserved + groupLocal.reserved, exchange: groupCache.groups.exchange + groupLocal.exchange };
 }
 
 let backlogCache: { at: number; bySource: Record<string, number> } | null = null;
@@ -249,6 +324,8 @@ export async function backlogActive(source: string): Promise<boolean> {
 
 async function record(lane: SpendLane, source: string, model: string, row: { calls: number; blocked: number; input: number; output: number; usd: number }) {
   localSince[lane] += row.usd;
+  const group = lane === 'core' || lane === 'bulk' ? groupOf(source) : null;
+  if (group) groupLocal[group] += row.usd;
   if (lane === 'backlog') backlogLocal[source.replace(/:batch$/, '')] = (backlogLocal[source.replace(/:batch$/, '')] ?? 0) + row.usd;
   try {
     const { error } = await ledger().rpc('ai_spend_record', {
@@ -266,7 +343,8 @@ export async function aiBudgetAvailable(source: string): Promise<{ ok: boolean; 
   const totals = await todayTotals();
   if (!totals) return { ok: true, reason: null };
   const { lane } = await resolveLane(source, totals);
-  const reason = overCap(lane, totals, spendCaps());
+  const groups = lane === 'core' || lane === 'bulk' ? await todayGroups() : null;
+  const reason = overCap(lane, totals, spendCaps(), { source, groups });
   return { ok: !reason, reason };
 }
 
@@ -318,7 +396,8 @@ export function guardedFetch(source: string, inner: typeof fetch = fetch): typeo
 
     const totals = await todayTotals();
     const { lane } = await resolveLane(source, totals);
-    const reason = totals ? overCap(lane, totals, spendCaps()) : null;
+    const groups = totals && (lane === 'core' || lane === 'bulk') ? await todayGroups() : null;
+    const reason = totals ? overCap(lane, totals, spendCaps(), { source, groups }) : null;
     if (reason) {
       await record(lane, source, requestedModel, { calls: 0, blocked: 1, input: 0, output: 0, usd: 0 });
       return budgetResponse(reason);
@@ -364,6 +443,8 @@ export function withSpendGuard<T extends object>(source: string, opts?: T): T & 
 /** Test hook. */
 export function __resetSpendGuardCache() {
   cached = null;
+  groupCache = null;
+  groupLocal = { reserved: 0, exchange: 0 };
   backlogCache = null;
   backlogLocal = {};
   localSince = { interactive: 0, search: 0, core: 0, bulk: 0, backlog: 0 };

@@ -2,6 +2,7 @@
 // Extracts licensing deals from 8-K filings using Claude AI
 
 import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
+import { noThinking, replyText } from '@/lib/ai/response-text';
 import Anthropic from '@anthropic-ai/sdk';
 import { withSpendGuard } from '@/lib/ai/spend-guard';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
@@ -608,6 +609,9 @@ ${filingText}`;
   return {
     model: EXTRACTION_MODEL,
     max_tokens: EXTRACTION_MAX_TOKENS,
+    // Nov 23 2026: claude-sonnet-5 thinks by default; for a JSON extraction that only costs
+    // output tokens and pushed the JSON out of content[0] (see lib/ai/response-text.ts).
+    ...noThinking(EXTRACTION_MODEL),
     // Sep 26 2026: the system prompt is ~2K tokens and identical on every call — cache it (≈10–20% off per extraction).
     system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userPrompt }],
@@ -637,16 +641,27 @@ export class ExtractionUnavailableError extends Error {
   constructor(msg: string) { super(msg); this.name = 'ExtractionUnavailableError'; }
 }
 
+/**
+ * Spend-ledger label per caller (Nov 23 2026). Every extraction used to be booked as
+ * 'sec-edgar', so ai_spend_daily could not say whether EDGAR, HKEX or ASX spent the day.
+ * The label also picks the budget group in lib/ai/spend-guard.ts.
+ */
+export type ExtractionSource =
+  | 'sec-edgar' | 'edgar-realtime' | 'edgar-fts-backfill' | 're-extract-pending'
+  | 'hkex' | 'hkex-backfill' | 'asx' | 'dart' | 'cninfo' | 'tdnet' | 'mfn';
+
 export async function extractDealFromFiling(
   filingText: string,
-  anthropicApiKey: string
+  anthropicApiKey: string,
+  source: ExtractionSource = 'sec-edgar',
 ): Promise<ExtractedDeal | null> {
-  const anthropic = new Anthropic(withSpendGuard('sec-edgar', { apiKey: anthropicApiKey, timeout: 60_000 }));
+  const anthropic = new Anthropic(withSpendGuard(source, { apiKey: anthropicApiKey, timeout: 60_000 }));
   try {
     const response = await anthropic.messages.create(buildDealExtractionRequest(filingText));
-    const content = response.content[0];
-    if (content.type !== 'text') return null;
-    return parseDealExtraction(content.text);
+    // Read the text blocks, not content[0]: a thinking block first is not "not a deal".
+    const text = replyText(response.content);
+    if (!text) throw new Error(`extractor reply had no text block (stop_reason ${response.stop_reason})`);
+    return parseDealExtraction(text);
   } catch (error) {
     // Sep 26 2026: an API failure (credit exhausted, rate limit, timeout) must not read as "not a deal".
     // Overnight, 5,371 filings were recorded as skipped while the account had no credit. Throw so callers

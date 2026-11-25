@@ -9,6 +9,8 @@ import { insertCitedDeal } from '../insert-deal';
 import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea } from '../sec-edgar';
 import { validateExtractedDeal } from '../deal-extraction-validator';
 import { classifyAndEnrichDeal } from '../company-geography';
+import { prefilterDocument } from '../deal-prefilter';
+import { alreadyJudged, rememberVerdict, forgetVerdict, type DocScope } from '../doc-memory';
 
 export interface FilingTextInput {
   /** Stable id for dedupe, e.g. 'cninfo:1225580763'. */
@@ -23,6 +25,10 @@ export interface FilingTextInput {
   defaultLicensorRegion?: string | null;
   /** Label for funnel examples, e.g. company + headline. */
   label: string;
+  /** Announcement title for the free pre-filter (lib/ingestion/deal-prefilter.ts). */
+  title?: string;
+  /** Document-memory scope and spend label (Nov 23 2026). */
+  scope: Extract<DocScope, 'cninfo' | 'mfn'>;
 }
 
 export interface FilingTextOptions {
@@ -45,8 +51,12 @@ export async function processFilingText(
   const { funnel, dryRun } = opts;
   const { data: existing } = await supabase.from('deals').select('id').eq('source_filing_id', input.filingId).limit(1).maybeSingle();
   if (existing) { funnel.count('already_in_table'); return 'skipped'; }
+  if (await alreadyJudged(supabase, input.scope, input.filingId)) { funnel.count('already_judged'); return 'skipped'; }
   if (input.text.length < 300) { funnel.count('content_too_short', input.sourceType, input.label); return 'skipped'; }
-  const deal = await extractDealFromFiling(input.text.substring(0, 12_000), opts.anthropicApiKey);
+  const screen = prefilterDocument({ title: input.title, text: input.text });
+  if (!screen.keep) { funnel.count('prefiltered', screen.reason, input.label.slice(0, 100)); return 'skipped'; }
+  const deal = await extractDealFromFiling(input.text.substring(0, 12_000), opts.anthropicApiKey, input.scope);
+  if (!dryRun) await rememberVerdict(supabase, input.scope, input.filingId, deal ? 'extracted' : 'not_a_deal');
   if (!deal) { funnel.count('not_a_deal', input.sourceType, input.label.slice(0, 100)); return 'skipped'; }
   const floor = Math.min(opts.reviewConfidence, opts.minConfidence);
   if (deal.confidence_score < floor) { funnel.count('confidence_gate', deal.confidence_score >= 60 ? '60-74' : 'below-60', `${deal.licensor} → ${deal.licensee} c=${deal.confidence_score}`); return 'skipped'; }
@@ -96,6 +106,7 @@ export async function processFilingText(
   if (result.outcome === 'inserted') { funnel.count(dryRun ? 'dry_run_would_insert' : 'inserted', undefined, `${deal.licensor} → ${deal.licensee} ${deal.total_deal_value_usd ?? ''}`); return 'inserted'; }
   if (result.outcome === 'duplicate') { funnel.count('insert_duplicate'); return 'skipped'; }
   funnel.count('insert_error', result.outcome, result.error);
+  await forgetVerdict(supabase, input.scope, input.filingId);
   return 'error';
 }
 

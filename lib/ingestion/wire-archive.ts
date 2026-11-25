@@ -331,7 +331,7 @@ export async function runWireArchive(supabase: SupabaseClient, browser: Browser,
           result.gated_in++;
           if (extractions >= maxExtractions) return;
           extractions++;
-          const deal = await extractDealFromArticle(item.title, content, item.source === 'prnewswire' ? 'PR Newswire archive' : 'GlobeNewswire archive', opts.anthropicApiKey);
+          const deal = await extractDealFromArticle(item.title, content, item.source === 'prnewswire' ? 'PR Newswire archive' : 'GlobeNewswire archive', opts.anthropicApiKey, 'wire-archive');
           if (!deal) {
             funnel.count('not_a_deal', 'article', item.title);
             if (!opts.dryRun) await upsertLedger(supabase, item, { processed: true, is_deal_announcement: false, processing_notes: 'archive: extractor found no deal' });
