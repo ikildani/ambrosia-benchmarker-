@@ -17,6 +17,10 @@
  * Suggested schedule (vercel.json is owned by the orchestrator):
  *   every 2 h  → "0 *\/2 * * *"  keeps ISRCTN/CTIS/Health Canada current and walks the
  *   id-based registries (IRCT, DRKS, CRIS, jRCT, ReBEC) at ~30 pages/day each.
+ *
+ * Bulk backfills (EU CTR, lib/ingestion/registries/schedule.ts) are kept out of the round
+ * robin and get the whole run at their UTC hours until the walk completes (then one re-walk
+ * every 90 days), so the incremental registries keep their slices.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -31,6 +35,7 @@ import {
   type AnyRegistryAdapter,
   type SweepResult,
 } from '@/lib/ingestion/registries';
+import { BACKLOG_REGISTRIES, planRegistryRun, type BacklogState } from '@/lib/ingestion/registries/schedule';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -69,6 +74,7 @@ export async function GET(request: NextRequest) {
   const perAdapterBudgetMs = (parsePositiveInt(params.get('budget'), 120) ?? 120) * 1000;
 
   let adapters: AnyRegistryAdapter[];
+  let dedicatedRun = false;
   if (only) {
     const adapter = getRegistryAdapter(only);
     if (!adapter) {
@@ -79,16 +85,32 @@ export async function GET(request: NextRequest) {
     adapters = sweepableAdapters();
     // Least recently run first.
     const lastRun = new Map<string, string>();
+    const backlogStates: Record<string, BacklogState> = {};
     try {
       const { data } = await supabase
         .from('radar_sync_cursors')
-        .select('source, last_run_at')
+        .select('source, last_run_at, cursor, state')
         .in('source', adapters.map(a => cursorSource(a.registry)));
-      for (const row of data ?? []) lastRun.set(String(row.source), String(row.last_run_at ?? ''));
+      for (const row of data ?? []) {
+        lastRun.set(String(row.source), String(row.last_run_at ?? ''));
+        const id = String(row.source).replace(/^registry:/, '');
+        if (BACKLOG_REGISTRIES.some(b => b.registry === id)) {
+          const state = (row.state ?? {}) as { last_completed_at?: string };
+          backlogStates[id] = { lastCompletedAt: state.last_completed_at ?? null, cursor: (row.cursor as string | null) ?? null };
+        }
+      }
     } catch {
       /* first run */
     }
-    adapters.sort((a, b) => (lastRun.get(cursorSource(a.registry)) ?? '').localeCompare(lastRun.get(cursorSource(b.registry)) ?? ''));
+    const plan = planRegistryRun(new Date().getUTCHours(), backlogStates);
+    const dedicated = plan.dedicated ? adapters.find(a => a.registry === plan.dedicated) : undefined;
+    if (dedicated) {
+      dedicatedRun = true;
+      adapters = [dedicated];
+    } else {
+      adapters = adapters.filter(a => !plan.exclude.includes(a.registry));
+      adapters.sort((a, b) => (lastRun.get(cursorSource(a.registry)) ?? '').localeCompare(lastRun.get(cursorSource(b.registry)) ?? ''));
+    }
   }
 
   const results: SweepResult[] = [];
@@ -99,7 +121,7 @@ export async function GET(request: NextRequest) {
     for (const adapter of adapters) {
       const remaining = TOTAL_BUDGET_MS - (Date.now() - startedAt);
       if (remaining < MIN_SLICE_MS) break;
-      const budgetMs = only ? remaining : Math.min(remaining, perAdapterBudgetMs);
+      const budgetMs = only || dedicatedRun ? remaining : Math.min(remaining, perAdapterBudgetMs);
       try {
         results.push(await runRegistrySweep(supabase, adapter, { budgetMs, limit, since, maxPages, signal: controller.signal }));
       } catch (err) {
@@ -151,6 +173,7 @@ export async function GET(request: NextRequest) {
     parameters: {
       stage: 'registry_sweep',
       registry: only ?? null,
+      dedicated_backlog: dedicatedRun ? adapters[0]?.registry ?? null : null,
       since: since ?? null,
       registries: perRegistry,
       companies_created: totals.companiesCreated,

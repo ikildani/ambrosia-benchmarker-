@@ -276,6 +276,7 @@ export async function runEdgarFtsBackfill(supabase: SupabaseClient, opts: Backfi
             outcome = await processEftsDocument(supabase, doc, {
               anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, reviewConfidence, funnel,
               sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k',
+              aiSource: 'edgar-fts-backfill',
             });
           } catch (e) {
             // One attempt per filing: recording the failure keeps a flaky filing from pinning the cursor.

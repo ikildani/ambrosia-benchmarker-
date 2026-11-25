@@ -22,7 +22,7 @@ import {
   type EvidenceBundle,
   type SignalFactor,
 } from '@/lib/radar/signal-detection';
-import { emptyFeatureBundle, FEATURE_NAMES, SIGN_CONSTRAINTS, type FeatureBundle } from '@/lib/radar/backtest/features';
+import { emptyFeatureBundle, FEATURE_NAMES, FEATURE_VERSION, SIGN_CONSTRAINTS, type FeatureBundle } from '@/lib/radar/backtest/features';
 import { buildModelParams, sigmoid, type ModelParams, type TrainedLogistic } from '@/lib/radar/backtest/model';
 
 const NOW = new Date('2026-09-08T08:00:00Z');
@@ -337,7 +337,7 @@ describe('radar scoring v3 — model path', () => {
     expect(r.modelVersion).toBe('v3.synthetic');
     expect(r.probability).not.toBeNull();
     expect(r.licensingIntentScore).toBe(Math.round(100 * (r.probability as number) * 1.0));
-    expect(r.featureVector?.version).toBe('v4.0');
+    expect(r.featureVector?.version).toBe(FEATURE_VERSION);
     expect(r.scoreConfidence).toBe(Math.round((r.featureVector?.completeness ?? 0) * 100));
     expect(r.scoreConfidence).toBeGreaterThan(0);
     // The nine legacy detectors still run and feed licensing_signals

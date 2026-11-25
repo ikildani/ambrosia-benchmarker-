@@ -82,6 +82,18 @@ export type DealType = 'licensing' | 'acquisition' | 'codevelopment' | 'option' 
 
 // Reformulation sub-type — differentiates 505(b)(2) pathways with dramatically different economics
 export type ReformulationSubType = 'formulation_change' | 'route_change' | 'dosage_form' | 'new_indication';
+/** What an acquisition buys: the whole company (default) or a single asset carved out of its owner. */
+export type AcquisitionScope = 'company' | 'asset';
+
+/**
+ * Asset purchases price at this share of the licensing value for the same program, with licensing's upfront share
+ * and milestone mix. Measured Nov 2026 on 49 primary-sourced asset purchases in `deals_verified` (2017+, neutral
+ * inputs, live calibration): with 0.10 the pre-approval ones (n=27) price at x1.44 of the upfront paid and x0.75 of
+ * the total (n=23); approved-product sales come out low (x0.44 upfront). 0.15 would put pre-approval upfronts at
+ * x2.2. Company pricing on the same 49 deals was x33 of the upfront paid. Whole-company acquisitions keep the phase
+ * acquisition multipliers (clinical-stage buyouts price at x0.5-1.1 of the upfront paid).
+ */
+export const ASSET_PURCHASE_FACTOR = 0.10;
 
 // Modality types (17 oncology + 6 neurology = 23 options)
 export type Modality =
@@ -464,6 +476,8 @@ export interface CalculationInput {
   // Reformulation: sub-type selection drives PoS uplift, cost, and duration profiles.
   // Only used when dealType === 'reformulation'. Defaults to 'route_change' if omitted.
   reformulationSubType?: ReformulationSubType;
+  // Acquisition: whole company (default) or a single asset. Only used when dealType === 'acquisition'.
+  acquisitionScope?: AcquisitionScope;
   // Co-development: licensee's share of the remaining R&D budget (0–1). Default 0.5.
   costSharingRatio?: number;
   // Option: exercise fee in $M, paid only if the licensee converts the option.
@@ -1781,8 +1795,15 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
     collaboration: phaseCollabMultipliers[input.phase] ?? 0.50,
     reformulation: phaseReformulationMultipliers[input.phase] ?? 0.55,
   };
-  const dealTypeMultiplier = dealTypeMultipliers[dealType];
-  if (dealType !== 'licensing') {
+  const isAssetPurchase = dealType === 'acquisition' && input.acquisitionScope === 'asset';
+  const dealTypeMultiplier = isAssetPurchase ? ASSET_PURCHASE_FACTOR : dealTypeMultipliers[dealType];
+  if (isAssetPurchase) {
+    modifiers.push({
+      name: 'Asset purchase',
+      multiplier: dealTypeMultiplier,
+      context: 'Single-asset sales pay a fraction of license value, mostly in milestones',
+    });
+  } else if (dealType !== 'licensing') {
     const dealTypeLabels: Record<DealType, string> = {
       licensing: 'Licensing', acquisition: 'Acquisition / M&A',
       codevelopment: 'Co-Development', option: 'Option Agreement',
@@ -2018,7 +2039,8 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
 
   // Calculate upfront based on phase ratios with risk adjustment
   const baseUpfrontRatios = phaseConfig.upfrontRatios[input.phase];
-  const upfrontRatios = dealTypeUpfrontOverrides[dealType] || baseUpfrontRatios;
+  // Asset purchases are paid like licenses (median upfront ~10% of total), not like company buyouts.
+  const upfrontRatios = (isAssetPurchase ? null : dealTypeUpfrontOverrides[dealType]) || baseUpfrontRatios;
   const riskScore = calculateRiskScore(input);
   // Higher risk = lower upfront ratio (toward low end)
   const riskFactor = Math.max(0, Math.min(riskScore / 100, 1)); // Clamp 0 to 1
@@ -2058,7 +2080,7 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   const useDMRebalance = isNeurology && input.treatmentApproach === 'diseaseModifying' && dmPhaseAdjust;
 
   // Priority: deal type override > neurology DM rebalance > phase-based default
-  const milestoneAlloc = dealTypeMilestoneOverrides[dealType]
+  const milestoneAlloc = (isAssetPurchase ? null : dealTypeMilestoneOverrides[dealType])
     ?? (useDMRebalance
       ? (dmPhaseAdjust.milestoneRebalance[input.phase] ?? phaseConfig.milestoneAllocations[input.phase])
       : phaseConfig.milestoneAllocations[input.phase]);
@@ -2150,7 +2172,9 @@ export function calculateDealTerms(input: CalculationInput): CalculationResult {
   };
 
   // Generate deal-type-specific labels to prevent cross-contamination
-  const dealTypeLabels = getDealTypeLabels(dealType, recommendedUpfrontPercent);
+  const dealTypeLabels = isAssetPurchase
+    ? assetPurchaseLabels(recommendedUpfrontPercent)
+    : getDealTypeLabels(dealType, recommendedUpfrontPercent);
 
   // Get negotiation insight
   const negotiationInsight = getNegotiationInsight(input);
@@ -2499,6 +2523,24 @@ function calculateBreakdownValue(
   };
 }
 
+/** Labels for a single-asset purchase: paid like a license (small upfront, development and sales milestones). */
+function assetPurchaseLabels(upfrontPercent: number): DealTypeLabels {
+  return {
+    upfrontLabel: 'Purchase Price at Closing',
+    upfrontBadge: 'Closing Payment',
+    upfrontTooltip: 'Cash paid when the asset changes hands. Asset purchases usually pay 5-25% of total value at closing and the rest as milestones.',
+    totalValueLabel: 'Total Purchase Price',
+    devMilestoneLabel: 'Development Milestones',
+    regMilestoneLabel: 'Regulatory Milestones',
+    commMilestoneLabel: 'Sales Milestones',
+    milestoneBadge: 'Contingent',
+    royaltyLabel: 'Ownership',
+    royaltyNote: 'Not modeled. Some asset purchases add royalties; most pay through milestones',
+    recommendationPrefix: `~${upfrontPercent}% at closing / ~${100 - upfrontPercent}% milestones`,
+    dealTypeDisplay: 'Asset purchase',
+  };
+}
+
 /**
  * Generate deal-type-specific labels for all user-facing output.
  * Prevents cross-contamination of licensing terminology into acquisitions, options, etc.
@@ -2657,7 +2699,9 @@ function generateRationale(input: CalculationInput, riskScore: number): string {
     collaboration: 'As a research collaboration, upfront research funding is modest with value contingent on achieving research objectives and potential license conversion. ',
     reformulation: 'As a reformulation / 505(b)(2) deal, economics reflect lower development risk due to established safety data, with regulatory milestones weighted toward the abbreviated approval pathway. ',
   };
-  const prefix = dealTypeFraming[dealType] || '';
+  const prefix = dealType === 'acquisition' && input.acquisitionScope === 'asset'
+    ? 'Structured as the purchase of a single asset, the price is paid mostly through milestones, as in the asset sales on record. '
+    : dealTypeFraming[dealType] || '';
 
   return prefix + generateTARationale(ta, phaseLabel, riskScore);
 }
@@ -2803,6 +2847,16 @@ export const dealTypeDescriptions: Record<string, string> = {
   option: 'Right to license at a future date, lower upfront',
   collaboration: 'Early research partnership, milestone-driven',
   reformulation: 'Line extension, new formulation, or 505(b)(2) pathway referencing prior approval',
+};
+
+export const acquisitionScopeOptions = [
+  { value: 'company', label: 'Whole company' },
+  { value: 'asset', label: 'Single asset' },
+];
+
+export const acquisitionScopeDescriptions: Record<string, string> = {
+  company: 'Buying the company that owns the program. Mostly upfront cash, priced off company buyouts.',
+  asset: 'Buying one program from its owner. Small upfront and large milestones, priced off asset purchases.',
 };
 
 export const reformulationSubTypeOptions = [

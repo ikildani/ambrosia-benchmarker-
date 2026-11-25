@@ -584,11 +584,12 @@ export async function loadFeedCompanies(
   const rows: Array<HkexMatchCandidate & { hkex_stock_code: string | null; hkex_match_method: string | null }> = [];
   let after: string | null = null;
   for (let page = 0; page < 100; page++) {
-    const { data, error } = await supabase.rpc('company_signal_feed_companies', { p_after: after, p_limit: 2000 });
+    // PostgREST caps responses at 1,000 rows whatever p_limit says: page until empty, not until short.
+    const { data, error } = await supabase.rpc('company_signal_feed_companies', { p_after: after, p_limit: 1000 });
     if (error) return { rows, error: `company_signal_feed_companies: ${error.message}` };
     const batch = (data ?? []) as Array<HkexMatchCandidate & { hkex_stock_code: string | null; hkex_match_method: string | null }>;
+    if (batch.length === 0) break;
     rows.push(...batch);
-    if (batch.length < 2000) break;
     after = batch[batch.length - 1].id;
   }
   return { rows };

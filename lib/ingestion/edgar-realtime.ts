@@ -12,7 +12,9 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea, EXTRACTION_MODEL, type ExtractedDeal } from './sec-edgar';
+import { extractDealFromFiling, findOrCreateCompany, deriveTherapeuticArea, EXTRACTION_MODEL, type ExtractedDeal, type ExtractionSource } from './sec-edgar';
+import { prefilterDocument } from './deal-prefilter';
+import { alreadyJudged, rememberVerdict, forgetVerdict, flushDocMemories } from './doc-memory';
 import { dealGate, type GateMode } from './deal-gate';
 import { validateExtractedDeal } from './deal-extraction-validator';
 import { classifyAndEnrichDeal } from './company-geography';
@@ -66,6 +68,14 @@ export interface EftsProcessOptions {
   reviewConfidence?: number;
   /** Gate in front of the extractor; defaults to EXTRACTION_GATE. */
   gate?: GateMode;
+  /** Spend label (Nov 23 2026): 'edgar-realtime' (reserved core budget) unless the caller is a backfill. */
+  aiSource?: ExtractionSource;
+  /**
+   * Remember extractor and gate verdicts per accession (lib/ingestion/doc-memory.ts) so a filing
+   * is judged once, not on every 2-hourly run of its two-day window. The backfill keeps its own
+   * per-filing ledger and leaves this off.
+   */
+  useMemory?: boolean;
 }
 
 export type EftsLoadResult =
@@ -106,12 +116,22 @@ export async function processEftsDocument(
   doc: EftsDocument,
   opts: EftsProcessOptions,
 ): Promise<'inserted' | 'skipped' | 'error'> {
+  const remember = opts.useMemory && !opts.dryRun;
+  if (opts.useMemory && await alreadyJudged(supabase, 'edgar', doc.accession)) { opts.funnel.count('already_judged'); return 'skipped'; }
   const loaded = await loadEftsDocumentText(supabase, doc, opts);
-  if (loaded.status === 'skipped') return 'skipped';
+  if (loaded.status === 'skipped') {
+    if (remember && loaded.outcome === 'gate_rejected') await rememberVerdict(supabase, 'edgar', doc.accession, 'not_a_deal');
+    return 'skipped';
+  }
+  const screen = prefilterDocument({ text: loaded.text });
+  if (!screen.keep) { opts.funnel.count('prefiltered', screen.reason, `${doc.companyName} ${doc.accession}`); return 'skipped'; }
 
-  const deal = await extractDealFromFiling(loaded.text, opts.anthropicApiKey);
+  const deal = await extractDealFromFiling(loaded.text, opts.anthropicApiKey, opts.aiSource ?? 'edgar-realtime');
+  if (remember) await rememberVerdict(supabase, 'edgar', doc.accession, deal ? 'extracted' : 'not_a_deal');
   if (!deal) { opts.funnel.count('not_a_deal', doc.fileType || 'unknown', `${doc.companyName} ${doc.accession}`); return 'skipped'; }
-  return persistExtractedDeal(supabase, doc, deal, opts);
+  const outcome = await persistExtractedDeal(supabase, doc, deal, opts);
+  if (outcome === 'error' && opts.useMemory) await forgetVerdict(supabase, 'edgar', doc.accession);
+  return outcome;
 }
 
 /**
@@ -245,6 +265,7 @@ export async function runEdgarRealtime(supabase: SupabaseClient, opts: EdgarReal
           const outcome = await processEftsDocument(supabase, doc, {
             anthropicApiKey: opts.anthropicApiKey, dryRun, minConfidence, funnel,
             sourceType: doc.form.startsWith('6-K') ? 'sec_6k' : 'sec_8k', onHighValue: opts.onHighValue,
+            aiSource: 'edgar-realtime', useMemory: true,
           });
           if (outcome === 'inserted') inserted++;
           if (outcome === 'error') errors.push(`Insert error for ${doc.accession}`);
@@ -260,5 +281,6 @@ export async function runEdgarRealtime(supabase: SupabaseClient, opts: EdgarReal
 
   const summary = funnel.summary();
   console.log(`[edgar-realtime] ${date} matched=${totalAcrossQueries} ${summary}${dryRun ? ' (dry run)' : ''}`);
+  await flushDocMemories(supabase, { dryRun });
   return { date, fetched, processed, inserted, errors, funnel: funnel.toJSON(), summary, noFilings: totalAcrossQueries === 0 };
 }

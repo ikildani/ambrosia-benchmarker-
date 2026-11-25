@@ -27,6 +27,7 @@ import { runCninfoIngestion } from '@/lib/ingestion/exchanges/cninfo';
 import { runMfnIngestion } from '@/lib/ingestion/exchanges/mfn';
 import { runResourcing } from '@/lib/ingestion/resource';
 import { runGeoEnrichment } from '@/lib/ingestion/geo-enrich';
+import { aiBudgetAvailable } from '@/lib/ai/spend-guard';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -102,8 +103,18 @@ const MFN: Adapter = {
     return { fetched: r.fetched, processed: r.extracted, inserted: r.inserted, errors: r.errors, funnel: r.funnel as Record<string, unknown> | undefined, parameters: { candidates: r.candidates }, expectRecords: r.expectRecords }; },
 };
 
+/** Adapters whose work is model extraction (spend group 'exchanges' in lib/ai/spend-guard.ts). */
+const EXTRACTING = new Set(['hkex_daily', 'hkex_backfill', 'tdnet', 'asx', 'dart', 'cninfo', 'mfn']);
+
 async function runOne(supabase: SupabaseClient, a: Adapter, ctx: { anthropicApiKey: string; dryRun: boolean; budgetMs: number }): Promise<Record<string, unknown>> {
   const started = Date.now();
+  // Nov 23 2026: once the exchange share of the day's budget is spent, do not walk listings and
+  // download PDFs only to have every extraction refused. Unjudged documents stay unremembered
+  // (lib/ingestion/doc-memory.ts) and are picked up after 00:00 UTC.
+  if (EXTRACTING.has(a.key)) {
+    const budget = await aiBudgetAvailable('hkex');
+    if (!budget.ok) return { adapter: a.key, skipped: 'ai_budget', reason: budget.reason };
+  }
   try {
     const r = await a.run(supabase, ctx);
     if (!ctx.dryRun) {

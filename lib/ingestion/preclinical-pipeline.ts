@@ -789,6 +789,12 @@ export interface PersistOptions {
   minCreateConfidence?: number;
   /** Skip the cross-company code check (tests). */
   skipForeignCheck?: boolean;
+  /**
+   * Write the disclosure onto a matched existing asset (default true). Sources that are weaker
+   * evidence than the row's own (an NIH grant vs a registry trial or a 10-K) record the match in
+   * asset_disclosures only.
+   */
+  stampMatched?: boolean;
 }
 
 /** Below this model confidence a program is recorded but never becomes a new asset. */
@@ -904,7 +910,7 @@ export async function persistPrograms(supabase: SupabaseClient, ctx: FilingConte
       continue;
     }
     if (decision.action === 'matched' && m?.asset) {
-      if (!opts.dryRun) {
+      if (!opts.dryRun && opts.stampMatched !== false) {
         const { error } = await supabase.from('clinical_assets').update(toExistingAssetPatch(p, ctx, m.asset)).eq('id', m.asset.id);
         if (error) { errors.push(`${co.name} ${p.program_name}: update ${error.message}`); continue; }
       }
@@ -973,17 +979,22 @@ export async function persistPrograms(supabase: SupabaseClient, ctx: FilingConte
 // RUN
 // ═══════════════════════════════════════════════════════════════════════
 
-export type PreclinicalMode = 'filings' | 'pages' | 'hkex';
+export type PreclinicalMode = 'filings' | 'pages' | 'hkex' | 'nih';
+
+/** UTC hours whose run reads NIH SBIR/STTR awards while that walk is due (no model calls). */
+export const NIH_SBIR_HOURS: ReadonlySet<number> = new Set([4, 16]);
 
 /**
  * Mode of a scheduled (parameterless) run of the preclinical cron, or null to skip. Filings keep
  * their 6-hourly lean slot (every run while the filings backlog allowance lasts), HKEX reports run
- * at 10:25 UTC, and server-side pipeline pages take the other slots once the owner has approved a
- * pages allowance.
+ * at 10:25 UTC, NIH SBIR/STTR awards (lib/ingestion/nih-sbir.ts, rules only) take 04:25 and 16:25
+ * while their backfill or weekly re-read is due, and server-side pipeline pages take the other
+ * slots once the owner has approved a pages allowance.
  */
-export function scheduledPreclinicalMode(utcHour: number, s: { pagesApproved: boolean; filingsBacklog: boolean; lean: boolean }): PreclinicalMode | null {
+export function scheduledPreclinicalMode(utcHour: number, s: { pagesApproved: boolean; filingsBacklog: boolean; lean: boolean; nihDue?: boolean }): PreclinicalMode | null {
   if (utcHour % 6 === 0) return 'filings';
   if (utcHour === 10) return 'hkex';
+  if (s.nihDue && NIH_SBIR_HOURS.has(utcHour)) return 'nih';
   if (s.pagesApproved) return 'pages';
   if (s.filingsBacklog || !s.lean) return 'filings';
   return null;

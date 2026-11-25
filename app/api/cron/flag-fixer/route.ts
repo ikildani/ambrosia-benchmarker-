@@ -15,6 +15,7 @@ import { timingSafeEqual } from 'crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { logCronRun } from '@/lib/cron-utils';
 import { fixFlaggedDeals } from '@/lib/ingestion/flag-fixer';
+import { perplexityDown } from '@/lib/ingestion/perplexity-health';
 import { buildFlagResolutionSlack } from '@/lib/ingestion/flag-resolution-report';
 
 export const maxDuration = 300;
@@ -28,9 +29,8 @@ export async function GET(request: NextRequest) {
   const ok = provided.length === expected.length && timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
   if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-  if (!perplexityApiKey || !anthropicApiKey) return NextResponse.json({ error: 'API keys not configured' }, { status: 500 });
+  if (!anthropicApiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
 
   const params = request.nextUrl.searchParams;
   const maxParam = Number(params.get('max'));
@@ -38,6 +38,8 @@ export async function GET(request: NextRequest) {
   const ids = (params.get('ids') || '').split(',').map(s => s.trim()).filter(Boolean);
 
   const supabase = createServiceClient();
+  // Nov 23 2026: without Perplexity (unset or marked down) only primary-cited rows are attempted.
+  const perplexityApiKey = process.env.PERPLEXITY_API_KEY && !(await perplexityDown(supabase)) ? process.env.PERPLEXITY_API_KEY : null;
   const result = await fixFlaggedDeals(supabase, perplexityApiKey, anthropicApiKey, {
     maxDeals,
     timeBudgetMs: 240_000,

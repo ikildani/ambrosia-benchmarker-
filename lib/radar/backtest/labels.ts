@@ -21,6 +21,15 @@
  *
  * Leakage: labels only look at announced_date; features only look at rows
  * dated <= as_of (features.ts). Nothing in this module reads a feature.
+ *
+ * v5 (Nov 2026) widens the positives without loosening the name match:
+ *   - licensor family: a deal whose licensor is in the asset company's corporate family
+ *     (companies.family_id, migration 193) matches like the company itself ('family');
+ *   - deal ledger: every asset of a program linked to the deal in radar_deal_program_links
+ *     (migration 192 / 196) is a positive ('ledger');
+ *   - program propagation: an event on one row of a program (a dose arm, a Chinese-name twin)
+ *     is an event for every row of that program ('program'), so the program's primary row, the
+ *     only row the feed shows and the model is trained on, carries the label.
  */
 
 import { matchAssetName, nameSegments, sameCompany, isEligibleDeal, type PartnershipDeal, type NameMatchKind } from '@/lib/radar/partnership';
@@ -34,6 +43,8 @@ export const SNAPSHOT_TO = '2025-09-01';
 export interface LabelDeal extends Pick<PartnershipDeal, 'id' | 'licensor_id' | 'licensor_name' | 'asset_name' | 'deal_type' | 'verification_status' | 'is_synthetic' | 'is_canonical'> {
   announced_date: string | null;
   source_url?: string | null;
+  /** Corporate family root of the licensor company, when known. */
+  licensor_family_id?: string | null;
 }
 
 export interface LabelAsset {
@@ -45,6 +56,10 @@ export interface LabelAsset {
   asset_aliases?: string[] | null;
   /** Resolved drug_master node, for brand/INN matches the name matcher cannot see (ZYNLONTA vs loncastuximab). */
   drug_master_id?: string | null;
+  /** Corporate family root of the company (companies.family_id, migration 193). */
+  family_id?: string | null;
+  /** Program identity (migration 187); events propagate across rows sharing it. */
+  program_key?: string | null;
 }
 
 export interface BuildLabelOptions {
@@ -67,8 +82,8 @@ export interface LabelEvent {
   deal_id: string;
   announced_date: string;
   deal_type: string | null;
-  match_kind: NameMatchKind;
-  licensor_match: 'id' | 'name';
+  match_kind: NameMatchKind | 'program';
+  licensor_match: 'id' | 'name' | 'family' | 'ledger';
 }
 
 export interface SnapshotLabel {
@@ -105,10 +120,13 @@ export function addMonths(isoDate: string, months: number): string {
 }
 
 /** Does this deal's licensor resolve to the asset's company? */
-export function licensorMatches(asset: LabelAsset, deal: Pick<LabelDeal, 'licensor_id' | 'licensor_name'>): 'id' | 'name' | null {
+export function licensorMatches(asset: LabelAsset, deal: Pick<LabelDeal, 'licensor_id' | 'licensor_name' | 'licensor_family_id'>): 'id' | 'name' | 'family' | null {
   if (deal.licensor_id && asset.company_id && deal.licensor_id === asset.company_id) return 'id';
   const names = [asset.company_name, ...(asset.company_name_variations ?? [])].filter(Boolean);
   if (names.some(n => sameCompany(n, deal.licensor_name))) return 'name';
+  const assetFamily = asset.family_id ?? asset.company_id;
+  const dealFamily = deal.licensor_family_id ?? deal.licensor_id;
+  if (assetFamily && dealFamily && assetFamily === dealFamily && (asset.family_id || deal.licensor_family_id)) return 'family';
   return null;
 }
 
@@ -123,6 +141,13 @@ export function isPositiveDealType(deal: Pick<LabelDeal, 'deal_type'>): boolean 
  */
 export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly LabelDeal[], opts: BuildLabelOptions = {}): LabelEvent[] {
   const byCompanyId = new Map<string, LabelAsset[]>();
+  const byFamily = new Map<string, LabelAsset[]>();
+  for (const a of assets) {
+    if (!a.family_id) continue;
+    const list = byFamily.get(a.family_id) ?? [];
+    list.push(a);
+    byFamily.set(a.family_id, list);
+  }
   // licensorMatches by name depends only on the company name and its variations, so a deal without a
   // usable licensor_id is compared once per company name group, not once per asset (42k assets x
   // thousands of unlinked deals ran the label phase past the cron's 300 s limit, Nov 2026).
@@ -154,7 +179,9 @@ export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly 
   for (const deal of deals) {
     if (!deal.announced_date || !isPositiveDealType(deal) || !isEligibleDeal(deal as PartnershipDeal)) continue;
     // Candidate assets: same licensor_id first (cheap), then company-name matches.
-    const candidates = deal.licensor_id ? byCompanyId.get(deal.licensor_id) ?? [] : [];
+    const own = deal.licensor_id ? byCompanyId.get(deal.licensor_id) ?? [] : [];
+    const family = deal.licensor_family_id ? byFamily.get(deal.licensor_family_id) ?? [] : [];
+    const candidates = family.length ? Array.from(new Set([...own, ...family])) : own;
     const pool = candidates.length ? candidates : assetsMatchingName(deal.licensor_name);
     // Drug ids the deal name resolves to (brand, INN or code through drug_aliases).
     const dealDrugIds = opts.drugIdByKey
@@ -173,6 +200,60 @@ export function buildLabelEvents(assets: readonly LabelAsset[], deals: readonly 
     }
   }
   return events.sort((a, b) => a.announced_date.localeCompare(b.announced_date));
+}
+
+export interface LedgerLink {
+  deal_id: string;
+  program_key: string;
+}
+
+/**
+ * Events from the deal ledger: every asset of a linked program, for eligible positive deals.
+ * The ledger already established owner and drug, so no name match is repeated here.
+ */
+export function ledgerEvents(
+  links: readonly LedgerLink[],
+  deals: ReadonlyMap<string, LabelDeal>,
+  assetsByProgram: ReadonlyMap<string, readonly LabelAsset[]>,
+): LabelEvent[] {
+  const out: LabelEvent[] = [];
+  const seen = new Set<string>();
+  for (const l of links) {
+    const deal = deals.get(l.deal_id);
+    if (!deal || !deal.announced_date || !isPositiveDealType(deal) || !isEligibleDeal(deal as PartnershipDeal)) continue;
+    for (const a of assetsByProgram.get(l.program_key) ?? []) {
+      const key = `${a.id}:${deal.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ asset_id: a.id, deal_id: deal.id, announced_date: deal.announced_date.slice(0, 10), deal_type: deal.deal_type ?? null, match_kind: 'ledger', licensor_match: 'ledger' });
+    }
+  }
+  return out;
+}
+
+/**
+ * Merge event lists and copy every event to all rows of the same program. Earlier lists win on
+ * (asset, deal) conflicts, so a direct name match keeps its own match_kind.
+ */
+export function mergeAndPropagate(
+  lists: readonly (readonly LabelEvent[])[],
+  programOf: ReadonlyMap<string, string | null | undefined>,
+  assetsByProgram: ReadonlyMap<string, readonly LabelAsset[]>,
+): LabelEvent[] {
+  const byKey = new Map<string, LabelEvent>();
+  for (const list of lists) for (const e of list) {
+    const k = `${e.asset_id}:${e.deal_id}`;
+    if (!byKey.has(k)) byKey.set(k, e);
+  }
+  for (const e of Array.from(byKey.values())) {
+    const pk = programOf.get(e.asset_id);
+    if (!pk) continue;
+    for (const sib of assetsByProgram.get(pk) ?? []) {
+      const k = `${sib.id}:${e.deal_id}`;
+      if (!byKey.has(k)) byKey.set(k, { ...e, asset_id: sib.id, match_kind: 'program' });
+    }
+  }
+  return Array.from(byKey.values()).sort((a, b) => a.announced_date.localeCompare(b.announced_date) || a.asset_id.localeCompare(b.asset_id) || a.deal_id.localeCompare(b.deal_id));
 }
 
 /**

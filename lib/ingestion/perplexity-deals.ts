@@ -12,6 +12,7 @@
  */
 
 import { budgetModel, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL } from '@/lib/ai/budget';
+import { noThinking, replyText } from '@/lib/ai/response-text';
 
 /** Deal extraction from Perplexity answers; Sonnet 5 in lean mode (lib/ai/budget.ts). */
 export const PERPLEXITY_EXTRACTION_MODEL = budgetModel(process.env.PERPLEXITY_EXTRACTION_MODEL, FULL_EXTRACTION_MODEL, LEAN_EXTRACTION_MODEL);
@@ -303,6 +304,7 @@ async function extractDealsFromText(
   const response = await anthropic.messages.create({
     model: PERPLEXITY_EXTRACTION_MODEL,
     max_tokens: 4000,
+    ...noThinking(PERPLEXITY_EXTRACTION_MODEL),
     system: `You extract structured biopharma deal data from text. Return ONLY valid JSON — an array of deal objects. Be precise: only include deals with enough information to be useful (at minimum: two company names and an asset/program name). Use null for unknown values. Do not invent or hallucinate data.`,
     messages: [{
       role: 'user',
@@ -336,10 +338,8 @@ ${text.substring(0, 8000)}${formatCitationList(citations)}`
     }],
   });
 
-  const textContent = response.content[0];
-  if (textContent.type !== 'text') return [];
-
-  const jsonMatch = textContent.text.match(/\[[\s\S]*\]/);
+  // Nov 23 2026: claude-sonnet-5 (lean) opens with a thinking block; read the text blocks.
+  const jsonMatch = replyText(response.content).match(/\[[\s\S]*\]/);
   if (!jsonMatch) return [];
 
   try {

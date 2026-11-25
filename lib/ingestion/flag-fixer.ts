@@ -24,6 +24,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { withSpendGuard } from '@/lib/ai/spend-guard';
+import { replyText } from '@/lib/ai/response-text';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchWithTimeout } from '../fetch-with-timeout';
 import { isTimeBudgetExceeded } from '../cron-utils';
@@ -306,14 +307,29 @@ async function searchPrimary(deal: FlaggedDeal, perplexityApiKey: string): Promi
   return urls;
 }
 
+/** True for a PDF by URL or content type (HKEX, ASX, CNINFO and TDnet announcements are PDFs). */
+export function isPdf(url: string, contentType: string | null): boolean {
+  return /application\/pdf/i.test(contentType ?? '') || /\.pdf(?:$|[?#])/i.test(url);
+}
+
 async function fetchDocument(url: string): Promise<string | null> {
   try {
     const res = await fetchWithTimeout(url, {
-      timeoutMs: 15_000,
-      headers: { 'User-Agent': 'Solidus research@ambrosiaventures.co', Accept: 'text/html,application/xhtml+xml,text/plain' },
+      timeoutMs: 20_000,
+      headers: { 'User-Agent': 'Solidus research@ambrosiaventures.co', Accept: 'text/html,application/xhtml+xml,text/plain,application/pdf' },
     });
     if (!res.ok) return null;
-    const text = documentText(await res.text());
+    let text: string;
+    if (isPdf(url, res.headers.get('content-type'))) {
+      // Nov 23 2026: exchange citations are PDFs; reading them as HTML gave binary noise and
+      // every exchange-sourced row failed the verbatim-evidence check.
+      const { extractText, getDocumentProxy } = await import('unpdf');
+      const pdf = await getDocumentProxy(new Uint8Array(await res.arrayBuffer()));
+      const { text: raw } = await extractText(pdf, { mergePages: true });
+      text = String(raw).replace(/\s+/g, ' ').trim().slice(0, 40_000);
+    } else {
+      text = documentText(await res.text());
+    }
     return text.length >= 400 ? text : null;
   } catch {
     return null;
@@ -349,9 +365,7 @@ Rules:
 - evidence: 1-3 sentences copied VERBATIM from the document that state the date and the money. They are checked against the text.`,
     }],
   });
-  const block = msg.content[0];
-  if (!block || block.type !== 'text') return null;
-  const m = block.text.match(/\{[\s\S]*\}/);
+  const m = replyText(msg.content).match(/\{[\s\S]*\}/);
   if (!m) return null;
   try {
     return JSON.parse(m[0]) as ExtractedTerms;
@@ -360,9 +374,9 @@ Rules:
   }
 }
 
-async function log(supabase: SupabaseClient, issueType: string, dealId: string, action: string, newValue: string | null, needsReview: boolean) {
+async function log(supabase: SupabaseClient, issueType: string, dealId: string, action: string, newValue: string | null, needsReview: boolean, cronSource: string = FLAG_FIXER_SOURCE) {
   await supabase.from('remediation_log').insert({
-    cron_source: FLAG_FIXER_SOURCE,
+    cron_source: cronSource,
     issue_type: issueType,
     deal_id: dealId,
     field_name: '*',
@@ -383,7 +397,12 @@ const DEAL_COLUMNS = 'id, licensor_name, licensee_name, asset_name, deal_type, a
  */
 export async function fixFlaggedDeals(
   supabase: SupabaseClient,
-  perplexityApiKey: string,
+  /**
+   * Null when Perplexity is not configured or is down (lib/ingestion/perplexity-health.ts).
+   * Then only rows whose own citation is a primary document are attempted; the others are
+   * left as they are, without spending one of their MAX_FIX_ATTEMPTS on an outage.
+   */
+  perplexityApiKey: string | null,
   anthropicApiKey: string,
   options?: { maxDeals?: number; timeBudgetMs?: number; retryAfterDays?: number; ids?: string[] },
 ): Promise<FlagFixResult> {
@@ -402,14 +421,18 @@ export async function fixFlaggedDeals(
   let query = supabase.from('deals').select(DEAL_COLUMNS)
     .eq('verification_status', 'flagged').eq('is_synthetic', false)
     .order('announced_date', { ascending: false, nullsFirst: false })
-    .limit(maxDeals * 5);
+    // Without a search, only primary-cited rows qualify (about 1 in 9 flagged rows): look deeper.
+    .limit(maxDeals * (perplexityApiKey ? 5 : 50));
   if (options?.ids?.length) query = query.in('id', options.ids);
   const { data: rows, error } = await query;
   if (error) {
     result.errors.push(`pick: ${error.message}`);
     return result;
   }
-  const queue = (rows ?? []).filter(r => options?.ids?.length || !skip.has(r.id)).slice(0, maxDeals) as FlaggedDeal[];
+  const queue = (rows ?? [])
+    .filter(r => options?.ids?.length || !skip.has(r.id))
+    .filter(r => perplexityApiKey || hasPrimaryCitation(r as FlaggedDeal))
+    .slice(0, maxDeals) as FlaggedDeal[];
 
   for (const deal of queue) {
     if (isTimeBudgetExceeded(start, budget)) break;
@@ -437,7 +460,13 @@ export function outcomeContext(deal: Pick<FlaggedDeal, 'licensor_name' | 'licens
   return { label, flaggedBecause: last.length > 220 ? `${last.slice(0, 217)}...` : last };
 }
 
-async function fixOne(supabase: SupabaseClient, anthropic: Anthropic, perplexityApiKey: string, deal: FlaggedDeal): Promise<FixOutcome> {
+/** True when the row's own citation is on a primary host or either party's domain. */
+export function hasPrimaryCitation(deal: Pick<FlaggedDeal, 'source_url' | 'press_release_url' | 'licensor_name' | 'licensee_name'>): boolean {
+  const urls = [deal.source_url, deal.press_release_url].filter((u): u is string => !!u);
+  return primaryCandidates(urls, { licensor: deal.licensor_name, licensee: deal.licensee_name }).length > 0;
+}
+
+async function fixOne(supabase: SupabaseClient, anthropic: Anthropic, perplexityApiKey: string | null, deal: FlaggedDeal): Promise<FixOutcome> {
   const ctx = outcomeContext(deal);
   const outcome = await fixOneInner(supabase, anthropic, perplexityApiKey, deal);
   return { ...ctx, ...outcome } as FixOutcome;
@@ -449,24 +478,32 @@ type BareOutcome =
   | { kind: 'rejected'; dealId: string; reason: string }
   | { kind: 'unresolved'; dealId: string; reason: string; attempt: number; retryOn: string };
 
-async function fixOneInner(supabase: SupabaseClient, anthropic: Anthropic, perplexityApiKey: string, deal: FlaggedDeal): Promise<BareOutcome> {
+/** Fetch each candidate in turn and keep the first extraction whose quotes are in the fetched text. */
+async function termsFromCandidates(anthropic: Anthropic, deal: FlaggedDeal, candidates: string[], max = 3): Promise<{ terms: ExtractedTerms; url: string } | { terms: null; reason: string; fetched: boolean }> {
+  let reason = candidates.length === 0 ? 'no primary source (SEC, exchange, newswire or company site) found' : 'primary source did not describe this deal';
+  let fetched = false;
+  for (const candidate of candidates.slice(0, max)) {
+    const text = await fetchDocument(candidate);
+    if (!text) { reason = `could not fetch ${candidate}`; continue; }
+    fetched = true;
+    const t = await extractTerms(anthropic, deal, candidate, text);
+    if (!t || !t.same_deal) { reason = `primary source ${candidate} did not describe this deal`; continue; }
+    if (!evidenceSupported(t.evidence, text)) { reason = `extraction from ${candidate} was not supported by the document text`; continue; }
+    return { terms: t, url: candidate };
+  }
+  return { terms: null, reason, fetched };
+}
+
+async function fixOneInner(supabase: SupabaseClient, anthropic: Anthropic, perplexityApiKey: string | null, deal: FlaggedDeal): Promise<BareOutcome> {
   const parties = { licensor: deal.licensor_name, licensee: deal.licensee_name };
   const existing = [deal.source_url, deal.press_release_url].filter((u): u is string => !!u);
   let candidates = primaryCandidates(existing, parties);
-  if (candidates.length === 0) candidates = primaryCandidates(await searchPrimary(deal, perplexityApiKey), parties);
+  if (candidates.length === 0 && perplexityApiKey) candidates = primaryCandidates(await searchPrimary(deal, perplexityApiKey), parties);
 
-  let terms: ExtractedTerms | null = null;
-  let url: string | null = null;
-  let lastReason = candidates.length === 0 ? 'no primary source (SEC, exchange, newswire or company site) found' : 'primary source did not describe this deal';
-  for (const candidate of candidates.slice(0, 3)) {
-    const text = await fetchDocument(candidate);
-    if (!text) { lastReason = `could not fetch ${candidate}`; continue; }
-    const t = await extractTerms(anthropic, deal, candidate, text);
-    if (!t || !t.same_deal) continue;
-    if (!evidenceSupported(t.evidence, text)) { lastReason = `extraction from ${candidate} was not supported by the document text`; continue; }
-    terms = t; url = candidate;
-    break;
-  }
+  const found = await termsFromCandidates(anthropic, deal, candidates);
+  const terms = found.terms;
+  const url = found.terms ? found.url : null;
+  const lastReason = found.terms ? '' : found.reason;
 
   if (!terms || !url) {
     const { count: prior } = await supabase.from('remediation_log').select('id', { count: 'exact', head: true })
@@ -492,13 +529,27 @@ async function fixOneInner(supabase: SupabaseClient, anthropic: Anthropic, perpl
     return { kind: 'unresolved', dealId: deal.id, reason: lastReason, attempt, retryOn };
   }
 
+  return applyTerms(supabase, deal, terms, url, FIXER_MODE);
+}
+
+/** How a successful primary-document check is written: the flag-fixer's wording or the pending verifier's. */
+interface ApplyMode { tag: string; cronSource: string; fixedIssue: string; duplicateIssue: string }
+const FIXER_MODE: ApplyMode = { tag: 'flag-and-fix', cronSource: FLAG_FIXER_SOURCE, fixedIssue: 'flagged_fixed', duplicateIssue: 'flagged_duplicate' };
+export const PRIMARY_VERIFY_SOURCE = 'primary_verify';
+const PENDING_MODE: ApplyMode = { tag: 'primary-verify', cronSource: PRIMARY_VERIFY_SOURCE, fixedIssue: 'pending_verified', duplicateIssue: 'pending_duplicate' };
+
+/**
+ * The document supports the deal: retire the row as the duplicate of a verified, cited row
+ * that already holds it, or correct it from the document, cite it and set it verified.
+ */
+async function applyTerms(supabase: SupabaseClient, deal: FlaggedDeal, terms: ExtractedTerms, url: string, mode: ApplyMode): Promise<BareOutcome> {
   // Already held by a verified, cited row? Then this one is its duplicate.
   const { data: others } = await supabase.from('deals')
     .select('id, licensor_name, licensee_name, announced_date, upfront_usd, total_deal_value_usd, verification_status, source_url, press_release_url, is_synthetic')
     .or(`licensor_name.ilike.%${likeToken(terms.licensor ?? deal.licensor_name)}%,licensee_name.ilike.%${likeToken(terms.licensor ?? deal.licensor_name)}%`)
     .limit(200);
   const keeper = findKeeper(deal.id, terms, (others ?? []) as CandidateRow[]);
-  if (keeper) return markDuplicate(supabase, deal, keeper.id, url);
+  if (keeper) return markDuplicate(supabase, deal, keeper.id, url, mode);
 
   const patch: Record<string, unknown> = buildPatch(deal, terms);
   if (rolesReversed(deal, terms)) {
@@ -521,7 +572,7 @@ async function fixOneInner(supabase: SupabaseClient, anthropic: Anthropic, perpl
     verify_attempted_at: new Date().toISOString(),
     ...(money ? { terms_disclosed: true } : {}),
     verification_notes: appendVerificationNote(deal.verification_notes,
-      `[${today()} flag-and-fix: re-sourced from ${url}; ${diff.length ? diff.join('; ') : 'record matched the source'}]`),
+      `[${today()} ${mode.tag}: ${mode === FIXER_MODE ? 're-sourced from' : 'verified against'} ${url}; ${diff.length ? diff.join('; ') : 'record matched the source'}]`),
   };
   const { error } = await supabase.from('deals').update(update).eq('id', deal.id);
   if (error?.code === '23505') {
@@ -530,24 +581,103 @@ async function fixOneInner(supabase: SupabaseClient, anthropic: Anthropic, perpl
       .eq('licensor_name', deal.licensor_name).eq('licensee_name', deal.licensee_name)
       .eq('total_deal_value_usd', (patch.total_deal_value_usd ?? deal.total_deal_value_usd) as number)
       .neq('id', deal.id).limit(1).maybeSingle();
-    if (twin?.id) return markDuplicate(supabase, deal, twin.id, url);
+    if (twin?.id) return markDuplicate(supabase, deal, twin.id, url, mode);
   }
   if (error) throw new Error(`save: ${error.message}`);
-  await log(supabase, 'flagged_fixed', deal.id, diff.join('; ') || 'record matched the source; cited and verified', url, false);
+  await log(supabase, mode.fixedIssue, deal.id, diff.join('; ') || 'record matched the source; cited and verified', url, false, mode.cronSource);
   return { kind: 'fixed', dealId: deal.id, url, diff };
 }
 
-async function markDuplicate(supabase: SupabaseClient, deal: FlaggedDeal, keeperId: string, url: string | null): Promise<BareOutcome> {
+async function markDuplicate(supabase: SupabaseClient, deal: FlaggedDeal, keeperId: string, url: string | null, mode: ApplyMode = FIXER_MODE): Promise<BareOutcome> {
   await supabase.from('deals').update({
     verification_status: 'rejected',
     verified: false,
     duplicate_of: keeperId,
     verify_attempted_at: new Date().toISOString(),
     verification_notes: appendVerificationNote(deal.verification_notes,
-      `[${today()} flag-and-fix: duplicate of ${keeperId} (same deal, already verified and cited${url ? `; checked against ${url}` : ''}). Removed from counts.]`),
+      `[${today()} ${mode.tag}: duplicate of ${keeperId} (same deal, already verified and cited${url ? `; checked against ${url}` : ''}). Removed from counts.]`),
   }).eq('id', deal.id);
-  await log(supabase, 'flagged_duplicate', deal.id, `duplicate of ${keeperId}`, keeperId, false);
+  await log(supabase, mode.duplicateIssue, deal.id, `duplicate of ${keeperId}`, keeperId, false, mode.cronSource);
   return { kind: 'duplicate', dealId: deal.id, keeperId, url };
+}
+
+// ─── Pending deals: verification from the primary document ─────────────────
+
+export interface PrimaryVerifyResult {
+  attempted: number;
+  verified: number;
+  duplicates: number;
+  /** Cited document did not support the row: flagged, so the fixer takes it (owner rule). */
+  flagged: number;
+  /** Document could not be fetched: left pending, retried after 12 hours. */
+  deferred: number;
+  flaggedDeals: Array<{ id: string; label: string; reason: string }>;
+  errors: string[];
+}
+
+/**
+ * Verify pending deals from the primary document they cite, newest first (Nov 23 2026).
+ *
+ * Perplexity has been out of quota since Oct 15 and nothing became verified after Sep 30.
+ * Every row the filing and newswire pipelines insert already cites its primary document,
+ * so the check needs no search: fetch that document by code, extract the terms, require the
+ * quotes to be in the fetched text, then verify (correcting from the document), retire as a
+ * duplicate, or flag with the reason so the flag-fixer resolves it.
+ */
+export async function verifyPendingFromPrimary(
+  supabase: SupabaseClient,
+  anthropicApiKey: string,
+  options?: { maxDeals?: number; timeBudgetMs?: number; retryAfterHours?: number },
+): Promise<PrimaryVerifyResult> {
+  const start = Date.now();
+  const maxDeals = options?.maxDeals ?? 6;
+  const budget = options?.timeBudgetMs ?? 100_000;
+  const cutoff = new Date(Date.now() - (options?.retryAfterHours ?? 12) * 3_600_000).toISOString();
+  const result: PrimaryVerifyResult = { attempted: 0, verified: 0, duplicates: 0, flagged: 0, deferred: 0, flaggedDeals: [], errors: [] };
+
+  const { data: rows, error } = await supabase.from('deals')
+    .select(`${DEAL_COLUMNS}, created_at`)
+    .eq('verification_status', 'pending').eq('is_synthetic', false)
+    .or(`verify_attempted_at.is.null,verify_attempted_at.lt.${cutoff}`)
+    .order('created_at', { ascending: false })
+    .limit(maxDeals * 10);
+  if (error) { result.errors.push(`pick: ${error.message}`); return result; }
+  const queue = ((rows ?? []) as FlaggedDeal[]).filter(hasPrimaryCitation).slice(0, maxDeals);
+  if (queue.length === 0) return result;
+
+  const anthropic = new Anthropic(withSpendGuard('primary-verify', { apiKey: anthropicApiKey }));
+  for (const deal of queue) {
+    if (isTimeBudgetExceeded(start, budget)) break;
+    result.attempted++;
+    try {
+      const candidates = primaryCandidates([deal.source_url, deal.press_release_url].filter((u): u is string => !!u), { licensor: deal.licensor_name, licensee: deal.licensee_name });
+      const found = await termsFromCandidates(anthropic, deal, candidates, 2);
+      if (found.terms) {
+        const outcome = await applyTerms(supabase, deal, found.terms, found.url, PENDING_MODE);
+        if (outcome.kind === 'duplicate') result.duplicates++; else result.verified++;
+        continue;
+      }
+      const stamp = new Date().toISOString();
+      if (!found.fetched) {
+        await supabase.from('deals').update({ verify_attempted_at: stamp }).eq('id', deal.id);
+        result.deferred++;
+        continue;
+      }
+      await supabase.from('deals').update({
+        verification_status: 'flagged',
+        verify_attempted_at: stamp,
+        verification_notes: appendVerificationNote(deal.verification_notes, `[${today()} primary-verify: flagged, ${found.reason}]`),
+      }).eq('id', deal.id);
+      await log(supabase, 'pending_flagged', deal.id, found.reason, null, false, PRIMARY_VERIFY_SOURCE);
+      result.flagged++;
+      result.flaggedDeals.push({ id: deal.id, label: outcomeContext(deal).label, reason: found.reason });
+    } catch (e) {
+      // Budget refusals land here too: the row stays pending and unstamped, so it is first in line tomorrow.
+      result.errors.push(`${deal.licensor_name}/${deal.licensee_name}: ${String(e).slice(0, 200)}`);
+      if (/Daily AI budget reached/.test(String(e))) break;
+    }
+  }
+  return result;
 }
 
 function today(): string {

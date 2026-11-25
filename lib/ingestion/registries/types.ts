@@ -35,7 +35,8 @@ export type RegistryId =
   | 'cde'
   | 'chictr'
   | 'ctri'
-  | 'cris';
+  | 'cris'
+  | 'euctr';
 
 export type RegistryCapability = 'api' | 'bulk' | 'scrape_required';
 
