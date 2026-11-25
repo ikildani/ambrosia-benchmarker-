@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
 
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
-        payment_method_types: ['card'],
+        // No payment_method_types: Stripe shows every method enabled in the Dashboard for the buyer's
+        // country and currency (Link, Apple Pay / Google Pay, local methods), not cards only.
         line_items: [{ price: reportPriceId, quantity: 1 }],
         success_url: `${appUrl}/calculator?report=${reportPurchase.id}&success=true${body.shareToken ? `&token=${body.shareToken}` : ''}`,
         cancel_url: `${appUrl}/calculator?canceled=true`,
@@ -122,7 +123,9 @@ export async function POST(request: NextRequest) {
 
     const sessionOptions: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
-      payment_method_types: ['card'],
+      // No payment_method_types: dynamic payment methods from the Dashboard. Card-only checkout lost
+      // international buyers (BiPER's French card was declined twice on USD checkout, Mar 2026), and most
+      // of the Nov 2026 cohort is outside the US.
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${appUrl}/welcome?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}?canceled=true`,
