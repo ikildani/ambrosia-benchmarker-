@@ -426,7 +426,7 @@ export function computeConfidence(closeCount: number, baseline: BaselineInfo | n
   if (cap === 'low') {
     return {
       level: 'low',
-      reason: 'Few comparable asset purchases; most acquisitions with disclosed prices bought a whole company. Lean on the deals below, not the estimate.',
+      reason: 'Few comparable asset purchases; most acquisitions with disclosed prices bought a whole company. Lean on the comparable deals, not the estimate.',
     };
   }
   const calibrated = baseline?.source === 'calibrated' && (baseline.sampleSize ?? 0) >= MIN_CALIBRATED_SAMPLE;
@@ -434,8 +434,8 @@ export function computeConfidence(closeCount: number, baseline: BaselineInfo | n
     return {
       level: 'low',
       reason: closeCount === 0
-        ? 'No closely comparable deals with disclosed terms. Lean on the deals below, not the estimate.'
-        : `Only ${closeCount} closely comparable ${closeCount === 1 ? 'deal' : 'deals'} with disclosed terms. Lean on the deals below, not the estimate.`,
+        ? 'No closely comparable deals with disclosed terms. Lean on the comparable deals, not the estimate.'
+        : `Only ${closeCount} closely comparable ${closeCount === 1 ? 'deal' : 'deals'} with disclosed terms. Lean on the comparable deals, not the estimate.`,
     };
   }
   if (!calibrated) {
@@ -550,9 +550,18 @@ export function topDrivers(modifiers: ModifierLike[], limit = 4): Driver[] {
  * "1.8x the comparable median, mainly because of Peptide (+25%)."
  * Picks the biggest factor pushing in the same direction as the gap.
  */
-export function estimateVsComps(estimateM: number, compMedianM: number | null, modifiers: ModifierLike[]): { ratio: number | null; sentence: string | null } {
+/**
+ * Deal-structure modifiers set the basis of the estimate (the comps are already of that structure), so they never
+ * explain a gap to the comps.
+ */
+const STRUCTURE_MODIFIERS = new Set([
+  'Asset purchase', 'Acquisition / M&A', 'Co-Development', 'Option Agreement', 'Research Collaboration', 'Reformulation / 505(b)(2)',
+]);
+
+export function estimateVsComps(estimateM: number, compMedianM: number | null, allModifiers: ModifierLike[]): { ratio: number | null; sentence: string | null } {
   if (!compMedianM || compMedianM <= 0 || !(estimateM > 0)) return { ratio: null, sentence: null };
   const ratio = estimateM / compMedianM;
+  const modifiers = allModifiers.filter(m => !STRUCTURE_MODIFIERS.has(m.name));
   const drivers = topDrivers(modifiers, 10);
   let head: string;
   if (ratio >= 1.15) head = `${ratio.toFixed(1)}x the comparable median`;

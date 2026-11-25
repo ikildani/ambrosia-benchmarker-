@@ -232,7 +232,7 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
   }, [data, inputs, result.labels]);
 
   const upfront = result.terms.upfront;
-  const vs = estimateVsComps(upfront.median, data?.summary.medianUpfrontM ?? null, result.modifiers ?? []);
+  const assetScope = inputs?.dealType === 'acquisition' && inputs?.acquisitionScope === 'asset';
   const drivers = topDrivers(result.modifiers ?? [], 5);
   const isLow = confidence?.level === 'low';
 
@@ -257,6 +257,10 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
   const hiddenForFree = data && data.limited ? Math.max(0, data.totalComps - data.comps.length) : 0;
   const s = data?.summary;
   const companyMedianM = companyComps.length >= 3 ? summarizeComps(companyComps).medianUpfrontM : null;
+  // Compare like with like: a whole-company estimate against company buyouts, an asset-purchase estimate against
+  // asset purchases. With fewer than 3 buyouts in the pool there is nothing fair to compare a company estimate to.
+  const vsBaseM = splitCompanies && !assetScope ? companyMedianM : (s?.medianUpfrontM ?? null);
+  const vs = estimateVsComps(upfront.median, vsBaseM, result.modifiers ?? []);
   const style = confidence ? CONFIDENCE_STYLE[confidence.level] : null;
 
   return (
@@ -407,11 +411,16 @@ export default function DealsLikeYours({ state, result, inputs, hasFullAccess, o
         {hasFullAccess ? (
           <>
             {vs.sentence && <p className="mt-2 text-sm text-neutral-800 dark:text-slate-100" data-testid="estimate-vs-comps">{vs.sentence}</p>}
-            {splitCompanies && (
+            {splitCompanies && !assetScope && (
               <p className="mt-1 text-xs text-neutral-600 dark:text-slate-400" data-testid="acquisition-basis-note">
                 This estimate prices a whole-company acquisition
                 {companyMedianM != null ? <>, where comparable buyouts have a median upfront of {formatCurrency(companyMedianM)}</> : null}
-                . For the sale of a single asset, the asset purchases above are the better guide.
+                . Selling a single asset? Set the acquisition to Single asset; the asset purchases above are the guide.
+              </p>
+            )}
+            {splitCompanies && assetScope && (
+              <p className="mt-1 text-xs text-neutral-600 dark:text-slate-400" data-testid="acquisition-basis-note">
+                This estimate prices the purchase of a single asset, so it is compared with the asset purchases above. Whole-company buyouts are listed separately.
               </p>
             )}
             {drivers.length > 0 && (

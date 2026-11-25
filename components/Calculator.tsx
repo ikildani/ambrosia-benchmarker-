@@ -56,7 +56,7 @@ import type {
   EndoscopicEndpoint,
 } from '@/lib/calculations';
 import {
-  calculateDealTerms, phaseOptions, dealTypeOptions,
+  calculateDealTerms, phaseOptions, dealTypeOptions, acquisitionScopeOptions, type AcquisitionScope,
   modalityOptions, neurologyModalityOptions, immunologyModalityOptions,
   metabolicModalityOptions, cardiovascularModalityOptions, infectiousDiseaseModalityOptions,
   ophthalmologyModalityOptions, womensHealthModalityOptions, rareDiseaseModalityOptions,
@@ -461,6 +461,8 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
     const urlTA = params.get('therapeuticArea');
     const urlDealType = params.get('dealType');
     const urlTerritory = params.get('territory');
+    const urlScope = params.get('acquisitionScope');
+    const scopeFromUrl: AcquisitionScope | null = urlScope === 'asset' || urlScope === 'company' ? urlScope : null;
 
     if (urlPhase || urlModality || urlIndication) {
       const patch: Partial<CalculatorFormState> = { showTemplates: false, quickMode: false };
@@ -470,6 +472,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
       if (urlModality) patch.modality = urlModality as Modality;
       if (urlIndication) patch.indication = urlIndication as Indication;
       if (urlTerritory) patch.territory = urlTerritory as Territory;
+      if (scopeFromUrl) patch.acquisitionScope = scopeFromUrl;
       actions.bulkSet(patch);
 
       const patchedState = {
@@ -480,6 +483,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
         ...(urlModality ? { modality: urlModality as Modality } : {}),
         ...(urlIndication ? { indication: urlIndication as Indication } : {}),
         ...(urlTerritory ? { territory: urlTerritory as Territory } : {}),
+        ...(scopeFromUrl ? { acquisitionScope: scopeFromUrl } : {}),
       };
       // Wait for the calibration overlay: computing on mount priced URL-prefilled links (outreach, share,
       // SEO pages) off static baselines, often 3-5x off the calibrated result.
@@ -487,7 +491,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
 
       // Clean up URL params after applying
       const url = new URL(window.location.href);
-      ['therapeuticArea', 'phase', 'dealType', 'modality', 'indication', 'territory'].forEach(p => url.searchParams.delete(p));
+      ['therapeuticArea', 'phase', 'dealType', 'acquisitionScope', 'modality', 'indication', 'territory'].forEach(p => url.searchParams.delete(p));
       window.history.replaceState({}, '', url.pathname + (url.search || ''));
       return;
     }
@@ -651,6 +655,15 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                   options={dealTypeOptions}
                   placeholder="Select deal type..."
                 />
+                {state.dealType === 'acquisition' && (
+                  <CustomSelect
+                    label="Acquiring"
+                    value={state.acquisitionScope}
+                    onChange={(v) => { trackParameterChange('acquisitionScope', state.acquisitionScope, v); actions.setAcquisitionScope(v as AcquisitionScope); }}
+                    options={acquisitionScopeOptions}
+                    placeholder="Whole company or single asset"
+                  />
+                )}
               </div>
 
               {/* Calculate button */}
@@ -833,6 +846,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           phase={(state.phase || '') as Phase}
                           dealType={(state.dealType || '') as DealType}
                           reformulationSubType={state.reformulationSubType}
+                          acquisitionScope={state.acquisitionScope}
                           modality={(state.modality || '') as Modality}
                           indication={(state.indication || '') as Indication}
                           biomarker={state.biomarker}
@@ -842,6 +856,7 @@ export default function Calculator({ tier = 'free', onUpgrade }: CalculatorProps
                           onPhaseChange={(newValue) => { trackParameterChange('phase', state.phase, newValue); actions.setPhase(newValue); }}
                           onDealTypeChange={(newValue: DealType) => { trackParameterChange('dealType', state.dealType, newValue); actions.setDealType(newValue); }}
                           onReformulationSubTypeChange={(newValue) => { actions.setReformulationSubType(newValue); }}
+                          onAcquisitionScopeChange={(newValue) => { trackParameterChange('acquisitionScope', state.acquisitionScope, newValue); actions.setAcquisitionScope(newValue); }}
                           onModalityChange={(newValue) => { trackParameterChange('modality', state.modality, newValue); actions.setModality(newValue); }}
                           onIndicationChange={(newValue) => { trackParameterChange('indication', state.indication, newValue); actions.setIndication(newValue); }}
                           onBiomarkerChange={(newValue) => { trackParameterChange('biomarker', state.biomarker, newValue); actions.setBiomarker(newValue); }}

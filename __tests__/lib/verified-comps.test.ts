@@ -250,6 +250,14 @@ describe('estimate vs comps', () => {
     expect(s).not.toMatch(/mainly because/);
     expect(estimateVsComps(50, 100, mods).sentence).toMatch(/^50% of the comparable median\. Most of the gap .* sits below/);
   });
+  it('never blames the deal structure, which the comps already share', () => {
+    const asset = [
+      { name: 'Asset purchase', multiplier: 0.1 },
+      { name: 'Peptide', multiplier: 0.6 },
+    ];
+    expect(estimateVsComps(4.9, 9, asset).sentence).toBe('54% of the comparable median, mainly because of Peptide (-40%).');
+    expect(estimateVsComps(2, 9, [{ name: 'Asset purchase', multiplier: 0.1 }]).sentence).not.toMatch(/Asset purchase/);
+  });
 });
 
 describe('source links', () => {
