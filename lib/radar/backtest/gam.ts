@@ -34,8 +34,14 @@ export interface GamTrainOptions {
   learningRate?: number;
   /** L2 penalty on leaf values (Newton denominator). */
   lambda?: number;
-  /** Minimum hessian mass on each side of a split. */
+  /** Minimum hessian mass on each side of a split (absolute; overrides minChildWeightShare). */
   minChildHessian?: number;
+  /**
+   * Minimum hessian mass per side as a share of the total class-weighted row weight. Default
+   * 0.000625 (v5). v6 uses 0.01: with ~150 positive programs per test year, smaller leaves fit
+   * single programs' monthly rows and the ranking lost out of sample.
+   */
+  minChildWeightShare?: number;
   /** Quantile bins per feature (excluding the missing bin). */
   maxBins?: number;
   /** Positive-class weight; 'balanced' = negative weight / positive weight. */
@@ -59,6 +65,9 @@ export interface GamFit {
   /** Validation loss per round (for diagnostics). */
   validCurve: number[];
 }
+
+/** v5 leaf floor: 0.25 % of the weight mass × 0.25. */
+export const DEFAULT_MIN_CHILD_WEIGHT_SHARE = 0.0025 * 0.25;
 
 const isMissing = (v: number | null | undefined): boolean => v === null || v === undefined || !Number.isFinite(v);
 
@@ -145,7 +154,7 @@ export function trainGam(X: readonly (readonly (number | null)[])[], y: readonly
   let wSum = 0;
   for (const v of w) wSum += v;
   // Hessian floor relative to the data mass, so the setting does not depend on row counts.
-  const minChild = opts.minChildHessian ?? wSum * 0.0025 * 0.25;
+  const minChild = opts.minChildHessian ?? wSum * (opts.minChildWeightShare ?? DEFAULT_MIN_CHILD_WEIGHT_SHARE);
 
   // Bin every cell once.
   const edges: number[][] = [];

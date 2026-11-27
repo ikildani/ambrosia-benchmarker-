@@ -348,7 +348,12 @@ function round4(x: number): number {
 // FEED PROTOCOL (v5): rank within each as-of month, average across months
 // ═══════════════════════════════════════════════════════════════════════
 
-export const EVAL_PROTOCOL = 'feed_monthly_v1';
+/**
+ * v2 (Nov 2026): v1 ranked every industry primary row, including the programs the default feed hides
+ * (comparator_or_background, marketed_other, duplicate_program, not_a_program: 22 % of test rows).
+ * v2 ranks only what the feed shows; the metrics of v1 and v2 rows are not comparable.
+ */
+export const EVAL_PROTOCOL = 'feed_monthly_v2';
 
 export interface MonthlyFeedMetrics {
   months: number;
