@@ -141,6 +141,17 @@ describe('AI spend guard', () => {
     expect(backlogBlocked('asset-classify', { 'asset-classify': 50 }, 0, on)).toMatch(/share/);
   });
 
+  it('EDGAR replay allowance is off by default and gives edgar-fts-backfill its own share when set', () => {
+    const off = backlogPlan({} as unknown as NodeJS.ProcessEnv);
+    expect(off.sources['edgar-fts-backfill']).toBeUndefined();
+    expect(backlogBlocked('edgar-fts-backfill', {}, 0, off)).toMatch(/not a backlog source/);
+    const on = backlogPlan({ AI_BACKLOG_EDGAR_REPLAY_USD: '5' } as unknown as NodeJS.ProcessEnv);
+    expect(on.sources['edgar-fts-backfill']).toBe(5);
+    expect(on.totalUsd).toBe(120);
+    expect(backlogBlocked('edgar-fts-backfill', { 'edgar-fts-backfill': 4.9 }, 0, on)).toBeNull();
+    expect(backlogBlocked('edgar-fts-backfill', { 'edgar-fts-backfill': 5 }, 0, on)).toMatch(/share/);
+  });
+
   it('charges a backlog source to the backlog lane while it has allowance', async () => {
     rpc.mockImplementation(async (fn: string) => {
       if (fn === 'ai_spend_today') return { data: [{ lane: 'bulk', usd: 99 }], error: null };
