@@ -168,6 +168,8 @@ export function useSession() {
           anonymous_id: anonId,
           event_data: {
             referrer: document.referrer,
+            landing_path: window.location.pathname,
+            webdriver: navigator.webdriver === true,
             ...utmParams,
           },
         }),

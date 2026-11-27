@@ -3,8 +3,9 @@ import crypto from 'crypto';
 import { GSCClient, type GSCPerformanceRow } from '@/lib/seo/gsc-client';
 import { createServiceClient } from '@/lib/supabase/server';
 import { runCronIntelligence } from '@/lib/cron-intelligence';
+import { postTrafficDigest } from '@/lib/analytics/traffic-digest';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -228,6 +229,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Weekly traffic digest runs first so it posts even when Search Console is unavailable.
+  let traffic: Awaited<ReturnType<typeof postTrafficDigest>> = null;
+  try {
+    traffic = await postTrafficDigest(createServiceClient());
+  } catch (err) {
+    console.error('[seo-performance] traffic digest failed:', err instanceof Error ? err.message : 'Unknown');
+  }
+
   try {
     const gsc = new GSCClient();
 
@@ -242,7 +251,7 @@ export async function GET(request: NextRequest) {
         'Google Search Console credentials are not configured. Set `GOOGLE_SERVICE_ACCOUNT_JSON` env var to enable SEO performance tracking.',
       );
 
-      return NextResponse.json({ success: true, message: 'GSC not configured' });
+      return NextResponse.json({ success: true, traffic, message: 'GSC not configured' });
     }
 
     // ── Fetch performance data for current week and previous week ───────
@@ -345,6 +354,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      traffic,
       metrics: {
         current: currentMetrics,
         previous: previousMetrics,

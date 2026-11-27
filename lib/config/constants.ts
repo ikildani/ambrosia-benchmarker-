@@ -89,7 +89,8 @@ export function formatDealCount(count: number): string {
 // pages now read lib/deal-stats.ts; this constant is the fallback and the client-side copy.
 // 2026-09-28: set by hand to the live primary-sourced, quality-filtered count (no synthetic,
 // duplicate, rejected or flagged rows) while the updater token is dead.
-export const LIVE_DEAL_COUNT = 1447;
+// 2026-11-27: set by hand to 2,373 (same query as lib/deal-stats.ts); static metadata still showed 1,400+.
+export const LIVE_DEAL_COUNT = 2373;
 
 export const DEAL_STATS = {
   TOTAL_DEALS: formatDealCount(LIVE_DEAL_COUNT),
