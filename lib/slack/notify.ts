@@ -564,3 +564,35 @@ export async function notifyShareView(details: {
     `Report viewed: ${details.modality} (view #${details.viewCount})`,
   );
 }
+
+/**
+ * Revenue-path monitor (lib/monitoring): a check went into or out of `fail`.
+ * Posted only on state change, so a long outage is one message plus a recovery.
+ */
+export async function notifyMonitorTransitions(lines: string[], anyFailing: boolean): Promise<void> {
+  if (lines.length === 0) return;
+  await postToSlack(
+    [{
+      color: anyFailing ? '#ef4444' : '#14b8a6',
+      blocks: [
+        { type: 'section', text: { type: 'mrkdwn', text: lines.join('\n') } },
+        { type: 'context', elements: [{ type: 'mrkdwn', text: `All checks: /api/cron/revenue-monitor | ${formatTimestamp()}` }] },
+      ],
+    }],
+    anyFailing ? `🔴 Solidus revenue path failing: ${lines[0].replace(/[*]/g, '')}` : `✅ Solidus revenue path recovered`,
+  );
+}
+
+/** Revenue-path monitor daily digest: one headline plus one line per check. */
+export async function notifyMonitorDigest(headline: string, lines: string[], anyFailing: boolean): Promise<void> {
+  await postToSlack(
+    [{
+      color: anyFailing ? '#ef4444' : lines.some(l => l.startsWith('⚠️')) ? '#f59e0b' : '#14b8a6',
+      blocks: [
+        { type: 'section', text: { type: 'mrkdwn', text: `*${headline}*\n${lines.join('\n')}` } },
+        { type: 'context', elements: [{ type: 'mrkdwn', text: `Daily digest | ${formatTimestamp()}` }] },
+      ],
+    }],
+    headline,
+  );
+}

@@ -13,13 +13,16 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { classifyCreditErrors, shouldAlert, buildCreditAlert, type AlertState, type Vendor } from '@/lib/ingestion/credit-sentinel';
 import { runDealInflowCheck, type InflowReport } from '@/lib/ingestion/inflow-check';
 import { sendFlagFixReport } from '@/lib/ingestion/flag-fix-report';
+import { runRevenueMonitor, type MonitorRun } from '@/lib/monitoring';
+import { createMonitorContext } from '@/lib/monitoring/context';
 
 /** UTC hour at which the hourly sentinel also runs the daily deal-inflow check. */
 const INFLOW_CHECK_UTC_HOUR = 13;
 /** UTC hour at which it also emails the owner the daily flag-and-fix report (12:20 UTC = 08:20 ET). */
 const FLAG_FIX_REPORT_UTC_HOUR = 12;
 
-export const maxDuration = 60;
+// 120 s: the revenue-path monitor (below) adds up to ~25 s of parallel checks.
+export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 
 const STATE_KEY = 'api_credit_alert_state';
@@ -112,5 +115,20 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, outages, alerted, recovered, checkedRuns: rows?.length ?? 0, inflow, flagFixReport });
+  // Revenue-path monitor (lib/monitoring), same ride-along reason: hourly checks
+  // every run, daily checks + Slack digest from 14:20 UTC. ?monitor=false skips it.
+  let monitor: { counts: Record<string, number>; transitions: number; digestSent: boolean } | { error: string } | null = null;
+  if (request.nextUrl.searchParams.get('monitor') !== 'false') {
+    try {
+      const run: MonitorRun = await runRevenueMonitor(createMonitorContext(now), { scope: 'auto', record: true });
+      const counts = { ok: 0, warn: 0, fail: 0 };
+      for (const r of run.results) counts[r.status]++;
+      monitor = { counts, transitions: run.transitions.length, digestSent: run.digestSent };
+    } catch (e) {
+      console.error('[api-credit-check] revenue monitor failed (non-fatal):', e);
+      monitor = { error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  return NextResponse.json({ ok: true, outages, alerted, recovered, checkedRuns: rows?.length ?? 0, inflow, flagFixReport, monitor });
 }
