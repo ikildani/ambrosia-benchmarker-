@@ -4,8 +4,8 @@ import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
-  title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked',
-  description: `Option/license deals now account for 35% of new transactions, up from 5% in 2023. See how upfronts, milestones, and royalties are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
+  title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties by Stage',
+  description: 'What biotech licensing deals actually pay at each stage: median upfronts, share paid at signing, milestones and royalty tiers from 2,102 primary-sourced deals announced since 2017.',
   keywords: [
     'biotech licensing deal structure',
     'biotech licensing deal structure 2026',
@@ -22,16 +22,16 @@ export const metadata: Metadata = {
     'pharma deal terms 2026',
   ],
   openGraph: {
-    title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked',
-    description: `Option/license deals now account for 35% of new transactions. See how deal economics are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
+    title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties by Stage',
+    description: 'Median upfronts, share paid at signing, milestones and royalty tiers by stage, from 2,102 primary-sourced biopharma deals since 2017.',
     type: 'article',
     url: 'https://solidus.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
     images: [{ url: '/api/og?title=Biotech%20Licensing%20Deal%20Structure&subtitle=Upfront%2C%20Milestones%20%26%20Royalties&type=landing', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties Benchmarked',
-    description: `Option/license deals now account for 35% of new transactions. See how deal economics are structured across ${DEAL_STATS.TOTAL_DEALS} real biopharma deals.`,
+    title: 'Biotech Licensing Deal Structure in 2026: Upfronts, Milestones & Royalties by Stage',
+    description: 'Median upfronts, share paid at signing, milestones and royalty tiers by stage, from 2,102 primary-sourced biopharma deals since 2017.',
   },
   alternates: {
     canonical: 'https://solidus.ambrosiaventures.co/guides/biotech-licensing-deal-structure',
@@ -57,7 +57,7 @@ export default function BiotechLicensingDealStructurePage() {
       logo: { '@type': 'ImageObject', url: `${baseUrl}/logo.png` },
     },
     datePublished: '2026-03-20',
-    dateModified: '2026-04-07',
+    dateModified: '2026-11-27',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${baseUrl}/guides/biotech-licensing-deal-structure`,
@@ -81,7 +81,7 @@ export default function BiotechLicensingDealStructurePage() {
         name: 'How much should the upfront payment be in a licensing deal?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Upfront payments typically represent 8-15% of total deal value for preclinical/Phase 1 assets, 15-25% for Phase 2 assets, and 25-50% for Phase 3 or approved products. The absolute dollar amount depends on the asset\'s total expected value, which is driven by indication size, competitive position, and development risk. In 2025-2026, median upfronts for Phase 2 oncology deals range from $75M-$200M.',
+          text: 'Upfronts are a small share of announced value at every stage. In our data the median share paid at signing is about 5% for preclinical licenses, 7% at Phase 1, 9.5% at Phase 2, 13% at Phase 3 and 18% for approved products. In dollars, the median upfront is US$10M preclinical, US$30M at Phase 1, US$25M at Phase 2, US$30M at Phase 3 and US$17M for approved products, with wide ranges around each. Source: Ambrosia Ventures deal benchmarks, 2,102 primary-sourced deals announced January 2017 to November 2026.',
         },
       },
       {
@@ -89,7 +89,7 @@ export default function BiotechLicensingDealStructurePage() {
         name: 'What is the difference between development and commercial milestones?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Development milestones are triggered by clinical and regulatory achievements (e.g., Phase 2 initiation, Phase 3 data readout, FDA approval) and are paid regardless of commercial success. Commercial milestones are tied to cumulative net sales thresholds (e.g., first $500M, $1B, $2B in annual sales) and are only paid if the product achieves significant market uptake. Development milestones typically total 1.5-3x the upfront payment, while commercial milestones can be 3-8x the upfront for large-market indications.',
+          text: 'Development milestones are triggered by clinical and regulatory events (trial starts, data readouts, filings, approvals). Commercial milestones are tied to annual or cumulative net sales thresholds and are only paid if the product sells. Across 269 deals that disclose the split, 73.1% of milestone value is commercial, 17.6% development and 9.4% regulatory. Total milestones are a large multiple of the upfront: at the median, about 20 times at preclinical, 13 times at Phase 1, 9.5 times at Phase 2 and 7 times at Phase 3.',
         },
       },
     ],
@@ -168,8 +168,8 @@ export default function BiotechLicensingDealStructurePage() {
             </p>
 
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
-              <li><strong>Phase-driven sizing:</strong> Preclinical deals typically command upfronts of $5M-$30M, Phase 1 deals $15M-$75M, Phase 2 deals $50M-$250M, and Phase 3/approved products $100M-$1B+. These ranges reflect the progressive de-risking of the asset.</li>
-              <li><strong>Percentage of total deal value:</strong> Upfronts as a share of total deal value increase with clinical maturity: 8-15% at preclinical, 15-25% at Phase 2, 25-50% at Phase 3/approved. This allocation reflects the diminishing contingent nature of later-stage deals.</li>
+              <li><strong>Sizing by stage:</strong> In our data the median upfront is US$10M for preclinical licenses (middle half US$1.3M to US$40M), US$30M at Phase 1 (US$10M to US$100M), US$25M at Phase 2 (US$10M to US$81M), US$30M at Phase 3 (US$12M to US$73M) and US$17M for approved products (US$5M to US$45M). The spread within each stage is wider than the difference between stages.</li>
+              <li><strong>Share of announced value:</strong> The share paid at signing rises with maturity: a median of 4.8% at preclinical, 7.4% at Phase 1, 9.5% at Phase 2, 13.1% at Phase 3 and 17.7% for approved products. Headline values for early assets are mostly milestones.</li>
               <li><strong>Cash vs. equity split:</strong> Some licensees offer a portion of the upfront as equity rather than cash, particularly mid-cap companies with strong stock performance. Licensors should evaluate the effective discount and liquidity constraints of equity components.</li>
               <li><strong>Signal value:</strong> Beyond its economic function, the upfront payment signals the licensee&apos;s commitment. A substantive upfront reduces the risk that the licensee will deprioritize the program in favor of internal assets.</li>
             </ul>
@@ -180,13 +180,14 @@ export default function BiotechLicensingDealStructurePage() {
             </h2>
 
             <p className="text-slate-600 leading-relaxed">
-              <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">Milestone payments</Link> are the largest single component of total deal value, typically representing 60-80% of headline numbers. Structuring milestones effectively requires balancing achievability, value signaling, and economic impact:
+              <Link href="/glossary/milestone-payment" className="text-teal-600 font-medium hover:text-teal-700">Milestone payments</Link> are the largest component of announced deal value. At the median, only 7.5% of announced value is paid at signing, so most of a headline number is milestones. Structuring milestones effectively requires balancing achievability, value signaling, and economic impact:
             </p>
 
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
-              <li><strong>Development milestones:</strong> These track clinical progress and typically include: IND/CTA filing ($3M-$15M), Phase 2 initiation ($10M-$30M), Phase 2 data readout ($15M-$50M), Phase 3 initiation ($20M-$75M), Phase 3 data readout ($25M-$100M), NDA/BLA filing ($25M-$75M), and FDA/EMA approval ($50M-$200M).</li>
-              <li><strong>Regulatory milestones:</strong> Approval in additional territories (EU, Japan, China) adds $15M-$75M per territory. Supplemental indications approvals typically trigger additional payments of $10M-$50M each, which can significantly increase total deal value for platform assets.</li>
-              <li><strong>Commercial milestones:</strong> These are tied to annual or cumulative net sales thresholds. Common tiers include $250M ($10M-$25M payment), $500M ($25M-$50M), $1B ($50M-$100M), $2B ($75M-$150M), and $3B+ ($100M-$200M). Higher tiers have lower probability-weighted values but are inexpensive for the licensee to pay given the implied revenue.</li>
+              <li><strong>Where the money sits:</strong> Across 269 deals that disclose the split, 73.1% of milestone value is commercial, 17.6% is development and 9.4% is regulatory. Most of a headline number is paid only if the product sells.</li>
+              <li><strong>Development and regulatory milestones:</strong> These track clinical progress (trial starts, data readouts, filings and approvals), often with separate payments for additional territories and indications.</li>
+              <li><strong>Commercial milestones:</strong> These are tied to annual or cumulative net sales thresholds. Higher tiers carry little probability-weighted value, which is why licensees accept large numbers there.</li>
+              <li><strong>Milestones versus upfront:</strong> At the median, total milestones are about 20 times the upfront for preclinical licenses, 13 times at Phase 1, 9.5 times at Phase 2, 7 times at Phase 3 and 5 times for approved products.</li>
               <li><strong>Probability weighting:</strong> Not all milestones are equally likely to be achieved. When evaluating a deal, apply probability-of-success rates to each milestone. A $100M Phase 3 milestone for a Phase 1 asset has a probability-weighted value of approximately $15M-$25M.</li>
             </ul>
 
@@ -200,10 +201,10 @@ export default function BiotechLicensingDealStructurePage() {
             </p>
 
             <ul className="list-disc pl-6 space-y-2 text-slate-600">
-              <li><strong>Base rates by phase:</strong> Preclinical deals: 2-6% royalties. Phase 1: 4-8%. Phase 2: 6-12%. Phase 3: 10-15%. Approved: 12-20%. These ranges reflect the licensor&apos;s remaining contribution to value creation.</li>
-              <li><strong>Tiered escalation:</strong> Most deals use tiered structures where royalty rates increase with sales volume. A typical structure might be 8% on the first $500M, 10% on $500M-$1B, 12% on $1B-$2B, and 14% above $2B in annual net sales.</li>
-              <li><strong>Royalty term:</strong> Royalties typically run for 10-15 years from first commercial sale or until patent expiry, whichever is later. Step-downs of 30-50% upon generic/biosimilar entry are standard. Orphan drug exclusivity can extend effective royalty protection.</li>
-              <li><strong>Net sales definition:</strong> The definition of &quot;net sales&quot; (gross sales minus returns, rebates, chargebacks, allowances, and distribution fees) materially affects the royalty base. Negotiate the specific deductions carefully, as gross-to-net adjustments can reduce the effective royalty base by 30-50% in the US market.</li>
+              <li><strong>Top tier by stage:</strong> The median top royalty tier is 9% for preclinical licenses, 12% at Phase 1, 15% at Phase 2 and 19% at Phase 3 and for approved products. Across all licenses that disclose tiers, the median runs from 5% at the bottom tier to 12% at the top.</li>
+              <li><strong>Tiered escalation:</strong> Most deals use tiers that rise with annual net sales, so the effective rate depends on how large the product becomes.</li>
+              <li><strong>Royalty term:</strong> Royalties usually run country by country until patent expiry, loss of regulatory exclusivity or a fixed period after first sale, with step-downs when generics or biosimilars enter.</li>
+              <li><strong>Net sales definition:</strong> The definition of &quot;net sales&quot; (gross sales less returns, rebates, chargebacks and allowances) sets the royalty base. In the US, gross-to-net deductions can be large, so negotiate the permitted deductions carefully.</li>
             </ul>
 
             {/* Section 5 */}
@@ -226,81 +227,87 @@ export default function BiotechLicensingDealStructurePage() {
               Use our <Link href="/calculator" className="text-teal-600 font-medium hover:text-teal-700">Solidus</Link> to model different allocation scenarios and see how the structure affects probability-weighted deal value for both parties.
             </p>
 
-            {/* Deal Terms by Deal Type */}
-            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="deal-terms-by-type">
-              Deal Terms by Deal Type: 2026 Benchmarks
+            {/* Deal Terms by Stage */}
+            <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="deal-terms-by-stage">
+              Licensing Deal Terms by Stage: 2026 Benchmarks
             </h2>
 
             <p className="text-slate-600 leading-relaxed mb-4">
-              Deal economics vary dramatically by structure type. The table below shows typical allocation patterns from our analysis of {DEAL_STATS.TOTAL_DEALS} biopharma transactions.
+              Medians from licenses, options and collaborations announced since 2017, each tied to a regulatory filing or the company&apos;s own announcement. The middle half shows where the central 50% of deals fall.
             </p>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Deal Type</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Upfront</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Dev Milestones</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Reg Milestones</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Comm Milestones</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Stage at signing</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Median upfront</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Middle half</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Paid at signing</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Milestones / upfront</th>
+                    <th className="text-center py-3 px-4 font-semibold text-slate-900">Top royalty tier</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   <tr>
-                    <td className="py-2.5 px-4 font-medium text-slate-900">Licensing</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">20-30%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">30-40%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">15-25%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">15-25%</td>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Preclinical</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$10M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$1.3M to US$40M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">4.8%</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">20x</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">9%</td>
                   </tr>
                   <tr className="bg-slate-50/50">
-                    <td className="py-2.5 px-4 font-medium text-slate-900">Acquisition</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">100%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-500" colSpan={3}>Premium 40-65% over pre-announcement share price</td>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Phase 1</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$30M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$10M to US$100M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">7.4%</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">13x</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">12%</td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-4 font-medium text-slate-900">Co-development</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">15-25%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-500" colSpan={2}>Shared costs (50/50 or 60/40)</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">Higher royalties</td>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Phase 2</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$25M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$10M to US$81M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">9.5%</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">9.5x</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">15%</td>
                   </tr>
                   <tr className="bg-slate-50/50">
-                    <td className="py-2.5 px-4 font-medium text-slate-900">Option / License</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">5-15%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-500" colSpan={2}>Option fee 5-10% of total value</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">Back-loaded</td>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Phase 3</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$30M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$12M to US$73M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">13.1%</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">6.7x</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">19%</td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-4 font-medium text-slate-900">Collaboration</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">10-20%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">25-35%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">15-20%</td>
-                    <td className="py-2.5 px-4 text-center text-slate-700">20-30%</td>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">Approved</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$17M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">US$5M to US$45M</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">17.7%</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">4.7x</td>
+                    <td className="py-2.5 px-4 text-center text-slate-700">19%</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <p className="text-xs text-slate-400 mb-6">
-              Source: Ambrosia Ventures deal database, {DEAL_STATS.TOTAL_DEALS} transactions as of April 2026. Percentages represent share of total non-royalty deal value.
+              Source: Ambrosia Ventures deal benchmarks, 2,102 primary-sourced deals announced January 2017 to November 2026; each figure uses the deals that disclose it (for example 136 Phase 2 upfronts and 56 Phase 2 royalty tiers). Full tables:{' '}
+              <a href="https://ambrosiaventures.co/benchmarks" className="text-teal-600 hover:text-teal-700">ambrosiaventures.co/benchmarks</a>.
             </p>
 
             {/* 2026 Deal Terms Trends */}
             <h2 className="text-2xl font-bold text-slate-900 mt-12 mb-4" id="2026-trends">
-              2026 Deal Terms Trends: The Shift Toward Option/License Structures
+              2026 Deal Terms Trends
             </h2>
 
-            <p className="text-slate-600 leading-relaxed">
-              The most significant structural trend in biopharma dealmaking over the past three years has been the dramatic rise of option/license structures. These deals give the licensee a time-limited option (typically exercisable at a key data readout) to acquire full licensing rights, rather than committing to a traditional upfront license.
-            </p>
-
             <ul className="list-disc pl-6 space-y-2 text-slate-600 my-4">
-              <li><strong>Option/license market share:</strong> Option/license structures represented just ~5% of biopharma deals in 2023. By Q1 2026, they account for approximately 35% of new licensing transactions -- a 7x increase in three years.</li>
-              <li><strong>Why the shift:</strong> Post-2022 capital discipline at large pharma, combined with early-stage pipeline uncertainty, has made option structures more attractive. Licensees pay a smaller initial commitment, preserve capital, and gain data-driven decision points before committing full economics.</li>
-              <li><strong>Impact on licensors:</strong> Option structures reduce upfront cash but often yield higher total deal values if the option is exercised, as the licensor captures a &quot;de-risking premium&quot; between option grant and exercise. The tradeoff is increased timing risk and the possibility the option lapses.</li>
-              <li><strong>Typical option terms:</strong> Option fees of $10M-$75M (5-10% of total deal value), exercise windows of 12-24 months, and exercise payments that are 2-4x the option fee. Post-exercise economics resemble traditional licensing terms.</li>
-              <li><strong>Other 2026 trends:</strong> Increasing use of biobucks structures (milestone-heavy, lower upfront), growing ex-China license carve-outs as geopolitical risk repricing continues, and rising co-development arrangements in oncology as pharma companies seek pipeline control.</li>
+              <li><strong>Upfronts rose in 2026:</strong> The median license upfront was US$45M in Q3 2026, against US$12M in Q3 2025, across the deals that disclosed one. Details in the{' '}<a href="https://ambrosiaventures.co/reports/2026-q3" className="text-teal-600 font-medium hover:text-teal-700">Q3 2026 deal report</a>.</li>
+              <li><strong>China&apos;s share keeps growing:</strong> China-based licensors accounted for 6% of licenses in 2017 and 18.3% in 2025. China out-licensing deals carry a median upfront of US$75M, well above the overall median of US$20M.</li>
+              <li><strong>Options defer the commitment:</strong> Across 167 option deals, the median option upfront is US$16M and the median share paid at signing is 4.8%, lower than for licenses overall. Where an exercise fee is disclosed (46 deals), the median is US$10M.</li>
+              <li><strong>Royalties follow risk:</strong> The top royalty tier roughly doubles from preclinical (9%) to Phase 3 (19%), the steepest stage effect in the data.</li>
             </ul>
 
             {/* Inline CTA */}
@@ -369,7 +376,7 @@ export default function BiotechLicensingDealStructurePage() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-6 text-slate-600 leading-relaxed">
-                  Upfronts typically represent 8-15% of total deal value for preclinical/Phase 1 assets, 15-25% for Phase 2, and 25-50% for Phase 3 or approved products. In 2025-2026, median upfronts for Phase 2 oncology deals range from $75M-$200M. Use our <Link href="/calculator" className="text-teal-600 hover:text-teal-700">calculator</Link> to benchmark upfront sizing for your specific parameters.
+                  At the median, 4.8% of announced value is paid at signing for preclinical licenses, 9.5% at Phase 2 and 17.7% for approved products. In dollars the median upfront is US$10M preclinical, US$25M at Phase 2 and US$30M at Phase 3. Use our <Link href="/calculator" className="text-teal-600 hover:text-teal-700">calculator</Link> to benchmark upfront sizing for your specific parameters.
                 </div>
               </details>
 

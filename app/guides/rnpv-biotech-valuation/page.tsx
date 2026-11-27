@@ -5,7 +5,7 @@ import { DEAL_STATS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
   title: 'How to Calculate rNPV for Biotech: Risk-Adjusted NPV Guide With PoS Rates by TA',
-  description: `Phase 1 oncology PoS: ~8%. Rare disease: ~15%. Learn rNPV calculation step by step with PoS rates across 12 TAs, calibrated against ${DEAL_STATS.TOTAL_DEALS} real deals. Free rNPV calculator included.`,
+  description: `Phase 1 oncology PoS: ~8%. Rare disease: ~15%. Learn rNPV calculation step by step with PoS rates across 12 TAs, calibrated against ${DEAL_STATS.TOTAL_DEALS} real deals. rNPV calculator included.`,
   keywords: [
     'rNPV calculation',
     'risk-adjusted NPV pharma',
@@ -60,7 +60,7 @@ export default function RnpvBiotechValuationPage() {
       logo: { '@type': 'ImageObject', url: `${baseUrl}/logo.png` },
     },
     datePublished: '2026-03-20',
-    dateModified: '2026-04-07',
+    dateModified: '2026-11-27',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${baseUrl}/guides/rnpv-biotech-valuation`,
