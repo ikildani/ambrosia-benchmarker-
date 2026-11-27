@@ -79,7 +79,7 @@ export async function buildTrafficDigest(supabase: SupabaseClient, now = new Dat
     if (path && src !== 'direct') w.landing.set(path, (w.landing.get(path) || 0) + 1);
   }
 
-  const [signupsCur, signupsPrev, calcsCur] = await Promise.all([
+  const [signupsCur, signupsPrev, calcsCur, migration] = await Promise.all([
     supabase.from('user_profiles').select('id', { count: 'exact', head: true }).gte('created_at', curStart.toISOString()),
     supabase
       .from('user_profiles')
@@ -91,6 +91,13 @@ export async function buildTrafficDigest(supabase: SupabaseClient, now = new Dat
       .select('id', { count: 'exact', head: true })
       .eq('event_type', 'calculation_completed')
       .gte('created_at', curStart.toISOString()),
+    supabase
+      .from('seo_metrics')
+      .select('data')
+      .eq('metric_type', 'gsc_migration')
+      .order('metric_date', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const sizes = (w: Week) => Object.fromEntries(SOURCES.map((s) => [s.key, w.humans[s.key].size])) as Record<SourceKey, number>;
@@ -109,6 +116,11 @@ export async function buildTrafficDigest(supabase: SupabaseClient, now = new Dat
     signups: signupsCur.count ?? 0,
     signupsPrev: signupsPrev.count ?? 0,
     calculations: calcsCur.count ?? 0,
+    // Google clicks over 90 days by host while the calculator -> solidus change of address completes.
+    migration: (migration.data?.data ?? null) as {
+      solidus: { clicks: number; impressions: number };
+      calculator: { clicks: number; impressions: number };
+    } | null,
   };
 }
 
@@ -128,6 +140,15 @@ export function formatTrafficDigest(t: TrafficDigest): string {
     '*People by source*',
     ...t.bySource.map((s) => `• ${s.label}: ${s.cur} (${delta(s.cur, s.prev)})`),
   ];
+  if (t.migration) {
+    const { solidus, calculator } = t.migration;
+    lines.push(
+      '',
+      '*Google, last 90 days (domain move)*',
+      `• solidus.ambrosiaventures.co: ${solidus.clicks} clicks, ${solidus.impressions} impressions`,
+      `• calculator.ambrosiaventures.co (old): ${calculator.clicks} clicks, ${calculator.impressions} impressions`,
+    );
+  }
   if (t.topLanding.length) {
     lines.push('', '*Top landing pages from search, AI and referrals*', ...t.topLanding.map(([p, n]) => `• ${p}: ${n}`));
   }

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { NOINDEX_FOLLOW, isIndexableBenchmark } from '@/lib/seo/search-allowlist';
 import { notFound } from 'next/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { ProGate } from '@/components/seo/ProGate';
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: page.title,
     description: page.metaDescription,
+    ...(isIndexableBenchmark(slug) ? {} : { robots: NOINDEX_FOLLOW }),
     alternates: {
       canonical: `https://solidus.ambrosiaventures.co/benchmarks/${slug}`,
     },

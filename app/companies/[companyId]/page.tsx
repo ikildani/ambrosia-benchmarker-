@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
+import { NOINDEX_FOLLOW } from '@/lib/seo/search-allowlist';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/server';
 import CompanyPageClient from './CompanyPageClient';
@@ -344,10 +345,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       alternates: {
         canonical: `${BASE_URL}/companies/${companyId}`,
       },
-      robots: {
-        index: true,
-        follow: true,
-      },
+      robots: NOINDEX_FOLLOW,
     };
   } catch {
     return { title: 'Company Profile' };

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { NOINDEX_FOLLOW } from '@/lib/seo/search-allowlist';
 import { notFound } from 'next/navigation';
 import { loadPlaybookBuyer, listAllSlugs } from '@/lib/playbook-data';
 import { InstitutionalNav } from '@/components/institutional/InstitutionalNav';
@@ -23,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { buyer } = data;
   return {
     title: `${buyer.companyName} — Counterparty Playbook | Solidus`,
+    robots: NOINDEX_FOLLOW,
     description: `${buyer.companyName} pays ${buyer.premiumMultiplier > 1 ? '+' : ''}${((buyer.premiumMultiplier - 1) * 100).toFixed(0)}% vs. comparable medians across ${buyer.sampleSize} disclosed deals. Per-TA and per-phase breakdowns sourced from public filings.`,
     alternates: {
       canonical: `https://solidus.ambrosiaventures.co/playbook/${slug}`,
