@@ -101,6 +101,7 @@ export async function GET(request: NextRequest) {
         metric_type: 'gsc_performance',
         data: {
           rowCount: performanceData.length,
+          error: gsc.lastError,
           totalClicks: performanceData.reduce((sum, r) => sum + r.clicks, 0),
           totalImpressions: performanceData.reduce((sum, r) => sum + r.impressions, 0),
           avgPosition:
@@ -119,6 +120,17 @@ export async function GET(request: NextRequest) {
               position: r.position,
             })),
         },
+      },
+      { onConflict: 'metric_date,metric_type' }
+    );
+
+    // 2b. Full per-page performance (90 days) for pruning and refresh decisions
+    const pages = await gsc.getPagePerformance(90);
+    await supabase.from('seo_metrics').upsert(
+      {
+        metric_date: today,
+        metric_type: 'gsc_pages_90d',
+        data: { rowCount: pages.length, error: gsc.lastError, pages },
       },
       { onConflict: 'metric_date,metric_type' }
     );
