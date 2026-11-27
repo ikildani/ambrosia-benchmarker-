@@ -165,12 +165,17 @@ export function backlogPlan(env: NodeJS.ProcessEnv = process.env): BacklogPlan {
   // $0.0033 per asset, so ~$7 clears it; ~$10 with retries. Off until the owner sets it; it extends the
   // classifier's spent $40 share.
   const classifyFeed = num(env.AI_BACKLOG_CLASSIFY_FEED_USD, 0);
+  // One-off EDGAR replay ($5 approved Nov 27 2026): 888 2013Q1–2015Q2 accessions were ledgered as
+  // not_a_deal on Sep 29 while the thinking-block bug (fixed in #142/#146) was live. Their ledger rows
+  // are removed and the walker re-runs those quarters; the bulk lane ($2/day, full most days) would
+  // starve it. Off unless set.
+  const edgarReplay = num(env.AI_BACKLOG_EDGAR_REPLAY_USD, 0);
   return {
     start: env.AI_BACKLOG_START || '2026-10-29',
-    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026; + families + pages + feed classification.
-    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + families + pages + classifyFeed),
+    // 90 approved Oct 29; +15 for the HKEX pipeline reader approved Nov 3 2026; + families + pages + feed classification + EDGAR replay.
+    totalUsd: num(env.AI_BACKLOG_TOTAL_USD, 105 + families + pages + classifyFeed + edgarReplay),
     dailyUsd: num(env.AI_BACKLOG_DAILY_USD, 15),
-    sources: { 'asset-classify': 40 + classifyFeed, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(families > 0 ? { 'company-family': families } : {}), ...(pages > 0 ? { 'preclinical-pages': pages } : {}) },
+    sources: { 'asset-classify': 40 + classifyFeed, 'preclinical-pipeline': 12, 'pipeline-pages': 35, 'hkex-pipeline': 15, ...(families > 0 ? { 'company-family': families } : {}), ...(pages > 0 ? { 'preclinical-pages': pages } : {}), ...(edgarReplay > 0 ? { 'edgar-fts-backfill': edgarReplay } : {}) },
   };
 }
 
