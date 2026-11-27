@@ -18,7 +18,8 @@
  *   train      Load the snapshots, fit the additive boosted-stump model (gam.ts) on
  *              as_of <= 2024-06 with early stopping + Platt calibration on
  *              (2024-06, 2024-12], test on 2025 by the feed protocol (industry
- *              programs, primary rows, ranked per month); write radar_score_models
+ *              programs, primary rows, ownership states the default feed shows,
+ *              ranked per month: feed_monthly_v2); write radar_score_models
  *              and radar_score_backtests. The gate (gateDecision) passes only when
  *              the candidate beats the active model on precision@100, top-decile
  *              lift AND AUC on the same rows; activation needs activate=1 (or
@@ -53,6 +54,7 @@ import {
   EVAL_PROTOCOL, MIN_POSITIVES_FOR_POWER, type MonthlyFeedMetrics,
 } from '@/lib/radar/backtest/metrics';
 import type { ScoreBacktestSummary } from '@/lib/radar/types';
+import { RADAR_OWNERSHIP_DEFAULT_EXCLUDED } from '@/lib/radar/vocab';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -72,6 +74,8 @@ export const CALIB_TO = '2024-12-01';
 export const TEST_FROM = '2025-01-01';
 /** ROC-AUC below this never activates, whatever the incumbent. */
 export const MIN_AUC_TO_ACTIVATE = 0.55;
+/** v6: v5 features and snapshots, larger leaf floor, feed_monthly_v2 evaluation. */
+export const MODEL_VERSION_PREFIX = 'v6';
 const MAX_RUNTIME_MS = 240_000;
 const ASSET_PAGE = 1000;
 const WAVE_ASSETS = 80;
@@ -672,6 +676,36 @@ export interface LoadedSnapshot {
   features: Record<string, number | null>;
   label: 0 | 1;
   weight: number;
+  /**
+   * False when the feed hides the program by default (ownership_status in
+   * RADAR_OWNERSHIP_DEFAULT_EXCLUDED). Such rows still train the model but are not ranked by the
+   * feed_monthly_v2 protocol. Undefined = visible.
+   */
+  in_feed?: boolean;
+}
+
+/** Rows the feed protocol ranks: test months, programs the default feed shows. */
+export function isFeedTestRow(r: Pick<LoadedSnapshot, 'as_of' | 'in_feed'>): boolean {
+  return r.as_of >= TEST_FROM && r.in_feed !== false;
+}
+
+/** The default feed hides these ownership states (lib/radar/vocab.ts); so does the v2 protocol. */
+export function feedVisibleOwnership(status: string | null | undefined): boolean {
+  return !status || !RADAR_OWNERSHIP_DEFAULT_EXCLUDED.includes(status);
+}
+
+/** Mark rows whose program the default feed hides (current ownership_status, read once per asset). */
+async function markFeedVisibility(supabase: SupabaseClient, rows: LoadedSnapshot[]): Promise<{ hidden_assets: number; hidden_rows: number }> {
+  const ids = Array.from(new Set(rows.map(r => r.asset_id)));
+  const hidden = new Set<string>();
+  for (const batch of chunk(ids, 200)) {
+    const { data, error } = await supabase.from('clinical_assets').select('id, ownership_status').in('id', batch);
+    if (error) throw new Error(`ownership read: ${error.message}`);
+    for (const a of data ?? []) if (!feedVisibleOwnership(a.ownership_status as string | null)) hidden.add(a.id as string);
+  }
+  let hiddenRows = 0;
+  for (const r of rows) { r.in_feed = !hidden.has(r.asset_id); if (!r.in_feed) hiddenRows++; }
+  return { hidden_assets: hidden.size, hidden_rows: hiddenRows };
 }
 
 /** Feature row in a model's order; missing names are null (imputed / missing bin). */
@@ -704,14 +738,18 @@ async function loadSnapshots(supabase: SupabaseClient, featureVersion: string): 
   return out;
 }
 
-export interface GamSettings { learningRate: number; lambda: number; maxBins: number; maxRounds: number; patience: number }
+export interface GamSettings { learningRate: number; lambda: number; maxBins: number; maxRounds: number; patience: number; minChildWeightShare: number }
 
 /**
  * Boosting settings. Rounds are chosen by early stopping on the 2024-H2 slice; the rest were
  * checked for stability, not tuned to the test months (Nov 2026 rebuild: lr 0.05 / λ 10 / 16 bins
  * all within ±0.002 AUC of these).
+ *
+ * v6 (Nov 27 2026): leaf floor 0.01 of the class-weighted mass (v5: 0.000625). Chosen on the
+ * 2024-H2 validation slice from {0.000625, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.04}; every value in
+ * 0.005..0.02 beat v5 on the 2025 test months, and the gain held on a purged split (train <= 2023-07).
  */
-export const GAM_SETTINGS: Readonly<GamSettings> = { learningRate: 0.1, lambda: 1, maxBins: 24, maxRounds: 800, patience: 60 };
+export const GAM_SETTINGS: Readonly<GamSettings> = { learningRate: 0.1, lambda: 1, maxBins: 24, maxRounds: 800, patience: 60, minChildWeightShare: 0.01 };
 
 /**
  * Features zeroed when an incumbent v3/v4 model is re-scored on v5 snapshots. availability reads
@@ -744,7 +782,8 @@ export function trainAndEvaluate(
   const settings = { ...GAM_SETTINGS, ...(opts.settings ?? {}) };
   const train = rows.filter(r => r.as_of <= TRAIN_TO);
   const calib = rows.filter(r => r.as_of > TRAIN_TO && r.as_of <= CALIB_TO);
-  const test = rows.filter(r => r.as_of >= TEST_FROM);
+  // Training and early stopping keep every population row; only the ranking is restricted to what the feed shows.
+  const test = rows.filter(isFeedTestRow);
   const notes: string[] = [];
   if (train.length === 0) throw new Error('trainAndEvaluate: no training rows');
   const X = (rs: readonly LoadedSnapshot[]) => rs.map(r => rowFor(r.features, names));
@@ -757,6 +796,7 @@ export function trainAndEvaluate(
     maxBins: settings.maxBins,
     maxRounds: settings.maxRounds,
     patience: settings.patience,
+    minChildWeightShare: settings.minChildWeightShare,
     rowWeights: train.map(r => r.weight),
     classWeightPos: 'balanced',
     valid: calib.length ? { X: calibX, y: calib.map(r => r.label), w: calib.map(r => r.weight) } : undefined,
@@ -785,7 +825,7 @@ export function trainAndEvaluate(
     model_type: 'gam',
     gam: fit.params,
   };
-  notes.push(`additive boosted stumps: ${fit.rounds} rounds (lr ${settings.learningRate}, λ ${settings.lambda}, ${settings.maxBins} bins), early stopping on ${calib.length} rows of ${TRAIN_TO.slice(0, 7)}..${CALIB_TO.slice(0, 7)}`);
+  notes.push(`additive boosted stumps: ${fit.rounds} rounds (lr ${settings.learningRate}, λ ${settings.lambda}, ${settings.maxBins} bins, leaf floor ${settings.minChildWeightShare} of weight), early stopping on ${calib.length} rows of ${TRAIN_TO.slice(0, 7)}..${CALIB_TO.slice(0, 7)}`);
 
   // Platt (monotone, no ties) on the validation slice, weighted to undo subsampling.
   const calibPos = calib.filter(r => r.label === 1).length;
@@ -804,7 +844,7 @@ export function trainAndEvaluate(
   const pooled = computeMetrics(preds, labels, weights, logits);
   const monthly = computeMonthlyMetrics(test.map(r => r.as_of), logits, labels, weights);
   const importance = factorImportance(names, contributionMatrix(testX, params));
-  notes.push(`population: industry programs, primary rows; negatives subsampled at ${NEGATIVE_ASSET_SAMPLING_RATE}; metrics ranked per month (${EVAL_PROTOCOL})`);
+  notes.push(`population: industry programs, primary rows; test ranks only programs the default feed shows (ownership not in ${RADAR_OWNERSHIP_DEFAULT_EXCLUDED.join('/')}); negatives subsampled at ${NEGATIVE_ASSET_SAMPLING_RATE}; metrics ranked per month (${EVAL_PROTOCOL})`);
   notes.push(`train positives ${posTrain} / ${train.length} rows; class weight ${fit.classWeightPos.toFixed(1)}`);
   notes.push(`pooled (v4 protocol) auc ${pooled.roc_auc.toFixed(4)} p@100 ${pooled.precision_at_100.toFixed(4)} lift ${pooled.lift_top_decile.toFixed(3)}`);
   if (pooled.positives < MIN_POSITIVES_FOR_POWER) notes.push('holdout has too few positives for a stable ranking estimate');
@@ -838,7 +878,7 @@ export function trainAndEvaluate(
 
 /** Re-score a stored model (any version) on the v5 test rows by the same protocol. */
 export function evaluateModelOnRows(params: ModelParams, rows: readonly LoadedSnapshot[]): MonthlyFeedMetrics {
-  const test = rows.filter(r => r.as_of >= TEST_FROM);
+  const test = rows.filter(isFeedTestRow);
   const X = test.map(r => rowFor(r.features, params.feature_names, isGamModel(params) ? new Set() : INCUMBENT_NEUTRALIZED));
   return computeMonthlyMetrics(test.map(r => r.as_of), logitBatch(X, params), test.map(r => r.label), test.map(r => r.weight));
 }
@@ -871,9 +911,11 @@ async function runTrainPhase(
   const errors: string[] = [];
   const rows = await loadSnapshots(supabase, state.feature_version);
   if (rows.length === 0) throw new Error('train: no snapshots for this feature version');
+  const visibility = await markFeedVisibility(supabase, rows);
   const stamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 12);
-  const version = `v5.${stamp}`;
+  const version = `${MODEL_VERSION_PREFIX}.${stamp}`;
   const outcome = trainAndEvaluate(rows, version, now);
+  outcome.notes.push(`feed visibility: ${visibility.hidden_assets} assets / ${visibility.hidden_rows} rows hidden by the default feed (trained on, not ranked)`);
 
   // Gate: re-score the incumbent on the same rows by the same protocol.
   let incumbent: (MonthlyFeedMetrics & { version: string }) | undefined;
@@ -938,7 +980,7 @@ async function runTrainPhase(
 
   // Raw predictions sample: top 2,000 by score + every positive, stored on the snapshot rows.
   const sample = [...outcome.testPredictions].sort((a, b) => b.prediction - a.prediction).slice(0, 2000);
-  const positives = new Set(rows.filter(r => r.as_of >= TEST_FROM && r.label === 1).map(r => `${r.asset_id}:${r.as_of}`));
+  const positives = new Set(rows.filter(r => isFeedTestRow(r) && r.label === 1).map(r => `${r.asset_id}:${r.as_of}`));
   const inSample = new Set(sample.map(p => `${p.asset_id}:${p.as_of}`));
   for (const p of outcome.testPredictions) if (positives.has(`${p.asset_id}:${p.as_of}`) && !inSample.has(`${p.asset_id}:${p.as_of}`)) sample.push(p);
   // UPDATE in place (RPC, migration 144): a partial upsert fails the NOT NULL
@@ -955,12 +997,12 @@ async function runTrainPhase(
     ...outcome.summary,
     activated,
     raw_predictions_path: `radar_score_snapshots.prediction where prediction_model = '${version}' (${sample.length} rows)`,
-    notes: [outcome.summary.notes, gateNote].filter(Boolean).join(' | '),
+    notes: [outcome.summary.notes, outcome.notes[outcome.notes.length - 1], gateNote].filter(Boolean).join(' | '),
     // Migration 196 columns.
     base_rate: round6(outcome.monthly.base_rate),
     lift_at_100: Math.round(outcome.monthly.lift_at_100 * 1000) / 1000,
     eval_protocol: EVAL_PROTOCOL,
-    metrics: { monthly: outcome.monthly, incumbent: incumbent ?? null, gate: gate.reasons, gate_passed: gatePassed, label_sources: state.label_sources ?? null, population: state.population ?? null },
+    metrics: { monthly: outcome.monthly, feed_visibility: visibility, incumbent: incumbent ?? null, gate: gate.reasons, gate_passed: gatePassed, label_sources: state.label_sources ?? null, population: state.population ?? null },
   };
   let bt = await supabase.from('radar_score_backtests').insert(backtestRow).select('id').single();
   if (bt.error && /base_rate|lift_at_100|eval_protocol|metrics/.test(bt.error.message)) {
@@ -1276,7 +1318,8 @@ export async function loadMethodologySummary(supabase: SupabaseClient, opts: { i
         `is linked to the program in the deal ledger, the deal type is ` +
         `${Array.from(POSITIVE_DEAL_TYPES).join(', ')}, and the announcement date falls in the ${LABEL_WINDOW_MONTHS} months after the snapshot date. ` +
         `A match on any row of a program counts for the whole program. The evaluated population is what the feed ranks: industry-owned ` +
-        `programs, one row per program, not approved. Negatives are programs that existed at the snapshot date with no such deal on or ` +
+        `programs, one row per program, not approved, excluding comparator arms, other companies' marketed drugs, duplicate rows and ` +
+        `non-programs (hidden by the default feed; they still train the model). Negatives are programs that existed at the snapshot date with no such deal on or ` +
         `before it and none in the window. Ranking metrics are computed within each month and averaged.`,
       window_months: LABEL_WINDOW_MONTHS,
       positive_deal_types: Array.from(POSITIVE_DEAL_TYPES),
