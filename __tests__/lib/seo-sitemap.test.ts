@@ -37,6 +37,7 @@ import sitemap, {
   HANDWRITTEN_INSIGHT_SLUGS,
 } from '@/app/sitemap';
 import { GET as sitemapIndex } from '@/app/sitemap.xml/route';
+import { isIndexableBenchmark } from '@/lib/seo/search-allowlist';
 
 const BASE = 'https://solidus.ambrosiaventures.co';
 
@@ -103,16 +104,24 @@ describe('sitemap shards', () => {
     expect(urls).toContain(`${BASE}/insights/rnpv-vs-dcf-biotech-valuation`);
   });
 
-  it('content shard includes playbook, guide, and report pages', async () => {
+  it('content shard includes guide and report pages but no noindexed playbook pages', async () => {
     const urls = (await sitemap({ id: SITEMAP.CONTENT })).map((e) => e.url);
-    expect(urls).toContain(`${BASE}/playbook/pfizer`);
+    expect(urls).not.toContain(`${BASE}/playbook/pfizer`);
+    expect(urls.some((u) => u.startsWith(`${BASE}/playbook/`))).toBe(false);
     expect(urls).toContain(`${BASE}/guides/rnpv-biotech-valuation`);
     expect(urls).toContain(`${BASE}/reports/q2-2026-biopharma-deal-benchmarks`);
   });
 
-  it('benchmarks and reference shards are large', async () => {
-    expect((await sitemap({ id: SITEMAP.BENCHMARKS })).length).toBeGreaterThan(200);
-    expect((await sitemap({ id: SITEMAP.REFERENCE })).length).toBeGreaterThan(50);
+  it('benchmarks and reference shards list only indexable pages', async () => {
+    const bench = (await sitemap({ id: SITEMAP.BENCHMARKS })).map((e) => e.url);
+    expect(bench).toContain(`${BASE}/benchmarks`);
+    expect(bench.some((u) => u.includes('/benchmarks/data/'))).toBe(false);
+    for (const u of bench.filter((x) => x.startsWith(`${BASE}/benchmarks/`))) {
+      expect(isIndexableBenchmark(u.slice(`${BASE}/benchmarks/`.length))).toBe(true);
+    }
+    const ref = (await sitemap({ id: SITEMAP.REFERENCE })).map((e) => e.url);
+    expect(ref.some((u) => u.includes('/glossary/'))).toBe(true);
+    expect(ref.some((u) => /\/data\/[^/]+$/.test(u))).toBe(false);
   });
 
   it('unknown shard id returns an empty list', async () => {
