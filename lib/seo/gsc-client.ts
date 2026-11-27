@@ -148,10 +148,38 @@ export class GSCClient {
         position: row.position || 0,
       }));
     } catch (err) {
+      this.lastError = err instanceof Error ? err.message : 'Unknown';
       console.error(
         '[GSCClient] getPerformanceData error:',
         err instanceof Error ? err.message : 'Unknown'
       );
+      return [];
+    }
+  }
+
+  /** Last Search Console API error, so crons can store why a pull came back empty. */
+  lastError: string | null = null;
+
+  /**
+   * Per-page clicks, impressions, CTR and position for the last N days (all pages, up to 25,000).
+   */
+  async getPagePerformance(days: number = 90): Promise<{ page: string; clicks: number; impressions: number; ctr: number; position: number }[]> {
+    if (!this.client || !this.configured) return [];
+    try {
+      const res = await this.client.searchanalytics.query({
+        siteUrl: this.siteUrl,
+        requestBody: { startDate: formatDate(daysAgo(days)), endDate: formatDate(daysAgo(2)), dimensions: ['page'], rowLimit: 25000 },
+      });
+      return (res.data.rows || []).map((row) => ({
+        page: row.keys?.[0] || '',
+        clicks: row.clicks || 0,
+        impressions: row.impressions || 0,
+        ctr: row.ctr || 0,
+        position: row.position || 0,
+      }));
+    } catch (err) {
+      this.lastError = err instanceof Error ? err.message : 'Unknown';
+      console.error('[GSCClient] getPagePerformance error:', this.lastError);
       return [];
     }
   }

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { checkRateLimit, getIdentifier, getRateLimitHeaders, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { classifyUserAgent } from '@/lib/analytics/ua-class';
 import { eventSchema, formatZodErrors } from '@/lib/api-validation';
 import { apiSuccess, apiError, apiErrorWithHeaders } from '@/lib/api-response';
 
@@ -94,7 +95,10 @@ export async function POST(request: NextRequest) {
       session_id: body.session_id || null,
       anonymous_id: body.anonymous_id || null,
       event_type: body.event_type,
-      event_data: body.event_data || {},
+      event_data:
+        body.event_type === 'session_started'
+          ? { ...(body.event_data || {}), ua_class: classifyUserAgent(request.headers.get('user-agent'), body.event_data?.webdriver === true) }
+          : body.event_data || {},
       user_tier: userTier,
     };
 
