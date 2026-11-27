@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { NOINDEX_FOLLOW } from '@/lib/seo/search-allowlist';
 import { notFound } from 'next/navigation';
 import { getAllPseoSlugs, getPseoBySlug, getRelatedPseoPages, formatDollar } from '@/lib/pseoPages';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
+    robots: NOINDEX_FOLLOW,
     alternates: {
       canonical: `/benchmarks/data/${slug}`,
     },

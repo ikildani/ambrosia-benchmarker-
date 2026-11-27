@@ -6,9 +6,7 @@ import { getAllInsightSlugs } from '@/lib/insightPages';
 import { getAllTermSlugs } from '@/lib/glossaryTerms';
 import { blogPosts as hardcodedBlogPosts } from '@/lib/blogPosts';
 import { SEO_INSIGHT_SLUGS } from '@/lib/insights/seo-pages';
-import { getIndexableProgrammaticSlugs } from '@/lib/seo/programmatic-pages';
-import { getAllPseoSlugs } from '@/lib/pseoPages';
-import { listAllSlugs as listPlaybookSlugs } from '@/lib/playbook-data';
+import { isIndexableBenchmark } from '@/lib/seo/search-allowlist';
 
 const BASE_URL = 'https://solidus.ambrosiaventures.co';
 
@@ -58,7 +56,8 @@ export default async function sitemap(
     case SITEMAP.INSIGHTS:
       return getInsightPages();
     case SITEMAP.COMPANIES:
-      return getCompanyPages();
+      // Company profiles are noindex (lib/seo/search-allowlist.ts); the shard stays so its URL resolves.
+      return [];
     case SITEMAP.REFERENCE:
       return getReferencePages();
     default:
@@ -215,14 +214,7 @@ async function getContentPages(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Counterparty playbooks — one page per buyer
-  let playbookPages: MetadataRoute.Sitemap = [];
-  try {
-    const slugs = await listPlaybookSlugs();
-    playbookPages = slugs.map((slug) => staticEntry(`/playbook/${slug}`, 'monthly', 0.7));
-  } catch {
-    console.log('Sitemap [content]: Playbook data not available');
-  }
+  // Counterparty playbook pages are noindex (lib/seo/search-allowlist.ts); only the /playbook hub is listed.
 
   const guidePages: MetadataRoute.Sitemap = [
     staticEntry('/guides', 'monthly', 0.7),
@@ -244,7 +236,7 @@ async function getContentPages(): Promise<MetadataRoute.Sitemap> {
     staticEntry('/press/data-kit', 'monthly', 0.8),
   ];
 
-  return [...blogIndex, ...blogPages, ...landingPages, ...playbookPages, ...guidePages, ...reportPages];
+  return [...blogIndex, ...blogPages, ...landingPages, ...guidePages, ...reportPages];
 }
 
 // ---------------------------------------------------------------------------
@@ -252,12 +244,11 @@ async function getContentPages(): Promise<MetadataRoute.Sitemap> {
 // ---------------------------------------------------------------------------
 async function getBenchmarkPages(): Promise<MetadataRoute.Sitemap> {
   const benchmarkSlugs = await getAllBenchmarkSlugsWithDb();
-  const pseoSlugs = getAllPseoSlugs();
 
   return [
     staticEntry('/benchmarks', 'weekly', 0.8),
-    ...benchmarkSlugs.map((slug) => staticEntry(`/benchmarks/${slug}`, 'monthly', 0.8)),
-    ...pseoSlugs.map((slug) => staticEntry(`/benchmarks/data/${slug}`, 'monthly', 0.7)),
+    // Only benchmark pages on the search allowlist; /benchmarks/data pages are noindex.
+    ...benchmarkSlugs.filter(isIndexableBenchmark).map((slug) => staticEntry(`/benchmarks/${slug}`, 'monthly', 0.8)),
   ];
 }
 
@@ -303,49 +294,16 @@ function getInsightPages(): MetadataRoute.Sitemap {
 }
 
 // ---------------------------------------------------------------------------
-// 4 — Company pages (DB-driven with real updated_at)
-// ---------------------------------------------------------------------------
-async function getCompanyPages(): Promise<MetadataRoute.Sitemap> {
-  try {
-    const supabase = createServiceClient();
-
-    const { data: companies, error } = await supabase
-      .from('companies')
-      .select('id, updated_at')
-      .order('deals_last_12mo', { ascending: false, nullsFirst: false })
-      .limit(200);
-
-    if (error) {
-      console.error('Sitemap: Error fetching companies:', error.message);
-      return [];
-    }
-
-    if (!companies?.length) return [];
-
-    return companies.map((company) => ({
-      url: `${BASE_URL}/companies/${company.id}`,
-      lastModified: new Date(company.updated_at || '2026-06-01'),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }));
-  } catch {
-    console.log('Sitemap [companies]: Companies table not available yet');
-    return [];
-  }
-}
-
-// ---------------------------------------------------------------------------
 // 5 — Reference pages (glossary terms + programmatic data)
 // ---------------------------------------------------------------------------
 function getReferencePages(): MetadataRoute.Sitemap {
   const termSlugs = getAllTermSlugs();
   // Only self-canonical data pages; thin territory variants canonicalise to
   // their global page and must not be submitted.
-  const programmaticSlugs = getIndexableProgrammaticSlugs();
 
   return [
     staticEntry('/data', 'weekly', 0.7),
     ...termSlugs.map((slug) => staticEntry(`/glossary/${slug}`, 'monthly', 0.6)),
-    ...programmaticSlugs.map((slug) => staticEntry(`/data/${slug}`, 'monthly', 0.6)),
+    // /data/{slug} pages are noindex (see lib/seo/search-allowlist.ts).
   ];
 }

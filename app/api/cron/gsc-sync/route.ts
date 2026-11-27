@@ -135,6 +135,34 @@ export async function GET(request: NextRequest) {
       { onConflict: 'metric_date,metric_type' }
     );
 
+    // 2c. Legacy host. Google still credits most Solidus search traffic to
+    // calculator.ambrosiaventures.co while the Nov 27 2026 change of address completes,
+    // so track both until the solidus.* property carries the clicks.
+    const legacy = new GSCClient('https://calculator.ambrosiaventures.co/');
+    if (!legacy.isConfigured()) await legacy.initOAuth2();
+    const legacyPages = await legacy.getPagePerformance(90);
+    const sum = (rows: { clicks: number; impressions: number }[], k: 'clicks' | 'impressions') =>
+      rows.reduce((a, r) => a + r[k], 0);
+    await supabase.from('seo_metrics').upsert(
+      {
+        metric_date: today,
+        metric_type: 'gsc_pages_90d_legacy',
+        data: { rowCount: legacyPages.length, error: legacy.lastError, pages: legacyPages },
+      },
+      { onConflict: 'metric_date,metric_type' }
+    );
+    await supabase.from('seo_metrics').upsert(
+      {
+        metric_date: today,
+        metric_type: 'gsc_migration',
+        data: {
+          solidus: { pages: pages.length, clicks: sum(pages, 'clicks'), impressions: sum(pages, 'impressions') },
+          calculator: { pages: legacyPages.length, clicks: sum(legacyPages, 'clicks'), impressions: sum(legacyPages, 'impressions') },
+        },
+      },
+      { onConflict: 'metric_date,metric_type' }
+    );
+
     // 3. Get indexed page count
     const indexedCount = await gsc.getIndexedPageCount();
 

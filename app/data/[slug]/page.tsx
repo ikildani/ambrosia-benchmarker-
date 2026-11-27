@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { NOINDEX_FOLLOW } from '@/lib/seo/search-allowlist';
 import Link from 'next/link';
 import {
   getAllProgrammaticSlugs,
@@ -30,6 +31,7 @@ export async function generateMetadata({
   return {
     title: page.title,
     description: page.metaDescription,
+    robots: NOINDEX_FOLLOW,
     keywords: [
       `${page.ta.label} deal benchmarks`,
       `${page.phase.label} licensing deals`,
